@@ -31,7 +31,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
@@ -101,11 +101,11 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       
 //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
 
-      Pair<CombinedTerrainObject3D, Double> combinedTerrainObjectAndRampEndX = createRamp();
-      CombinedTerrainObject3D combinedTerrainObject = combinedTerrainObjectAndRampEndX.first();
+      ImmutablePair<CombinedTerrainObject3D, Double> combinedTerrainObjectAndRampEndX = createRamp();
+      CombinedTerrainObject3D combinedTerrainObject = combinedTerrainObjectAndRampEndX.getLeft();
       boolean drawGroundProfile = false;
 
-      double rampEndX = combinedTerrainObjectAndRampEndX.second();
+      double rampEndX = combinedTerrainObjectAndRampEndX.getRight();
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       
       
@@ -184,11 +184,11 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       
 //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
 
-      Pair<CombinedTerrainObject3D, Double> combinedTerrainObjectAndRampEndX = createRandomBlocks(); 
-      CombinedTerrainObject3D combinedTerrainObject = combinedTerrainObjectAndRampEndX.first();
+      ImmutablePair<CombinedTerrainObject3D, Double> combinedTerrainObjectAndRampEndX = createRandomBlocks(); 
+      CombinedTerrainObject3D combinedTerrainObject = combinedTerrainObjectAndRampEndX.getLeft();
       boolean drawGroundProfile = false;
 
-      double rampEndX = combinedTerrainObjectAndRampEndX.second();
+      double rampEndX = combinedTerrainObjectAndRampEndX.getRight();
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.01, 0);
       
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, null, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
@@ -237,7 +237,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       assertTrue(success);
    }
    
-   private Pair<CombinedTerrainObject3D, Double> createRamp()
+   private ImmutablePair<CombinedTerrainObject3D, Double> createRamp()
    {
       double rampSlopeUp = 0.1;
       double rampSlopeDown = 0.08;
@@ -264,10 +264,10 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       combinedTerrainObject.addBox(rampXStart0 - 2.0, rampYStart, rampEndX + 2.0, rampYEnd, -0.05, 0.0);
       
-      return new Pair<CombinedTerrainObject3D, Double>(combinedTerrainObject, rampEndX);
+      return new ImmutablePair<CombinedTerrainObject3D, Double>(combinedTerrainObject, rampEndX);
    }
    
-   private Pair<CombinedTerrainObject3D, Double> createRandomBlocks()
+   private ImmutablePair<CombinedTerrainObject3D, Double> createRandomBlocks()
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("RandomBlocks");
 
@@ -292,7 +292,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
          combinedTerrainObject.addBox(xStart, yStart, xEnd, yEnd, zStart, zEnd, YoAppearance.Green());
       }
       
-      return new Pair<CombinedTerrainObject3D, Double>(combinedTerrainObject, xMax);
+      return new ImmutablePair<CombinedTerrainObject3D, Double>(combinedTerrainObject, xMax);
    }
 
 	@EstimatedDuration(duration = 87.3)

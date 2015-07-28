@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -14,8 +14,8 @@ public class SDFPerfectSimulatedOutputWriter
 {
    private final String name;
    protected final SDFRobot robot;
-   protected Pair<FloatingJoint, SixDoFJoint> rootJointPair;
-   protected final ArrayList<Pair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
+   protected ImmutablePair<FloatingJoint, SixDoFJoint> rootJointPair;
+   protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
    
    public SDFPerfectSimulatedOutputWriter(SDFRobot robot)
    {
@@ -45,11 +45,11 @@ public class SDFPerfectSimulatedOutputWriter
          String name = revoluteJoint.getName();
          OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(name);
          
-         Pair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new Pair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
+         ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
          this.revoluteJoints.add(jointPair);
       }
       
-      rootJointPair = new Pair<FloatingJoint, SixDoFJoint>(robot.getRootJoint(), fullRobotModel.getRootJoint());
+      rootJointPair = new ImmutablePair<FloatingJoint, SixDoFJoint>(robot.getRootJoint(), fullRobotModel.getRootJoint());
    }
 
    public String getName()
@@ -64,10 +64,10 @@ public class SDFPerfectSimulatedOutputWriter
 
    public void write()
    {
-      for (Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
+      for (ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
       {
-         OneDegreeOfFreedomJoint pinJoint = jointPair.first();
-         OneDoFJoint revoluteJoint = jointPair.second();
+         OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
+         OneDoFJoint revoluteJoint = jointPair.getRight();
 
          pinJoint.setTau(revoluteJoint.getTau());
       }
@@ -75,16 +75,16 @@ public class SDFPerfectSimulatedOutputWriter
 
    public void updateRobotConfigurationBasedOnFullRobotModel()
    {
-      for (Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
+      for (ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
       {
-         OneDegreeOfFreedomJoint pinJoint = jointPair.first();
-         OneDoFJoint revoluteJoint = jointPair.second();
+         OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
+         OneDoFJoint revoluteJoint = jointPair.getRight();
 
          pinJoint.setQ(revoluteJoint.getQ());
       }
       
-      FloatingJoint floatingJoint = rootJointPair.first();
-      SixDoFJoint sixDoFJoint = rootJointPair.second();
+      FloatingJoint floatingJoint = rootJointPair.getLeft();
+      SixDoFJoint sixDoFJoint = rootJointPair.getRight();
       
       RigidBodyTransform transform = sixDoFJoint.getJointTransform3D();
       floatingJoint.setRotationAndTranslation(transform);

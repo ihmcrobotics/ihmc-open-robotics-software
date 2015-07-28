@@ -12,7 +12,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseWobblyFootTest;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -57,7 +57,7 @@ public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFo
       AtlasJointMap atlasJointMap = new AtlasJointMap(atlasVersion)
       {
          @Override
-         public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
+         public List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap()
          {
             return createWobblyContactPoints(this, atlasVersion).getJointNameGroundContactPointMap();
          }

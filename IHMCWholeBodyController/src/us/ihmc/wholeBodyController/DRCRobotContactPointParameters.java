@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
@@ -30,7 +30,7 @@ public abstract class DRCRobotContactPointParameters
 
    public abstract SideDependentList<List<Point2d>> getThighContactPoints();
 
-   public abstract List<Pair<String, Vector3d>> getJointNameGroundContactPointMap();
+   public abstract List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap();
 
    public abstract SideDependentList<ArrayList<Point2d>> getFootContactPoints();
    

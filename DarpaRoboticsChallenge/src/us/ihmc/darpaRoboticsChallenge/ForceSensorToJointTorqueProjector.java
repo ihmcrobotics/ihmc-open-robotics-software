@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import java.util.ArrayList;
 
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -23,7 +23,7 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
 
 
    private final Wrench tempWrench = new Wrench();
-   private final ArrayList<Pair<FrameVector,DoubleYoVariable>> yoTorqueInJoints;
+   private final ArrayList<ImmutablePair<FrameVector,DoubleYoVariable>> yoTorqueInJoints;
    private final int numberOfJointFromSensor = 2;
 
    public ForceSensorToJointTorqueProjector(String namePrefix, ForceSensorData forceSensorData, RigidBody sensorLinkBody) 
@@ -38,7 +38,7 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
       for(int i=0;i<numberOfJointFromSensor;i++)
       {
          FrameVector jAxis = ((OneDoFJoint)currentBody.getParentJoint()).getJointAxis();
-         yoTorqueInJoints.add(new Pair<>(jAxis,new DoubleYoVariable("NegGRFWrenchIn"+ currentBody.getParentJoint().getName(), registry)));
+         yoTorqueInJoints.add(new ImmutablePair<>(jAxis,new DoubleYoVariable("NegGRFWrenchIn"+ currentBody.getParentJoint().getName(), registry)));
          currentBody=currentBody.getParentJoint().getPredecessor();
       }
    }
@@ -72,9 +72,9 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
       forceSensorData.packWrench(tempWrench);
       for(int i = 0; i < yoTorqueInJoints.size(); i++)
       {
-         Pair<FrameVector, DoubleYoVariable> pair = yoTorqueInJoints.get(i);
-         FrameVector jointAxis = pair.first();
-         DoubleYoVariable torqueAboutJointAxis = pair.second();
+         ImmutablePair<FrameVector, DoubleYoVariable> pair = yoTorqueInJoints.get(i);
+         FrameVector jointAxis = pair.getLeft();
+         DoubleYoVariable torqueAboutJointAxis = pair.getRight();
 
          tempWrench.changeFrame(jointAxis.getReferenceFrame());
          tempFrameVector.setToZero(tempWrench.getExpressedInFrame());

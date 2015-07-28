@@ -16,7 +16,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
@@ -145,14 +145,14 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
    }
 
    @Override
-   public ArrayList<Pair<FramePose, FramePose>> generatePointsForRegression(RobotSide robotSide, int numberOfPoints)
+   public ArrayList<ImmutablePair<FramePose, FramePose>> generatePointsForRegression(RobotSide robotSide, int numberOfPoints)
    {
       // this is intentionally null. We want to skip these tests.
       return null;
    }
 
    @Override
-   public ArrayList<Pair<FramePose, FramePose>> generatePointsForRegression(int numberOfPoints)
+   public ArrayList<ImmutablePair<FramePose, FramePose>> generatePointsForRegression(int numberOfPoints)
    {
       // this is intentionally null. We want to skip these tests.
       return null;

@@ -45,7 +45,7 @@ import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNo
 import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.FormattingTools;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.math.InertiaTools;
@@ -153,9 +153,9 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       LinkedHashMap<String, Integer> counters = new LinkedHashMap<String, Integer>();
       if (sdfJointNameMap != null)
       {
-         for (Pair<String, Vector3d> jointContactPoint : sdfJointNameMap.getJointNameGroundContactPointMap())
+         for (ImmutablePair<String, Vector3d> jointContactPoint : sdfJointNameMap.getJointNameGroundContactPointMap())
          {
-            String jointName = jointContactPoint.first();
+            String jointName = jointContactPoint.getLeft();
 
             int count;
             if (counters.get(jointName) == null)
@@ -163,7 +163,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
             else
                count = counters.get(jointName);
 
-            Vector3d gcOffset = jointContactPoint.second();
+            Vector3d gcOffset = jointContactPoint.getRight();
 
             GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset,
                   this.getRobotsYoVariableRegistry());
@@ -192,7 +192,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
             {
                Graphics3DObject graphics = joint.getLink().getLinkGraphics();
                graphics.identity();
-               graphics.translate(jointContactPoint.second());
+               graphics.translate(jointContactPoint.getRight());
                double radius = 0.01;
                graphics.addSphere(radius, YoAppearance.Orange());
                

@@ -31,7 +31,7 @@ import us.ihmc.ihmcPerception.OpenCVFaceDetector;
 import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -52,7 +52,7 @@ public class VisionPoseEstimator implements DRCStereoListener
    ExecutorService executorService = Executors.newFixedThreadPool(2);
 
    PacketCommunicator communicator;
-   LinkedBlockingQueue<Pair<CameraData, RigidBodyTransform>> imagesToProcess = new LinkedBlockingQueue<>(2);
+   LinkedBlockingQueue<ImmutablePair<CameraData, RigidBodyTransform>> imagesToProcess = new LinkedBlockingQueue<>(2);
    SDFFullRobotModelFactory modelFactory;
    PointCloudDataReceiver pointCloudDataReceiver;
 
@@ -92,11 +92,11 @@ public class VisionPoseEstimator implements DRCStereoListener
             {
                try
                {
-                  Pair<CameraData, RigidBodyTransform> data = imagesToProcess.take();
+                  ImmutablePair<CameraData, RigidBodyTransform> data = imagesToProcess.take();
                   long timeStart = System.currentTimeMillis();
                   //robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null);
                   //IntrinsicParameters intrinsicParameters = data.first().intrinsicParameters;
-                  BufferedImage image = data.first().image;
+                  BufferedImage image = data.getLeft().image;
                   Rect[] faces = faceDetector.detect(image);
 
                   for (Rect face : faces)
@@ -206,7 +206,7 @@ public class VisionPoseEstimator implements DRCStereoListener
    @Override
    public void newImageAvailable(CameraData data, RigidBodyTransform transformToWorld)
    {
-      imagesToProcess.offer(new Pair<CameraData, RigidBodyTransform>(data, transformToWorld));
+      imagesToProcess.offer(new ImmutablePair<CameraData, RigidBodyTransform>(data, transformToWorld));
    }
 
    private void startChessBoardDetector(final OpenCVChessboardPoseEstimator chessboardDetector, final int targerId)
@@ -224,19 +224,19 @@ public class VisionPoseEstimator implements DRCStereoListener
             {
                try
                {
-                  Pair<CameraData, RigidBodyTransform> data = imagesToProcess.take();
+                  ImmutablePair<CameraData, RigidBodyTransform> data = imagesToProcess.take();
 
                   //
                   long timeStart = System.currentTimeMillis();
 
                   //                  robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null);
-                  IntrinsicParameters intrinsicParameters = data.first().intrinsicParameters;
+                  IntrinsicParameters intrinsicParameters = data.getLeft().intrinsicParameters;
                   chessboardDetector.setCameraMatrix(intrinsicParameters.fx, intrinsicParameters.fy, intrinsicParameters.cx, intrinsicParameters.cy);
 
-                  RigidBodyTransform targetToCameraOpticalFrame = chessboardDetector.detect(data.first().image);
+                  RigidBodyTransform targetToCameraOpticalFrame = chessboardDetector.detect(data.getLeft().image);
                   if (targetToCameraOpticalFrame != null)
                   {
-                     RigidBodyTransform cameraToWorld = data.second();
+                     RigidBodyTransform cameraToWorld = data.getRight();
                      RigidBodyTransform opticalFrameToCameraFrame = new RigidBodyTransform();
                      opticalFrameToCameraFrame.setEuler(-Math.PI / 2.0, 0.0, -Math.PI / 2);
                      RigidBodyTransform targetToWorld = new RigidBodyTransform();

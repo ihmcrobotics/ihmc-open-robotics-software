@@ -16,7 +16,7 @@ import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHan
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType;
 import us.ihmc.robotDataCommunication.jointState.JointHolder;
 import us.ihmc.robotDataCommunication.jointState.JointHolderFactory;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -34,7 +34,7 @@ public class YoVariableHandShakeBuilder
    private final YoProtoHandshake.Builder yoProtoHandshakeBuilder = YoProtoHandshake.newBuilder();
    private final ArrayList<JointHolder> jointHolders = new ArrayList<JointHolder>();   
    private final HashMap<YoVariable<?>, Integer> yoVariableIndices = new HashMap<YoVariable<?>, Integer>();
-   private final ArrayList<Pair<YoVariable<?>, YoVariableRegistry>> variablesAndRootRegistries = new ArrayList<>();
+   private final ArrayList<ImmutablePair<YoVariable<?>, YoVariableRegistry>> variablesAndRootRegistries = new ArrayList<>();
 
    
    private int registryID = 1;
@@ -192,7 +192,7 @@ public class YoVariableHandShakeBuilder
 
          yoProtoHandshakeBuilder.addVariable(yoVariableDefinition);
          variableListToPack.add(variable);
-         variablesAndRootRegistries.add(new Pair<YoVariable<?>, YoVariableRegistry>(variable, rootRegistry));
+         variablesAndRootRegistries.add(new ImmutablePair<YoVariable<?>, YoVariableRegistry>(variable, rootRegistry));
          this.yoVariableIndices.put(variable, variablesAndRootRegistries.size() - 1);
 
       }
@@ -244,7 +244,7 @@ public class YoVariableHandShakeBuilder
       return variablesAndRootRegistries.size();
    }
 
-   public ArrayList<Pair<YoVariable<?>, YoVariableRegistry>> getVariablesAndRootRegistries()
+   public ArrayList<ImmutablePair<YoVariable<?>, YoVariableRegistry>> getVariablesAndRootRegistries()
    {
       return variablesAndRootRegistries;
    }

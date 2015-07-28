@@ -10,7 +10,7 @@ import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.robotDataCommunication.VariableChangedMessage;
 import us.ihmc.robotDataCommunication.YoVariableHandShakeBuilder;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -73,9 +73,9 @@ public class LogControlServer
       public void consumeObject(VariableChangeRequest object)
       {
          VariableChangedMessage message;
-         Pair<YoVariable<?>, YoVariableRegistry> variableAndRootRegistry = handshakeBuilder.getVariablesAndRootRegistries().get(object.variableID);
+         ImmutablePair<YoVariable<?>, YoVariableRegistry> variableAndRootRegistry = handshakeBuilder.getVariablesAndRootRegistries().get(object.variableID);
 
-         ConcurrentRingBuffer<VariableChangedMessage> buffer = variableChangeData.get(variableAndRootRegistry.second());
+         ConcurrentRingBuffer<VariableChangedMessage> buffer = variableChangeData.get(variableAndRootRegistry.getRight());
          while ((message = buffer.next()) == null)
          {
             ThreadTools.sleep(1);
@@ -83,7 +83,7 @@ public class LogControlServer
 
          if (message != null)
          {
-            message.setVariable(variableAndRootRegistry.first());
+            message.setVariable(variableAndRootRegistry.getLeft());
             message.setVal(object.requestedValue);
             buffer.commit();
          }

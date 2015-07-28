@@ -15,7 +15,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.pathGeneration.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -146,12 +146,12 @@ public class FootstepGeneratorVisualizer
    {
       Robot nullRobot = new Robot("FootstepVisualizerRobot");
 
-      Pair<List<Footstep>, List<ContactablePlaneBody>> footstepsAndContactablePlaneBodies = generateDefaultFootstepList();
+      ImmutablePair<List<Footstep>, List<ContactablePlaneBody>> footstepsAndContactablePlaneBodies = generateDefaultFootstepList();
 
-      visualizeFootsteps(nullRobot, footstepsAndContactablePlaneBodies.first(), footstepsAndContactablePlaneBodies.second());
+      visualizeFootsteps(nullRobot, footstepsAndContactablePlaneBodies.getLeft(), footstepsAndContactablePlaneBodies.getRight());
    }
 
-   public static Pair<List<Footstep>, List<ContactablePlaneBody>> generateDefaultFootstepList()
+   public static ImmutablePair<List<Footstep>, List<ContactablePlaneBody>> generateDefaultFootstepList()
    {
       SideDependentList<ContactablePlaneBody> contactableFeet = new SideDependentList<ContactablePlaneBody>();
       SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
@@ -188,13 +188,13 @@ public class FootstepGeneratorVisualizer
       TurningThenStraightFootstepGenerator generator = new TurningThenStraightFootstepGenerator(feet, soleFrames, endPoint, pathType, RobotSide.LEFT);
       List<Footstep> footsteps = generator.generateDesiredFootstepList();
 
-      Pair<List<Footstep>, List<ContactablePlaneBody>> footstepsAndContactablePlaneBodies = new Pair<List<Footstep>, List<ContactablePlaneBody>>(
+      ImmutablePair<List<Footstep>, List<ContactablePlaneBody>> footstepsAndContactablePlaneBodies = new ImmutablePair<List<Footstep>, List<ContactablePlaneBody>>(
             new ArrayList<Footstep>(), new ArrayList<ContactablePlaneBody>());
 
       for (Footstep footstep : footsteps)
       {
-         footstepsAndContactablePlaneBodies.first().add(footstep);
-         footstepsAndContactablePlaneBodies.second().add(contactableFeet.get(footstep.getRobotSide()));
+         footstepsAndContactablePlaneBodies.getLeft().add(footstep);
+         footstepsAndContactablePlaneBodies.getRight().add(contactableFeet.get(footstep.getRobotSide()));
       }
 
       return footstepsAndContactablePlaneBodies;

@@ -31,7 +31,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.utilities.ClassLoaderTools;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
@@ -65,7 +65,7 @@ public class JMEAppearanceMaterial
    {
       Material material = new Material(assetLocator.getAssetManager(), "Common/MatDefs/Terrain/TerrainLighting.j3md");
 
-      ArrayList<Pair<Double, Double>> blendMap = appearanceDefinition.getBlends();
+      ArrayList<ImmutablePair<Double, Double>> blendMap = appearanceDefinition.getBlends();
       if (blendMap.size() > 4)
       {
          throw new RuntimeException("Only 4 blends are supported");
@@ -95,8 +95,8 @@ public class JMEAppearanceMaterial
 
             for (int i = 0; i < blendMap.size(); i++)
             {
-               double minHeight = blendMap.get(i).first();
-               double fadeHeight = blendMap.get(i).second();
+               double minHeight = blendMap.get(i).getLeft();
+               double fadeHeight = blendMap.get(i).getRight();
 
                if (height > minHeight && minHeight > layerHeight)
                {

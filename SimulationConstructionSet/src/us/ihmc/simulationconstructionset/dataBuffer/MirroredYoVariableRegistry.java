@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -12,7 +12,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 @SuppressWarnings("rawtypes")
 public class MirroredYoVariableRegistry extends YoVariableRegistry
 {
-   private final ArrayList<Pair<YoVariable, YoVariable>> variablePairs = new ArrayList<Pair<YoVariable, YoVariable>>();
+   private final ArrayList<ImmutablePair<YoVariable, YoVariable>> variablePairs = new ArrayList<ImmutablePair<YoVariable, YoVariable>>();
    private final HashMap<YoVariable, YoVariable> copyToMirroredVariables = new HashMap<YoVariable, YoVariable>();
 
    private final ConcurrentLinkedQueue<YoVariable> changedVariables = new ConcurrentLinkedQueue<YoVariable>();
@@ -31,7 +31,7 @@ public class MirroredYoVariableRegistry extends YoVariableRegistry
       for (YoVariable<?> var : vars)
       {
          YoVariable<?> newVar = var.duplicate(target);
-         variablePairs.add(new Pair<YoVariable, YoVariable>(var, newVar));
+         variablePairs.add(new ImmutablePair<YoVariable, YoVariable>(var, newVar));
          copyToMirroredVariables.put(newVar, var);
          addVariableListener(newVar, var);
       }
@@ -69,10 +69,10 @@ public class MirroredYoVariableRegistry extends YoVariableRegistry
    {
       for (int i = 0; i < variablePairs.size(); i++)
       {
-         Pair<YoVariable, YoVariable> pair = variablePairs.get(i);
+         ImmutablePair<YoVariable, YoVariable> pair = variablePairs.get(i);
 
-         YoVariable target = pair.second();
-         boolean changed = target.setValue(pair.first(), false);
+         YoVariable target = pair.getRight();
+         boolean changed = target.setValue(pair.getLeft(), false);
 
          if (changed)
          {

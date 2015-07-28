@@ -17,7 +17,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -78,14 +78,14 @@ public class WholeBodyIkSolverTestHelper
    }
 
    public void executeHandTargetTest(ControlledDoF dofToControlLeft, ControlledDoF dofToControlRight,
-                                     ArrayList<Pair<FramePose, FramePose>> handTargetPairsArray, boolean thisTestIsStaticsBased)
+                                     ArrayList<ImmutablePair<FramePose, FramePose>> handTargetPairsArray, boolean thisTestIsStaticsBased)
    {
       executeHandTargetTest(dofToControlLeft, dofToControlRight, handTargetPairsArray, thisTestIsStaticsBased, true);
    }
 
    public void executeHandTargetTest(ControlledDoF dofToControlLeft, 
                                      ControlledDoF dofToControlRight,
-                                     ArrayList<Pair<FramePose, FramePose>> handTargetPairsArray, boolean thisTestIsStaticsBased,
+                                     ArrayList<ImmutablePair<FramePose, FramePose>> handTargetPairsArray, boolean thisTestIsStaticsBased,
                                      boolean useRandomRobotLocations)
    {
       Random random = new Random(100L);
@@ -117,18 +117,18 @@ public class WholeBodyIkSolverTestHelper
       dofToControl.set(RobotSide.LEFT, dofToControlLeft);
       dofToControl.set(RobotSide.RIGHT, dofToControlRight);
 
-      for (Pair<FramePose, FramePose> framePair : handTargetPairsArray)
+      for (ImmutablePair<FramePose, FramePose> framePair : handTargetPairsArray)
       {
          SideDependentList<FramePose> endEffectorTarget = new SideDependentList<FramePose>();
 
-         if (framePair.first() != null)
+         if (framePair.getLeft() != null)
          {
-            endEffectorTarget.set(RobotSide.LEFT, framePair.first());
+            endEffectorTarget.set(RobotSide.LEFT, framePair.getLeft());
          }
 
-         if (framePair.second() != null)
+         if (framePair.getRight() != null)
          {
-            endEffectorTarget.set(RobotSide.RIGHT, framePair.second());
+            endEffectorTarget.set(RobotSide.RIGHT, framePair.getRight());
          }
 
          actualRobotModel.updateFrames();
@@ -267,7 +267,7 @@ public class WholeBodyIkSolverTestHelper
 
    // static private int count = 0;
 
-   public ArrayList<Pair<FramePose, FramePose>> createWallOfTargetPoints(RobotSide robotSide)
+   public ArrayList<ImmutablePair<FramePose, FramePose>> createWallOfTargetPoints(RobotSide robotSide)
    {
       // Creates a wall of points in the front and center of the robot. The orientation of each target frame is as if the humanoid were performing the DRC wall task with the y-axis always pointing straight into the wall.
       double maxWallDepth = 0.2;
@@ -279,7 +279,7 @@ public class WholeBodyIkSolverTestHelper
       int halfOfWidthIncrements = 10;
       int heightIncrements = 10;
       int sign = ((robotSide == RobotSide.RIGHT) ? -1 : 1);
-      ArrayList<Pair<FramePose, FramePose>> handArrayList = new ArrayList<Pair<FramePose, FramePose>>();
+      ArrayList<ImmutablePair<FramePose, FramePose>> handArrayList = new ArrayList<ImmutablePair<FramePose, FramePose>>();
       for (int x = 0; x < depthIncrements; x++)
       {
          for (int y = -halfOfWidthIncrements; y < (halfOfWidthIncrements + 1); y++)
@@ -295,8 +295,8 @@ public class WholeBodyIkSolverTestHelper
                                                          ReferenceFrame.getWorldFrame(), transformToParent);
                FramePose desiredFramePose = new FramePose(desiredReferenceFrame);
 
-               Pair<FramePose, FramePose> handLeftFramesPair = new Pair<FramePose, FramePose>(desiredFramePose, null);
-               Pair<FramePose, FramePose> handRightFramesPair = new Pair<FramePose, FramePose>(null, desiredFramePose);
+               ImmutablePair<FramePose, FramePose> handLeftFramesPair = new ImmutablePair<FramePose, FramePose>(desiredFramePose, null);
+               ImmutablePair<FramePose, FramePose> handRightFramesPair = new ImmutablePair<FramePose, FramePose>(null, desiredFramePose);
                if (robotSide == RobotSide.RIGHT)
                {
                   handArrayList.add(handRightFramesPair);
@@ -322,7 +322,7 @@ public class WholeBodyIkSolverTestHelper
       return robot;
    }
 
-   public ArrayList<Pair<FramePose, FramePose>> createHalfCylinderOfTargetPoints(RobotSide robotSide)
+   public ArrayList<ImmutablePair<FramePose, FramePose>> createHalfCylinderOfTargetPoints(RobotSide robotSide)
    {
       double maxReachRadius = wholeBodyHalfCylinderTargetParameters.getMaxReachRadius();
       double maxHeight = wholeBodyHalfCylinderTargetParameters.getMaxHeight();
@@ -334,7 +334,7 @@ public class WholeBodyIkSolverTestHelper
       // Creates a half cylinder of points for the robot to try to reach in its (Right/Left) arm workspace.
       int sign = ((robotSide == RobotSide.RIGHT) ? -1 : 1);
 
-      ArrayList<Pair<FramePose, FramePose>> handArrayList = new ArrayList<Pair<FramePose, FramePose>>();
+      ArrayList<ImmutablePair<FramePose, FramePose>> handArrayList = new ArrayList<ImmutablePair<FramePose, FramePose>>();
 
       for (int z_int = heightIncrements; z_int > 0; z_int--)
       {
@@ -351,8 +351,8 @@ public class WholeBodyIkSolverTestHelper
 
                FramePose desiredPose = new FramePose( hikSolver.getRootFrame(actualRobotModel) , point, noRotation);
 
-               Pair<FramePose, FramePose> handLeftFramesPair = new Pair<FramePose, FramePose>(desiredPose, null);
-               Pair<FramePose, FramePose> handRightFramesPair = new Pair<FramePose, FramePose>(null, desiredPose);
+               ImmutablePair<FramePose, FramePose> handLeftFramesPair = new ImmutablePair<FramePose, FramePose>(desiredPose, null);
+               ImmutablePair<FramePose, FramePose> handRightFramesPair = new ImmutablePair<FramePose, FramePose>(null, desiredPose);
 
                if (robotSide == RobotSide.RIGHT)
                {
@@ -370,10 +370,10 @@ public class WholeBodyIkSolverTestHelper
    }
 
 
-   public ArrayList<Pair<FramePose, FramePose>> createManualFramePosePairArrayList(
+   public ArrayList<ImmutablePair<FramePose, FramePose>> createManualFramePosePairArrayList(
          ArrayList<SideDependentList<RigidBodyTransform>> handRigidBodyTransformData )
    {
-      ArrayList<Pair<FramePose, FramePose>> arrayListToReturn = new ArrayList<Pair<FramePose, FramePose>>();
+      ArrayList<ImmutablePair<FramePose, FramePose>> arrayListToReturn = new ArrayList<ImmutablePair<FramePose, FramePose>>();
 
       FramePose desiredLeftHandFrame = null;
       FramePose desiredRightHandFrame = null;
@@ -383,7 +383,7 @@ public class WholeBodyIkSolverTestHelper
          desiredLeftHandFrame  = new FramePose( hikSolver.getRootFrame( actualRobotModel ), targetPair.get(RobotSide.LEFT)  );
          desiredRightHandFrame = new FramePose( hikSolver.getRootFrame( actualRobotModel ), targetPair.get(RobotSide.RIGHT) );
 
-         Pair<FramePose, FramePose> pair = new Pair<FramePose, FramePose>(desiredLeftHandFrame, desiredRightHandFrame);
+         ImmutablePair<FramePose, FramePose> pair = new ImmutablePair<FramePose, FramePose>(desiredLeftHandFrame, desiredRightHandFrame);
          arrayListToReturn.add(pair);
       }
 

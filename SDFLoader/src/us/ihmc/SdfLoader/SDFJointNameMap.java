@@ -5,7 +5,7 @@ import java.util.Set;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
@@ -29,15 +29,15 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
 
    public JointRole getJointRole(String jointName);
 
-   public Pair<RobotSide, LegJointName> getLegJointName(String jointName);
+   public ImmutablePair<RobotSide, LegJointName> getLegJointName(String jointName);
 
-   public Pair<RobotSide, ArmJointName> getArmJointName(String jointName);
+   public ImmutablePair<RobotSide, ArmJointName> getArmJointName(String jointName);
 
    public NeckJointName getNeckJointName(String jointName);
 
    public SpineJointName getSpineJointName(String jointName);
 
-   public Pair<RobotSide, LimbName> getLimbName(String limbName);
+   public ImmutablePair<RobotSide, LimbName> getLimbName(String limbName);
 
    public String getPelvisName();
    
@@ -51,7 +51,7 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
 
    public String getJointBeforeHandName(RobotSide robotSide);
 
-   public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap();
+   public List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap();
 
    public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide);
 

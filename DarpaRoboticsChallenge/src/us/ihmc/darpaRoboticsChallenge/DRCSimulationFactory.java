@@ -42,7 +42,7 @@ import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotContr
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -283,14 +283,14 @@ public class DRCSimulationFactory
          }
       }
 
-      List<Pair<String, YoPDGains>> passiveJointNameWithGains = jointMap.getPassiveJointNameWithGains(simulatedRobot.getRobotsYoVariableRegistry());
+      List<ImmutablePair<String, YoPDGains>> passiveJointNameWithGains = jointMap.getPassiveJointNameWithGains(simulatedRobot.getRobotsYoVariableRegistry());
       if (passiveJointNameWithGains != null)
       {
          for (int i = 0; i < passiveJointNameWithGains.size(); i++)
          {
-            String jointName = passiveJointNameWithGains.get(i).first();
+            String jointName = passiveJointNameWithGains.get(i).getLeft();
             OneDegreeOfFreedomJoint simulatedJoint = simulatedRobot.getOneDegreeOfFreedomJoint(jointName);
-            YoPDGains gains = passiveJointNameWithGains.get(i).second();
+            YoPDGains gains = passiveJointNameWithGains.get(i).getRight();
             PassiveJointController passiveJointController = new PassiveJointController(simulatedJoint, gains);
             simulatedRobot.setController(passiveJointController);
          }

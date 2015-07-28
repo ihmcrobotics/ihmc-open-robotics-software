@@ -1,7 +1,7 @@
 package us.ihmc.wholeBodyController;
 
 import us.ihmc.SdfLoader.SDFJointNameMap;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
@@ -35,5 +35,5 @@ public interface DRCRobotJointMap extends SDFJointNameMap
 
    public abstract DRCRobotContactPointParameters getContactPointParameters();
 
-   public List<Pair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry);
+   public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry);
 }

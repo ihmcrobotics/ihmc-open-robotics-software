@@ -39,7 +39,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProv
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.RobotMotionStatus;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
@@ -762,11 +762,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             initializingICPTrajectory.set(true);
 
-            Pair<FramePoint2d, Double> finalDesiredICPAndTrajectoryTime = computeFinalDesiredICPAndTrajectoryTime();
+            ImmutablePair<FramePoint2d, Double> finalDesiredICPAndTrajectoryTime = computeFinalDesiredICPAndTrajectoryTime();
 
             if (transferToSide == null && !hasICPPlannerBeenInitializedAtStart.getBooleanValue())
             {
-               FramePoint2d finalDesiredICP = finalDesiredICPAndTrajectoryTime.first();
+               FramePoint2d finalDesiredICP = finalDesiredICPAndTrajectoryTime.getLeft();
                finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
 
                desiredICP.set(finalDesiredICP);
@@ -830,9 +830,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       private final FramePoint2d tempFramePoint2d = new FramePoint2d();
       
-      private Pair<FramePoint2d, Double> computeFinalDesiredICPAndTrajectoryTime()
+      private ImmutablePair<FramePoint2d, Double> computeFinalDesiredICPAndTrajectoryTime()
       {
-         Pair<FramePoint2d, Double> finalDesiredICPAndTrajectoryTime;
+         ImmutablePair<FramePoint2d, Double> finalDesiredICPAndTrajectoryTime;
 
          if (transferToSide == null)
          {
@@ -841,7 +841,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
             finalDesiredICPInWorld.set(Double.NaN, Double.NaN);
 
-            finalDesiredICPAndTrajectoryTime = new Pair<FramePoint2d, Double>(finalDesiredICP, trajectoryTime);
+            finalDesiredICPAndTrajectoryTime = new ImmutablePair<FramePoint2d, Double>(finalDesiredICP, trajectoryTime);
          }
 
          else if (rememberFinalICPFromSingleSupport.getBooleanValue() && !finalDesiredICPInWorld.containsNaN())
@@ -849,7 +849,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             FramePoint2d finalDesiredICP = finalDesiredICPInWorld.getFramePoint2dCopy();
             double trajectoryTime = transferTimeCalculationProvider.getValue();
 
-            finalDesiredICPAndTrajectoryTime = new Pair<FramePoint2d, Double>(finalDesiredICP, trajectoryTime);
+            finalDesiredICPAndTrajectoryTime = new ImmutablePair<FramePoint2d, Double>(finalDesiredICP, trajectoryTime);
          }
 
          else
@@ -876,7 +876,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             tempFramePoint2d.setIncludingFrame(finalDesiredICP);
             tempFramePoint2d.changeFrame(worldFrame);
             finalDesiredICPInWorld.set(tempFramePoint2d);
-            finalDesiredICPAndTrajectoryTime = new Pair<FramePoint2d, Double>(finalDesiredICP, trajectoryTime);
+            finalDesiredICPAndTrajectoryTime = new ImmutablePair<FramePoint2d, Double>(finalDesiredICP, trajectoryTime);
          }
 
          return finalDesiredICPAndTrajectoryTime;

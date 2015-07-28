@@ -3,14 +3,14 @@ package us.ihmc.graphics3DAdapter.graphics.appearances;
 import java.util.ArrayList;
 
 import us.ihmc.graphics3DAdapter.HeightMap;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class HeightBasedTerrainBlend extends YoAppearanceTransparent
 {
 
    private final HeightMap heightMap;
    private final ArrayList<TextureDefinition> textures = new ArrayList<TextureDefinition>();
-   private final ArrayList<Pair<Double, Double>> blends = new ArrayList<Pair<Double, Double>>();
+   private final ArrayList<ImmutablePair<Double, Double>> blends = new ArrayList<ImmutablePair<Double, Double>>();
    
    public HeightBasedTerrainBlend(HeightMap heightMap)
    {
@@ -29,11 +29,11 @@ public class HeightBasedTerrainBlend extends YoAppearanceTransparent
    
    public void addBlend(double min_height, double fade_dist)
    {
-      blends.add(new Pair<Double, Double>(min_height, fade_dist));
+      blends.add(new ImmutablePair<Double, Double>(min_height, fade_dist));
    }
 
 
-   public ArrayList<Pair<Double, Double>> getBlends()
+   public ArrayList<ImmutablePair<Double, Double>> getBlends()
    {
       return blends;
    }

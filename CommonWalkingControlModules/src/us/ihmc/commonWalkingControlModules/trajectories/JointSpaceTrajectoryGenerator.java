@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointPositions
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -477,9 +477,9 @@ public class JointSpaceTrajectoryGenerator
       
       if (bagOfBalls != null)
       {
-         Pair<FramePose, FrameVector> poseAndVelocity = bodyPositionInTimeEstimator.getPelvisPoseAndVelocityInTime(swingDuration.getDoubleValue() - timeInSwing, swingSide);
-         FramePose bodyFrameInTime = poseAndVelocity.first();
-         FrameVector bodyVelocityInTime = poseAndVelocity.second();
+         ImmutablePair<FramePose, FrameVector> poseAndVelocity = bodyPositionInTimeEstimator.getPelvisPoseAndVelocityInTime(swingDuration.getDoubleValue() - timeInSwing, swingSide);
+         FramePose bodyFrameInTime = poseAndVelocity.getLeft();
+         FrameVector bodyVelocityInTime = poseAndVelocity.getRight();
          bodyVelocityInTime.changeFrame(ReferenceFrame.getWorldFrame());
          
          FramePoint bodyPoint = new FramePoint();

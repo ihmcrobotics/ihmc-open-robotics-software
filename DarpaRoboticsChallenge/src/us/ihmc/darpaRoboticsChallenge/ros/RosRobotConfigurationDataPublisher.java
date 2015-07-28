@@ -15,7 +15,7 @@ import us.ihmc.communication.packets.dataobjects.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.IMUDefinition;
-import us.ihmc.utilities.Triplet;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModelUtils;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -66,7 +66,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final SideDependentList<float[]> footForceSensorWrenches = new SideDependentList<float[]>();
    private final SideDependentList<float[]> wristForceSensorWrenches = new SideDependentList<float[]>();
 
-   private final ArrayList<Triplet<String, String, RigidBodyTransform>> staticTransforms;
+   private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTransforms;
 
    public RosRobotConfigurationDataPublisher(SDFFullRobotModelFactory sdfFullRobotModelFactory, PacketCommunicator rosModulePacketCommunicator,
          final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
@@ -247,10 +247,10 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             {
                for (int i = 0; i < staticTransforms.size(); i++)
                {
-                  Triplet<String, String, RigidBodyTransform> staticTransformTriplet = staticTransforms.get(i);
-                  String from = staticTransformTriplet.first();
-                  String to = staticTransformTriplet.second();
-                  RigidBodyTransform staticTransform = staticTransformTriplet.third();
+                  ImmutableTriple<String, String, RigidBodyTransform> staticTransformTriplet = staticTransforms.get(i);
+                  String from = staticTransformTriplet.getLeft();
+                  String to = staticTransformTriplet.getMiddle();
+                  RigidBodyTransform staticTransform = staticTransformTriplet.getRight();
                   tfPublisher.publish(staticTransform, timeStamp, from, to);
                }
             }

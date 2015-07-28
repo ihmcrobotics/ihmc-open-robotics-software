@@ -9,7 +9,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -37,10 +37,10 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
    {
       for (int i = 0; i < revoluteJoints.size(); i++)
       {
-         Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = revoluteJoints.get(i);
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = revoluteJoints.get(i);
 
-         OneDegreeOfFreedomJoint pinJoint = jointPair.first();
-         OneDoFJoint revoluteJoint = jointPair.second();
+         OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
+         OneDoFJoint revoluteJoint = jointPair.getRight();
 
          double tau = revoluteJoint.getTau();
          DoubleYoVariable rawJointTorque = rawJointTorques.get(revoluteJoint);

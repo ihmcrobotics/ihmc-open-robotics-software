@@ -20,7 +20,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -84,15 +84,15 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
 
    public abstract DRCHandType getDRCHandType();
    
-   public abstract LinkedHashMap<NeckJointName,Pair<Double,Double>> getSliderBoardControlledNeckJointsWithLimits();
+   public abstract LinkedHashMap<NeckJointName,ImmutablePair<Double,Double>> getSliderBoardControlledNeckJointsWithLimits();
    
-   public abstract SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> getSliderBoardControlledFingerJointsWithLimits();
+   public abstract SideDependentList<LinkedHashMap<String,ImmutablePair<Double,Double>>> getSliderBoardControlledFingerJointsWithLimits();
 
    public abstract LogSettings getLogSettings();
 
    public abstract LogModelProvider getLogModelProvider();
 
-   public abstract Pair<Class<?>, String[]> getOperatorInterfaceStarter();
+   public abstract ImmutablePair<Class<?>, String[]> getOperatorInterfaceStarter();
 
    public abstract Class<?> getSpectatorInterfaceClass();
 

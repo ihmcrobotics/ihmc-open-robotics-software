@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.parameters;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.Triplet;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -43,5 +43,5 @@ public interface DRCRobotSensorInformation
    
    public boolean isMultisenseHead();
    
-   public ArrayList<Triplet<String, String, RigidBodyTransform>> getStaticTransformsForRos();
+   public ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> getStaticTransformsForRos();
 }
