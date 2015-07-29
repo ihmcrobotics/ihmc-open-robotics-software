@@ -2,7 +2,7 @@ package us.ihmc.acsell;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.time.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

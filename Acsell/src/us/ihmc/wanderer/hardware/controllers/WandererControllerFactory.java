@@ -3,7 +3,6 @@ package us.ihmc.wanderer.hardware.controllers;
 import java.io.IOException;
 import java.util.logging.Level;
 
-import javax.vecmath.Point3d;
 import javax.xml.bind.JAXBException;
 
 import us.ihmc.acsell.CostOfTransportCalculator;
@@ -35,7 +34,7 @@ import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
+import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.io.logging.LogTools;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.wanderer.hardware.output.WandererOutputWriter;
