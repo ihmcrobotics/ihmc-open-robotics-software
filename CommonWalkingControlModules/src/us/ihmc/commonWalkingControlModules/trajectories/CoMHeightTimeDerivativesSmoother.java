@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.linearDynamicSystems.ComplexConjugateMode;
-import us.ihmc.utilities.linearDynamicSystems.EigenvalueDecomposer;
-import us.ihmc.utilities.linearDynamicSystems.SingleRealMode;
+import us.ihmc.robotics.linearDynamicSystems.ComplexConjugateMode;
+import us.ihmc.robotics.linearDynamicSystems.EigenvalueDecomposer;
+import us.ihmc.robotics.linearDynamicSystems.SingleRealMode;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.dataStructures.ComplexNumber;
 import us.ihmc.utilities.math.geometry.FramePoint;
