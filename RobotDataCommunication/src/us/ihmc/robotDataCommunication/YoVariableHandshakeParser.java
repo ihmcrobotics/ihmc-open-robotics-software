@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.vecmath.Color3f;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Artifact;
@@ -18,7 +20,6 @@ import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHan
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.utilities.dynamicClassLoader.DynamicEnumCreator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -34,8 +35,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-
 public class YoVariableHandshakeParser
 {
    private final String registryPrefix;
@@ -46,7 +45,6 @@ public class YoVariableHandshakeParser
    private final ArrayList<YoVariable<?>> variables = new ArrayList<YoVariable<?>>();
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ArrayList<JointState<? extends Joint>> jointStates = new ArrayList<>();
-   private final DynamicEnumCreator dynamicEnumCreator = new DynamicEnumCreator();
 
    private int bufferSize;
    
@@ -240,7 +238,9 @@ public class YoVariableHandshakeParser
             variable = new LongYoVariable(name, parent);
             break;
          case EnumYoVariable:
-            variable = createEnumYoVariable(name, yoVariableDefinition.getEnumValuesList(), parent);
+            List<String> values = yoVariableDefinition.getEnumValuesList();
+            boolean allowNullValues = yoVariableDefinition.hasAllowNullValues() ? yoVariableDefinition.getAllowNullValues() : true;
+            variable = (YoVariable<?>) new EnumYoVariable(name, "", parent, allowNullValues, values.toArray(new String[values.size()]));
             break;
          default:
             throw new RuntimeException();
@@ -248,13 +248,6 @@ public class YoVariableHandshakeParser
    
          variables.add(variable);
       }
-   }
-
-   @SuppressWarnings({ "rawtypes", "unchecked" })
-   private YoVariable<?> createEnumYoVariable(String name, List<String> values, YoVariableRegistry parent)
-   {
-      Class<?> enumType = dynamicEnumCreator.createEnum(name, values);
-      return new EnumYoVariable(name, "", parent, enumType, true);
    }
 
    public double getDt()

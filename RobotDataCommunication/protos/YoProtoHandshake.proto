@@ -27,6 +27,7 @@ message YoProtoHandshake
 		
 		required YoProtoType type = 3;
 		repeated string enumValues = 4;
+		optional bool allowNullValues = 5;
 	}
 	
 	message JointDefinition

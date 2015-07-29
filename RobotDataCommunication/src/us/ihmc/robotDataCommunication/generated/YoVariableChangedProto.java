@@ -8,66 +8,160 @@ public final class YoVariableChangedProto {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface YoVariableChangedOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-    
-    // required uint32 variableID = 1;
+  public interface YoVariableChangedOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:YoVariableChanged)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>required uint32 variableID = 1;</code>
+     */
     boolean hasVariableID();
+    /**
+     * <code>required uint32 variableID = 1;</code>
+     */
     int getVariableID();
-    
-    // required double value = 2;
+
+    /**
+     * <code>required double value = 2;</code>
+     */
     boolean hasValue();
+    /**
+     * <code>required double value = 2;</code>
+     */
     double getValue();
   }
+  /**
+   * Protobuf type {@code YoVariableChanged}
+   */
   public static final class YoVariableChanged extends
-      com.google.protobuf.GeneratedMessage
-      implements YoVariableChangedOrBuilder {
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:YoVariableChanged)
+      YoVariableChangedOrBuilder {
     // Use YoVariableChanged.newBuilder() to construct.
-    private YoVariableChanged(Builder builder) {
+    private YoVariableChanged(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private YoVariableChanged(boolean noInit) {}
-    
+    private YoVariableChanged(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final YoVariableChanged defaultInstance;
     public static YoVariableChanged getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public YoVariableChanged getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private YoVariableChanged(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              variableID_ = input.readUInt32();
+              break;
+            }
+            case 17: {
+              bitField0_ |= 0x00000002;
+              value_ = input.readDouble();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.internal_static_YoVariableChanged_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.internal_static_YoVariableChanged_fieldAccessorTable;
+      return us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.internal_static_YoVariableChanged_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged.class, us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<YoVariableChanged> PARSER =
+        new com.google.protobuf.AbstractParser<YoVariableChanged>() {
+      public YoVariableChanged parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new YoVariableChanged(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<YoVariableChanged> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
-    // required uint32 variableID = 1;
     public static final int VARIABLEID_FIELD_NUMBER = 1;
     private int variableID_;
+    /**
+     * <code>required uint32 variableID = 1;</code>
+     */
     public boolean hasVariableID() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>required uint32 variableID = 1;</code>
+     */
     public int getVariableID() {
       return variableID_;
     }
-    
-    // required double value = 2;
+
     public static final int VALUE_FIELD_NUMBER = 2;
     private double value_;
+    /**
+     * <code>required double value = 2;</code>
+     */
     public boolean hasValue() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
+    /**
+     * <code>required double value = 2;</code>
+     */
     public double getValue() {
       return value_;
     }
-    
+
     private void initFields() {
       variableID_ = 0;
       value_ = 0D;
@@ -75,8 +169,9 @@ public final class YoVariableChangedProto {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-      
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
       if (!hasVariableID()) {
         memoizedIsInitialized = 0;
         return false;
@@ -88,7 +183,7 @@ public final class YoVariableChangedProto {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -100,12 +195,12 @@ public final class YoVariableChangedProto {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -119,113 +214,106 @@ public final class YoVariableChangedProto {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     public static us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code YoVariableChanged}
+     */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChangedOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:YoVariableChanged)
+        us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChangedOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.internal_static_YoVariableChanged_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.internal_static_YoVariableChanged_fieldAccessorTable;
+        return us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.internal_static_YoVariableChanged_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged.class, us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged.Builder.class);
       }
-      
+
       // Construct using us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -236,7 +324,7 @@ public final class YoVariableChangedProto {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         variableID_ = 0;
@@ -245,20 +333,20 @@ public final class YoVariableChangedProto {
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged.getDescriptor();
+        return us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.internal_static_YoVariableChanged_descriptor;
       }
-      
+
       public us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged getDefaultInstanceForType() {
         return us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged.getDefaultInstance();
       }
-      
+
       public us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged build() {
         us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged result = buildPartial();
         if (!result.isInitialized()) {
@@ -266,17 +354,7 @@ public final class YoVariableChangedProto {
         }
         return result;
       }
-      
-      private us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged buildPartial() {
         us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged result = new us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged(this);
         int from_bitField0_ = bitField0_;
@@ -293,7 +371,7 @@ public final class YoVariableChangedProto {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged) {
           return mergeFrom((us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged)other);
@@ -302,7 +380,7 @@ public final class YoVariableChangedProto {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged other) {
         if (other == us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged.getDefaultInstance()) return this;
         if (other.hasVariableID()) {
@@ -314,7 +392,7 @@ public final class YoVariableChangedProto {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasVariableID()) {
           
@@ -326,105 +404,107 @@ public final class YoVariableChangedProto {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              variableID_ = input.readUInt32();
-              break;
-            }
-            case 17: {
-              bitField0_ |= 0x00000002;
-              value_ = input.readDouble();
-              break;
-            }
+        us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // required uint32 variableID = 1;
+
       private int variableID_ ;
+      /**
+       * <code>required uint32 variableID = 1;</code>
+       */
       public boolean hasVariableID() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required uint32 variableID = 1;</code>
+       */
       public int getVariableID() {
         return variableID_;
       }
+      /**
+       * <code>required uint32 variableID = 1;</code>
+       */
       public Builder setVariableID(int value) {
         bitField0_ |= 0x00000001;
         variableID_ = value;
         onChanged();
         return this;
       }
+      /**
+       * <code>required uint32 variableID = 1;</code>
+       */
       public Builder clearVariableID() {
         bitField0_ = (bitField0_ & ~0x00000001);
         variableID_ = 0;
         onChanged();
         return this;
       }
-      
-      // required double value = 2;
+
       private double value_ ;
+      /**
+       * <code>required double value = 2;</code>
+       */
       public boolean hasValue() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
+      /**
+       * <code>required double value = 2;</code>
+       */
       public double getValue() {
         return value_;
       }
+      /**
+       * <code>required double value = 2;</code>
+       */
       public Builder setValue(double value) {
         bitField0_ |= 0x00000002;
         value_ = value;
         onChanged();
         return this;
       }
+      /**
+       * <code>required double value = 2;</code>
+       */
       public Builder clearValue() {
         bitField0_ = (bitField0_ & ~0x00000002);
         value_ = 0D;
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:YoVariableChanged)
     }
-    
+
     static {
       defaultInstance = new YoVariableChanged(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:YoVariableChanged)
   }
-  
-  private static com.google.protobuf.Descriptors.Descriptor
+
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_YoVariableChanged_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_YoVariableChanged_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -439,26 +519,24 @@ public final class YoVariableChangedProto {
       "on.generatedB\026YoVariableChangedProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
-        public com.google.protobuf.ExtensionRegistry assignDescriptors(
-            com.google.protobuf.Descriptors.FileDescriptor root) {
-          descriptor = root;
-          internal_static_YoVariableChanged_descriptor =
-            getDescriptor().getMessageTypes().get(0);
-          internal_static_YoVariableChanged_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_YoVariableChanged_descriptor,
-              new java.lang.String[] { "VariableID", "Value", },
-              us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged.class,
-              us.ihmc.robotDataCommunication.generated.YoVariableChangedProto.YoVariableChanged.Builder.class);
-          return null;
-        }
-      };
+        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+              com.google.protobuf.Descriptors.FileDescriptor root) {
+            descriptor = root;
+            return null;
+          }
+        };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
+    internal_static_YoVariableChanged_descriptor =
+      getDescriptor().getMessageTypes().get(0);
+    internal_static_YoVariableChanged_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_YoVariableChanged_descriptor,
+        new java.lang.String[] { "VariableID", "Value", });
   }
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }

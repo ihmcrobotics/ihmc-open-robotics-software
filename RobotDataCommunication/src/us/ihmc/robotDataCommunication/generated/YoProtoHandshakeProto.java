@@ -8,173 +8,477 @@ public final class YoProtoHandshakeProto {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface YoProtoHandshakeOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-    
-    // optional double dt = 1;
+  public interface YoProtoHandshakeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:YoProtoHandshake)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional double dt = 1;</code>
+     */
     boolean hasDt();
+    /**
+     * <code>optional double dt = 1;</code>
+     */
     double getDt();
-    
-    // repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;
+
+    /**
+     * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+     */
     java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition> 
         getRegistryList();
+    /**
+     * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+     */
     us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition getRegistry(int index);
+    /**
+     * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+     */
     int getRegistryCount();
+    /**
+     * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+     */
     java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinitionOrBuilder> 
         getRegistryOrBuilderList();
+    /**
+     * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+     */
     us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinitionOrBuilder getRegistryOrBuilder(
         int index);
-    
-    // repeated .YoProtoHandshake.YoVariableDefinition variable = 3;
+
+    /**
+     * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+     */
     java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition> 
         getVariableList();
+    /**
+     * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+     */
     us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition getVariable(int index);
+    /**
+     * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+     */
     int getVariableCount();
+    /**
+     * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+     */
     java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinitionOrBuilder> 
         getVariableOrBuilderList();
+    /**
+     * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+     */
     us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinitionOrBuilder getVariableOrBuilder(
         int index);
-    
-    // repeated .YoProtoHandshake.JointDefinition joint = 4;
+
+    /**
+     * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+     */
     java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition> 
         getJointList();
+    /**
+     * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+     */
     us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition getJoint(int index);
+    /**
+     * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+     */
     int getJointCount();
+    /**
+     * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+     */
     java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinitionOrBuilder> 
         getJointOrBuilderList();
+    /**
+     * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+     */
     us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinitionOrBuilder getJointOrBuilder(
         int index);
-    
-    // repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;
+
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+     */
     java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage> 
         getGraphicObjectList();
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+     */
     us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage getGraphicObject(int index);
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+     */
     int getGraphicObjectCount();
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+     */
     java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder> 
         getGraphicObjectOrBuilderList();
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+     */
     us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder getGraphicObjectOrBuilder(
         int index);
-    
-    // repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;
+
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+     */
     java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage> 
         getArtifactList();
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+     */
     us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage getArtifact(int index);
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+     */
     int getArtifactCount();
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+     */
     java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder> 
         getArtifactOrBuilderList();
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+     */
     us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder getArtifactOrBuilder(
         int index);
   }
+  /**
+   * Protobuf type {@code YoProtoHandshake}
+   */
   public static final class YoProtoHandshake extends
-      com.google.protobuf.GeneratedMessage
-      implements YoProtoHandshakeOrBuilder {
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:YoProtoHandshake)
+      YoProtoHandshakeOrBuilder {
     // Use YoProtoHandshake.newBuilder() to construct.
-    private YoProtoHandshake(Builder builder) {
+    private YoProtoHandshake(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private YoProtoHandshake(boolean noInit) {}
-    
+    private YoProtoHandshake(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final YoProtoHandshake defaultInstance;
     public static YoProtoHandshake getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public YoProtoHandshake getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private YoProtoHandshake(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 9: {
+              bitField0_ |= 0x00000001;
+              dt_ = input.readDouble();
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                registry_ = new java.util.ArrayList<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              registry_.add(input.readMessage(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.PARSER, extensionRegistry));
+              break;
+            }
+            case 26: {
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                variable_ = new java.util.ArrayList<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition>();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              variable_.add(input.readMessage(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.PARSER, extensionRegistry));
+              break;
+            }
+            case 34: {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+                joint_ = new java.util.ArrayList<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition>();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              joint_.add(input.readMessage(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.PARSER, extensionRegistry));
+              break;
+            }
+            case 42: {
+              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+                graphicObject_ = new java.util.ArrayList<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage>();
+                mutable_bitField0_ |= 0x00000010;
+              }
+              graphicObject_.add(input.readMessage(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.PARSER, extensionRegistry));
+              break;
+            }
+            case 50: {
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
+                artifact_ = new java.util.ArrayList<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage>();
+                mutable_bitField0_ |= 0x00000020;
+              }
+              artifact_.add(input.readMessage(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          registry_ = java.util.Collections.unmodifiableList(registry_);
+        }
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+          variable_ = java.util.Collections.unmodifiableList(variable_);
+        }
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+          joint_ = java.util.Collections.unmodifiableList(joint_);
+        }
+        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+          graphicObject_ = java.util.Collections.unmodifiableList(graphicObject_);
+        }
+        if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
+          artifact_ = java.util.Collections.unmodifiableList(artifact_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_fieldAccessorTable;
+      return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.class, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.Builder.class);
     }
-    
-    public interface YoRegistryDefinitionOrBuilder
-        extends com.google.protobuf.MessageOrBuilder {
-      
-      // required uint32 parent = 1;
-      boolean hasParent();
-      int getParent();
-      
-      // required string name = 2;
-      boolean hasName();
-      String getName();
-    }
-    public static final class YoRegistryDefinition extends
-        com.google.protobuf.GeneratedMessage
-        implements YoRegistryDefinitionOrBuilder {
-      // Use YoRegistryDefinition.newBuilder() to construct.
-      private YoRegistryDefinition(Builder builder) {
-        super(builder);
+
+    public static com.google.protobuf.Parser<YoProtoHandshake> PARSER =
+        new com.google.protobuf.AbstractParser<YoProtoHandshake>() {
+      public YoProtoHandshake parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new YoProtoHandshake(input, extensionRegistry);
       }
-      private YoRegistryDefinition(boolean noInit) {}
-      
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<YoProtoHandshake> getParserForType() {
+      return PARSER;
+    }
+
+    public interface YoRegistryDefinitionOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:YoProtoHandshake.YoRegistryDefinition)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required uint32 parent = 1;</code>
+       */
+      boolean hasParent();
+      /**
+       * <code>required uint32 parent = 1;</code>
+       */
+      int getParent();
+
+      /**
+       * <code>required string name = 2;</code>
+       */
+      boolean hasName();
+      /**
+       * <code>required string name = 2;</code>
+       */
+      java.lang.String getName();
+      /**
+       * <code>required string name = 2;</code>
+       */
+      com.google.protobuf.ByteString
+          getNameBytes();
+    }
+    /**
+     * Protobuf type {@code YoProtoHandshake.YoRegistryDefinition}
+     */
+    public static final class YoRegistryDefinition extends
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:YoProtoHandshake.YoRegistryDefinition)
+        YoRegistryDefinitionOrBuilder {
+      // Use YoRegistryDefinition.newBuilder() to construct.
+      private YoRegistryDefinition(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+      private YoRegistryDefinition(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
       private static final YoRegistryDefinition defaultInstance;
       public static YoRegistryDefinition getDefaultInstance() {
         return defaultInstance;
       }
-      
+
       public YoRegistryDefinition getDefaultInstanceForType() {
         return defaultInstance;
       }
-      
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private YoRegistryDefinition(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 8: {
+                bitField0_ |= 0x00000001;
+                parent_ = input.readUInt32();
+                break;
+              }
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000002;
+                name_ = bs;
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_YoRegistryDefinition_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_YoRegistryDefinition_fieldAccessorTable;
+        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_YoRegistryDefinition_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.class, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.Builder.class);
       }
-      
+
+      public static com.google.protobuf.Parser<YoRegistryDefinition> PARSER =
+          new com.google.protobuf.AbstractParser<YoRegistryDefinition>() {
+        public YoRegistryDefinition parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new YoRegistryDefinition(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<YoRegistryDefinition> getParserForType() {
+        return PARSER;
+      }
+
       private int bitField0_;
-      // required uint32 parent = 1;
       public static final int PARENT_FIELD_NUMBER = 1;
       private int parent_;
+      /**
+       * <code>required uint32 parent = 1;</code>
+       */
       public boolean hasParent() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required uint32 parent = 1;</code>
+       */
       public int getParent() {
         return parent_;
       }
-      
-      // required string name = 2;
+
       public static final int NAME_FIELD_NUMBER = 2;
       private java.lang.Object name_;
+      /**
+       * <code>required string name = 2;</code>
+       */
       public boolean hasName() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      public String getName() {
+      /**
+       * <code>required string name = 2;</code>
+       */
+      public java.lang.String getName() {
         java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          return (String) ref;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
         } else {
           com.google.protobuf.ByteString bs = 
               (com.google.protobuf.ByteString) ref;
-          String s = bs.toStringUtf8();
-          if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
             name_ = s;
           }
           return s;
         }
       }
-      private com.google.protobuf.ByteString getNameBytes() {
+      /**
+       * <code>required string name = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
         java.lang.Object ref = name_;
-        if (ref instanceof String) {
+        if (ref instanceof java.lang.String) {
           com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
           name_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
-      
+
       private void initFields() {
         parent_ = 0;
         name_ = "";
@@ -182,8 +486,9 @@ public final class YoProtoHandshakeProto {
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
         byte isInitialized = memoizedIsInitialized;
-        if (isInitialized != -1) return isInitialized == 1;
-        
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
         if (!hasParent()) {
           memoizedIsInitialized = 0;
           return false;
@@ -195,7 +500,7 @@ public final class YoProtoHandshakeProto {
         memoizedIsInitialized = 1;
         return true;
       }
-      
+
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
         getSerializedSize();
@@ -207,12 +512,12 @@ public final class YoProtoHandshakeProto {
         }
         getUnknownFields().writeTo(output);
       }
-      
+
       private int memoizedSerializedSize = -1;
       public int getSerializedSize() {
         int size = memoizedSerializedSize;
         if (size != -1) return size;
-      
+
         size = 0;
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           size += com.google.protobuf.CodedOutputStream
@@ -226,113 +531,106 @@ public final class YoProtoHandshakeProto {
         memoizedSerializedSize = size;
         return size;
       }
-      
+
       private static final long serialVersionUID = 0L;
       @java.lang.Override
       protected java.lang.Object writeReplace()
           throws java.io.ObjectStreamException {
         return super.writeReplace();
       }
-      
+
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition parseFrom(
           com.google.protobuf.ByteString data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
+        return PARSER.parseFrom(data);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition parseFrom(
           com.google.protobuf.ByteString data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(data, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition parseFrom(byte[] data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
+        return PARSER.parseFrom(data);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition parseFrom(
           byte[] data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(data, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition parseFrom(java.io.InputStream input)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
+        return PARSER.parseFrom(input);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition parseFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(input, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition parseDelimitedFrom(java.io.InputStream input)
           throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
+        return PARSER.parseDelimitedFrom(input);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition parseFrom(
           com.google.protobuf.CodedInputStream input)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
+        return PARSER.parseFrom(input);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition parseFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(input, extensionRegistry);
       }
-      
+
       public static Builder newBuilder() { return Builder.create(); }
       public Builder newBuilderForType() { return newBuilder(); }
       public static Builder newBuilder(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition prototype) {
         return newBuilder().mergeFrom(prototype);
       }
       public Builder toBuilder() { return newBuilder(this); }
-      
+
       @java.lang.Override
       protected Builder newBuilderForType(
           com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         Builder builder = new Builder(parent);
         return builder;
       }
+      /**
+       * Protobuf type {@code YoProtoHandshake.YoRegistryDefinition}
+       */
       public static final class Builder extends
-          com.google.protobuf.GeneratedMessage.Builder<Builder>
-         implements us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinitionOrBuilder {
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:YoProtoHandshake.YoRegistryDefinition)
+          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinitionOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
           return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_YoRegistryDefinition_descriptor;
         }
-        
+
         protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_YoRegistryDefinition_fieldAccessorTable;
+          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_YoRegistryDefinition_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.class, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.Builder.class);
         }
-        
+
         // Construct using us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.newBuilder()
         private Builder() {
           maybeForceBuilderInitialization();
         }
-        
-        private Builder(BuilderParent parent) {
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
           super(parent);
           maybeForceBuilderInitialization();
         }
@@ -343,7 +641,7 @@ public final class YoProtoHandshakeProto {
         private static Builder create() {
           return new Builder();
         }
-        
+
         public Builder clear() {
           super.clear();
           parent_ = 0;
@@ -352,20 +650,20 @@ public final class YoProtoHandshakeProto {
           bitField0_ = (bitField0_ & ~0x00000002);
           return this;
         }
-        
+
         public Builder clone() {
           return create().mergeFrom(buildPartial());
         }
-        
+
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.getDescriptor();
+          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_YoRegistryDefinition_descriptor;
         }
-        
+
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition getDefaultInstanceForType() {
           return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.getDefaultInstance();
         }
-        
+
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition build() {
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition result = buildPartial();
           if (!result.isInitialized()) {
@@ -373,17 +671,7 @@ public final class YoProtoHandshakeProto {
           }
           return result;
         }
-        
-        private us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition buildParsed()
-            throws com.google.protobuf.InvalidProtocolBufferException {
-          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition result = buildPartial();
-          if (!result.isInitialized()) {
-            throw newUninitializedMessageException(
-              result).asInvalidProtocolBufferException();
-          }
-          return result;
-        }
-        
+
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition buildPartial() {
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition result = new us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition(this);
           int from_bitField0_ = bitField0_;
@@ -400,7 +688,7 @@ public final class YoProtoHandshakeProto {
           onBuilt();
           return result;
         }
-        
+
         public Builder mergeFrom(com.google.protobuf.Message other) {
           if (other instanceof us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition) {
             return mergeFrom((us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition)other);
@@ -409,19 +697,21 @@ public final class YoProtoHandshakeProto {
             return this;
           }
         }
-        
+
         public Builder mergeFrom(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition other) {
           if (other == us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.getDefaultInstance()) return this;
           if (other.hasParent()) {
             setParent(other.getParent());
           }
           if (other.hasName()) {
-            setName(other.getName());
+            bitField0_ |= 0x00000002;
+            name_ = other.name_;
+            onChanged();
           }
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
         }
-        
+
         public final boolean isInitialized() {
           if (!hasParent()) {
             
@@ -433,83 +723,103 @@ public final class YoProtoHandshakeProto {
           }
           return true;
         }
-        
+
         public Builder mergeFrom(
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder(
-              this.getUnknownFields());
-          while (true) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              default: {
-                if (!parseUnknownField(input, unknownFields,
-                                       extensionRegistry, tag)) {
-                  this.setUnknownFields(unknownFields.build());
-                  onChanged();
-                  return this;
-                }
-                break;
-              }
-              case 8: {
-                bitField0_ |= 0x00000001;
-                parent_ = input.readUInt32();
-                break;
-              }
-              case 18: {
-                bitField0_ |= 0x00000002;
-                name_ = input.readBytes();
-                break;
-              }
+          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
             }
           }
+          return this;
         }
-        
         private int bitField0_;
-        
-        // required uint32 parent = 1;
+
         private int parent_ ;
+        /**
+         * <code>required uint32 parent = 1;</code>
+         */
         public boolean hasParent() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
+        /**
+         * <code>required uint32 parent = 1;</code>
+         */
         public int getParent() {
           return parent_;
         }
+        /**
+         * <code>required uint32 parent = 1;</code>
+         */
         public Builder setParent(int value) {
           bitField0_ |= 0x00000001;
           parent_ = value;
           onChanged();
           return this;
         }
+        /**
+         * <code>required uint32 parent = 1;</code>
+         */
         public Builder clearParent() {
           bitField0_ = (bitField0_ & ~0x00000001);
           parent_ = 0;
           onChanged();
           return this;
         }
-        
-        // required string name = 2;
+
         private java.lang.Object name_ = "";
+        /**
+         * <code>required string name = 2;</code>
+         */
         public boolean hasName() {
           return ((bitField0_ & 0x00000002) == 0x00000002);
         }
-        public String getName() {
+        /**
+         * <code>required string name = 2;</code>
+         */
+        public java.lang.String getName() {
           java.lang.Object ref = name_;
-          if (!(ref instanceof String)) {
-            String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-            name_ = s;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              name_ = s;
+            }
             return s;
           } else {
-            return (String) ref;
+            return (java.lang.String) ref;
           }
         }
-        public Builder setName(String value) {
+        /**
+         * <code>required string name = 2;</code>
+         */
+        public com.google.protobuf.ByteString
+            getNameBytes() {
+          java.lang.Object ref = name_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            name_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string name = 2;</code>
+         */
+        public Builder setName(
+            java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
@@ -518,95 +828,285 @@ public final class YoProtoHandshakeProto {
           onChanged();
           return this;
         }
+        /**
+         * <code>required string name = 2;</code>
+         */
         public Builder clearName() {
           bitField0_ = (bitField0_ & ~0x00000002);
           name_ = getDefaultInstance().getName();
           onChanged();
           return this;
         }
-        void setName(com.google.protobuf.ByteString value) {
-          bitField0_ |= 0x00000002;
+        /**
+         * <code>required string name = 2;</code>
+         */
+        public Builder setNameBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
           name_ = value;
           onChanged();
+          return this;
         }
-        
+
         // @@protoc_insertion_point(builder_scope:YoProtoHandshake.YoRegistryDefinition)
       }
-      
+
       static {
         defaultInstance = new YoRegistryDefinition(true);
         defaultInstance.initFields();
       }
-      
+
       // @@protoc_insertion_point(class_scope:YoProtoHandshake.YoRegistryDefinition)
     }
-    
-    public interface YoVariableDefinitionOrBuilder
-        extends com.google.protobuf.MessageOrBuilder {
-      
-      // required string name = 1;
+
+    public interface YoVariableDefinitionOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:YoProtoHandshake.YoVariableDefinition)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required string name = 1;</code>
+       */
       boolean hasName();
-      String getName();
-      
-      // required uint32 registry = 2;
+      /**
+       * <code>required string name = 1;</code>
+       */
+      java.lang.String getName();
+      /**
+       * <code>required string name = 1;</code>
+       */
+      com.google.protobuf.ByteString
+          getNameBytes();
+
+      /**
+       * <code>required uint32 registry = 2;</code>
+       */
       boolean hasRegistry();
+      /**
+       * <code>required uint32 registry = 2;</code>
+       */
       int getRegistry();
-      
-      // required .YoProtoHandshake.YoVariableDefinition.YoProtoType type = 3;
+
+      /**
+       * <code>required .YoProtoHandshake.YoVariableDefinition.YoProtoType type = 3;</code>
+       */
       boolean hasType();
+      /**
+       * <code>required .YoProtoHandshake.YoVariableDefinition.YoProtoType type = 3;</code>
+       */
       us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType getType();
-      
-      // repeated string enumValues = 4;
-      java.util.List<String> getEnumValuesList();
+
+      /**
+       * <code>repeated string enumValues = 4;</code>
+       */
+      com.google.protobuf.ProtocolStringList
+          getEnumValuesList();
+      /**
+       * <code>repeated string enumValues = 4;</code>
+       */
       int getEnumValuesCount();
-      String getEnumValues(int index);
+      /**
+       * <code>repeated string enumValues = 4;</code>
+       */
+      java.lang.String getEnumValues(int index);
+      /**
+       * <code>repeated string enumValues = 4;</code>
+       */
+      com.google.protobuf.ByteString
+          getEnumValuesBytes(int index);
+
+      /**
+       * <code>optional bool allowNullValues = 5;</code>
+       */
+      boolean hasAllowNullValues();
+      /**
+       * <code>optional bool allowNullValues = 5;</code>
+       */
+      boolean getAllowNullValues();
     }
+    /**
+     * Protobuf type {@code YoProtoHandshake.YoVariableDefinition}
+     */
     public static final class YoVariableDefinition extends
-        com.google.protobuf.GeneratedMessage
-        implements YoVariableDefinitionOrBuilder {
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:YoProtoHandshake.YoVariableDefinition)
+        YoVariableDefinitionOrBuilder {
       // Use YoVariableDefinition.newBuilder() to construct.
-      private YoVariableDefinition(Builder builder) {
+      private YoVariableDefinition(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
         super(builder);
+        this.unknownFields = builder.getUnknownFields();
       }
-      private YoVariableDefinition(boolean noInit) {}
-      
+      private YoVariableDefinition(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
       private static final YoVariableDefinition defaultInstance;
       public static YoVariableDefinition getDefaultInstance() {
         return defaultInstance;
       }
-      
+
       public YoVariableDefinition getDefaultInstanceForType() {
         return defaultInstance;
       }
-      
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private YoVariableDefinition(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000001;
+                name_ = bs;
+                break;
+              }
+              case 16: {
+                bitField0_ |= 0x00000002;
+                registry_ = input.readUInt32();
+                break;
+              }
+              case 24: {
+                int rawValue = input.readEnum();
+                us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType value = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType.valueOf(rawValue);
+                if (value == null) {
+                  unknownFields.mergeVarintField(3, rawValue);
+                } else {
+                  bitField0_ |= 0x00000004;
+                  type_ = value;
+                }
+                break;
+              }
+              case 34: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+                  enumValues_ = new com.google.protobuf.LazyStringArrayList();
+                  mutable_bitField0_ |= 0x00000008;
+                }
+                enumValues_.add(bs);
+                break;
+              }
+              case 40: {
+                bitField0_ |= 0x00000008;
+                allowNullValues_ = input.readBool();
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+            enumValues_ = enumValues_.getUnmodifiableView();
+          }
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_YoVariableDefinition_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_YoVariableDefinition_fieldAccessorTable;
+        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_YoVariableDefinition_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.class, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.Builder.class);
       }
-      
+
+      public static com.google.protobuf.Parser<YoVariableDefinition> PARSER =
+          new com.google.protobuf.AbstractParser<YoVariableDefinition>() {
+        public YoVariableDefinition parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new YoVariableDefinition(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<YoVariableDefinition> getParserForType() {
+        return PARSER;
+      }
+
+      /**
+       * Protobuf enum {@code YoProtoHandshake.YoVariableDefinition.YoProtoType}
+       */
       public enum YoProtoType
           implements com.google.protobuf.ProtocolMessageEnum {
+        /**
+         * <code>DoubleYoVariable = 1;</code>
+         */
         DoubleYoVariable(0, 1),
+        /**
+         * <code>BooleanYoVariable = 2;</code>
+         */
         BooleanYoVariable(1, 2),
+        /**
+         * <code>IntegerYoVariable = 3;</code>
+         */
         IntegerYoVariable(2, 3),
+        /**
+         * <code>LongYoVariable = 4;</code>
+         */
         LongYoVariable(3, 4),
+        /**
+         * <code>EnumYoVariable = 5;</code>
+         */
         EnumYoVariable(4, 5),
         ;
-        
+
+        /**
+         * <code>DoubleYoVariable = 1;</code>
+         */
         public static final int DoubleYoVariable_VALUE = 1;
+        /**
+         * <code>BooleanYoVariable = 2;</code>
+         */
         public static final int BooleanYoVariable_VALUE = 2;
+        /**
+         * <code>IntegerYoVariable = 3;</code>
+         */
         public static final int IntegerYoVariable_VALUE = 3;
+        /**
+         * <code>LongYoVariable = 4;</code>
+         */
         public static final int LongYoVariable_VALUE = 4;
+        /**
+         * <code>EnumYoVariable = 5;</code>
+         */
         public static final int EnumYoVariable_VALUE = 5;
-        
-        
+
+
         public final int getNumber() { return value; }
-        
+
         public static YoProtoType valueOf(int value) {
           switch (value) {
             case 1: return DoubleYoVariable;
@@ -617,7 +1117,7 @@ public final class YoProtoHandshakeProto {
             default: return null;
           }
         }
-        
+
         public static com.google.protobuf.Internal.EnumLiteMap<YoProtoType>
             internalGetValueMap() {
           return internalValueMap;
@@ -629,7 +1129,7 @@ public final class YoProtoHandshakeProto {
                   return YoProtoType.valueOf(number);
                 }
               };
-        
+
         public final com.google.protobuf.Descriptors.EnumValueDescriptor
             getValueDescriptor() {
           return getDescriptor().getValues().get(index);
@@ -642,11 +1142,9 @@ public final class YoProtoHandshakeProto {
             getDescriptor() {
           return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.getDescriptor().getEnumTypes().get(0);
         }
-        
-        private static final YoProtoType[] VALUES = {
-          DoubleYoVariable, BooleanYoVariable, IntegerYoVariable, LongYoVariable, EnumYoVariable, 
-        };
-        
+
+        private static final YoProtoType[] VALUES = values();
+
         public static YoProtoType valueOf(
             com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
           if (desc.getType() != getDescriptor()) {
@@ -655,96 +1153,148 @@ public final class YoProtoHandshakeProto {
           }
           return VALUES[desc.getIndex()];
         }
-        
+
         private final int index;
         private final int value;
-        
+
         private YoProtoType(int index, int value) {
           this.index = index;
           this.value = value;
         }
-        
+
         // @@protoc_insertion_point(enum_scope:YoProtoHandshake.YoVariableDefinition.YoProtoType)
       }
-      
+
       private int bitField0_;
-      // required string name = 1;
       public static final int NAME_FIELD_NUMBER = 1;
       private java.lang.Object name_;
+      /**
+       * <code>required string name = 1;</code>
+       */
       public boolean hasName() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      public String getName() {
+      /**
+       * <code>required string name = 1;</code>
+       */
+      public java.lang.String getName() {
         java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          return (String) ref;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
         } else {
           com.google.protobuf.ByteString bs = 
               (com.google.protobuf.ByteString) ref;
-          String s = bs.toStringUtf8();
-          if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
             name_ = s;
           }
           return s;
         }
       }
-      private com.google.protobuf.ByteString getNameBytes() {
+      /**
+       * <code>required string name = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
         java.lang.Object ref = name_;
-        if (ref instanceof String) {
+        if (ref instanceof java.lang.String) {
           com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
           name_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
-      
-      // required uint32 registry = 2;
+
       public static final int REGISTRY_FIELD_NUMBER = 2;
       private int registry_;
+      /**
+       * <code>required uint32 registry = 2;</code>
+       */
       public boolean hasRegistry() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
+      /**
+       * <code>required uint32 registry = 2;</code>
+       */
       public int getRegistry() {
         return registry_;
       }
-      
-      // required .YoProtoHandshake.YoVariableDefinition.YoProtoType type = 3;
+
       public static final int TYPE_FIELD_NUMBER = 3;
       private us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType type_;
+      /**
+       * <code>required .YoProtoHandshake.YoVariableDefinition.YoProtoType type = 3;</code>
+       */
       public boolean hasType() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
+      /**
+       * <code>required .YoProtoHandshake.YoVariableDefinition.YoProtoType type = 3;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType getType() {
         return type_;
       }
-      
-      // repeated string enumValues = 4;
+
       public static final int ENUMVALUES_FIELD_NUMBER = 4;
       private com.google.protobuf.LazyStringList enumValues_;
-      public java.util.List<String>
+      /**
+       * <code>repeated string enumValues = 4;</code>
+       */
+      public com.google.protobuf.ProtocolStringList
           getEnumValuesList() {
         return enumValues_;
       }
+      /**
+       * <code>repeated string enumValues = 4;</code>
+       */
       public int getEnumValuesCount() {
         return enumValues_.size();
       }
-      public String getEnumValues(int index) {
+      /**
+       * <code>repeated string enumValues = 4;</code>
+       */
+      public java.lang.String getEnumValues(int index) {
         return enumValues_.get(index);
       }
-      
+      /**
+       * <code>repeated string enumValues = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getEnumValuesBytes(int index) {
+        return enumValues_.getByteString(index);
+      }
+
+      public static final int ALLOWNULLVALUES_FIELD_NUMBER = 5;
+      private boolean allowNullValues_;
+      /**
+       * <code>optional bool allowNullValues = 5;</code>
+       */
+      public boolean hasAllowNullValues() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional bool allowNullValues = 5;</code>
+       */
+      public boolean getAllowNullValues() {
+        return allowNullValues_;
+      }
+
       private void initFields() {
         name_ = "";
         registry_ = 0;
         type_ = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType.DoubleYoVariable;
         enumValues_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        allowNullValues_ = false;
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
         byte isInitialized = memoizedIsInitialized;
-        if (isInitialized != -1) return isInitialized == 1;
-        
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
         if (!hasName()) {
           memoizedIsInitialized = 0;
           return false;
@@ -760,7 +1310,7 @@ public final class YoProtoHandshakeProto {
         memoizedIsInitialized = 1;
         return true;
       }
-      
+
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
         getSerializedSize();
@@ -776,14 +1326,17 @@ public final class YoProtoHandshakeProto {
         for (int i = 0; i < enumValues_.size(); i++) {
           output.writeBytes(4, enumValues_.getByteString(i));
         }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          output.writeBool(5, allowNullValues_);
+        }
         getUnknownFields().writeTo(output);
       }
-      
+
       private int memoizedSerializedSize = -1;
       public int getSerializedSize() {
         int size = memoizedSerializedSize;
         if (size != -1) return size;
-      
+
         size = 0;
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           size += com.google.protobuf.CodedOutputStream
@@ -806,117 +1359,114 @@ public final class YoProtoHandshakeProto {
           size += dataSize;
           size += 1 * getEnumValuesList().size();
         }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBoolSize(5, allowNullValues_);
+        }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
         return size;
       }
-      
+
       private static final long serialVersionUID = 0L;
       @java.lang.Override
       protected java.lang.Object writeReplace()
           throws java.io.ObjectStreamException {
         return super.writeReplace();
       }
-      
+
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition parseFrom(
           com.google.protobuf.ByteString data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
+        return PARSER.parseFrom(data);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition parseFrom(
           com.google.protobuf.ByteString data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(data, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition parseFrom(byte[] data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
+        return PARSER.parseFrom(data);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition parseFrom(
           byte[] data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(data, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition parseFrom(java.io.InputStream input)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
+        return PARSER.parseFrom(input);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition parseFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(input, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition parseDelimitedFrom(java.io.InputStream input)
           throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
+        return PARSER.parseDelimitedFrom(input);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition parseFrom(
           com.google.protobuf.CodedInputStream input)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
+        return PARSER.parseFrom(input);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition parseFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(input, extensionRegistry);
       }
-      
+
       public static Builder newBuilder() { return Builder.create(); }
       public Builder newBuilderForType() { return newBuilder(); }
       public static Builder newBuilder(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition prototype) {
         return newBuilder().mergeFrom(prototype);
       }
       public Builder toBuilder() { return newBuilder(this); }
-      
+
       @java.lang.Override
       protected Builder newBuilderForType(
           com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         Builder builder = new Builder(parent);
         return builder;
       }
+      /**
+       * Protobuf type {@code YoProtoHandshake.YoVariableDefinition}
+       */
       public static final class Builder extends
-          com.google.protobuf.GeneratedMessage.Builder<Builder>
-         implements us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinitionOrBuilder {
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:YoProtoHandshake.YoVariableDefinition)
+          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinitionOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
           return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_YoVariableDefinition_descriptor;
         }
-        
+
         protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_YoVariableDefinition_fieldAccessorTable;
+          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_YoVariableDefinition_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.class, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.Builder.class);
         }
-        
+
         // Construct using us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.newBuilder()
         private Builder() {
           maybeForceBuilderInitialization();
         }
-        
-        private Builder(BuilderParent parent) {
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
           super(parent);
           maybeForceBuilderInitialization();
         }
@@ -927,7 +1477,7 @@ public final class YoProtoHandshakeProto {
         private static Builder create() {
           return new Builder();
         }
-        
+
         public Builder clear() {
           super.clear();
           name_ = "";
@@ -938,22 +1488,24 @@ public final class YoProtoHandshakeProto {
           bitField0_ = (bitField0_ & ~0x00000004);
           enumValues_ = com.google.protobuf.LazyStringArrayList.EMPTY;
           bitField0_ = (bitField0_ & ~0x00000008);
+          allowNullValues_ = false;
+          bitField0_ = (bitField0_ & ~0x00000010);
           return this;
         }
-        
+
         public Builder clone() {
           return create().mergeFrom(buildPartial());
         }
-        
+
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.getDescriptor();
+          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_YoVariableDefinition_descriptor;
         }
-        
+
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition getDefaultInstanceForType() {
           return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.getDefaultInstance();
         }
-        
+
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition build() {
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition result = buildPartial();
           if (!result.isInitialized()) {
@@ -961,17 +1513,7 @@ public final class YoProtoHandshakeProto {
           }
           return result;
         }
-        
-        private us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition buildParsed()
-            throws com.google.protobuf.InvalidProtocolBufferException {
-          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition result = buildPartial();
-          if (!result.isInitialized()) {
-            throw newUninitializedMessageException(
-              result).asInvalidProtocolBufferException();
-          }
-          return result;
-        }
-        
+
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition buildPartial() {
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition result = new us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition(this);
           int from_bitField0_ = bitField0_;
@@ -989,16 +1531,19 @@ public final class YoProtoHandshakeProto {
           }
           result.type_ = type_;
           if (((bitField0_ & 0x00000008) == 0x00000008)) {
-            enumValues_ = new com.google.protobuf.UnmodifiableLazyStringList(
-                enumValues_);
+            enumValues_ = enumValues_.getUnmodifiableView();
             bitField0_ = (bitField0_ & ~0x00000008);
           }
           result.enumValues_ = enumValues_;
+          if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+            to_bitField0_ |= 0x00000008;
+          }
+          result.allowNullValues_ = allowNullValues_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
         }
-        
+
         public Builder mergeFrom(com.google.protobuf.Message other) {
           if (other instanceof us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition) {
             return mergeFrom((us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition)other);
@@ -1007,11 +1552,13 @@ public final class YoProtoHandshakeProto {
             return this;
           }
         }
-        
+
         public Builder mergeFrom(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition other) {
           if (other == us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.getDefaultInstance()) return this;
           if (other.hasName()) {
-            setName(other.getName());
+            bitField0_ |= 0x00000001;
+            name_ = other.name_;
+            onChanged();
           }
           if (other.hasRegistry()) {
             setRegistry(other.getRegistry());
@@ -1029,10 +1576,13 @@ public final class YoProtoHandshakeProto {
             }
             onChanged();
           }
+          if (other.hasAllowNullValues()) {
+            setAllowNullValues(other.getAllowNullValues());
+          }
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
         }
-        
+
         public final boolean isInitialized() {
           if (!hasName()) {
             
@@ -1048,78 +1598,71 @@ public final class YoProtoHandshakeProto {
           }
           return true;
         }
-        
+
         public Builder mergeFrom(
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder(
-              this.getUnknownFields());
-          while (true) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              default: {
-                if (!parseUnknownField(input, unknownFields,
-                                       extensionRegistry, tag)) {
-                  this.setUnknownFields(unknownFields.build());
-                  onChanged();
-                  return this;
-                }
-                break;
-              }
-              case 10: {
-                bitField0_ |= 0x00000001;
-                name_ = input.readBytes();
-                break;
-              }
-              case 16: {
-                bitField0_ |= 0x00000002;
-                registry_ = input.readUInt32();
-                break;
-              }
-              case 24: {
-                int rawValue = input.readEnum();
-                us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType value = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType.valueOf(rawValue);
-                if (value == null) {
-                  unknownFields.mergeVarintField(3, rawValue);
-                } else {
-                  bitField0_ |= 0x00000004;
-                  type_ = value;
-                }
-                break;
-              }
-              case 34: {
-                ensureEnumValuesIsMutable();
-                enumValues_.add(input.readBytes());
-                break;
-              }
+          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
             }
           }
+          return this;
         }
-        
         private int bitField0_;
-        
-        // required string name = 1;
+
         private java.lang.Object name_ = "";
+        /**
+         * <code>required string name = 1;</code>
+         */
         public boolean hasName() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
-        public String getName() {
+        /**
+         * <code>required string name = 1;</code>
+         */
+        public java.lang.String getName() {
           java.lang.Object ref = name_;
-          if (!(ref instanceof String)) {
-            String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-            name_ = s;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              name_ = s;
+            }
             return s;
           } else {
-            return (String) ref;
+            return (java.lang.String) ref;
           }
         }
-        public Builder setName(String value) {
+        /**
+         * <code>required string name = 1;</code>
+         */
+        public com.google.protobuf.ByteString
+            getNameBytes() {
+          java.lang.Object ref = name_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            name_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string name = 1;</code>
+         */
+        public Builder setName(
+            java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
@@ -1128,47 +1671,77 @@ public final class YoProtoHandshakeProto {
           onChanged();
           return this;
         }
+        /**
+         * <code>required string name = 1;</code>
+         */
         public Builder clearName() {
           bitField0_ = (bitField0_ & ~0x00000001);
           name_ = getDefaultInstance().getName();
           onChanged();
           return this;
         }
-        void setName(com.google.protobuf.ByteString value) {
-          bitField0_ |= 0x00000001;
+        /**
+         * <code>required string name = 1;</code>
+         */
+        public Builder setNameBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
           name_ = value;
           onChanged();
+          return this;
         }
-        
-        // required uint32 registry = 2;
+
         private int registry_ ;
+        /**
+         * <code>required uint32 registry = 2;</code>
+         */
         public boolean hasRegistry() {
           return ((bitField0_ & 0x00000002) == 0x00000002);
         }
+        /**
+         * <code>required uint32 registry = 2;</code>
+         */
         public int getRegistry() {
           return registry_;
         }
+        /**
+         * <code>required uint32 registry = 2;</code>
+         */
         public Builder setRegistry(int value) {
           bitField0_ |= 0x00000002;
           registry_ = value;
           onChanged();
           return this;
         }
+        /**
+         * <code>required uint32 registry = 2;</code>
+         */
         public Builder clearRegistry() {
           bitField0_ = (bitField0_ & ~0x00000002);
           registry_ = 0;
           onChanged();
           return this;
         }
-        
-        // required .YoProtoHandshake.YoVariableDefinition.YoProtoType type = 3;
+
         private us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType type_ = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType.DoubleYoVariable;
+        /**
+         * <code>required .YoProtoHandshake.YoVariableDefinition.YoProtoType type = 3;</code>
+         */
         public boolean hasType() {
           return ((bitField0_ & 0x00000004) == 0x00000004);
         }
+        /**
+         * <code>required .YoProtoHandshake.YoVariableDefinition.YoProtoType type = 3;</code>
+         */
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType getType() {
           return type_;
         }
+        /**
+         * <code>required .YoProtoHandshake.YoVariableDefinition.YoProtoType type = 3;</code>
+         */
         public Builder setType(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType value) {
           if (value == null) {
             throw new NullPointerException();
@@ -1178,14 +1751,16 @@ public final class YoProtoHandshakeProto {
           onChanged();
           return this;
         }
+        /**
+         * <code>required .YoProtoHandshake.YoVariableDefinition.YoProtoType type = 3;</code>
+         */
         public Builder clearType() {
           bitField0_ = (bitField0_ & ~0x00000004);
           type_ = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType.DoubleYoVariable;
           onChanged();
           return this;
         }
-        
-        // repeated string enumValues = 4;
+
         private com.google.protobuf.LazyStringList enumValues_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         private void ensureEnumValuesIsMutable() {
           if (!((bitField0_ & 0x00000008) == 0x00000008)) {
@@ -1193,18 +1768,37 @@ public final class YoProtoHandshakeProto {
             bitField0_ |= 0x00000008;
            }
         }
-        public java.util.List<String>
+        /**
+         * <code>repeated string enumValues = 4;</code>
+         */
+        public com.google.protobuf.ProtocolStringList
             getEnumValuesList() {
-          return java.util.Collections.unmodifiableList(enumValues_);
+          return enumValues_.getUnmodifiableView();
         }
+        /**
+         * <code>repeated string enumValues = 4;</code>
+         */
         public int getEnumValuesCount() {
           return enumValues_.size();
         }
-        public String getEnumValues(int index) {
+        /**
+         * <code>repeated string enumValues = 4;</code>
+         */
+        public java.lang.String getEnumValues(int index) {
           return enumValues_.get(index);
         }
+        /**
+         * <code>repeated string enumValues = 4;</code>
+         */
+        public com.google.protobuf.ByteString
+            getEnumValuesBytes(int index) {
+          return enumValues_.getByteString(index);
+        }
+        /**
+         * <code>repeated string enumValues = 4;</code>
+         */
         public Builder setEnumValues(
-            int index, String value) {
+            int index, java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
@@ -1213,7 +1807,11 @@ public final class YoProtoHandshakeProto {
           onChanged();
           return this;
         }
-        public Builder addEnumValues(String value) {
+        /**
+         * <code>repeated string enumValues = 4;</code>
+         */
+        public Builder addEnumValues(
+            java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
@@ -1222,87 +1820,245 @@ public final class YoProtoHandshakeProto {
           onChanged();
           return this;
         }
+        /**
+         * <code>repeated string enumValues = 4;</code>
+         */
         public Builder addAllEnumValues(
-            java.lang.Iterable<String> values) {
+            java.lang.Iterable<java.lang.String> values) {
           ensureEnumValuesIsMutable();
-          super.addAll(values, enumValues_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, enumValues_);
           onChanged();
           return this;
         }
+        /**
+         * <code>repeated string enumValues = 4;</code>
+         */
         public Builder clearEnumValues() {
           enumValues_ = com.google.protobuf.LazyStringArrayList.EMPTY;
           bitField0_ = (bitField0_ & ~0x00000008);
           onChanged();
           return this;
         }
-        void addEnumValues(com.google.protobuf.ByteString value) {
-          ensureEnumValuesIsMutable();
+        /**
+         * <code>repeated string enumValues = 4;</code>
+         */
+        public Builder addEnumValuesBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureEnumValuesIsMutable();
           enumValues_.add(value);
           onChanged();
+          return this;
         }
-        
+
+        private boolean allowNullValues_ ;
+        /**
+         * <code>optional bool allowNullValues = 5;</code>
+         */
+        public boolean hasAllowNullValues() {
+          return ((bitField0_ & 0x00000010) == 0x00000010);
+        }
+        /**
+         * <code>optional bool allowNullValues = 5;</code>
+         */
+        public boolean getAllowNullValues() {
+          return allowNullValues_;
+        }
+        /**
+         * <code>optional bool allowNullValues = 5;</code>
+         */
+        public Builder setAllowNullValues(boolean value) {
+          bitField0_ |= 0x00000010;
+          allowNullValues_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional bool allowNullValues = 5;</code>
+         */
+        public Builder clearAllowNullValues() {
+          bitField0_ = (bitField0_ & ~0x00000010);
+          allowNullValues_ = false;
+          onChanged();
+          return this;
+        }
+
         // @@protoc_insertion_point(builder_scope:YoProtoHandshake.YoVariableDefinition)
       }
-      
+
       static {
         defaultInstance = new YoVariableDefinition(true);
         defaultInstance.initFields();
       }
-      
+
       // @@protoc_insertion_point(class_scope:YoProtoHandshake.YoVariableDefinition)
     }
-    
-    public interface JointDefinitionOrBuilder
-        extends com.google.protobuf.MessageOrBuilder {
-      
-      // required string name = 1;
+
+    public interface JointDefinitionOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:YoProtoHandshake.JointDefinition)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required string name = 1;</code>
+       */
       boolean hasName();
-      String getName();
-      
-      // required .YoProtoHandshake.JointDefinition.JointType type = 2;
+      /**
+       * <code>required string name = 1;</code>
+       */
+      java.lang.String getName();
+      /**
+       * <code>required string name = 1;</code>
+       */
+      com.google.protobuf.ByteString
+          getNameBytes();
+
+      /**
+       * <code>required .YoProtoHandshake.JointDefinition.JointType type = 2;</code>
+       */
       boolean hasType();
+      /**
+       * <code>required .YoProtoHandshake.JointDefinition.JointType type = 2;</code>
+       */
       us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType getType();
     }
+    /**
+     * Protobuf type {@code YoProtoHandshake.JointDefinition}
+     */
     public static final class JointDefinition extends
-        com.google.protobuf.GeneratedMessage
-        implements JointDefinitionOrBuilder {
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:YoProtoHandshake.JointDefinition)
+        JointDefinitionOrBuilder {
       // Use JointDefinition.newBuilder() to construct.
-      private JointDefinition(Builder builder) {
+      private JointDefinition(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
         super(builder);
+        this.unknownFields = builder.getUnknownFields();
       }
-      private JointDefinition(boolean noInit) {}
-      
+      private JointDefinition(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
       private static final JointDefinition defaultInstance;
       public static JointDefinition getDefaultInstance() {
         return defaultInstance;
       }
-      
+
       public JointDefinition getDefaultInstanceForType() {
         return defaultInstance;
       }
-      
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private JointDefinition(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000001;
+                name_ = bs;
+                break;
+              }
+              case 16: {
+                int rawValue = input.readEnum();
+                us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType value = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType.valueOf(rawValue);
+                if (value == null) {
+                  unknownFields.mergeVarintField(2, rawValue);
+                } else {
+                  bitField0_ |= 0x00000002;
+                  type_ = value;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_JointDefinition_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_JointDefinition_fieldAccessorTable;
+        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_JointDefinition_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.class, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.Builder.class);
       }
-      
+
+      public static com.google.protobuf.Parser<JointDefinition> PARSER =
+          new com.google.protobuf.AbstractParser<JointDefinition>() {
+        public JointDefinition parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new JointDefinition(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<JointDefinition> getParserForType() {
+        return PARSER;
+      }
+
+      /**
+       * Protobuf enum {@code YoProtoHandshake.JointDefinition.JointType}
+       */
       public enum JointType
           implements com.google.protobuf.ProtocolMessageEnum {
+        /**
+         * <code>SiXDoFJoint = 1;</code>
+         */
         SiXDoFJoint(0, 1),
+        /**
+         * <code>OneDoFJoint = 2;</code>
+         */
         OneDoFJoint(1, 2),
         ;
-        
+
+        /**
+         * <code>SiXDoFJoint = 1;</code>
+         */
         public static final int SiXDoFJoint_VALUE = 1;
+        /**
+         * <code>OneDoFJoint = 2;</code>
+         */
         public static final int OneDoFJoint_VALUE = 2;
-        
-        
+
+
         public final int getNumber() { return value; }
-        
+
         public static JointType valueOf(int value) {
           switch (value) {
             case 1: return SiXDoFJoint;
@@ -1310,7 +2066,7 @@ public final class YoProtoHandshakeProto {
             default: return null;
           }
         }
-        
+
         public static com.google.protobuf.Internal.EnumLiteMap<JointType>
             internalGetValueMap() {
           return internalValueMap;
@@ -1322,7 +2078,7 @@ public final class YoProtoHandshakeProto {
                   return JointType.valueOf(number);
                 }
               };
-        
+
         public final com.google.protobuf.Descriptors.EnumValueDescriptor
             getValueDescriptor() {
           return getDescriptor().getValues().get(index);
@@ -1335,11 +2091,9 @@ public final class YoProtoHandshakeProto {
             getDescriptor() {
           return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.getDescriptor().getEnumTypes().get(0);
         }
-        
-        private static final JointType[] VALUES = {
-          SiXDoFJoint, OneDoFJoint, 
-        };
-        
+
+        private static final JointType[] VALUES = values();
+
         public static JointType valueOf(
             com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
           if (desc.getType() != getDescriptor()) {
@@ -1348,61 +2102,76 @@ public final class YoProtoHandshakeProto {
           }
           return VALUES[desc.getIndex()];
         }
-        
+
         private final int index;
         private final int value;
-        
+
         private JointType(int index, int value) {
           this.index = index;
           this.value = value;
         }
-        
+
         // @@protoc_insertion_point(enum_scope:YoProtoHandshake.JointDefinition.JointType)
       }
-      
+
       private int bitField0_;
-      // required string name = 1;
       public static final int NAME_FIELD_NUMBER = 1;
       private java.lang.Object name_;
+      /**
+       * <code>required string name = 1;</code>
+       */
       public boolean hasName() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      public String getName() {
+      /**
+       * <code>required string name = 1;</code>
+       */
+      public java.lang.String getName() {
         java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          return (String) ref;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
         } else {
           com.google.protobuf.ByteString bs = 
               (com.google.protobuf.ByteString) ref;
-          String s = bs.toStringUtf8();
-          if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
             name_ = s;
           }
           return s;
         }
       }
-      private com.google.protobuf.ByteString getNameBytes() {
+      /**
+       * <code>required string name = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
         java.lang.Object ref = name_;
-        if (ref instanceof String) {
+        if (ref instanceof java.lang.String) {
           com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
           name_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
-      
-      // required .YoProtoHandshake.JointDefinition.JointType type = 2;
+
       public static final int TYPE_FIELD_NUMBER = 2;
       private us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType type_;
+      /**
+       * <code>required .YoProtoHandshake.JointDefinition.JointType type = 2;</code>
+       */
       public boolean hasType() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
+      /**
+       * <code>required .YoProtoHandshake.JointDefinition.JointType type = 2;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType getType() {
         return type_;
       }
-      
+
       private void initFields() {
         name_ = "";
         type_ = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType.SiXDoFJoint;
@@ -1410,8 +2179,9 @@ public final class YoProtoHandshakeProto {
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
         byte isInitialized = memoizedIsInitialized;
-        if (isInitialized != -1) return isInitialized == 1;
-        
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
         if (!hasName()) {
           memoizedIsInitialized = 0;
           return false;
@@ -1423,7 +2193,7 @@ public final class YoProtoHandshakeProto {
         memoizedIsInitialized = 1;
         return true;
       }
-      
+
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
         getSerializedSize();
@@ -1435,12 +2205,12 @@ public final class YoProtoHandshakeProto {
         }
         getUnknownFields().writeTo(output);
       }
-      
+
       private int memoizedSerializedSize = -1;
       public int getSerializedSize() {
         int size = memoizedSerializedSize;
         if (size != -1) return size;
-      
+
         size = 0;
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           size += com.google.protobuf.CodedOutputStream
@@ -1454,113 +2224,106 @@ public final class YoProtoHandshakeProto {
         memoizedSerializedSize = size;
         return size;
       }
-      
+
       private static final long serialVersionUID = 0L;
       @java.lang.Override
       protected java.lang.Object writeReplace()
           throws java.io.ObjectStreamException {
         return super.writeReplace();
       }
-      
+
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition parseFrom(
           com.google.protobuf.ByteString data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
+        return PARSER.parseFrom(data);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition parseFrom(
           com.google.protobuf.ByteString data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(data, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition parseFrom(byte[] data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
+        return PARSER.parseFrom(data);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition parseFrom(
           byte[] data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(data, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition parseFrom(java.io.InputStream input)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
+        return PARSER.parseFrom(input);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition parseFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(input, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition parseDelimitedFrom(java.io.InputStream input)
           throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
+        return PARSER.parseDelimitedFrom(input);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition parseFrom(
           com.google.protobuf.CodedInputStream input)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
+        return PARSER.parseFrom(input);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition parseFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(input, extensionRegistry);
       }
-      
+
       public static Builder newBuilder() { return Builder.create(); }
       public Builder newBuilderForType() { return newBuilder(); }
       public static Builder newBuilder(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition prototype) {
         return newBuilder().mergeFrom(prototype);
       }
       public Builder toBuilder() { return newBuilder(this); }
-      
+
       @java.lang.Override
       protected Builder newBuilderForType(
           com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         Builder builder = new Builder(parent);
         return builder;
       }
+      /**
+       * Protobuf type {@code YoProtoHandshake.JointDefinition}
+       */
       public static final class Builder extends
-          com.google.protobuf.GeneratedMessage.Builder<Builder>
-         implements us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinitionOrBuilder {
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:YoProtoHandshake.JointDefinition)
+          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinitionOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
           return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_JointDefinition_descriptor;
         }
-        
+
         protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_JointDefinition_fieldAccessorTable;
+          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_JointDefinition_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.class, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.Builder.class);
         }
-        
+
         // Construct using us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.newBuilder()
         private Builder() {
           maybeForceBuilderInitialization();
         }
-        
-        private Builder(BuilderParent parent) {
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
           super(parent);
           maybeForceBuilderInitialization();
         }
@@ -1571,7 +2334,7 @@ public final class YoProtoHandshakeProto {
         private static Builder create() {
           return new Builder();
         }
-        
+
         public Builder clear() {
           super.clear();
           name_ = "";
@@ -1580,20 +2343,20 @@ public final class YoProtoHandshakeProto {
           bitField0_ = (bitField0_ & ~0x00000002);
           return this;
         }
-        
+
         public Builder clone() {
           return create().mergeFrom(buildPartial());
         }
-        
+
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.getDescriptor();
+          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_JointDefinition_descriptor;
         }
-        
+
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition getDefaultInstanceForType() {
           return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.getDefaultInstance();
         }
-        
+
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition build() {
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition result = buildPartial();
           if (!result.isInitialized()) {
@@ -1601,17 +2364,7 @@ public final class YoProtoHandshakeProto {
           }
           return result;
         }
-        
-        private us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition buildParsed()
-            throws com.google.protobuf.InvalidProtocolBufferException {
-          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition result = buildPartial();
-          if (!result.isInitialized()) {
-            throw newUninitializedMessageException(
-              result).asInvalidProtocolBufferException();
-          }
-          return result;
-        }
-        
+
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition buildPartial() {
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition result = new us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition(this);
           int from_bitField0_ = bitField0_;
@@ -1628,7 +2381,7 @@ public final class YoProtoHandshakeProto {
           onBuilt();
           return result;
         }
-        
+
         public Builder mergeFrom(com.google.protobuf.Message other) {
           if (other instanceof us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition) {
             return mergeFrom((us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition)other);
@@ -1637,11 +2390,13 @@ public final class YoProtoHandshakeProto {
             return this;
           }
         }
-        
+
         public Builder mergeFrom(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition other) {
           if (other == us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.getDefaultInstance()) return this;
           if (other.hasName()) {
-            setName(other.getName());
+            bitField0_ |= 0x00000001;
+            name_ = other.name_;
+            onChanged();
           }
           if (other.hasType()) {
             setType(other.getType());
@@ -1649,7 +2404,7 @@ public final class YoProtoHandshakeProto {
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
         }
-        
+
         public final boolean isInitialized() {
           if (!hasName()) {
             
@@ -1661,68 +2416,71 @@ public final class YoProtoHandshakeProto {
           }
           return true;
         }
-        
+
         public Builder mergeFrom(
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder(
-              this.getUnknownFields());
-          while (true) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              default: {
-                if (!parseUnknownField(input, unknownFields,
-                                       extensionRegistry, tag)) {
-                  this.setUnknownFields(unknownFields.build());
-                  onChanged();
-                  return this;
-                }
-                break;
-              }
-              case 10: {
-                bitField0_ |= 0x00000001;
-                name_ = input.readBytes();
-                break;
-              }
-              case 16: {
-                int rawValue = input.readEnum();
-                us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType value = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType.valueOf(rawValue);
-                if (value == null) {
-                  unknownFields.mergeVarintField(2, rawValue);
-                } else {
-                  bitField0_ |= 0x00000002;
-                  type_ = value;
-                }
-                break;
-              }
+          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
             }
           }
+          return this;
         }
-        
         private int bitField0_;
-        
-        // required string name = 1;
+
         private java.lang.Object name_ = "";
+        /**
+         * <code>required string name = 1;</code>
+         */
         public boolean hasName() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
-        public String getName() {
+        /**
+         * <code>required string name = 1;</code>
+         */
+        public java.lang.String getName() {
           java.lang.Object ref = name_;
-          if (!(ref instanceof String)) {
-            String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-            name_ = s;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              name_ = s;
+            }
             return s;
           } else {
-            return (String) ref;
+            return (java.lang.String) ref;
           }
         }
-        public Builder setName(String value) {
+        /**
+         * <code>required string name = 1;</code>
+         */
+        public com.google.protobuf.ByteString
+            getNameBytes() {
+          java.lang.Object ref = name_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            name_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string name = 1;</code>
+         */
+        public Builder setName(
+            java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
@@ -1731,26 +2489,45 @@ public final class YoProtoHandshakeProto {
           onChanged();
           return this;
         }
+        /**
+         * <code>required string name = 1;</code>
+         */
         public Builder clearName() {
           bitField0_ = (bitField0_ & ~0x00000001);
           name_ = getDefaultInstance().getName();
           onChanged();
           return this;
         }
-        void setName(com.google.protobuf.ByteString value) {
-          bitField0_ |= 0x00000001;
+        /**
+         * <code>required string name = 1;</code>
+         */
+        public Builder setNameBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
           name_ = value;
           onChanged();
+          return this;
         }
-        
-        // required .YoProtoHandshake.JointDefinition.JointType type = 2;
+
         private us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType type_ = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType.SiXDoFJoint;
+        /**
+         * <code>required .YoProtoHandshake.JointDefinition.JointType type = 2;</code>
+         */
         public boolean hasType() {
           return ((bitField0_ & 0x00000002) == 0x00000002);
         }
+        /**
+         * <code>required .YoProtoHandshake.JointDefinition.JointType type = 2;</code>
+         */
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType getType() {
           return type_;
         }
+        /**
+         * <code>required .YoProtoHandshake.JointDefinition.JointType type = 2;</code>
+         */
         public Builder setType(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType value) {
           if (value == null) {
             throw new NullPointerException();
@@ -1760,441 +2537,116 @@ public final class YoProtoHandshakeProto {
           onChanged();
           return this;
         }
+        /**
+         * <code>required .YoProtoHandshake.JointDefinition.JointType type = 2;</code>
+         */
         public Builder clearType() {
           bitField0_ = (bitField0_ & ~0x00000002);
           type_ = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType.SiXDoFJoint;
           onChanged();
           return this;
         }
-        
+
         // @@protoc_insertion_point(builder_scope:YoProtoHandshake.JointDefinition)
       }
-      
+
       static {
         defaultInstance = new JointDefinition(true);
         defaultInstance.initFields();
       }
-      
+
       // @@protoc_insertion_point(class_scope:YoProtoHandshake.JointDefinition)
     }
-    
-    public interface AppearanceDefinitionMessageOrBuilder
-        extends com.google.protobuf.MessageOrBuilder {
-      
-      // required double x = 1;
+
+    public interface AppearanceDefinitionMessageOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:YoProtoHandshake.AppearanceDefinitionMessage)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required double x = 1;</code>
+       */
       boolean hasX();
+      /**
+       * <code>required double x = 1;</code>
+       */
       double getX();
-      
-      // required double y = 2;
+
+      /**
+       * <code>required double y = 2;</code>
+       */
       boolean hasY();
+      /**
+       * <code>required double y = 2;</code>
+       */
       double getY();
-      
-      // required double z = 3;
+
+      /**
+       * <code>required double z = 3;</code>
+       */
       boolean hasZ();
+      /**
+       * <code>required double z = 3;</code>
+       */
       double getZ();
-      
-      // required double transparency = 4;
+
+      /**
+       * <code>required double transparency = 4;</code>
+       */
       boolean hasTransparency();
+      /**
+       * <code>required double transparency = 4;</code>
+       */
       double getTransparency();
     }
+    /**
+     * Protobuf type {@code YoProtoHandshake.AppearanceDefinitionMessage}
+     */
     public static final class AppearanceDefinitionMessage extends
-        com.google.protobuf.GeneratedMessage
-        implements AppearanceDefinitionMessageOrBuilder {
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:YoProtoHandshake.AppearanceDefinitionMessage)
+        AppearanceDefinitionMessageOrBuilder {
       // Use AppearanceDefinitionMessage.newBuilder() to construct.
-      private AppearanceDefinitionMessage(Builder builder) {
+      private AppearanceDefinitionMessage(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
         super(builder);
+        this.unknownFields = builder.getUnknownFields();
       }
-      private AppearanceDefinitionMessage(boolean noInit) {}
-      
+      private AppearanceDefinitionMessage(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
       private static final AppearanceDefinitionMessage defaultInstance;
       public static AppearanceDefinitionMessage getDefaultInstance() {
         return defaultInstance;
       }
-      
+
       public AppearanceDefinitionMessage getDefaultInstanceForType() {
         return defaultInstance;
       }
-      
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_AppearanceDefinitionMessage_descriptor;
-      }
-      
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_AppearanceDefinitionMessage_fieldAccessorTable;
-      }
-      
-      private int bitField0_;
-      // required double x = 1;
-      public static final int X_FIELD_NUMBER = 1;
-      private double x_;
-      public boolean hasX() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      public double getX() {
-        return x_;
-      }
-      
-      // required double y = 2;
-      public static final int Y_FIELD_NUMBER = 2;
-      private double y_;
-      public boolean hasY() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      public double getY() {
-        return y_;
-      }
-      
-      // required double z = 3;
-      public static final int Z_FIELD_NUMBER = 3;
-      private double z_;
-      public boolean hasZ() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      public double getZ() {
-        return z_;
-      }
-      
-      // required double transparency = 4;
-      public static final int TRANSPARENCY_FIELD_NUMBER = 4;
-      private double transparency_;
-      public boolean hasTransparency() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
-      }
-      public double getTransparency() {
-        return transparency_;
-      }
-      
-      private void initFields() {
-        x_ = 0D;
-        y_ = 0D;
-        z_ = 0D;
-        transparency_ = 0D;
-      }
-      private byte memoizedIsInitialized = -1;
-      public final boolean isInitialized() {
-        byte isInitialized = memoizedIsInitialized;
-        if (isInitialized != -1) return isInitialized == 1;
-        
-        if (!hasX()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-        if (!hasY()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-        if (!hasZ()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-        if (!hasTransparency()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-        memoizedIsInitialized = 1;
-        return true;
-      }
-      
-      public void writeTo(com.google.protobuf.CodedOutputStream output)
-                          throws java.io.IOException {
-        getSerializedSize();
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          output.writeDouble(1, x_);
-        }
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
-          output.writeDouble(2, y_);
-        }
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
-          output.writeDouble(3, z_);
-        }
-        if (((bitField0_ & 0x00000008) == 0x00000008)) {
-          output.writeDouble(4, transparency_);
-        }
-        getUnknownFields().writeTo(output);
-      }
-      
-      private int memoizedSerializedSize = -1;
-      public int getSerializedSize() {
-        int size = memoizedSerializedSize;
-        if (size != -1) return size;
-      
-        size = 0;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          size += com.google.protobuf.CodedOutputStream
-            .computeDoubleSize(1, x_);
-        }
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
-          size += com.google.protobuf.CodedOutputStream
-            .computeDoubleSize(2, y_);
-        }
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
-          size += com.google.protobuf.CodedOutputStream
-            .computeDoubleSize(3, z_);
-        }
-        if (((bitField0_ & 0x00000008) == 0x00000008)) {
-          size += com.google.protobuf.CodedOutputStream
-            .computeDoubleSize(4, transparency_);
-        }
-        size += getUnknownFields().getSerializedSize();
-        memoizedSerializedSize = size;
-        return size;
-      }
-      
-      private static final long serialVersionUID = 0L;
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
       @java.lang.Override
-      protected java.lang.Object writeReplace()
-          throws java.io.ObjectStreamException {
-        return super.writeReplace();
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
       }
-      
-      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(
-          com.google.protobuf.ByteString data)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
-      }
-      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(
-          com.google.protobuf.ByteString data,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
-      }
-      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(byte[] data)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
-      }
-      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(
-          byte[] data,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
-      }
-      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(java.io.InputStream input)
-          throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
-      }
-      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(
-          java.io.InputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
-      }
-      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseDelimitedFrom(java.io.InputStream input)
-          throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
-      }
-      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseDelimitedFrom(
-          java.io.InputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
-      }
-      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(
-          com.google.protobuf.CodedInputStream input)
-          throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
-      }
-      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(
+      private AppearanceDefinitionMessage(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
-      }
-      
-      public static Builder newBuilder() { return Builder.create(); }
-      public Builder newBuilderForType() { return newBuilder(); }
-      public static Builder newBuilder(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage prototype) {
-        return newBuilder().mergeFrom(prototype);
-      }
-      public Builder toBuilder() { return newBuilder(this); }
-      
-      @java.lang.Override
-      protected Builder newBuilderForType(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        Builder builder = new Builder(parent);
-        return builder;
-      }
-      public static final class Builder extends
-          com.google.protobuf.GeneratedMessage.Builder<Builder>
-         implements us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessageOrBuilder {
-        public static final com.google.protobuf.Descriptors.Descriptor
-            getDescriptor() {
-          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_AppearanceDefinitionMessage_descriptor;
-        }
-        
-        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-            internalGetFieldAccessorTable() {
-          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_AppearanceDefinitionMessage_fieldAccessorTable;
-        }
-        
-        // Construct using us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.newBuilder()
-        private Builder() {
-          maybeForceBuilderInitialization();
-        }
-        
-        private Builder(BuilderParent parent) {
-          super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          }
-        }
-        private static Builder create() {
-          return new Builder();
-        }
-        
-        public Builder clear() {
-          super.clear();
-          x_ = 0D;
-          bitField0_ = (bitField0_ & ~0x00000001);
-          y_ = 0D;
-          bitField0_ = (bitField0_ & ~0x00000002);
-          z_ = 0D;
-          bitField0_ = (bitField0_ & ~0x00000004);
-          transparency_ = 0D;
-          bitField0_ = (bitField0_ & ~0x00000008);
-          return this;
-        }
-        
-        public Builder clone() {
-          return create().mergeFrom(buildPartial());
-        }
-        
-        public com.google.protobuf.Descriptors.Descriptor
-            getDescriptorForType() {
-          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.getDescriptor();
-        }
-        
-        public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage getDefaultInstanceForType() {
-          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.getDefaultInstance();
-        }
-        
-        public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage build() {
-          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage result = buildPartial();
-          if (!result.isInitialized()) {
-            throw newUninitializedMessageException(result);
-          }
-          return result;
-        }
-        
-        private us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage buildParsed()
-            throws com.google.protobuf.InvalidProtocolBufferException {
-          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage result = buildPartial();
-          if (!result.isInitialized()) {
-            throw newUninitializedMessageException(
-              result).asInvalidProtocolBufferException();
-          }
-          return result;
-        }
-        
-        public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage buildPartial() {
-          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage result = new us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage(this);
-          int from_bitField0_ = bitField0_;
-          int to_bitField0_ = 0;
-          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-            to_bitField0_ |= 0x00000001;
-          }
-          result.x_ = x_;
-          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-            to_bitField0_ |= 0x00000002;
-          }
-          result.y_ = y_;
-          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-            to_bitField0_ |= 0x00000004;
-          }
-          result.z_ = z_;
-          if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-            to_bitField0_ |= 0x00000008;
-          }
-          result.transparency_ = transparency_;
-          result.bitField0_ = to_bitField0_;
-          onBuilt();
-          return result;
-        }
-        
-        public Builder mergeFrom(com.google.protobuf.Message other) {
-          if (other instanceof us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage) {
-            return mergeFrom((us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage)other);
-          } else {
-            super.mergeFrom(other);
-            return this;
-          }
-        }
-        
-        public Builder mergeFrom(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage other) {
-          if (other == us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.getDefaultInstance()) return this;
-          if (other.hasX()) {
-            setX(other.getX());
-          }
-          if (other.hasY()) {
-            setY(other.getY());
-          }
-          if (other.hasZ()) {
-            setZ(other.getZ());
-          }
-          if (other.hasTransparency()) {
-            setTransparency(other.getTransparency());
-          }
-          this.mergeUnknownFields(other.getUnknownFields());
-          return this;
-        }
-        
-        public final boolean isInitialized() {
-          if (!hasX()) {
-            
-            return false;
-          }
-          if (!hasY()) {
-            
-            return false;
-          }
-          if (!hasZ()) {
-            
-            return false;
-          }
-          if (!hasTransparency()) {
-            
-            return false;
-          }
-          return true;
-        }
-        
-        public Builder mergeFrom(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-          com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder(
-              this.getUnknownFields());
-          while (true) {
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
             int tag = input.readTag();
             switch (tag) {
               case 0:
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
+                done = true;
+                break;
               default: {
                 if (!parseUnknownField(input, unknownFields,
                                        extensionRegistry, tag)) {
-                  this.setUnknownFields(unknownFields.build());
-                  onChanged();
-                  return this;
+                  done = true;
                 }
                 break;
               }
@@ -2220,292 +2672,983 @@ public final class YoProtoHandshakeProto {
               }
             }
           }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
         }
-        
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_AppearanceDefinitionMessage_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_AppearanceDefinitionMessage_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.class, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.Builder.class);
+      }
+
+      public static com.google.protobuf.Parser<AppearanceDefinitionMessage> PARSER =
+          new com.google.protobuf.AbstractParser<AppearanceDefinitionMessage>() {
+        public AppearanceDefinitionMessage parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new AppearanceDefinitionMessage(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<AppearanceDefinitionMessage> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
+      public static final int X_FIELD_NUMBER = 1;
+      private double x_;
+      /**
+       * <code>required double x = 1;</code>
+       */
+      public boolean hasX() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required double x = 1;</code>
+       */
+      public double getX() {
+        return x_;
+      }
+
+      public static final int Y_FIELD_NUMBER = 2;
+      private double y_;
+      /**
+       * <code>required double y = 2;</code>
+       */
+      public boolean hasY() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required double y = 2;</code>
+       */
+      public double getY() {
+        return y_;
+      }
+
+      public static final int Z_FIELD_NUMBER = 3;
+      private double z_;
+      /**
+       * <code>required double z = 3;</code>
+       */
+      public boolean hasZ() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required double z = 3;</code>
+       */
+      public double getZ() {
+        return z_;
+      }
+
+      public static final int TRANSPARENCY_FIELD_NUMBER = 4;
+      private double transparency_;
+      /**
+       * <code>required double transparency = 4;</code>
+       */
+      public boolean hasTransparency() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required double transparency = 4;</code>
+       */
+      public double getTransparency() {
+        return transparency_;
+      }
+
+      private void initFields() {
+        x_ = 0D;
+        y_ = 0D;
+        z_ = 0D;
+        transparency_ = 0D;
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasX()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasY()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasZ()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasTransparency()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeDouble(1, x_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeDouble(2, y_);
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          output.writeDouble(3, z_);
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          output.writeDouble(4, transparency_);
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeDoubleSize(1, x_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeDoubleSize(2, y_);
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeDoubleSize(3, z_);
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeDoubleSize(4, transparency_);
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code YoProtoHandshake.AppearanceDefinitionMessage}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:YoProtoHandshake.AppearanceDefinitionMessage)
+          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessageOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_AppearanceDefinitionMessage_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_AppearanceDefinitionMessage_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.class, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.Builder.class);
+        }
+
+        // Construct using us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          }
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          x_ = 0D;
+          bitField0_ = (bitField0_ & ~0x00000001);
+          y_ = 0D;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          z_ = 0D;
+          bitField0_ = (bitField0_ & ~0x00000004);
+          transparency_ = 0D;
+          bitField0_ = (bitField0_ & ~0x00000008);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_AppearanceDefinitionMessage_descriptor;
+        }
+
+        public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage getDefaultInstanceForType() {
+          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.getDefaultInstance();
+        }
+
+        public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage build() {
+          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage buildPartial() {
+          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage result = new us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.x_ = x_;
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.y_ = y_;
+          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+            to_bitField0_ |= 0x00000004;
+          }
+          result.z_ = z_;
+          if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+            to_bitField0_ |= 0x00000008;
+          }
+          result.transparency_ = transparency_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage) {
+            return mergeFrom((us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage other) {
+          if (other == us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.getDefaultInstance()) return this;
+          if (other.hasX()) {
+            setX(other.getX());
+          }
+          if (other.hasY()) {
+            setY(other.getY());
+          }
+          if (other.hasZ()) {
+            setZ(other.getZ());
+          }
+          if (other.hasTransparency()) {
+            setTransparency(other.getTransparency());
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          if (!hasX()) {
+            
+            return false;
+          }
+          if (!hasY()) {
+            
+            return false;
+          }
+          if (!hasZ()) {
+            
+            return false;
+          }
+          if (!hasTransparency()) {
+            
+            return false;
+          }
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
         private int bitField0_;
-        
-        // required double x = 1;
+
         private double x_ ;
+        /**
+         * <code>required double x = 1;</code>
+         */
         public boolean hasX() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
+        /**
+         * <code>required double x = 1;</code>
+         */
         public double getX() {
           return x_;
         }
+        /**
+         * <code>required double x = 1;</code>
+         */
         public Builder setX(double value) {
           bitField0_ |= 0x00000001;
           x_ = value;
           onChanged();
           return this;
         }
+        /**
+         * <code>required double x = 1;</code>
+         */
         public Builder clearX() {
           bitField0_ = (bitField0_ & ~0x00000001);
           x_ = 0D;
           onChanged();
           return this;
         }
-        
-        // required double y = 2;
+
         private double y_ ;
+        /**
+         * <code>required double y = 2;</code>
+         */
         public boolean hasY() {
           return ((bitField0_ & 0x00000002) == 0x00000002);
         }
+        /**
+         * <code>required double y = 2;</code>
+         */
         public double getY() {
           return y_;
         }
+        /**
+         * <code>required double y = 2;</code>
+         */
         public Builder setY(double value) {
           bitField0_ |= 0x00000002;
           y_ = value;
           onChanged();
           return this;
         }
+        /**
+         * <code>required double y = 2;</code>
+         */
         public Builder clearY() {
           bitField0_ = (bitField0_ & ~0x00000002);
           y_ = 0D;
           onChanged();
           return this;
         }
-        
-        // required double z = 3;
+
         private double z_ ;
+        /**
+         * <code>required double z = 3;</code>
+         */
         public boolean hasZ() {
           return ((bitField0_ & 0x00000004) == 0x00000004);
         }
+        /**
+         * <code>required double z = 3;</code>
+         */
         public double getZ() {
           return z_;
         }
+        /**
+         * <code>required double z = 3;</code>
+         */
         public Builder setZ(double value) {
           bitField0_ |= 0x00000004;
           z_ = value;
           onChanged();
           return this;
         }
+        /**
+         * <code>required double z = 3;</code>
+         */
         public Builder clearZ() {
           bitField0_ = (bitField0_ & ~0x00000004);
           z_ = 0D;
           onChanged();
           return this;
         }
-        
-        // required double transparency = 4;
+
         private double transparency_ ;
+        /**
+         * <code>required double transparency = 4;</code>
+         */
         public boolean hasTransparency() {
           return ((bitField0_ & 0x00000008) == 0x00000008);
         }
+        /**
+         * <code>required double transparency = 4;</code>
+         */
         public double getTransparency() {
           return transparency_;
         }
+        /**
+         * <code>required double transparency = 4;</code>
+         */
         public Builder setTransparency(double value) {
           bitField0_ |= 0x00000008;
           transparency_ = value;
           onChanged();
           return this;
         }
+        /**
+         * <code>required double transparency = 4;</code>
+         */
         public Builder clearTransparency() {
           bitField0_ = (bitField0_ & ~0x00000008);
           transparency_ = 0D;
           onChanged();
           return this;
         }
-        
+
         // @@protoc_insertion_point(builder_scope:YoProtoHandshake.AppearanceDefinitionMessage)
       }
-      
+
       static {
         defaultInstance = new AppearanceDefinitionMessage(true);
         defaultInstance.initFields();
       }
-      
+
       // @@protoc_insertion_point(class_scope:YoProtoHandshake.AppearanceDefinitionMessage)
     }
-    
-    public interface DynamicGraphicMessageOrBuilder
-        extends com.google.protobuf.MessageOrBuilder {
-      
-      // required uint32 type = 1;
+
+    public interface DynamicGraphicMessageOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:YoProtoHandshake.DynamicGraphicMessage)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required uint32 type = 1;</code>
+       */
       boolean hasType();
+      /**
+       * <code>required uint32 type = 1;</code>
+       */
       int getType();
-      
-      // required string name = 2;
+
+      /**
+       * <code>required string name = 2;</code>
+       */
       boolean hasName();
-      String getName();
-      
-      // repeated uint32 yo_index = 3;
+      /**
+       * <code>required string name = 2;</code>
+       */
+      java.lang.String getName();
+      /**
+       * <code>required string name = 2;</code>
+       */
+      com.google.protobuf.ByteString
+          getNameBytes();
+
+      /**
+       * <code>repeated uint32 yo_index = 3;</code>
+       */
       java.util.List<java.lang.Integer> getYoIndexList();
+      /**
+       * <code>repeated uint32 yo_index = 3;</code>
+       */
       int getYoIndexCount();
+      /**
+       * <code>repeated uint32 yo_index = 3;</code>
+       */
       int getYoIndex(int index);
-      
-      // repeated double constant = 4;
+
+      /**
+       * <code>repeated double constant = 4;</code>
+       */
       java.util.List<java.lang.Double> getConstantList();
+      /**
+       * <code>repeated double constant = 4;</code>
+       */
       int getConstantCount();
+      /**
+       * <code>repeated double constant = 4;</code>
+       */
       double getConstant(int index);
-      
-      // optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;
+
+      /**
+       * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+       */
       boolean hasAppearance();
+      /**
+       * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+       */
       us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage getAppearance();
+      /**
+       * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+       */
       us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessageOrBuilder getAppearanceOrBuilder();
-      
-      // optional string list_name = 6;
+
+      /**
+       * <code>optional string list_name = 6;</code>
+       */
       boolean hasListName();
-      String getListName();
+      /**
+       * <code>optional string list_name = 6;</code>
+       */
+      java.lang.String getListName();
+      /**
+       * <code>optional string list_name = 6;</code>
+       */
+      com.google.protobuf.ByteString
+          getListNameBytes();
     }
+    /**
+     * Protobuf type {@code YoProtoHandshake.DynamicGraphicMessage}
+     */
     public static final class DynamicGraphicMessage extends
-        com.google.protobuf.GeneratedMessage
-        implements DynamicGraphicMessageOrBuilder {
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:YoProtoHandshake.DynamicGraphicMessage)
+        DynamicGraphicMessageOrBuilder {
       // Use DynamicGraphicMessage.newBuilder() to construct.
-      private DynamicGraphicMessage(Builder builder) {
+      private DynamicGraphicMessage(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
         super(builder);
+        this.unknownFields = builder.getUnknownFields();
       }
-      private DynamicGraphicMessage(boolean noInit) {}
-      
+      private DynamicGraphicMessage(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
       private static final DynamicGraphicMessage defaultInstance;
       public static DynamicGraphicMessage getDefaultInstance() {
         return defaultInstance;
       }
-      
+
       public DynamicGraphicMessage getDefaultInstanceForType() {
         return defaultInstance;
       }
-      
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private DynamicGraphicMessage(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 8: {
+                bitField0_ |= 0x00000001;
+                type_ = input.readUInt32();
+                break;
+              }
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000002;
+                name_ = bs;
+                break;
+              }
+              case 24: {
+                if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                  yoIndex_ = new java.util.ArrayList<java.lang.Integer>();
+                  mutable_bitField0_ |= 0x00000004;
+                }
+                yoIndex_.add(input.readUInt32());
+                break;
+              }
+              case 26: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                if (!((mutable_bitField0_ & 0x00000004) == 0x00000004) && input.getBytesUntilLimit() > 0) {
+                  yoIndex_ = new java.util.ArrayList<java.lang.Integer>();
+                  mutable_bitField0_ |= 0x00000004;
+                }
+                while (input.getBytesUntilLimit() > 0) {
+                  yoIndex_.add(input.readUInt32());
+                }
+                input.popLimit(limit);
+                break;
+              }
+              case 33: {
+                if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+                  constant_ = new java.util.ArrayList<java.lang.Double>();
+                  mutable_bitField0_ |= 0x00000008;
+                }
+                constant_.add(input.readDouble());
+                break;
+              }
+              case 34: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                if (!((mutable_bitField0_ & 0x00000008) == 0x00000008) && input.getBytesUntilLimit() > 0) {
+                  constant_ = new java.util.ArrayList<java.lang.Double>();
+                  mutable_bitField0_ |= 0x00000008;
+                }
+                while (input.getBytesUntilLimit() > 0) {
+                  constant_.add(input.readDouble());
+                }
+                input.popLimit(limit);
+                break;
+              }
+              case 42: {
+                us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.Builder subBuilder = null;
+                if (((bitField0_ & 0x00000004) == 0x00000004)) {
+                  subBuilder = appearance_.toBuilder();
+                }
+                appearance_ = input.readMessage(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.PARSER, extensionRegistry);
+                if (subBuilder != null) {
+                  subBuilder.mergeFrom(appearance_);
+                  appearance_ = subBuilder.buildPartial();
+                }
+                bitField0_ |= 0x00000004;
+                break;
+              }
+              case 50: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000008;
+                listName_ = bs;
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+            yoIndex_ = java.util.Collections.unmodifiableList(yoIndex_);
+          }
+          if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+            constant_ = java.util.Collections.unmodifiableList(constant_);
+          }
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_DynamicGraphicMessage_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_DynamicGraphicMessage_fieldAccessorTable;
+        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_DynamicGraphicMessage_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.class, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder.class);
       }
-      
+
+      public static com.google.protobuf.Parser<DynamicGraphicMessage> PARSER =
+          new com.google.protobuf.AbstractParser<DynamicGraphicMessage>() {
+        public DynamicGraphicMessage parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new DynamicGraphicMessage(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<DynamicGraphicMessage> getParserForType() {
+        return PARSER;
+      }
+
       private int bitField0_;
-      // required uint32 type = 1;
       public static final int TYPE_FIELD_NUMBER = 1;
       private int type_;
+      /**
+       * <code>required uint32 type = 1;</code>
+       */
       public boolean hasType() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required uint32 type = 1;</code>
+       */
       public int getType() {
         return type_;
       }
-      
-      // required string name = 2;
+
       public static final int NAME_FIELD_NUMBER = 2;
       private java.lang.Object name_;
+      /**
+       * <code>required string name = 2;</code>
+       */
       public boolean hasName() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      public String getName() {
+      /**
+       * <code>required string name = 2;</code>
+       */
+      public java.lang.String getName() {
         java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          return (String) ref;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
         } else {
           com.google.protobuf.ByteString bs = 
               (com.google.protobuf.ByteString) ref;
-          String s = bs.toStringUtf8();
-          if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
             name_ = s;
           }
           return s;
         }
       }
-      private com.google.protobuf.ByteString getNameBytes() {
+      /**
+       * <code>required string name = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
         java.lang.Object ref = name_;
-        if (ref instanceof String) {
+        if (ref instanceof java.lang.String) {
           com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
           name_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
-      
-      // repeated uint32 yo_index = 3;
+
       public static final int YO_INDEX_FIELD_NUMBER = 3;
       private java.util.List<java.lang.Integer> yoIndex_;
+      /**
+       * <code>repeated uint32 yo_index = 3;</code>
+       */
       public java.util.List<java.lang.Integer>
           getYoIndexList() {
         return yoIndex_;
       }
+      /**
+       * <code>repeated uint32 yo_index = 3;</code>
+       */
       public int getYoIndexCount() {
         return yoIndex_.size();
       }
+      /**
+       * <code>repeated uint32 yo_index = 3;</code>
+       */
       public int getYoIndex(int index) {
         return yoIndex_.get(index);
       }
-      
-      // repeated double constant = 4;
+
       public static final int CONSTANT_FIELD_NUMBER = 4;
       private java.util.List<java.lang.Double> constant_;
+      /**
+       * <code>repeated double constant = 4;</code>
+       */
       public java.util.List<java.lang.Double>
           getConstantList() {
         return constant_;
       }
+      /**
+       * <code>repeated double constant = 4;</code>
+       */
       public int getConstantCount() {
         return constant_.size();
       }
+      /**
+       * <code>repeated double constant = 4;</code>
+       */
       public double getConstant(int index) {
         return constant_.get(index);
       }
-      
-      // optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;
+
       public static final int APPEARANCE_FIELD_NUMBER = 5;
       private us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage appearance_;
+      /**
+       * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+       */
       public boolean hasAppearance() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
+      /**
+       * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage getAppearance() {
         return appearance_;
       }
+      /**
+       * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessageOrBuilder getAppearanceOrBuilder() {
         return appearance_;
       }
-      
-      // optional string list_name = 6;
+
       public static final int LIST_NAME_FIELD_NUMBER = 6;
       private java.lang.Object listName_;
+      /**
+       * <code>optional string list_name = 6;</code>
+       */
       public boolean hasListName() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
-      public String getListName() {
+      /**
+       * <code>optional string list_name = 6;</code>
+       */
+      public java.lang.String getListName() {
         java.lang.Object ref = listName_;
-        if (ref instanceof String) {
-          return (String) ref;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
         } else {
           com.google.protobuf.ByteString bs = 
               (com.google.protobuf.ByteString) ref;
-          String s = bs.toStringUtf8();
-          if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
             listName_ = s;
           }
           return s;
         }
       }
-      private com.google.protobuf.ByteString getListNameBytes() {
+      /**
+       * <code>optional string list_name = 6;</code>
+       */
+      public com.google.protobuf.ByteString
+          getListNameBytes() {
         java.lang.Object ref = listName_;
-        if (ref instanceof String) {
+        if (ref instanceof java.lang.String) {
           com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
           listName_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
-      
+
       private void initFields() {
         type_ = 0;
         name_ = "";
-        yoIndex_ = java.util.Collections.emptyList();;
-        constant_ = java.util.Collections.emptyList();;
+        yoIndex_ = java.util.Collections.emptyList();
+        constant_ = java.util.Collections.emptyList();
         appearance_ = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.getDefaultInstance();
         listName_ = "";
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
         byte isInitialized = memoizedIsInitialized;
-        if (isInitialized != -1) return isInitialized == 1;
-        
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
         if (!hasType()) {
           memoizedIsInitialized = 0;
           return false;
@@ -2523,7 +3666,7 @@ public final class YoProtoHandshakeProto {
         memoizedIsInitialized = 1;
         return true;
       }
-      
+
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
         getSerializedSize();
@@ -2547,12 +3690,12 @@ public final class YoProtoHandshakeProto {
         }
         getUnknownFields().writeTo(output);
       }
-      
+
       private int memoizedSerializedSize = -1;
       public int getSerializedSize() {
         int size = memoizedSerializedSize;
         if (size != -1) return size;
-      
+
         size = 0;
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           size += com.google.protobuf.CodedOutputStream
@@ -2589,113 +3732,106 @@ public final class YoProtoHandshakeProto {
         memoizedSerializedSize = size;
         return size;
       }
-      
+
       private static final long serialVersionUID = 0L;
       @java.lang.Override
       protected java.lang.Object writeReplace()
           throws java.io.ObjectStreamException {
         return super.writeReplace();
       }
-      
+
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage parseFrom(
           com.google.protobuf.ByteString data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
+        return PARSER.parseFrom(data);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage parseFrom(
           com.google.protobuf.ByteString data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(data, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage parseFrom(byte[] data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
+        return PARSER.parseFrom(data);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage parseFrom(
           byte[] data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(data, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage parseFrom(java.io.InputStream input)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
+        return PARSER.parseFrom(input);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage parseFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(input, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage parseDelimitedFrom(java.io.InputStream input)
           throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
+        return PARSER.parseDelimitedFrom(input);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage parseFrom(
           com.google.protobuf.CodedInputStream input)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
+        return PARSER.parseFrom(input);
       }
       public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage parseFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(input, extensionRegistry);
       }
-      
+
       public static Builder newBuilder() { return Builder.create(); }
       public Builder newBuilderForType() { return newBuilder(); }
       public static Builder newBuilder(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage prototype) {
         return newBuilder().mergeFrom(prototype);
       }
       public Builder toBuilder() { return newBuilder(this); }
-      
+
       @java.lang.Override
       protected Builder newBuilderForType(
           com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         Builder builder = new Builder(parent);
         return builder;
       }
+      /**
+       * Protobuf type {@code YoProtoHandshake.DynamicGraphicMessage}
+       */
       public static final class Builder extends
-          com.google.protobuf.GeneratedMessage.Builder<Builder>
-         implements us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder {
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:YoProtoHandshake.DynamicGraphicMessage)
+          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
           return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_DynamicGraphicMessage_descriptor;
         }
-        
+
         protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_DynamicGraphicMessage_fieldAccessorTable;
+          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_DynamicGraphicMessage_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.class, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder.class);
         }
-        
+
         // Construct using us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.newBuilder()
         private Builder() {
           maybeForceBuilderInitialization();
         }
-        
-        private Builder(BuilderParent parent) {
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
           super(parent);
           maybeForceBuilderInitialization();
         }
@@ -2707,16 +3843,16 @@ public final class YoProtoHandshakeProto {
         private static Builder create() {
           return new Builder();
         }
-        
+
         public Builder clear() {
           super.clear();
           type_ = 0;
           bitField0_ = (bitField0_ & ~0x00000001);
           name_ = "";
           bitField0_ = (bitField0_ & ~0x00000002);
-          yoIndex_ = java.util.Collections.emptyList();;
+          yoIndex_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000004);
-          constant_ = java.util.Collections.emptyList();;
+          constant_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000008);
           if (appearanceBuilder_ == null) {
             appearance_ = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.getDefaultInstance();
@@ -2728,20 +3864,20 @@ public final class YoProtoHandshakeProto {
           bitField0_ = (bitField0_ & ~0x00000020);
           return this;
         }
-        
+
         public Builder clone() {
           return create().mergeFrom(buildPartial());
         }
-        
+
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.getDescriptor();
+          return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_DynamicGraphicMessage_descriptor;
         }
-        
+
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage getDefaultInstanceForType() {
           return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.getDefaultInstance();
         }
-        
+
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage build() {
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage result = buildPartial();
           if (!result.isInitialized()) {
@@ -2749,17 +3885,7 @@ public final class YoProtoHandshakeProto {
           }
           return result;
         }
-        
-        private us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage buildParsed()
-            throws com.google.protobuf.InvalidProtocolBufferException {
-          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage result = buildPartial();
-          if (!result.isInitialized()) {
-            throw newUninitializedMessageException(
-              result).asInvalidProtocolBufferException();
-          }
-          return result;
-        }
-        
+
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage buildPartial() {
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage result = new us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage(this);
           int from_bitField0_ = bitField0_;
@@ -2798,7 +3924,7 @@ public final class YoProtoHandshakeProto {
           onBuilt();
           return result;
         }
-        
+
         public Builder mergeFrom(com.google.protobuf.Message other) {
           if (other instanceof us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage) {
             return mergeFrom((us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage)other);
@@ -2807,14 +3933,16 @@ public final class YoProtoHandshakeProto {
             return this;
           }
         }
-        
+
         public Builder mergeFrom(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage other) {
           if (other == us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.getDefaultInstance()) return this;
           if (other.hasType()) {
             setType(other.getType());
           }
           if (other.hasName()) {
-            setName(other.getName());
+            bitField0_ |= 0x00000002;
+            name_ = other.name_;
+            onChanged();
           }
           if (!other.yoIndex_.isEmpty()) {
             if (yoIndex_.isEmpty()) {
@@ -2840,12 +3968,14 @@ public final class YoProtoHandshakeProto {
             mergeAppearance(other.getAppearance());
           }
           if (other.hasListName()) {
-            setListName(other.getListName());
+            bitField0_ |= 0x00000020;
+            listName_ = other.listName_;
+            onChanged();
           }
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
         }
-        
+
         public final boolean isInitialized() {
           if (!hasType()) {
             
@@ -2863,125 +3993,103 @@ public final class YoProtoHandshakeProto {
           }
           return true;
         }
-        
+
         public Builder mergeFrom(
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder(
-              this.getUnknownFields());
-          while (true) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              default: {
-                if (!parseUnknownField(input, unknownFields,
-                                       extensionRegistry, tag)) {
-                  this.setUnknownFields(unknownFields.build());
-                  onChanged();
-                  return this;
-                }
-                break;
-              }
-              case 8: {
-                bitField0_ |= 0x00000001;
-                type_ = input.readUInt32();
-                break;
-              }
-              case 18: {
-                bitField0_ |= 0x00000002;
-                name_ = input.readBytes();
-                break;
-              }
-              case 24: {
-                ensureYoIndexIsMutable();
-                yoIndex_.add(input.readUInt32());
-                break;
-              }
-              case 26: {
-                int length = input.readRawVarint32();
-                int limit = input.pushLimit(length);
-                while (input.getBytesUntilLimit() > 0) {
-                  addYoIndex(input.readUInt32());
-                }
-                input.popLimit(limit);
-                break;
-              }
-              case 33: {
-                ensureConstantIsMutable();
-                constant_.add(input.readDouble());
-                break;
-              }
-              case 34: {
-                int length = input.readRawVarint32();
-                int limit = input.pushLimit(length);
-                while (input.getBytesUntilLimit() > 0) {
-                  addConstant(input.readDouble());
-                }
-                input.popLimit(limit);
-                break;
-              }
-              case 42: {
-                us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.Builder subBuilder = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.newBuilder();
-                if (hasAppearance()) {
-                  subBuilder.mergeFrom(getAppearance());
-                }
-                input.readMessage(subBuilder, extensionRegistry);
-                setAppearance(subBuilder.buildPartial());
-                break;
-              }
-              case 50: {
-                bitField0_ |= 0x00000020;
-                listName_ = input.readBytes();
-                break;
-              }
+          us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
             }
           }
+          return this;
         }
-        
         private int bitField0_;
-        
-        // required uint32 type = 1;
+
         private int type_ ;
+        /**
+         * <code>required uint32 type = 1;</code>
+         */
         public boolean hasType() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
+        /**
+         * <code>required uint32 type = 1;</code>
+         */
         public int getType() {
           return type_;
         }
+        /**
+         * <code>required uint32 type = 1;</code>
+         */
         public Builder setType(int value) {
           bitField0_ |= 0x00000001;
           type_ = value;
           onChanged();
           return this;
         }
+        /**
+         * <code>required uint32 type = 1;</code>
+         */
         public Builder clearType() {
           bitField0_ = (bitField0_ & ~0x00000001);
           type_ = 0;
           onChanged();
           return this;
         }
-        
-        // required string name = 2;
+
         private java.lang.Object name_ = "";
+        /**
+         * <code>required string name = 2;</code>
+         */
         public boolean hasName() {
           return ((bitField0_ & 0x00000002) == 0x00000002);
         }
-        public String getName() {
+        /**
+         * <code>required string name = 2;</code>
+         */
+        public java.lang.String getName() {
           java.lang.Object ref = name_;
-          if (!(ref instanceof String)) {
-            String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-            name_ = s;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              name_ = s;
+            }
             return s;
           } else {
-            return (String) ref;
+            return (java.lang.String) ref;
           }
         }
-        public Builder setName(String value) {
+        /**
+         * <code>required string name = 2;</code>
+         */
+        public com.google.protobuf.ByteString
+            getNameBytes() {
+          java.lang.Object ref = name_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            name_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string name = 2;</code>
+         */
+        public Builder setName(
+            java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
@@ -2990,36 +4098,58 @@ public final class YoProtoHandshakeProto {
           onChanged();
           return this;
         }
+        /**
+         * <code>required string name = 2;</code>
+         */
         public Builder clearName() {
           bitField0_ = (bitField0_ & ~0x00000002);
           name_ = getDefaultInstance().getName();
           onChanged();
           return this;
         }
-        void setName(com.google.protobuf.ByteString value) {
-          bitField0_ |= 0x00000002;
+        /**
+         * <code>required string name = 2;</code>
+         */
+        public Builder setNameBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
           name_ = value;
           onChanged();
+          return this;
         }
-        
-        // repeated uint32 yo_index = 3;
-        private java.util.List<java.lang.Integer> yoIndex_ = java.util.Collections.emptyList();;
+
+        private java.util.List<java.lang.Integer> yoIndex_ = java.util.Collections.emptyList();
         private void ensureYoIndexIsMutable() {
           if (!((bitField0_ & 0x00000004) == 0x00000004)) {
             yoIndex_ = new java.util.ArrayList<java.lang.Integer>(yoIndex_);
             bitField0_ |= 0x00000004;
            }
         }
+        /**
+         * <code>repeated uint32 yo_index = 3;</code>
+         */
         public java.util.List<java.lang.Integer>
             getYoIndexList() {
           return java.util.Collections.unmodifiableList(yoIndex_);
         }
+        /**
+         * <code>repeated uint32 yo_index = 3;</code>
+         */
         public int getYoIndexCount() {
           return yoIndex_.size();
         }
+        /**
+         * <code>repeated uint32 yo_index = 3;</code>
+         */
         public int getYoIndex(int index) {
           return yoIndex_.get(index);
         }
+        /**
+         * <code>repeated uint32 yo_index = 3;</code>
+         */
         public Builder setYoIndex(
             int index, int value) {
           ensureYoIndexIsMutable();
@@ -3027,44 +4157,65 @@ public final class YoProtoHandshakeProto {
           onChanged();
           return this;
         }
+        /**
+         * <code>repeated uint32 yo_index = 3;</code>
+         */
         public Builder addYoIndex(int value) {
           ensureYoIndexIsMutable();
           yoIndex_.add(value);
           onChanged();
           return this;
         }
+        /**
+         * <code>repeated uint32 yo_index = 3;</code>
+         */
         public Builder addAllYoIndex(
             java.lang.Iterable<? extends java.lang.Integer> values) {
           ensureYoIndexIsMutable();
-          super.addAll(values, yoIndex_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, yoIndex_);
           onChanged();
           return this;
         }
+        /**
+         * <code>repeated uint32 yo_index = 3;</code>
+         */
         public Builder clearYoIndex() {
-          yoIndex_ = java.util.Collections.emptyList();;
+          yoIndex_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000004);
           onChanged();
           return this;
         }
-        
-        // repeated double constant = 4;
-        private java.util.List<java.lang.Double> constant_ = java.util.Collections.emptyList();;
+
+        private java.util.List<java.lang.Double> constant_ = java.util.Collections.emptyList();
         private void ensureConstantIsMutable() {
           if (!((bitField0_ & 0x00000008) == 0x00000008)) {
             constant_ = new java.util.ArrayList<java.lang.Double>(constant_);
             bitField0_ |= 0x00000008;
            }
         }
+        /**
+         * <code>repeated double constant = 4;</code>
+         */
         public java.util.List<java.lang.Double>
             getConstantList() {
           return java.util.Collections.unmodifiableList(constant_);
         }
+        /**
+         * <code>repeated double constant = 4;</code>
+         */
         public int getConstantCount() {
           return constant_.size();
         }
+        /**
+         * <code>repeated double constant = 4;</code>
+         */
         public double getConstant(int index) {
           return constant_.get(index);
         }
+        /**
+         * <code>repeated double constant = 4;</code>
+         */
         public Builder setConstant(
             int index, double value) {
           ensureConstantIsMutable();
@@ -3072,33 +4223,48 @@ public final class YoProtoHandshakeProto {
           onChanged();
           return this;
         }
+        /**
+         * <code>repeated double constant = 4;</code>
+         */
         public Builder addConstant(double value) {
           ensureConstantIsMutable();
           constant_.add(value);
           onChanged();
           return this;
         }
+        /**
+         * <code>repeated double constant = 4;</code>
+         */
         public Builder addAllConstant(
             java.lang.Iterable<? extends java.lang.Double> values) {
           ensureConstantIsMutable();
-          super.addAll(values, constant_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, constant_);
           onChanged();
           return this;
         }
+        /**
+         * <code>repeated double constant = 4;</code>
+         */
         public Builder clearConstant() {
-          constant_ = java.util.Collections.emptyList();;
+          constant_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000008);
           onChanged();
           return this;
         }
-        
-        // optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;
+
         private us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage appearance_ = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.getDefaultInstance();
         private com.google.protobuf.SingleFieldBuilder<
             us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.Builder, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessageOrBuilder> appearanceBuilder_;
+        /**
+         * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+         */
         public boolean hasAppearance() {
           return ((bitField0_ & 0x00000010) == 0x00000010);
         }
+        /**
+         * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+         */
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage getAppearance() {
           if (appearanceBuilder_ == null) {
             return appearance_;
@@ -3106,6 +4272,9 @@ public final class YoProtoHandshakeProto {
             return appearanceBuilder_.getMessage();
           }
         }
+        /**
+         * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+         */
         public Builder setAppearance(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage value) {
           if (appearanceBuilder_ == null) {
             if (value == null) {
@@ -3119,6 +4288,9 @@ public final class YoProtoHandshakeProto {
           bitField0_ |= 0x00000010;
           return this;
         }
+        /**
+         * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+         */
         public Builder setAppearance(
             us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.Builder builderForValue) {
           if (appearanceBuilder_ == null) {
@@ -3130,6 +4302,9 @@ public final class YoProtoHandshakeProto {
           bitField0_ |= 0x00000010;
           return this;
         }
+        /**
+         * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+         */
         public Builder mergeAppearance(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage value) {
           if (appearanceBuilder_ == null) {
             if (((bitField0_ & 0x00000010) == 0x00000010) &&
@@ -3146,6 +4321,9 @@ public final class YoProtoHandshakeProto {
           bitField0_ |= 0x00000010;
           return this;
         }
+        /**
+         * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+         */
         public Builder clearAppearance() {
           if (appearanceBuilder_ == null) {
             appearance_ = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.getDefaultInstance();
@@ -3156,11 +4334,17 @@ public final class YoProtoHandshakeProto {
           bitField0_ = (bitField0_ & ~0x00000010);
           return this;
         }
+        /**
+         * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+         */
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.Builder getAppearanceBuilder() {
           bitField0_ |= 0x00000010;
           onChanged();
           return getAppearanceFieldBuilder().getBuilder();
         }
+        /**
+         * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+         */
         public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessageOrBuilder getAppearanceOrBuilder() {
           if (appearanceBuilder_ != null) {
             return appearanceBuilder_.getMessageOrBuilder();
@@ -3168,36 +4352,68 @@ public final class YoProtoHandshakeProto {
             return appearance_;
           }
         }
+        /**
+         * <code>optional .YoProtoHandshake.AppearanceDefinitionMessage appearance = 5;</code>
+         */
         private com.google.protobuf.SingleFieldBuilder<
             us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.Builder, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessageOrBuilder> 
             getAppearanceFieldBuilder() {
           if (appearanceBuilder_ == null) {
             appearanceBuilder_ = new com.google.protobuf.SingleFieldBuilder<
                 us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.Builder, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessageOrBuilder>(
-                    appearance_,
+                    getAppearance(),
                     getParentForChildren(),
                     isClean());
             appearance_ = null;
           }
           return appearanceBuilder_;
         }
-        
-        // optional string list_name = 6;
+
         private java.lang.Object listName_ = "";
+        /**
+         * <code>optional string list_name = 6;</code>
+         */
         public boolean hasListName() {
           return ((bitField0_ & 0x00000020) == 0x00000020);
         }
-        public String getListName() {
+        /**
+         * <code>optional string list_name = 6;</code>
+         */
+        public java.lang.String getListName() {
           java.lang.Object ref = listName_;
-          if (!(ref instanceof String)) {
-            String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-            listName_ = s;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              listName_ = s;
+            }
             return s;
           } else {
-            return (String) ref;
+            return (java.lang.String) ref;
           }
         }
-        public Builder setListName(String value) {
+        /**
+         * <code>optional string list_name = 6;</code>
+         */
+        public com.google.protobuf.ByteString
+            getListNameBytes() {
+          java.lang.Object ref = listName_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            listName_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string list_name = 6;</code>
+         */
+        public Builder setListName(
+            java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
@@ -3206,145 +4422,231 @@ public final class YoProtoHandshakeProto {
           onChanged();
           return this;
         }
+        /**
+         * <code>optional string list_name = 6;</code>
+         */
         public Builder clearListName() {
           bitField0_ = (bitField0_ & ~0x00000020);
           listName_ = getDefaultInstance().getListName();
           onChanged();
           return this;
         }
-        void setListName(com.google.protobuf.ByteString value) {
-          bitField0_ |= 0x00000020;
+        /**
+         * <code>optional string list_name = 6;</code>
+         */
+        public Builder setListNameBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000020;
           listName_ = value;
           onChanged();
+          return this;
         }
-        
+
         // @@protoc_insertion_point(builder_scope:YoProtoHandshake.DynamicGraphicMessage)
       }
-      
+
       static {
         defaultInstance = new DynamicGraphicMessage(true);
         defaultInstance.initFields();
       }
-      
+
       // @@protoc_insertion_point(class_scope:YoProtoHandshake.DynamicGraphicMessage)
     }
-    
+
     private int bitField0_;
-    // optional double dt = 1;
     public static final int DT_FIELD_NUMBER = 1;
     private double dt_;
+    /**
+     * <code>optional double dt = 1;</code>
+     */
     public boolean hasDt() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>optional double dt = 1;</code>
+     */
     public double getDt() {
       return dt_;
     }
-    
-    // repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;
+
     public static final int REGISTRY_FIELD_NUMBER = 2;
     private java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition> registry_;
+    /**
+     * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+     */
     public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition> getRegistryList() {
       return registry_;
     }
+    /**
+     * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+     */
     public java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinitionOrBuilder> 
         getRegistryOrBuilderList() {
       return registry_;
     }
+    /**
+     * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+     */
     public int getRegistryCount() {
       return registry_.size();
     }
+    /**
+     * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+     */
     public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition getRegistry(int index) {
       return registry_.get(index);
     }
+    /**
+     * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+     */
     public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinitionOrBuilder getRegistryOrBuilder(
         int index) {
       return registry_.get(index);
     }
-    
-    // repeated .YoProtoHandshake.YoVariableDefinition variable = 3;
+
     public static final int VARIABLE_FIELD_NUMBER = 3;
     private java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition> variable_;
+    /**
+     * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+     */
     public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition> getVariableList() {
       return variable_;
     }
+    /**
+     * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+     */
     public java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinitionOrBuilder> 
         getVariableOrBuilderList() {
       return variable_;
     }
+    /**
+     * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+     */
     public int getVariableCount() {
       return variable_.size();
     }
+    /**
+     * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+     */
     public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition getVariable(int index) {
       return variable_.get(index);
     }
+    /**
+     * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+     */
     public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinitionOrBuilder getVariableOrBuilder(
         int index) {
       return variable_.get(index);
     }
-    
-    // repeated .YoProtoHandshake.JointDefinition joint = 4;
+
     public static final int JOINT_FIELD_NUMBER = 4;
     private java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition> joint_;
+    /**
+     * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+     */
     public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition> getJointList() {
       return joint_;
     }
+    /**
+     * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+     */
     public java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinitionOrBuilder> 
         getJointOrBuilderList() {
       return joint_;
     }
+    /**
+     * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+     */
     public int getJointCount() {
       return joint_.size();
     }
+    /**
+     * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+     */
     public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition getJoint(int index) {
       return joint_.get(index);
     }
+    /**
+     * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+     */
     public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinitionOrBuilder getJointOrBuilder(
         int index) {
       return joint_.get(index);
     }
-    
-    // repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;
+
     public static final int GRAPHIC_OBJECT_FIELD_NUMBER = 5;
     private java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage> graphicObject_;
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+     */
     public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage> getGraphicObjectList() {
       return graphicObject_;
     }
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+     */
     public java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder> 
         getGraphicObjectOrBuilderList() {
       return graphicObject_;
     }
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+     */
     public int getGraphicObjectCount() {
       return graphicObject_.size();
     }
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+     */
     public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage getGraphicObject(int index) {
       return graphicObject_.get(index);
     }
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+     */
     public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder getGraphicObjectOrBuilder(
         int index) {
       return graphicObject_.get(index);
     }
-    
-    // repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;
+
     public static final int ARTIFACT_FIELD_NUMBER = 6;
     private java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage> artifact_;
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+     */
     public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage> getArtifactList() {
       return artifact_;
     }
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+     */
     public java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder> 
         getArtifactOrBuilderList() {
       return artifact_;
     }
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+     */
     public int getArtifactCount() {
       return artifact_.size();
     }
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+     */
     public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage getArtifact(int index) {
       return artifact_.get(index);
     }
+    /**
+     * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+     */
     public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder getArtifactOrBuilder(
         int index) {
       return artifact_.get(index);
     }
-    
+
     private void initFields() {
       dt_ = 0D;
       registry_ = java.util.Collections.emptyList();
@@ -3356,8 +4658,9 @@ public final class YoProtoHandshakeProto {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-      
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
       for (int i = 0; i < getRegistryCount(); i++) {
         if (!getRegistry(i).isInitialized()) {
           memoizedIsInitialized = 0;
@@ -3391,7 +4694,7 @@ public final class YoProtoHandshakeProto {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -3415,12 +4718,12 @@ public final class YoProtoHandshakeProto {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -3450,113 +4753,106 @@ public final class YoProtoHandshakeProto {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code YoProtoHandshake}
+     */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshakeOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:YoProtoHandshake)
+        us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshakeOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_fieldAccessorTable;
+        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.class, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.Builder.class);
       }
-      
+
       // Construct using us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -3572,7 +4868,7 @@ public final class YoProtoHandshakeProto {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         dt_ = 0D;
@@ -3609,20 +4905,20 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.getDescriptor();
+        return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.internal_static_YoProtoHandshake_descriptor;
       }
-      
+
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake getDefaultInstanceForType() {
         return us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.getDefaultInstance();
       }
-      
+
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake build() {
         us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake result = buildPartial();
         if (!result.isInitialized()) {
@@ -3630,17 +4926,7 @@ public final class YoProtoHandshakeProto {
         }
         return result;
       }
-      
-      private us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake buildPartial() {
         us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake result = new us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake(this);
         int from_bitField0_ = bitField0_;
@@ -3698,7 +4984,7 @@ public final class YoProtoHandshakeProto {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake) {
           return mergeFrom((us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake)other);
@@ -3707,7 +4993,7 @@ public final class YoProtoHandshakeProto {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake other) {
         if (other == us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.getDefaultInstance()) return this;
         if (other.hasDt()) {
@@ -3846,7 +5132,7 @@ public final class YoProtoHandshakeProto {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         for (int i = 0; i < getRegistryCount(); i++) {
           if (!getRegistry(i).isInitialized()) {
@@ -3880,93 +5166,58 @@ public final class YoProtoHandshakeProto {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 9: {
-              bitField0_ |= 0x00000001;
-              dt_ = input.readDouble();
-              break;
-            }
-            case 18: {
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.Builder subBuilder = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addRegistry(subBuilder.buildPartial());
-              break;
-            }
-            case 26: {
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.Builder subBuilder = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addVariable(subBuilder.buildPartial());
-              break;
-            }
-            case 34: {
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.Builder subBuilder = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addJoint(subBuilder.buildPartial());
-              break;
-            }
-            case 42: {
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder subBuilder = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addGraphicObject(subBuilder.buildPartial());
-              break;
-            }
-            case 50: {
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder subBuilder = us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addArtifact(subBuilder.buildPartial());
-              break;
-            }
+        us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // optional double dt = 1;
+
       private double dt_ ;
+      /**
+       * <code>optional double dt = 1;</code>
+       */
       public boolean hasDt() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>optional double dt = 1;</code>
+       */
       public double getDt() {
         return dt_;
       }
+      /**
+       * <code>optional double dt = 1;</code>
+       */
       public Builder setDt(double value) {
         bitField0_ |= 0x00000001;
         dt_ = value;
         onChanged();
         return this;
       }
+      /**
+       * <code>optional double dt = 1;</code>
+       */
       public Builder clearDt() {
         bitField0_ = (bitField0_ & ~0x00000001);
         dt_ = 0D;
         onChanged();
         return this;
       }
-      
-      // repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;
+
       private java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition> registry_ =
         java.util.Collections.emptyList();
       private void ensureRegistryIsMutable() {
@@ -3975,10 +5226,13 @@ public final class YoProtoHandshakeProto {
           bitField0_ |= 0x00000002;
          }
       }
-      
+
       private com.google.protobuf.RepeatedFieldBuilder<
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.Builder, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinitionOrBuilder> registryBuilder_;
-      
+
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition> getRegistryList() {
         if (registryBuilder_ == null) {
           return java.util.Collections.unmodifiableList(registry_);
@@ -3986,6 +5240,9 @@ public final class YoProtoHandshakeProto {
           return registryBuilder_.getMessageList();
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public int getRegistryCount() {
         if (registryBuilder_ == null) {
           return registry_.size();
@@ -3993,6 +5250,9 @@ public final class YoProtoHandshakeProto {
           return registryBuilder_.getCount();
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition getRegistry(int index) {
         if (registryBuilder_ == null) {
           return registry_.get(index);
@@ -4000,6 +5260,9 @@ public final class YoProtoHandshakeProto {
           return registryBuilder_.getMessage(index);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public Builder setRegistry(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition value) {
         if (registryBuilder_ == null) {
@@ -4014,6 +5277,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public Builder setRegistry(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.Builder builderForValue) {
         if (registryBuilder_ == null) {
@@ -4025,6 +5291,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public Builder addRegistry(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition value) {
         if (registryBuilder_ == null) {
           if (value == null) {
@@ -4038,6 +5307,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public Builder addRegistry(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition value) {
         if (registryBuilder_ == null) {
@@ -4052,6 +5324,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public Builder addRegistry(
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.Builder builderForValue) {
         if (registryBuilder_ == null) {
@@ -4063,6 +5338,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public Builder addRegistry(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.Builder builderForValue) {
         if (registryBuilder_ == null) {
@@ -4074,17 +5352,24 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public Builder addAllRegistry(
           java.lang.Iterable<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition> values) {
         if (registryBuilder_ == null) {
           ensureRegistryIsMutable();
-          super.addAll(values, registry_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, registry_);
           onChanged();
         } else {
           registryBuilder_.addAllMessages(values);
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public Builder clearRegistry() {
         if (registryBuilder_ == null) {
           registry_ = java.util.Collections.emptyList();
@@ -4095,6 +5380,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public Builder removeRegistry(int index) {
         if (registryBuilder_ == null) {
           ensureRegistryIsMutable();
@@ -4105,10 +5393,16 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.Builder getRegistryBuilder(
           int index) {
         return getRegistryFieldBuilder().getBuilder(index);
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinitionOrBuilder getRegistryOrBuilder(
           int index) {
         if (registryBuilder_ == null) {
@@ -4116,6 +5410,9 @@ public final class YoProtoHandshakeProto {
           return registryBuilder_.getMessageOrBuilder(index);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinitionOrBuilder> 
            getRegistryOrBuilderList() {
         if (registryBuilder_ != null) {
@@ -4124,15 +5421,24 @@ public final class YoProtoHandshakeProto {
           return java.util.Collections.unmodifiableList(registry_);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.Builder addRegistryBuilder() {
         return getRegistryFieldBuilder().addBuilder(
             us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.getDefaultInstance());
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.Builder addRegistryBuilder(
           int index) {
         return getRegistryFieldBuilder().addBuilder(
             index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.getDefaultInstance());
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoRegistryDefinition registry = 2;</code>
+       */
       public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.Builder> 
            getRegistryBuilderList() {
         return getRegistryFieldBuilder().getBuilderList();
@@ -4151,8 +5457,7 @@ public final class YoProtoHandshakeProto {
         }
         return registryBuilder_;
       }
-      
-      // repeated .YoProtoHandshake.YoVariableDefinition variable = 3;
+
       private java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition> variable_ =
         java.util.Collections.emptyList();
       private void ensureVariableIsMutable() {
@@ -4161,10 +5466,13 @@ public final class YoProtoHandshakeProto {
           bitField0_ |= 0x00000004;
          }
       }
-      
+
       private com.google.protobuf.RepeatedFieldBuilder<
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.Builder, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinitionOrBuilder> variableBuilder_;
-      
+
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition> getVariableList() {
         if (variableBuilder_ == null) {
           return java.util.Collections.unmodifiableList(variable_);
@@ -4172,6 +5480,9 @@ public final class YoProtoHandshakeProto {
           return variableBuilder_.getMessageList();
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public int getVariableCount() {
         if (variableBuilder_ == null) {
           return variable_.size();
@@ -4179,6 +5490,9 @@ public final class YoProtoHandshakeProto {
           return variableBuilder_.getCount();
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition getVariable(int index) {
         if (variableBuilder_ == null) {
           return variable_.get(index);
@@ -4186,6 +5500,9 @@ public final class YoProtoHandshakeProto {
           return variableBuilder_.getMessage(index);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public Builder setVariable(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition value) {
         if (variableBuilder_ == null) {
@@ -4200,6 +5517,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public Builder setVariable(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.Builder builderForValue) {
         if (variableBuilder_ == null) {
@@ -4211,6 +5531,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public Builder addVariable(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition value) {
         if (variableBuilder_ == null) {
           if (value == null) {
@@ -4224,6 +5547,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public Builder addVariable(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition value) {
         if (variableBuilder_ == null) {
@@ -4238,6 +5564,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public Builder addVariable(
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.Builder builderForValue) {
         if (variableBuilder_ == null) {
@@ -4249,6 +5578,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public Builder addVariable(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.Builder builderForValue) {
         if (variableBuilder_ == null) {
@@ -4260,17 +5592,24 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public Builder addAllVariable(
           java.lang.Iterable<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition> values) {
         if (variableBuilder_ == null) {
           ensureVariableIsMutable();
-          super.addAll(values, variable_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, variable_);
           onChanged();
         } else {
           variableBuilder_.addAllMessages(values);
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public Builder clearVariable() {
         if (variableBuilder_ == null) {
           variable_ = java.util.Collections.emptyList();
@@ -4281,6 +5620,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public Builder removeVariable(int index) {
         if (variableBuilder_ == null) {
           ensureVariableIsMutable();
@@ -4291,10 +5633,16 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.Builder getVariableBuilder(
           int index) {
         return getVariableFieldBuilder().getBuilder(index);
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinitionOrBuilder getVariableOrBuilder(
           int index) {
         if (variableBuilder_ == null) {
@@ -4302,6 +5650,9 @@ public final class YoProtoHandshakeProto {
           return variableBuilder_.getMessageOrBuilder(index);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinitionOrBuilder> 
            getVariableOrBuilderList() {
         if (variableBuilder_ != null) {
@@ -4310,15 +5661,24 @@ public final class YoProtoHandshakeProto {
           return java.util.Collections.unmodifiableList(variable_);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.Builder addVariableBuilder() {
         return getVariableFieldBuilder().addBuilder(
             us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.getDefaultInstance());
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.Builder addVariableBuilder(
           int index) {
         return getVariableFieldBuilder().addBuilder(
             index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.getDefaultInstance());
       }
+      /**
+       * <code>repeated .YoProtoHandshake.YoVariableDefinition variable = 3;</code>
+       */
       public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.Builder> 
            getVariableBuilderList() {
         return getVariableFieldBuilder().getBuilderList();
@@ -4337,8 +5697,7 @@ public final class YoProtoHandshakeProto {
         }
         return variableBuilder_;
       }
-      
-      // repeated .YoProtoHandshake.JointDefinition joint = 4;
+
       private java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition> joint_ =
         java.util.Collections.emptyList();
       private void ensureJointIsMutable() {
@@ -4347,10 +5706,13 @@ public final class YoProtoHandshakeProto {
           bitField0_ |= 0x00000008;
          }
       }
-      
+
       private com.google.protobuf.RepeatedFieldBuilder<
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.Builder, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinitionOrBuilder> jointBuilder_;
-      
+
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition> getJointList() {
         if (jointBuilder_ == null) {
           return java.util.Collections.unmodifiableList(joint_);
@@ -4358,6 +5720,9 @@ public final class YoProtoHandshakeProto {
           return jointBuilder_.getMessageList();
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public int getJointCount() {
         if (jointBuilder_ == null) {
           return joint_.size();
@@ -4365,6 +5730,9 @@ public final class YoProtoHandshakeProto {
           return jointBuilder_.getCount();
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition getJoint(int index) {
         if (jointBuilder_ == null) {
           return joint_.get(index);
@@ -4372,6 +5740,9 @@ public final class YoProtoHandshakeProto {
           return jointBuilder_.getMessage(index);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public Builder setJoint(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition value) {
         if (jointBuilder_ == null) {
@@ -4386,6 +5757,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public Builder setJoint(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.Builder builderForValue) {
         if (jointBuilder_ == null) {
@@ -4397,6 +5771,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public Builder addJoint(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition value) {
         if (jointBuilder_ == null) {
           if (value == null) {
@@ -4410,6 +5787,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public Builder addJoint(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition value) {
         if (jointBuilder_ == null) {
@@ -4424,6 +5804,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public Builder addJoint(
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.Builder builderForValue) {
         if (jointBuilder_ == null) {
@@ -4435,6 +5818,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public Builder addJoint(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.Builder builderForValue) {
         if (jointBuilder_ == null) {
@@ -4446,17 +5832,24 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public Builder addAllJoint(
           java.lang.Iterable<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition> values) {
         if (jointBuilder_ == null) {
           ensureJointIsMutable();
-          super.addAll(values, joint_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, joint_);
           onChanged();
         } else {
           jointBuilder_.addAllMessages(values);
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public Builder clearJoint() {
         if (jointBuilder_ == null) {
           joint_ = java.util.Collections.emptyList();
@@ -4467,6 +5860,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public Builder removeJoint(int index) {
         if (jointBuilder_ == null) {
           ensureJointIsMutable();
@@ -4477,10 +5873,16 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.Builder getJointBuilder(
           int index) {
         return getJointFieldBuilder().getBuilder(index);
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinitionOrBuilder getJointOrBuilder(
           int index) {
         if (jointBuilder_ == null) {
@@ -4488,6 +5890,9 @@ public final class YoProtoHandshakeProto {
           return jointBuilder_.getMessageOrBuilder(index);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinitionOrBuilder> 
            getJointOrBuilderList() {
         if (jointBuilder_ != null) {
@@ -4496,15 +5901,24 @@ public final class YoProtoHandshakeProto {
           return java.util.Collections.unmodifiableList(joint_);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.Builder addJointBuilder() {
         return getJointFieldBuilder().addBuilder(
             us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.getDefaultInstance());
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.Builder addJointBuilder(
           int index) {
         return getJointFieldBuilder().addBuilder(
             index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.getDefaultInstance());
       }
+      /**
+       * <code>repeated .YoProtoHandshake.JointDefinition joint = 4;</code>
+       */
       public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.Builder> 
            getJointBuilderList() {
         return getJointFieldBuilder().getBuilderList();
@@ -4523,8 +5937,7 @@ public final class YoProtoHandshakeProto {
         }
         return jointBuilder_;
       }
-      
-      // repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;
+
       private java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage> graphicObject_ =
         java.util.Collections.emptyList();
       private void ensureGraphicObjectIsMutable() {
@@ -4533,10 +5946,13 @@ public final class YoProtoHandshakeProto {
           bitField0_ |= 0x00000010;
          }
       }
-      
+
       private com.google.protobuf.RepeatedFieldBuilder<
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder> graphicObjectBuilder_;
-      
+
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage> getGraphicObjectList() {
         if (graphicObjectBuilder_ == null) {
           return java.util.Collections.unmodifiableList(graphicObject_);
@@ -4544,6 +5960,9 @@ public final class YoProtoHandshakeProto {
           return graphicObjectBuilder_.getMessageList();
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public int getGraphicObjectCount() {
         if (graphicObjectBuilder_ == null) {
           return graphicObject_.size();
@@ -4551,6 +5970,9 @@ public final class YoProtoHandshakeProto {
           return graphicObjectBuilder_.getCount();
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage getGraphicObject(int index) {
         if (graphicObjectBuilder_ == null) {
           return graphicObject_.get(index);
@@ -4558,6 +5980,9 @@ public final class YoProtoHandshakeProto {
           return graphicObjectBuilder_.getMessage(index);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public Builder setGraphicObject(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage value) {
         if (graphicObjectBuilder_ == null) {
@@ -4572,6 +5997,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public Builder setGraphicObject(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder builderForValue) {
         if (graphicObjectBuilder_ == null) {
@@ -4583,6 +6011,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public Builder addGraphicObject(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage value) {
         if (graphicObjectBuilder_ == null) {
           if (value == null) {
@@ -4596,6 +6027,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public Builder addGraphicObject(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage value) {
         if (graphicObjectBuilder_ == null) {
@@ -4610,6 +6044,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public Builder addGraphicObject(
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder builderForValue) {
         if (graphicObjectBuilder_ == null) {
@@ -4621,6 +6058,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public Builder addGraphicObject(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder builderForValue) {
         if (graphicObjectBuilder_ == null) {
@@ -4632,17 +6072,24 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public Builder addAllGraphicObject(
           java.lang.Iterable<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage> values) {
         if (graphicObjectBuilder_ == null) {
           ensureGraphicObjectIsMutable();
-          super.addAll(values, graphicObject_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, graphicObject_);
           onChanged();
         } else {
           graphicObjectBuilder_.addAllMessages(values);
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public Builder clearGraphicObject() {
         if (graphicObjectBuilder_ == null) {
           graphicObject_ = java.util.Collections.emptyList();
@@ -4653,6 +6100,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public Builder removeGraphicObject(int index) {
         if (graphicObjectBuilder_ == null) {
           ensureGraphicObjectIsMutable();
@@ -4663,10 +6113,16 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder getGraphicObjectBuilder(
           int index) {
         return getGraphicObjectFieldBuilder().getBuilder(index);
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder getGraphicObjectOrBuilder(
           int index) {
         if (graphicObjectBuilder_ == null) {
@@ -4674,6 +6130,9 @@ public final class YoProtoHandshakeProto {
           return graphicObjectBuilder_.getMessageOrBuilder(index);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder> 
            getGraphicObjectOrBuilderList() {
         if (graphicObjectBuilder_ != null) {
@@ -4682,15 +6141,24 @@ public final class YoProtoHandshakeProto {
           return java.util.Collections.unmodifiableList(graphicObject_);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder addGraphicObjectBuilder() {
         return getGraphicObjectFieldBuilder().addBuilder(
             us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.getDefaultInstance());
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder addGraphicObjectBuilder(
           int index) {
         return getGraphicObjectFieldBuilder().addBuilder(
             index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.getDefaultInstance());
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage graphic_object = 5;</code>
+       */
       public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder> 
            getGraphicObjectBuilderList() {
         return getGraphicObjectFieldBuilder().getBuilderList();
@@ -4709,8 +6177,7 @@ public final class YoProtoHandshakeProto {
         }
         return graphicObjectBuilder_;
       }
-      
-      // repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;
+
       private java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage> artifact_ =
         java.util.Collections.emptyList();
       private void ensureArtifactIsMutable() {
@@ -4719,10 +6186,13 @@ public final class YoProtoHandshakeProto {
           bitField0_ |= 0x00000020;
          }
       }
-      
+
       private com.google.protobuf.RepeatedFieldBuilder<
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder> artifactBuilder_;
-      
+
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage> getArtifactList() {
         if (artifactBuilder_ == null) {
           return java.util.Collections.unmodifiableList(artifact_);
@@ -4730,6 +6200,9 @@ public final class YoProtoHandshakeProto {
           return artifactBuilder_.getMessageList();
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public int getArtifactCount() {
         if (artifactBuilder_ == null) {
           return artifact_.size();
@@ -4737,6 +6210,9 @@ public final class YoProtoHandshakeProto {
           return artifactBuilder_.getCount();
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage getArtifact(int index) {
         if (artifactBuilder_ == null) {
           return artifact_.get(index);
@@ -4744,6 +6220,9 @@ public final class YoProtoHandshakeProto {
           return artifactBuilder_.getMessage(index);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public Builder setArtifact(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage value) {
         if (artifactBuilder_ == null) {
@@ -4758,6 +6237,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public Builder setArtifact(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder builderForValue) {
         if (artifactBuilder_ == null) {
@@ -4769,6 +6251,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public Builder addArtifact(us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage value) {
         if (artifactBuilder_ == null) {
           if (value == null) {
@@ -4782,6 +6267,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public Builder addArtifact(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage value) {
         if (artifactBuilder_ == null) {
@@ -4796,6 +6284,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public Builder addArtifact(
           us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder builderForValue) {
         if (artifactBuilder_ == null) {
@@ -4807,6 +6298,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public Builder addArtifact(
           int index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder builderForValue) {
         if (artifactBuilder_ == null) {
@@ -4818,17 +6312,24 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public Builder addAllArtifact(
           java.lang.Iterable<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage> values) {
         if (artifactBuilder_ == null) {
           ensureArtifactIsMutable();
-          super.addAll(values, artifact_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, artifact_);
           onChanged();
         } else {
           artifactBuilder_.addAllMessages(values);
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public Builder clearArtifact() {
         if (artifactBuilder_ == null) {
           artifact_ = java.util.Collections.emptyList();
@@ -4839,6 +6340,9 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public Builder removeArtifact(int index) {
         if (artifactBuilder_ == null) {
           ensureArtifactIsMutable();
@@ -4849,10 +6353,16 @@ public final class YoProtoHandshakeProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder getArtifactBuilder(
           int index) {
         return getArtifactFieldBuilder().getBuilder(index);
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder getArtifactOrBuilder(
           int index) {
         if (artifactBuilder_ == null) {
@@ -4860,6 +6370,9 @@ public final class YoProtoHandshakeProto {
           return artifactBuilder_.getMessageOrBuilder(index);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public java.util.List<? extends us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessageOrBuilder> 
            getArtifactOrBuilderList() {
         if (artifactBuilder_ != null) {
@@ -4868,15 +6381,24 @@ public final class YoProtoHandshakeProto {
           return java.util.Collections.unmodifiableList(artifact_);
         }
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder addArtifactBuilder() {
         return getArtifactFieldBuilder().addBuilder(
             us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.getDefaultInstance());
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder addArtifactBuilder(
           int index) {
         return getArtifactFieldBuilder().addBuilder(
             index, us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.getDefaultInstance());
       }
+      /**
+       * <code>repeated .YoProtoHandshake.DynamicGraphicMessage artifact = 6;</code>
+       */
       public java.util.List<us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder> 
            getArtifactBuilderList() {
         return getArtifactFieldBuilder().getBuilderList();
@@ -4895,49 +6417,49 @@ public final class YoProtoHandshakeProto {
         }
         return artifactBuilder_;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:YoProtoHandshake)
     }
-    
+
     static {
       defaultInstance = new YoProtoHandshake(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:YoProtoHandshake)
   }
-  
-  private static com.google.protobuf.Descriptors.Descriptor
+
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_YoProtoHandshake_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_YoProtoHandshake_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_YoProtoHandshake_YoRegistryDefinition_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_YoProtoHandshake_YoRegistryDefinition_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_YoProtoHandshake_YoVariableDefinition_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_YoProtoHandshake_YoVariableDefinition_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_YoProtoHandshake_JointDefinition_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_YoProtoHandshake_JointDefinition_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_YoProtoHandshake_AppearanceDefinitionMessage_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_YoProtoHandshake_AppearanceDefinitionMessage_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_YoProtoHandshake_DynamicGraphicMessage_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_YoProtoHandshake_DynamicGraphicMessage_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -4946,7 +6468,7 @@ public final class YoProtoHandshakeProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\035protos/YoProtoHandshake.proto\"\222\010\n\020YoPr" +
+      "\n\035protos/YoProtoHandshake.proto\"\253\010\n\020YoPr" +
       "otoHandshake\022\n\n\002dt\030\001 \001(\001\0228\n\010registry\030\002 \003" +
       "(\0132&.YoProtoHandshake.YoRegistryDefiniti" +
       "on\0228\n\010variable\030\003 \003(\0132&.YoProtoHandshake." +
@@ -4956,87 +6478,76 @@ public final class YoProtoHandshakeProto {
       "cGraphicMessage\0229\n\010artifact\030\006 \003(\0132\'.YoPr" +
       "otoHandshake.DynamicGraphicMessage\0324\n\024Yo" +
       "RegistryDefinition\022\016\n\006parent\030\001 \002(\r\022\014\n\004na",
-      "me\030\002 \002(\t\032\207\002\n\024YoVariableDefinition\022\014\n\004nam" +
+      "me\030\002 \002(\t\032\240\002\n\024YoVariableDefinition\022\014\n\004nam" +
       "e\030\001 \002(\t\022\020\n\010registry\030\002 \002(\r\022@\n\004type\030\003 \002(\0162" +
       "2.YoProtoHandshake.YoVariableDefinition." +
-      "YoProtoType\022\022\n\nenumValues\030\004 \003(\t\"y\n\013YoPro" +
-      "toType\022\024\n\020DoubleYoVariable\020\001\022\025\n\021BooleanY" +
-      "oVariable\020\002\022\025\n\021IntegerYoVariable\020\003\022\022\n\016Lo" +
-      "ngYoVariable\020\004\022\022\n\016EnumYoVariable\020\005\032\211\001\n\017J" +
-      "ointDefinition\022\014\n\004name\030\001 \002(\t\0229\n\004type\030\002 \002" +
-      "(\0162+.YoProtoHandshake.JointDefinition.Jo" +
-      "intType\"-\n\tJointType\022\017\n\013SiXDoFJoint\020\001\022\017\n",
-      "\013OneDoFJoint\020\002\032T\n\033AppearanceDefinitionMe" +
-      "ssage\022\t\n\001x\030\001 \002(\001\022\t\n\001y\030\002 \002(\001\022\t\n\001z\030\003 \002(\001\022\024" +
-      "\n\014transparency\030\004 \002(\001\032\255\001\n\025DynamicGraphicM" +
-      "essage\022\014\n\004type\030\001 \002(\r\022\014\n\004name\030\002 \002(\t\022\020\n\010yo" +
-      "_index\030\003 \003(\r\022\020\n\010constant\030\004 \003(\001\022A\n\nappear" +
-      "ance\030\005 \001(\0132-.YoProtoHandshake.Appearance" +
-      "DefinitionMessage\022\021\n\tlist_name\030\006 \001(\tBA\n(" +
-      "us.ihmc.robotDataCommunication.generated" +
-      "B\025YoProtoHandshakeProto"
+      "YoProtoType\022\022\n\nenumValues\030\004 \003(\t\022\027\n\017allow" +
+      "NullValues\030\005 \001(\010\"y\n\013YoProtoType\022\024\n\020Doubl" +
+      "eYoVariable\020\001\022\025\n\021BooleanYoVariable\020\002\022\025\n\021" +
+      "IntegerYoVariable\020\003\022\022\n\016LongYoVariable\020\004\022" +
+      "\022\n\016EnumYoVariable\020\005\032\211\001\n\017JointDefinition\022" +
+      "\014\n\004name\030\001 \002(\t\0229\n\004type\030\002 \002(\0162+.YoProtoHan" +
+      "dshake.JointDefinition.JointType\"-\n\tJoin",
+      "tType\022\017\n\013SiXDoFJoint\020\001\022\017\n\013OneDoFJoint\020\002\032" +
+      "T\n\033AppearanceDefinitionMessage\022\t\n\001x\030\001 \002(" +
+      "\001\022\t\n\001y\030\002 \002(\001\022\t\n\001z\030\003 \002(\001\022\024\n\014transparency\030" +
+      "\004 \002(\001\032\255\001\n\025DynamicGraphicMessage\022\014\n\004type\030" +
+      "\001 \002(\r\022\014\n\004name\030\002 \002(\t\022\020\n\010yo_index\030\003 \003(\r\022\020\n" +
+      "\010constant\030\004 \003(\001\022A\n\nappearance\030\005 \001(\0132-.Yo" +
+      "ProtoHandshake.AppearanceDefinitionMessa" +
+      "ge\022\021\n\tlist_name\030\006 \001(\tBA\n(us.ihmc.robotDa" +
+      "taCommunication.generatedB\025YoProtoHandsh" +
+      "akeProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
-        public com.google.protobuf.ExtensionRegistry assignDescriptors(
-            com.google.protobuf.Descriptors.FileDescriptor root) {
-          descriptor = root;
-          internal_static_YoProtoHandshake_descriptor =
-            getDescriptor().getMessageTypes().get(0);
-          internal_static_YoProtoHandshake_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_YoProtoHandshake_descriptor,
-              new java.lang.String[] { "Dt", "Registry", "Variable", "Joint", "GraphicObject", "Artifact", },
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.class,
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.Builder.class);
-          internal_static_YoProtoHandshake_YoRegistryDefinition_descriptor =
-            internal_static_YoProtoHandshake_descriptor.getNestedTypes().get(0);
-          internal_static_YoProtoHandshake_YoRegistryDefinition_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_YoProtoHandshake_YoRegistryDefinition_descriptor,
-              new java.lang.String[] { "Parent", "Name", },
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.class,
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition.Builder.class);
-          internal_static_YoProtoHandshake_YoVariableDefinition_descriptor =
-            internal_static_YoProtoHandshake_descriptor.getNestedTypes().get(1);
-          internal_static_YoProtoHandshake_YoVariableDefinition_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_YoProtoHandshake_YoVariableDefinition_descriptor,
-              new java.lang.String[] { "Name", "Registry", "Type", "EnumValues", },
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.class,
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.Builder.class);
-          internal_static_YoProtoHandshake_JointDefinition_descriptor =
-            internal_static_YoProtoHandshake_descriptor.getNestedTypes().get(2);
-          internal_static_YoProtoHandshake_JointDefinition_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_YoProtoHandshake_JointDefinition_descriptor,
-              new java.lang.String[] { "Name", "Type", },
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.class,
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.Builder.class);
-          internal_static_YoProtoHandshake_AppearanceDefinitionMessage_descriptor =
-            internal_static_YoProtoHandshake_descriptor.getNestedTypes().get(3);
-          internal_static_YoProtoHandshake_AppearanceDefinitionMessage_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_YoProtoHandshake_AppearanceDefinitionMessage_descriptor,
-              new java.lang.String[] { "X", "Y", "Z", "Transparency", },
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.class,
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage.Builder.class);
-          internal_static_YoProtoHandshake_DynamicGraphicMessage_descriptor =
-            internal_static_YoProtoHandshake_descriptor.getNestedTypes().get(4);
-          internal_static_YoProtoHandshake_DynamicGraphicMessage_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_YoProtoHandshake_DynamicGraphicMessage_descriptor,
-              new java.lang.String[] { "Type", "Name", "YoIndex", "Constant", "Appearance", "ListName", },
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.class,
-              us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage.Builder.class);
-          return null;
-        }
-      };
+        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+              com.google.protobuf.Descriptors.FileDescriptor root) {
+            descriptor = root;
+            return null;
+          }
+        };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
+    internal_static_YoProtoHandshake_descriptor =
+      getDescriptor().getMessageTypes().get(0);
+    internal_static_YoProtoHandshake_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_YoProtoHandshake_descriptor,
+        new java.lang.String[] { "Dt", "Registry", "Variable", "Joint", "GraphicObject", "Artifact", });
+    internal_static_YoProtoHandshake_YoRegistryDefinition_descriptor =
+      internal_static_YoProtoHandshake_descriptor.getNestedTypes().get(0);
+    internal_static_YoProtoHandshake_YoRegistryDefinition_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_YoProtoHandshake_YoRegistryDefinition_descriptor,
+        new java.lang.String[] { "Parent", "Name", });
+    internal_static_YoProtoHandshake_YoVariableDefinition_descriptor =
+      internal_static_YoProtoHandshake_descriptor.getNestedTypes().get(1);
+    internal_static_YoProtoHandshake_YoVariableDefinition_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_YoProtoHandshake_YoVariableDefinition_descriptor,
+        new java.lang.String[] { "Name", "Registry", "Type", "EnumValues", "AllowNullValues", });
+    internal_static_YoProtoHandshake_JointDefinition_descriptor =
+      internal_static_YoProtoHandshake_descriptor.getNestedTypes().get(2);
+    internal_static_YoProtoHandshake_JointDefinition_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_YoProtoHandshake_JointDefinition_descriptor,
+        new java.lang.String[] { "Name", "Type", });
+    internal_static_YoProtoHandshake_AppearanceDefinitionMessage_descriptor =
+      internal_static_YoProtoHandshake_descriptor.getNestedTypes().get(3);
+    internal_static_YoProtoHandshake_AppearanceDefinitionMessage_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_YoProtoHandshake_AppearanceDefinitionMessage_descriptor,
+        new java.lang.String[] { "X", "Y", "Z", "Transparency", });
+    internal_static_YoProtoHandshake_DynamicGraphicMessage_descriptor =
+      internal_static_YoProtoHandshake_descriptor.getNestedTypes().get(4);
+    internal_static_YoProtoHandshake_DynamicGraphicMessage_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_YoProtoHandshake_DynamicGraphicMessage_descriptor,
+        new java.lang.String[] { "Type", "Name", "YoIndex", "Constant", "Appearance", "ListName", });
   }
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }

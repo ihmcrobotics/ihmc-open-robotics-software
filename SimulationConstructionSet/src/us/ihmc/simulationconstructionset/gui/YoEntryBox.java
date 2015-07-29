@@ -276,7 +276,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
       if ((variable instanceof EnumYoVariable<?>) && USE_NEW_DISPLAY_FOR_ENUMS)
       {
          EnumYoVariable<?> enumVariable = (EnumYoVariable<?>) variable;
-         switchContainerType(new YoEnumEntryContainer(enumVariable.getEnumType()));
+         switchContainerType(new YoEnumEntryContainer(enumVariable.getEnumValuesAsString()));
       }
       else
       {

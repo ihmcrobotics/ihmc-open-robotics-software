@@ -177,14 +177,14 @@ public class YoVariableHandShakeBuilder
             break;
          case ENUM:
             yoVariableDefinition.setType(YoProtoType.EnumYoVariable);
-            @SuppressWarnings("rawtypes")
-            Enum[] enumTypes = ((EnumYoVariable) variable).getEnumValues();
 
-            for (@SuppressWarnings("rawtypes")
-            Enum enumType : enumTypes)
+            String[] enumTypes = ((EnumYoVariable<?>) variable).getEnumValuesAsString();
+
+            for (String enumType : enumTypes)
             {
-               yoVariableDefinition.addEnumValues(enumType.toString());
+               yoVariableDefinition.addEnumValues(enumType);
             }
+            yoVariableDefinition.setAllowNullValues(((EnumYoVariable<?>) variable).getAllowNullValue());
             break;
          default:
             throw new RuntimeException("Unknown variable type: " + variable.getYoVariableType());
