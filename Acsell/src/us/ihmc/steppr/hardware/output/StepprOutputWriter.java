@@ -24,7 +24,7 @@ import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.configuration.StepprRightAnkleSpringProperties;
 import us.ihmc.steppr.hardware.configuration.StepprRightHipXSpringProperties;
 import us.ihmc.steppr.hardware.controllers.StepprStandPrep;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCOutputWriter;

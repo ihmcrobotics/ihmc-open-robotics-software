@@ -4,7 +4,6 @@ import java.util.EnumMap;
 
 import us.ihmc.acsell.hardware.state.AcsellAnkleAngleCalculator;
 import us.ihmc.acsell.hardware.state.AcsellAnkleFullComputation;
-import us.ihmc.acsell.hardware.state.AcsellAnkleInterpolator;
 import us.ihmc.acsell.hardware.state.AcsellFourbarCalculator;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.wanderer.hardware.WandererActuator;
@@ -12,7 +11,7 @@ import us.ihmc.wanderer.hardware.WandererJoint;
 import us.ihmc.wanderer.hardware.WandererUtil;
 import us.ihmc.wanderer.hardware.configuration.WandererAnkleKinematicParameters;
 import us.ihmc.wanderer.hardware.configuration.WandererFourbarProperties;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
