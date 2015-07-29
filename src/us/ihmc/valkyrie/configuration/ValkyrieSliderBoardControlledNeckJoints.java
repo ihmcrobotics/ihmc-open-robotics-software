@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.configuration;
 
-import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
+import us.ihmc.robotics.humanoidRobot.partNames.NeckJointName;
 
 public abstract class ValkyrieSliderBoardControlledNeckJoints
 {  
