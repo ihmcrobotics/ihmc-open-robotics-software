@@ -18,7 +18,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Line2d;
 import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.stringStretcher2d.StringStretcher2d;
+import us.ihmc.utilities.math.geometry.StringStretcher2d;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
