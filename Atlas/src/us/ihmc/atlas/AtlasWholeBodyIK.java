@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 
-import us.ihmc.utilities.hierarchicalKinematics.RobotModel;
+import us.ihmc.robotics.hierarchicalKinematics.RobotModel;
 import us.ihmc.utilities.math.Vector64F;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
