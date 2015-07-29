@@ -16,10 +16,9 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.humanoidRobot.RobotMotionStatus;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModelUtils;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.robotics.humanoidRobot.RobotMotionStatus;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModelUtils;
 
 public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnable
 {

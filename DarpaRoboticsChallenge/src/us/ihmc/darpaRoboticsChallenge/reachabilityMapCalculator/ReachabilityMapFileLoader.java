@@ -16,7 +16,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
-import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;

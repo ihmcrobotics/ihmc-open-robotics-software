@@ -2,8 +2,8 @@ package us.ihmc.humanoidBehaviors.behaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 

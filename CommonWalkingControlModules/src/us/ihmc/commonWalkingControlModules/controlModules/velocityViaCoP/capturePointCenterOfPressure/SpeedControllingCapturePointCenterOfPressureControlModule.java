@@ -4,7 +4,7 @@ import java.awt.Color;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.ConvexPolygonShrinker;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;

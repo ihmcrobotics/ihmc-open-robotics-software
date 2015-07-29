@@ -9,7 +9,7 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;

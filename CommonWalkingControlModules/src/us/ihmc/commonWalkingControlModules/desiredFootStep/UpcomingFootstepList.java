@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

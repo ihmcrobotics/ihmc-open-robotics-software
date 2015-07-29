@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.arm;
 
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

@@ -19,9 +19,9 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.utilities.IMUDefinition;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;

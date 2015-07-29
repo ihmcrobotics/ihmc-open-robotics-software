@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControl
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;

@@ -3,11 +3,11 @@ package us.ihmc.sensorProcessing;
 import java.util.HashMap;
 
 import us.ihmc.sensorProcessing.sensors.FingerForceSensors;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
-import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
-import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
-import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
+import us.ihmc.robotics.humanoidRobot.partNames.NeckJointName;
+import us.ihmc.robotics.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;

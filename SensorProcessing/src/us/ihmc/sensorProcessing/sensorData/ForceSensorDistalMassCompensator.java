@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.sensorData;
 
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorData;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;

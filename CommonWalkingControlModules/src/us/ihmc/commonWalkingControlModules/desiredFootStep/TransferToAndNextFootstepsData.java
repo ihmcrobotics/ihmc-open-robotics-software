@@ -11,8 +11,8 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.utilities.humanoidRobot.footstep.FootstepUtils;
+import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.robotics.humanoidRobot.footstep.FootstepUtils;
 
 public class TransferToAndNextFootstepsData
 {

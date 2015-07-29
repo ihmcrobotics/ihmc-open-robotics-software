@@ -11,7 +11,7 @@ import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContro
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation.states.ToroidManipulationState;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation.states.ToroidManipulationStateInterface;
 import us.ihmc.utilities.FormattingTools;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.CylindricalCoordinatesCalculator;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;

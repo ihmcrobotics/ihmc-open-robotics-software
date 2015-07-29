@@ -37,16 +37,16 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
 import com.martiansoftware.jsap.JSAPException;
 

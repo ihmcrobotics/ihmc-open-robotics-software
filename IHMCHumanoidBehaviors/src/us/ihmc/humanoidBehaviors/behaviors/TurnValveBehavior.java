@@ -20,7 +20,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ScriptTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.utilities.Axis;
-import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePose2d;

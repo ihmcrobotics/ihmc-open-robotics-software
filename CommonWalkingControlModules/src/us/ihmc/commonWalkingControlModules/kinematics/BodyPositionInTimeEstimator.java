@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;

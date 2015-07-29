@@ -10,10 +10,10 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
+import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;

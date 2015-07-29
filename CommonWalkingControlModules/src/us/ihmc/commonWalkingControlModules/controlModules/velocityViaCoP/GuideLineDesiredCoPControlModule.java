@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Single
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -27,7 +27,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;

@@ -8,7 +8,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -54,9 +53,9 @@ import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
+import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;

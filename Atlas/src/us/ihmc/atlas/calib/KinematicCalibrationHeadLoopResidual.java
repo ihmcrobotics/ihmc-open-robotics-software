@@ -16,7 +16,7 @@ import javax.vecmath.Vector3d;
 import org.ddogleg.optimization.functions.FunctionNtoM;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
+import us.ihmc.robotics.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;

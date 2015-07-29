@@ -11,7 +11,7 @@ import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.utilities.humanoidRobot.partNames.FingerName;
+import us.ihmc.robotics.humanoidRobot.partNames.FingerName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.robotSide.RobotSide;

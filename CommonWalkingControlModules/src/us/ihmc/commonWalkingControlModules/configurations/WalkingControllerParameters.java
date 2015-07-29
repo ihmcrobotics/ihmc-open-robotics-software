@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlG
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
+import us.ihmc.robotics.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;

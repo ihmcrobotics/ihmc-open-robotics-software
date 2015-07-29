@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.filters;
 import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
-import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
-import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
+import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
+import us.ihmc.robotics.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

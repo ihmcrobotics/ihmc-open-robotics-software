@@ -13,7 +13,6 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDebrisEnvironment;
@@ -27,7 +26,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
+import us.ihmc.robotics.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;

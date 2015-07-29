@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.ArmControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmTorques;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;

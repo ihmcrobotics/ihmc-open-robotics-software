@@ -4,7 +4,7 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.GeometryTools;

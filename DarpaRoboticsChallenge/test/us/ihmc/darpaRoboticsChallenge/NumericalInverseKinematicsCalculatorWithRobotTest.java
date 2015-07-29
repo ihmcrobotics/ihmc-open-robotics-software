@@ -18,7 +18,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.utilities.kinematics.InverseKinematicsCalculator;
 import us.ihmc.utilities.kinematics.InverseKinematicsStepListener;

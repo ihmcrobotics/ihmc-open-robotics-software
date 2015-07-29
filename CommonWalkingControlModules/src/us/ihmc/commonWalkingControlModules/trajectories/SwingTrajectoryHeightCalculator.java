@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.communication.packets.walking.FootstepData;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
 import us.ihmc.utilities.math.geometry.*;
 

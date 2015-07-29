@@ -3,15 +3,15 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 import java.util.ArrayList;
 
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 
 public class FootstepTask extends BehaviorTask
 {

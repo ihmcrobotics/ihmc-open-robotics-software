@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;

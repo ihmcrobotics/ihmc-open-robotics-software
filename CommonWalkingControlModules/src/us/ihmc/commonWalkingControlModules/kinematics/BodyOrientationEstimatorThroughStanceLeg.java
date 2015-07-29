@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.kinematics;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.simulationconstructionset.robotController.SensorProcessor;
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;

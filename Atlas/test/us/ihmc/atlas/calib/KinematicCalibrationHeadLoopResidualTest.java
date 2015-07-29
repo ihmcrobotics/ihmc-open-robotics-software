@@ -30,7 +30,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.imageProcessing.configuration.ConfigurationLoader;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
+import us.ihmc.robotics.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;

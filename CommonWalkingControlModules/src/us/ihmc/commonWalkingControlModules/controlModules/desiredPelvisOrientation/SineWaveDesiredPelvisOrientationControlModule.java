@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.desiredPelvisOrientat
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.robotSide.RobotSide;

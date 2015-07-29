@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 
 public interface DesiredFootstepCalculator
 {

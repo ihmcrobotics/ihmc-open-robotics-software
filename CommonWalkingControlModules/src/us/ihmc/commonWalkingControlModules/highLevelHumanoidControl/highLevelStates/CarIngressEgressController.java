@@ -22,7 +22,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBeari
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
-import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
+import us.ihmc.robotics.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class LowerBodyTorques

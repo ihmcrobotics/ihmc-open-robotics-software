@@ -6,7 +6,7 @@ import java.util.List;
 import javax.vecmath.Point3d;
 
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 

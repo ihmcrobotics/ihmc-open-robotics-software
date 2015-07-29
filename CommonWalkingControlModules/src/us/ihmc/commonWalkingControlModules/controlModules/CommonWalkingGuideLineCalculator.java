@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineCalculator;
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;

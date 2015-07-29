@@ -16,9 +16,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.NonFlatGroundPla
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.utilities.humanoidRobot.footstep.FootSpoof;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.humanoidRobot.footstep.FootSpoof;
+import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;

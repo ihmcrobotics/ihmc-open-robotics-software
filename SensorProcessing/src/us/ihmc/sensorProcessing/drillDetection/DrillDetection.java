@@ -16,7 +16,6 @@ import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 import org.jtransforms.fft.FloatFFT_1D;
 
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.screwTheory.Wrench;
 

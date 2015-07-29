@@ -1,10 +1,10 @@
 package us.ihmc.wholeBodyController;
 
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
-import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
-import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
+import us.ihmc.robotics.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class WholeBodyUtils

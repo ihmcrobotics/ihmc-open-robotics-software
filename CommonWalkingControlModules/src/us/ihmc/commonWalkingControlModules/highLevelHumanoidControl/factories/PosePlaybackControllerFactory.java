@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackController;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 

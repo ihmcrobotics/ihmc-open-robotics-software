@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
+import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;

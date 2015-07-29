@@ -9,7 +9,7 @@ import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.IMUDefinition;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;

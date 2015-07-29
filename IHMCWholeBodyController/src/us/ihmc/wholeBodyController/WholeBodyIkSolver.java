@@ -25,7 +25,7 @@ import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_BodyPose;
 import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_COM;
 import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_JointsPose;
 import us.ihmc.utilities.hierarchicalKinematics.RobotModel;
-import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.Vector64F;
 import us.ihmc.utilities.math.geometry.FramePoint;

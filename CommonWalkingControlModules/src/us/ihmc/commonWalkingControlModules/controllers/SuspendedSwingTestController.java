@@ -5,8 +5,8 @@ import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SwingS
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
+import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;

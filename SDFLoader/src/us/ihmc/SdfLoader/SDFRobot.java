@@ -46,7 +46,7 @@ import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUp
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.FormattingTools;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.math.InertiaTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
