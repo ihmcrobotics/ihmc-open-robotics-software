@@ -375,6 +375,9 @@ abstract public class WholeBodyIkSolver
        */
       abstract public int[] getWaistJointId();
       
+      
+      abstract public String getJointNextToFoot(RobotSide side);
+      
       //---------------------------------------------------------------------------
       
       public WholeBodyIkSolver( WholeBodyControllerParameters robotControllerParameters ) 
@@ -821,8 +824,8 @@ abstract public class WholeBodyIkSolver
             return new PoseReferenceFrame("rootFootFrame", feetTarget.get(getSideOfTheFootRoot()) );
          }
          else{
-            // FIXME this is robot specific
-            return actualSdfModel.getOneDoFJointByName("r_leg_akx").getFrameAfterJoint();
+            String ankleJointName = getJointNextToFoot( getSideOfTheFootRoot() );
+            return actualSdfModel.getOneDoFJointByName( ankleJointName ).getFrameAfterJoint();
          }
       }
 
@@ -831,11 +834,6 @@ abstract public class WholeBodyIkSolver
          return getRootFrame(cachedModel);
       }
 
-
-
-
-
-     
 
       public ReferenceFrames getWorkingReferenceFrames()
       {
@@ -972,7 +970,8 @@ abstract public class WholeBodyIkSolver
 
          if( feetTarget.get(RobotSide.LEFT) == null || parameters.getLockLevel() != LockLevel.CONTROL_MANUALLY )
          {
-            targetFrame = actualRobotModel.getOneDoFJointByName("l_leg_akx").getFrameAfterJoint() ;
+            String ankleJointName = getJointNextToFoot( getSideOfTheFootRoot().getOppositeSide() );
+            targetFrame = actualRobotModel.getOneDoFJointByName( ankleJointName ).getFrameAfterJoint() ;
          }
          else {
             RobotSide nonRootSide = getSideOfTheFootRoot().getOppositeSide();
@@ -1333,9 +1332,8 @@ abstract public class WholeBodyIkSolver
          followerModel.updateFrames();
 
          ReferenceFrame referenceSoleFrame =  getRootFrame( referenceModel ); 
-         //referenceModel.getSoleFrame( getSideOfTheFootRoot() );
-         ReferenceFrame followerSoleFrame  =  followerModel.getOneDoFJointByName( "r_leg_akx" ).getFrameAfterJoint();
-         //followerModel.getSoleFrame( getSideOfTheFootRoot() );
+         String ankleJointName = getJointNextToFoot( getSideOfTheFootRoot() );
+         ReferenceFrame followerSoleFrame  =  followerModel.getOneDoFJointByName( ankleJointName ).getFrameAfterJoint();
 
          RigidBodyTransform soleWorldToFollow = new RigidBodyTransform();
          RigidBodyTransform soleToPelvis      = new RigidBodyTransform();
@@ -1424,9 +1422,13 @@ abstract public class WholeBodyIkSolver
 
          if( preferredKneeAngle < 0.6) preferredKneeAngle = 0.6;
 
-         parameters.setPreferedJointAngle("l_leg_kny", preferredKneeAngle);
-         parameters.setPreferedJointAngle("r_leg_kny", preferredKneeAngle);
+         parameters.setPreferedJointAngle( getKneeJointName(RIGHT), preferredKneeAngle);
+         parameters.setPreferedJointAngle( getKneeJointName(LEFT),  preferredKneeAngle);
 
       }
+
+      abstract public String getKneeJointName(RobotSide side);
+
+      
 
 }

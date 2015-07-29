@@ -28,7 +28,17 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
    public String getFootLinkName(RobotSide side) {
       return (side == RobotSide.LEFT) ? "l_foot" : "r_foot";
    }
-
+   
+   @Override
+   public String getKneeJointName(RobotSide side) {
+      return (side == RobotSide.LEFT) ? "l_leg_kny" : "r_leg_kny";
+   }
+   
+   @Override
+   public String getJointNextToFoot(RobotSide side) {
+      return  (side == RobotSide.LEFT) ? "l_leg_akx" : "r_leg_akx";
+   }
+   
    @Override 
    public int getNumberDoFperArm(){
       return 7;
