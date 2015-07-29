@@ -12,7 +12,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorParameters;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
-import us.ihmc.utilities.humanoidRobot.model.ContactSensorType;
+import us.ihmc.robotics.humanoidRobot.model.ContactSensorType;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
