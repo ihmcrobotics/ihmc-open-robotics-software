@@ -66,8 +66,8 @@ public class TestYoVariableConnection
       private final DoubleYoVariable C = new DoubleYoVariable("C", registry);
       
       
-      private final DoubleYoVariable echoThreadIn = new DoubleYoVariable("echoThreadIn", registry);
-      private final DoubleYoVariable echoThreadOut = new DoubleYoVariable("echoThreadOut", registry);
+      private final EnumYoVariable<TestEnum> echoThreadIn = new EnumYoVariable<TestEnum>("echoThreadIn", registry, TestEnum.class, false);
+      private final EnumYoVariable<TestEnum> echoThreadOut = new EnumYoVariable<TestEnum>("echoThreadOut", registry, TestEnum.class, false);
 
       
       public ThreadTester(YoVariableServer server)
@@ -83,7 +83,7 @@ public class TestYoVariableConnection
             B.set(B.getDoubleValue() - 0.5);
             C.set(C.getDoubleValue() * 2.0);
             
-            echoThreadOut.set(echoThreadIn.getDoubleValue());
+            echoThreadOut.set(echoThreadIn.getEnumValue());
             
             server.update(timestamp, registry);
             
