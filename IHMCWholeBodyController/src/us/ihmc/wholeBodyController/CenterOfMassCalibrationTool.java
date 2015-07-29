@@ -1,11 +1,11 @@
 package us.ihmc.wholeBodyController;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataReadOnly;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
-import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataReadOnly;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
+import us.ihmc.robotics.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

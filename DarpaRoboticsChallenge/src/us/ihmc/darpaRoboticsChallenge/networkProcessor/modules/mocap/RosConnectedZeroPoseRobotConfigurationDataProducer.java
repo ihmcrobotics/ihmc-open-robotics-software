@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
 
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
@@ -27,10 +26,10 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.humanoidRobot.RobotMotionStatus;
-import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
-import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
+import us.ihmc.robotics.humanoidRobot.RobotMotionStatus;
+import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.robotics.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.RosTools;

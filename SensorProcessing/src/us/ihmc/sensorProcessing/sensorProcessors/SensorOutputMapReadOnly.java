@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.sensorProcessors;
 import java.util.List;
 
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public interface SensorOutputMapReadOnly

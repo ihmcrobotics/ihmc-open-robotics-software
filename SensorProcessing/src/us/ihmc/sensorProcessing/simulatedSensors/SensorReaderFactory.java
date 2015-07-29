@@ -2,9 +2,9 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.utilities.IMUDefinition;
-import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
-import us.ihmc.utilities.humanoidRobot.model.DesiredJointDataHolder;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.robotics.humanoidRobot.model.ContactSensorHolder;
+import us.ihmc.robotics.humanoidRobot.model.DesiredJointDataHolder;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 

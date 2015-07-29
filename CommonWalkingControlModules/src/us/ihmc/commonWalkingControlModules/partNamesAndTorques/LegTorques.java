@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
 import java.util.EnumMap;
 
-import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
-import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
+import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
+import us.ihmc.robotics.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class LegTorques implements LegTorquesInterface

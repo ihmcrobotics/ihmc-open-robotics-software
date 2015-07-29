@@ -9,8 +9,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.vecmath.Vector3d;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
@@ -26,12 +24,11 @@ import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModelUtils;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.robotics.humanoidRobot.model.FullRobotModelUtils;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.utilities.time.TimeTools;
 
 public class AtlasNoSimPacketBlaster implements Runnable

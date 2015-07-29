@@ -11,10 +11,10 @@ import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.IMUDefinition;
-import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
-import us.ihmc.utilities.humanoidRobot.model.DesiredJointDataHolder;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.robotics.humanoidRobot.model.ContactSensorHolder;
+import us.ihmc.robotics.humanoidRobot.model.DesiredJointDataHolder;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 

@@ -2,7 +2,7 @@ package us.ihmc.robotiq.model;
 
 import us.ihmc.communication.packets.dataobjects.HandJointName;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
-import us.ihmc.utilities.humanoidRobot.partNames.FingerName;
+import us.ihmc.robotics.humanoidRobot.partNames.FingerName;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class RobotiqHandModel implements HandModel
