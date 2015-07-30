@@ -315,7 +315,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       {
          SDFRobot robot = super.createSdfRobot(createCollisionMeshes);
          
-         Joint joint = robot.getJoint("TorsoPitch");
+         Joint joint = robot.getJoint("TorsoRoll");
          
          ArrayList<Vector3d> attachmentLocations = new ArrayList<Vector3d>();
              
