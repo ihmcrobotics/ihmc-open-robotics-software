@@ -50,11 +50,11 @@ public class MocapFrameDataPacket
 
    private static boolean DEBUG = false;
 
-   private static ArrayList<MocapRigidBody> listfOfRigidbodies = new ArrayList<>();
+   private static ArrayList<MocapRigidBody> listfOfRigidbodies;
 
    public static ArrayList<MocapRigidBody> createFromBytes(byte[] bytes) throws IOException
    {
-      listfOfRigidbodies.removeAll(listfOfRigidbodies);
+      listfOfRigidbodies = new ArrayList<>();
 
       final MocapFrameDataPacket data = new MocapFrameDataPacket();
       final ByteBuffer buf = ByteBuffer.wrap(bytes);
@@ -200,6 +200,3 @@ public class MocapFrameDataPacket
       return listfOfRigidbodies;
    }
 }
-
-
-//~ Formatted by Jindent --- http://www.jindent.com
