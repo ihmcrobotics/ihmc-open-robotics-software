@@ -8,21 +8,23 @@ import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
+import us.ihmc.utilities.ThreadTools;
+import us.ihmc.vicon.ViconClient;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.time.CallFrequencyCalculator;
 
 public class MocapDataClient
 {
+   private static MocapDataClient mocapDataClientSingleton;
    private MulticastSocket socket;
-   private ArrayList<RigidBodyListener> listOfMocapRigidBodyListeners = new ArrayList<>();
-   private ArrayList<MocapRigidbodiesListener> listOfMocapRigidBodiesListeners = new ArrayList<>();
+   protected ArrayList<MocapRigidbodiesListener> listOfMocapRigidBodiesListeners = new ArrayList<>();
    public static int NETWORK_IF_TO_USE = -1;
 
    private CallFrequencyCalculator callFrequencyCalculator;
-   private double frequency;
-   private long lastTime = 0;
-   
-   //Do not change these
+   protected double frequency;
+   protected long lastTime = 0;
+
+   // Do not change these
    private int port = 1511;
    private String mocapIP = "239.255.42.99";
 
@@ -61,10 +63,23 @@ public class MocapDataClient
       }
       catch (IOException e)
       {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+         // TODO Auto-generated catch block
+         e.printStackTrace();
       }
    }
+
+   public static MocapDataClient getInstance() throws Exception
+   {
+      if (mocapDataClientSingleton == null)
+      {
+         mocapDataClientSingleton = new MocapDataClient();
+      }
+
+      return mocapDataClientSingleton;
+   }
+
+   boolean firstTime = true;
+   ArrayList<String> listOfModels = new ArrayList<>();
 
    protected class UdpClientReceivingThread implements Runnable
    {
@@ -72,8 +87,7 @@ public class MocapDataClient
       {
          while (true)
          {
-//          ThreadTools.sleep(10);
-
+          ThreadTools.sleep(10);
             try
             {
                DatagramPacket packet;
@@ -82,14 +96,33 @@ public class MocapDataClient
                socket.receive(packet);
 
                ArrayList<MocapRigidBody> lisftOfRigidbodies = MocapFrameDataPacket.createFromBytes(buf);
+
+               if (firstTime)
+               {
+                  firstTime = false;
+                  listOfModels = new ArrayList<>();
+
+                  for (MocapRigidBody rb : lisftOfRigidbodies)
+                  {
+                     listOfModels.add("" + rb.getId());
+                  }
+               }
+
                updateListeners(lisftOfRigidbodies);
             }
             catch (IOException e)
             {
-               System.err.println("**MOCAP WARNING** - Socket Timeout - No Rigibodies are being transmitted from MOCAP SERVER. Make sure streaming is enabled!");
+               System.err.println(
+                   "**MOCAP WARNING** - Socket Timeout - No Rigibodies are being transmitted from MOCAP SERVER. Make sure streaming is enabled!");
             }
          }
       }
+   }
+
+
+   public ArrayList<String> getAvailableModels()
+   {
+      return listOfModels;
    }
 
 
@@ -111,30 +144,15 @@ public class MocapDataClient
       {
          if (frequency < 95)    // Should always be around 99
          {
-            System.err.println("**MOCAP WARNING** - Receiving data rate is less than 95Hz");
+            System.err.println("**MOCAP WARNING** - Receiving data rate is less than 95Hz >>>> " + frequency);
          }
       }
 
-      for (RigidBodyListener listener : listOfMocapRigidBodyListeners)
-      {
-         for (MocapRigidBody rb : listOfRigidbodies)
-         {
-            if (listener.updateId() == rb.getId())
-            {
-               listener.updateMocapRigidBody(rb);
-            }
-         }
-      }
-
-      for (MocapRigidbodiesListener listener : listOfMocapRigidBodiesListeners)
+      ArrayList<MocapRigidbodiesListener>list = (ArrayList<MocapRigidbodiesListener>) listOfMocapRigidBodiesListeners.clone();
+      for (MocapRigidbodiesListener listener : list)
       {
          listener.updateRigidbodies(listOfRigidbodies);
       }
-   }
-
-   public void registerRigidBodyListener(RigidBodyListener listener)
-   {
-      listOfMocapRigidBodyListeners.add(listener);
    }
 
    public void registerRigidBodiesListener(MocapRigidbodiesListener listener)

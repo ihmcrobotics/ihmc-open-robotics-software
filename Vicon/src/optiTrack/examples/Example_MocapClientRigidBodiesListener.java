@@ -1,6 +1,10 @@
-package optiTrack;
+package optiTrack.examples;
 
 import java.util.ArrayList;
+
+import optiTrack.MocapDataClient;
+import optiTrack.MocapRigidBody;
+import optiTrack.MocapRigidbodiesListener;
 
 
 

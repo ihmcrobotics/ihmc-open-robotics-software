@@ -1,16 +1,19 @@
-package optiTrack;
+package optiTrack.examples;
 
 import java.util.ArrayList;
 
+import optiTrack.MocapDataClient;
+import optiTrack.MocapRigidBody;
+import optiTrack.MocapRigidbodiesListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.time.CallFrequencyCalculator;
 
-public class TrackMultipleRigidBodiesTest implements MocapRigidbodiesListener
+public class Example_TrackMultipleRigidBodies implements MocapRigidbodiesListener
 {
    private YoVariableRegistry registry = new YoVariableRegistry("MOCAP");
    private CallFrequencyCalculator frequencyCalculator = new CallFrequencyCalculator(registry, "");
 
-   public TrackMultipleRigidBodiesTest()
+   public Example_TrackMultipleRigidBodies()
    {
       MocapDataClient mocapDataClient = new MocapDataClient();
       mocapDataClient.registerRigidBodiesListener(this);
@@ -33,6 +36,6 @@ public class TrackMultipleRigidBodiesTest implements MocapRigidbodiesListener
 
    public static void main(String args[])
    {
-      new TrackMultipleRigidBodiesTest();
+      new Example_TrackMultipleRigidBodies();
    }
 }

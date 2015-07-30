@@ -1,4 +1,4 @@
-package optiTrack;
+package LidarTests;
 
 import java.util.ArrayList;
 
@@ -6,6 +6,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import optiTrack.MocapDataClient;
+import optiTrack.MocapRigidBody;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
