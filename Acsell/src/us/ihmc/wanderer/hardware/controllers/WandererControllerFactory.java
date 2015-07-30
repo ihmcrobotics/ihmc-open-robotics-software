@@ -194,8 +194,7 @@ public class WandererControllerFactory
             feetForceSensorNames, feetContactSensorNames, wristForceSensorNames ,
             walkingControllerParamaters, armControllerParamaters, capturePointPlannerParameters, initialBehavior);
 
-      double kneeAngleMultiplicationFactor = -1.0;
-      HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList(kneeAngleMultiplicationFactor);
+      HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
       humanoidJointPoseList.createPoseSettersJustLegs();
       
       boolean useArms = false;

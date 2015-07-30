@@ -43,8 +43,7 @@ public class StepprDiagnosticsWhenHangingSimulation
       double initialYaw = 0.3;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
 
-      double kneeAngleMultiplicationFactor = -1.0;
-      HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList(kneeAngleMultiplicationFactor);
+      HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
       humanoidJointPoseList.createPoseSettersJustLegs();
       
       boolean robotIsHanging = true;
@@ -56,7 +55,7 @@ public class StepprDiagnosticsWhenHangingSimulation
       diagnosticsWhenHangingController = humanoidDiagnosticsWhenHangingSimulation.getDiagnosticsWhenHangingController();
       SimulationConstructionSet simulationConstructionSet = humanoidDiagnosticsWhenHangingSimulation.getSimulationConstructionSet();
       
-      loadDataAndDoSomeOptimizationTests(humanoidDiagnosticsWhenHangingSimulation);
+//      loadDataAndDoSomeOptimizationTests(humanoidDiagnosticsWhenHangingSimulation);
       
       humanoidDiagnosticsWhenHangingSimulation.updateDataAndComputeTorqueOffsetsBasedOnAverages(computeTorqueOffsetsBasedOnAverages);
       
