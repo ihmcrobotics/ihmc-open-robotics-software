@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Point3d;
 
-import optiTrack.IHMCMocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
 import sensor_msgs.PointCloud2;
@@ -24,6 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
+import LidarTests.IHMCMocapDataClient;
 
 import com.martiansoftware.jsap.JSAPException;
 
