@@ -216,7 +216,7 @@ abstract public class WholeBodyIkSolver
       {
          try
          {
-            NativeLibraryLoader.loadLibrary("us.ihmc.utilities.hierarchicalKinematics", "hik_java");
+            NativeLibraryLoader.loadLibrary("us.ihmc.robotics.hierarchicalKinematics", "hik_java");
             NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
          }
          catch (UnsatisfiedLinkError e)
