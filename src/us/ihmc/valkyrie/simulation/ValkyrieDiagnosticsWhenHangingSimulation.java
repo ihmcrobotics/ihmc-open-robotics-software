@@ -39,8 +39,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       double initialYaw = 0.0;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw);
       
-      double kneeAngleMultiplicationFactor = 1.0;
-      HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList(kneeAngleMultiplicationFactor);
+      HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
       humanoidJointPoseList.createPoseSetters();
       humanoidJointPoseList.createPoseSettersJustArms();
       humanoidJointPoseList.createPoseSettersTuneWaist();
