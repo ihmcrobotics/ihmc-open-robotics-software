@@ -84,6 +84,7 @@ public class AtlasRobotModel implements DRCRobotModel
 
    private static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
+   private static final boolean USE_WHOLE_BODY_IK = true;
 
    private final JaxbSDFLoader loader;
 
@@ -104,7 +105,11 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public WholeBodyIkSolver createWholeBodyIkSolver()
    {
-      return new AtlasWholeBodyIK(this);
+      if(USE_WHOLE_BODY_IK)
+      {
+         return new AtlasWholeBodyIK(this);
+      }
+      return null;
    }
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, AtlasTarget target, boolean headless)
