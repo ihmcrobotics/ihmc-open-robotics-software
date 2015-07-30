@@ -87,7 +87,7 @@ public class MocapDataClient
       {
          while (true)
          {
-          ThreadTools.sleep(10);
+//          ThreadTools.sleep(10);
             try
             {
                DatagramPacket packet;
