@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 
-import optiTrack.IHMCMocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
@@ -18,6 +17,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap.MocapToStat
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap.RosConnectedZeroPoseRobotConfigurationDataProducer;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.RosMainNode;
+import LidarTests.IHMCMocapDataClient;
 
 public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbodiesListener
 {
