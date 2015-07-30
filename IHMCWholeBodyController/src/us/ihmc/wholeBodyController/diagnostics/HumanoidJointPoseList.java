@@ -27,12 +27,9 @@ public class HumanoidJointPoseList
    private final EnumYoVariable<HumanoidArmPose> desiredArmPose = new EnumYoVariable<HumanoidArmPose>("desiredArmPose", registry, HumanoidArmPose.class);
    private final EnumYoVariable<HumanoidSpinePose> desiredSpinePose = new EnumYoVariable<HumanoidSpinePose>("desiredSpinePose", registry, HumanoidSpinePose.class);
    private final EnumYoVariable<HumanoidLegPose> desiredLegPose = new EnumYoVariable<HumanoidLegPose>("desiredLegPose", registry, HumanoidLegPose.class);
-   
-   private final double kneeAngleMultiplicationFactor;
-   
-   public HumanoidJointPoseList(double kneeAngleMultiplicationFactor)
+      
+   public HumanoidJointPoseList()
    {
-      this.kneeAngleMultiplicationFactor = kneeAngleMultiplicationFactor;
    }
    
    public void setParentRegistry(YoVariableRegistry parentRegistry)
@@ -122,7 +119,7 @@ public class HumanoidJointPoseList
    {
       HumanoidJointPose humanoidJointPose = humanoidJointPoses.get(humanoidJointPoseIndex.getIntegerValue());
       desiredLegPose.set(humanoidJointPose.getLegPose());
-      return humanoidJointPose.getLegJointAngles(kneeAngleMultiplicationFactor);
+      return humanoidJointPose.getLegJointAngles();
    }
    
    public double[] getSpineJointAngles()
@@ -133,27 +130,16 @@ public class HumanoidJointPoseList
    }
    
    private class HumanoidJointPose
-   {
-      private static final int KNEE_INDEX = 3;
-      
+   {      
       private final HumanoidArmPose armPose;
       private final HumanoidSpinePose spinePose;
       private final HumanoidLegPose legPose;
       
-      private final boolean hipRollSymmetric;
-      
       public HumanoidJointPose(HumanoidArmPose armPose, HumanoidSpinePose spinePose, HumanoidLegPose legPose)
-      {
-         this(armPose, spinePose, legPose, true);
-      }
-      
-      public HumanoidJointPose(HumanoidArmPose armPose, HumanoidSpinePose spinePose, HumanoidLegPose legPose, boolean hipRollSymmetric)
       {   
          this.armPose = armPose;
          this.spinePose = spinePose;
          this.legPose = legPose;
-
-         this.hipRollSymmetric = hipRollSymmetric;
       }
       
       public HumanoidArmPose getArmPose()
@@ -173,27 +159,16 @@ public class HumanoidJointPoseList
 
       public SideDependentList<double[]> getArmJointAngles()
       {
-         double[] leftArmJointAngles = armPose.getArmJointAngles();
-         double[] rightArmJointAngles = armPose.getArmJointAngles();
+         double[] leftArmJointAngles = armPose.getArmJointAngles(RobotSide.LEFT);
+         double[] rightArmJointAngles = armPose.getArmJointAngles(RobotSide.RIGHT);
          
          return new SideDependentList<double[]>(leftArmJointAngles, rightArmJointAngles);
       }
       
-      public SideDependentList<double[]> getLegJointAngles(double kneeAngleMultiplicationFactor)
+      public SideDependentList<double[]> getLegJointAngles()
       {
-         double[] leftLegJointAngles = legPose.getLegJointAngles();
-         double[] rightLegJointAngles = legPose.getLegJointAngles();
-         
-         if (!hipRollSymmetric)
-         {
-            rightLegJointAngles[1] = -1.0 * rightLegJointAngles[1];
-         }
-         
-         //TODO: kneeAngleMultiplicationFactor is a hack. Need to look at the joint axes instead...
-         leftLegJointAngles[KNEE_INDEX] = kneeAngleMultiplicationFactor * leftLegJointAngles[KNEE_INDEX];
-         rightLegJointAngles[KNEE_INDEX] = kneeAngleMultiplicationFactor * rightLegJointAngles[KNEE_INDEX];
-         leftLegJointAngles[1] = kneeAngleMultiplicationFactor * leftLegJointAngles[1];
-
+         double[] leftLegJointAngles = legPose.getLegJointAngles(RobotSide.LEFT);
+         double[] rightLegJointAngles = legPose.getLegJointAngles(RobotSide.RIGHT);
          
          return new SideDependentList<double[]>(leftLegJointAngles, rightLegJointAngles);
       }
@@ -202,7 +177,6 @@ public class HumanoidJointPoseList
       {
          return spinePose.getSpineJointAngles();  
       }
-
    }
    
    public void createPoseSetters()

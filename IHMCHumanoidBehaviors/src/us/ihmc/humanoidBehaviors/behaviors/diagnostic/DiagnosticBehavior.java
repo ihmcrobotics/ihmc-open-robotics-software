@@ -2123,7 +2123,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame(),
             armPose.getDesiredUpperArmYawPitchRoll());
-      double elbowAngle = armPose.getDesiredElbowAngle();
+      double elbowAngle = armPose.getDesiredElbowAngle(robotSide);
       double[] handOrientation = new double[3];
       if (enableHandOrientation.getBooleanValue())
       {

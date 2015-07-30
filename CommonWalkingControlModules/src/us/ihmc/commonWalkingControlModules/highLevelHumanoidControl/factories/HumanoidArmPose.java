@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import us.ihmc.utilities.robotSide.RobotSide;
+
 public enum HumanoidArmPose
 {   
    STAND_PREP, SMALL_CHICKEN_WINGS, LARGE_CHICKEN_WINGS, STRAIGHTEN_ELBOWS, SUPPINATE_ARMS_IN_A_LITTLE, ARMS_BACK, LARGER_CHICKEN_WINGS, KARATE_KID_KRANE_KICK,
@@ -19,93 +21,93 @@ public enum HumanoidArmPose
     * 
     * @return armAngles
     */
-   public double[] getArmJointAngles()
+   public double[] getArmJointAngles(RobotSide robotSide)
    {
       switch (this)
       {
          case STAND_PREP:
-            return new double[]{0.3, -0.4, 0.05, -1.7};
+            return symmetricArmPose(0.3, 0.4, 0.05, 1.7, robotSide);
          case SMALL_CHICKEN_WINGS:
-            return new double[]{0.3, -0.6, 0.05, -1.7};
+            return symmetricArmPose(0.3, 0.6, 0.05, 1.7, robotSide);
          case LARGE_CHICKEN_WINGS:
-            return new double[]{0.3, -0.8, 0.05, -1.7};
+            return symmetricArmPose(0.3, 0.8, 0.05, 1.7, robotSide);
          case STRAIGHTEN_ELBOWS:
-            return new double[]{0.3, -0.6, 0.05, -1.0};
+            return symmetricArmPose(0.3, 0.6, 0.05, 1.0, robotSide);
          case SUPPINATE_ARMS_IN_A_LITTLE:
-            return new double[]{0.3, -0.6, 0.2, -1.7};
+            return symmetricArmPose(0.3, 0.6, 0.2, 1.7, robotSide);
          case ARMS_BACK:
-            return new double[]{0.6, -0.4, 0.05, -1.7};
+            return symmetricArmPose(0.6, 0.4, 0.05, 1.7, robotSide);
          case LARGER_CHICKEN_WINGS:
-            return new double[]{0.3, -1.0, 0.05, -1.7};
+            return symmetricArmPose(0.3, 1.0, 0.05, 1.7, robotSide);
          case ARMS_OUT_EXTENDED:
-            return new double[]{0.3, -1.0, 0.05, -0.9};
+            return symmetricArmPose(0.3, 1.0, 0.05, 0.9, robotSide);
          case FLYING:
-            return new double[]{0.3, -1.2, 0.05, -0.4};
+            return symmetricArmPose(0.3, 1.2, 0.05, 0.4, robotSide);
          case FLYING_PALMS_UP:
-            return new double[]{0.3, -1.2, -1.0, -0.4};
+            return symmetricArmPose(0.3, 1.2, -1.0, 0.4, robotSide);
          case FLEX_UP:
-            return new double[]{0.0,0.0,0.0,-2};
+            return symmetricArmPose(0.0,0.0,0.0,-2, robotSide);
          case FLEX_DOWN:
-            return new double[]{0.0,0.0,0.0,-1.4};
+            return symmetricArmPose(0.0,0.0,0.0,-1.4, robotSide);
          case FLYING_SUPPINATE_IN:
-            return new double[]{0.3, -1.2, 1.0, -0.4};
+            return symmetricArmPose(0.3, 1.2, 1.0, 0.4, robotSide);
          case FLYING_SUPPINATE_OUT:
-            return new double[]{0.3, -1.2, -1.0, -0.4};
+            return symmetricArmPose(0.3, 1.2, -1.0, 0.4, robotSide);
          case KARATE_KID_KRANE_KICK:
-            return new double[]{0.0,0.0,0.0,0.0};
+            return symmetricArmPose(0.0,0.0,0.0,0.0, robotSide);
          case SUPPINATE_ARMS_IN_MORE:
-            return new double[]{0.3, -0.4, 0.3, -1.7};
+            return symmetricArmPose(0.3, 0.4, 0.3, 1.7, robotSide);
          case SUPPINATE_ARMS_IN_A_LOT:
-            return new double[]{0.3, -0.4, 0.5, -1.7};
+            return symmetricArmPose(0.3, 0.4, 0.5, 1.7, robotSide);
          case SUPER_CHICKEN_WINGS:
-            return new double[]{0.3, -1.3, 0.05, -1.7};
+            return symmetricArmPose(0.3, 1.3, 0.05, 1.7, robotSide);
             
          case REACH_BACK:
-            return new double[]{1.0, -0.4, 0.05, -1.7};
+            return symmetricArmPose(1.0, 0.4, 0.05, 1.7, robotSide);
          case REACH_WAY_BACK:
-            return new double[]{1.0, -0.4, 0.05, -0.4};
+            return symmetricArmPose(1.0, 0.4, 0.05, 0.4, robotSide);
          case ARMS_03:
-            return new double[]{0.3, -0.4, 0.3, -1.7};
+            return symmetricArmPose(0.3, 0.4, 0.3, 1.7, robotSide);
          case REACH_FORWARD:
-            return new double[]{-0.6, -0.4, 0.05, -1.7};
+            return symmetricArmPose(-0.6, 0.4, 0.05, 1.7, robotSide);
          case REACH_WAY_FORWARD:
-            return new double[]{-0.6, -0.4, 0.05, -0.4};
+            return symmetricArmPose(-0.6, 0.4, 0.05, 0.4, robotSide);
          case REACH_FAR_FORWARD:
-            return new double[]{-0.8 * halfPi, -0.4, 0.0, 0.0};
+            return symmetricArmPose(-0.8 * halfPi, 0.4, 0.0, 0.0, robotSide);
          case REACH_FAR_BACK:
-            return new double[]{ 0.8 * halfPi, -0.4, 0.0, 0.0};
+            return symmetricArmPose( 0.8 * halfPi, 0.4, 0.0, 0.0, robotSide);
             
             
          case ARM_STRAIGHT_DOWN:
-            return new double[]{0.0, -0.5, 1.45, -0.53};
+            return symmetricArmPose(0.0, 0.5, 1.45, 0.53, robotSide);
 
          case ARM_NINETY_ELBOW_DOWN:
-            return new double[]{0.0, -halfPi, halfPi, -halfPi};
+            return symmetricArmPose(0.0, halfPi, halfPi, halfPi, robotSide);
          case ARM_NINETY_ELBOW_DOWN2:
-            return new double[]{halfPi / 2.0, -halfPi, halfPi / 2.0, -halfPi};
+            return symmetricArmPose(halfPi / 2.0, halfPi, halfPi / 2.0, halfPi, robotSide);
          case ARM_NINETY_ELBOW_FORWARD:
-            return new double[]{0.0, -halfPi, 0.0, -halfPi};
+            return symmetricArmPose(0.0, halfPi, 0.0, halfPi, robotSide);
          case ARM_NINETY_ELBOW_FORWARD2:
-            return new double[]{halfPi / 2.0, -halfPi, -halfPi / 2.0, -halfPi};
+            return symmetricArmPose(halfPi / 2.0, halfPi, -halfPi / 2.0, halfPi, robotSide);
          case ARM_NINETY_ELBOW_UP:
-            return new double[]{0.0, -halfPi, -halfPi, -halfPi};
+            return symmetricArmPose(0.0, halfPi, -halfPi, halfPi, robotSide);
          case ARM_NINETY_ELBOW_UP2:
-            return new double[]{-halfPi / 2.0, -halfPi, -halfPi / 2.0, -halfPi};
+            return symmetricArmPose(-halfPi / 2.0, halfPi, -halfPi / 2.0, halfPi, robotSide);
          case ARM_FORTFIVE_ELBOW_UP:
-            return new double[]{0.0, -halfPi, -halfPi / 2.0, -halfPi};
+            return symmetricArmPose(0.0, halfPi, -halfPi / 2.0, halfPi, robotSide);
          case ARM_FORTFIVE_ELBOW_UP2:
-            return new double[]{-halfPi /2.0, -halfPi, 0.0, -halfPi};
+            return symmetricArmPose(-halfPi /2.0, halfPi, 0.0, halfPi, robotSide);
          case ARM_FORTFIVE_ELBOW_UP3:
-            return new double[]{halfPi /2.0, -halfPi, -halfPi, -halfPi};
+            return symmetricArmPose(halfPi /2.0, halfPi, -halfPi, halfPi, robotSide);
          case ARM_FORTFIVE_ELBOW_DOWN:
-            return new double[]{0.0, -halfPi, 0.6, -halfPi};
+            return symmetricArmPose(0.0, halfPi, 0.6, halfPi, robotSide);
          case ARM_FORTFIVE_ELBOW_DOWN2:
-            return new double[]{halfPi/ 2.0, -halfPi, 0.0, -halfPi};
+            return symmetricArmPose(halfPi/ 2.0, halfPi, 0.0, halfPi, robotSide);
          case ARM_FORTFIVE_ELBOW_DOWN3:
-            return new double[]{-halfPi/ 2.0, -halfPi, halfPi, -halfPi};
+            return symmetricArmPose(-halfPi/ 2.0, halfPi, halfPi, halfPi, robotSide);
             
          case ARM_OUT_TRICEP_EXERCISE:
-            return new double[]{0.0, -1.4, 1.4, 0.05};
+            return symmetricArmPose(0.0, -1.4, 1.4, 0.05, robotSide);
             
                      
          default:
@@ -114,9 +116,15 @@ public enum HumanoidArmPose
    }
 
 
-   public double getDesiredElbowAngle()
+   private double[] symmetricArmPose(double d0, double d1, double d2, double d3, RobotSide robotSide)
    {
-      return getArmJointAngles()[3];
+      return new double[]{d0, robotSide.negateIfLeftSide(d1), d2, robotSide.negateIfLeftSide(d3)};
+   }
+
+
+   public double getDesiredElbowAngle(RobotSide robotSide)
+   {
+      return getArmJointAngles(robotSide)[3];
    }
 
    /**
