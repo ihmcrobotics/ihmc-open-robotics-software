@@ -11,7 +11,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.Vector64F;
+import us.ihmc.utilities.math.dataStructures.Vector64F;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
