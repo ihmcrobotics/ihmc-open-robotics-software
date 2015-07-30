@@ -107,7 +107,17 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       if(USE_WHOLE_BODY_IK)
       {
-         return new AtlasWholeBodyIK(this);
+         try
+         {
+            return new AtlasWholeBodyIK(this);
+         }
+         catch(UnsatisfiedLinkError e)
+         {
+            System.err.println("There was an error linking to the Whole Body IK C library, "
+                  + "please check that it has been compiles and is located in the correct place, "
+                  + "no wholebody components will function");
+            System.err.println(e.getMessage());
+         }
       }
       return null;
    }
