@@ -15,7 +15,7 @@ import us.ihmc.yoUtilities.time.CallFrequencyCalculator;
 
 public class IHMCMocapClient extends MocapDataClient
 {
-   private static IHMCMocapClient ihmcMocapClientSingleton;	
+   private static IHMCMocapClient ihmcMocapClientSingleton;
    protected ThirdPersonPerspective thirdPersonPerspective;
    ReferenceFrame mocapOrigin;
    ReferenceFrame mocapRB;
@@ -58,27 +58,14 @@ public class IHMCMocapClient extends MocapDataClient
             setTransformToParent(transformToParent);
          }
       };
-
-
-//      try
-//      {
-//         mocapDataClient = MocapDataClient.getInstance();
-//         mocapDataClient.registerRigidBodiesListener(this);
-//
-//      }
-//      catch (Exception e)
-//      {
-//         // TODO Auto-generated catch block
-//         e.printStackTrace();
-//      }
    }
 
-   
+
    public static IHMCMocapClient getInstance() throws Exception
    {
       if (ihmcMocapClientSingleton == null)
       {
-    	  ihmcMocapClientSingleton = new IHMCMocapClient();
+         ihmcMocapClientSingleton = new IHMCMocapClient();
       }
 
       return ihmcMocapClientSingleton;
@@ -90,28 +77,26 @@ public class IHMCMocapClient extends MocapDataClient
    }
 
    ArrayList<MocapRigidBody> listOfConvertedRigidBodies;
-   
+
    @Override
    protected void updateRigidBodiesListeners(ArrayList<MocapRigidBody> listOfRigidbodies)
    {
-//      frequency = callFrequencyCalculator.determineCallFrequency();
-//
-//      if (System.currentTimeMillis() - lastTime > 5000)
-//      {
-//         if (frequency < 95)    // Should always be around 99
-//         {
-//            System.err.println("**MOCAP WARNING** - Receiving data rate is less than 95Hz >>>> " + frequency);
-//         }
-//      }
+      frequency = callFrequencyCalculator.determineCallFrequency();
 
-      ArrayList<MocapRigidbodiesListener>list = (ArrayList<MocapRigidbodiesListener>) listOfMocapRigidBodiesListeners.clone();
+      if ((System.currentTimeMillis() - lastTime > 5000) && (frequency < 95))
+      {
+         System.err.println("**MOCAP WARNING** - Receiving data rate is less than 95Hz >>>> " + frequency);
+         lastTime = System.currentTimeMillis();
+      }
+
+      ArrayList<MocapRigidbodiesListener> list = (ArrayList<MocapRigidbodiesListener>) listOfMocapRigidBodiesListeners.clone();
       for (MocapRigidbodiesListener listener : list)
       {
-    	  updateRigidbodies(listOfRigidbodies);
+         updateRigidbodies(listOfRigidbodies);
       }
    }
 
-   
+
    public void updateRigidbodies(ArrayList<MocapRigidBody> listOfRigidbodies)
    {
       listOfConvertedRigidBodies = new ArrayList<>();
