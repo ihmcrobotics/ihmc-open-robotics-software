@@ -10,7 +10,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
-import us.ihmc.utilities.kinematics.InverseJacobianSolver;
+import us.ihmc.robotics.kinematics.InverseJacobianSolver;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.robotics.geometry.FrameOrientation;

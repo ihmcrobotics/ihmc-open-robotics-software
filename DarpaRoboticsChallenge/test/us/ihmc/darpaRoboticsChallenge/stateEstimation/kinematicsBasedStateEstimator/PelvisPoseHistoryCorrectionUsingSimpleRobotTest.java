@@ -31,7 +31,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPos
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

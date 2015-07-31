@@ -3,7 +3,7 @@ package us.ihmc.utilities.ros.subscriber;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 
 public abstract class RosPoseStampedSubscriber extends AbstractRosTopicSubscriber<geometry_msgs.PoseStamped>
 {

@@ -7,7 +7,7 @@ import geometry_msgs.Quaternion;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 
 public abstract class RosNavMsgsOdometrySubscriber extends AbstractRosTopicSubscriber<nav_msgs.Odometry>
 {
