@@ -1,7 +1,7 @@
 package us.ihmc.acsell.hardware.state;
 
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
-import us.ihmc.utilities.math.geometry.AngleTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 

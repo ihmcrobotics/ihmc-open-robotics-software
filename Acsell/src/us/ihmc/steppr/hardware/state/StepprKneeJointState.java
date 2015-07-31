@@ -4,7 +4,7 @@ import us.ihmc.acsell.hardware.state.AcsellActuatorState;
 import us.ihmc.acsell.hardware.state.AcsellJointState;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
 import us.ihmc.steppr.hardware.StepprJoint;
-import us.ihmc.utilities.math.geometry.AngleTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
