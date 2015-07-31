@@ -24,7 +24,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DesiredMomentumModuleCommandListener;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleSolverListener;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionConstraintListener;
-import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;

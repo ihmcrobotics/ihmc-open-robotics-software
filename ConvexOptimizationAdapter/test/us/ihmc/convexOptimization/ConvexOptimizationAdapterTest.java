@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;

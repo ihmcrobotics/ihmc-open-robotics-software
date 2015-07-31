@@ -5,7 +5,7 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
 // Uses the algorithm and naming convention found in MIT Paper
 // "An efficiently solvable quadratic program for stabilizing dynamic locomotion"
 // by Scott Kuindersma, Frank Permenter, and Russ Tedrake.

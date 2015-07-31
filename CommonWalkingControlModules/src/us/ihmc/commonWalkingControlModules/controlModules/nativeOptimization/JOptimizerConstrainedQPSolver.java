@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.interfaces.linsol.LinearSolver;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
-import us.ihmc.utilities.math.DampedLeastSquaresSolver;
+import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;

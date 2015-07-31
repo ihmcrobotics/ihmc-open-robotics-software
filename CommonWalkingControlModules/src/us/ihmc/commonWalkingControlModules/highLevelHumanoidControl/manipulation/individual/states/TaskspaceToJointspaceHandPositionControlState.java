@@ -13,7 +13,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;

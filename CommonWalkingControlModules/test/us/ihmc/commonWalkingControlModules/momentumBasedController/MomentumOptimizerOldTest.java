@@ -14,7 +14,7 @@ import org.junit.Test;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;

@@ -8,7 +8,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
 import Jama.Matrix;
 
 

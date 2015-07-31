@@ -10,7 +10,7 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.RandomMatrices;
 
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;

@@ -20,8 +20,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.MatrixTools;
-import us.ihmc.utilities.math.NullspaceCalculator;
+import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
+import us.ihmc.utilities.math.linearAlgebra.NullspaceCalculator;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.ConvectiveTermCalculator;
