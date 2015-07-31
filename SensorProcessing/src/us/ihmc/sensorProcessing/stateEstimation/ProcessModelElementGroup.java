@@ -19,7 +19,7 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.ProcessModelElement;
 import us.ihmc.robotics.linearDynamicSystems.SplitUpMatrixExponentialStateSpaceSystemDiscretizer;
 import us.ihmc.robotics.linearDynamicSystems.StateSpaceSystemDiscretizer;
-import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
 
 public class ProcessModelElementGroup
 {

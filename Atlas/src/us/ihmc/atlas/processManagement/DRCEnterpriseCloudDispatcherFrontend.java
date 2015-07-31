@@ -47,7 +47,7 @@ import us.ihmc.communication.net.tcpServer.DisconnectedException;
 import us.ihmc.communication.net.tcpServer.ReconnectingTCPClient;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
-import us.ihmc.utilities.math.UnsignedByteTools;
+import us.ihmc.utilities.processManagement.UnsignedByteTools;
 import us.ihmc.utilities.processManagement.ExitListener;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 

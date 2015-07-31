@@ -14,9 +14,9 @@ import org.ejml.ops.NormOps;
 
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.ColumnSpaceProjector;
-import us.ihmc.utilities.math.DampedLeastSquaresSolver;
-import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.linearAlgebra.ColumnSpaceProjector;
+import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
+import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;

@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.QuarticRootFinder;
+import us.ihmc.utilities.math.numericalMethods.QuarticRootFinder;
 
 
 public class CollisionIntegrator implements java.io.Serializable

@@ -11,7 +11,7 @@ import org.ejml.interfaces.decomposition.QRPDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
-import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
 
 public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
 {

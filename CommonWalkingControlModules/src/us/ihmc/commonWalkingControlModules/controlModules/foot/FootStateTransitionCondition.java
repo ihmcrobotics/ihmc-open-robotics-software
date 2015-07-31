@@ -4,7 +4,7 @@ import org.ejml.alg.dense.mult.VectorVectorMult;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.utilities.math.NullspaceCalculator;
+import us.ihmc.utilities.math.linearAlgebra.NullspaceCalculator;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;

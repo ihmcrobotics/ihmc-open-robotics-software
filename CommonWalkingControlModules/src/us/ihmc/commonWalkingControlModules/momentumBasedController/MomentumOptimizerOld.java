@@ -5,7 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.fed.fs.fpl.optimization.Lmdif_fcn;
 import us.fed.fs.fpl.optimization.Minpack_f77;
-import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CentroidalMomentumMatrix;

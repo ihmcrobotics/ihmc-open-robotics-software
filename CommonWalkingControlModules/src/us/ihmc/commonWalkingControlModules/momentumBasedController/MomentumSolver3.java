@@ -8,7 +8,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionConstraintHandler;
-import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.utilities.optimization.EqualityConstraintEnforcer;
 import us.ihmc.utilities.screwTheory.CentroidalMomentumMatrix;
