@@ -25,7 +25,7 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

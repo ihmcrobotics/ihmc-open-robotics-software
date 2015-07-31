@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
+import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.*;

@@ -11,7 +11,7 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.graphics.joints.GraphicsJoint;
 import us.ihmc.utilities.gui.GraphicsUpdatable;
-import us.ihmc.utilities.kinematics.CommonJoint;
+import us.ihmc.robotics.kinematics.CommonJoint;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 

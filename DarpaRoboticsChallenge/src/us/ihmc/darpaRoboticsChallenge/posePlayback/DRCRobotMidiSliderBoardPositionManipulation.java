@@ -23,7 +23,7 @@ import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
 import us.ihmc.robotics.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.robotics.humanoidRobot.partNames.SpineJointName;
-import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
+import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
