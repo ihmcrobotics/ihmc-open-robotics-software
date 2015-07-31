@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
-import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
+import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals, GroundProfile3D

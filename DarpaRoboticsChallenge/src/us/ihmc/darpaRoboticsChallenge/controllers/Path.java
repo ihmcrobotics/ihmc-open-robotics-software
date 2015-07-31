@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.controllers;
 import java.util.ArrayList;
 
 import us.ihmc.userInterface.modifiableObjects.PathActivationLevel;
-import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
+import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.humanoidRobot.footstep.Footstep;

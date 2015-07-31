@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 
 import us.ihmc.robotics.hierarchicalKinematics.RobotModel;
-import us.ihmc.utilities.math.dataStructures.Vector64F;
+import us.ihmc.robotics.dataStructures.Vector64F;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;

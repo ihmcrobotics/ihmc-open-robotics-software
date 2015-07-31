@@ -7,7 +7,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.InclusionFunction;
 import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
-import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
+import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
