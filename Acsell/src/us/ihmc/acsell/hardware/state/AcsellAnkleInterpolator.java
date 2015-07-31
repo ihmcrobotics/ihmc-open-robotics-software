@@ -5,7 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.acsell.hardware.configuration.AcsellAnkleKinematicParameters;
-import us.ihmc.utilities.math.geometry.AngleTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class AcsellAnkleInterpolator implements AcsellAnkleAngleCalculator
