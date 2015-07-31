@@ -28,7 +28,7 @@ import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
+import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class VariousWalkingProviders

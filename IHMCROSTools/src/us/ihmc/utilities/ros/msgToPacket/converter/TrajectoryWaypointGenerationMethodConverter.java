@@ -1,6 +1,6 @@
 package us.ihmc.utilities.ros.msgToPacket.converter;
 
-import us.ihmc.utilities.math.trajectories.TrajectoryType;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class TrajectoryWaypointGenerationMethodConverter
 {

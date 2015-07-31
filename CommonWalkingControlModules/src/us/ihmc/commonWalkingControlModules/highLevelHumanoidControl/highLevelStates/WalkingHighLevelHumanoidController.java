@@ -56,7 +56,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.PoseReferenceFrame;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.TrajectoryType;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;

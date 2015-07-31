@@ -38,7 +38,7 @@ import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RotationFunctions;
-import us.ihmc.utilities.math.trajectories.TrajectoryType;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInterface

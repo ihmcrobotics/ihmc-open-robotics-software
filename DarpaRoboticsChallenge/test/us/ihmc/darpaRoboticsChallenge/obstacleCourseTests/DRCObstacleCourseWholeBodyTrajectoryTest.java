@@ -46,7 +46,7 @@ import us.ihmc.robotics.geometry.ZUpFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.math.trajectories.TrajectoryND;
+import us.ihmc.robotics.trajectories.TrajectoryND;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;

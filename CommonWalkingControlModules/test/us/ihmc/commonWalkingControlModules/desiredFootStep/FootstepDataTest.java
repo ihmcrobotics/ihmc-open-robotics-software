@@ -35,7 +35,7 @@ import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PoseReferenceFrame;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.TrajectoryType;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;

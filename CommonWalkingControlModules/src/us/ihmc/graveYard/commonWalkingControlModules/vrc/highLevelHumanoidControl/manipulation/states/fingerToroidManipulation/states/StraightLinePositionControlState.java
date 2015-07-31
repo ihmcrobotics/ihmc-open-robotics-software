@@ -6,7 +6,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.providers.SE3ConfigurationProvider;
+import us.ihmc.robotics.trajectories.providers.SE3ConfigurationProvider;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.RigidBody;
