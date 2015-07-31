@@ -6,7 +6,7 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTreeListener;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundListener;
-import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
+import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 
 public interface QuadTreeHeightMapInterface extends HeightMapWithPoints
 {
