@@ -7,7 +7,7 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.trajectory.TrajectoryND;
+import us.ihmc.utilities.math.trajectories.TrajectoryND;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
