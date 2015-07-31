@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;

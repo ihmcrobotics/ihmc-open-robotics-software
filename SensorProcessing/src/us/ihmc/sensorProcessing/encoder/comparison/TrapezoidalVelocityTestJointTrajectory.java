@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.encoder.comparison;
 
-import us.ihmc.utilities.math.trajectories.TrapezoidalVelocityTrajectory;
+import us.ihmc.robotics.trajectories.TrapezoidalVelocityTrajectory;
 
 public class TrapezoidalVelocityTestJointTrajectory implements EncoderProcessorEvaluationTrajectory
 {

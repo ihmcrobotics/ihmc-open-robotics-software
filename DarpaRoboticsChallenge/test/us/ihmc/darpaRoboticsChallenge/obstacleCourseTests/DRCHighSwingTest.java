@@ -31,7 +31,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RotationFunctions;
-import us.ihmc.utilities.math.trajectories.TrajectoryType;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 

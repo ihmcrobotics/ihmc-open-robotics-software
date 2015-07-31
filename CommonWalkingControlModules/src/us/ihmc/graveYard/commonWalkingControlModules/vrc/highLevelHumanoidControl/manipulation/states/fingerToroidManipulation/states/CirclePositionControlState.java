@@ -4,10 +4,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.FingerToroidManipulationState;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.providers.ConstantDoubleProvider;
-import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
-import us.ihmc.utilities.math.trajectories.providers.OrientationProvider;
-import us.ihmc.utilities.math.trajectories.providers.SE3ConfigurationProvider;
+import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
+import us.ihmc.robotics.trajectories.providers.OrientationProvider;
+import us.ihmc.robotics.trajectories.providers.SE3ConfigurationProvider;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.RigidBody;

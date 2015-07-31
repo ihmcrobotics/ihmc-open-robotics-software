@@ -11,7 +11,7 @@ import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
-import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
+import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
 /**

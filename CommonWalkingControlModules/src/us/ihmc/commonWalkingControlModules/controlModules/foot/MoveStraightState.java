@@ -5,11 +5,11 @@ import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTra
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.providers.ChangeableConfigurationProvider;
-import us.ihmc.utilities.math.trajectories.providers.ConstantVectorProvider;
-import us.ihmc.utilities.math.trajectories.providers.SettableDoubleProvider;
-import us.ihmc.utilities.math.trajectories.providers.SettablePositionProvider;
-import us.ihmc.utilities.math.trajectories.providers.VectorProvider;
+import us.ihmc.robotics.trajectories.providers.ChangeableConfigurationProvider;
+import us.ihmc.robotics.trajectories.providers.ConstantVectorProvider;
+import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
+import us.ihmc.robotics.trajectories.providers.SettablePositionProvider;
+import us.ihmc.robotics.trajectories.providers.VectorProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

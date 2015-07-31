@@ -38,7 +38,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalc
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
+import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

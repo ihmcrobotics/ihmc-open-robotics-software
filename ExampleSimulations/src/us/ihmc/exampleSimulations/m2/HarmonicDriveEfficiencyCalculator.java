@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.m2;
 
-import us.ihmc.utilities.math.trajectories.LinearInterpolater;
+import us.ihmc.robotics.trajectories.LinearInterpolater;
 
 public class HarmonicDriveEfficiencyCalculator
 {

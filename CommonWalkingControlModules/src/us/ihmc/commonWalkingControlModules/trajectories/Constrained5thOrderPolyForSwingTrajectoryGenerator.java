@@ -4,9 +4,9 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
-import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
-import us.ihmc.utilities.math.trajectories.providers.VectorProvider;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
+import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.robotics.trajectories.providers.VectorProvider;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
