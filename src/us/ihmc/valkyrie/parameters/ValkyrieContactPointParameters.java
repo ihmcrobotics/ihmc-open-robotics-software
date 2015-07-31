@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVX
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;

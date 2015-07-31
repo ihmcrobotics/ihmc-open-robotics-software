@@ -3,10 +3,9 @@ package us.ihmc.valkyrie.parameters;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
 {  
