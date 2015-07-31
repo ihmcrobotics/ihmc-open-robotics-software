@@ -18,7 +18,7 @@ import org.ros.message.Time;
 
 import std_msgs.Header;
 import tf2_msgs.TFMessage;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class RosTf2Publisher extends RosTopicPublisher<tf2_msgs.TFMessage> implements RosTfPublisherInterface
 {

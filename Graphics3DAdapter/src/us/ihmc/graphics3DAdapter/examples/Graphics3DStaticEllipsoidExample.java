@@ -12,8 +12,8 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.utilities.math.geometry.Ellipsoid3d;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.Ellipsoid3d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class Graphics3DStaticEllipsoidExample
 {

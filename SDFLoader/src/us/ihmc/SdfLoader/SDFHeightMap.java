@@ -8,7 +8,7 @@ import javax.imageio.ImageIO;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.HeightMap;
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class SDFHeightMap implements us.ihmc.graphics3DAdapter.HeightMap
 {

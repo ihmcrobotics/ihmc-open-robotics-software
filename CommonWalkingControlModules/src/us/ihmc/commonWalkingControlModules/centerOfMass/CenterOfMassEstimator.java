@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.centerOfMass;
 
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 
 public interface CenterOfMassEstimator
 {

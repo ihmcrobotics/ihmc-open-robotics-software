@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 /**

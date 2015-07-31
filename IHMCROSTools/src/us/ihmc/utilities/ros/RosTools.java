@@ -27,7 +27,7 @@ import javax.vecmath.Vector3f;
 
 import org.ros.node.NodeConfiguration;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class RosTools
 {

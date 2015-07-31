@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset.processedSensors;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector;
 
 public interface ProcessedIMUSensorsWriteOnlyInterface
 {

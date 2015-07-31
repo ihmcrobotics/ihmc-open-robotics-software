@@ -7,9 +7,9 @@ import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRob
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;

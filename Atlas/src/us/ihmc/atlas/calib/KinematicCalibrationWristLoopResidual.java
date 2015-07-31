@@ -14,8 +14,8 @@ import org.ddogleg.optimization.functions.FunctionNtoM;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.robotics.humanoidRobot.partNames.LimbName;
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class KinematicCalibrationWristLoopResidual implements FunctionNtoM

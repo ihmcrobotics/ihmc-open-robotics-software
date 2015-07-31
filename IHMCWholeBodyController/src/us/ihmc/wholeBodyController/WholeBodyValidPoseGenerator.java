@@ -3,22 +3,9 @@ package us.ihmc.wholeBodyController;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
-import java.util.Random;
-
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public abstract class WholeBodyValidPoseGenerator
 {

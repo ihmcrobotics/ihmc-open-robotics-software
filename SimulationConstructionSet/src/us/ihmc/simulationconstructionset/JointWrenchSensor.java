@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 public class JointWrenchSensor

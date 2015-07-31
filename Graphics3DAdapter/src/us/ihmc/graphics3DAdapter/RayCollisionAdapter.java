@@ -1,6 +1,6 @@
 package us.ihmc.graphics3DAdapter;
 
-import us.ihmc.utilities.math.geometry.Ray3d;
+import us.ihmc.robotics.geometry.Ray3d;
 
 public interface RayCollisionAdapter
 {

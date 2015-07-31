@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.vicon.QuaternionPose;
 
 public class MocapRigidBody extends QuaternionPose

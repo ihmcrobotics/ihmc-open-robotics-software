@@ -34,7 +34,7 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DScal
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.graphics3DAdapter.jme.terrain.JMEHeightMapTerrain;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationFunctions;
 
 import com.jme3.app.Application;
 import com.jme3.asset.AssetManager;

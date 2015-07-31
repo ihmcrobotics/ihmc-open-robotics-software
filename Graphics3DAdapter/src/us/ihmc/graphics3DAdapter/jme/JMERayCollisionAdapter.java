@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.utilities.math.geometry.Ray3d;
+import us.ihmc.robotics.geometry.Ray3d;
 
 import com.jme3.collision.Collidable;
 import com.jme3.collision.CollisionResult;

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import us.ihmc.utilities.math.geometry.LineSegment2d;
+import us.ihmc.robotics.geometry.LineSegment2d;
 
 public class ThreePointDoubleSplines2D
 {

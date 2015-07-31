@@ -1,10 +1,6 @@
 package us.ihmc.sensorProcessing.sensorData;
 
-import java.awt.image.BufferedImage;
-
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.robotSide.RobotSide;
-import boofcv.struct.calib.IntrinsicParameters;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 /**
  * Listens for stereo images

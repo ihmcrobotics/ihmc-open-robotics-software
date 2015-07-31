@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class SDFJointHolder
 {

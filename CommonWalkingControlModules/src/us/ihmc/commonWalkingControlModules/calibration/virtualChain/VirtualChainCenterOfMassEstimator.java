@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.centerOfMass.CenterOfMassEstimator;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 
 public class VirtualChainCenterOfMassEstimator implements CenterOfMassEstimator
 {   

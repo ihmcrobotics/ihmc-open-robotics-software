@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.physics.collision.gdx;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.physics.bullet.linearmath.btVector3;

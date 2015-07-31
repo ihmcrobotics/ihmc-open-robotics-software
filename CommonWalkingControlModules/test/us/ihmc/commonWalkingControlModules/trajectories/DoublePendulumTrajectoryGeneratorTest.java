@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.util.graphs.JFreePlot;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.math.geometry.Line2d;
+import us.ihmc.robotics.geometry.Line2d;
 
 /**
  * Created by agrabertilton on 2/9/15.

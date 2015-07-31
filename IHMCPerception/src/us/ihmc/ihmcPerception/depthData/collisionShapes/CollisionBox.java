@@ -2,7 +2,7 @@ package us.ihmc.ihmcPerception.depthData.collisionShapes;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class CollisionBox extends CollisionShape
 {

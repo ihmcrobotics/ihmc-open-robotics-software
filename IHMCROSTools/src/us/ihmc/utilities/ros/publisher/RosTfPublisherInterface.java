@@ -1,6 +1,6 @@
 package us.ihmc.utilities.ros.publisher;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public interface RosTfPublisherInterface
 {

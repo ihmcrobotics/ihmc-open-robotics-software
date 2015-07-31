@@ -2,9 +2,9 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
 
 public interface StateEstimator
 {

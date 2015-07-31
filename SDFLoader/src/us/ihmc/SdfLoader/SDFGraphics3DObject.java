@@ -25,8 +25,8 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.HeightBasedTerrainBlend;
 import us.ihmc.graphics3DAdapter.graphics.appearances.SDFAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceMaterial;
-import us.ihmc.utilities.math.geometry.GeometryTools;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 
 public class SDFGraphics3DObject extends Graphics3DObject

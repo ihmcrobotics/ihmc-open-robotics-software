@@ -1,7 +1,7 @@
 package us.ihmc.graphics3DAdapter.utils;
 
 import us.ihmc.graphics3DAdapter.HeightMap;
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class FlatHeightMap implements HeightMap
 {

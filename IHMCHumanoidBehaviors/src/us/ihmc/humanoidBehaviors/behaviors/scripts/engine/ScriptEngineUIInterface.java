@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 
 public interface ScriptEngineUIInterface
 {

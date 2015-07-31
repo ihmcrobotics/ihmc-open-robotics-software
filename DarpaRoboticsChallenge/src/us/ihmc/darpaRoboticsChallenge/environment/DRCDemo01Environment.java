@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListe
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
 public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
 {

@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBase
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class GroundContactPointBasedWrenchCalculatorTest
 {

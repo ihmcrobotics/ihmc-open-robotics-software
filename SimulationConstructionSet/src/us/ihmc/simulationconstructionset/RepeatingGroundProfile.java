@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
 import us.ihmc.simulationconstructionset.util.ground.RepeatingHeightMap;
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class RepeatingGroundProfile implements GroundProfile3D
 {

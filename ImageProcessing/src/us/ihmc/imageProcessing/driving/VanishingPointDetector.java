@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 
 import us.ihmc.imageProcessing.utilities.PostProcessor;
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
-import us.ihmc.utilities.math.geometry.GeometryTools;
-import us.ihmc.utilities.math.geometry.Line2d;
+import us.ihmc.robotics.geometry.BoundingBox2d;
+import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.geometry.Line2d;
 
 /**
  * User: Matt

@@ -23,8 +23,8 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.robotics.humanoidRobot.footstep.FootSpoof;
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
-import us.ihmc.utilities.math.geometry.InsufficientDataException;
+import us.ihmc.robotics.geometry.BoundingBox2d;
+import us.ihmc.robotics.geometry.InsufficientDataException;
 
 /**
  * Created by agrabertilton on 3/4/15.

@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
 public abstract class DRCRobotContactPointParameters

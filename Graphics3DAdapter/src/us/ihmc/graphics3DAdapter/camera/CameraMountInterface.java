@@ -1,6 +1,6 @@
 package us.ihmc.graphics3DAdapter.camera;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public interface CameraMountInterface
 {

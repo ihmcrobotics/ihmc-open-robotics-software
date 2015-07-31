@@ -18,7 +18,7 @@ import us.ihmc.graphics3DAdapter.jme.JMEViewportAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.graphics3DAdapter.utils.GraphicsDemoTools.PanBackAndForthTrackingAndDollyPositionHolder;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class TransformRayDemo
 {

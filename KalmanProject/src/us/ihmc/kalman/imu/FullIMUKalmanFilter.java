@@ -1,6 +1,6 @@
 package us.ihmc.kalman.imu;
 
-import us.ihmc.utilities.math.geometry.QuaternionTools;
+import us.ihmc.robotics.geometry.QuaternionTools;
 import Jama.Matrix;
 
 /**

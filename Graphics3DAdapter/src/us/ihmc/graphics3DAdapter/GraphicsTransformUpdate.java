@@ -3,7 +3,7 @@ package us.ihmc.graphics3DAdapter;
 import java.util.concurrent.Callable;
 
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class GraphicsTransformUpdate implements Callable<Object>
 {

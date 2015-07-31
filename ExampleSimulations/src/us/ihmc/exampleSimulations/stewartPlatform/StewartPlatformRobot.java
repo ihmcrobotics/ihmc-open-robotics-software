@@ -6,7 +6,7 @@ package us.ihmc.exampleSimulations.stewartPlatform;
 //import com.sun.j3d.utils.applet.MainFrame;
 //import com.sun.j3d.utils.universe.*;
 //import com.sun.j3d.utils.geometry.*;
-//import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+//import RigidBodyTransform;
 
 import javax.vecmath.Vector3d;
 

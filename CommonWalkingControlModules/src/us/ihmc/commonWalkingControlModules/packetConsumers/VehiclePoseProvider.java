@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.driving.VehiclePosePacket;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class VehiclePoseProvider implements PacketConsumer<VehiclePosePacket>
 {

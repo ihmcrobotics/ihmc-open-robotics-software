@@ -7,7 +7,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.robotics.geometry.Transform3d;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;

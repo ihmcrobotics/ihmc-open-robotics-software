@@ -5,7 +5,7 @@ import javax.vecmath.Matrix3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 
 public class OrientationSensorConfiguration
 {

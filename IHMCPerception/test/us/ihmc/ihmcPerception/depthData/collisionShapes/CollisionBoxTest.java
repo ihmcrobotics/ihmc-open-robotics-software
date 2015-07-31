@@ -10,7 +10,7 @@ import javax.vecmath.Point3d;
 import org.junit.Test;
 
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Mesh;

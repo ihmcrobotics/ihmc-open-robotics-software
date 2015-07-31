@@ -13,7 +13,7 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.math.geometry.Ray3d;
+import us.ihmc.robotics.geometry.Ray3d;
 
 @BambooPlan(planType={BambooPlanType.UI})
 public class JMERayCollisionAdapterTest

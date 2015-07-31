@@ -20,8 +20,8 @@ import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.utilities.inputDevices.mouse.MouseButton;
 import us.ihmc.utilities.inputDevices.mouse.MouseListener;
 import us.ihmc.utilities.inputDevices.mouse3DJoystick.Mouse3DListener;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.math.geometry.Sphere3d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.Sphere3d;
 
 public class ClassicCameraController implements TrackingDollyCameraController, KeyListener, MouseListener, Mouse3DListener, SelectedListener
 {

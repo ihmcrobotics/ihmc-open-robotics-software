@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL11;
 
 import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.jme.JMERenderer;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;

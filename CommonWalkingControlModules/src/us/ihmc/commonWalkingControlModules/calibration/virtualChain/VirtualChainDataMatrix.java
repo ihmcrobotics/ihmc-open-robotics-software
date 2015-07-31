@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import javax.vecmath.Matrix3d;
 
-import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import Jama.Matrix;
 
 public class VirtualChainDataMatrix

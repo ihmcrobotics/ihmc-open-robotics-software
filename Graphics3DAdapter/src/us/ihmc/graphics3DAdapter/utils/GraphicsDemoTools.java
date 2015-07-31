@@ -31,8 +31,8 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.ThreadTools;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.utilities.math.geometry.Sphere3d;
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.robotics.geometry.Sphere3d;
+import us.ihmc.robotics.geometry.Transform3d;
 
 public class GraphicsDemoTools
 {

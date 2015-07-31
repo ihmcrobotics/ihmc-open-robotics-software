@@ -11,9 +11,9 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 

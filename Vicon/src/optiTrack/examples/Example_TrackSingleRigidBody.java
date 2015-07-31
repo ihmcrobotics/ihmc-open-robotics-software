@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
-import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.time.CallFrequencyCalculator;
 

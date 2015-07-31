@@ -1,15 +1,13 @@
 package us.ihmc.ihmcPerception.linemod;
 
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 
 

@@ -14,7 +14,7 @@ import org.ros.message.Time;
 
 import std_msgs.Header;
 import us.ihmc.communication.packets.dataobjects.IMUPacket;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.utilities.time.TimeTools;
 
 public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<BatchRawImuData>

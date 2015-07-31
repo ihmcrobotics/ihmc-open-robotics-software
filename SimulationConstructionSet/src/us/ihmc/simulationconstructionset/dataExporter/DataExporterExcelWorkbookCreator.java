@@ -32,7 +32,7 @@ import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.Direction;
+import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 public class DataExporterExcelWorkbookCreator

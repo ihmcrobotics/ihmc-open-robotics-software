@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 

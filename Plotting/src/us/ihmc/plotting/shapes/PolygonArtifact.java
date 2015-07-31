@@ -8,8 +8,8 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import us.ihmc.plotting.Artifact;
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.BoundingBox2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
 public class PolygonArtifact extends Artifact
 {

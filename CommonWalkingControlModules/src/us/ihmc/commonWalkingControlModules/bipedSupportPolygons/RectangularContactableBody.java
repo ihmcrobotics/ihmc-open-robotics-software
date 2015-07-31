@@ -7,7 +7,7 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class RectangularContactableBody extends ListOfPointsContactablePlaneBody
