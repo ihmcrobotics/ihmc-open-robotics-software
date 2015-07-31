@@ -75,7 +75,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 	private final static double EPSILON = 100.0; //5.0e-3;
 	private final DoubleYoVariable distanceToGoal;
 
-	private enum BehaviorStates {SET_STARTPOSITION, READY, WAIT, INSERT_DRILL, SEND_CUT_COMMAND_TO_CONTROLLER, RETRACT_DRILL, GET_TO_DROP_POSITION, DONE};
+	private enum BehaviorStates {SET_STARTPOSITION, WAIT_FOR_INPUT, WAIT, INSERT_DRILL, SEND_CUT_COMMAND_TO_CONTROLLER, RETRACT_DRILL, GET_TO_DROP_POSITION, DONE};
 	private EnumYoVariable<BehaviorStates> behaviorState;
 	private BehaviorStates nextBehaviorState;
 
@@ -115,8 +115,10 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 
 		straightTrajectoryTime = new DoubleYoVariable("straightTrajectoryTime", registry);
 		circleTrajectorytime = new DoubleYoVariable("circularTrajectoryTime", registry);
+		//WARNING: INCREASE IF POSITION CONTROLLED IS APPLIED
+		//circleTrajectorytime.set(1.0);
 		circleTrajectorytime.set(30.0);
-
+		
 		distanceToGoal = new DoubleYoVariable(getName()+ "distanceToGoal", registry);
 		straightLineControlCmd = new HandPosePacket(robotSide, Frame.WORLD, null, null, 1.0);
 		circleControlCmd = new HandRotateAboutAxisPacket();
@@ -167,9 +169,13 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 			{
 				behaviorState.set(BehaviorStates.SET_STARTPOSITION);
 			}
-			if(packet.getCommand() == Commands.CUT)
+			if(packet.getCommand() == Commands.INSERT)
 			{
 				behaviorState.set(BehaviorStates.INSERT_DRILL);
+			}
+			if(packet.getCommand() == Commands.CUT)
+			{
+				behaviorState.set(BehaviorStates.SEND_CUT_COMMAND_TO_CONTROLLER);
 			}
 		}
 
@@ -177,13 +183,13 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		{
 		case SET_STARTPOSITION :
 			goToStartPosition();
-			nextBehaviorState = BehaviorStates.READY;
+			nextBehaviorState = BehaviorStates.WAIT_FOR_INPUT;
 			behaviorState.set(BehaviorStates.WAIT);
 			break;
 			
 		case INSERT_DRILL :
 			insertDrill();
-			nextBehaviorState = BehaviorStates.SEND_CUT_COMMAND_TO_CONTROLLER;
+			nextBehaviorState = BehaviorStates.WAIT_FOR_INPUT;
 			behaviorState.set(BehaviorStates.WAIT);
 			break;
 			
@@ -216,7 +222,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		case SEND_CUT_COMMAND_TO_CONTROLLER :
 			sendCutCommand();
 			circlecounter ++;
-			if (circlecounter == 5)
+			if (circlecounter == 1)
 			{
 				nextBehaviorState = BehaviorStates.RETRACT_DRILL;
 			}
@@ -237,7 +243,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 			isDone.set(true);
 			break;
 			
-		case READY :
+		case WAIT_FOR_INPUT :
 			// Wait for input.
 			break;
 
@@ -324,7 +330,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 
 		rotationAxis.setToZero(chestFrame);
 		rotationAxis.set(1.0, 0.0, 0.0);
-		behaviorState.set(BehaviorStates.READY);
+		behaviorState.set(BehaviorStates.WAIT_FOR_INPUT);
 
 		status = null;
 		hasBeenInitialized.set(true);
