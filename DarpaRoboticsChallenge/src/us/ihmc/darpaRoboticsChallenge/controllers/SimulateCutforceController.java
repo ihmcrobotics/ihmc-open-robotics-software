@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -24,12 +25,15 @@ public class SimulateCutforceController implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
-   private final ExternalForcePoint efpGravity;
-   private final ExternalForcePoint efpToolTip;
-   private final Vector3d comOffset;
-   private final Vector3d toolTipOffset;
-   private final Vector3d tempVector;
+   private final ExternalForcePoint efpWrist;
+   private final ExternalForcePoint efpHandControlFrame;
+   private final Point3d handControlFramePositionInWorld;
+   private final Vector3d wristToHandControlFrame;
+   private final Vector3d tangentVector;
+   private final Vector3d tangentionalVelocity;
    
+   private final DoubleYoVariable efpHandControlFrameVelocity;
+  
    private final SDFRobot sdfRobot;
    private final SDFFullRobotModel sdfFullRobotModel;
    private final RobotSide robotSide;
@@ -39,19 +43,14 @@ public class SimulateCutforceController implements RobotController
    
    private final static double gGRAVITY = 9.81;
    
-   //TODO measure:
-   private final static double MASSDRILL = 0.3;
-   private final static double HANDOFFSET = 0.26;
-   private final static double COMOFFSET = 0.00;
-   private final static double TOOLTIPOFFSET = 0.18;
    
    //TODO estimate:
    private DoubleYoVariable quadraticForcecoeff;
    
    // Graphicregistry for viz
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
-   private final FramePose comPose, toolTipPose;
-   private final YoFramePose yoComPose, yoToolTipPose;
+   private final FramePose wristJointPose, handControlFramePose;
+   private final YoFramePose yoWristJointPose, yoHandControlFramePose;
    
    public SimulateCutforceController(SDFRobot robot, SDFFullRobotModel sdfFullRobotModel, RobotSide robotSide, SimulationConstructionSet scs)
    {
@@ -59,54 +58,55 @@ public class SimulateCutforceController implements RobotController
       this.sdfFullRobotModel = sdfFullRobotModel;
       this.robotSide = robotSide;
       
+   
+      
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       
       wristJoint = robot.getJoint(sdfFullRobotModel.getHand(this.robotSide).getParentJoint().getName());
-//      System.out.println(wristJoint);
       
       transform = new RigidBodyTransform();
-      comOffset = new Vector3d();
-      toolTipOffset = new Vector3d();
-      tempVector = new Vector3d();
+      wristToHandControlFrame = new Vector3d();
+      tangentVector = new Vector3d();
+      tangentionalVelocity = new Vector3d();
+      
+      efpHandControlFrameVelocity = new DoubleYoVariable("cutforceSimulatorVelocity", registry);
+      
       switch (this.robotSide)
       {
       case LEFT:
-         comOffset.set(-COMOFFSET, HANDOFFSET, 0.0);
-         toolTipOffset.set(-TOOLTIPOFFSET, HANDOFFSET, 0.0);
+         wristToHandControlFrame.set(0.0, 0.26, 0.0);
          break;
       case RIGHT:
-         comOffset.set(-COMOFFSET, -HANDOFFSET, 0.0);
-         toolTipOffset.set(-TOOLTIPOFFSET,-HANDOFFSET, 0.0);
+         wristToHandControlFrame.set(0.0, -0.26, 0.0);
          break;
       default:
          PrintTools.error(this, "No robotSide assigned.");
          break;
       }
 
-      efpGravity = new ExternalForcePoint("Gravity", comOffset, robot);
-      efpToolTip = new ExternalForcePoint("Cutmodel", toolTipOffset, sdfRobot);
+      efpWrist = new ExternalForcePoint("wrist", sdfRobot);
+      efpHandControlFrame = new ExternalForcePoint("tooltip", wristToHandControlFrame, sdfRobot);
+      handControlFramePositionInWorld = new Point3d();
       
-      wristJoint.addExternalForcePoint(efpGravity);
-      wristJoint.addExternalForcePoint(efpToolTip);
-      
-      wristJoint.getTransformToWorld(transform);
-      transform.transform(comOffset, tempVector);
-      comPose = new FramePose(ReferenceFrames.getWorldFrame(), transform);
-      comPose.translate(tempVector);
-      yoComPose = new YoFramePose("yoComPose", ReferenceFrames.getWorldFrame(), registry);
-      yoComPose.set(comPose);
-      YoGraphicCoordinateSystem yoCom = new YoGraphicCoordinateSystem("drillComViz", yoComPose, 0.1, YoAppearance.Red());
+      wristJoint.addExternalForcePoint(efpWrist);
+      wristJoint.addExternalForcePoint(efpHandControlFrame);
       
       wristJoint.getTransformToWorld(transform);
-      transform.transform(toolTipOffset, tempVector);
-      toolTipPose = new FramePose(ReferenceFrames.getWorldFrame(), transform);
-      toolTipPose.translate(tempVector);
-      yoToolTipPose = new YoFramePose("yoToolTipPose",ReferenceFrames.getWorldFrame(), registry);
-      yoToolTipPose.set(toolTipPose);
-      YoGraphicCoordinateSystem yoToolTip = new YoGraphicCoordinateSystem("toolTipViz", yoToolTipPose, 0.1, YoAppearance.Yellow());
+      wristJointPose = new FramePose(ReferenceFrames.getWorldFrame(), transform);
+      yoWristJointPose = new YoFramePose("wristJointPose", ReferenceFrames.getWorldFrame(), registry);
+      yoWristJointPose.set(wristJointPose);
+      YoGraphicCoordinateSystem yoWristCoordinateSystem = new YoGraphicCoordinateSystem("wristCoordinateSystemViz", yoWristJointPose, 0.1, YoAppearance.Red());
+      
+      wristJoint.getTransformToWorld(transform);
+      transform.transform(wristToHandControlFrame, tangentVector);
+      handControlFramePose = new FramePose(ReferenceFrames.getWorldFrame(), transform);
+      handControlFramePose.translate(tangentVector);
+      yoHandControlFramePose = new YoFramePose("handControlFrame",ReferenceFrames.getWorldFrame(), registry);
+      yoHandControlFramePose.set(handControlFramePose);
+      YoGraphicCoordinateSystem yoToolTip = new YoGraphicCoordinateSystem("toolTipViz", yoHandControlFramePose, 0.1, YoAppearance.Yellow());
       
       
-      yoGraphicsListRegistry.registerYoGraphic("drillComViz", yoCom);
+      yoGraphicsListRegistry.registerYoGraphic("drillComViz", yoWristCoordinateSystem);
       yoGraphicsListRegistry.registerYoGraphic("drillToolTipViz", yoToolTip);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       
@@ -146,42 +146,60 @@ public class SimulateCutforceController implements RobotController
    public void doControl()
    {
       wristJoint.getTransformToWorld(transform);
-      transform.transform(comOffset, tempVector);
-      comPose.setPose(transform);
-      comPose.translate(tempVector);
-      yoComPose.set(comPose);
+      wristJointPose.setPose(transform);
+      yoWristJointPose.set(wristJointPose);
       
       wristJoint.getTransformToWorld(transform);
-      transform.transform(toolTipOffset, tempVector);
-      toolTipPose.setPose(transform);
-      toolTipPose.translate(tempVector);
-      yoToolTipPose.set(toolTipPose);
+      transform.transform(wristToHandControlFrame, tangentVector);
+      handControlFramePose.setPose(transform);
+      handControlFramePose.translate(tangentVector);
+      yoHandControlFramePose.set(handControlFramePose);
+      handControlFramePose.getPosition(handControlFramePositionInWorld);
       
+      efpHandControlFrame.setPosition(handControlFramePositionInWorld);
       
-      
-      efpGravity.setForce(0.0, 0.0, -gGRAVITY * MASSDRILL);
+//      efpGravity.setForce(0.0, 0.0, -gGRAVITY * MASSDRILL);
 //      efpGravity.setForce(0.0, 0.0, 0.0);
-      efpToolTip.setForce(quadraticCutForceModel(efpToolTip.getVelocityVector()));
+      efpWrist.setForce(exponentialCutForceModel(efpHandControlFrame.getVelocityVector()));
+      
    }
    
    private Vector3d quadraticCutForceModel(Vector3d toolTipVelocity)
    {
-     tempVector.set(toolTipVelocity);
+     tangentVector.set(toolTipVelocity);
      
-     if(tempVector.length() != 0.0)
+     if(tangentVector.length() != 0.0)
      {
-        tempVector.normalize();
-        tempVector.scale(-1.0);
+        tangentVector.normalize();
+        tangentVector.scale(-1.0);
         
-        tempVector.scale(quadraticForcecoeff.getDoubleValue() * Math.pow(toolTipVelocity.length(), 2));
-        return tempVector;
+        tangentVector.scale(quadraticForcecoeff.getDoubleValue() * Math.pow(toolTipVelocity.length(), 2));
+        return tangentVector;
      }
      else
      {
-        return tempVector;
+        return tangentVector;
      }
    }
-   
-   
-
+   private Vector3d exponentialCutForceModel(Vector3d toolTipVelocity)
+   {
+	   tangentVector.set(toolTipVelocity);
+	   tangentionalVelocity.set(toolTipVelocity);
+	   
+	     
+	     if(tangentVector.length() != 0.0)
+	     {
+	    	tangentionalVelocity.setX(0.0);
+	    	tangentVector.setX(0.0);
+	        tangentVector.normalize();
+	        tangentVector.scale(-1.0);
+	        tangentVector.scale(90.0 * (Math.exp(1.0 *tangentionalVelocity.length()) - 1.0));
+	        efpHandControlFrameVelocity.set(tangentionalVelocity.length());
+	        return tangentVector;
+	     }
+	     else
+	     {
+	        return tangentVector;
+	     }  
+   }
 }
