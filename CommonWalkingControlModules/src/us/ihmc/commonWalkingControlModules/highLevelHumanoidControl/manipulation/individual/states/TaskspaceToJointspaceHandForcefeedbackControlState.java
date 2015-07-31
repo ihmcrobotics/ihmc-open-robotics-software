@@ -38,7 +38,7 @@ import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 
 public class TaskspaceToJointspaceHandForcefeedbackControlState extends TrajectoryBasedTaskspaceHandControlState
 {
-	private final static boolean TRAJECTORY_FORCEFEEDBACK = true; //DO NOT SET TO TRUE! NOT ENTIRELY TESTED YET!! T.Meier
+	private final static boolean TRAJECTORY_FORCEFEEDBACK = false; //DO NOT SET TO TRUE! NOT ENTIRELY TESTED YET!! T.Meier
 	private final static boolean SIMULATION = true;
 	private final BooleanYoVariable forcefeedback;
 	private final Boolean doPositionControlOnJoints;
