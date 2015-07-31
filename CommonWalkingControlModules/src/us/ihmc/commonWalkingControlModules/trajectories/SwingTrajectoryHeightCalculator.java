@@ -2,9 +2,12 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.communication.packets.walking.FootstepData;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.InclusionFunction;
 import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
-import us.ihmc.utilities.math.geometry.*;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;

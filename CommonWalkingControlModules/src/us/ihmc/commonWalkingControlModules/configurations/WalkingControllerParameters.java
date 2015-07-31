@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.robotics.humanoidRobot.partNames.NeckJointName;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.controllers.YoPDGains;

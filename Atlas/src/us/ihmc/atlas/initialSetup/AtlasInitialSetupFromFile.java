@@ -14,7 +14,7 @@ import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
 import us.ihmc.robotics.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 

@@ -4,8 +4,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.manipulation.TorusPosePacket;
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 
 /**
  * @author twan

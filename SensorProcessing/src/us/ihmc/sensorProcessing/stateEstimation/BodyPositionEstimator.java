@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 import javax.vecmath.Tuple3d;
 
-import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint;
 
 public interface BodyPositionEstimator
 {

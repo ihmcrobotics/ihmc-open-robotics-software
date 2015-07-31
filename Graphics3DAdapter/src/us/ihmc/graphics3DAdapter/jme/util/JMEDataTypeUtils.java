@@ -12,9 +12,9 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.Ray3d;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.Ray3d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;

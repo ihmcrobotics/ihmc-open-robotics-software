@@ -16,7 +16,6 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
@@ -32,7 +31,7 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 

@@ -9,9 +9,9 @@ import java.util.List;
 import javax.vecmath.Point3d;
 
 import us.ihmc.darpaRoboticsChallenge.odometry.IcpCloud3D;
-import us.ihmc.utilities.math.geometry.AngleTools;
-import us.ihmc.utilities.math.geometry.GeoregressionConversionTools;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.geometry.GeoregressionConversionTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class WheelRotationEstimator extends IcpCloud3D
 {

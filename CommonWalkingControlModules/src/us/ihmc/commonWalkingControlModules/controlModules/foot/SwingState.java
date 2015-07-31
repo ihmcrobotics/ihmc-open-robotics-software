@@ -10,11 +10,11 @@ import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTraje
 import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.TrajectoryType;
 import us.ihmc.utilities.math.trajectories.TwoWaypointTrajectoryGeneratorParameters;
 import us.ihmc.utilities.math.trajectories.providers.ConstantVectorProvider;

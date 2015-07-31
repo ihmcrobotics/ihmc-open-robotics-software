@@ -8,7 +8,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.TexCoord2f;
 
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
 public class MeshDataGenerator
 {

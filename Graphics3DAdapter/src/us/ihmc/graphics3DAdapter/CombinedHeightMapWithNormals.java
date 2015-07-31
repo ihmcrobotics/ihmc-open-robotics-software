@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class CombinedHeightMapWithNormals implements HeightMapWithNormals
 {

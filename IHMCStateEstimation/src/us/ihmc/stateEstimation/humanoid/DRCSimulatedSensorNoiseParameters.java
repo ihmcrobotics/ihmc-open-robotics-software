@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.Direction;
+import us.ihmc.robotics.geometry.Direction;
 
 public class DRCSimulatedSensorNoiseParameters
 {

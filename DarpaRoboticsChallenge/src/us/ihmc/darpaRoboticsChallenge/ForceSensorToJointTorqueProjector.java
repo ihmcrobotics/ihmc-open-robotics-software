@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorData;
-import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;

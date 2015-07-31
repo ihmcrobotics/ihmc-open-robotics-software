@@ -13,7 +13,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.io.StreamException;

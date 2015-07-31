@@ -3,8 +3,8 @@ package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 import javax.vecmath.Point3d;
 
 import us.ihmc.utilities.compare.GenericCRC32;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 
 public class PointPositionDataObject
 {

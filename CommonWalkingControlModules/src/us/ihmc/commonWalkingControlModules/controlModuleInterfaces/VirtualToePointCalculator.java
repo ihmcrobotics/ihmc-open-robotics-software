@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
-import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2dAndConnectingEdges;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 

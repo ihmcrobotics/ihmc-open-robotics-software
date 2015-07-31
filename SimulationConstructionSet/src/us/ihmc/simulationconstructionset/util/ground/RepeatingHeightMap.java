@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset.util.ground;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class RepeatingHeightMap implements HeightMapWithNormals
 {

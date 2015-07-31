@@ -3,7 +3,7 @@ package us.ihmc.graphics3DAdapter;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public interface GroundProfile3D
 {

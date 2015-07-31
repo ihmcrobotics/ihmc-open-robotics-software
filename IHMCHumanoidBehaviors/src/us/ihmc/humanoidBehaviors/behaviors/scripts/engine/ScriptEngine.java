@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import com.thoughtworks.xstream.io.StreamException;
 
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class ScriptEngine
 {

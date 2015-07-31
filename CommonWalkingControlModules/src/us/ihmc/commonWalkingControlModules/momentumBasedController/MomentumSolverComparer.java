@@ -11,10 +11,10 @@ import org.ejml.ops.RandomMatrices;
 
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.MatrixTools;
-import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.CenterOfMassReferenceFrame;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;

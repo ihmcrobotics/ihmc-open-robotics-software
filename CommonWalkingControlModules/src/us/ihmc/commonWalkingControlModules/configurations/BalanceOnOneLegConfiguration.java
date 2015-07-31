@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.Random;
 
 import us.ihmc.utilities.ArrayTools;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class BalanceOnOneLegConfiguration

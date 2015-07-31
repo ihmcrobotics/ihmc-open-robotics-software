@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
-import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2d;
 
 public interface DesiredVelocityControlModule
 {

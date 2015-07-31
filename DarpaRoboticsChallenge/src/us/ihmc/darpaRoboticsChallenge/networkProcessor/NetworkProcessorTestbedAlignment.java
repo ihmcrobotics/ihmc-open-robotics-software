@@ -22,7 +22,7 @@ import us.ihmc.communication.packets.sensing.TestbedClientPacket;
 import us.ihmc.communication.packets.sensing.TestbedServerPacket;
 import us.ihmc.sensorProcessing.pointClouds.testbed.TestbedAutomaticAlignment;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 import com.thoughtworks.xstream.XStream;
 

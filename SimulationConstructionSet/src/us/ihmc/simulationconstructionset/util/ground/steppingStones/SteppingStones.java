@@ -9,7 +9,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
 /**
  * <p>Title: </p>

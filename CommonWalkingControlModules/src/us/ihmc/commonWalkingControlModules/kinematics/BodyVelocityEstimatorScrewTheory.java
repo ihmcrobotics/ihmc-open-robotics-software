@@ -4,8 +4,8 @@ import javax.vecmath.Tuple3d;
 
 import us.ihmc.sensorProcessing.stateEstimation.BodyVelocityEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.LegToTrustForVelocityReadOnly;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;

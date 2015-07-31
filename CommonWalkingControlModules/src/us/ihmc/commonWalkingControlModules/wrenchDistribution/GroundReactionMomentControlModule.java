@@ -2,10 +2,10 @@ package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
 import javax.vecmath.Matrix3d;
 
-import us.ihmc.utilities.math.geometry.AngleTools;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

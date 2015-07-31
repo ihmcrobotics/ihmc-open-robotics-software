@@ -26,7 +26,7 @@ import us.ihmc.plotting.shapes.LineArtifact;
 import us.ihmc.plotting.shapes.PointArtifact;
 import us.ihmc.plotting.shapes.PolygonArtifact;
 import us.ihmc.plotting.shapes.ShapeArtifact;
-import us.ihmc.utilities.math.geometry.Line2d;
+import us.ihmc.robotics.geometry.Line2d;
 
 public class Plotter extends JPanel
 {

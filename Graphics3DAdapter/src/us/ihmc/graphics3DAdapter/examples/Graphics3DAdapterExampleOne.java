@@ -28,7 +28,7 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.robotics.geometry.Transform3d;
 
 public class Graphics3DAdapterExampleOne
 {   

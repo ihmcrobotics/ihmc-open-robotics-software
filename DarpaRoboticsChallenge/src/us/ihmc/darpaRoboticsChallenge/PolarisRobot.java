@@ -10,7 +10,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.RotationalInertiaCalculator;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 /**
  * This is a non-contactable Polaris model only for visualizing in SCS

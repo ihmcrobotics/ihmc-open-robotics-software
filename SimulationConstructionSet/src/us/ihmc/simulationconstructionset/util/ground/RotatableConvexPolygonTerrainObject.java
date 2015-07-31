@@ -12,11 +12,11 @@ import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.LineSegment3d;
-import us.ihmc.utilities.math.geometry.Plane3d;
+import us.ihmc.robotics.geometry.BoundingBox2d;
+import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.LineSegment3d;
+import us.ihmc.robotics.geometry.Plane3d;
 
 
 public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, HeightMapWithNormals

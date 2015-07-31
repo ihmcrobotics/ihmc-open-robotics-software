@@ -4,7 +4,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 @SuppressWarnings("serial")
 public class GPULidarScanBuffer extends LinkedBlockingQueue<LidarScan> implements GPULidarListener

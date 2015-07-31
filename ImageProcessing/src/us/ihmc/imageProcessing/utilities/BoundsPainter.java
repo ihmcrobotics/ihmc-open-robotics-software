@@ -8,7 +8,7 @@ import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
+import us.ihmc.robotics.geometry.BoundingBox2d;
 
 /**
  * User: Matt

@@ -15,7 +15,7 @@ import nav_msgs.Odometry;
 import org.ros.message.Time;
 
 import std_msgs.Header;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.RosTools;
 
 public class RosOdometryPublisher extends RosTopicPublisher<nav_msgs.Odometry>

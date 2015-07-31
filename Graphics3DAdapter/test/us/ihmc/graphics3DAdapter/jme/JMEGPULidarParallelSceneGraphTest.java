@@ -20,9 +20,9 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.math.geometry.Sphere3d;
-import us.ihmc.utilities.math.geometry.TransformTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.Sphere3d;
+import us.ihmc.robotics.geometry.TransformTools;
 
 @BambooPlan(planType={BambooPlanType.UI})
 public class JMEGPULidarParallelSceneGraphTest

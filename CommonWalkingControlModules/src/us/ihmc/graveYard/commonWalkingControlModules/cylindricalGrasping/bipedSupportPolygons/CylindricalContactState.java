@@ -1,6 +1,6 @@
 package us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons;
 
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 
 public interface CylindricalContactState
 {

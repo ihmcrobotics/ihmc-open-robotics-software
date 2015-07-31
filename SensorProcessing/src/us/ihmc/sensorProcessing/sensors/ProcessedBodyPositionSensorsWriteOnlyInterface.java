@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.sensors;
 
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
 
 public interface ProcessedBodyPositionSensorsWriteOnlyInterface
 {

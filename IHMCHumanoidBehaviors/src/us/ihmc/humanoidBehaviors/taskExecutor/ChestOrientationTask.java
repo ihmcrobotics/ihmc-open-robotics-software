@@ -4,7 +4,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class ChestOrientationTask extends BehaviorTask

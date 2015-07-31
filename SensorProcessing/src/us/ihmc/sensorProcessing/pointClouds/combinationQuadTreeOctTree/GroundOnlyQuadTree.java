@@ -13,8 +13,8 @@ import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.RecursableHyperTreeNode;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.ResolutionProvider;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundListener;
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
-import us.ihmc.utilities.math.geometry.InclusionFunction;
+import us.ihmc.robotics.geometry.BoundingBox2d;
+import us.ihmc.robotics.geometry.InclusionFunction;
 
 public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, GroundOnlyQuadTreeData> implements QuadTreeHeightMapInterface
 {

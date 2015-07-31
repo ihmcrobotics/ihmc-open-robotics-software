@@ -6,7 +6,7 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
+import us.ihmc.robotics.geometry.BoundingBox2d;
 
 /**
  * Created by agrabertilton on 2/12/15.

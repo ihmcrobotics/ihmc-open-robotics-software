@@ -16,8 +16,8 @@ import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.utilities.math.geometry.Box3d;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.Box3d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class DRCCarEgressEnvironment implements CommonAvatarEnvironmentInterface
 {

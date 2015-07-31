@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorReader
 {

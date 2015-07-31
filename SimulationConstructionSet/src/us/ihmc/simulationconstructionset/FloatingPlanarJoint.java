@@ -6,7 +6,7 @@ import javax.vecmath.Tuple2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.simulationconstructionset.physics.engine.jerry.FloatingPlanarJointPhysics;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;

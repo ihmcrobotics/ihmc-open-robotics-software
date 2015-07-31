@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.calibration.virtualChain;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 
 public class VirtualChainData
 {   

@@ -12,7 +12,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class IMUSensor implements IMUSensorReadOnly

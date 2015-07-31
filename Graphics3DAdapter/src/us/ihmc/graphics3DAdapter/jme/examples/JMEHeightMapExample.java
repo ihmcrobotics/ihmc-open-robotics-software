@@ -17,7 +17,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class JMEHeightMapExample
 {

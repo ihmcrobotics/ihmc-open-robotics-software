@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.util.environments.ContactableToroidRobo
 import us.ihmc.simulationconstructionset.util.environments.PointMassRobot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class ExampleContactSimulationWithMultipleObjects
 {

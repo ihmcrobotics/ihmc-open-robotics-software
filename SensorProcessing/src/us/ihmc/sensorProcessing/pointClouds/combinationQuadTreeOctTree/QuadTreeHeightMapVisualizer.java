@@ -12,7 +12,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundLeaf;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundNode;
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
+import us.ihmc.robotics.geometry.BoundingBox2d;
 
 public class QuadTreeHeightMapVisualizer
 {

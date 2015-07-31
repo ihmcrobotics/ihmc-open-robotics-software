@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset.util.ground;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
 public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap

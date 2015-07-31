@@ -1,8 +1,6 @@
 package us.ihmc.utilities.ros.msgToPacket.converter;
 
 import com.google.common.base.CaseFormat;
-import sun.reflect.generics.tree.Tree;
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
 
 /**
@@ -28,13 +26,12 @@ import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
-import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 
 public class GenericRosMessageConverter

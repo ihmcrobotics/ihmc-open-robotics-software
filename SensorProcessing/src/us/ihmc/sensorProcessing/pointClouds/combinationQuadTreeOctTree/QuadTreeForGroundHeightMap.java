@@ -11,7 +11,7 @@ import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGround;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundPutResult;
-import us.ihmc.utilities.math.geometry.InclusionFunction;
+import us.ihmc.robotics.geometry.InclusionFunction;
 
 public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements QuadTreeHeightMapInterface
 {

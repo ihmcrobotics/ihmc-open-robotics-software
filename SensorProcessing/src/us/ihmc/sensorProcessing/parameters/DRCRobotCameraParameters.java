@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.parameters;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class DRCRobotCameraParameters implements DRCRobotSensorParameters

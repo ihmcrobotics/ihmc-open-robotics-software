@@ -21,7 +21,7 @@ import us.ihmc.utilities.inputDevices.keyboard.KeyListener;
 import us.ihmc.utilities.inputDevices.mouse.MouseListener;
 import us.ihmc.utilities.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class NullGraphics3DAdapter implements Graphics3DAdapter
 {

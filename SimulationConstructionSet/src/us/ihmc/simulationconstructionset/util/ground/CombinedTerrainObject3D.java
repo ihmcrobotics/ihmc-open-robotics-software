@@ -9,9 +9,9 @@ import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
-import us.ihmc.utilities.math.geometry.Box3d;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.Box3d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 
 public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNormals

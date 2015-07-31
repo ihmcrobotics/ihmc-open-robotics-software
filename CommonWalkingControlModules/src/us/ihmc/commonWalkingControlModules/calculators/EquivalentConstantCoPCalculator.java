@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.calculators;
 
-import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector2d;
 
 public class EquivalentConstantCoPCalculator
 {

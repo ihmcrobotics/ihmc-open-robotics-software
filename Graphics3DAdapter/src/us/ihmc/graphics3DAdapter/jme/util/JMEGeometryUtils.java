@@ -2,7 +2,7 @@ package us.ihmc.graphics3DAdapter.jme.util;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;

@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.math.trajectories.WaypointOrientationTrajectoryData;
 import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
 

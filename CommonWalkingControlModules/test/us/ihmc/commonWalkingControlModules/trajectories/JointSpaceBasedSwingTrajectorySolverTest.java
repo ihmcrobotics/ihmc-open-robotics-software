@@ -23,7 +23,7 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.math.geometry.Line2d;
+import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.utilities.math.trajectories.ParametricSplineTrajectory;
 import us.ihmc.utilities.math.trajectories.ParametricSplineTrajectorySolver;
 

@@ -1,6 +1,6 @@
 package us.ihmc.graphics3DAdapter;
 
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public interface HeightMap
 {

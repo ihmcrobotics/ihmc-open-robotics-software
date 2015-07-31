@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableRollingBody;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2d;
 
 public class RollingContactStateCommand
 {

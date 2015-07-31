@@ -22,8 +22,8 @@ import us.ihmc.simulationconstructionset.util.ground.StairGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStone;
 import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStonesGroundProfile;
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class CommonTerrain

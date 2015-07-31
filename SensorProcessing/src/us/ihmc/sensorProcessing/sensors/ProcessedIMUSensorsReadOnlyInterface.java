@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.sensors;
 
 import javax.vecmath.Quat4d;
 
-import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector;
 
 public interface ProcessedIMUSensorsReadOnlyInterface
 {
