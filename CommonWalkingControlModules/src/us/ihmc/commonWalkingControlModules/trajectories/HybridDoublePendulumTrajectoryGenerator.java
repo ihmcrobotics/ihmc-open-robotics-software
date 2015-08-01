@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import org.ejml.simple.SimpleMatrix;
-import us.ihmc.utilities.math.numericalMethods.RungeKuttaSimulation;
+import us.ihmc.robotics.numericalMethods.RungeKuttaSimulation;
 import us.ihmc.robotics.trajectories.ParametricSplineTrajectory;
 import us.ihmc.robotics.trajectories.ParametricSplineTrajectorySolver;
 
