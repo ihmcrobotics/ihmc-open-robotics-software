@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.simple.SimpleMatrix;
-import us.ihmc.utilities.math.numericalMethods.RungeKuttaSimulation;
+import us.ihmc.robotics.numericalMethods.RungeKuttaSimulation;
 
 import java.util.Arrays;
 
