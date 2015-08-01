@@ -12,7 +12,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.engine.jerry.LinkPhysics;
 import us.ihmc.simulationconstructionset.robotdefinition.LinkDefinitionFixedFrame;
-import us.ihmc.utilities.math.InertiaTools;
+import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 /**

@@ -14,7 +14,7 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.utilities.math.RotationalInertiaCalculator;
+import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.FrameCylinder3d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;

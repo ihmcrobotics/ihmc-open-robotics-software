@@ -23,7 +23,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.utilities.containers.EnumTools;
 import us.ihmc.utilities.inputDevices.keyboard.Key;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.utilities.math.RotationalInertiaCalculator;
+import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.Box3d;
 import us.ihmc.robotics.geometry.Box3d.FaceName;
 import us.ihmc.robotics.geometry.Direction;
