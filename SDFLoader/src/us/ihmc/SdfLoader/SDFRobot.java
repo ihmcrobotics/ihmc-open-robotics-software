@@ -48,7 +48,7 @@ import us.ihmc.utilities.FormattingTools;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
-import us.ihmc.utilities.math.InertiaTools;
+import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

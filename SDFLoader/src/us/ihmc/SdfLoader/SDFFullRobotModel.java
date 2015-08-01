@@ -29,7 +29,7 @@ import us.ihmc.robotics.humanoidRobot.partNames.LimbName;
 import us.ihmc.robotics.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.robotics.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.humanoidRobot.partNames.SpineJointName;
-import us.ihmc.utilities.math.InertiaTools;
+import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;

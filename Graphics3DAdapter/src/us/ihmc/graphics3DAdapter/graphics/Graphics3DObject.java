@@ -31,7 +31,7 @@ import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.utilities.math.InertiaTools;
+import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.Shape3d;

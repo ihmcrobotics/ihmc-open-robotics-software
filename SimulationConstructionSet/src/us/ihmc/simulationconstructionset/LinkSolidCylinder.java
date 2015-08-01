@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.utilities.Axis;
-import us.ihmc.utilities.math.RotationalInertiaCalculator;
+import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;

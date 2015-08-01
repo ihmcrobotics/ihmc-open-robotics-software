@@ -25,7 +25,7 @@ import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.inputDevices.keyboard.Key;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.utilities.math.RotationalInertiaCalculator;
+import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.FrameBox3d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
