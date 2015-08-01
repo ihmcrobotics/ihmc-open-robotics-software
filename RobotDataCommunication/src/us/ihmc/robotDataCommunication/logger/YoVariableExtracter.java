@@ -51,8 +51,7 @@ public class YoVariableExtracter
 
       YoVariableHandshakeParser parser = new YoVariableHandshakeParser("logged", true);
       parser.parseFrom(handshakeData);
-
-      YoVariableRegistry registry = parser.getYoVariableRegistry();
+      YoVariableRegistry registry = parser.getRootRegistry();
 
       File logdata = new File(logFile, logProperties.getVariableDataFile());
       if(!logdata.exists())
@@ -68,8 +67,6 @@ public class YoVariableExtracter
       int bufferSize = (1 + jointStateOffset + numberOfJointStates) * 8;
 
       new YoVariableDialog(bufferSize, logChannel, variables, registry);
-
-
    }
 
    public static void main(String[] args) throws IOException
@@ -170,9 +167,7 @@ public class YoVariableExtracter
          ArrayList<YoVariable<?>> matchingVariables = registry.getMatchingVariables(search, regexp);
          YoVariable<?>[] variables = matchingVariables.toArray(new YoVariable[matchingVariables.size()]);
          
-         
          result.setListData(variables);
-         
       }
 
       @Override

@@ -39,14 +39,13 @@ public class YoVariableHandshakeParser
 {
    private final String registryPrefix;
    private final boolean registerYoVariables;
-   private YoVariableRegistry registry;
-   private double dt;
-   private final ArrayList<YoVariableRegistry> registries = new ArrayList<YoVariableRegistry>();
-   private final ArrayList<YoVariable<?>> variables = new ArrayList<YoVariable<?>>();
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ArrayList<JointState<? extends Joint>> jointStates = new ArrayList<>();
 
+   private double dt;
    private int bufferSize;
+   private List<YoVariableRegistry> registries = new ArrayList<>();
+   private List<YoVariable<?>> variables = new ArrayList<>();
    
    public YoVariableHandshakeParser(String registryPrefix, boolean registerYoVariables)
    {
@@ -54,12 +53,7 @@ public class YoVariableHandshakeParser
       this.registryPrefix = registryPrefix;
    }
 
-   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
-   {
-      return yoGraphicsListRegistry;
-   }
-
-   private static YoProtoHandshake parseYoProtoHandshake(byte[] handShake) 
+   private static YoProtoHandshake parseYoProtoHandshake(byte[] handShake)
    {
       try
       {
@@ -91,12 +85,9 @@ public class YoVariableHandshakeParser
       this.dt = yoProtoHandshake.getDt();
       if(registerYoVariables)
       {
-         YoRegistryDefinition rootDefinition = yoProtoHandshake.getRegistry(0);
-         registry = new YoVariableRegistry(registryPrefix + rootDefinition.getName());
-         registries.add(registry);
-         addChildRegistries(yoProtoHandshake);
-   
-         addVariables(yoProtoHandshake);
+         registries = parseRegistries(yoProtoHandshake, registryPrefix);
+         variables = parseVariables(yoProtoHandshake, registries);
+
          addJointStates(yoProtoHandshake);
          addGraphicObjects(yoProtoHandshake);
       }
@@ -105,7 +96,74 @@ public class YoVariableHandshakeParser
       int numberOfJointStateVariables = getNumberOfJointStateVariables(yoProtoHandshake);
       this.bufferSize = (1 + numberOfVariables + numberOfJointStateVariables) * 8;
    }
-   
+
+   public static List<YoVariableRegistry> parseRegistries(YoProtoHandshake yoProtoHandshake, String registryPrefix)
+   {
+      YoRegistryDefinition rootDefinition = yoProtoHandshake.getRegistry(0);
+      YoVariableRegistry rootRegistry = new YoVariableRegistry(registryPrefix + rootDefinition.getName());
+
+      List<YoVariableRegistry> registryList = new ArrayList<>();
+      registryList.add(rootRegistry);
+
+      for (int i = 1; i < yoProtoHandshake.getRegistryCount(); i++)
+      {
+         YoRegistryDefinition registryDefinition = yoProtoHandshake.getRegistry(i);
+         YoVariableRegistry registry = new YoVariableRegistry(registryDefinition.getName());
+         registryList.add(registry);
+         registryList.get(registryDefinition.getParent()).addChild(registry);
+      }
+
+      return registryList;
+   }
+
+   public static List<YoVariable<?>> parseVariables(YoProtoHandshake yoProtoHandshake, List<YoVariableRegistry> registryList)
+   {
+      List<YoVariable<?>> variableList = new ArrayList<>();
+      for (YoVariableDefinition yoVariableDefinition : yoProtoHandshake.getVariableList())
+      {
+         String name = yoVariableDefinition.getName();
+         int registryIndex = yoVariableDefinition.getRegistry();
+         YoVariableRegistry parent = registryList.get(registryIndex);
+
+         YoVariableDefinition.YoProtoType type = yoVariableDefinition.getType();
+         switch (type)
+         {
+            case DoubleYoVariable:
+               DoubleYoVariable doubleVar = new DoubleYoVariable(name, parent);
+               variableList.add(doubleVar);
+               break;
+
+            case IntegerYoVariable:
+               IntegerYoVariable intVar = new IntegerYoVariable(name, parent);
+               variableList.add(intVar);
+               break;
+
+            case BooleanYoVariable:
+               BooleanYoVariable boolVar = new BooleanYoVariable(name, parent);
+               variableList.add(boolVar);
+               break;
+
+            case LongYoVariable:
+               LongYoVariable longVar = new LongYoVariable(name, parent);
+               variableList.add(longVar);
+               break;
+
+            case EnumYoVariable:
+               List<String> values = yoVariableDefinition.getEnumValuesList();
+               String[] names = values.toArray(new String[values.size()]);
+               boolean allowNullValues = (!yoVariableDefinition.hasAllowNullValues() || yoVariableDefinition.getAllowNullValues());
+               EnumYoVariable enumVar = new EnumYoVariable(name, "", parent, allowNullValues, names);
+               variableList.add(enumVar);
+               break;
+
+            default:
+               throw new RuntimeException("Unknown YoVariable type: " + type.name());
+         }
+      }
+
+      return variableList;
+   }
+
    private int getNumberOfJointStateVariables(YoProtoHandshake yoProtoHandshake)
    {
       int numberOfJointStates = 0;
@@ -125,8 +183,6 @@ public class YoVariableHandshakeParser
          jointStates.add(JointState.createJointState(joint.getName(), joint.getType()));
       }
    }
-   
-   
 
    private void addGraphicObjects(YoProtoHandshake yoProtoHandshake)
    {
@@ -189,9 +245,9 @@ public class YoVariableHandshakeParser
       return YoGraphicFactory.yoGraphicFromMessage(type, name, vars, consts, appearance);
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoVariableRegistry getRootRegistry()
    {
-      return registry;
+      return registries.get(0);
    }
 
    public List<JointState<? extends Joint>> getJointStates()
@@ -199,65 +255,19 @@ public class YoVariableHandshakeParser
       return Collections.unmodifiableList(jointStates);
    }
 
-   private void addChildRegistries(YoProtoHandshake yoProtoHandshake)
-   {
-      for (int i = 1; i < yoProtoHandshake.getRegistryCount(); i++)
-      {
-         YoRegistryDefinition registryDefinition = yoProtoHandshake.getRegistry(i);
-         YoVariableRegistry registry = new YoVariableRegistry(registryDefinition.getName());
-         registries.add(registry);
-         registries.get(registryDefinition.getParent()).addChild(registry);
-      }
-   }
-
    public List<YoVariable<?>> getYoVariablesList()
    {
       return Collections.unmodifiableList(variables);
    }
 
-   private void addVariables(YoProtoHandshake yoProtoHandshake)
+   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
    {
-      for (YoVariableDefinition yoVariableDefinition : yoProtoHandshake.getVariableList())
-      {
-         String name = yoVariableDefinition.getName();
-         YoVariableRegistry parent = registries.get(yoVariableDefinition.getRegistry());
-   
-         YoVariable<?> variable;
-         switch (yoVariableDefinition.getType())
-         {
-         case DoubleYoVariable:
-            variable = new DoubleYoVariable(name, parent);
-            break;
-         case IntegerYoVariable:
-            variable = new IntegerYoVariable(name, parent);
-            break;
-         case BooleanYoVariable:
-            variable = new BooleanYoVariable(name, parent);
-            break;
-         case LongYoVariable:
-            variable = new LongYoVariable(name, parent);
-            break;
-         case EnumYoVariable:
-            List<String> values = yoVariableDefinition.getEnumValuesList();
-            boolean allowNullValues = yoVariableDefinition.hasAllowNullValues() ? yoVariableDefinition.getAllowNullValues() : true;
-            variable = (YoVariable<?>) new EnumYoVariable(name, "", parent, allowNullValues, values.toArray(new String[values.size()]));
-            break;
-         default:
-            throw new RuntimeException();
-         }
-   
-         variables.add(variable);
-      }
+      return yoGraphicsListRegistry;
    }
 
    public double getDt()
    {
       return dt;
-   }
-   
-   public YoVariableRegistry getRootRegistry()
-   {
-      return registry;
    }
 
    public int getBufferSize()
