@@ -12,7 +12,7 @@ import org.ejml.ops.NormOps;
 
 import us.ihmc.robotics.kinematics.InverseJacobianSolver;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;

@@ -30,7 +30,7 @@ import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.utilities.test.JUnitTools;
 public class GenericActiveSetQPSolverTest
 {

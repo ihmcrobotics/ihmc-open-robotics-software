@@ -40,7 +40,7 @@ import us.ihmc.robotics.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.robotics.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;

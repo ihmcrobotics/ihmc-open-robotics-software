@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
-import us.ihmc.utilities.math.linearAlgebra.NullspaceCalculator;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 
 public class MotionConstraintSingularityEscapeHandler
