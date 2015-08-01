@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsR
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

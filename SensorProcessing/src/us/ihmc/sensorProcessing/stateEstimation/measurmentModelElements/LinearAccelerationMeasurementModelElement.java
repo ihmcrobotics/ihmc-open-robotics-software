@@ -10,7 +10,7 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;

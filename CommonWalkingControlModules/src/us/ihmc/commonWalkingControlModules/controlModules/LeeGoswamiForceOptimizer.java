@@ -11,7 +11,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.LeeGoswamiForceOptimizerNative;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
-import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;

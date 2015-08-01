@@ -39,7 +39,7 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.utilities.math.linearAlgebra.NullspaceCalculator;
+import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
 import us.ihmc.robotics.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;

@@ -10,7 +10,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.MeasurementModelElement;
-import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class MeasurementModel
 {

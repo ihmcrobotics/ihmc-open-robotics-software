@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
 import us.ihmc.robotics.humanoidRobot.partNames.RobotSpecificJointNames;
-import us.ihmc.utilities.math.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
