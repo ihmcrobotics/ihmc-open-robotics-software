@@ -1,11 +1,13 @@
 package us.ihmc.robotDataCommunication;
 
 import java.net.SocketTimeoutException;
+import java.util.List;
 
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionDisplay;
 import us.ihmc.multicastLogDataProtocol.control.LogControlClient;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class YoVariableClient
 {
@@ -64,10 +66,10 @@ public class YoVariableClient
       handshakeParser.parseFrom(handshake.protoShake);
 
       listener.start(handshake, handshakeParser);
-
       if (listener.changesVariables())
       {
-         logControlClient.startVariableChangedProducers(handshakeParser.getYoVariablesList());
+         List<YoVariable<?>> variablesList = handshakeParser.getYoVariablesList();
+         logControlClient.startVariableChangedProducers(variablesList, listener.executeVariableChangedListeners());
       }
 
       int bufferSize = handshakeParser.getBufferSize();
