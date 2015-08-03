@@ -4,7 +4,7 @@ import us.ihmc.graphics3DAdapter.GPULidar;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulatedSensor;
-import us.ihmc.utilities.lidar.LidarScanParameters;
+import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class LidarMount implements SimulatedSensor

@@ -19,7 +19,7 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.utilities.inputDevices.keyboard.KeyListener;
 import us.ihmc.utilities.inputDevices.mouse.MouseListener;
 import us.ihmc.utilities.inputDevices.mouse3DJoystick.Mouse3DListener;
-import us.ihmc.utilities.lidar.LidarScanParameters;
+import us.ihmc.robotics.lidar.LidarScanParameters;
 
 /*
 * Pass-through class to avoid having to import JME on all projects

@@ -18,8 +18,8 @@ import java.util.regex.Pattern;
 import javax.vecmath.Point3d;
 
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.utilities.lidar.LidarScan;
-import us.ihmc.utilities.lidar.LidarScanParameters;
+import us.ihmc.robotics.lidar.LidarScan;
+import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 import com.jme3.app.SimpleApplication;

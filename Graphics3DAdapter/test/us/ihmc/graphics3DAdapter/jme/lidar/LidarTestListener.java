@@ -1,6 +1,6 @@
 package us.ihmc.graphics3DAdapter.jme.lidar;
 
-import us.ihmc.utilities.lidar.LidarScan;
+import us.ihmc.robotics.lidar.LidarScan;
 
 public interface LidarTestListener
 {

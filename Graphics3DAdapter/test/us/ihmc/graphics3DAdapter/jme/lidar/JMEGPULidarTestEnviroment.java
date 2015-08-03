@@ -10,7 +10,7 @@ import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.utils.lidar.Graphics3DLidarScan;
 import us.ihmc.robotics.Axis;
-import us.ihmc.utilities.lidar.LidarScan;
+import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.geometry.Sphere3d;
 
 import com.jme3.material.Material;

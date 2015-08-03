@@ -7,8 +7,8 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.utilities.lidar.LidarScan;
-import us.ihmc.utilities.lidar.LidarScanParameters;
+import us.ihmc.robotics.lidar.LidarScan;
+import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 import com.jme3.scene.Node;
