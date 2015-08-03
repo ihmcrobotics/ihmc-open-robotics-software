@@ -5,9 +5,9 @@ import java.util.HashMap;
 
 import org.ddogleg.optimization.functions.FunctionNtoM;
 
-import us.ihmc.utilities.frictionModels.FrictionModel;
-import us.ihmc.utilities.frictionModels.JointFrictionModel;
-import us.ihmc.utilities.frictionModels.PressureBasedFrictionModel;
+import us.ihmc.robotics.frictionModels.FrictionModel;
+import us.ihmc.robotics.frictionModels.JointFrictionModel;
+import us.ihmc.robotics.frictionModels.PressureBasedFrictionModel;
 
 /**
  * Use this class to compute the error between measured joint torque and predicted joint torque for a set of samples.
