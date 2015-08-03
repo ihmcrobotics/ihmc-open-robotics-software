@@ -5,7 +5,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
 import us.ihmc.simulationconstructionset.util.ground.*;
-import us.ihmc.utilities.Axis;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.Box3d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

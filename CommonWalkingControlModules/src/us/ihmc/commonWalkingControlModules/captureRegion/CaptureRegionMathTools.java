@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;

@@ -22,7 +22,7 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableCinderBlockTerrain
 import us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TrussWithSimpleCollisions;
-import us.ihmc.utilities.Axis;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.Box3d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

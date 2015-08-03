@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.Axis;
+import us.ihmc.robotics.Axis;
 
 /**
  * Title:        Yobotics! Simulation Construction Set<p>

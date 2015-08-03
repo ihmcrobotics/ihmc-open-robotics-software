@@ -29,7 +29,7 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DScal
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.utilities.Axis;
+import us.ihmc.robotics.Axis;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;

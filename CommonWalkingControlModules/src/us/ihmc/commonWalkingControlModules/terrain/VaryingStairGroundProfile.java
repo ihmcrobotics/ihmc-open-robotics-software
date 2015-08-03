@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
 
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
 

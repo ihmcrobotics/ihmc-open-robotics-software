@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.combined;
 import java.util.LinkedHashMap;
 
 import us.ihmc.sensorProcessing.ProcessedVelocitySensor;
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotics.MathTools;
 
 public class WeightedSubtractionVelocitySensor extends LinearCombinationVelocitySensor
 {

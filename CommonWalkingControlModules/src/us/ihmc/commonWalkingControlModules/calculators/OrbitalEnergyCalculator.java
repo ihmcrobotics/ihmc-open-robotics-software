@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.calculators;
 
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
 

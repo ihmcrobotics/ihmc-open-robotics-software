@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SliderJoint;
 import us.ihmc.simulationconstructionset.UniversalJoint;
-import us.ihmc.utilities.Axis;
+import us.ihmc.robotics.Axis;
 
 public class StewartPlatformRobot extends Robot
 {

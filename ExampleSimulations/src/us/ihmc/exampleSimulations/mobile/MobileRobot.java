@@ -9,7 +9,7 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GimbalJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.utilities.Axis;
+import us.ihmc.robotics.Axis;
 
 
 /**

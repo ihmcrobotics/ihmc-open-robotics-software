@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.gui.GUISetterUpperRegistry;
 import us.ihmc.utilities.containers.ContainerTools;
 import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
 import us.ihmc.robotics.humanoidRobot.partNames.RobotSpecificJointNames;
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

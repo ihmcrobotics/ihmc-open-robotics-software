@@ -4,7 +4,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.Axis;
+import us.ihmc.robotics.Axis;
 
 public class UniversalJoint extends PinJoint
 {
