@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wanderer.hardware.WandererJoint;
 import us.ihmc.wanderer.hardware.WandererUtil;
 import us.ihmc.wanderer.hardware.command.WandererCommand;

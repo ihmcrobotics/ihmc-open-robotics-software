@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.steppr.parameters.BonoRobotModel;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

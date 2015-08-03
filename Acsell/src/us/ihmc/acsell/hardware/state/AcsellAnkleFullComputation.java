@@ -7,7 +7,7 @@ import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.acsell.hardware.configuration.AcsellAnkleKinematicParameters;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class AcsellAnkleFullComputation implements AcsellAnkleAngleCalculator
 {	   
