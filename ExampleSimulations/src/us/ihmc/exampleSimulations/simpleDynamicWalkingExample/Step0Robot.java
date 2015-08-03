@@ -14,7 +14,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SliderJoint;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-import us.ihmc.utilities.Axis;
+import us.ihmc.robotics.Axis;
 
 
 public class Step0Robot extends Robot

@@ -6,7 +6,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.communication.packets.dataobjects.BlindWalkingDirection;
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;

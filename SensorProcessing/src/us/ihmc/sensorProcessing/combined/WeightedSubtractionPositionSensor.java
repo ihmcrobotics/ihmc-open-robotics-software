@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.combined;
 import java.util.LinkedHashMap;
 
 import us.ihmc.sensorProcessing.ProcessedPositionSensor;
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotics.MathTools;
 
 public class WeightedSubtractionPositionSensor extends LinearCombinationPositionSensor
 {

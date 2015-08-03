@@ -4,7 +4,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DScaleInstruction;
-import us.ihmc.utilities.Axis;
+import us.ihmc.robotics.Axis;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.light.AmbientLight;

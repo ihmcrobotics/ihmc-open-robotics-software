@@ -5,7 +5,7 @@ import java.awt.Graphics;
 
 import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Drawing2DTools;
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 

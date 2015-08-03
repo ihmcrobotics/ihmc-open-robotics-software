@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.util.perturbance;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotics.MathTools;
 
 public class ParticleCollisionCalculator
 {

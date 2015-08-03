@@ -7,7 +7,7 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SliderJoint;
-import us.ihmc.utilities.Axis;
+import us.ihmc.robotics.Axis;
 
 public class VelocityControlEvaluationRobot extends Robot
 {

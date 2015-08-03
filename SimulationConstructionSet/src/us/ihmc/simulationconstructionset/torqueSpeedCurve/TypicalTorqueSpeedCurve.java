@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.torqueSpeedCurve;
 
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotics.MathTools;
 
 public class TypicalTorqueSpeedCurve implements TorqueSpeedCurve
 {

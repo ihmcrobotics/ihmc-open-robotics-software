@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotics.MathTools;
 
 /**
  * @author Peter Abeles

@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset.util.simulationTesting;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class BodyPositionSimulationComparer implements SimulationComparer
