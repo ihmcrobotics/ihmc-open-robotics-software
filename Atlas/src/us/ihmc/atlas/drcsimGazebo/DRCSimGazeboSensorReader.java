@@ -46,7 +46,7 @@ public class DRCSimGazeboSensorReader implements SensorReader
 
    private final IMUDefinition imu;
 
-   private final SocketChannel channel;
+   private SocketChannel channel;
 
    private final int jointDataLength;
    private final int imuDataLength;
@@ -84,6 +84,22 @@ public class DRCSimGazeboSensorReader implements SensorReader
       try
       {
          channel = SocketChannel.open();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+
+      parentRegistry.addChild(registry);
+   }
+
+   private long previousTimestamp = 0L;
+   private long currentTimestamp = 0L;
+
+   public void connect()
+   {
+      try
+      {
          channel.configureBlocking(true);
          channel.socket().setKeepAlive(true);
          channel.socket().setReuseAddress(true);
@@ -98,11 +114,7 @@ public class DRCSimGazeboSensorReader implements SensorReader
       {
          throw new RuntimeException(e);
       }
-      parentRegistry.addChild(registry);
    }
-
-   private long previousTimestamp = 0L;
-   private long currentTimestamp = 0L;
    
    @Override
    public void read()

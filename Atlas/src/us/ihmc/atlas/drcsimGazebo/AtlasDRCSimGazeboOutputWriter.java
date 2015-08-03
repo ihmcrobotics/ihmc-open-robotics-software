@@ -18,6 +18,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolderReadOnly;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -110,8 +111,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
       Collections.sort(joints, new Comparator<OneDoFJoint>()
       {
 
-         @Override
-         public int compare(OneDoFJoint o1, OneDoFJoint o2)
+         @Override public int compare(OneDoFJoint o1, OneDoFJoint o2)
          {
             return o1.getName().compareTo(o2.getName());
          }
@@ -159,6 +159,54 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
       {
          channel.write(jointCommand);
       }
+   }
+
+   public void connect()
+   {
+//      try
+//      {
+//
+//      }
+//      catch (IOException e)
+//      {
+//         throw new RuntimeException(e);
+//      }
+
+      boolean isConnected = false;
+      System.out.println("[DRCSim] Connecting to " + address);
+      while(!isConnected)
+      {
+         try
+         {
+            channel = SocketChannel.open();
+            channel.configureBlocking(true);
+            channel.socket().setKeepAlive(true);
+            channel.socket().setReuseAddress(true);
+            channel.socket().setSoLinger(false, 0);
+            channel.socket().setTcpNoDelay(true);
+
+            channel.connect(address);
+            isConnected = true;
+            sendInitialState();
+         }
+         catch (IOException e)
+         {
+            System.out.println("Connect failed.");
+            try
+            {
+               channel.close();
+            }
+            catch (IOException e1)
+            {
+               e1.printStackTrace();
+            }
+            ThreadTools.sleep(3000);
+            isConnected = false;
+         }
+      }
+
+      System.out.println("[DRCSim] Connected");
+      System.out.println("num of joints = " + joints.size());
    }
 
    @Override
