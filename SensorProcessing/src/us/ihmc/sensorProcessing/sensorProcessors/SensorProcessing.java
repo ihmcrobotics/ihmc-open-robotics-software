@@ -18,7 +18,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
-import us.ihmc.utilities.IMUDefinition;
+import us.ihmc.robotics.humanoidRobot.model.IMUDefinition;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;

@@ -21,7 +21,7 @@ import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
-import us.ihmc.utilities.IMUDefinition;
+import us.ihmc.robotics.humanoidRobot.model.IMUDefinition;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
