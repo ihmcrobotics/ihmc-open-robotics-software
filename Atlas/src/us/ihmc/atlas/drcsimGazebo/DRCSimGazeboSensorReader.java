@@ -28,6 +28,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.robotics.humanoidRobot.model.IMUDefinition;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
@@ -81,15 +82,6 @@ public class DRCSimGazeboSensorReader implements SensorReader
       data = ByteBuffer.allocate(16 + jointDataLength + imuDataLength + forceSensorDataLength);
       data.order(ByteOrder.nativeOrder());
 
-      try
-      {
-         channel = SocketChannel.open();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-
       parentRegistry.addChild(registry);
    }
 
@@ -98,22 +90,40 @@ public class DRCSimGazeboSensorReader implements SensorReader
 
    public void connect()
    {
-      try
+      boolean isConnected = false;
+      System.out.println("[DRCSimGazeboSensorReader] Connecting to " + address);
+      
+      while(!isConnected)
       {
-         channel.configureBlocking(true);
-         channel.socket().setKeepAlive(true);
-         channel.socket().setReuseAddress(true);
-         channel.socket().setSoLinger(false, 0);
-         channel.socket().setTcpNoDelay(true);
+         try
+         {
+            channel = SocketChannel.open();
+            channel.configureBlocking(true);
+            channel.socket().setKeepAlive(true);
+            channel.socket().setReuseAddress(true);
+            channel.socket().setSoLinger(false, 0);
+            channel.socket().setTcpNoDelay(true);
 
-         System.out.println("[DRCSim] Connecting to " + address);
-         channel.connect(address);
-         System.out.println("[DRCSim] Connected");
+            channel.connect(address);
+            isConnected = true;
+         }
+         catch (IOException e)
+         {
+            System.out.println("Connect failed.");
+            try
+            {
+               channel.close();
+            }
+            catch (IOException e1)
+            {
+               e1.printStackTrace();
+            }
+            ThreadTools.sleep(3000);
+            isConnected = false;
+         }
       }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+
+      System.out.println("[DRCSimGazeboSensorReader] Connecting to " + address);
    }
    
    @Override

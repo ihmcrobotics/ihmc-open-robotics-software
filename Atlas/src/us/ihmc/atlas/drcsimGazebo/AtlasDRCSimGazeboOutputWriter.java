@@ -120,26 +120,6 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
       jointCommand = ByteBuffer.allocate(joints.size() * 8 + 24);
       jointCommand.order(ByteOrder.nativeOrder());
 
-      try
-      {
-         channel = SocketChannel.open();
-         channel.configureBlocking(true);
-         channel.socket().setKeepAlive(true);
-         channel.socket().setReuseAddress(true);
-         channel.socket().setSoLinger(false, 0);
-         channel.socket().setTcpNoDelay(true);
-
-         System.out.println("[DRCSim] Connecting to " + address);
-         channel.connect(address);
-         System.out.println("[DRCSim] Connected");
-
-         sendInitialState();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-
       System.out.println("num of joints = " + joints.size());
    }
 
@@ -173,7 +153,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
 //      }
 
       boolean isConnected = false;
-      System.out.println("[DRCSim] Connecting to " + address);
+      System.out.println("[AtlasDRCSimGazeboOutputWriter] Connecting to " + address);
       while(!isConnected)
       {
          try
@@ -205,7 +185,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
          }
       }
 
-      System.out.println("[DRCSim] Connected");
+      System.out.println("[AtlasDRCSimGazeboOutputWriter] Connected");
       System.out.println("num of joints = " + joints.size());
    }
 
