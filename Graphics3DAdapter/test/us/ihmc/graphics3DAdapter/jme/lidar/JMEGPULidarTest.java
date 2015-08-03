@@ -15,7 +15,7 @@ import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidarSphere270FovTest;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.lidar.polarLidar.LidarScan;
+import us.ihmc.utilities.lidar.LidarScan;
 import us.ihmc.utilities.test.JUnitTools;
 
 @BambooPlan(planType={BambooPlanType.UI})

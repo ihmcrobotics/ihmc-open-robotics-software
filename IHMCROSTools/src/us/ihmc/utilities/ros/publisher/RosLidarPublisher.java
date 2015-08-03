@@ -4,7 +4,7 @@ import org.ros.message.Time;
 
 import std_msgs.Header;
 import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
-import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
+import us.ihmc.utilities.lidar.LidarScanParameters;
 
 public class RosLidarPublisher extends RosTopicPublisher<sensor_msgs.LaserScan>
 {
