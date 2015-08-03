@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.fingers;
 import us.ihmc.communication.packets.dataobjects.HandJointName;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.robotics.humanoidRobot.partNames.FingerName;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ValkyrieHandModel implements HandModel
 {
