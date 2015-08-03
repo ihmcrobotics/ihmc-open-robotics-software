@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.kinematics.transmissions;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.Axis;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
