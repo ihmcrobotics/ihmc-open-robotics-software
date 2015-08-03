@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.steppr.hardware.StepprJoint;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

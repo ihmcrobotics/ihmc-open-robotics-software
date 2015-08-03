@@ -6,7 +6,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.utilities.maps.EnumDoubleMap;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.time.TimeTools;
 import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

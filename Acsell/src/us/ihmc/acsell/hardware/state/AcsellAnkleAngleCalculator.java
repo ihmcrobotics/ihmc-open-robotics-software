@@ -1,7 +1,7 @@
 package us.ihmc.acsell.hardware.state;
 
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public interface AcsellAnkleAngleCalculator
 {

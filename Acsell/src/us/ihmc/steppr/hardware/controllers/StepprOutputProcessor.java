@@ -13,7 +13,7 @@ import us.ihmc.steppr.hardware.configuration.StepprAnkleKinematicParameters;
 import us.ihmc.steppr.hardware.configuration.StepprFourbarProperties;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.SimpleMovingAverageFilteredYoVariable;

@@ -4,7 +4,7 @@ import us.ihmc.acsell.fourbar.FourbarCalculator;
 import us.ihmc.acsell.fourbar.FourbarProperties;
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
