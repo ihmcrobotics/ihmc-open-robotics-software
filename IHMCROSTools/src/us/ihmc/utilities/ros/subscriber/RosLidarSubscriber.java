@@ -1,8 +1,8 @@
 package us.ihmc.utilities.ros.subscriber;
 
 import sensor_msgs.LaserScan;
-import us.ihmc.utilities.lidar.LidarScan;
-import us.ihmc.utilities.lidar.LidarScanParameters;
+import us.ihmc.robotics.lidar.LidarScan;
+import us.ihmc.robotics.lidar.LidarScanParameters;
 
 public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sensor_msgs.LaserScan>
 {

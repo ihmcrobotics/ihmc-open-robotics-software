@@ -2,8 +2,8 @@ package us.ihmc.graphics3DAdapter;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-import us.ihmc.utilities.lidar.LidarScan;
-import us.ihmc.utilities.lidar.LidarScanParameters;
+import us.ihmc.robotics.lidar.LidarScan;
+import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 @SuppressWarnings("serial")

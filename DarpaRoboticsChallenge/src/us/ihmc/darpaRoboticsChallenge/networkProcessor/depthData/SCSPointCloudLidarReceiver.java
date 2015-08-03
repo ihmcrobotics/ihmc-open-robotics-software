@@ -8,7 +8,7 @@ import javax.vecmath.Point3d;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
-import us.ihmc.utilities.lidar.LidarScan;
+import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 

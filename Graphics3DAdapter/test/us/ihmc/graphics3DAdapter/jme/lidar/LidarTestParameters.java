@@ -1,6 +1,6 @@
 package us.ihmc.graphics3DAdapter.jme.lidar;
 
-import us.ihmc.utilities.lidar.LidarScanParameters;
+import us.ihmc.robotics.lidar.LidarScanParameters;
 
 public class LidarTestParameters
 {
