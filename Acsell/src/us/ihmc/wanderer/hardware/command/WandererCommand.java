@@ -10,7 +10,7 @@ import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.acsell.hardware.command.AcsellKneeActuatorCommand;
 import us.ihmc.acsell.hardware.command.AcsellLinearTransmissionActuatorCommand;
 import us.ihmc.acsell.hardware.configuration.AcsellAnkleKinematicParameters;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wanderer.hardware.WandererActuator;
 import us.ihmc.wanderer.hardware.WandererJoint;
 import us.ihmc.wanderer.hardware.configuration.WandererAnkleKinematicParameters;

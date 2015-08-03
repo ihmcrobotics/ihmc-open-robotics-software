@@ -1,7 +1,7 @@
 package us.ihmc.steppr.parameters;
 
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 
 public class BonoOrderedJointNames
