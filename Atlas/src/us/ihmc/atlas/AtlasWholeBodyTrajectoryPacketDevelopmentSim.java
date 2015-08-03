@@ -18,7 +18,7 @@ import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.WholeBodyIKIngressEgressControllerSimulation;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.utilities.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.ReferenceFrame;

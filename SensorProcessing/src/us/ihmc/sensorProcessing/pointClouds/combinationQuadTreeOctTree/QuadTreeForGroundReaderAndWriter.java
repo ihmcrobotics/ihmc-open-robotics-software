@@ -14,7 +14,7 @@ import java.util.StringTokenizer;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.utilities.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
 
