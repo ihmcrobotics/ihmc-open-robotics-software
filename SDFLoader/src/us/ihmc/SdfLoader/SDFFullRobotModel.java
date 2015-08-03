@@ -16,7 +16,7 @@ import us.ihmc.SdfLoader.SDFJointNameMap.JointRole;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
-import us.ihmc.utilities.IMUDefinition;
+import us.ihmc.robotics.humanoidRobot.model.IMUDefinition;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.containers.ContainerTools;
 import us.ihmc.robotics.humanoidRobot.model.ContactSensorDefinition;
