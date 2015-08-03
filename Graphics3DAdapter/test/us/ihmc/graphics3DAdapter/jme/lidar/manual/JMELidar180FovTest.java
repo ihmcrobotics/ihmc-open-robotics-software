@@ -3,7 +3,7 @@ package us.ihmc.graphics3DAdapter.jme.lidar.manual;
 import us.ihmc.graphics3DAdapter.jme.lidar.JMEGPULidarTestEnviroment;
 import us.ihmc.graphics3DAdapter.jme.lidar.LidarTestListener;
 import us.ihmc.graphics3DAdapter.jme.lidar.LidarTestParameters;
-import us.ihmc.utilities.lidar.polarLidar.LidarScan;
+import us.ihmc.utilities.lidar.LidarScan;
 
 public class JMELidar180FovTest extends LidarTestParameters implements LidarTestListener
 {

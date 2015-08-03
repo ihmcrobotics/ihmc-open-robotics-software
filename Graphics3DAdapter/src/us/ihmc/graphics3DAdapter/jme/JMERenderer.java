@@ -51,7 +51,7 @@ import us.ihmc.utilities.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.utilities.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
 import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
+import us.ihmc.utilities.lidar.LidarScanParameters;
 import us.ihmc.utilities.time.Timer;
 
 import com.google.common.collect.HashBiMap;
