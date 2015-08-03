@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2dAndConnectingEdges;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface VirtualToePointCalculator
 {

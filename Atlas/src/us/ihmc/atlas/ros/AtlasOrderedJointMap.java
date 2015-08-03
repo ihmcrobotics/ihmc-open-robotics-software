@@ -3,8 +3,8 @@ package us.ihmc.atlas.ros;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class AtlasOrderedJointMap

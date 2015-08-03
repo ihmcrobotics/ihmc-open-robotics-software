@@ -4,8 +4,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.ThighStatePacket;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class DesiredThighLoadBearingProvider implements PacketConsumer<ThighStatePacket>
 {

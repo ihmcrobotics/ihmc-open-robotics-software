@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointPositions
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface SwingLegAnglesAtEndOfStepEstimator
 {

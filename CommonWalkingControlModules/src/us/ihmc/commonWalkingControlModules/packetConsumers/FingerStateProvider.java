@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FingerStateProvider implements PacketConsumer<FingerStatePacket>
 {

@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface DesiredCenterOfPressureFilter
 {

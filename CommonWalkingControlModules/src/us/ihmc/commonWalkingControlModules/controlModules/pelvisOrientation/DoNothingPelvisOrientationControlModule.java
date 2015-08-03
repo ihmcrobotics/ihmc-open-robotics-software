@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisOrienta
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class DoNothingPelvisOrientationControlModule implements PelvisOrientationControlModule
 {

@@ -4,7 +4,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.net.NetStateListener;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import boofcv.struct.calib.IntrinsicParameters;
 
 public interface CompressedVideoHandler

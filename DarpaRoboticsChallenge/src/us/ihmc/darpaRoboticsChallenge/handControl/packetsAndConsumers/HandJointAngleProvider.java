@@ -11,8 +11,8 @@ import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.utilities.gui.GraphicsUpdatable;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePacket>

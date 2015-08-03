@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.kinematics;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointPositions;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface ArmInverseKinematicsCalculator
 {

@@ -17,7 +17,7 @@ import us.ihmc.codecs.h264.OpenH264Encoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.time.TimeTools;
 import boofcv.struct.calib.IntrinsicParameters;
 

@@ -7,7 +7,7 @@ import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.communication.producers.CompressedVideoHandler;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import boofcv.struct.calib.IntrinsicParameters;
 
 class VideoPacketHandler implements CompressedVideoHandler

@@ -14,7 +14,7 @@ import us.ihmc.robotiq.communication.RobotiqWriteRequestFactory;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gACT;
 import us.ihmc.robotiq.data.RobotiqHandSensorDizzata;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RobotiqHandCommunicator
 {

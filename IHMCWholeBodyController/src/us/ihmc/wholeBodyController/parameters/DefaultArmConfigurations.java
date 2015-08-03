@@ -1,6 +1,6 @@
 package us.ihmc.wholeBodyController.parameters;
 
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface DefaultArmConfigurations
 {

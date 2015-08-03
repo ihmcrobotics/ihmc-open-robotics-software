@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface LegStrengthCalculator
 {

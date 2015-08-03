@@ -12,7 +12,7 @@ import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.ManualHand
 import us.ihmc.robotiq.RobotiqHandCommunicator;
 import us.ihmc.robotiq.data.RobotiqHandSensorDizzata;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;

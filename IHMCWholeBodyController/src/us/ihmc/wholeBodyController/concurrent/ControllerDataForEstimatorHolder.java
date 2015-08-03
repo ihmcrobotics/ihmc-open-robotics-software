@@ -9,8 +9,8 @@ import us.ihmc.robotics.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.humanoidRobot.model.DesiredJointDataHolder;
 import us.ihmc.robotics.humanoidRobot.model.IntermediateDesiredJointDataHolder;
 import us.ihmc.robotics.humanoidRobot.model.RobotMotionStatusHolder;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ControllerDataForEstimatorHolder
 {

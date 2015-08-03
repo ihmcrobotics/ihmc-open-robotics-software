@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 
 
