@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspPieceOfDebrisBehavior;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class GraspPieceOfDebrisTask extends BehaviorTask

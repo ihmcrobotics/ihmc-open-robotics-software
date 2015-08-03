@@ -2,8 +2,8 @@ package us.ihmc.darpaRoboticsChallenge.ros;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosBoolPublisher;
 import us.ihmc.utilities.ros.publisher.RosPoint2dPublisher;

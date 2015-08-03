@@ -32,7 +32,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterface

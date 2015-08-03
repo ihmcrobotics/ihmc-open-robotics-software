@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface HandstepProvider
 {

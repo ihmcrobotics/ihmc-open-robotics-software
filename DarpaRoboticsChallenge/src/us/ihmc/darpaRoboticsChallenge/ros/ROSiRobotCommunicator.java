@@ -11,8 +11,8 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ROSiRobotCommunicator extends AbstractNodeMain
 {

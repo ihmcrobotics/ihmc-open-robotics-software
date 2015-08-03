@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface SwingSubController
 {

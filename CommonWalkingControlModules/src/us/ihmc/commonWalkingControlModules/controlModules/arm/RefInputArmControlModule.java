@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.ArmControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmTorques;
 import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface RefInputArmControlModule extends ArmControlModule
 {

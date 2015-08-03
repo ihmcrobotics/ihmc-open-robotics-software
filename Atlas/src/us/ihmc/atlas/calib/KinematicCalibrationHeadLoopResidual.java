@@ -19,7 +19,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.robotics.humanoidRobot.partNames.LimbName;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.geo.calibration.PlanarCalibrationTarget;

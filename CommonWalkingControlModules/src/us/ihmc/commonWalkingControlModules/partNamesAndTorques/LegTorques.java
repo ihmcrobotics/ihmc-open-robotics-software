@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
 import us.ihmc.robotics.humanoidRobot.partNames.RobotSpecificJointNames;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class LegTorques implements LegTorquesInterface
 {

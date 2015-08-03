@@ -19,7 +19,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 
 
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 

@@ -3,10 +3,7 @@ package us.ihmc.robotiq.data;
 import java.util.Arrays;
 
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
-import us.ihmc.robotiq.communication.RobotiqReadResponse;
-import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gACT;
-import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gGTO;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RobotiqHandSensorData implements HandSensorData
 {

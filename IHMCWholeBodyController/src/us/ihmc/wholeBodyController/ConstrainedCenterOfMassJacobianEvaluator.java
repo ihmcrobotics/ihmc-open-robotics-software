@@ -19,7 +19,7 @@ import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.ConstrainedCenterOfMassJacobianCalculator;
 import us.ihmc.utilities.screwTheory.ConstrainedCentroidalMomentumMatrixCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;

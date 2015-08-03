@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCal
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 
 public class BasicReachableScorer implements StepLocationScorer

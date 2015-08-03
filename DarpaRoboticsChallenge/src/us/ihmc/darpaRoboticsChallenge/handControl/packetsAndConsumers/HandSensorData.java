@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers;
 
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface HandSensorData
 {

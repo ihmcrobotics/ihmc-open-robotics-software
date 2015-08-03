@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface DesiredPelvisOrientationControlModule
 {

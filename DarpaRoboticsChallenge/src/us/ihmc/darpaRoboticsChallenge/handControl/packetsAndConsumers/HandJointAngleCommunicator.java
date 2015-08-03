@@ -10,7 +10,7 @@ import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandJointAngleCommunicator
 {

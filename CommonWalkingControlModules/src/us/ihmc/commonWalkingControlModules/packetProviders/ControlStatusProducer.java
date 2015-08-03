@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.packetProviders;
 
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface ControlStatusProducer
 {

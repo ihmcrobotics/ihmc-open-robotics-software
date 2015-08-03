@@ -6,8 +6,8 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.ArmControlMod
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmTorques;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

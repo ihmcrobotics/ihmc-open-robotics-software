@@ -12,7 +12,7 @@ import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 /**
  * User: Matt

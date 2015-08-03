@@ -49,7 +49,7 @@ import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 import us.ihmc.utilities.time.TimeTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;

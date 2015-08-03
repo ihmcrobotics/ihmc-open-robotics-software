@@ -1,6 +1,6 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 public class AtlasDefaultArmConfigurations implements DefaultArmConfigurations

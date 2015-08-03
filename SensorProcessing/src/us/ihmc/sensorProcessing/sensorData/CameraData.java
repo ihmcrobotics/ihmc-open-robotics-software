@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.sensorData;
 
 import java.awt.image.BufferedImage;
 
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import boofcv.struct.calib.IntrinsicParameters;
 
 public class CameraData

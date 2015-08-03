@@ -7,8 +7,8 @@ import javax.swing.JFrame;
 
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -653,9 +653,11 @@ public class SpringFlamingoFastWalkingController implements RobotController
 //    }
 //
 //if   (rightStateMachine.isCurrentState(States.SWING))
-//{  
+//{
+  
 //    act_lh.val = act_lh.val - act_rh.val;
-//}  
+//}
+  
 
 // T  ransition Conditions:
 

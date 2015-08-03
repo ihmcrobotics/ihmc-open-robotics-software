@@ -6,7 +6,7 @@ import java.util.Arrays;
 import us.ihmc.robotiq.communication.ModbusTCPConnection;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 /* GENERAL INFO
  * (This information assumes right hand for convention)
