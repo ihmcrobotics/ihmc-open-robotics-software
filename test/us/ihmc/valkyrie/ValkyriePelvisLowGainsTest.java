@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.screwTheory.InverseDynamicsCalculatorListener;
+import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 

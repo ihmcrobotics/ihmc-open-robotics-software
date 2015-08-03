@@ -8,7 +8,7 @@ import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
+import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
