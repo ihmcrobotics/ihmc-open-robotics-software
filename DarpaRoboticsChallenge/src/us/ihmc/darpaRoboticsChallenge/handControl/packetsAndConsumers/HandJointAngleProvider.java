@@ -13,7 +13,7 @@ import us.ihmc.utilities.gui.GraphicsUpdatable;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePacket>
 {

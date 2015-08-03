@@ -18,7 +18,7 @@ import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.util.PeriodicThreadScheduler;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;

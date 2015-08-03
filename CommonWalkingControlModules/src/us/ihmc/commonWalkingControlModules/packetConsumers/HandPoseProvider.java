@@ -11,7 +11,7 @@ import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public interface HandPoseProvider
 {

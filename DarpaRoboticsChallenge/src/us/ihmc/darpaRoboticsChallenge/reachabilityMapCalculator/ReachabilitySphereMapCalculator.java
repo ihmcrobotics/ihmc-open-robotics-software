@@ -23,10 +23,10 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.ScrewTestTools;
-import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.ScrewTestTools;
+import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ReachabilitySphereMapCalculator

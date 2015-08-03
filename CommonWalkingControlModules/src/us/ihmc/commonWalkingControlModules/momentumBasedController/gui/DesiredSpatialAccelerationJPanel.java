@@ -10,7 +10,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommandAndMotionConstraint;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
 public class DesiredSpatialAccelerationJPanel extends JPanel
 {

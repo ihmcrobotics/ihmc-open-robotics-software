@@ -2,8 +2,8 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
 import java.util.LinkedHashMap;
 
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class RigidBodyToIndexMap
 {

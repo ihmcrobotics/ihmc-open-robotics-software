@@ -6,7 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class LinearAccelerationSensorConfiguration
 {

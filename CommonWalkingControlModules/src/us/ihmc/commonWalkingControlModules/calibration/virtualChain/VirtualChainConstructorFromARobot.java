@@ -11,8 +11,8 @@ import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RevoluteJointReferenceFrame;
-import us.ihmc.utilities.screwTheory.SixDoFJointReferenceFrame;
+import us.ihmc.robotics.screwTheory.RevoluteJointReferenceFrame;
+import us.ihmc.robotics.screwTheory.SixDoFJointReferenceFrame;
 
 public class VirtualChainConstructorFromARobot
 {

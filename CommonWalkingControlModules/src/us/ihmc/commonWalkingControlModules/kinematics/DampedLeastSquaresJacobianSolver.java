@@ -7,7 +7,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.utilities.screwTheory.JacobianSolver;
+import us.ihmc.robotics.screwTheory.JacobianSolver;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 

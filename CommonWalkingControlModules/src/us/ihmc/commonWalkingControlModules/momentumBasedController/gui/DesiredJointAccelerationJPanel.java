@@ -9,7 +9,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommandAndMotionConstraint;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 
 public class DesiredJointAccelerationJPanel extends JPanel
 {

@@ -5,8 +5,8 @@ import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.ReachabilitySphe
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class ReachabilitySphereMapExample
 {

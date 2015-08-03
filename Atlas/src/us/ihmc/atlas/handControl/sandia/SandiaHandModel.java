@@ -7,7 +7,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.FingerJoint;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class SandiaHandModel
 {

@@ -5,7 +5,7 @@ import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.robotics.humanoidRobot.model.ContactSensorHolder;
 import us.ihmc.robotics.humanoidRobot.model.DesiredJointDataHolder;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public interface SensorReaderFactory

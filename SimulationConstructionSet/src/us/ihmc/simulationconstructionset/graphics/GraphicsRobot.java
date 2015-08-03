@@ -12,8 +12,8 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.graphics.joints.GraphicsJoint;
 import us.ihmc.utilities.gui.GraphicsUpdatable;
 import us.ihmc.robotics.kinematics.CommonJoint;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class GraphicsRobot implements GraphicsUpdatable
 {

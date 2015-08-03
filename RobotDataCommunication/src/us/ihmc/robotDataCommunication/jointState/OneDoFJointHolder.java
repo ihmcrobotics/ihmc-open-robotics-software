@@ -1,7 +1,7 @@
 package us.ihmc.robotDataCommunication.jointState;
 
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class OneDoFJointHolder implements JointHolder
 {

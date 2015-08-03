@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class StateEstimatorSensorDefinitions
 {

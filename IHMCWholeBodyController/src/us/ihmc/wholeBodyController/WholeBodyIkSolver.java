@@ -36,9 +36,9 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJointStateCopier;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 
 /**

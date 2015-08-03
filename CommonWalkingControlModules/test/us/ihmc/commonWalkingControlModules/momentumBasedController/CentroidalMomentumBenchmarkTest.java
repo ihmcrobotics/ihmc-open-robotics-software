@@ -17,15 +17,15 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.CentroidalMomentumMatrix;
-import us.ihmc.utilities.screwTheory.CentroidalMomentumRateADotVTerm;
-import us.ihmc.utilities.screwTheory.CentroidalMomentumRateTermCalculator;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTestTools;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
+import us.ihmc.robotics.screwTheory.CentroidalMomentumRateADotVTerm;
+import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RevoluteJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTestTools;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 
 public class CentroidalMomentumBenchmarkTest
 {

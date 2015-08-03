@@ -50,7 +50,7 @@ import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.InverseDynamicsCalculatorListener;
+import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class DRCSimulationTestHelper
