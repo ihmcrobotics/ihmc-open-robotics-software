@@ -39,6 +39,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
