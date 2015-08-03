@@ -15,8 +15,8 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.robotics.humanoidRobot.model.ContactSensorType;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 
 public class ValkyrieSensorInformation implements DRCRobotSensorInformation

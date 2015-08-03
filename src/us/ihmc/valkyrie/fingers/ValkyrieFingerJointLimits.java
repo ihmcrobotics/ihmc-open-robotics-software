@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.fingers;
 
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ValkyrieFingerJointLimits
 {
