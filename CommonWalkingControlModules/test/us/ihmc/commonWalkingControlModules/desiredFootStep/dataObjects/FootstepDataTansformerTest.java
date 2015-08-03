@@ -15,7 +15,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.communication.packets.walking.FootstepData;
-import us.ihmc.utilities.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;

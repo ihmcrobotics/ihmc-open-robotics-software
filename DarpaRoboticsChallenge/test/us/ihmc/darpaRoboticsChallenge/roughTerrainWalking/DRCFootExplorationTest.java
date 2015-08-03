@@ -35,7 +35,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 
 import us.ihmc.utilities.MemoryTools;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.utilities.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
