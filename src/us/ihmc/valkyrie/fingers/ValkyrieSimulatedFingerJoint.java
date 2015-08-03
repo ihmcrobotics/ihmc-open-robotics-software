@@ -4,7 +4,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
+import us.ihmc.robotics.screwTheory.RevoluteJoint;
 
 public enum ValkyrieSimulatedFingerJoint
 {

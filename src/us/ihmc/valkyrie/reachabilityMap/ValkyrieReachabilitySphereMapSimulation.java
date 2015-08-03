@@ -8,8 +8,8 @@ import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationContro
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieReachabilitySphereMapSimulation
