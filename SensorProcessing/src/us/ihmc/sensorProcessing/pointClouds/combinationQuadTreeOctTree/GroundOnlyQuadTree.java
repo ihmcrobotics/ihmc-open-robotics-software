@@ -12,7 +12,7 @@ import us.ihmc.robotics.hyperCubeTree.HyperCubeTree;
 import us.ihmc.robotics.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.robotics.hyperCubeTree.RecursableHyperTreeNode;
 import us.ihmc.robotics.hyperCubeTree.ResolutionProvider;
-import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundListener;
+import us.ihmc.robotics.quadTree.QuadTreeForGroundListener;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.InclusionFunction;
 

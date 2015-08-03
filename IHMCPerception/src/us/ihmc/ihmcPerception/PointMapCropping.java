@@ -11,7 +11,7 @@ import javax.swing.JFileChooser;
 import javax.vecmath.Point3d;
 
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundReaderAndWriter;
-import us.ihmc.utilities.dataStructures.quadTree.Box;
+import us.ihmc.robotics.quadTree.Box;
 
 /**
  * Created by agrabertilton on 1/26/15.

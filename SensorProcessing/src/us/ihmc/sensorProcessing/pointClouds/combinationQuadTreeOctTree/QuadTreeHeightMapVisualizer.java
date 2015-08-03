@@ -9,9 +9,9 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.utilities.dataStructures.quadTree.Box;
-import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundLeaf;
-import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundNode;
+import us.ihmc.robotics.quadTree.Box;
+import us.ihmc.robotics.quadTree.QuadTreeForGroundLeaf;
+import us.ihmc.robotics.quadTree.QuadTreeForGroundNode;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 
 public class QuadTreeHeightMapVisualizer
