@@ -15,12 +15,12 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.RigidBodyInertia;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBodyInertia;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.Twist;
 
 public class SimulatedIMURawSensorReaderTest
 {

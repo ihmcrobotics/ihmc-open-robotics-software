@@ -6,8 +6,8 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.Momentum;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.Momentum;
 
 public class JointSpaceConstraintResolver
 {

@@ -20,16 +20,16 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.CenterOfMassAccelerationCalculator;
-import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
-import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.Twist;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.robotics.screwTheory.CenterOfMassAccelerationCalculator;
+import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
+import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.utilities.test.JUnitTools;
 
 public class OrientationAndPositionFullRobotModelUpdaterTest

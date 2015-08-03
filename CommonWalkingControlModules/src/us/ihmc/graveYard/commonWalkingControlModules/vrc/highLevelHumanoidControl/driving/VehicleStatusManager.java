@@ -3,8 +3,8 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContr
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RevoluteJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

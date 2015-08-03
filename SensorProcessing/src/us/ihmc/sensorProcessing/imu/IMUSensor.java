@@ -13,7 +13,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class IMUSensor implements IMUSensorReadOnly
 {

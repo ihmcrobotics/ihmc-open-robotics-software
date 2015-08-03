@@ -9,11 +9,11 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.CompositeRigidBodyMassMatrixCalculator;
-import us.ihmc.utilities.screwTheory.DifferentialIDMassMatrixCalculator;
-import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.robotics.screwTheory.CompositeRigidBodyMassMatrixCalculator;
+import us.ihmc.robotics.screwTheory.DifferentialIDMassMatrixCalculator;
+import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 

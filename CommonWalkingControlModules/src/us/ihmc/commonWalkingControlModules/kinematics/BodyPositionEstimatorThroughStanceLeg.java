@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFramePoint;

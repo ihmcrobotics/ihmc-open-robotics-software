@@ -1,8 +1,8 @@
 package us.ihmc.robotDataCommunication.jointState;
 
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class JointHolderFactory
 {

@@ -33,7 +33,7 @@ import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
 import us.ihmc.utilities.ros.publisher.RosOdometryPublisher;
 import us.ihmc.utilities.ros.publisher.RosStringPublisher;
 import us.ihmc.utilities.ros.publisher.RosWrenchPublisher;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable

@@ -6,8 +6,8 @@ import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContro
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.utilities.taskExecutor.Task;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

@@ -6,8 +6,8 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.SixDoFJointReferenceFrame;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.SixDoFJointReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;

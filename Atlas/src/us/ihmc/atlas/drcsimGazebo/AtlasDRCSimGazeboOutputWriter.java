@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 

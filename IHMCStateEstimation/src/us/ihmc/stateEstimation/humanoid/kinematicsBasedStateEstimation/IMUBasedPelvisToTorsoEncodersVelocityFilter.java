@@ -12,9 +12,9 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 

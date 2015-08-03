@@ -2,8 +2,8 @@ package us.ihmc.wholeBodyController.concurrent;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.utilities.compare.GenericCRC32;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJointDesiredAccelerationChecksum;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJointDesiredAccelerationCopier;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJointDesiredAccelerationChecksum;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJointDesiredAccelerationCopier;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
  
 public class IntermediateControllerStateHolder

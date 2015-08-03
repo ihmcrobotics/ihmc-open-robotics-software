@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoPIDGains;

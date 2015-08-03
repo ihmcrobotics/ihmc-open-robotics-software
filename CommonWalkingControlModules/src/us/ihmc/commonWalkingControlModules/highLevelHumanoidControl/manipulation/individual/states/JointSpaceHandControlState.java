@@ -7,10 +7,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
-import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RevoluteJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

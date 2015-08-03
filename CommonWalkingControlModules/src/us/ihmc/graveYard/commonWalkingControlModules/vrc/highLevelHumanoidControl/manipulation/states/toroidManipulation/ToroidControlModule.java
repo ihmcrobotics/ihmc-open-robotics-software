@@ -3,10 +3,10 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContr
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.ManipulableToroid;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
-import us.ihmc.utilities.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 

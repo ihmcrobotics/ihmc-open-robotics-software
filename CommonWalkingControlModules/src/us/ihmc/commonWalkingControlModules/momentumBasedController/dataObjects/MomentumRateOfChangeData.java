@@ -6,8 +6,8 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
 
 public class MomentumRateOfChangeData
 {

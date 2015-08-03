@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class FootstepProviderTestHelper

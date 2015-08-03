@@ -19,8 +19,8 @@ import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class ReachabilityMapFileWriter
 {

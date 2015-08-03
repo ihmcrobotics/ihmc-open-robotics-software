@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.*
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
@@ -26,7 +27,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.*;
 import us.ihmc.yoUtilities.controllers.AxisAngleOrientationController;
 import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

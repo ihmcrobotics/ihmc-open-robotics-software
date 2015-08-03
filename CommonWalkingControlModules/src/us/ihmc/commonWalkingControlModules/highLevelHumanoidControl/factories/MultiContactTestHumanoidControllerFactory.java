@@ -10,8 +10,8 @@ import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 

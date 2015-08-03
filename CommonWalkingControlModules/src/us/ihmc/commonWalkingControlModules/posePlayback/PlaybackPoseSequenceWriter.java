@@ -17,7 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class PlaybackPoseSequenceWriter
 {

@@ -11,7 +11,7 @@ import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;

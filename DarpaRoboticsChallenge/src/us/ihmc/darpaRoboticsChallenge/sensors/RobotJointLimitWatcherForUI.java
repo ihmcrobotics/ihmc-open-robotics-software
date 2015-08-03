@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.sensors;
 import java.util.ArrayList;
 
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.math.YoVariableLimitChecker;
 
 

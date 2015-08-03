@@ -46,7 +46,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithStateChangeSmoother;

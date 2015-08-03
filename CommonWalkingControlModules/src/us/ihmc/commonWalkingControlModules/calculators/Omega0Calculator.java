@@ -7,7 +7,7 @@ import us.ihmc.robotics.geometry.OriginAndPointFrame;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
 
 public class Omega0Calculator implements Omega0CalculatorInterface
 {

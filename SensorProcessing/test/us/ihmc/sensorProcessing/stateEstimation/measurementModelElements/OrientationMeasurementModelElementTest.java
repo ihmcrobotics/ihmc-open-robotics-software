@@ -19,9 +19,9 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class OrientationMeasurementModelElementTest

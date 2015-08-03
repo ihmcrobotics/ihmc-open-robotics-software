@@ -5,7 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
-import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
 public class MotionConstraintSingularityEscapeHandler
 {

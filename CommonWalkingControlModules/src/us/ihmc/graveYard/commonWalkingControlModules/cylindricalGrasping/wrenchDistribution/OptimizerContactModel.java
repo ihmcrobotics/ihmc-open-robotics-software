@@ -1,7 +1,7 @@
 package us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution;
 
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
 
 public interface OptimizerContactModel
 {

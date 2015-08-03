@@ -5,8 +5,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;

@@ -1,10 +1,10 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class FullInverseDynamicsStructure
 {

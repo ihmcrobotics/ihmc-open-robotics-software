@@ -13,7 +13,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.robotics.screwTheory.Wrench;
 
 public class WrenchDistributorTools
 {

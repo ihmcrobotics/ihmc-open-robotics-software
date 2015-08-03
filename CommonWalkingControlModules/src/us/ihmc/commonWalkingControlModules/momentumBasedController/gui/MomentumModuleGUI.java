@@ -12,7 +12,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.AllMomentumModuleListener;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommandAndMotionConstraint;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommandAndMotionConstraint;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class MomentumModuleGUI

@@ -42,8 +42,8 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ComposableOrientationAndCoMEstimatorCreator

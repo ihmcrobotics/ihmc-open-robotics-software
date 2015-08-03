@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.interfaces.linsol.LinearSolver;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.yoUtilities.math.SolvePseudoInverseSvdGCFree;
 
 public class SelectionMatrixComputer

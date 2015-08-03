@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.Wrench;
 
 public class MomentumModuleDataObject
 {   

@@ -12,12 +12,12 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
-import us.ihmc.utilities.screwTheory.TotalMassCalculator;
-import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.screwTheory.Wrench;
 
 /**
  * @author twan

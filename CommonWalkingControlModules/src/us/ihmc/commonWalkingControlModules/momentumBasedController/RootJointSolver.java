@@ -12,9 +12,9 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.Momentum;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.Momentum;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class RootJointSolver
 {

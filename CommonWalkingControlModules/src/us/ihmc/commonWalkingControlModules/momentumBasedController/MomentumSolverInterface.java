@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
 
 /**
  * @author twan

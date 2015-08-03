@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.calibration.virtualChain;
 
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.utilities.screwTheory.RevoluteJointReferenceFrame;
+import us.ihmc.robotics.screwTheory.RevoluteJointReferenceFrame;
 
 public class VirtualLinkFromPinJoint extends VirtualLinkFromJoint
 {

@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.utilities.compare.GenericCRC32;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class PointVelocityDataObject
 {

@@ -27,9 +27,9 @@ import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PoseReferenceFrame;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 /**

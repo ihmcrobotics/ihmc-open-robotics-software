@@ -8,9 +8,9 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMapCopier;
 import us.ihmc.utilities.compare.GenericCRC32;
 import us.ihmc.robotics.humanoidRobot.model.ContactSensorHolder;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolder;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateChecksum;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJointStateChecksum;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJointStateCopier;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
  
 public class IntermediateEstimatorStateHolder

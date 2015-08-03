@@ -45,7 +45,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.TrajectoryND;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;

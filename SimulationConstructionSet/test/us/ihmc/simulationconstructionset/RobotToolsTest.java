@@ -10,8 +10,8 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.screwTheory.ScrewTestTools;
-import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
+import us.ihmc.robotics.screwTheory.ScrewTestTools;
+import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
 public class RobotToolsTest
 {

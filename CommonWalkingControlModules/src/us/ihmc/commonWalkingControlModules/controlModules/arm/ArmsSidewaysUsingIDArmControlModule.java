@@ -6,8 +6,8 @@ import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
+import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
+import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ArmsSidewaysUsingIDArmControlModule extends IDArmControlModule

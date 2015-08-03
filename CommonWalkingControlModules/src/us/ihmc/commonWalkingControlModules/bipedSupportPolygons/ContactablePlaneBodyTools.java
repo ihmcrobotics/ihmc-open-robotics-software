@@ -5,7 +5,7 @@ import java.util.Random;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class ContactablePlaneBodyTools
 {

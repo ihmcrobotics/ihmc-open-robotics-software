@@ -17,7 +17,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class CalibUtil
 {

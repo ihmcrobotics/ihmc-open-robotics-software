@@ -3,7 +3,7 @@ package us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrench
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
 
 // TODO the problem could be defined in a simpler way making the problem faster to solve and the problem easier to understand
 // Probably should get rid of either the phi or the rho part.

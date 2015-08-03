@@ -4,7 +4,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.utilities.screwTheory.SixDoFJointReferenceFrame;
+import us.ihmc.robotics.screwTheory.SixDoFJointReferenceFrame;
 
 public class VirtualLinkFromFloatingJoint extends VirtualLinkFromJoint
 {

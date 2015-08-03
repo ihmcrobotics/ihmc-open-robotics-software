@@ -5,7 +5,7 @@ import java.util.List;
 import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolderReadOnly;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public interface SensorRawOutputMapReadOnly
 {

@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.utilities.screwTheory.CompositeRigidBodyInertia;
-import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.robotics.screwTheory.CompositeRigidBodyInertia;
+import us.ihmc.robotics.screwTheory.Wrench;
 
 public interface SpineLungingControlModule extends SpineControlModule
 {

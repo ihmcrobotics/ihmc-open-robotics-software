@@ -10,7 +10,7 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.YoPointVelocityDataObject;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
+import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 

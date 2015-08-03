@@ -10,7 +10,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.SimpleStanceController;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;

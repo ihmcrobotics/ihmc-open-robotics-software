@@ -1,7 +1,7 @@
 package us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons;
 
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 
 public interface ContactableCylinderBody

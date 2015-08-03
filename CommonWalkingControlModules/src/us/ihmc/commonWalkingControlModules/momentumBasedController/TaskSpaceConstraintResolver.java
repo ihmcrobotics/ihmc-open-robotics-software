@@ -13,13 +13,13 @@ import org.ejml.ops.MatrixFeatures;
 
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
-import us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.Momentum;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.DesiredJointAccelerationCalculator;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.Momentum;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
 public class TaskSpaceConstraintResolver
 {

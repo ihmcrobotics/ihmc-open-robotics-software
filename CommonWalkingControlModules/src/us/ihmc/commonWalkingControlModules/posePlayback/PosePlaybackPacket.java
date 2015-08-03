@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.posePlayback;
 
 import java.util.Map;
 
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public interface PosePlaybackPacket
 {

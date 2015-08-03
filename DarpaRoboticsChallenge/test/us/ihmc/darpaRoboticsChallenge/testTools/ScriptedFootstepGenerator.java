@@ -20,7 +20,7 @@ import us.ihmc.robotics.geometry.PoseReferenceFrame;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class ScriptedFootstepGenerator
 {

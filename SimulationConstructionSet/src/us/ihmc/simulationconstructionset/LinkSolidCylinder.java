@@ -9,7 +9,7 @@ import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RigidBodyInertia;
+import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 
 public class LinkSolidCylinder extends Link
 {

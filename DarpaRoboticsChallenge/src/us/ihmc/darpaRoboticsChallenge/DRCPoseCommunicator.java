@@ -28,7 +28,7 @@ import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 // fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 

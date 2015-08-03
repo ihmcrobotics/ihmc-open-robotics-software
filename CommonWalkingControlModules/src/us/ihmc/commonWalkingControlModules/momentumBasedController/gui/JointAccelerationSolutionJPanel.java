@@ -10,7 +10,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 
 public class JointAccelerationSolutionJPanel extends JPanel
 {

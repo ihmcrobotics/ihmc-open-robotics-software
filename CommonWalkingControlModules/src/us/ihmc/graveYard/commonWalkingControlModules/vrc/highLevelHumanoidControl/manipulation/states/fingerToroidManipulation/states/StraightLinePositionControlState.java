@@ -9,7 +9,7 @@ import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.SE3ConfigurationProvider;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.SE3PIDGains;
 import us.ihmc.yoUtilities.stateMachines.State;
 

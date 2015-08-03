@@ -7,8 +7,8 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class SDFPerfectSimulatedOutputWriter 
 {

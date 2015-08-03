@@ -11,8 +11,8 @@ import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModelUtils;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class JointConfigurationGatherer
 {
