@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
