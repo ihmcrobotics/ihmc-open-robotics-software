@@ -139,6 +139,10 @@ public class DRCSimGazeboControllerFactory
 
       yoVariableServer.start();
 
+      outputWriter.connect();
+
+      sensorReaderFactory.getSensorReader().connect();
+
       Thread simulationThread = new Thread(robotController);
       simulationThread.start();
 
