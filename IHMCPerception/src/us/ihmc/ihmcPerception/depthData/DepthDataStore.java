@@ -5,8 +5,8 @@ import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapInterface;
 import us.ihmc.userInterface.util.DecayingResolutionFilter;
-import us.ihmc.utilities.dataStructures.quadTree.Box;
-import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
+import us.ihmc.robotics.quadTree.Box;
+import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
 
 public class DepthDataStore
 {

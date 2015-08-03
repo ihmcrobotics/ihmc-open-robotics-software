@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.utilities.dataStructures.quadTree.Box;
-import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
+import us.ihmc.robotics.quadTree.Box;
+import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 
 /**

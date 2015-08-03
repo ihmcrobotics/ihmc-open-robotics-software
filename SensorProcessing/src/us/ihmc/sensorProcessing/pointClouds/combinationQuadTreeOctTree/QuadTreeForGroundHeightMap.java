@@ -7,10 +7,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.vecmath.Point3d;
 
 import us.ihmc.robotics.hyperCubeTree.HyperCubeTreeListener;
-import us.ihmc.utilities.dataStructures.quadTree.Box;
-import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGround;
-import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundPutResult;
+import us.ihmc.robotics.quadTree.Box;
+import us.ihmc.robotics.quadTree.QuadTreeForGround;
+import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
+import us.ihmc.robotics.quadTree.QuadTreeForGroundPutResult;
 import us.ihmc.robotics.geometry.InclusionFunction;
 
 public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements QuadTreeHeightMapInterface

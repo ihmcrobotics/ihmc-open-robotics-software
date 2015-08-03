@@ -21,7 +21,7 @@ import us.ihmc.pathGeneration.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundReaderAndWriter;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.dataStructures.quadTree.Box;
+import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.humanoidRobot.footstep.FootSpoof;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
