@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionConstraintHandler;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.utilities.optimization.EqualityConstraintEnforcer;
+import us.ihmc.robotics.optimization.EqualityConstraintEnforcer;
 import us.ihmc.utilities.screwTheory.CentroidalMomentumMatrix;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
