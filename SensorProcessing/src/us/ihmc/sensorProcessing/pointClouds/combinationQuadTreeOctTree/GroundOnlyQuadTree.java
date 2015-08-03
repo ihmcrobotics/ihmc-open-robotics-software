@@ -6,12 +6,12 @@ import java.util.List;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.utilities.dataStructures.hyperCubeTree.ConstantResolutionProvider;
-import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeLeaf;
-import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTree;
-import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
-import us.ihmc.utilities.dataStructures.hyperCubeTree.RecursableHyperTreeNode;
-import us.ihmc.utilities.dataStructures.hyperCubeTree.ResolutionProvider;
+import us.ihmc.robotics.hyperCubeTree.ConstantResolutionProvider;
+import us.ihmc.robotics.hyperCubeTree.HyperCubeLeaf;
+import us.ihmc.robotics.hyperCubeTree.HyperCubeTree;
+import us.ihmc.robotics.hyperCubeTree.OneDimensionalBounds;
+import us.ihmc.robotics.hyperCubeTree.RecursableHyperTreeNode;
+import us.ihmc.robotics.hyperCubeTree.ResolutionProvider;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundListener;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.InclusionFunction;

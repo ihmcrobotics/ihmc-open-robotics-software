@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTreeListener;
+import us.ihmc.robotics.hyperCubeTree.HyperCubeTreeListener;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundListener;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 

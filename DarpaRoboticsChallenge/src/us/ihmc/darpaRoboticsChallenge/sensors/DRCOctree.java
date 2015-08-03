@@ -3,8 +3,8 @@ package us.ihmc.darpaRoboticsChallenge.sensors;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 
-import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
-import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
+import us.ihmc.robotics.hyperCubeTree.Octree;
+import us.ihmc.robotics.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundListener;
 
