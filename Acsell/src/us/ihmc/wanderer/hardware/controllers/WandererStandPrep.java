@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.wanderer.hardware.WandererJoint;
 import us.ihmc.utilities.maps.EnumDoubleMap;
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.time.TimeTools;
 import us.ihmc.yoUtilities.controllers.PDController;
