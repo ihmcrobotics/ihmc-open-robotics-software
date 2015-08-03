@@ -185,7 +185,7 @@ public class DRCSimGazeboControllerFactory
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
             feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, initialBehavior);
 
-      controllerFactory.addHighLevelBehaviorFactory(new JointPositionControllerFactory(true));
+//      controllerFactory.addHighLevelBehaviorFactory(new JointPositionControllerFactory(true));
 
       if (USE_GUI)
       {
