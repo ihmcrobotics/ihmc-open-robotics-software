@@ -37,7 +37,7 @@ import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.io.logging.LogTools;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithAccelerationIntegration;

@@ -9,8 +9,8 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class WandererSensorInformation implements DRCRobotSensorInformation
 {

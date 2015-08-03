@@ -19,7 +19,7 @@ import us.ihmc.steppr.hardware.StepprAnkle;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.configuration.StepprAnkleKinematicParameters;
 import us.ihmc.steppr.hardware.state.slowSensors.StepprSlowSensorConstants;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 

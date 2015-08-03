@@ -4,8 +4,7 @@ import us.ihmc.acsell.hardware.AcsellActuator;
 import us.ihmc.acsell.hardware.configuration.AcsellAnkleKinematicParameters;
 import us.ihmc.acsell.hardware.state.AcsellAnkleAngleCalculator;
 import us.ihmc.acsell.hardware.state.AcsellAnkleFullComputation;
-import us.ihmc.acsell.hardware.state.AcsellAnkleInterpolator;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class AcsellAnkleActuatorCommand
