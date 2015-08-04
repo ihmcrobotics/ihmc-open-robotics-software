@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.robotics.humanoidRobot.RobotMotionStatus;
+import us.ihmc.robotics.humanoidRobot.model.RobotMotionStatus;
 import us.ihmc.robotics.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.humanoidRobot.model.DesiredJointDataHolder;
 import us.ihmc.robotics.humanoidRobot.model.IntermediateDesiredJointDataHolder;
