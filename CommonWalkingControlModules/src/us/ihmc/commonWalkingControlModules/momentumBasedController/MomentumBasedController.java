@@ -40,7 +40,7 @@ import us.ihmc.robotics.humanoidRobot.model.RobotMotionStatusChangedListener;
 import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataReadOnly;
+import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
 import us.ihmc.robotics.MathTools;

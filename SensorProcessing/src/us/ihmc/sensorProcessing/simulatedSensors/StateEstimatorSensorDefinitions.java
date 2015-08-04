@@ -2,8 +2,8 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.humanoidRobot.model.IMUDefinition;
-import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class StateEstimatorSensorDefinitions

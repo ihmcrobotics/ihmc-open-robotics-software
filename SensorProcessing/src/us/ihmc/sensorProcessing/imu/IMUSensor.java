@@ -10,7 +10,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.robotics.humanoidRobot.model.IMUDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;

@@ -5,7 +5,7 @@ import java.util.EnumMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.FingerJoint;
-import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataReadOnly;
+import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
