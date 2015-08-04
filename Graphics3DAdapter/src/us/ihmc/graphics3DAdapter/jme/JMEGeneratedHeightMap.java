@@ -11,9 +11,9 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.robotics.geometry.Ray3d;
 import us.ihmc.utilities.maps.SimpleLRUCache;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.Ray3d;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;

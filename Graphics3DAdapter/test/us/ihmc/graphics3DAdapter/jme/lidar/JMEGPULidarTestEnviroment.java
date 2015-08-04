@@ -11,7 +11,7 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.utils.lidar.Graphics3DLidarScan;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.lidar.LidarScan;
-import us.ihmc.robotics.geometry.Sphere3d;
+import us.ihmc.robotics.geometry.shapes.Sphere3d;
 
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;

@@ -4,7 +4,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import us.ihmc.robotics.geometry.Box3d;
+import us.ihmc.robotics.geometry.shapes.Box3d;
 
 public class MarbleRunGround extends CombinedTerrainObject3D
 {

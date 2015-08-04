@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.LineSegment3d;
-import us.ihmc.robotics.geometry.Plane3d;
+import us.ihmc.robotics.geometry.shapes.Plane3d;
 
 
 public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, HeightMapWithNormals
