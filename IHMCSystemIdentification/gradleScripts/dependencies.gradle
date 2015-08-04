@@ -3,8 +3,6 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: '1.5.2'
 	compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: '0.7-internal'
 	
-	compile project(':IHMCUtilities')
 	compile project(':Plotting')
 	compile project(':SimulationConstructionSet')
-	//compile project(':ThirdParty')
 }
