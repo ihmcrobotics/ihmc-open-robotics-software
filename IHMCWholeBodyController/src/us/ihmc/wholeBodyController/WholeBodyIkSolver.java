@@ -18,13 +18,8 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.robotics.hierarchicalKinematics.ForwardKinematicSolver;
-import us.ihmc.robotics.hierarchicalKinematics.HierarchicalKinematicSolver;
-import us.ihmc.robotics.hierarchicalKinematics.HierarchicalTask;
-import us.ihmc.robotics.hierarchicalKinematics.HierarchicalTask_BodyPose;
-import us.ihmc.robotics.hierarchicalKinematics.HierarchicalTask_COM;
-import us.ihmc.robotics.hierarchicalKinematics.HierarchicalTask_JointsPose;
-import us.ihmc.robotics.hierarchicalKinematics.RobotModel;
+import us.ihmc.robotics.hierarchicalKinematics.*;
+import us.ihmc.robotics.hierarchicalKinematics.HierarchicalTaskBodyPose;
 import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.dataStructures.Vector64F;
@@ -241,30 +236,30 @@ abstract public class WholeBodyIkSolver
       protected final HierarchicalKinematicSolver hierarchicalSolver;
 
       /** Task that controls the Center of Mass. */
-      public HierarchicalTask_COM        taskCoM;
+      public HierarchicalTaskCOM taskCoM;
 
       /** This task is the last in the hierarchy and controls the posture of the robot. */
-      public HierarchicalTask_JointsPose taskJointsPose;
+      public HierarchicalTaskJointsPose taskJointsPose;
 
 
 
       /**  Task use to control mostly the pelvis. Note that when taskComPosition is active, this task 
        * should control only rotation when taskCoM is enabled.*/
 
-      public final HierarchicalTask_BodyPose taskPelvisPose;
+      public final HierarchicalTaskBodyPose taskPelvisPose;
 
       /** Task that controls the foot position of the leg opposite to the root foot. */
-      public final HierarchicalTask_BodyPose taskLegPose;
+      public final HierarchicalTaskBodyPose taskLegPose;
 
-      // NOTE: HierarchicalTask_BodyPose can be used to control 6 degrees of freedom.
+      // NOTE: HierarchicalTaskBodyPose can be used to control 6 degrees of freedom.
       // Nevertheless we split this 6 DoF task in two tasks, each of them controlling 3 DoF.
       // This allows us to prioritize the position task over the rotation one.
       
       /** The task that controls the end effector position. */
-      public final SideDependentList<HierarchicalTask_BodyPose> taskEndEffectorPosition = new SideDependentList<HierarchicalTask_BodyPose>();
+      public final SideDependentList<HierarchicalTaskBodyPose> taskEndEffectorPosition = new SideDependentList<HierarchicalTaskBodyPose>();
 
       /** The task that controls the end effector rotation. */
-      public final SideDependentList<HierarchicalTask_BodyPose> taskEndEffectorRotation = new SideDependentList<HierarchicalTask_BodyPose>();
+      public final SideDependentList<HierarchicalTaskBodyPose> taskEndEffectorRotation = new SideDependentList<HierarchicalTaskBodyPose>();
 
       protected final SideDependentList<MutableBoolean> keepArmQuiet = new SideDependentList<MutableBoolean>();
       private boolean suggestKneeAngle = true;
@@ -439,8 +434,8 @@ abstract public class WholeBodyIkSolver
 
          ForwardKinematicSolver fk = hierarchicalSolver.getForwardSolver();
 
-         taskCoM = new HierarchicalTask_COM("COM Position",fk);
-         taskPelvisPose = new HierarchicalTask_BodyPose("PelvisPose",fk, urdfModel, "pelvis");
+         taskCoM = new HierarchicalTaskCOM("COM Position",fk);
+         taskPelvisPose = new HierarchicalTaskBodyPose("PelvisPose",fk, urdfModel, "pelvis");
 
          for (RobotSide robotSide : RobotSide.values())
          {
@@ -450,9 +445,9 @@ abstract public class WholeBodyIkSolver
             String sideName = (robotSide == RobotSide.LEFT) ? "Left" : "Right";
 
             taskEndEffectorPosition.set(robotSide, 
-                  new HierarchicalTask_BodyPose(sideName + " Hand Position", fk, urdfModel, gripperPalm));
+                  new HierarchicalTaskBodyPose(sideName + " Hand Position", fk, urdfModel, gripperPalm));
             taskEndEffectorRotation.set(robotSide, 
-                  new HierarchicalTask_BodyPose(sideName + " Hand Rotation", fk, urdfModel, gripperPalm));
+                  new HierarchicalTaskBodyPose(sideName + " Hand Rotation", fk, urdfModel, gripperPalm));
 
             feetTarget.set(robotSide, null );
             handTarget.set(robotSide, null );
@@ -468,7 +463,7 @@ abstract public class WholeBodyIkSolver
          {
             RobotSide otherFootSide = getSideOfTheFootRoot().getOppositeSide(); 
             int leftFootId = urdfModel.getBodyId(  getFootLinkName(otherFootSide ) );
-            taskLegPose = new HierarchicalTask_BodyPose("Left Leg Pose",fk,urdfModel,  getFootLinkName(otherFootSide ));
+            taskLegPose = new HierarchicalTaskBodyPose("Left Leg Pose",fk,urdfModel,  getFootLinkName(otherFootSide ));
 
             int [] indexes = new  int[ getNumberDoFperArm()];
             urdfModel.getParentJoints(leftFootId, getNumberDoFperLeg(), indexes );
@@ -483,7 +478,7 @@ abstract public class WholeBodyIkSolver
             legJointIds.get( getSideOfTheFootRoot()).add(i);
          }
 
-         taskJointsPose = new HierarchicalTask_JointsPose("Whole body Posture", fk);
+         taskJointsPose = new HierarchicalTaskJointsPose("Whole body Posture", fk);
 
 
          // the order is important!! first to be added have higher priority
@@ -1401,8 +1396,8 @@ abstract public class WholeBodyIkSolver
          {
             return;
          }
-         HierarchicalTask_BodyPose taskL = taskEndEffectorPosition.get(LEFT);
-         HierarchicalTask_BodyPose taskR = taskEndEffectorPosition.get(RIGHT);
+         HierarchicalTaskBodyPose taskL = taskEndEffectorPosition.get(LEFT);
+         HierarchicalTaskBodyPose taskR = taskEndEffectorPosition.get(RIGHT);
 
          double zL = taskL.getTarget().get(2);
          double zR = taskR.getTarget().get(2);
