@@ -11,7 +11,7 @@ import javax.vecmath.Quat4d;
 import org.junit.Test;
 
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.lists.FrameTupleArrayList;
+import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;

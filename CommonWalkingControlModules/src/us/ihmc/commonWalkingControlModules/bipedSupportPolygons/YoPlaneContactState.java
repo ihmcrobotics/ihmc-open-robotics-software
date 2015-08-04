@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.utilities.lists.FrameTuple2dArrayList;
+import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
