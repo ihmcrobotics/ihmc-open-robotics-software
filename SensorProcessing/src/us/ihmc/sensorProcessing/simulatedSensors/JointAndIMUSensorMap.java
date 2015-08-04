@@ -8,7 +8,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.robotics.humanoidRobot.model.IMUDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointAndIMUSensorMap

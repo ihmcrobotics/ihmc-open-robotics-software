@@ -3,10 +3,10 @@ package us.ihmc.wholeBodyController.concurrent;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.robotics.humanoidRobot.model.CenterOfPressureDataHolder;
-import us.ihmc.robotics.humanoidRobot.model.ContactSensorHolder;
+import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.humanoidRobot.model.DesiredJointDataHolder;
-import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolder;
-import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.humanoidRobot.model.RobotMotionStatusHolder;
 
 public interface ThreadDataSynchronizerInterface

@@ -1,6 +1,6 @@
 package us.ihmc.SdfLoader;
 
-import us.ihmc.robotics.humanoidRobot.model.ContactSensorType;
+import us.ihmc.robotics.sensors.ContactSensorType;
 
 
 public class SDFContactSensor

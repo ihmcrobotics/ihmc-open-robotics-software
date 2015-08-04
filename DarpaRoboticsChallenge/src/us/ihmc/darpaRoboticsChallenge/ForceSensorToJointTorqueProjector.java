@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.robotics.humanoidRobot.model.ForceSensorData;
+import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
