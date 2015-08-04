@@ -11,7 +11,7 @@ import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositio
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.robotics.compare.GenericCRC32;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class StateEstimationDataFromController extends AbstractControlFlowElement
 {

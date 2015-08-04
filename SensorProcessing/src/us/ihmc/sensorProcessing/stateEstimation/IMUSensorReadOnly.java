@@ -7,7 +7,7 @@ import javax.vecmath.Vector3f;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public interface IMUSensorReadOnly

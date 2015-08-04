@@ -3,10 +3,6 @@ package us.ihmc.wholeBodyController;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
 public abstract class WholeBodyValidPoseGenerator
 {
 //   public void executeHandTargetTest(ControlledDoF dofToControlLeft, ControlledDoF dofToControlRight,

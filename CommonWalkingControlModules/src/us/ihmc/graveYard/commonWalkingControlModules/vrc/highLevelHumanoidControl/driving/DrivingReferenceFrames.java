@@ -4,8 +4,8 @@ import java.util.EnumMap;
 
 import us.ihmc.robotics.FormattingTools;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.PoseReferenceFrame;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 /**

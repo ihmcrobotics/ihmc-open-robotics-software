@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.parameters;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.SideDependentList;
 

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.desiredPelvisOrientat
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ZeroDesiredPelvisOrientationControlModule implements DesiredPelvisOrientationControlModule

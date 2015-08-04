@@ -10,7 +10,7 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface.BehaviorStatus;
 import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public abstract class StopThreadUpdatable implements Updatable

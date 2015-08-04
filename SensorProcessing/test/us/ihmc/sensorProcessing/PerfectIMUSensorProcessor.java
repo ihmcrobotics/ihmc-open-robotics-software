@@ -7,7 +7,7 @@ import us.ihmc.simulationconstructionset.processedSensors.ProcessedIMUSensorsWri
 import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
 import us.ihmc.simulationconstructionset.robotController.SensorProcessor;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class PerfectIMUSensorProcessor implements SensorProcessor

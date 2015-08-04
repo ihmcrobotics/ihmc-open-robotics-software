@@ -29,7 +29,7 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableCinderBlockTerrain
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 

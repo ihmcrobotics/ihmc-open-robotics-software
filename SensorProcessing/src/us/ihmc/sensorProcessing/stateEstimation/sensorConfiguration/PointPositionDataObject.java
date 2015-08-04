@@ -4,7 +4,7 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.robotics.compare.GenericCRC32;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class PointPositionDataObject
 {

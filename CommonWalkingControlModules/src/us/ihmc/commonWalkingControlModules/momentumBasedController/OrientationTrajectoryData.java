@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class OrientationTrajectoryData
 {

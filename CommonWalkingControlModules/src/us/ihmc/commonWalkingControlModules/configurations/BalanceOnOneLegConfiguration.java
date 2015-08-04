@@ -6,7 +6,7 @@ import java.util.Random;
 
 import us.ihmc.robotics.ArrayTools;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class BalanceOnOneLegConfiguration
