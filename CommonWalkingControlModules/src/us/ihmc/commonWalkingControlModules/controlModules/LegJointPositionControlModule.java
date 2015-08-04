@@ -10,7 +10,7 @@ import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.GUISetterUpper;
 import us.ihmc.simulationconstructionset.gui.GUISetterUpperRegistry;
-import us.ihmc.utilities.containers.ContainerTools;
+import us.ihmc.robotics.containers.ContainerTools;
 import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
 import us.ihmc.robotics.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.MathTools;
