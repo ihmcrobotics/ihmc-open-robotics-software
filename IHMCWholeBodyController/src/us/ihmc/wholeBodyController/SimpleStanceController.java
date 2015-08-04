@@ -15,11 +15,11 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.*
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -67,7 +67,7 @@ public class SimpleStanceController implements RobotController
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final MomentumRateOfChangeData momentumRateOfChangeData;
 
-   public SimpleStanceController(SDFRobot robot, SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames, double controlDT,
+   public SimpleStanceController(SDFRobot robot, SDFFullRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, double controlDT,
                                  InverseDynamicsJoint[] jointsToOptimize, double gravityZ, double footForward, double footBack, double footWidth)
    {
       this.sensorReader = new SDFPerfectSimulatedSensorReader(robot, fullRobotModel, referenceFrames);
@@ -330,7 +330,7 @@ public class SimpleStanceController implements RobotController
       return getName();
    }
 
-   private SideDependentList<ContactablePlaneBody> createFeet(SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames, double footForward,
+   private SideDependentList<ContactablePlaneBody> createFeet(SDFFullRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, double footForward,
            double footBack, double footWidth)
    {
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();

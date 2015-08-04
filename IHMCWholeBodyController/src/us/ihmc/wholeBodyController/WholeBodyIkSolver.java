@@ -25,7 +25,7 @@ import us.ihmc.robotics.hierarchicalKinematics.HierarchicalTask_BodyPose;
 import us.ihmc.robotics.hierarchicalKinematics.HierarchicalTask_COM;
 import us.ihmc.robotics.hierarchicalKinematics.HierarchicalTask_JointsPose;
 import us.ihmc.robotics.hierarchicalKinematics.RobotModel;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.dataStructures.Vector64F;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -230,7 +230,7 @@ abstract public class WholeBodyIkSolver
       final private static RobotSide LEFT  = RobotSide.LEFT;
 
 
-      private final ReferenceFrames workingFrames;
+      private final HumanoidReferenceFrames workingFrames;
       private final SideDependentList<ReferenceFrame> workingSoleFrames = new SideDependentList<ReferenceFrame>();
 
       private final RobotModel        urdfModel;
@@ -384,7 +384,7 @@ abstract public class WholeBodyIkSolver
       {
          // load external library
          cachedModel  = robotControllerParameters.createFullRobotModel();
-         workingFrames = new ReferenceFrames(cachedModel);
+         workingFrames = new HumanoidReferenceFrames(cachedModel);
 
          //----------- STEP A: find, copy and load the urdf file -------------------------------- 
 
@@ -835,7 +835,7 @@ abstract public class WholeBodyIkSolver
       }
 
 
-      public ReferenceFrames getWorkingReferenceFrames()
+      public HumanoidReferenceFrames getWorkingReferenceFrames()
       {
          return workingFrames;
       }

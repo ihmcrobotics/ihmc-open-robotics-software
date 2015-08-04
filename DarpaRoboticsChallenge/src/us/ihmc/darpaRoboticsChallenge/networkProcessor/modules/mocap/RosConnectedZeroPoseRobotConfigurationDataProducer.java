@@ -22,12 +22,12 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.robotics.humanoidRobot.model.IMUDefinition;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.humanoidRobot.RobotMotionStatus;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.robotics.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -42,7 +42,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
    private final DRCRobotModel robotModel;
    private final SDFFullRobotModel fullRobotModel;
    private final ForceSensorDefinition[] forceSensorDefinitions;
-   private final ReferenceFrames referenceFrames;
+   private final HumanoidReferenceFrames referenceFrames;
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame headFrame;
    private final AtomicReference<RigidBodyTransform> atomicPelvisPose = new AtomicReference<RigidBodyTransform>(new RigidBodyTransform());
@@ -53,7 +53,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
       this.robotModel = robotModel;
       this.packetCommunicator = objectCommunicator;
       fullRobotModel = robotModel.createFullRobotModel();
-      referenceFrames = new ReferenceFrames(fullRobotModel);
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       
       pelvisFrame = referenceFrames.getPelvisFrame();
       headFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);
@@ -141,7 +141,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
       atomicPelvisPose.set(pelvisPose);
    }
 
-   public ReferenceFrames getReferenceFrames()
+   public HumanoidReferenceFrames getReferenceFrames()
    {
       return referenceFrames;
    }

@@ -12,7 +12,7 @@ import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -24,7 +24,7 @@ public class WholeBodyIKPacketCreator
 {
 //   private final ArmJointName[] armJointNames;
    private final SDFFullRobotModel outgoingSDFFullRobotModel;
-   private final ReferenceFrames desiredReferenceFrames;
+   private final HumanoidReferenceFrames desiredReferenceFrames;
    private final ReferenceFrame pelvisReferenceFrame;
    private final ReferenceFrame chestReferenceFrame;
    private final ReferenceFrame midZUpReferenceFrame;
@@ -36,7 +36,7 @@ public class WholeBodyIKPacketCreator
       this.nominalComHeight = drcRobotModel.getWalkingControllerParameters().nominalHeightAboveAnkle();
 //      this.armJointNames = drcRobotModel.getJointMap().getArmJointNames();
       this.outgoingSDFFullRobotModel = drcRobotModel.createFullRobotModel();
-      this.desiredReferenceFrames = new ReferenceFrames(outgoingSDFFullRobotModel);
+      this.desiredReferenceFrames = new HumanoidReferenceFrames(outgoingSDFFullRobotModel);
       this.pelvisReferenceFrame = desiredReferenceFrames.getPelvisFrame();
       this.chestReferenceFrame = desiredReferenceFrames.getChestFrame();
       this.midZUpReferenceFrame = desiredReferenceFrames.getMidFeetZUpFrame();

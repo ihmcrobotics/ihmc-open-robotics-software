@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotics.FormattingTools;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.MathTools;
@@ -43,7 +43,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	private final BooleanYoVariable forcefeedback;
 	private final Boolean doPositionControlOnJoints;
 
-	private final ReferenceFrames referenceFrames;
+	private final HumanoidReferenceFrames referenceFrames;
 	private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 	private final ReferenceFrame handControlFrame;
 	private PoseTrajectoryGenerator poseTrajectoryGenerator;
@@ -150,7 +150,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 			YoPIDGains gains, YoVariableRegistry parentRegistry)
 	{
 		super(namePrefix, stateEnum, momentumBasedController, jacobianId, base, endEffector, parentRegistry);
-		referenceFrames = new ReferenceFrames(momentumBasedController.getFullRobotModel());
+		referenceFrames = new HumanoidReferenceFrames(momentumBasedController.getFullRobotModel());
 		handControlFrame = referenceFrames.getHandFrame(robotSide);
 		currentTimeInState = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "CurrentTimeInCutForceControlState", registry);
 		dtControl = momentumBasedController.getControlDT();

@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -12,14 +12,14 @@ public class KeepArmOutOfCinderBlocksBehavior extends BehaviorInterface
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FullRobotModel fullRobotModel;
-   private final ReferenceFrames referenceFrames;
+   private final HumanoidReferenceFrames referenceFrames;
 
    private final HandPoseBehavior handPoseBehavior;
    
    
    
    public KeepArmOutOfCinderBlocksBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrames, DoubleYoVariable yoTime)
+         HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
  

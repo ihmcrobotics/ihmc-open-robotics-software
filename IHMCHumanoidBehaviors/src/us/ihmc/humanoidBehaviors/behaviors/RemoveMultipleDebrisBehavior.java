@@ -13,7 +13,7 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.RemovePieceOfDebrisTask;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -47,7 +47,7 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
    private final SideDependentList<WristForceSensorFilteredUpdatable> wristSensors;
 
    public RemoveMultipleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrame, SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, DoubleYoVariable yoTime,
+         HumanoidReferenceFrames referenceFrame, SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, DoubleYoVariable yoTime,
          WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);

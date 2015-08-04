@@ -12,7 +12,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -30,7 +30,7 @@ public class LogDataProcessorHelper
 {
    private final FullRobotModel fullRobotModel;
    private final FullInverseDynamicsStructure inverseDynamicsStructure;
-   private final ReferenceFrames referenceFrames;
+   private final HumanoidReferenceFrames referenceFrames;
    private final SDFPerfectSimulatedSensorReader sensorReader;
    private final LogDataRawSensorMap rawSensorMap;
    private final TwistCalculator twistCalculator;
@@ -51,7 +51,7 @@ public class LogDataProcessorHelper
    {
       this.scs = scs;
       fullRobotModel = model.createFullRobotModel();
-      referenceFrames = new ReferenceFrames(fullRobotModel);
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       sensorReader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
       rawSensorMap = new LogDataRawSensorMap(fullRobotModel, scs);
       twistCalculator = new TwistCalculator(fullRobotModel.getElevatorFrame(), fullRobotModel.getElevator());
@@ -175,7 +175,7 @@ public class LogDataProcessorHelper
       return inverseDynamicsStructure;
    }
 
-   public ReferenceFrames getReferenceFrames()
+   public HumanoidReferenceFrames getReferenceFrames()
    {
       return referenceFrames;
    }

@@ -16,7 +16,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -37,7 +37,7 @@ public class ReachabilityMapFileLoader
       this(robotName, rootBody, null);
    }
 
-   public ReachabilityMapFileLoader(String robotName, RigidBody rootBody, ReferenceFrames referenceFrames)
+   public ReachabilityMapFileLoader(String robotName, RigidBody rootBody, HumanoidReferenceFrames referenceFrames)
    {
       this(selectionFileDialog(), robotName, rootBody, referenceFrames);
    }
@@ -47,7 +47,7 @@ public class ReachabilityMapFileLoader
       this(selectionFileDialog(), robotName, rootBody, null);
    }
 
-   public ReachabilityMapFileLoader(File fileToLoad, String robotName, RigidBody rootBody, ReferenceFrames referenceFrames)
+   public ReachabilityMapFileLoader(File fileToLoad, String robotName, RigidBody rootBody, HumanoidReferenceFrames referenceFrames)
    {
       try
       {
@@ -122,7 +122,7 @@ public class ReachabilityMapFileLoader
       }
    }
 
-   private ReferenceFrame createGridReferenceFrame(RigidBody rootBody, ReferenceFrames referenceFrames, HSSFSheet descriptionSheet)
+   private ReferenceFrame createGridReferenceFrame(RigidBody rootBody, HumanoidReferenceFrames referenceFrames, HSSFSheet descriptionSheet)
    {
       String gridFrameName = descriptionSheet.getRow(6).getCell(2).getStringCellValue();
       String parentFrameName = descriptionSheet.getRow(7).getCell(2).getStringCellValue();
@@ -192,7 +192,7 @@ public class ReachabilityMapFileLoader
       return loadedGrid;
    }
 
-   private ReferenceFrame searchParentFrameInCommonRobotFrames(String parentFrameName, ReferenceFrames referenceFrames, RigidBody rootBody)
+   private ReferenceFrame searchParentFrameInCommonRobotFrames(String parentFrameName, HumanoidReferenceFrames referenceFrames, RigidBody rootBody)
    {
       if (parentFrameName.equals(worldFrame.getName()))
          return worldFrame;

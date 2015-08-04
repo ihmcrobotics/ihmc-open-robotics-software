@@ -668,7 +668,7 @@ public class DoubleSupportFootCenterToToeICPComputer
 
    public void reset(double time)
    {
-      ///////////////////// Deleting all but the first two ReferenceFrames in soleFrameList
+      ///////////////////// Deleting all but the first two HumanoidReferenceFrames in soleFrameList
       ArrayList<ReferenceFrame> tempFrameList = new ArrayList<ReferenceFrame>();
 
       for (int i = 0; i < 2; i++)

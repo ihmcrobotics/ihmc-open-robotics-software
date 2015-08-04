@@ -14,7 +14,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ControllerDataForEstimatorHolder
 {
-   // Do not use FramePoint here, as ReferenceFrames are not shared between controller/estimator
+   // Do not use FramePoint here, as HumanoidReferenceFrames are not shared between controller/estimator
    private final SideDependentList<Point2d> centerOfPressure = new SideDependentList<>();
    private AtomicReference<RobotMotionStatus> robotMotionStatus = new AtomicReference<RobotMotionStatus>(null);
 

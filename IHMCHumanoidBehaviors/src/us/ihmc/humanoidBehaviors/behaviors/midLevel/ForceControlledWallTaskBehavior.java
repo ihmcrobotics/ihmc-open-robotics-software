@@ -15,7 +15,7 @@ import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -88,7 +88,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 	private FrameVector drillInsertion;
 	private FramePoint dropPosition;
 
-	public ForceControlledWallTaskBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, ReferenceFrames referenceFrames, FullRobotModel fullRobotModel, DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsRegistry)
+	public ForceControlledWallTaskBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames, FullRobotModel fullRobotModel, DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsRegistry)
 	{
 		super(outgoingCommunicationBridge);
 		this.fullrobotModel = fullRobotModel;
@@ -105,7 +105,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		isDone.set(false);
 
 		// Reference Frames:
-		worldFrame = ReferenceFrames.getWorldFrame();
+		worldFrame = HumanoidReferenceFrames.getWorldFrame();
 		chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
 		handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
 
