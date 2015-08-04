@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.utilities.FormattingTools;
+import us.ihmc.robotics.FormattingTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrame;

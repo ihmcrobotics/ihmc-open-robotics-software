@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.manipulation.HandPoseStatus.Status;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.utilities.FormattingTools;
+import us.ihmc.robotics.FormattingTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.utilities.FormattingTools;
+import us.ihmc.robotics.FormattingTools;
 import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

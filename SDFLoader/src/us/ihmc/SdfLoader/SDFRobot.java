@@ -44,7 +44,7 @@ import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLi
 import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import us.ihmc.utilities.FormattingTools;
+import us.ihmc.robotics.FormattingTools;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.lidar.LidarScanParameters;

@@ -10,7 +10,7 @@ import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.ReachabilitySphe
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.JointAnglesWriter;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.utilities.FormattingTools;
+import us.ihmc.robotics.FormattingTools;
 import us.ihmc.robotics.humanoidRobot.partNames.LimbName;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

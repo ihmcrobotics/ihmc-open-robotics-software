@@ -1,6 +1,6 @@
 package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving;
 
-import us.ihmc.utilities.FormattingTools;
+import us.ihmc.robotics.FormattingTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PoseReferenceFrame;
 import us.ihmc.robotics.geometry.ReferenceFrame;

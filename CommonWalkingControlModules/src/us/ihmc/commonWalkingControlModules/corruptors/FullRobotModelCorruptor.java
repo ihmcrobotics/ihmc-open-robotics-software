@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.FormattingTools;
+import us.ihmc.robotics.FormattingTools;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;

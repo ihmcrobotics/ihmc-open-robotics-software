@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.behaviors;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -11,7 +10,7 @@ import us.ihmc.humanoidBehaviors.communication.ControllerGlobalObjectConsumer;
 import us.ihmc.humanoidBehaviors.communication.NetworkProcessorGlobalObjectConsumer;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.utilities.FormattingTools;
+import us.ihmc.robotics.FormattingTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

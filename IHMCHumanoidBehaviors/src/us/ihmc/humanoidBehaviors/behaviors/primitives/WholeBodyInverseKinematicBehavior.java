@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.utilities.FormattingTools;
+import us.ihmc.robotics.FormattingTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
