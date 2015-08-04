@@ -2,8 +2,8 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContr
 
 import us.ihmc.robotics.FormattingTools;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.PoseReferenceFrame;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;

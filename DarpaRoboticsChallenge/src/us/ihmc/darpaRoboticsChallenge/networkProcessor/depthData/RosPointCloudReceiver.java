@@ -7,7 +7,7 @@ import javax.vecmath.Point3d;
 
 import sensor_msgs.PointCloud2;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 

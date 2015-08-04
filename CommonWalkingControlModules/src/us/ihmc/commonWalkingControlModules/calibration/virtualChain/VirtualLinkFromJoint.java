@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class VirtualLinkFromJoint
 {

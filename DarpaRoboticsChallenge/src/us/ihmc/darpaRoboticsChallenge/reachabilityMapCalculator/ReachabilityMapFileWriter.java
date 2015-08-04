@@ -17,7 +17,7 @@ import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveSh
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;

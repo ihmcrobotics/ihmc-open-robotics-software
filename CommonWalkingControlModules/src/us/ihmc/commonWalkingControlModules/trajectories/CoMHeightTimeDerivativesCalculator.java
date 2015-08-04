@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CoMHeightTimeDerivativesCalculator
 {   

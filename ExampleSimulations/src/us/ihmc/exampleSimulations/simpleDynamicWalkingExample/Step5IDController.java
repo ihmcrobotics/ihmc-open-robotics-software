@@ -7,7 +7,7 @@ import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.Jo
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.LinkNames;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.robotics.screwTheory.DifferentialIDMassMatrixCalculator;

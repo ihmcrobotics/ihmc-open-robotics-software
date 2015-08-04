@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.util.environments.ValveType;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RotationFunctions;
 
 public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface

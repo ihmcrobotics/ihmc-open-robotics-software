@@ -42,7 +42,7 @@ import us.ihmc.robotics.humanoidRobot.model.ContactSensorHolder;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;

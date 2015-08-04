@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 public class NewDoubleSupportICPComputer

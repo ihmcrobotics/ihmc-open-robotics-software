@@ -2,7 +2,7 @@ package us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrench
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 
 // TODO the problem could be defined in a simpler way making the problem faster to solve and the problem easier to understand

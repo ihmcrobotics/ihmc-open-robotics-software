@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;

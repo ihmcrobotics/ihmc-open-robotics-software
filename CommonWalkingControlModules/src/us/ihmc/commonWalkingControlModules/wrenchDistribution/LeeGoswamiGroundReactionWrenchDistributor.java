@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.LeeGoswamiCoPAndNormal
 import us.ihmc.commonWalkingControlModules.controlModules.LeeGoswamiForceOptimizer;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 

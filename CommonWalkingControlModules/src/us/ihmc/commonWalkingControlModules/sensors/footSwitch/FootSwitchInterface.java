@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Wrench;
 
 // TODO Nuke that interface

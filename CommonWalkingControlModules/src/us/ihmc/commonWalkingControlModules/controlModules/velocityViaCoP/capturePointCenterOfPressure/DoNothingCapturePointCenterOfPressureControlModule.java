@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointC
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class DoNothingCapturePointCenterOfPressureControlModule implements CapturePointCenterOfPressureControlModule

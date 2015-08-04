@@ -4,7 +4,7 @@ import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContro
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation.ToroidControlModule;
 import us.ihmc.robotics.FormattingTools;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;

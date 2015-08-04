@@ -13,7 +13,7 @@ import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoUtilities.math.trajectories.WaypointOrientationTrajectoryData;
 import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
 

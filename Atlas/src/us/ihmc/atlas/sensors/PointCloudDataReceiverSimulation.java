@@ -28,7 +28,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataR
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudSource;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModelUtils;
-import us.ihmc.robotics.geometry.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 
 public class PointCloudDataReceiverSimulation implements Runnable, PacketConsumer<PointCloudWorldPacket>
