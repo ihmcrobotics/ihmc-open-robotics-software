@@ -1,6 +1,6 @@
 package us.ihmc.graphics3DAdapter.exceptions;
 
-import us.ihmc.robotics.geometry.Shape3d;
+import us.ihmc.robotics.geometry.shapes.Shape3d;
 
 @SuppressWarnings("serial")
 public class ShapeNotSupportedException extends Exception
