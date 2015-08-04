@@ -6,12 +6,12 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.robotics.frictionModels.AsymmetricCoulombViscousFrictionModel;
-import us.ihmc.robotics.frictionModels.AsymmetricCoulombViscousStribeckFrictionModel;
-import us.ihmc.robotics.frictionModels.FrictionModel;
-import us.ihmc.robotics.frictionModels.FrictionState;
-import us.ihmc.robotics.frictionModels.JointFrictionModel;
-import us.ihmc.robotics.frictionModels.NoCompensationFrictionModel;
+import us.ihmc.FrictionID.frictionModels.AsymmetricCoulombViscousFrictionModel;
+import us.ihmc.FrictionID.frictionModels.AsymmetricCoulombViscousStribeckFrictionModel;
+import us.ihmc.FrictionID.frictionModels.FrictionModel;
+import us.ihmc.FrictionID.frictionModels.FrictionState;
+import us.ihmc.FrictionID.frictionModels.JointFrictionModel;
+import us.ihmc.FrictionID.frictionModels.NoCompensationFrictionModel;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class JointFrictionModelsHolderTest
