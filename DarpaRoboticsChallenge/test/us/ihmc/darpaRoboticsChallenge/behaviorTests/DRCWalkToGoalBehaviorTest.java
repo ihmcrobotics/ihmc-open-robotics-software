@@ -42,7 +42,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -270,7 +270,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       return ret;
    }
 
-   private FramePose2d getCurrentMidFeetPose2d(ReferenceFrames referenceFrames)
+   private FramePose2d getCurrentMidFeetPose2d(HumanoidReferenceFrames referenceFrames)
    {
       robotDataReceiver.updateRobotModel();
       referenceFrames.updateFrames();

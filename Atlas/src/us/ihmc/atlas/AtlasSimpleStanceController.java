@@ -8,8 +8,8 @@ import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.SimpleStanceController;
@@ -55,7 +55,7 @@ public class AtlasSimpleStanceController
       DRCRobotJointMap jointMap = model.getJointMap();
       SDFFullRobotModel fullRobotModel = model.createFullRobotModel();
       SDFRobot robot = model.createSdfRobot(false);
-      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel);
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
       DRCRobotInitialSetup<SDFRobot> intialSetup = model.getDefaultRobotInitialSetup(0, 0);
       intialSetup.initializeRobot(robot, jointMap);

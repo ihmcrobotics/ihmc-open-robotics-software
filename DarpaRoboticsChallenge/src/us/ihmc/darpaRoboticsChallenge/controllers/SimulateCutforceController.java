@@ -6,11 +6,11 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -92,16 +92,16 @@ public class SimulateCutforceController implements RobotController
       wristJoint.addExternalForcePoint(efpHandControlFrame);
       
       wristJoint.getTransformToWorld(transform);
-      wristJointPose = new FramePose(ReferenceFrames.getWorldFrame(), transform);
-      yoWristJointPose = new YoFramePose("wristJointPose", ReferenceFrames.getWorldFrame(), registry);
+      wristJointPose = new FramePose(HumanoidReferenceFrames.getWorldFrame(), transform);
+      yoWristJointPose = new YoFramePose("wristJointPose", HumanoidReferenceFrames.getWorldFrame(), registry);
       yoWristJointPose.set(wristJointPose);
       YoGraphicCoordinateSystem yoWristCoordinateSystem = new YoGraphicCoordinateSystem("wristCoordinateSystemViz", yoWristJointPose, 0.1, YoAppearance.Red());
       
       wristJoint.getTransformToWorld(transform);
       transform.transform(wristToHandControlFrame, tangentVector);
-      handControlFramePose = new FramePose(ReferenceFrames.getWorldFrame(), transform);
+      handControlFramePose = new FramePose(HumanoidReferenceFrames.getWorldFrame(), transform);
       handControlFramePose.translate(tangentVector);
-      yoHandControlFramePose = new YoFramePose("handControlFrame",ReferenceFrames.getWorldFrame(), registry);
+      yoHandControlFramePose = new YoFramePose("handControlFrame", HumanoidReferenceFrames.getWorldFrame(), registry);
       yoHandControlFramePose.set(handControlFramePose);
       YoGraphicCoordinateSystem yoToolTip = new YoGraphicCoordinateSystem("toolTipViz", yoHandControlFramePose, 0.1, YoAppearance.Yellow());
       

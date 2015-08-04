@@ -23,6 +23,7 @@ import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior.WalkingOrientation;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -31,7 +32,6 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePose;
@@ -623,7 +623,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
    {
       BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
       FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-      ReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();
 
       final WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(communicationBridge, fullRobotModel, referenceFrames,

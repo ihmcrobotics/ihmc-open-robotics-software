@@ -12,12 +12,12 @@ import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
@@ -254,10 +254,10 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         YoFramePose footIK = new YoFramePose(sidePrefix + "FootIK", "", ReferenceFrames.getWorldFrame(), registry);
+         YoFramePose footIK = new YoFramePose(sidePrefix + "FootIK", "", HumanoidReferenceFrames.getWorldFrame(), registry);
          feetIKs.put(robotSide, footIK);
          
-         YoFramePose handIK = new YoFramePose(sidePrefix + "HandIK", "", ReferenceFrames.getWorldFrame(), registry);
+         YoFramePose handIK = new YoFramePose(sidePrefix + "HandIK", "", HumanoidReferenceFrames.getWorldFrame(), registry);
          handIKs.put(robotSide, handIK);
 
          yoGraphicsListRegistry.registerYoGraphic(listName, new YoGraphicCoordinateSystem(sidePrefix + "FootViz", footIK, scale));

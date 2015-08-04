@@ -36,6 +36,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
@@ -43,7 +44,6 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -85,7 +85,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFRobot sdfRobot = robotModel.createSdfRobot(false);
       
-      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel);
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
       DRCRobotInitialSetup<SDFRobot> intialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       initializeRobot(fullRobotModel, sdfRobot, referenceFrames, intialSetup, jointMap);
@@ -178,7 +178,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFRobot robot = robotModel.createSdfRobot(false);
       
-      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel);
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
       DRCRobotInitialSetup<SDFRobot> intialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       initializeRobot(fullRobotModel, robot, referenceFrames, intialSetup, jointMap);
@@ -319,7 +319,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       }
    }
 
-   private void initializeRobot(SDFFullRobotModel fullRobotModel, SDFRobot robot, ReferenceFrames referenceFrames, DRCRobotInitialSetup<SDFRobot> intialSetup, DRCRobotJointMap jointMap)
+   private void initializeRobot(SDFFullRobotModel fullRobotModel, SDFRobot robot, HumanoidReferenceFrames referenceFrames, DRCRobotInitialSetup<SDFRobot> intialSetup, DRCRobotJointMap jointMap)
    {
       intialSetup.initializeRobot(robot, jointMap);
       SDFPerfectSimulatedSensorReader sensorReader = new SDFPerfectSimulatedSensorReader(robot, fullRobotModel, referenceFrames);
@@ -341,7 +341,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       return contactStates;
    }
 
-   private SideDependentList<ContactablePlaneBody> createFeet(SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames, WalkingControllerParameters walkingControlParamaters)
+   private SideDependentList<ContactablePlaneBody> createFeet(SDFFullRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControlParamaters)
    {
       double footForward = walkingControlParamaters.getFootForwardOffset();
       double footBack = walkingControlParamaters.getFootBackwardOffset();

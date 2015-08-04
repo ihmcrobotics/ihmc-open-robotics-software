@@ -35,7 +35,7 @@ import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 /**
- * TODO There is not enough ReferenceFrames in that class, it is pretty fragile
+ * TODO There is not enough HumanoidReferenceFrames in that class, it is pretty fragile
  *
  */
 public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator

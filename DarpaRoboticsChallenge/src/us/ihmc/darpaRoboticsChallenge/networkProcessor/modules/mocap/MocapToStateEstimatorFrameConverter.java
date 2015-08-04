@@ -8,7 +8,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -67,7 +67,7 @@ public class MocapToStateEstimatorFrameConverter
    {
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
-      ReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
       robotHeadFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);
       
 

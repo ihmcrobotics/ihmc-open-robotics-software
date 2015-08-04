@@ -15,7 +15,7 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidBehaviors.taskExecutor.DropDebrisTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GraspPieceOfDebrisTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -52,7 +52,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
    private FramePoint graspPosition;
 
    public RemoveSingleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrames, DoubleYoVariable yoTime, WholeBodyControllerParameters wholeBodyControllerParameters)
+         HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);
 

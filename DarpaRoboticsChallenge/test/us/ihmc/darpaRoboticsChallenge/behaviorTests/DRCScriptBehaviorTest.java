@@ -55,7 +55,7 @@ import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.robotics.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -556,7 +556,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       return ret;
    }
 
-   private FootstepDataList createFootStepDataList(Vector2d walkDeltaXY, ReferenceFrames referenceFrames)
+   private FootstepDataList createFootStepDataList(Vector2d walkDeltaXY, HumanoidReferenceFrames referenceFrames)
    {
       drcBehaviorTestHelper.updateRobotModel();
       FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();

@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface.BehaviorStatus;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -28,7 +28,7 @@ public abstract class StopThreadUpdatable implements Updatable
 
    protected LinkedHashMap<HumanoidBehaviorControlModeEnum, BehaviorStatus> behaviorStatus = new LinkedHashMap<HumanoidBehaviorControlModeEnum, BehaviorStatus>();
    protected LinkedHashMap<HumanoidBehaviorControlModeEnum, RigidBodyTransform> testFrameTransformToWorld = new LinkedHashMap<HumanoidBehaviorControlModeEnum, RigidBodyTransform>();
-   protected LinkedHashMap<HumanoidBehaviorControlModeEnum, ReferenceFrames> referenceFramesForLogging = new LinkedHashMap<HumanoidBehaviorControlModeEnum, ReferenceFrames>();
+   protected LinkedHashMap<HumanoidBehaviorControlModeEnum, HumanoidReferenceFrames> referenceFramesForLogging = new LinkedHashMap<HumanoidBehaviorControlModeEnum, HumanoidReferenceFrames>();
 
    public StopThreadUpdatable(RobotDataReceiver robotDataReceiver, BehaviorInterface behavior, ReferenceFrame frameToKeepTrackOf)
    {
@@ -58,7 +58,7 @@ public abstract class StopThreadUpdatable implements Updatable
       }
    }
 
-   public ReferenceFrames getReferenceFramesAtTransition(HumanoidBehaviorControlModeEnum controlMode)
+   public HumanoidReferenceFrames getReferenceFramesAtTransition(HumanoidBehaviorControlModeEnum controlMode)
    {
       return referenceFramesForLogging.get(controlMode);
    }

@@ -39,7 +39,7 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -392,7 +392,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
    {
       BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
       SDFFullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-      ReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       DoubleYoVariable yoTime = drcBehaviorTestHelper.getYoTime();
       CapturePointUpdatable capturePointUpdatable = drcBehaviorTestHelper.getCapturePointUpdatable();
       BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
@@ -405,7 +405,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       return turnValveBehavior;
    }
 
-   private FramePose getRobotPose(ReferenceFrames referenceFrames)
+   private FramePose getRobotPose(HumanoidReferenceFrames referenceFrames)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 

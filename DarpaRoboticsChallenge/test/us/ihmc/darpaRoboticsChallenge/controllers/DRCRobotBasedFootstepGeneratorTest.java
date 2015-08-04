@@ -20,11 +20,11 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.FootstepGeneratorVisualizer;
 import us.ihmc.pathGeneration.footstepGenerator.SemiCircularStepValidityMetric;
 import us.ihmc.pathGeneration.footstepGenerator.TurningThenStraightFootstepGenerator;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -45,10 +45,10 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    private final static boolean VISUALIZE = false;
    private final static boolean SIDESTEP = false;
 
-   public static final ReferenceFrame WORLD_FRAME = ReferenceFrames.getWorldFrame();
+   public static final ReferenceFrame WORLD_FRAME = HumanoidReferenceFrames.getWorldFrame();
    private List<Footstep> footSteps = new ArrayList<Footstep>();
    private FullRobotModel fullRobotModel;
-   private ReferenceFrames referenceFrames;
+   private HumanoidReferenceFrames referenceFrames;
    private SideDependentList<ContactablePlaneBody> contactableFeet;
    private SideDependentList<RigidBody> feet;
    private SideDependentList<ReferenceFrame> soleFrames;
@@ -179,7 +179,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       DRCRobotModel robotModel = getRobotModel();
       walkingParamaters = robotModel.getWalkingControllerParameters();
       fullRobotModel = robotModel.createFullRobotModel();
-      referenceFrames = new ReferenceFrames(fullRobotModel);
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       contactableFeet = robotModel.getContactPointParameters().getContactableBodiesFactory().createFootContactableBodies(fullRobotModel, referenceFrames);
 
       feet = new SideDependentList<RigidBody>();

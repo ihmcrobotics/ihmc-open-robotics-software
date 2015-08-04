@@ -41,7 +41,7 @@ import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -73,7 +73,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final PacketCommunicator behaviorCommunicatorServer;
    private final BehaviorCommunicationBridge behaviorCommunicationBridge;
    private final RobotDataReceiver robotDataReceiver;
-   private final ReferenceFrames referenceFrames;
+   private final HumanoidReferenceFrames referenceFrames;
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    private final CapturePointUpdatable capturePointUpdatable;
@@ -159,7 +159,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return fullRobotModel;
    }
 
-   public ReferenceFrames getReferenceFrames()
+   public HumanoidReferenceFrames getReferenceFrames()
    {
       return referenceFrames;
    }

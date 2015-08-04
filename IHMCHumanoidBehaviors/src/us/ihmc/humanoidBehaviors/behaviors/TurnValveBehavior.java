@@ -20,7 +20,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ScriptTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -60,7 +60,7 @@ public class TurnValveBehavior extends BehaviorInterface
    public static final double howFarToStandBackFromValve = 1.25 * 0.64; //0.64
 
    private final SDFFullRobotModel fullRobotModel;
-   private final ReferenceFrames referenceFrames;
+   private final HumanoidReferenceFrames referenceFrames;
 
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
@@ -88,7 +88,7 @@ public class TurnValveBehavior extends BehaviorInterface
    private final double minYawDeltaForWalkingBetweenValveTurns = Math.toRadians(5.0);
 
    public TurnValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrames, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, BooleanYoVariable tippingDetectedBoolean,
+         HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, BooleanYoVariable tippingDetectedBoolean,
          WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);

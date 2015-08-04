@@ -15,7 +15,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.LookAtBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -43,7 +43,7 @@ public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
    private final LookAtBehavior lookAtBehavior;
    private final LinkedList<FootstepData> footStepToTake;
    private final LinkedList<FootstepData> footStepsToLookAt;
-   private final ReferenceFrames referenceFrames;
+   private final HumanoidReferenceFrames referenceFrames;
    private final ReferenceFrame midZUpFrame;
    private final RigidBodyTransform midZUpTransform = new RigidBodyTransform();
    private final Vector3d midZUpTranslation = new Vector3d();
@@ -54,7 +54,7 @@ public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
    private FootstepDataList currentFootStepList;
    private FootstepData currentFootBeingLookedAt;
    
-   public CheckEachStepWhileWalkingBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, ReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, DoubleYoVariable yoTime)
+   public CheckEachStepWhileWalkingBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
       isDone = new BooleanYoVariable(behaviorName + "_isDone", registry);

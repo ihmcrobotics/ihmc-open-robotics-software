@@ -21,7 +21,7 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -97,7 +97,7 @@ public class PushButtonBehavior extends BehaviorInterface
 
 
    public PushButtonBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
-         ReferenceFrames referenceFrames, DoubleYoVariable yoTime, SideDependentList<WristForceSensorFilteredUpdatable> wristSensors)
+         HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime, SideDependentList<WristForceSensorFilteredUpdatable> wristSensors)
    {
       super(outgoingCommunicationBridge);
 

@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -44,7 +44,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       robotForEnvironmentSetup.update();
       FullRobotModel fullRobotModelForEnvironmentSetup = robotModel.createFullRobotModel();
 
-      CommonHumanoidReferenceFrames referenceFramesForEnvironmentSetup = new ReferenceFrames(fullRobotModelForEnvironmentSetup);
+      CommonHumanoidReferenceFrames referenceFramesForEnvironmentSetup = new HumanoidReferenceFrames(fullRobotModelForEnvironmentSetup);
       SDFPerfectSimulatedSensorReader sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReader(robotForEnvironmentSetup,
                                                                                 fullRobotModelForEnvironmentSetup, referenceFramesForEnvironmentSetup);
       sensorReaderAndOutputWriter.read();

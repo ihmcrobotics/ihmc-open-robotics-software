@@ -19,10 +19,10 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
@@ -50,7 +50,7 @@ public class PoseSequenceSelectorPanel extends JPanel
 
       sequence = new PlaybackPoseSequence(fullRobotModel);
       
-      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel);
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       SDFPerfectSimulatedSensorReader reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
       ModularRobotController controller = new ModularRobotController("Reader");
       controller.setRawSensorReader(reader);

@@ -12,7 +12,7 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.pathGeneration.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.robotics.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
@@ -43,7 +43,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final boolean DEBUG = false;
    private final FullRobotModel fullRobotModel;
-   private final ReferenceFrames referenceFrames;
+   private final HumanoidReferenceFrames referenceFrames;
 
    private double swingTime;
    private double transferTime;
@@ -73,7 +73,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
    private double minDistanceThresholdForWalking, minYawThresholdForWalking;
 
    public WalkToLocationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
+         HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
 

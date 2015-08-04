@@ -18,6 +18,7 @@ import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.communication.subscribers.StateEstimatorModeSubscriber;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
@@ -35,7 +36,6 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinema
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.robotics.humanoidRobot.model.IMUDefinition;
 import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.humanoidRobot.model.ContactSensorHolder;
 import us.ihmc.robotics.humanoidRobot.model.DesiredJointDataHolder;
@@ -294,7 +294,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(estimatorFullRobotModel);
 
-      ReferenceFrames estimatorReferenceFrames = new ReferenceFrames(estimatorFullRobotModel);
+      HumanoidReferenceFrames estimatorReferenceFrames = new HumanoidReferenceFrames(estimatorFullRobotModel);
       ContactableBodiesFactory contactableBodiesFactory = contactPointParamaters.getContactableBodiesFactory();
       SideDependentList<ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(estimatorFullRobotModel,
             estimatorReferenceFrames);

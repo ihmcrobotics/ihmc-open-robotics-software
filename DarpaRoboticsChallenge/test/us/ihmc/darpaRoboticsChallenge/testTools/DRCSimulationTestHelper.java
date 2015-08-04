@@ -45,7 +45,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -68,7 +68,7 @@ public class DRCSimulationTestHelper
    private final WalkingControllerParameters walkingControlParameters;
 
    private final FullRobotModel fullRobotModel;
-   private final ReferenceFrames referenceFrames;
+   private final HumanoidReferenceFrames referenceFrames;
    private final ScriptedFootstepGenerator scriptedFootstepGenerator;
    private final ScriptedHandstepGenerator scriptedHandstepGenerator;
 
@@ -115,7 +115,7 @@ public class DRCSimulationTestHelper
       }
 
       fullRobotModel = robotModel.createFullRobotModel();
-      referenceFrames = new ReferenceFrames(fullRobotModel);
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel, walkingControlParameters);
       scriptedHandstepGenerator = new ScriptedHandstepGenerator(fullRobotModel);
 

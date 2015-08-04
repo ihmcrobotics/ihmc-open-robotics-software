@@ -62,7 +62,7 @@ public class AngularVelocityProcessModelElement extends AbstractProcessModelElem
          FrameVector angularAccelerationData = angularAccelerationPort.getData();
          angularAccelerationData.get(angularAccelerationVector3d);
          
-         //TODO: Figure out how to deal best with ReferenceFrames here. 
+         //TODO: Figure out how to deal best with HumanoidReferenceFrames here.
          // Upon generation, the generator might not know what the estimation frame will
          // be. So here we're just making sure that the frame is null if it's not
          // the estimation frame.

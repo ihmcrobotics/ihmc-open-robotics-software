@@ -13,7 +13,7 @@ import us.ihmc.communication.packets.sensing.MultisenseTest;
 import us.ihmc.communication.packets.sensing.MultisenseTest.MultisenseFrameName;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.robotics.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -38,7 +38,7 @@ public class MultisensePointCloudReceiver extends RosPointCloudSubscriber
       
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
-      ReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
       
       this.headRootReferenceFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);
       setupReferenceFrames(referenceFrames);
@@ -81,7 +81,7 @@ public class MultisensePointCloudReceiver extends RosPointCloudSubscriber
       return frame;
    }
    
-   private void setupReferenceFrames(ReferenceFrames referenceFrames)
+   private void setupReferenceFrames(HumanoidReferenceFrames referenceFrames)
    {
       switch (frame)
       {
