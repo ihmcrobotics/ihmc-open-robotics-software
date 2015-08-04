@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.utilities.containers.EnumTools;
+import us.ihmc.robotics.containers.EnumTools;
 import us.ihmc.utilities.inputDevices.keyboard.Key;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
