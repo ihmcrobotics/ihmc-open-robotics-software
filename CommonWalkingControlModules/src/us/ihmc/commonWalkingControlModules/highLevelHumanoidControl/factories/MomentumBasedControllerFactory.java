@@ -34,7 +34,7 @@ import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
-import us.ihmc.robotics.humanoidRobot.RobotMotionStatusChangedListener;
+import us.ihmc.robotics.humanoidRobot.model.RobotMotionStatusChangedListener;
 import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.CenterOfPressureDataHolder;

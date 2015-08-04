@@ -40,7 +40,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationP
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.robotics.humanoidRobot.RobotMotionStatus;
+import us.ihmc.robotics.humanoidRobot.model.RobotMotionStatus;
 import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
