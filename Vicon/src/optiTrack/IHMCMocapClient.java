@@ -103,8 +103,8 @@ public class IHMCMocapClient extends MocapDataClient
 
       for (MocapRigidBody rb : listOfRigidbodies)
       {
-         if (rb.getId() == 1)
-         {
+//         if (rb.getId() == 1)
+//         {
             rigidBodyInformationInMocapOrigin = new RigidBodyTransform(new Quat4d(rb.qx, rb.qy, rb.qz, rb.qw),
                     new Vector3d(rb.xPosition, rb.yPosition, rb.zPosition));
             mocapRB.update();
@@ -120,7 +120,7 @@ public class IHMCMocapClient extends MocapDataClient
             rigidBodyPoseInZUp.getOrientation(rotation);
 
             listOfConvertedRigidBodies.add(new MocapRigidBody(rb.getId(), position, rotation, null, true));
-         }
+//         }
       }
 
       for (MocapRigidbodiesListener listener : listOfMocapRigidBodiesListeners)
