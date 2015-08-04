@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGe
 import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.lists.FrameTupleArrayList;
+import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;

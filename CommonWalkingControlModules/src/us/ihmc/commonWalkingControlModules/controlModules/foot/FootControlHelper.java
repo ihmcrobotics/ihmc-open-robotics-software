@@ -18,7 +18,7 @@ import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
-import us.ihmc.utilities.lists.FrameTuple2dArrayList;
+import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
