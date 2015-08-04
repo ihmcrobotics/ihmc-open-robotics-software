@@ -5,8 +5,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.robotics.geometry.Ray3d;
+import us.ihmc.utilities.TimestampProvider;
 
 import com.jme3.app.Application;
 import com.jme3.scene.Node;

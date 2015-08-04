@@ -13,7 +13,7 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.Sphere3d;
+import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.robotics.geometry.Transform3d;
 
 public class Graphics3DLidarScan

@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.utilities.inputDevices.keyboard.Key;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.FrameTorus3d;
+import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;

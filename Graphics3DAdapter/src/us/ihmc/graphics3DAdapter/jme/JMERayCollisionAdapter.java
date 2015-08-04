@@ -6,7 +6,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.robotics.geometry.Ray3d;
 
 import com.jme3.collision.Collidable;
 import com.jme3.collision.CollisionResult;
@@ -15,6 +14,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import us.ihmc.robotics.geometry.Ray3d;
 
 public class JMERayCollisionAdapter
 {

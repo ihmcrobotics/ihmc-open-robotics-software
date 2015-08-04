@@ -10,7 +10,7 @@ import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.Box3d;
+import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 

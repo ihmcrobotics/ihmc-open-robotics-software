@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.NullJoint;
 import us.ihmc.utilities.inputDevices.keyboard.Key;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.robotics.geometry.FrameCylinder3d;
+import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

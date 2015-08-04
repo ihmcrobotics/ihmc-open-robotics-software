@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.geometry.FrameEllipsoid3d;
+import us.ihmc.robotics.geometry.shapes.FrameEllipsoid3d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

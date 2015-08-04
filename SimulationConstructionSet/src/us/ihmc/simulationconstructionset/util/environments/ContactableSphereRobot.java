@@ -9,7 +9,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.Sphere3d;
+import us.ihmc.robotics.geometry.shapes.Sphere3d;
 
 
 public class ContactableSphereRobot extends ContactableRobot

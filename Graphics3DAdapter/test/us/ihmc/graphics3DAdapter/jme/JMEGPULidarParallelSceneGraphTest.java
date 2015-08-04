@@ -21,7 +21,7 @@ import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.Sphere3d;
+import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.robotics.geometry.TransformTools;
 
 @BambooPlan(planType={BambooPlanType.UI})

@@ -14,10 +14,10 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.Box3d;
-import us.ihmc.robotics.geometry.Cylinder3d;
+import us.ihmc.robotics.geometry.shapes.Box3d;
+import us.ihmc.robotics.geometry.shapes.Cylinder3d;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.Plane3d;
+import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
 

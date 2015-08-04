@@ -17,7 +17,7 @@ import us.ihmc.graphics3DAdapter.utils.FlatHeightMap;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.robotics.geometry.Sphere3d;
+import us.ihmc.robotics.geometry.shapes.Sphere3d;
 
 @BambooPlan(planType={BambooPlanType.UI})
 public class JMERendererTest
