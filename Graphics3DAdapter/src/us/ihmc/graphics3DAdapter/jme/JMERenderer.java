@@ -41,7 +41,7 @@ import us.ihmc.graphics3DAdapter.jme.util.JMENodeTools;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.loaders.jme.STLLoader;
-import us.ihmc.utilities.FormattingTools;
+import us.ihmc.robotics.FormattingTools;
 import us.ihmc.utilities.inputDevices.keyboard.KeyListener;
 import us.ihmc.utilities.inputDevices.keyboard.KeyListenerHolder;
 import us.ihmc.utilities.inputDevices.mouse.MouseListener;

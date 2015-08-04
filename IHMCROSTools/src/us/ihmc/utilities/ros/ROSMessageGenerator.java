@@ -22,7 +22,7 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
-import us.ihmc.utilities.DocumentedEnum;
+import us.ihmc.robotics.DocumentedEnum;
 import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 
 public class ROSMessageGenerator
