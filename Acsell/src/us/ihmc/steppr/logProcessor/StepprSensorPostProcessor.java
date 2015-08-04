@@ -17,6 +17,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorFunction;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorHelper;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataRawSensorMap;
+import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -29,7 +30,6 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinema
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.robotics.humanoidRobot.model.IMUDefinition;
 import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.robotics.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.robotics.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
 import us.ihmc.robotics.humanoidRobot.model.RobotMotionStatusHolder;
@@ -185,7 +185,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
       String[] imuSensorsToUseInStateEstimator = robotModel.getSensorInformation().getIMUSensorsToUseInStateEstimator();
       double gravitationalAcceleration = -9.80;
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
-      CommonHumanoidReferenceFrames referenceFrames = new ReferenceFrames(estimatorFullRobotModel);
+      CommonHumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(estimatorFullRobotModel);
       SideDependentList<ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(estimatorFullRobotModel, referenceFrames);
       SideDependentList<FootSwitchInterface> footSwitches = createStateEstimatorFootSwitches(logDataProcessorHelper, bipedFeet);
       YoGraphicsListRegistry yoGraphicsListRegistry = null; // no viz for now
