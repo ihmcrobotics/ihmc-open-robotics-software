@@ -45,7 +45,7 @@ public class SimulateCutforceController implements RobotController
    
    
    //TODO estimate:
-   private DoubleYoVariable quadraticForcecoeff;
+   private DoubleYoVariable quadraticForceCoeff;
    
    // Graphicregistry for viz
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -101,7 +101,7 @@ public class SimulateCutforceController implements RobotController
       transform.transform(wristToHandControlFrame, tangentVector);
       handControlFramePose = new FramePose(HumanoidReferenceFrames.getWorldFrame(), transform);
       handControlFramePose.translate(tangentVector);
-      yoHandControlFramePose = new YoFramePose("handControlFrame", HumanoidReferenceFrames.getWorldFrame(), registry);
+      yoHandControlFramePose = new YoFramePose("handControlFrame",HumanoidReferenceFrames.getWorldFrame(), registry);
       yoHandControlFramePose.set(handControlFramePose);
       YoGraphicCoordinateSystem yoToolTip = new YoGraphicCoordinateSystem("toolTipViz", yoHandControlFramePose, 0.1, YoAppearance.Yellow());
       
@@ -112,8 +112,8 @@ public class SimulateCutforceController implements RobotController
       
       
       //
-      quadraticForcecoeff = new DoubleYoVariable("quadraticForceCoeff", registry);
-      quadraticForcecoeff.set(5000.0);
+      quadraticForceCoeff = new DoubleYoVariable("quadraticForceCoeff", registry);
+      quadraticForceCoeff.set(1000.0);
             
    }
 
@@ -160,27 +160,42 @@ public class SimulateCutforceController implements RobotController
       
 //      efpGravity.setForce(0.0, 0.0, -gGRAVITY * MASSDRILL);
 //      efpGravity.setForce(0.0, 0.0, 0.0);
-      efpWrist.setForce(exponentialCutForceModel(efpHandControlFrame.getVelocityVector()));
+//      efpWrist.setForce(exponentialCutForceModel(efpHandControlFrame.getVelocityVector()));
+      efpWrist.setForce(quadraticCutForceModel(efpHandControlFrame.getVelocityVector()));
       
    }
    
    private Vector3d quadraticCutForceModel(Vector3d toolTipVelocity)
    {
-     tangentVector.set(toolTipVelocity);
-     
-     if(tangentVector.length() != 0.0)
-     {
-        tangentVector.normalize();
-        tangentVector.scale(-1.0);
-        
-        tangentVector.scale(quadraticForcecoeff.getDoubleValue() * Math.pow(toolTipVelocity.length(), 2));
-        return tangentVector;
-     }
-     else
-     {
-        return tangentVector;
-     }
+	   tangentVector.set(toolTipVelocity);
+	   tangentionalVelocity.set(toolTipVelocity);
+	  //System.out.println(this.sdfRobot.getTime());
+	     
+	   if(this.sdfRobot.getTime() >=13 && this.sdfRobot.getTime() <= 17)
+	   {
+		   quadraticForceCoeff.set(10000.0);
+	   }
+	   else
+	   {
+		   quadraticForceCoeff.set(1000.0);
+	   }
+	     if(tangentVector.length() != 0.0)
+	     {
+	    	tangentionalVelocity.setX(0.0);
+	    	tangentVector.setX(0.0);
+	        tangentVector.normalize();
+	        tangentVector.scale(-1.0);
+	        tangentVector.scale(quadraticForceCoeff.getDoubleValue() * Math.pow(toolTipVelocity.length(), 2));
+	        efpHandControlFrameVelocity.set(tangentionalVelocity.length());
+	        return tangentVector;
+	     }
+	     else
+	     {
+	        return tangentVector;
+	     }  
    }
+   
+   
    private Vector3d exponentialCutForceModel(Vector3d toolTipVelocity)
    {
 	   tangentVector.set(toolTipVelocity);
