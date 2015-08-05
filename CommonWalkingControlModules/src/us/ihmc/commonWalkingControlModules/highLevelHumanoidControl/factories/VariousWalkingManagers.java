@@ -15,8 +15,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.robotSide.RobotSide;

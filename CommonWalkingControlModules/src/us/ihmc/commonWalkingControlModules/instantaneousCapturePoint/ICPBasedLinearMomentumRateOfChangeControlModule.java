@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;

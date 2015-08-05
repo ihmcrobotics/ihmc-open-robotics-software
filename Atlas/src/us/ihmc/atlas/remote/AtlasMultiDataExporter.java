@@ -41,7 +41,7 @@ import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.gui.SwingUtils;
-import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;

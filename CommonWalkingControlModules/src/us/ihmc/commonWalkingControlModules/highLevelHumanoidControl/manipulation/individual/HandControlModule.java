@@ -24,8 +24,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
-import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;

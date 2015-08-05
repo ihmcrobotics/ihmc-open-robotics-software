@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
 import us.ihmc.robotics.ArrayTools;
-import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ArmTorques

@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.kinematics.StanceFullLegJacobian;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

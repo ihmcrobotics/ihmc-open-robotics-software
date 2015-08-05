@@ -8,7 +8,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.robotics.humanoidRobot.partNames.NeckJointName;
+import us.ihmc.humanoidRobotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;

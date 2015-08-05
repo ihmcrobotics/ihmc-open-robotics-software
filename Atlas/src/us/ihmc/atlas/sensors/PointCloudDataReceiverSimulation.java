@@ -27,7 +27,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudSource;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModelUtils;
+import us.ihmc.humanoidRobotics.model.FullRobotModelUtils;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 

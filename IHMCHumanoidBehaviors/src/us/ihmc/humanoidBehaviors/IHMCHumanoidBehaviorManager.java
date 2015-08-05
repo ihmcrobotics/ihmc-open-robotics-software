@@ -38,7 +38,7 @@ import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
-import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;

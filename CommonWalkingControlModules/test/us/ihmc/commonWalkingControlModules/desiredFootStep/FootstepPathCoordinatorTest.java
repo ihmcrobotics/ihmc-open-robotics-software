@@ -22,8 +22,8 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalc
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

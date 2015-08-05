@@ -10,9 +10,9 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointPositions
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
-import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;

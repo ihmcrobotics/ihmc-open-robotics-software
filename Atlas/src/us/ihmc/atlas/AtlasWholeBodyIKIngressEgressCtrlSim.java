@@ -20,7 +20,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.robotics.humanoidRobot.partNames.LimbName;
+import us.ihmc.humanoidRobotics.partNames.LimbName;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

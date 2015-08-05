@@ -25,7 +25,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModelUtils;
+import us.ihmc.humanoidRobotics.model.FullRobotModelUtils;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

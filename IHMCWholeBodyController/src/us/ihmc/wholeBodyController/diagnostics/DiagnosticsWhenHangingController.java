@@ -13,10 +13,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
-import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
-import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
-import us.ihmc.robotics.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.partNames.ArmJointName;
+import us.ihmc.humanoidRobotics.partNames.LegJointName;
+import us.ihmc.humanoidRobotics.partNames.SpineJointName;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;

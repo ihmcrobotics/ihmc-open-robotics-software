@@ -21,7 +21,7 @@ import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBo
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

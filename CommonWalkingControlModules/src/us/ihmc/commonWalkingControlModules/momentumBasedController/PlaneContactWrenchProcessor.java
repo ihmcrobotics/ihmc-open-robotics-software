@@ -16,7 +16,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 

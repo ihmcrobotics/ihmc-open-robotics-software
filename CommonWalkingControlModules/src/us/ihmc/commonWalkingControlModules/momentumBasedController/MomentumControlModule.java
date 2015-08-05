@@ -13,7 +13,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 /**
  * @author twan

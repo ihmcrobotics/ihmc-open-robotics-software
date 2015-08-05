@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCenterOfPressureFilter;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

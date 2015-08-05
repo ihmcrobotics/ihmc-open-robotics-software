@@ -32,7 +32,7 @@ import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import boofcv.struct.calib.IntrinsicParameters;

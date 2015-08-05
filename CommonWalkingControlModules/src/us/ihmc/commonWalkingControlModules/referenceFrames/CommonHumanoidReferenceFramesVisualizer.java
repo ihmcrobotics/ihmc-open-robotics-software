@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;

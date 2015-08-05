@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

@@ -6,7 +6,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PosePlaybackSCSBridge;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;

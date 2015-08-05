@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

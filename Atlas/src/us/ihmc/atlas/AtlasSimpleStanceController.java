@@ -8,7 +8,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;

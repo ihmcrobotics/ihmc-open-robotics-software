@@ -11,8 +11,8 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;

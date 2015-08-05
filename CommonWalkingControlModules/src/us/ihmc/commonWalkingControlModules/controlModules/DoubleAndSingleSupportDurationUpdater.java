@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 
 public class DoubleAndSingleSupportDurationUpdater

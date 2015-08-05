@@ -4,7 +4,7 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;

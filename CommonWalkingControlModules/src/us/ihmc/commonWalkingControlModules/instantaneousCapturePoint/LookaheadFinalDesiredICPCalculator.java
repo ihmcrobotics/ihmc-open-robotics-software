@@ -13,7 +13,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 
 public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalculator

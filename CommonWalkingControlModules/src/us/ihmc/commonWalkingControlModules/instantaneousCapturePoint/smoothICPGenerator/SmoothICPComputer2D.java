@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.InstantaneousCapturePointPlanner;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;

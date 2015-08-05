@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.sensorProcessing.stateEstimation.LegToTrustForVelocityWriteOnly;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;

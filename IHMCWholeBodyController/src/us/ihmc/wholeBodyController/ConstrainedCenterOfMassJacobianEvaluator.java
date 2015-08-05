@@ -13,7 +13,7 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.linearAlgebra.ColumnSpaceProjector;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;

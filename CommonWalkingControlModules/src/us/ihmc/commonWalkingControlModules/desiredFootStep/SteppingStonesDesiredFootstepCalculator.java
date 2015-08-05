@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.captureRegion.SteppingStonesCaptureRe
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -24,8 +24,8 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 /**

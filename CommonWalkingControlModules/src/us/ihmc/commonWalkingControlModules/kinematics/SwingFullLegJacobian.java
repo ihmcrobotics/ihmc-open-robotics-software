@@ -5,8 +5,8 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
-import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;

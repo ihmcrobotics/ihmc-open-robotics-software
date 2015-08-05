@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportP
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;

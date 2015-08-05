@@ -6,7 +6,7 @@ import java.util.Set;
 
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJointHolder;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class PlaybackPose

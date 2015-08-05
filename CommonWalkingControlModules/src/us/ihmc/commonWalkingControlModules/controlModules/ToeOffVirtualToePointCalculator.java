@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePoi
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SimpleDesiredCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2dAndConnectingEdges;

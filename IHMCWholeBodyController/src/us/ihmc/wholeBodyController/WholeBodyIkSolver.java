@@ -20,7 +20,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.robotics.hierarchicalKinematics.*;
 import us.ihmc.robotics.hierarchicalKinematics.HierarchicalTaskBodyPose;
-import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.dataStructures.Vector64F;
 import us.ihmc.robotics.geometry.FramePoint;

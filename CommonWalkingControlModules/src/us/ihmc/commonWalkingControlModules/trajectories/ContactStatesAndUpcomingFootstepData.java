@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 public class ContactStatesAndUpcomingFootstepData
 {

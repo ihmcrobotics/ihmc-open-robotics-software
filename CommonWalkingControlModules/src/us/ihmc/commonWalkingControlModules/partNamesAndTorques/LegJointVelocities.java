@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
+import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class LegJointVelocities

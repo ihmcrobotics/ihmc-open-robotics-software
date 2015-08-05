@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

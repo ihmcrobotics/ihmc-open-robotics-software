@@ -10,8 +10,8 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer, PacketConsumer<FootstepData>
 {

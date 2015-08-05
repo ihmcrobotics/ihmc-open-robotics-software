@@ -24,8 +24,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 
 public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableDesiredFootstepCalculator

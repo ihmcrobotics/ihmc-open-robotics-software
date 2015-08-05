@@ -22,7 +22,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.robotics.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;

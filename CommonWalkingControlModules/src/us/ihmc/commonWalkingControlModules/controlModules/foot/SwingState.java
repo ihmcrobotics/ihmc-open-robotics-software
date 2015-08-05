@@ -7,8 +7,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.trajectories.PushRecoveryTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGenerator;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;

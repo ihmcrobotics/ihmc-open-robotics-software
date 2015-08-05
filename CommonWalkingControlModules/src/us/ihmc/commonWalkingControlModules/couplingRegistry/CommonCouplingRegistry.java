@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.couplingRegistry;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -18,7 +18,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 

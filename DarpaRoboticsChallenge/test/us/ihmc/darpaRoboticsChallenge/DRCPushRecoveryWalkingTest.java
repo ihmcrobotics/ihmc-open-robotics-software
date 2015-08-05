@@ -25,7 +25,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;

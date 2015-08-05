@@ -15,12 +15,12 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.*
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
-import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;

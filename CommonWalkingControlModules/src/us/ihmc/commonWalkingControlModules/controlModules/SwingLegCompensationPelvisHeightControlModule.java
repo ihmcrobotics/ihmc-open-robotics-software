@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisHeightControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoUtilities.controllers.PDController;

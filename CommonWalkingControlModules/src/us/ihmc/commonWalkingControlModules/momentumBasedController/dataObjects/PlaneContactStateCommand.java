@@ -4,7 +4,7 @@ import java.util.List;
 
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 public class PlaneContactStateCommand
 {

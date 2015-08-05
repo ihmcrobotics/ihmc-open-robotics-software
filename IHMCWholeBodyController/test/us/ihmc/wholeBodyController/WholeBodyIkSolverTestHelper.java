@@ -18,7 +18,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

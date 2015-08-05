@@ -11,7 +11,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 public class FootRotationProcessor implements LogDataProcessorFunction
 {

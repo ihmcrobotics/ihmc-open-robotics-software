@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceCons
 import us.ihmc.communication.packets.dataobjects.LowLevelDrivingAction;
 import us.ihmc.communication.packets.driving.LowLevelDrivingStatus;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -38,7 +38,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;

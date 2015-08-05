@@ -9,8 +9,8 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.robotics.robotSide.SideDependentList;
 

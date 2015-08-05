@@ -9,10 +9,10 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularConta
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
-import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;

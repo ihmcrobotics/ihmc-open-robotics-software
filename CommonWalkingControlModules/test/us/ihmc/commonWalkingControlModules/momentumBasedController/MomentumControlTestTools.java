@@ -7,7 +7,7 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

@@ -4,7 +4,7 @@ import javax.vecmath.Matrix3d;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;

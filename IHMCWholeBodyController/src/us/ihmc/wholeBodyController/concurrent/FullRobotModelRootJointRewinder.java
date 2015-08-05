@@ -4,7 +4,7 @@ package us.ihmc.wholeBodyController.concurrent;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJointReferenceFrame;

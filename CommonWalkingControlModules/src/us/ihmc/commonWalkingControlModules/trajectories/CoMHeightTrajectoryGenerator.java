@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 
 public interface CoMHeightTrajectoryGenerator

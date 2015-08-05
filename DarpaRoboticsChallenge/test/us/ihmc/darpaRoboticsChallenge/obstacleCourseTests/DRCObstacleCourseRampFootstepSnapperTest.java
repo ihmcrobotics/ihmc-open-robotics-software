@@ -49,7 +49,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiRobotTestInterface
 {

@@ -31,10 +31,10 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPolygon;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
-import us.ihmc.robotics.humanoidRobot.footstep.FootstepUtils;
-import us.ihmc.robotics.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
+import us.ihmc.humanoidRobotics.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 

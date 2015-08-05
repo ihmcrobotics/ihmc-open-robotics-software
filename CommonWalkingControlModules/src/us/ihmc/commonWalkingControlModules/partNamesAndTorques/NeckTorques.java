@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
-import us.ihmc.robotics.humanoidRobot.partNames.NeckJointName;
+import us.ihmc.humanoidRobotics.partNames.NeckJointName;
 
 
 public class NeckTorques

@@ -15,7 +15,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.LookAtBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;

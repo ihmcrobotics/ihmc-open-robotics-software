@@ -6,13 +6,13 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 
 public interface VariousWalkingProviderFactory

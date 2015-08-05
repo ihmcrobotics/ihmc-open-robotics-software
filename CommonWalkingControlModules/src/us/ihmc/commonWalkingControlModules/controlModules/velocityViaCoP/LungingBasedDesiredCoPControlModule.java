@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCenter
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.robotics.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint2d;

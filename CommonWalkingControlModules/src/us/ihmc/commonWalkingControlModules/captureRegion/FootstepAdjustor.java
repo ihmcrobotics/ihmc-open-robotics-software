@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;

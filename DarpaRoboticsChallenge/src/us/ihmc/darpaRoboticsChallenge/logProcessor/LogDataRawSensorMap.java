@@ -9,7 +9,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;

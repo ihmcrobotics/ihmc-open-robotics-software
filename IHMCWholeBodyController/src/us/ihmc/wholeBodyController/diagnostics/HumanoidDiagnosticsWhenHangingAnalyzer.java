@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

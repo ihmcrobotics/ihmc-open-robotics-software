@@ -45,7 +45,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateWrapper;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;

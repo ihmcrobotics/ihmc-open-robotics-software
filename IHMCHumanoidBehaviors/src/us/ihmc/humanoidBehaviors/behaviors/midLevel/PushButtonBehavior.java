@@ -21,7 +21,7 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
-import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;

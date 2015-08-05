@@ -4,8 +4,8 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.robotics.humanoidRobot.partNames.LegJointName;
-import us.ihmc.robotics.humanoidRobot.partNames.RobotSpecificJointNames;
+import us.ihmc.humanoidRobotics.partNames.LegJointName;
+import us.ihmc.humanoidRobotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

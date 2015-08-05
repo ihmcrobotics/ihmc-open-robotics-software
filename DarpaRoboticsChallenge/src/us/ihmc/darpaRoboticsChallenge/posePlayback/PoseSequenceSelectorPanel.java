@@ -19,11 +19,11 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class PoseSequenceSelectorPanel extends JPanel
