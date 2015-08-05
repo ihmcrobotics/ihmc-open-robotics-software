@@ -117,7 +117,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		circleTrajectorytime = new DoubleYoVariable("circularTrajectoryTime", registry);
 		//WARNING: INCREASE IF POSITION CONTROLLED IS APPLIED
 		//circleTrajectorytime.set(1.0);
-		circleTrajectorytime.set(30.0);
+		circleTrajectorytime.set(1.0);
 		
 		distanceToGoal = new DoubleYoVariable(getName()+ "distanceToGoal", registry);
 		straightLineControlCmd = new HandPosePacket(robotSide, Frame.WORLD, null, null, 1.0);
