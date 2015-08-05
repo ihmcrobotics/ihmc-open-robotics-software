@@ -1,0 +1,36 @@
+String baseDir = getProjectDir()
+new File(baseDir + File.separator + 'src').mkdir()
+new File(baseDir + File.separator + 'test').mkdir()
+new File(baseDir + File.separator + 'resources').mkdir()
+new File(baseDir + File.separator + 'testResources').mkdir()
+new File(baseDir + File.separator + 'gradleScripts').mkdir()
+new File(baseDir + File.separator + 'gradleScripts' + File.separator + 'dependencies.gradle').createNewFile()
+
+sourceSets
+{
+    main
+    {
+        java
+        {
+            srcDirs = ['src']
+        }
+
+        resources
+        {
+            srcDirs = ['resources']
+        }
+    }
+
+    test
+    {
+        java
+        {
+            srcDirs = ['test']
+        }
+        
+        resources
+        {
+        	srcDirs = ['testResources']
+        }
+    }
+}
