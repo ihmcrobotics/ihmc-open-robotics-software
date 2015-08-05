@@ -17,7 +17,7 @@ import us.ihmc.steppr.hardware.StepprUtil;
 import us.ihmc.steppr.hardware.state.StepprState;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
-import us.ihmc.robotics.humanoidRobot.model.DesiredJointDataHolder;
+import us.ihmc.humanoidRobotics.model.DesiredJointDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
