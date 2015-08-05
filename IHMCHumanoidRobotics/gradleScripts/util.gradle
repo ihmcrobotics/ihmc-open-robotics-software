@@ -1,0 +1,15 @@
+gradle.allprojects {
+    ext {
+        setupDefaultDirectoryStructure = {
+            apply from: 'gradleScripts/structure.gradle'
+        }
+
+        setupDefaultRepositories = {
+            apply from: 'gradleScripts/repositories.gradle'
+        }
+
+        setupProjectSpecificDependencies = {
+            apply from: 'gradleScripts/dependencies.gradle'
+        }
+    }
+}
