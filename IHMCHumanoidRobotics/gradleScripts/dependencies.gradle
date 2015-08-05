@@ -2,4 +2,6 @@ evaluationDependsOn(':Planning')
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
     compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x'
+
+    compile project(':IHMCUtilities')
 }

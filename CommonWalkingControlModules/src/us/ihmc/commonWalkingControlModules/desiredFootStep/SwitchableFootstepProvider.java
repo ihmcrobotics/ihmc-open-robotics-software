@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 public class SwitchableFootstepProvider implements FootstepProvider
 {

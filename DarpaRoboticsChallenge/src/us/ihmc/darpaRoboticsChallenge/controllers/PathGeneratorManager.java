@@ -1,9 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
-import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 public interface PathGeneratorManager
 {

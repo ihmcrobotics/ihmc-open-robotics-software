@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.ContactSensor;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.geometry.FramePoint2d;

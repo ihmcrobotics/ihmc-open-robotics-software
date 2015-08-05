@@ -12,7 +12,7 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
-import us.ihmc.robotics.humanoidRobot.model.DesiredJointDataHolder;
+import us.ihmc.humanoidRobotics.model.DesiredJointDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;

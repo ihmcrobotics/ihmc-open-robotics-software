@@ -23,7 +23,7 @@ import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.humanoidRobot.model.RobotMotionStatusHolder;
+import us.ihmc.humanoidRobotics.model.RobotMotionStatusHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.robotSide.RobotSide;

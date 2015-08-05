@@ -20,12 +20,12 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.FootstepGeneratorVisualizer;
 import us.ihmc.pathGeneration.footstepGenerator.SemiCircularStepValidityMetric;
 import us.ihmc.pathGeneration.footstepGenerator.TurningThenStraightFootstepGenerator;
-import us.ihmc.robotics.humanoidRobot.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.robotics.humanoidRobot.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -33,11 +33,11 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.humanoidRobot.footstep.Footstep;
-import us.ihmc.robotics.humanoidRobot.footstep.FootstepUtils;
-import us.ihmc.robotics.humanoidRobot.footstep.FootstepValidityMetric;
-import us.ihmc.robotics.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
+import us.ihmc.humanoidRobotics.footstep.FootstepValidityMetric;
+import us.ihmc.humanoidRobotics.footstep.footsepGenerator.SimplePathParameters;
 
 public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTestInterface
 {

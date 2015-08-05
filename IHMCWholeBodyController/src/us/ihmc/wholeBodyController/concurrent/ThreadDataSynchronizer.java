@@ -5,11 +5,11 @@ import java.util.Arrays;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.robotics.humanoidRobot.model.CenterOfPressureDataHolder;
+import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
-import us.ihmc.robotics.humanoidRobot.model.DesiredJointDataHolder;
+import us.ihmc.humanoidRobotics.model.DesiredJointDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.robotics.humanoidRobot.model.RobotMotionStatusHolder;
+import us.ihmc.humanoidRobotics.model.RobotMotionStatusHolder;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
