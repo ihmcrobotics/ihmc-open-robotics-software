@@ -35,6 +35,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
+import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
@@ -286,7 +287,7 @@ public class OptimizationMomentumControlModuleTest
       JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-3);
       assertWrenchesInFrictionCones(externalWrenchSolution, contactStates, coefficientOfFriction);
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-3);
-      JUnitTools.assertFrameVectorEquals(desiredPointAccelerationBack, desiredPointAcceleration, 1e-3);
+      FrameVectorTest.assertFrameVectorEquals(desiredPointAccelerationBack, desiredPointAcceleration, 1e-3);
    }
 
 	@EstimatedDuration(duration = 0.1)

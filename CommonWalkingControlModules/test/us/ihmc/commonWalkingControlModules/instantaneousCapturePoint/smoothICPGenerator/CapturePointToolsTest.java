@@ -10,12 +10,9 @@ import javax.vecmath.Quat4d;
 
 import org.junit.Test;
 
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.utilities.test.JUnitTools;
@@ -374,7 +371,7 @@ public class CapturePointToolsTest
 			CapturePointTools.computeDesiredCapturePointPosition(omega0, 0, capturePointsToPack.get(0), constantCentersOfPressures.get(0),
 					icpToCheck);
 
-			JUnitTools.assertFramePointEquals(capturePointsToPack.get(0).getFramePointCopy(), icpToCheck.getFramePointCopy(), 1e-8);
+			FramePointTest.assertFramePointEquals(capturePointsToPack.get(0).getFramePointCopy(), icpToCheck.getFramePointCopy(), 1e-8);
 
 			for (int i = 0; i < constantCentersOfPressures.size() - 2; i++)
 			{
