@@ -9,10 +9,11 @@ import org.junit.Test;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.ManualTest;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
-@ManualTest
+@BambooPlan(planType = BambooPlanType.Manual)
 public class SimulationConstructionSetTest
 {
    private boolean isGradleBuild()
