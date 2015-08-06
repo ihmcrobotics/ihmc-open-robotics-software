@@ -15,12 +15,9 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
@@ -324,7 +321,7 @@ public class CirclePoseTrajectoryGeneratorTest
       FrameOrientation initialOrientation = new FrameOrientation(frame);
       initialOrientationProvider.get(initialOrientation);
 
-      JUnitTools.assertFrameOrientationEquals(initialOrientation, orientation, 1e-12);
+      FrameOrientationTest.assertFrameOrientationEquals(initialOrientation, orientation, 1e-12);
 
       FramePoint initialPosition = new FramePoint(frame);
       trajectoryGenerator.get(initialPosition);
@@ -343,7 +340,7 @@ public class CirclePoseTrajectoryGeneratorTest
          trajectoryGenerator.get(newPosition);
          trajectoryGenerator.get(orientation);
 
-         AxisAngle4d difference = JUnitTools.computeDifferenceAxisAngle(initialOrientation, orientation);
+         AxisAngle4d difference = FrameOrientationTest.computeDifferenceAxisAngle(initialOrientation, orientation);
          Matrix3d rotationMatrix = new Matrix3d();
          rotationMatrix.set(difference);
 
@@ -369,6 +366,6 @@ public class CirclePoseTrajectoryGeneratorTest
       FrameVector vCheck = new FrameVector(frame);
       vCheck.cross(omega, r);
 
-      JUnitTools.assertFrameVectorEquals(vCheck, v, 1e-8);
+      FrameVectorTest.assertFrameVectorEquals(vCheck, v, 1e-8);
    }
 }

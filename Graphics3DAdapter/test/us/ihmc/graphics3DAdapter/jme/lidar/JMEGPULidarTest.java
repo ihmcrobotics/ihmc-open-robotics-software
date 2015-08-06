@@ -12,6 +12,7 @@ import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar120FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar360FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar60FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidarSphere270FovTest;
+import us.ihmc.robotics.lidar.LidarScanTest;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
@@ -106,7 +107,7 @@ public class JMEGPULidarTest implements LidarTestListener
          {
             ScanPair pair = scanPairs.poll();
             
-            JUnitTools.assertLidarScanEquals(pair.gpuScan, pair.traceScan, 1e-7, (float) parameters.getGpuVsTraceTolerance()); 
+            LidarScanTest.assertLidarScanEquals(pair.gpuScan, pair.traceScan, 1e-7, (float) parameters.getGpuVsTraceTolerance());
             
             recordStatistics(pair.gpuScan, pair.traceScan);
          }

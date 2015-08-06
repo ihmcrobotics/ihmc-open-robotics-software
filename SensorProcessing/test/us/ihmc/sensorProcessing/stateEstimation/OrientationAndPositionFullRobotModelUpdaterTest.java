@@ -13,12 +13,10 @@ import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
@@ -130,7 +128,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       centerOfMassCalculator.compute();
       FramePoint centerOfMassBack = new FramePoint(ReferenceFrame.getWorldFrame());
       centerOfMassCalculator.packCenterOfMass(centerOfMassBack);
-      JUnitTools.assertFramePointEquals(centerOfMassPositionPort.getData(), centerOfMassBack, epsilon);
+      FramePointTest.assertFramePointEquals(centerOfMassPositionPort.getData(), centerOfMassBack, epsilon);
    }
 
    private void compareOrientation(ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameOrientation> orientationPort, double epsilon)
@@ -150,7 +148,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       centerOfMassJacobian.packCenterOfMassVelocity(centerOfMassVelocityBack);
       FrameVector centerOfMassVelocity = centerOfMassVelocityPort.getData();
       centerOfMassVelocityBack.changeFrame(centerOfMassVelocity.getReferenceFrame());
-      JUnitTools.assertFrameVectorEquals(centerOfMassVelocity, centerOfMassVelocityBack, epsilon);
+      FrameVectorTest.assertFrameVectorEquals(centerOfMassVelocity, centerOfMassVelocityBack, epsilon);
    }
 
    private void compareCenterOfMassAcceleration(RigidBody elevator, SpatialAccelerationCalculator spatialAccelerationCalculator,
@@ -161,7 +159,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       centerOfMassAccelerationCalculator.packCoMAcceleration(centerOfMassAccelerationBack);
       centerOfMassAccelerationBack.changeFrame(ReferenceFrame.getWorldFrame());
       FrameVector centerOfMassAcceleration = centerOfMassAccelerationPort.getData();
-      JUnitTools.assertFrameVectorEquals(centerOfMassAcceleration, centerOfMassAccelerationBack, epsilon);
+      FrameVectorTest.assertFrameVectorEquals(centerOfMassAcceleration, centerOfMassAccelerationBack, epsilon);
    }
 
    private void compareAngularVelocity(RigidBody estimationLink, ReferenceFrame estimationFrame, TwistCalculator twistCalculator,
@@ -172,7 +170,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       estimationLinkTwist.changeFrame(estimationFrame);
       FrameVector angularVelocityBack = new FrameVector(estimationFrame);
       estimationLinkTwist.packAngularPart(angularVelocityBack);
-      JUnitTools.assertFrameVectorEquals(angularVelocityBack, angularVelocityPort.getData(), epsilon);
+      FrameVectorTest.assertFrameVectorEquals(angularVelocityBack, angularVelocityPort.getData(), epsilon);
    }
 
    private void compareAngularAcceleration(RigidBody estimationLink, ReferenceFrame estimationFrame,
@@ -183,6 +181,6 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       estimationLinkAcceleration.changeFrameNoRelativeMotion(estimationFrame);
       FrameVector angularAccelerationBack = new FrameVector(estimationFrame);
       estimationLinkAcceleration.packAngularPart(angularAccelerationBack);
-      JUnitTools.assertFrameVectorEquals(angularAccelerationBack, angularAccelerationPort.getData(), epsilon);
+      FrameVectorTest.assertFrameVectorEquals(angularAccelerationBack, angularAccelerationPort.getData(), epsilon);
    }
 }
