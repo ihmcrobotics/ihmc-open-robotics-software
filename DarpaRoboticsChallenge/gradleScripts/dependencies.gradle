@@ -58,6 +58,7 @@ dependencies {
     compile project(':IHMCWholeBodyController')
 	compile project(':IHMCStateEstimation')
 	compile project(':PathGeneration')
+	compile project(':IHMCJavaToolkit')
 	//testCompile project(':PathGeneration').sourceSets.test.output
 
 	testCompile project(':CommonWalkingControlModules').sourceSets.test.output
