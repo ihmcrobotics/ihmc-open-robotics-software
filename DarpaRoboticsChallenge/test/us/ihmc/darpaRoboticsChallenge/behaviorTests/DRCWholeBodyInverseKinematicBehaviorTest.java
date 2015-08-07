@@ -223,7 +223,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       generatePositionAndAngleLimits(side, xyzMin, xyzMax, yawPitchRollMin, yawPitchRollMax);
 
       Random random = new Random();
-      FramePose desiredHandPose = RandomTools.generateRandomFramePose(random, worldFrame, xyzMin, xyzMax, yawPitchRollMin, yawPitchRollMax);
+      FramePose desiredHandPose = FramePose.generateRandomFramePose(random, worldFrame, xyzMin, xyzMax, yawPitchRollMin, yawPitchRollMax);
 
       if (DEBUG)
       {

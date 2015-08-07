@@ -16,14 +16,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.*;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
-import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.trajectories.CirclePoseTrajectoryGenerator;
 
@@ -48,7 +46,7 @@ public class CirclePoseTrajectoryGeneratorTest
       worldFrame = ReferenceFrame.getWorldFrame();
       registry = new YoVariableRegistry("reg");
 
-      FramePose initialPose = RandomTools.generateRandomFramePose(random, worldFrame, 1.0, 1.0, 1.0);
+      FramePose initialPose = FramePose.generateRandomFramePose(random, worldFrame, 1.0, 1.0, 1.0);
       FrameOrientation initialOrientation = new FrameOrientation();
       initialPose.getOrientationIncludingFrame(initialOrientation);
       initialOrientationProvider = new ConstantOrientationProvider(initialOrientation);
