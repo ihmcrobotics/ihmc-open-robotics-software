@@ -5,7 +5,7 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.robotics.FormattingTools;
+import us.ihmc.tools.FormattingTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

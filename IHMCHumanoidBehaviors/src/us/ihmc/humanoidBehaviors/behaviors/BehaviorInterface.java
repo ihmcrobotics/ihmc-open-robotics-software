@@ -10,7 +10,7 @@ import us.ihmc.humanoidBehaviors.communication.ControllerGlobalObjectConsumer;
 import us.ihmc.humanoidBehaviors.communication.NetworkProcessorGlobalObjectConsumer;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.robotics.FormattingTools;
+import us.ihmc.tools.FormattingTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

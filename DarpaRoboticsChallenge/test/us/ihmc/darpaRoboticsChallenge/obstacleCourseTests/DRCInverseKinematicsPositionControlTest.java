@@ -38,7 +38,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataChecker;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.robotics.ArrayTools;
+import us.ihmc.tools.ArrayTools;
 import us.ihmc.robotics.Axis;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.robotics.random.RandomTools;

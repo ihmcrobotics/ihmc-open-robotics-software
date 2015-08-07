@@ -9,7 +9,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.robotics.FormattingTools;
+import us.ihmc.tools.FormattingTools;
 import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
