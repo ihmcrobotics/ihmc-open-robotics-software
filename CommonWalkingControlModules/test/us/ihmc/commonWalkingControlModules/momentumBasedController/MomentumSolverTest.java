@@ -1,16 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
@@ -21,16 +10,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import us.ihmc.utilities.MemoryTools;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -46,12 +32,25 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialForceVectorTest;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 //TODO: tests where MomentumSolver is called multiple times in a row
@@ -859,7 +858,7 @@ public class MomentumSolverTest
       momentumRateNumerical.scale(1.0 / dt);
       momentumRateNumerical.changeFrame(referenceFrame);
 
-      JUnitTools.assertSpatialForceVectorEquals(desiredMomentumRate, momentumRateNumerical, epsilon);
+      SpatialForceVectorTest.assertSpatialForceVectorEquals(desiredMomentumRate, momentumRateNumerical, epsilon);
    }
 
    private static void checkAgainstInverseDynamicsCalculator(SixDoFJoint rootJoint, SpatialForceVector desiredMomentumRate, double epsilonInverseDynamics)
@@ -875,7 +874,7 @@ public class MomentumSolverTest
       rootJoint.packWrench(rootJointWrench);
       rootJointWrench.changeFrame(referenceFrame);
 
-      JUnitTools.assertSpatialForceVectorEquals(desiredMomentumRate, rootJointWrench, epsilonInverseDynamics);
+      SpatialForceVectorTest.assertSpatialForceVectorEquals(desiredMomentumRate, rootJointWrench, epsilonInverseDynamics);
    }
 
    private static void setRandomPositionsAndVelocities(Random random, RigidBody elevator, List<SixDoFJoint> sixDoFJoints,

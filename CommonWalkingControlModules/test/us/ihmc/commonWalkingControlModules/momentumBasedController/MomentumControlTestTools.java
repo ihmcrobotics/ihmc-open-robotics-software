@@ -1,10 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import static junit.framework.Assert.assertTrue;
-
-import java.util.Collection;
-import java.util.Map;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -15,9 +10,14 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialForceVectorTest;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.utilities.test.JUnitTools;
+
+import java.util.Collection;
+import java.util.Map;
+
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author twan
@@ -41,7 +41,7 @@ public class MomentumControlTestTools
       gravitationalWrench.setLinearPartZ(-mass * gravityZ);
       totalWrench.add(gravitationalWrench);
 
-      JUnitTools.assertSpatialForceVectorEquals(desiredCentroidalMomentumRate, totalWrench, epsilon);
+      SpatialForceVectorTest.assertSpatialForceVectorEquals(desiredCentroidalMomentumRate, totalWrench, epsilon);
    }
 
    public static void assertWrenchesInFrictionCones(Map<RigidBody, Wrench> externalWrenches,
@@ -87,6 +87,6 @@ public class MomentumControlTestTools
       rootJoint.packWrench(wrench);
 
       SpatialForceVector zeroWrench = new SpatialForceVector(wrench.getExpressedInFrame());
-      JUnitTools.assertSpatialForceVectorEquals(wrench, zeroWrench, epsilon);
+      SpatialForceVectorTest.assertSpatialForceVectorEquals(wrench, zeroWrench, epsilon);
    }
 }

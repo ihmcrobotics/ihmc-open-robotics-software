@@ -1,28 +1,11 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertRootJointWrenchZero;
-import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesInFrictionCones;
-import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesSumUpToMomentumDot;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -35,17 +18,15 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
-import us.ihmc.robotics.geometry.FrameVectorTest;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -56,13 +37,31 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialForceVectorTest;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.TotalWrenchCalculator;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertRootJointWrenchZero;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesInFrictionCones;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesSumUpToMomentumDot;
 
 /**
  * @author twan
@@ -127,7 +126,7 @@ public class OptimizationMomentumControlModuleTest
       assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame,
                                        1e-3);
       assertWrenchesInFrictionCones(externalWrenchSolution, contactStates, coefficientOfFriction);
-      JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-3);
+      SpatialForceVectorTest.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-3);
       EjmlUnitTests.assertEquals(desiredJointAccelerations, jointAccelerationsBack, 1e-3);
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-3);
    }
@@ -203,7 +202,7 @@ public class OptimizationMomentumControlModuleTest
 
       assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame,
                                        1e-3);
-      JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-1);
+      SpatialForceVectorTest.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-1);
       assertWrenchesInFrictionCones(externalWrenchSolution, contactStates, coefficientOfFriction);
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
    }
@@ -284,7 +283,7 @@ public class OptimizationMomentumControlModuleTest
 
       assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame,
                                        1e-3);
-      JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-3);
+      SpatialForceVectorTest.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-3);
       assertWrenchesInFrictionCones(externalWrenchSolution, contactStates, coefficientOfFriction);
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-3);
       FrameVectorTest.assertFrameVectorEquals(desiredPointAccelerationBack, desiredPointAcceleration, 1e-3);
@@ -347,7 +346,7 @@ public class OptimizationMomentumControlModuleTest
          
          assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumRateOfChangeOut, gravityZ, totalMass,
                                           centerOfMassFrame, 1e-2);
-         JUnitTools.assertSpatialForceVectorEquals(desiredRateOfChangeOfMomentum, momentumRateOfChangeOut, 1e-1);
+         SpatialForceVectorTest.assertSpatialForceVectorEquals(desiredRateOfChangeOfMomentum, momentumRateOfChangeOut, 1e-1);
          assertWrenchesInFrictionCones(externalWrenchSolution, contactStates, coefficientOfFriction);
          assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
       }
@@ -443,7 +442,7 @@ public class OptimizationMomentumControlModuleTest
 
       assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame,
                                        1e-3);
-      JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-1);
+      SpatialForceVectorTest.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-1);
       assertWrenchesInFrictionCones(externalWrenchSolution, contactStates, coefficientOfFriction);
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
    }
@@ -540,7 +539,7 @@ public class OptimizationMomentumControlModuleTest
       
       assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame,
             1e-3);
-      JUnitTools.assertSpatialForceVectorEquals(desiredMomentumRate, momentumRateOfChangeOut, 1e-1);
+      SpatialForceVectorTest.assertSpatialForceVectorEquals(desiredMomentumRate, momentumRateOfChangeOut, 1e-1);
       assertWrenchesInFrictionCones(externalWrenchSolution, contactStates, coefficientOfFriction);
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
    }
