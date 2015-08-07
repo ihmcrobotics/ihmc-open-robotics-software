@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
