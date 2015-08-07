@@ -33,7 +33,7 @@ dependencies {
 	compile project(':UserInterface')
     compile project(':IHMCPerception')
     compile project(':IHMCWholeBodyController')
-	
+	compile project(':IHMCJavaToolkit')
 	runtime project(':IHMCHumanoidOperatorInterface')
 	
 	testCompile project(':IHMCUtilities').sourceSets.test.output
