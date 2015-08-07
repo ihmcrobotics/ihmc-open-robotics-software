@@ -23,7 +23,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationRunsSameWayTwiceVerifier;
-import us.ihmc.robotics.ArrayTools;
+import us.ihmc.tools.ArrayTools;
 
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
