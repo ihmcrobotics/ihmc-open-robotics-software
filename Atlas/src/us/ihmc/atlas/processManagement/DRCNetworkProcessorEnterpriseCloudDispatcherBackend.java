@@ -10,7 +10,7 @@ import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.communication.net.tcpServer.DisconnectedException;
 import us.ihmc.communication.net.tcpServer.ReconnectingTCPServer;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.processManagement.UnsignedByteTools;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 

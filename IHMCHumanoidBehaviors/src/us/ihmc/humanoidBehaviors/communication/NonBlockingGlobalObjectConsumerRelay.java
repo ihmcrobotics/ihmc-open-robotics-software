@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class NonBlockingGlobalObjectConsumerRelay implements GlobalPacketConsumer
 {

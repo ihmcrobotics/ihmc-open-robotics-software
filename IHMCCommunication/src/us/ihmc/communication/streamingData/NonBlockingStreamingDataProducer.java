@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.communication.packetCommunicator.PacketProducer;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class NonBlockingStreamingDataProducer<T extends Packet> extends PacketProducer<T>
 {

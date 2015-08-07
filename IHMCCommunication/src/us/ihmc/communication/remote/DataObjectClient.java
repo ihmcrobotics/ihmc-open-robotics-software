@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
 
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 /**
  * User: Matt

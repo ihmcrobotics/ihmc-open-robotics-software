@@ -13,7 +13,7 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.darpaRoboticsChallenge.odometry.CarLocalizerFileWritingUtils;
 import us.ihmc.darpaRoboticsChallenge.odometry.IcpCloud3D;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 /**
  * @author GrayThomas

@@ -15,7 +15,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class GUICaptureBroadcast implements Runnable
 {

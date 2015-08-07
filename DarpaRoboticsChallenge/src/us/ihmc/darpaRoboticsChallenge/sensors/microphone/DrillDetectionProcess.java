@@ -8,7 +8,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.sensing.DrillDetectionPacket;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class DrillDetectionProcess extends DrillDetectionThread implements NetStateListener
 {

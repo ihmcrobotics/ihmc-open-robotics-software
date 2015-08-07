@@ -26,7 +26,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationRunsSa
 import us.ihmc.tools.ArrayTools;
 
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

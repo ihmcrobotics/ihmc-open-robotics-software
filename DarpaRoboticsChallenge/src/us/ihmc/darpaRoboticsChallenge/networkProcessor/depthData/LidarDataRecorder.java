@@ -10,7 +10,7 @@ import java.util.Date;
 import javax.vecmath.Point3d;
 
 import us.ihmc.darpaRoboticsChallenge.odometry.CarLocalizerFileWritingUtils;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class LidarDataRecorder
 {

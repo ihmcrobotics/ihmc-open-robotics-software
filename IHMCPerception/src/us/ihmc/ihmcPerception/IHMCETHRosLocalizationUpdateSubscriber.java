@@ -13,7 +13,7 @@ import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.communication.packets.sensing.LocalizationPointMapPacket;
 import us.ihmc.communication.packets.sensing.LocalizationStatusPacket;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
