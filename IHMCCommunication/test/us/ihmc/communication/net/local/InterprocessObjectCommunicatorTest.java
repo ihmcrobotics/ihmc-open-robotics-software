@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.ObjectConsumer;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class InterprocessObjectCommunicatorTest
 {

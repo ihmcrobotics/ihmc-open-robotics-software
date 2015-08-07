@@ -7,7 +7,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class SliderBoardUtilsTest
 {

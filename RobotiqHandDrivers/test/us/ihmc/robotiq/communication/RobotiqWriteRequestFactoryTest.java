@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.robotiq.RobotiqGraspMode;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class RobotiqWriteRequestFactoryTest
 {

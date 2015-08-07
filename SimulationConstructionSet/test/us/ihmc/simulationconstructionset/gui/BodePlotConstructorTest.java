@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset.gui;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.linearDynamicSystems.TransferFunction;
 
 /**

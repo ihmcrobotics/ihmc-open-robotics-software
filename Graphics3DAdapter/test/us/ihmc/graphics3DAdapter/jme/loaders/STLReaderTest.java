@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import com.jme3.asset.AssetInfo;
 import org.junit.Test;
 
 import us.ihmc.loaders.jme.ASCIISTLReader;
@@ -31,7 +30,7 @@ import us.ihmc.loaders.jme.BinarySTLReader;
 import us.ihmc.loaders.jme.STLReader;
 import us.ihmc.loaders.jme.STLReaderFactory;
 import us.ihmc.loaders.jme.Triangle;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 /**
  * Test loading of STL files based on a hand crafted STL files with three triangles and known values.

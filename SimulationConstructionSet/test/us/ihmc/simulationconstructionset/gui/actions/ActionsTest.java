@@ -37,7 +37,7 @@ import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.ViewportWindow;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AboutAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.AboutDialogConstructor;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class ActionsTest
 {

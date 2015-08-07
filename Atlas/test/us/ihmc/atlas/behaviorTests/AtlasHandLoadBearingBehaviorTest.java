@@ -6,8 +6,8 @@ import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCHandLoadBearingBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 
 
 @BambooPlan(planType = {BambooPlanType.InDevelopment})

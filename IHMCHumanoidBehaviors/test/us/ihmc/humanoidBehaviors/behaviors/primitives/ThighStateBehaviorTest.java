@@ -7,7 +7,7 @@ import org.junit.Test;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.ThighStatePacket;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ThighStateBehaviorTest
