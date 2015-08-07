@@ -16,7 +16,7 @@ import org.junit.Before;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.random.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
