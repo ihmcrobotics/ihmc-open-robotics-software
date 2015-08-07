@@ -8,8 +8,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class DataBufferEntryTest
@@ -70,7 +70,7 @@ public class DataBufferEntryTest
       double total = 0.0;
       for (int i = 0; i < nPoints; i++)
       {
-         double data = MathTools.generateRandomDoubleInRange(random, -100.0, 100.0);
+         double data = RandomTools.generateRandomDoubleInRange(random, -100.0, 100.0);
          doubleYoVariable.set(data);
          total = total + data;
          dataBufferEntry.setDataAtIndexToYoVariableValue(i);
