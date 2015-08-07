@@ -11,8 +11,8 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -93,16 +93,16 @@ public class JointWrenchSensorTest
       Tuple3d jointTorque = new Vector3d();
       
       Random random = new Random(1797L);
-      pinJointOne.setQ(MathTools.generateRandomDoubleInRange(random, -Math.PI, Math.PI));
-      pinJointTwo.setQ(MathTools.generateRandomDoubleInRange(random, -Math.PI, Math.PI));
+      pinJointOne.setQ(RandomTools.generateRandomDoubleInRange(random, -Math.PI, Math.PI));
+      pinJointTwo.setQ(RandomTools.generateRandomDoubleInRange(random, -Math.PI, Math.PI));
       
-      pinJointOne.setQd(MathTools.generateRandomDoubleInRange(random, -1.0, 1.0));
-      pinJointTwo.setQd(MathTools.generateRandomDoubleInRange(random, -1.0, 1.0));
+      pinJointOne.setQd(RandomTools.generateRandomDoubleInRange(random, -1.0, 1.0));
+      pinJointTwo.setQd(RandomTools.generateRandomDoubleInRange(random, -1.0, 1.0));
       
       for (int i=0; i<100; i++)
       {
-         pinJointOne.setTau(MathTools.generateRandomDoubleInRange(random, -1.0, 1.0));
-         pinJointTwo.setTau(MathTools.generateRandomDoubleInRange(random, -1.0, 1.0));
+         pinJointOne.setTau(RandomTools.generateRandomDoubleInRange(random, -1.0, 1.0));
+         pinJointTwo.setTau(RandomTools.generateRandomDoubleInRange(random, -1.0, 1.0));
          
          robot.doDynamicsAndIntegrate(0.0001);
          
