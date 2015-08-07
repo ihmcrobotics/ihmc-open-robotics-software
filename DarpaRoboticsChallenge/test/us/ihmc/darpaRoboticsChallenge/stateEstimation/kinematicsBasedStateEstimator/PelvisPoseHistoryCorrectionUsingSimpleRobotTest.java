@@ -29,7 +29,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseHistoryCorrection;
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.MathTools;
@@ -329,7 +328,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       RigidBodyTransform[] targets = new RigidBodyTransform[numOfTargets];
       for (int i = 0; i < 10; i++)
       {
-         targets[i] = RandomTools.generateRandomTransform(random);
+         targets[i] = RigidBodyTransform.generateRandomTransform(random);
       }
       return targets;
    }

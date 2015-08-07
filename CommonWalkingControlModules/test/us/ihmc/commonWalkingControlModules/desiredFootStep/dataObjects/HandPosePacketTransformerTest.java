@@ -70,7 +70,7 @@ public class HandPosePacketTransformerTest
 
          HandPosePacket starting = new HandPosePacket(robotSide, frame, dataType, point3d, quat, i % 2 == 1, trajectoryTime, randomJointAngles);
 
-         transform3D = RandomTools.generateRandomTransform(random);
+         transform3D = RigidBodyTransform.generateRandomTransform(random);
 
          HandPosePacket ending = starting.transform(transform3D);
 

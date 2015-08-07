@@ -49,7 +49,7 @@ public class TorusPosePacketTransformerTest
 
          TorusPosePacket starting = new TorusPosePacket(point3d, quat, radius);
 
-         transform3D = RandomTools.generateRandomTransform(random);
+         transform3D = RigidBodyTransform.generateRandomTransform(random);
 
          TorusPosePacket ending = starting.transform(transform3D);
 
