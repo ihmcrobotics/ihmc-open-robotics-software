@@ -20,7 +20,7 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.wanderer.hardware.WandererJoint;

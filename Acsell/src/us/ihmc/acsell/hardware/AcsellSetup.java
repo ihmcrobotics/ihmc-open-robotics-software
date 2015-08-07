@@ -18,7 +18,7 @@ import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PeriodicParameters;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;

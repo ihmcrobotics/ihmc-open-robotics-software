@@ -33,7 +33,7 @@ import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.utilities.io.logging.LogTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
