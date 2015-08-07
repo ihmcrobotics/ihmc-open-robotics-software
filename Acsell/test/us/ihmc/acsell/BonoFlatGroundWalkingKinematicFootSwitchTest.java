@@ -13,9 +13,9 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.steppr.controlParameters.BonoStateEstimatorParameters;
 import us.ihmc.steppr.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.steppr.parameters.BonoRobotModel;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooPlanType;
 
 @BambooPlan(planType = BambooPlanType.InDevelopment)
 public class BonoFlatGroundWalkingKinematicFootSwitchTest extends DRCFlatGroundWalkingTest
