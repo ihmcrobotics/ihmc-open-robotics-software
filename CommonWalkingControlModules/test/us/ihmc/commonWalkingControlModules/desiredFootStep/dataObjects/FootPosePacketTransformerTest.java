@@ -12,7 +12,7 @@ import javax.vecmath.Quat4d;
 import org.junit.Test;
 
 import us.ihmc.communication.packets.walking.FootPosePacket;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.random.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;

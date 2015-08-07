@@ -22,7 +22,7 @@ import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.random.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.humanoidRobotics.model.FullRobotModelUtils;
