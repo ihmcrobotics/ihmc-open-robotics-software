@@ -480,10 +480,10 @@ public class GroundReactionWrenchDistributorTest
       FlatGroundPlaneContactState rightFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation, coefficientOfFriction,
             rightFoot);
 
-      RigidBodyTransform leftHandFrameAfterJointTransformInWorld = RandomTools.generateRandomTransform(random);
-      RigidBodyTransform leftHandCylinderFrameTransformInWorld = RandomTools.generateRandomTransform(random);
-      RigidBodyTransform rightHandFrameAfterJointTransformInWorld = RandomTools.generateRandomTransform(random);
-      RigidBodyTransform rightHandCylinderFrameTransformInWorld = RandomTools.generateRandomTransform(random);
+      RigidBodyTransform leftHandFrameAfterJointTransformInWorld = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform leftHandCylinderFrameTransformInWorld = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform rightHandFrameAfterJointTransformInWorld = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform rightHandCylinderFrameTransformInWorld = RigidBodyTransform.generateRandomTransform(random);
 
       FramePose[] poses = new FramePose[4];
       CylindricalContactState leftHandContactState = getCylinderContactState("leftHand", leftHandFrameAfterJointTransformInWorld,

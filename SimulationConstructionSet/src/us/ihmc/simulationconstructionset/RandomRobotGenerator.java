@@ -113,7 +113,7 @@ public class RandomRobotGenerator
       {
          FloatingJoint floatingJoint = (FloatingJoint) joint;
        
-         RigidBodyTransform randomTransform = RandomTools.generateRandomTransform(random);
+         RigidBodyTransform randomTransform = RigidBodyTransform.generateRandomTransform(random);
          floatingJoint.setRotationAndTranslation(randomTransform);
       }
       else if (joint instanceof FloatingPlanarJoint)

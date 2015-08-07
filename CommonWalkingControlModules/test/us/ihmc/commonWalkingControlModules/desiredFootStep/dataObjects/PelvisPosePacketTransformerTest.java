@@ -44,7 +44,7 @@ public class PelvisPosePacketTransformerTest
 
          PelvisPosePacket starting = new PelvisPosePacket(quat);
 
-         transform3D = RandomTools.generateRandomTransform(random);
+         transform3D = RigidBodyTransform.generateRandomTransform(random);
 
          PelvisPosePacket ending = starting.transform(transform3D);
 
@@ -56,7 +56,7 @@ public class PelvisPosePacketTransformerTest
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
 
          PelvisPosePacket starting = new PelvisPosePacket(point3d);
-         transform3D = RandomTools.generateRandomTransform(random);
+         transform3D = RigidBodyTransform.generateRandomTransform(random);
          PelvisPosePacket ending = starting.transform(transform3D);
          performEqualsTestForPoint(starting, transform3D, ending);
       }

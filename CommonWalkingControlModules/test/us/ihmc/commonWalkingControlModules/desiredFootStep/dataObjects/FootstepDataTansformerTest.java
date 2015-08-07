@@ -48,7 +48,7 @@ public class FootstepDataTansformerTest
       {
          originalFootstepData = getTestFootstepData();
          transform3D = new RigidBodyTransform();
-         transform3D = RandomTools.generateRandomTransform(random);
+         transform3D = RigidBodyTransform.generateRandomTransform(random);
          
          transformedFootstepData = originalFootstepData.transform(transform3D);
 

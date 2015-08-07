@@ -57,7 +57,7 @@ public class FootPosePacketTransformerTest
 
          FootPosePacket starting = new FootPosePacket(robotSide, point3d, quat, trajectoryTime);
 
-         transform3D = RandomTools.generateRandomTransform(random);
+         transform3D = RigidBodyTransform.generateRandomTransform(random);
 
          FootPosePacket ending = starting.transform(transform3D);
 
