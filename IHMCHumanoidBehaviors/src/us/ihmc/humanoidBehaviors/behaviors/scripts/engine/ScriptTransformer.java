@@ -11,7 +11,7 @@ import java.util.Set;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 

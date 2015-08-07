@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class UDPMilticastCommandClient
 {

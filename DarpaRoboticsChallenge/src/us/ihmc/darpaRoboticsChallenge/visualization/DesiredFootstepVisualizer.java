@@ -28,7 +28,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;

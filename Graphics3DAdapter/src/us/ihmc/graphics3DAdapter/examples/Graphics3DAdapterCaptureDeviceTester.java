@@ -17,7 +17,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class Graphics3DAdapterCaptureDeviceTester
 {

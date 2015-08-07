@@ -11,7 +11,7 @@ import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
 import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooPlanType;

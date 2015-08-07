@@ -1,6 +1,6 @@
 package us.ihmc.communication.remote;
 
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 class ServerToClientStringPacketCommunicationTester extends AbstractStringPacketCommunicationTester
 {

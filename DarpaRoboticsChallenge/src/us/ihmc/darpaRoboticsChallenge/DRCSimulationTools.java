@@ -28,7 +28,7 @@ import javax.swing.event.ChangeListener;
 
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCSimulationTools
 {

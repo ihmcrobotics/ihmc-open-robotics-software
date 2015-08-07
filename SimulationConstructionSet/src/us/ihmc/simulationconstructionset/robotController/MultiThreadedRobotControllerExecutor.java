@@ -7,7 +7,7 @@ import java.util.concurrent.Future;
 
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 

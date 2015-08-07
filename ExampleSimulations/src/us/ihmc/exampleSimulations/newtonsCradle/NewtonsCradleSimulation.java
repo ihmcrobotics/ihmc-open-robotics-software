@@ -10,7 +10,7 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class NewtonsCradleSimulation
 {

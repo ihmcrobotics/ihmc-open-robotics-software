@@ -53,7 +53,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -64,7 +63,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.graphics3DAdapter.camera.CameraStreamer;
 import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;

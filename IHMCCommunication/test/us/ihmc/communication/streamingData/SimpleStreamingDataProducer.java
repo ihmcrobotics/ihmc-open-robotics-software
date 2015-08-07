@@ -2,7 +2,7 @@ package us.ihmc.communication.streamingData;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 
 public class SimpleStreamingDataProducer implements StreamingDataProducer

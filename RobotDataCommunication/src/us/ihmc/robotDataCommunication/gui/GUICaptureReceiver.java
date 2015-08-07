@@ -8,7 +8,7 @@ import java.nio.channels.ClosedByInterruptException;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class GUICaptureReceiver extends Thread
 {

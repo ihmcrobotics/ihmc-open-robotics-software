@@ -40,7 +40,7 @@ import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.humanoidRobotics.model.FullRobotModel;

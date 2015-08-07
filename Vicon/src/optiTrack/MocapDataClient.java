@@ -8,8 +8,6 @@ import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-import us.ihmc.utilities.ThreadTools;
-import us.ihmc.vicon.ViconClient;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.time.CallFrequencyCalculator;
 

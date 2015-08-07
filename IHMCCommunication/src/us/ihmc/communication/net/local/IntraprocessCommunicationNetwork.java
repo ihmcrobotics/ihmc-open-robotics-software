@@ -1,7 +1,7 @@
 package us.ihmc.communication.net.local;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;

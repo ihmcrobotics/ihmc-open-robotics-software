@@ -15,7 +15,7 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.model.RobotMotionStatus;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.humanoidRobotics.model.FullRobotModelUtils;

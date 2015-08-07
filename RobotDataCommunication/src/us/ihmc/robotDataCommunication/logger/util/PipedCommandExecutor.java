@@ -5,7 +5,7 @@ import java.io.PrintStream;
 
 import org.apache.commons.lang3.SystemUtils;
 
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.processManagement.UnixProcessKiller;
 

@@ -2,7 +2,7 @@ package us.ihmc.robotDataCommunication;
 
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;

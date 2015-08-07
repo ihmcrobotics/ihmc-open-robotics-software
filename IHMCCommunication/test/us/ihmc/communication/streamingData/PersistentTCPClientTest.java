@@ -12,7 +12,7 @@ import java.net.Socket;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class PersistentTCPClientTest

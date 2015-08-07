@@ -23,7 +23,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.humanoidRobotics.model.FullRobotModelUtils;
 import us.ihmc.utilities.io.printing.PrintTools;

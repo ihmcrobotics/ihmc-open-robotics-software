@@ -11,7 +11,7 @@ import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.units.UnitConversions;

@@ -1,6 +1,6 @@
 package us.ihmc.atlas.drcsimGazebo;
 
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class DRCSimGazeboLauncher
 {

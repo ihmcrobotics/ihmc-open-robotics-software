@@ -12,7 +12,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class NothingChangedVerifier
 {

@@ -11,7 +11,7 @@ import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.robotDataCommunication.VariableChangedMessage;
 import us.ihmc.robotDataCommunication.YoVariableHandShakeBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 

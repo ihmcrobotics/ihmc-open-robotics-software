@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class SegmentedPacketSimulation
 {

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.FrameVector2d;
 
 /**
