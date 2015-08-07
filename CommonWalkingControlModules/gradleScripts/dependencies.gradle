@@ -28,4 +28,5 @@ dependencies {
     compile project(':IHMCRealtime')
 
     testCompile project(':IHMCUtilities').sourceSets.test.output
+    compile project(':IHMCJavaToolkit')
 }

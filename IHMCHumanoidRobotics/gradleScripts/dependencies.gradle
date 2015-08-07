@@ -4,4 +4,5 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x'
 
     compile project(':IHMCUtilities')
+    compile project(':IHMCJavaToolkit')
 }
