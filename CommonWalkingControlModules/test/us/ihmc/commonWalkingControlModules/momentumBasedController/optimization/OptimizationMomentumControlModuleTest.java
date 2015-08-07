@@ -38,6 +38,7 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVectorTest;
+import us.ihmc.robotics.screwTheory.SpatialMotionVectorTest;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.TotalWrenchCalculator;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -45,7 +46,6 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
-import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import javax.vecmath.Vector3d;
@@ -198,7 +198,7 @@ public class OptimizationMomentumControlModuleTest
       spatialAccelerationCalculator.compute();
       SpatialAccelerationVector endEffectorAccelerationBack = new SpatialAccelerationVector();
       spatialAccelerationCalculator.packRelativeAcceleration(endEffectorAccelerationBack, base, endEffector);
-      JUnitTools.assertSpatialMotionVectorEquals(endEffectorSpatialAcceleration, endEffectorAccelerationBack, 1e-3);
+      SpatialMotionVectorTest.assertSpatialMotionVectorEquals(endEffectorSpatialAcceleration, endEffectorAccelerationBack, 1e-3);
 
       assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame,
                                        1e-3);
@@ -433,7 +433,7 @@ public class OptimizationMomentumControlModuleTest
       spatialAccelerationCalculator.compute();
       SpatialAccelerationVector endEffectorAccelerationBack = new SpatialAccelerationVector();
       spatialAccelerationCalculator.packRelativeAcceleration(endEffectorAccelerationBack, base, endEffector);
-      JUnitTools.assertSpatialMotionVectorEquals(endEffectorSpatialAcceleration, endEffectorAccelerationBack, 1e-3);
+      SpatialMotionVectorTest.assertSpatialMotionVectorEquals(endEffectorSpatialAcceleration, endEffectorAccelerationBack, 1e-3);
 
       for (RevoluteJoint revoluteJoint : desiredJointAccelerations.keySet())
       {

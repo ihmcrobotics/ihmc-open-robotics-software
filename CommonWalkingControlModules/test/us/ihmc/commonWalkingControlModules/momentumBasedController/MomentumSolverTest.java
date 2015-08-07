@@ -34,6 +34,7 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVectorTest;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
+import us.ihmc.robotics.screwTheory.SpatialMotionVectorTest;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -792,7 +793,7 @@ public class MomentumSolverTest
       }
       else
       {
-         JUnitTools.assertSpatialMotionVectorEquals(spatialAcceleration, checkAcceleration, epsilon);
+         SpatialMotionVectorTest.assertSpatialMotionVectorEquals(spatialAcceleration, checkAcceleration, epsilon);
       }
    }
 
@@ -823,7 +824,7 @@ public class MomentumSolverTest
       SpatialAccelerationVector checkAcceleration = new SpatialAccelerationVector();
       spatialAccelerationCalculator.packRelativeAcceleration(checkAcceleration, jacobian.getBase(), jacobian.getEndEffector());
 
-      JUnitTools.assertSpatialMotionVectorEquals(spatialAcceleration, checkAcceleration, selectionMatrix, epsilon);
+      SpatialMotionVectorTest.assertSpatialMotionVectorEquals(spatialAcceleration, checkAcceleration, selectionMatrix, epsilon);
    }
 
    private static void checkAgainstNumericalDifferentiation(SixDoFJoint rootJoint, List<SixDoFJoint> sixDoFJoints, List<RevoluteJoint> joints, double dt,
