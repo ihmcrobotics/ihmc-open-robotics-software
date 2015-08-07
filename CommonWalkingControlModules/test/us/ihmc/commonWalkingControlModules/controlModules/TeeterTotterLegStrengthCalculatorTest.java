@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;

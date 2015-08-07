@@ -16,7 +16,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.*;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;

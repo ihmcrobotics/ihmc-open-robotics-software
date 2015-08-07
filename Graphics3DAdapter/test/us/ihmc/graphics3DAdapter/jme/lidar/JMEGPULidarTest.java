@@ -13,11 +13,10 @@ import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar360FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar60FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidarSphere270FovTest;
 import us.ihmc.robotics.lidar.LidarScanTest;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.robotics.lidar.LidarScan;
-import us.ihmc.utilities.test.JUnitTools;
 
 @BambooPlan(planType={BambooPlanType.UI})
 public class JMEGPULidarTest implements LidarTestListener

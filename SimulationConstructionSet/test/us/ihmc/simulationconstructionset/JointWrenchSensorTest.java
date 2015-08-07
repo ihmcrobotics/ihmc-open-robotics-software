@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.Axis;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 

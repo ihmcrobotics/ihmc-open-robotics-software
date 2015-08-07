@@ -2,8 +2,8 @@ package us.ihmc.convexOptimization.jOptimizer;
 
 import us.ihmc.convexOptimization.ConvexOptimizationAdapter;
 import us.ihmc.convexOptimization.ConvexOptimizationAdapterTest;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 
 
 //TODO: Get this working some day!!

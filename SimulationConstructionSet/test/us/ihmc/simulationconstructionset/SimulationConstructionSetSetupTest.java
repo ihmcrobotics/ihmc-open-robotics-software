@@ -5,9 +5,9 @@ import javax.swing.JWindow;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.gui.SplashPanel;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooPlanType;
 
 @BambooPlan(planType = {BambooPlanType.UI})
 public class SimulationConstructionSetSetupTest

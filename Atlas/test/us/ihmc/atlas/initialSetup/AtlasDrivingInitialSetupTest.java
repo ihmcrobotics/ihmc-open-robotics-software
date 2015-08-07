@@ -13,7 +13,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.humanoidRobotics.partNames.SpineJointName;

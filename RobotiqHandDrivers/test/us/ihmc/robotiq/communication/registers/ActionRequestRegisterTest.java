@@ -4,8 +4,8 @@ import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rACT;
 import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rATR;
 import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rGTO;
 import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rMOD;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 
 @BambooPlan(planType = BambooPlanType.Fast)
 public class ActionRequestRegisterTest extends RobotiqOutputRegisterTest

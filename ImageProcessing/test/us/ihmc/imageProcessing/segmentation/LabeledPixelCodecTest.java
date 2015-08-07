@@ -12,7 +12,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 /**
  * @author Peter Abeles

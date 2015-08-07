@@ -13,8 +13,8 @@ import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseWobbl
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 

@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.PacketsForwardedToTheUi;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class DRCConfigParametersTest
 {

@@ -3,8 +3,8 @@ package us.ihmc.atlas;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundRewindabilityTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.agileTesting.BambooPlanType;
 
 @BambooPlan(planType = BambooPlanType.Flaky)
 public class AtlasFlatGroundRewindabilityTest extends DRCFlatGroundRewindabilityTest

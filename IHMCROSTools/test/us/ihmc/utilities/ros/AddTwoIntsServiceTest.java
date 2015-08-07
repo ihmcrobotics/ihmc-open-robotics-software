@@ -15,9 +15,9 @@ import org.ros.node.service.ServiceResponseListener;
 import test_ros.AddTwoInts;
 import test_ros.AddTwoIntsRequest;
 import test_ros.AddTwoIntsResponse;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.utilities.ros.service.AddTwoIntsClient;
 import us.ihmc.utilities.ros.service.AddTwoIntsServer;
 
