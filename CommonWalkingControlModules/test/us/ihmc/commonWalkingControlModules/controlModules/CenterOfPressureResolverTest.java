@@ -25,7 +25,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.utilities.test.JUnitTools;
+import us.ihmc.tools.test.JUnitTools;
 
 public class CenterOfPressureResolverTest
 {

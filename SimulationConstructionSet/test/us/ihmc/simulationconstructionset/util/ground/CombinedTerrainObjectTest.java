@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.utilities.test.JUnitTools;
+import us.ihmc.tools.test.JUnitTools;
 
 public class CombinedTerrainObjectTest
 {
