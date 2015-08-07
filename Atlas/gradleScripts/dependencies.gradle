@@ -58,4 +58,5 @@ dependencies {
     compile project(':IHMCPerception')
 	compile project(':PathGeneration')
 	testCompile project(':PathGeneration').sourceSets.test.output
+    compile project(':IHMCJavaToolkit')
   }
