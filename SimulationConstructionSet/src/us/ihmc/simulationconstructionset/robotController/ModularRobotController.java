@@ -1,9 +1,5 @@
 package us.ihmc.simulationconstructionset.robotController;
 
-
-import us.ihmc.utilities.code.visualization.Visualize;
-
-@Visualize
 public class ModularRobotController extends AbstractModularRobotController implements RobotController
 {
    public ModularRobotController(String name)
@@ -13,7 +9,6 @@ public class ModularRobotController extends AbstractModularRobotController imple
 
    @Override
    public void doControl()
-
    {
       if (rawSensorReader != null)
          rawSensorReader.read();

@@ -1,7 +1,5 @@
 package us.ihmc.simulationconstructionset.robotController;
 
-import us.ihmc.utilities.code.visualization.Visualize;
-
 /**
  * Interface for controlling a robot. doControl() gets called each update.
  * Has a name and a YoVariableRegistry. This registry should not be attached to a 
@@ -10,8 +8,6 @@ import us.ihmc.utilities.code.visualization.Visualize;
  * Copyright:    Copyright (c) 2000-2011
  * Company:      IHMC and Yobotics, Inc. 
  */
-
-@Visualize
 public interface RobotController extends RobotControlElement
 {
    void doControl();
