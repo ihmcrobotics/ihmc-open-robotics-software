@@ -14,7 +14,8 @@ import org.junit.runners.Suite;
    us.ihmc.tools.lists.RecyclingArrayListTest.class,
    us.ihmc.tools.random.RandomToolsTest.class,
    us.ihmc.tools.test.JUnitToolsTest.class,
-   us.ihmc.tools.thread.ThreadToolsTest.class
+   us.ihmc.tools.thread.ThreadToolsTest.class,
+   us.ihmc.tools.time.TimeToolsTest.class
 })
 
 public class IHMCJavaToolkitAFastTestSuite
