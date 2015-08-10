@@ -19,6 +19,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-terrain', version: '3.1.0-internal2'
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-effects', version: '3.1.0-internal2'
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-plugins', version: '3.1.0-internal2'
+	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-dae', version: '1.0.0-internal1'
 	compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.3'
 	compile group: 'com.vividsolutions', name: 'jts', version: '1.12'
 	compile group: 'com.google.guava', name: 'guava', version: '17.0'
