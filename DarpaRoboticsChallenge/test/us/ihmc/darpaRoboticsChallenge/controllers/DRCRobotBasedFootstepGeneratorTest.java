@@ -22,7 +22,7 @@ import us.ihmc.pathGeneration.footstepGenerator.SemiCircularStepValidityMetric;
 import us.ihmc.pathGeneration.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.humanoidRobotics.model.FullRobotModel;

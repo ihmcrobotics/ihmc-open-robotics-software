@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.ReflectionSimulationComparer;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimpleRewindabilityComparisonScript;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationComparisonScript;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;

@@ -21,7 +21,7 @@ import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.XMLReaderUtility;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 
 public class ExportMovie implements ExportMovieCommandExecutor
 {
