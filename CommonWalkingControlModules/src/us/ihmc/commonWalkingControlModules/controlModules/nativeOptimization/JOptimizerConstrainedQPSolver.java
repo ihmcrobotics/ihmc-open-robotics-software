@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.interfaces.linsol.LinearSolver;
 
-import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
+import us.ihmc.utilities.exceptions.NoConvergenceException;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;

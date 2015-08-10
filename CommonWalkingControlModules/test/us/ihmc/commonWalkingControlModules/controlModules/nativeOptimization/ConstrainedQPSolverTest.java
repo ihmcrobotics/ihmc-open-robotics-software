@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.exceptions.NoConvergenceException;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ConstrainedQPSolverTest

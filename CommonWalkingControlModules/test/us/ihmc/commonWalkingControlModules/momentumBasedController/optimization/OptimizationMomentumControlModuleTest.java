@@ -25,6 +25,7 @@ import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.utilities.exceptions.NoConvergenceException;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -45,7 +46,6 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import javax.vecmath.Vector3d;

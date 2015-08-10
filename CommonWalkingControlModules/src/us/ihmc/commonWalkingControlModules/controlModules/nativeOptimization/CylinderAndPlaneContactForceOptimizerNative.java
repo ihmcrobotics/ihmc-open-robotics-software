@@ -5,8 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
-import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
+import us.ihmc.utilities.exceptions.NoConvergenceException;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
