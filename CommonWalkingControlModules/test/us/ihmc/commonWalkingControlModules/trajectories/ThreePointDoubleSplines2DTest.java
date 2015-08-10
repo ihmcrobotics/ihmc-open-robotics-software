@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 

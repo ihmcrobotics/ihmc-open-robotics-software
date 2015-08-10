@@ -27,7 +27,7 @@ import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;

@@ -18,7 +18,7 @@ import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;

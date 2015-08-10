@@ -36,7 +36,7 @@ import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSu
 import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.CylinderAndContactPointWrenchDistributor;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;

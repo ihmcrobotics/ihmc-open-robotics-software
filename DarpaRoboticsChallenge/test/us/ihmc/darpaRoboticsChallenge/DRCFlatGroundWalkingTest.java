@@ -25,7 +25,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVe
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationRunsSameWayTwiceVerifier;
 import us.ihmc.tools.ArrayTools;
 
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;

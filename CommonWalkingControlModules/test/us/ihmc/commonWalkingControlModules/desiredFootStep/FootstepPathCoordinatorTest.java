@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;

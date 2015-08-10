@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;

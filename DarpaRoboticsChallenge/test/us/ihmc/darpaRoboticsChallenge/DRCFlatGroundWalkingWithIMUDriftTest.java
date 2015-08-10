@@ -22,7 +22,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.stateEstimation.humanoid.DRCSimulatedSensorNoiseParameters;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

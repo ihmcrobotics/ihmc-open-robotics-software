@@ -9,7 +9,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooPlanType;

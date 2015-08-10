@@ -38,7 +38,7 @@ import us.ihmc.robotics.screwTheory.SpatialMotionVectorTest;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

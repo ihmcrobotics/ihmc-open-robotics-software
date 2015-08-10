@@ -46,7 +46,7 @@ import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotCo
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.robotSide.SideDependentList;

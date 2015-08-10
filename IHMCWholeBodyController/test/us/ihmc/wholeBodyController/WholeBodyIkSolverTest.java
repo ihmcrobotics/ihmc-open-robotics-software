@@ -14,7 +14,7 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;

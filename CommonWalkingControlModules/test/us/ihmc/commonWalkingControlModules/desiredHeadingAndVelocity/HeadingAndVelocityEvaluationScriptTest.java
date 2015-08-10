@@ -13,7 +13,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndV
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;

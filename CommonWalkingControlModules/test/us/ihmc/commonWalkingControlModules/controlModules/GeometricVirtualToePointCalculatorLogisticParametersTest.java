@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import org.junit.After;
 import org.junit.Before;
 
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 
 
 public class GeometricVirtualToePointCalculatorLogisticParametersTest extends GeometricVirtualToePointCalculatorTest

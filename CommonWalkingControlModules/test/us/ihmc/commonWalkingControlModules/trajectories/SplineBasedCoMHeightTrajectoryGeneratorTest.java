@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.NonFlatGroundPlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.utilities.MemoryTools;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
