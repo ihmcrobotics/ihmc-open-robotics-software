@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
-import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
+import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 import com.sun.jna.Native;
 

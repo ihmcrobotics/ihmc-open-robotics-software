@@ -19,7 +19,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
 import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
-import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
+import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 

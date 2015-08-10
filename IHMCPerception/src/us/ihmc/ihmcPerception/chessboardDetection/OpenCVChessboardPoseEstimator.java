@@ -25,7 +25,7 @@ import org.opencv.core.TermCriteria;
 import org.opencv.imgproc.Imgproc;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
+import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 public class OpenCVChessboardPoseEstimator
 {

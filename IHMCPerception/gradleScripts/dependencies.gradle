@@ -28,4 +28,5 @@ dependencies {
     compile project(':SensorProcessing')
     compile project(':UserInterface')
     compile project(':SDFLoader')
+    compile project(':IHMCJavaToolkit')
 }
