@@ -14,7 +14,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.robotics.units.UnitConversions;
+import us.ihmc.tools.UnitConversions;
 
 public class AtlasUIPacketLoader
 {
