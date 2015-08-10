@@ -15,7 +15,7 @@
  *    
  *    Written by Jesper Smith with assistance from IHMC team members
  */
-package us.ihmc.loaders.jme;
+package us.ihmc.graphics3DAdapter.stlLoader;
 
 import java.io.DataInputStream;
 import java.io.IOException;

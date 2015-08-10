@@ -25,11 +25,11 @@ import java.util.List;
 
 import org.junit.Test;
 
-import us.ihmc.loaders.jme.ASCIISTLReader;
-import us.ihmc.loaders.jme.BinarySTLReader;
-import us.ihmc.loaders.jme.STLReader;
-import us.ihmc.loaders.jme.STLReaderFactory;
-import us.ihmc.loaders.jme.Triangle;
+import us.ihmc.graphics3DAdapter.stlLoader.ASCIISTLReader;
+import us.ihmc.graphics3DAdapter.stlLoader.BinarySTLReader;
+import us.ihmc.graphics3DAdapter.stlLoader.STLReader;
+import us.ihmc.graphics3DAdapter.stlLoader.STLReaderFactory;
+import us.ihmc.graphics3DAdapter.stlLoader.Triangle;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 /**
