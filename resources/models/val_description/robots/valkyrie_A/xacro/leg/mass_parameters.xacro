@@ -3,6 +3,12 @@
  
   <xacro:property name="HipYawLinkMass" value="2.39" />
   <xacro:property name="HipYawLinkComPosition" value="0.02176 ${reflect*-0.00131} 0.03867" />
+  <xacro:property name="HipYawLinkInertia_IXX" value="0.017260978" />
+  <xacro:property name="HipYawLinkInertia_IXY" value="0.000000000" />
+  <xacro:property name="HipYawLinkInertia_IXZ" value="0.000000000" />
+  <xacro:property name="HipYawLinkInertia_IYY" value="0.014866198" />
+  <xacro:property name="HipYawLinkInertia_IYZ" value="0.000000000" />
+  <xacro:property name="HipYawLinkInertia_IZZ" value="0.011238178" />
 
   <xacro:property name="HipRollLinkMass" value="3.665000" />
   <xacro:property name="HipRollLinkComPosition" value="0.012959 ${reflect*0.007550} -0.015950" />

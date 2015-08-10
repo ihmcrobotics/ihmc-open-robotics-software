@@ -8,40 +8,34 @@
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/middle_finger/joint_limits.xacro"/>
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/middle_finger/frame_parameters.xacro"/>
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/middle_finger/mass_parameters.xacro"/>
-  
-  <xacro:property name="MFJ1_Link_Width" value="0.054"/>
-  <xacro:property name="MFJ1_Link_Height" value="0.019"/>
-  <xacro:property name="MFJ1_Link_Length" value="0.026"/>
-
-  <xacro:property name="MFJ2_Link_Width" value="0.034"/>
-  <xacro:property name="MFJ2_Link_Height" value="0.013"/>
-  <xacro:property name="MFJ2_Link_Length" value="0.022"/>
-
-  <xacro:property name="MFJ3_Link_Width" value="0.027"/>
-  <xacro:property name="MFJ3_Link_Height" value="0.012"/>
-  <xacro:property name="MFJ3_Link_Length" value="0.019"/>
 
   <xacro:macro name="make_middle_finger" params="prefix reflect middle_finger_root_link">
 
-    <xacro:box_link name="${MiddleFingerPitch1LinkName}" 
-                    width="${MFJ1_Link_Width}" height="${MFJ1_Link_Height}" depth="${MFJ1_Link_Length}" mass="${MiddleFingerPitch1LinkMass}" 
+    <xacro:standard_link name="${MiddleFingerPitch1LinkName}" 
+                    mass="${MiddleFingerPitch1LinkMass}" 
                     origin_xyz="${MiddleFingerPitch1ComPosition}"
+                    ixx="${MiddleFingerPitch1LinkInertia_IXX}" ixy="${MiddleFingerPitch1LinkInertia_IXY}" ixz="${MiddleFingerPitch1LinkInertia_IXZ}"
+                    iyy="${MiddleFingerPitch1LinkInertia_IYY}" iyz="${MiddleFingerPitch1LinkInertia_IYZ}" izz="${MiddleFingerPitch1LinkInertia_IZZ}"
                     origin_rpy="0 0 0" 
                     visual_mesh="${mesh_root}/fingers/middlej1_${prefix}.dae"
                     material="Gold"
                     collision_mesh="${mesh_root}/fingers/middlej1_${prefix}.dae"/>
 
-    <xacro:box_link name="${MiddleFingerPitch2LinkName}" 
-                    width="${MFJ2_Link_Width}" height="${MFJ2_Link_Height}" depth="${MFJ2_Link_Length}" mass="${MiddleFingerPitch2LinkMass}" 
+    <xacro:standard_link name="${MiddleFingerPitch2LinkName}" 
+                    mass="${MiddleFingerPitch2LinkMass}" 
                     origin_xyz="${MiddleFingerPitch2ComPosition}"
+                    ixx="${MiddleFingerPitch2LinkInertia_IXX}" ixy="${MiddleFingerPitch2LinkInertia_IXY}" ixz="${MiddleFingerPitch2LinkInertia_IXZ}"
+                    iyy="${MiddleFingerPitch2LinkInertia_IYY}" iyz="${MiddleFingerPitch2LinkInertia_IYZ}" izz="${MiddleFingerPitch2LinkInertia_IZZ}"
                     origin_rpy="0 0 0" 
                     visual_mesh="${mesh_root}/fingers/middlej2_${prefix}.dae"
                     material="Gold"
                     collision_mesh="${mesh_root}/fingers/middlej2_${prefix}.dae"/>
 
-    <xacro:box_link name="${MiddleFingerPitch3LinkName}" 
-                    width="${MFJ3_Link_Width}" height="${MFJ3_Link_Height}" depth="${MFJ3_Link_Length}" mass="${MiddleFingerPitch3LinkMass}" 
+    <xacro:standard_link name="${MiddleFingerPitch3LinkName}" 
+                    mass="${MiddleFingerPitch3LinkMass}" 
                     origin_xyz="${MiddleFingerPitch3ComPosition}"
+                    ixx="${MiddleFingerPitch3LinkInertia_IXX}" ixy="${MiddleFingerPitch3LinkInertia_IXY}" ixz="${MiddleFingerPitch3LinkInertia_IXZ}"
+                    iyy="${MiddleFingerPitch3LinkInertia_IYY}" iyz="${MiddleFingerPitch3LinkInertia_IYZ}" izz="${MiddleFingerPitch3LinkInertia_IZZ}"
                     origin_rpy="0 0 0" 
                     visual_mesh="${mesh_root}/fingers/middlej3_${prefix}.dae"
                     material="Gold"

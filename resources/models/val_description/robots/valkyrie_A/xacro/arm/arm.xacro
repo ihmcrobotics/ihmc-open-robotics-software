@@ -8,36 +8,13 @@
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/arm/frame_parameters.xacro"/>
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/arm/mass_parameters.xacro"/>
 
-  <xacro:property name="AJ1_Link_Width" value="0.162"/>
-  <xacro:property name="AJ1_Link_Height" value="0.202"/>
-  <xacro:property name="AJ1_Link_Length" value="0.146"/>
-
-  <xacro:property name="AJ3_Link_Width" value="0.136"/>
-  <xacro:property name="AJ3_Link_Height" value="0.158"/>
-  <xacro:property name="AJ3_Link_Length" value="0.285"/>
-
-  <xacro:property name="AJ4_Link_Width" value="0.11323257841518076516"/>
-  <xacro:property name="AJ4_Link_Height" value="0.11855222975004402197"/>
-  <xacro:property name="AJ4_Link_Length" value="0.10487312631734664603"/>
-
-  <xacro:property name="AJ5_Link_Width" value="0.13557189311158912570"/>
-  <xacro:property name="AJ5_Link_Height" value="0.11439484172804967321"/>
-  <xacro:property name="AJ5_Link_Length" value="0.25365181285234167374"/>
-
-  <xacro:property name="AJ6_Link_Width" value="0.03"/>
-  <xacro:property name="AJ6_Link_Height" value="0.01"/>
-  <xacro:property name="AJ6_Link_Length" value="0.051"/>
-
-  <xacro:property name="AJ7_Link_Width" value="0.085"/>
-  <xacro:property name="AJ7_Link_Height" value="0.1"/>
-  <xacro:property name="AJ7_Link_Length" value="0.038"/>
-
-
   <xacro:macro name="make_upper_arm" params="prefix reflect upper_arm_root_link">
 
-    <xacro:box_link name="${ShoulderPitchLinkName}"
-                    width="${AJ1_Link_Width}" height="${AJ1_Link_Height}" depth="${AJ1_Link_Length}" mass="${ShoulderPitchLinkMass}"
+    <xacro:standard_link name="${ShoulderPitchLinkName}"
+                    mass="${ShoulderPitchLinkMass}"
                     origin_xyz="${ShoulderPitchLinkComPosition}" origin_rpy="0 0 0"
+                    ixx="${ShoulderPitchLinkInertia_IXX}" ixy="${ShoulderPitchLinkInertia_IXY}" ixz="${ShoulderPitchLinkInertia_IXZ}"
+                    iyy="${ShoulderPitchLinkInertia_IYY}" iyz="${ShoulderPitchLinkInertia_IYZ}" izz="${ShoulderPitchLinkInertia_IZZ}"
                     visual_mesh="${mesh_root}/arms/aj1_${prefix}.dae"
                     material="Gold"
                     collision_mesh="${mesh_root}/arms/aj1_${prefix}.dae" />
@@ -52,16 +29,21 @@
                     material="White"
                     collision_mesh="${mesh_root}/arms/aj2_${prefix}.dae" />
 
-    <xacro:box_link name="${ShoulderYawLinkName}"
-                    width="${AJ3_Link_Width}" height="${AJ3_Link_Height}" depth="${AJ3_Link_Length}" mass="${ShoulderYawLinkMass}"
-                    origin_xyz="${ShoulderYawLinkComPosition}" origin_rpy="0 0 0"
+    <xacro:standard_link name="${ShoulderYawLinkName}"
+                    mass="${ShoulderYawLinkMass}"
+                    origin_xyz="${ShoulderYawLinkComPosition}" 
+                    ixx="${ShoulderYawLinkInertia_IXX}" ixy="${ShoulderYawLinkInertia_IXY}" ixz="${ShoulderYawLinkInertia_IXZ}"
+                    iyy="${ShoulderYawLinkInertia_IYY}" iyz="${ShoulderYawLinkInertia_IYZ}" izz="${ShoulderYawLinkInertia_IZZ}"
+                    origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/arms/aj3_${prefix}.dae"
                     material="White"
                     collision_mesh="${mesh_root}/arms/aj3_${prefix}.dae" />
 
-    <xacro:box_link name="${ElbowPitchLinkName}"
-                    width="${AJ4_Link_Width}" height="${AJ4_Link_Height}" depth="${AJ4_Link_Length}" mass="${ElbowPitchLinkMass}"
+    <xacro:standard_link name="${ElbowPitchLinkName}"
+                    mass="${ElbowPitchLinkMass}"
                     origin_xyz="${ElbowPitchLinkComPosition}"
+                    ixx="${ElbowPitchLinkInertia_IXX}" ixy="${ElbowPitchLinkInertia_IXY}" ixz="${ElbowPitchLinkInertia_IXZ}"
+                    iyy="${ElbowPitchLinkInertia_IYY}" iyz="${ElbowPitchLinkInertia_IYZ}" izz="${ElbowPitchLinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/arms/aj4_${prefix}.dae"
                     material="Gold"
@@ -120,25 +102,31 @@
 
 
   <xacro:macro name="make_lower_arm" params="prefix reflect lower_arm_root_link">
-    <xacro:box_link name="${ForearmLinkName}"
-                    width="${AJ5_Link_Width}" height="${AJ5_Link_Height}" depth="${AJ5_Link_Length}" mass="${ForearmYawLinkMass}"
+    <xacro:standard_link name="${ForearmLinkName}"
+                    mass="${ForearmYawLinkMass}"
                     origin_xyz="${ForearmYawLinkComPosition}"
+                    ixx="${ForearmYawLinkInertia_IXX}" ixy="${ForearmYawLinkInertia_IXY}" ixz="${ForearmYawLinkInertia_IXZ}"
+                    iyy="${ForearmYawLinkInertia_IYY}" iyz="${ForearmYawLinkInertia_IYZ}" izz="${ForearmYawLinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/arms/aj5_${prefix}.dae"
                     material="White"
                     collision_mesh="${mesh_root}/arms/aj5_${prefix}.dae" />
 
-    <xacro:box_link name="${WristRollLinkName}"
-                    width="${AJ6_Link_Width}" height="${AJ6_Link_Height}" depth="${AJ6_Link_Length}" mass="${WristRollLinkMass}"
+    <xacro:standard_link name="${WristRollLinkName}"
+                    mass="${WristRollLinkMass}"
                     origin_xyz="${WristRollLinkComPosition}"
+                    ixx="${WristRollLinkInertia_IXX}" ixy="${WristRollLinkInertia_IXY}" ixz="${WristRollLinkInertia_IXZ}"
+                    iyy="${WristRollLinkInertia_IYY}" iyz="${WristRollLinkInertia_IYZ}" izz="${WristRollLinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/arms/aj6_${prefix}.dae"
                     material="White"
                     collision_mesh="${mesh_root}/arms/aj6_${prefix}.dae" />
 
-    <xacro:box_link name="${WristPitchLinkName}"
-                    width="${AJ7_Link_Width}" height="${AJ7_Link_Height}" depth="${AJ7_Link_Length}" mass="${PalmMass}"
+    <xacro:standard_link name="${WristPitchLinkName}"
+                    mass="${PalmMass}"
                     origin_xyz="${PalmComPosition}"
+                    ixx="${PalmInertia_IXX}" ixy="${PalmInertia_IXY}" ixz="${PalmInertia_IXZ}"
+                    iyy="${PalmInertia_IYY}" iyz="${PalmInertia_IYZ}" izz="${PalmInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/arms/palm_${prefix}.dae"
                     material="Gold"
