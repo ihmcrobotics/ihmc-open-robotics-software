@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.tools.lists.RecyclingArrayList;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;

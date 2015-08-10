@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.sensors;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.robotics.lists.PairList;
+import us.ihmc.tools.lists.PairList;
 
 public class RawJointSensorDataHolderMapCopier
 {
