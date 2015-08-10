@@ -10,4 +10,5 @@ dependencies {
 	compile project(':Graphics3DAdapter')
 	compile project(':SimulationConstructionSet')
 	compile project(':Plotting')
+	compile project(':IHMCJavaToolkit')
 }

@@ -10,4 +10,5 @@ dependencies {
 	compile project(':IHMCYoUtilities')
 	compile project(':SimulationConstructionSet')
 	compile project(':IHMCWholeBodyController')
+	compile project(':IHMCJavaToolkit')
 }
