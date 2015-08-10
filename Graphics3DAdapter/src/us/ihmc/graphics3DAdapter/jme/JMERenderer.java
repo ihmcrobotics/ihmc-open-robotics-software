@@ -16,10 +16,9 @@ import java.util.logging.Logger;
 
 import javax.vecmath.Color3f;
 
+import org.jmonkeyengine.scene.plugins.ogre.MaterialLoader;
+
 import jme3dae.ColladaLoader;
-
-import org.jmonkeyengine.scene.plugins.ihmc.ogre.MaterialLoader;
-
 import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
