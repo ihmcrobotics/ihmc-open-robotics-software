@@ -4,7 +4,7 @@ import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionG
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.time.TimeTools;
+import us.ihmc.tools.time.TimeTools;
 import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 

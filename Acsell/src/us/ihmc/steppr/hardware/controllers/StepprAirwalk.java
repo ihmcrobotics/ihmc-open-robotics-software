@@ -7,7 +7,7 @@ import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.utilities.maps.EnumDoubleMap;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.time.TimeTools;
+import us.ihmc.tools.time.TimeTools;
 import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
