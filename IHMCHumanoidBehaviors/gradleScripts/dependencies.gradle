@@ -19,4 +19,5 @@ dependencies {
 	compile project(':SensorProcessing')
 	compile project(':IHMCWholeBodyController')
 	compile project(':IHMCPerception')
+	compile project(':IHMCJavaToolkit')
 }

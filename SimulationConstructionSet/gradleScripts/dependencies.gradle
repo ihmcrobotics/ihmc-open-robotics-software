@@ -42,4 +42,5 @@ dependencies {
 	compile project(':Graphics3DAdapter')
 	compile project(':ParameterOptimization')
 	compile project(':IHMCCommunication')
+	compile project(':IHMCJavaToolkit')
 }

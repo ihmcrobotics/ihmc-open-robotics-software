@@ -22,4 +22,5 @@ dependencies {
 	compile project(':SimulationConstructionSet')
 	compile project(':UserInterface')
 	compile project(':IHMCCommunication')
+	compile project(':IHMCJavaToolkit')
 }
