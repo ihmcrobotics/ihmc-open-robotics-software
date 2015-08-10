@@ -1,13 +1,31 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/index_finger/mass_parameters">
   
-  <xacro:property name="IndexFingerPitch1LinkMass" value="0.006" />
+  <xacro:property name="IndexFingerPitch1LinkMass" value="0.02" />
   <xacro:property name="IndexFingerPitch1ComPosition" value="0 ${reflect*0.02} 0" />
+  <xacro:property name="IndexFingerPitch1LinkInertia_IXX" value="0.000004232" />
+  <xacro:property name="IndexFingerPitch1LinkInertia_IXY" value="${reflect*0.000000060}" />
+  <xacro:property name="IndexFingerPitch1LinkInertia_IXZ" value="${reflect*0.000000008}" />
+  <xacro:property name="IndexFingerPitch1LinkInertia_IYY" value="0.000001215" />
+  <xacro:property name="IndexFingerPitch1LinkInertia_IYZ" value="-0.000000007" />
+  <xacro:property name="IndexFingerPitch1LinkInertia_IZZ" value="0.000003892" />
 
   <xacro:property name="IndexFingerPitch2LinkMass" value="0.018" />
   <xacro:property name="IndexFingerPitch2ComPosition" value="0 ${reflect*0.013} 0" />
+  <xacro:property name="IndexFingerPitch2LinkInertia_IXX" value="0.000001562" />
+  <xacro:property name="IndexFingerPitch2LinkInertia_IXY" value="${reflect*0.000000017}" />
+  <xacro:property name="IndexFingerPitch2LinkInertia_IXZ" value="${reflect*0.000000013}" />
+  <xacro:property name="IndexFingerPitch2LinkInertia_IYY" value="0.000000722" />
+  <xacro:property name="IndexFingerPitch2LinkInertia_IYZ" value="0.000000031" />
+  <xacro:property name="IndexFingerPitch2LinkInertia_IZZ" value="0.000001255" />
 
   <xacro:property name="IndexFingerPitch3LinkMass" value="0.01" />
   <xacro:property name="IndexFingerPitch3ComPosition" value="0 ${reflect*0.01} 0" />
+  <xacro:property name="IndexFingerPitch3LinkInertia_IXX" value="0.000000602" />
+  <xacro:property name="IndexFingerPitch3LinkInertia_IXY" value="${reflect*0.000000024}" />
+  <xacro:property name="IndexFingerPitch3LinkInertia_IXZ" value="${reflect*-0.000000000}" />
+  <xacro:property name="IndexFingerPitch3LinkInertia_IYY" value="0.000000209" />
+  <xacro:property name="IndexFingerPitch3LinkInertia_IYZ" value="0.000000017" />
+  <xacro:property name="IndexFingerPitch3LinkInertia_IZZ" value="0.000000502" />
   
 </robot>

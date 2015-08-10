@@ -46,18 +46,22 @@
   </xacro:macro>
 
   <xacro:macro name="make_waist" params="waist_root_link">
-    <xacro:box_link name="${TorsoYawLinkName}"
-                    width="0.0001" height="0.0001" depth="0.0001" mass="0.00001"
+    <xacro:standard_link name="${TorsoYawLinkName}"
+                    mass="${TorsoYawLinkMass}"
                     origin_rpy="0 0 0"
-                    origin_xyz="0 0 0"
+                    origin_xyz="${TorsoYawLinkComPosition}"
+                    ixx="${TorsoYawLinkInertia_IXX}" ixy="${TorsoYawLinkInertia_IXY}" ixz="${TorsoYawLinkInertia_IXZ}"
+                    iyy="${TorsoYawLinkInertia_IYY}" iyz="${TorsoYawLinkInertia_IYZ}" izz="${TorsoYawLinkInertia_IZZ}"
                     visual_mesh="${mesh_root}/torso/torsoyaw.dae"
                     material="White"
                     collision_mesh="${mesh_root}/torso/torsoyaw.dae" />
 
-    <xacro:box_link name="${TorsoPitchLinkName}"
-                    width="0.0001" height="0.0001" depth="0.0001" mass="0.00001"
+    <xacro:standard_link name="${TorsoPitchLinkName}"
+                    mass="${TorsoPitchLinkMass}"
                     origin_rpy="0 0 0"
-                    origin_xyz="0 0 0"
+                    origin_xyz="${TorsoPitchLinkComPosition}"
+                    ixx="${TorsoPitchLinkInertia_IXX}" ixy="${TorsoPitchLinkInertia_IXY}" ixz="${TorsoPitchLinkInertia_IXZ}"
+                    iyy="${TorsoPitchLinkInertia_IYY}" iyz="${TorsoPitchLinkInertia_IYZ}" izz="${TorsoPitchLinkInertia_IZZ}"
                     visual_mesh="${mesh_root}/torso/torsopitch.dae"
                     material="White"
                     collision_mesh="${mesh_root}/torso/torsopitch.dae" />
@@ -73,17 +77,6 @@
                     collision_mesh="${mesh_root}/torso/torso.dae" />
 
     <xacro:make_waist_common waist_root_link="${waist_root_link}"/>
-  </xacro:macro>
-
-  <xacro:macro name="make_no_waist">
-
-    <xacro:box_link name="${TorsoRollLinkName}"
-                    width="${Trunk_Width}" height="${Trunk_Height}" depth="${Trunk_Length}" mass="${TorsoRollLinkMass}"
-                    origin_rpy="0 0 0"
-                    origin_xyz="0 0 0"
-                    visual_mesh="${mesh_root}/torso/wj3.dae"
-                    material="White"
-                    collision_mesh="${mesh_root}/torso/wj3.dae" />
   </xacro:macro>
 
   <xacro:macro name="waist_actuators"  params="name1 type1 name2 type2 name3 type3">

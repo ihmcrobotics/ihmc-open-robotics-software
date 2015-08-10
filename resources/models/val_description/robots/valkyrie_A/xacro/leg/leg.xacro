@@ -8,17 +8,12 @@
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/leg/mass_parameters.xacro"/>
   <xacro:include filename="$(find val_description)/robots/common/sensors/ati_force_torque.xacro"/>
 
-  <xacro:property name="LJ1_Link_Width" value="0.149"/>
-  <xacro:property name="LJ1_Link_Height" value="0.185"/>
-  <xacro:property name="LJ1_Link_Length" value="0.229"/>
-  <xacro:property name="LJ1_Link_Origin_X" value="0.02176"/>
-  <xacro:property name="LJ1_Link_Origin_Y" value="0.0013"/>
-  <xacro:property name="LJ1_Link_Origin_Z" value="0.03867"/>
-
   <xacro:macro name="make_leg_links" params="prefix reflect leg_root_link">
-    <xacro:box_link name="${HipYawLinkName}"
-                    width="${LJ1_Link_Width}" height="${LJ1_Link_Height}" depth="${LJ1_Link_Length}" mass="${HipYawLinkMass}"
+    <xacro:standard_link name="${HipYawLinkName}"
+                    mass="${HipYawLinkMass}"
                     origin_xyz="${HipYawLinkComPosition}" origin_rpy="0 0 0" 
+                    ixx="${HipYawLinkInertia_IXX}" ixy="${HipYawLinkInertia_IXY}" ixz="${HipYawLinkInertia_IXZ}"
+                    iyy="${HipYawLinkInertia_IYY}" iyz="${HipYawLinkInertia_IYZ}" izz="${HipYawLinkInertia_IZZ}"
                     visual_mesh="${mesh_root}/legs/lj1_${prefix}.dae"
                     material="Gold"
                     collision_mesh="${mesh_root}/legs/lj1_${prefix}.dae"/>
