@@ -24,7 +24,7 @@ import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.MultiClientStreamingDataTCPServer;
 import us.ihmc.robotDataCommunication.LogDataHeader;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.utilities.time.TimeTools;
+import us.ihmc.tools.time.TimeTools;
 
 public class GUICaptureStreamer
 {

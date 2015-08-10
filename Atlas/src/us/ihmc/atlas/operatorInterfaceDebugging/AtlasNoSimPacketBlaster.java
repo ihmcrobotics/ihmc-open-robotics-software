@@ -29,7 +29,7 @@ import us.ihmc.humanoidRobotics.model.FullRobotModelUtils;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.time.TimeTools;
+import us.ihmc.tools.time.TimeTools;
 
 public class AtlasNoSimPacketBlaster implements Runnable
 {
