@@ -5,7 +5,7 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.util.Arrays;
 
-import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
+import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 public class SimpleHQPNative
 {

@@ -11,7 +11,7 @@ import java.util.Arrays;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
-import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
+import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;

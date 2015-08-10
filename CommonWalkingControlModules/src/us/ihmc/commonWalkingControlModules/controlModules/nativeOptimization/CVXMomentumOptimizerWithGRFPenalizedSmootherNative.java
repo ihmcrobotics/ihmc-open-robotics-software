@@ -6,7 +6,7 @@ import java.nio.DoubleBuffer;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
+import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 /**
  * see csrc/CVXMomentumOptimizerWithGRFPenalizedSmoother/description.cvxgen for problem description
