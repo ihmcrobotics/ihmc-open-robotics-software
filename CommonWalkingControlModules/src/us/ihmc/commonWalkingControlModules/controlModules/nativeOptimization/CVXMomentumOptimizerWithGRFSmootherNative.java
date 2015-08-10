@@ -4,9 +4,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
-import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
+import us.ihmc.utilities.exceptions.NoConvergenceException;
 
 /**
  * see csrc/CVXMomentumOptimizerWithGRFSmoother/description.cvxgen for problem description

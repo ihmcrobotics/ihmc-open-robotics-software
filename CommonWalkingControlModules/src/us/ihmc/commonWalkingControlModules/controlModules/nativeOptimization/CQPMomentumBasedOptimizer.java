@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.BlockDiagSquareMatrix;
-import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.exceptions.NoConvergenceException;
 
 
 /**

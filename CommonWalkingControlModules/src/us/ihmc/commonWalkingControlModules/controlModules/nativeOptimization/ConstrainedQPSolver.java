@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.exceptions.NoConvergenceException;
 
 public abstract class ConstrainedQPSolver
 {
