@@ -1,7 +1,7 @@
-package org.jmonkeyengine.tralala;
+package us.ihmc.graphics3DAdapter.utils;
 
-
-/** Encapsulation of 2 objects, the key and its value.
+/** 
+ * Encapsulation of 2 objects, the key and its value.
  */
 public class Pair<Key, Value>
 {
