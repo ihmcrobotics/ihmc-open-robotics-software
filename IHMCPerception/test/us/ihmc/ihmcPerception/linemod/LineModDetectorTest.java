@@ -17,7 +17,7 @@ import org.junit.Test;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.robotics.units.UnitConversions;
+import us.ihmc.tools.UnitConversions;
 
 import com.jme3.math.FastMath;
 
