@@ -2,9 +2,9 @@ package us.ihmc.graphics3DAdapter.jme;
 
 import java.io.File;
 
-import org.jmonkeyengine.scene.plugins.ihmc.ogre.matext.MaterialExtension;
-import org.jmonkeyengine.scene.plugins.ihmc.ogre.matext.MaterialExtensionSet;
-import org.jmonkeyengine.scene.plugins.ihmc.ogre.matext.OgreMaterialKey;
+import org.jmonkeyengine.scene.plugins.ogre.matext.MaterialExtension;
+import org.jmonkeyengine.scene.plugins.ogre.matext.MaterialExtensionSet;
+import org.jmonkeyengine.scene.plugins.ogre.matext.OgreMaterialKey;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.plugins.ClasspathLocator;
@@ -62,7 +62,7 @@ public class JMEAssetLocator
       if(!ogreLoaderInitialized)
       {
          assetManager.unregisterLoader(com.jme3.scene.plugins.ogre.MaterialLoader.class);
-         assetManager.registerLoader(org.jmonkeyengine.scene.plugins.ihmc.ogre.MaterialLoader.class, "material");
+         assetManager.registerLoader(org.jmonkeyengine.scene.plugins.ogre.MaterialLoader.class, "material");
          ogreLoaderInitialized = true;
       }
 
