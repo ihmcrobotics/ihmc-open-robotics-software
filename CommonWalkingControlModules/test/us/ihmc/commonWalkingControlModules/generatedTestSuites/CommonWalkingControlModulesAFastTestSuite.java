@@ -7,7 +7,6 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.commonWalkingControlModules.calculators.GroundContactPointBasedWrenchCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.calibration.virtualChain.VirtualChainBuilderTest.class,
    us.ihmc.commonWalkingControlModules.calibration.virtualChain.VirtualChainConstructorFromARobotTest.class,
    us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculatorTest.class,
@@ -15,7 +14,6 @@ import org.junit.runners.Suite;
    us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolverTest.class,
    us.ihmc.commonWalkingControlModules.controlModules.GeometricVirtualToePointCalculatorLogisticParametersTest.class,
    us.ihmc.commonWalkingControlModules.controlModules.GeometricVirtualToePointCalculatorTest.class,
-   us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributorTest.class,
    us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolverTest.class,
    us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootPosePacketTransformerTest.class,
@@ -24,7 +22,7 @@ import org.junit.runners.Suite;
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PelvisPosePacketTransformerTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.TorusPosePacketTransformerTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorToolsTest.class,
-   us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepDataTest.class,
+   us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathCoordinatorTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.RangeOfStep2dTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.RangeOfStep3dTest.class,
@@ -37,7 +35,6 @@ import org.junit.runners.Suite;
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.NewDoubleSupportICPComputerTest.class,
    us.ihmc.commonWalkingControlModules.kinematics.DampedLeastSquaresJacobianSolverTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.CentroidalMomentumBenchmarkTest.class,
-   us.ihmc.commonWalkingControlModules.momentumBasedController.CentroidalMomentumRateADotVTermTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.CentroidalMomentumRateTermCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumOptimizerOldTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumSolverTest.class,
@@ -65,6 +62,7 @@ import org.junit.runners.Suite;
    us.ihmc.commonWalkingControlModules.trajectories.ZeroToOneParabolicVelocityTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest.class,
+   us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorTest.class,
    us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculatorTest.class
 })
 

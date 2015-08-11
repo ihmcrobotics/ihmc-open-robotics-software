@@ -140,7 +140,6 @@ public class CentroidalMomentumRateADotVTerm
       MatrixTools.setMatrixBlock(matrixToPack, 0, 0, tmpOmegaSkew, 0, 0, 3, 3, 1.0); // top left block
       MatrixTools.setMatrixBlock(matrixToPack, 3, 3, tmpOmegaSkew, 0, 0, 3, 3, 1.0); // bottom right block
       MatrixTools.setMatrixBlock(matrixToPack, 3, 0, tmpVelSkew, 0, 0, 3, 3, 1.0); // bottom left block
-
    }
 
    /**

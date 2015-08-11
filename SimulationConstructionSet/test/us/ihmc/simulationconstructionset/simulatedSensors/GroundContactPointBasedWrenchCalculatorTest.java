@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.calculators;
+package us.ihmc.simulationconstructionset.simulatedSensors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
