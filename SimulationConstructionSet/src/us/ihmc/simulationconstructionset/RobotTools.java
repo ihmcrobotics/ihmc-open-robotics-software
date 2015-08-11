@@ -22,7 +22,6 @@ import us.ihmc.robotics.screwTheory.Twist;
 
 public class RobotTools
 {
-
    public static class SCSRobotFromInverseDynamicsRobotModel extends Robot
    {
       private final SixDoFJoint idFloatingJoint;

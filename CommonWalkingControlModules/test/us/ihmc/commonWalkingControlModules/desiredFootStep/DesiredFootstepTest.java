@@ -41,11 +41,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
-/**
- * User: Matt
- * Date: 1/10/13
- */
-public class FootstepDataTest
+public class DesiredFootstepTest
 {
    private static final RobotSide robotSide = RobotSide.LEFT;
    //TODO: Make listeners or something blocking so we don't have to do arbitrary sleep times...

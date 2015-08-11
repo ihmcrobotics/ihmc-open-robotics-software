@@ -12,9 +12,6 @@ import javax.vecmath.Point2d;
 
 import java.util.List;
 
-/**
- * Created by agrabertilton on 2/18/15.
- */
 public class FootstepTools
 {
    public static Footstep generateFootstepFromFootstepData(FootstepData footstepData, ContactablePlaneBody contactableBody, int index)

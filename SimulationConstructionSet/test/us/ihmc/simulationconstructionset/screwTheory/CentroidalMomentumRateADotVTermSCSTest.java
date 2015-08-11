@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController;
+package us.ihmc.simulationconstructionset.screwTheory;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -9,8 +9,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
-import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -27,9 +27,8 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.tools.test.JUnitTools;
 
-public class CentroidalMomentumRateADotVTermTest
+public class CentroidalMomentumRateADotVTermSCSTest
 {
-
    private static final double EPSILON = 1.0e-5;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -44,8 +43,6 @@ public class CentroidalMomentumRateADotVTermTest
 
    private final DenseMatrix64F aDotVNumerical = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
-
-//   @Ignore
 
 	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 30000)
@@ -66,8 +63,6 @@ public class CentroidalMomentumRateADotVTermTest
 
       assertADotV(random, joints, elevator, robot,numberOfJoints);
    }
-
-//   @Ignore
 
 	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 30000)
