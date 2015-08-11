@@ -1,4 +1,4 @@
-package us.ihmc.robotiq.communication.registers;
+package us.ihmc.robotiq.communication;
 
 import static org.junit.Assert.assertTrue;
 
