@@ -70,7 +70,7 @@ public class ControllerDataForEstimatorHolder
       intermediateDesiredJointDataHolder.copyFromController();
    }
 
-   public static class Builder implements us.ihmc.concurrent.Builder<ControllerDataForEstimatorHolder>
+   public static class Builder implements us.ihmc.realtime.concurrent.Builder<ControllerDataForEstimatorHolder>
    {
       private final CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder;
       private final CenterOfPressureDataHolder controllerCenterOfPressureDataHolder;

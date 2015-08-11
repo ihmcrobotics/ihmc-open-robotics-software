@@ -63,7 +63,7 @@ public class IntermediateControllerStateHolder
       }
    }
 
-   public static class Builder implements us.ihmc.concurrent.Builder<IntermediateControllerStateHolder>
+   public static class Builder implements us.ihmc.realtime.concurrent.Builder<IntermediateControllerStateHolder>
    {
 
       private final SDFFullRobotModel estimatorModel;
