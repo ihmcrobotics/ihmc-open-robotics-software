@@ -16,9 +16,8 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
-public abstract class PlaybackPoseSequenceTest implements MultiRobotTestInterface
+public abstract class PlaybackPoseSequenceDRCTest implements MultiRobotTestInterface
 {
-
 	@EstimatedDuration(duration = 0.1)
 	@Test(timeout = 30000)
    public void testReadAndWriteWithRandomSequence()
@@ -31,8 +30,7 @@ public abstract class PlaybackPoseSequenceTest implements MultiRobotTestInterfac
       double trajectoryTime = 1.0;
 
       Random random = new Random(1776L);
-      PlaybackPoseSequence sequence = PosePlaybackExampleSequence.createRandomPlaybackPoseSequence(random, fullRobotModel, numberOfPoses, delay,
-                                                  trajectoryTime);
+      PlaybackPoseSequence sequence = PosePlaybackExampleSequence.createRandomPlaybackPoseSequence(random, fullRobotModel, numberOfPoses, delay, trajectoryTime);
 
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
       PlaybackPoseSequenceWriter.writeToOutputStream(sequence, outputStream);
@@ -49,7 +47,5 @@ public abstract class PlaybackPoseSequenceTest implements MultiRobotTestInterfac
       double jointEpsilon = 1e-7;
       double timeEpsilon = 1e-7;
       assertTrue(sequence.epsilonEquals(sequenceTwo, jointEpsilon, timeEpsilon));
-
    }
-
 }
