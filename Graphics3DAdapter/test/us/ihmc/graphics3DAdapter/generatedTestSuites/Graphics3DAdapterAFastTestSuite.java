@@ -8,7 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.graphics3DAdapter.graphics.Graphics3DObjectTest.class,
-   us.ihmc.graphics3DAdapter.jme.loaders.STLReaderTest.class,
+   us.ihmc.graphics3DAdapter.stlLoader.STLReaderTest.class,
    us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtilsTest.class,
    us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtilsTest.class
 })
