@@ -5,24 +5,11 @@ import Jama.Matrix;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2004</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class QuaternionTools
 {
    private static final double PI = Math.PI;
    private static final double TwoPI = 2.0 * PI;
    private static final double EPSILON = 1e-10;
-
 
 // /*
 //  * This will convert from quaternions to euler angles
@@ -92,7 +79,6 @@ public class QuaternionTools
       rollPitchYaw.set(0, 0, roll);
       rollPitchYaw.set(1, 0, pitch);
       rollPitchYaw.set(2, 0, yaw);
-
    }
 
 // public static double[] quat2euler(double[] quat)
@@ -123,7 +109,6 @@ public class QuaternionTools
 //
 //    return euler;
 // }
-
 
    public static void quaternionsToRollPitchYaw(double[] quaternions, double[] rollPitchYaw)
    {
@@ -156,17 +141,13 @@ public class QuaternionTools
       rollPitchYaw[0] = roll;
       rollPitchYaw[1] = pitch;
       rollPitchYaw[2] = yaw;
-
    }
-
-
 
    /*
     * This will convert from euler angles to quaternion vector
     * phi, theta, psi -> q(4,1)
     * euler angles in radians in order of roll, pitch, yaw
     */
-
 // public static Matrix euler2quat(Matrix euler)
 // {
 //    Transform3D transform3D = new Transform3D();
@@ -246,8 +227,6 @@ public class QuaternionTools
       quaternions.set(3, 0, chphi0 * chtheta0 * shpsi0 - shphi0 * shtheta0 * chpsi0);
    }
 
-
-
 // public static double[] euler2quat(double[] euler)
 // {
 //    double phi = euler[0] / 2.0;   // Roll
@@ -299,11 +278,7 @@ public class QuaternionTools
       quaternions[1] = -chphi0 * shtheta0 * shpsi0 + shphi0 * chtheta0 * chpsi0;
       quaternions[2] = chphi0 * shtheta0 * chpsi0 + shphi0 * chtheta0 * shpsi0;
       quaternions[3] = chphi0 * chtheta0 * shpsi0 - shphi0 * shtheta0 * chpsi0;
-
    }
-
-
-
 
    /**
     * computeAngleDifferenceMinusPiToPi: returns (angleA - angleB), where the return value is [-pi, pi)
@@ -320,7 +295,6 @@ public class QuaternionTools
 
       return difference;
    }
-
 
    /**
     * This will shift an angle to be in the range [<i>startOfAngleRange</i>,
@@ -348,7 +322,6 @@ public class QuaternionTools
       return ret;
    }
 
-
    // Format the number to exactly 4 decimal places (or 1 less when negative).  by Shervin 7/17/07.
    public static String format4(double d)
    {
@@ -361,6 +334,4 @@ public class QuaternionTools
 
       return formatter.format(d);
    }
-
-
 }
