@@ -39,4 +39,5 @@ dependencies {
 	
 	testCompile project(':IHMCUtilities').sourceSets.test.output
 	testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
+	testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
 }
