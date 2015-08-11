@@ -9,6 +9,10 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import us.ihmc.utilities.ros.RosMainNode;
+
+import us.ihmc.utilities.ros.subscriber.RosFloat32MultiArraySubscriber;
+
 import net.java.games.input.Component;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
@@ -34,8 +38,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.valkyrie.treadmill.ValkyrieTreadmill;
-import us.ihmc.valkyrie.treadmill.ValkyrieTreadmillRunner;
+
 /**
  * Created by dstephen on 2/28/14.
  */
@@ -118,83 +121,86 @@ public class ValkyrieSliderBoard
       Thread thread = new Thread(joystickUpdater);
       thread.start();
 
-      // Start the treadmill manager thread.
-      final ValkyrieTreadmill myTreadmill = new ValkyrieTreadmill(false); // Show GUI
-      final Thread treadmillThread = new Thread(myTreadmill);
-      treadmillThread.start();
-      //Start the treadmill writer thread
-      final ValkyrieTreadmillWriter treadmillWriter = new ValkyrieTreadmillWriter(registry);
-      final Thread treadmillWriterThread = new Thread(treadmillWriter);
-      treadmillWriterThread.start();
-      
       double deadZone = 0.02;
       final double desiredVelocityX_Bias = 0.0;
       double desiredVelocityY_Bias = 0.0;
-      double desiredHeadingDot_Bias = 0.0;
-      final double minVelocityX = -0.10;
-      
-      //Whether we are controlling velocity through joystick or through treadmill
-      final BooleanYoVariable isJoystickControllingWalkingSpeed = new BooleanYoVariable("isJoystickControllingWalkingSpeed", registry);
+      final double desiredHeadingDot_Bias = 0.0;
+
+      final double minHeadingDot = -0.1, minVelocityX = -0.2, maxHeadingDot = 0.1, maxVelocityX = 0.2;
+      boolean signFlip = true;
+
+      // Start the heading and speed updater thread
+      //--(!) Requires data from MultisenseHeadingSubscriber
+      final ValkyrieHeadingUpdater valkyrieHeadingUpdater = new ValkyrieHeadingUpdater(registry, minHeadingDot, maxHeadingDot, minVelocityX, maxVelocityX,
+            signFlip);
+      final Thread headingUpdaterThread = new Thread(valkyrieHeadingUpdater);
+      headingUpdaterThread.start();
+      //--------------------
+      // Speed and Heading Controller
+      //--------------------            
+      final BooleanYoVariable isMultisenseControllingSpeedAndHeading = new BooleanYoVariable("isMultisenseControllingSpeedAndHeading", registry);
+      final DoubleYoVariable headingDotConstant = new DoubleYoVariable("headingDotConstant", registry);
+      final DoubleYoVariable velocityXConstant = new DoubleYoVariable("velocityXConstant", registry);
+
+      final DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
       final DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
       if (desiredVelocityX == null || joystickUpdater == null)
          return;
+
+      isMultisenseControllingSpeedAndHeading.set(false);
+      isMultisenseControllingSpeedAndHeading.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            // Reset heading and speed when toggling controller 
+            if (v.getValueAsDouble() != 0)
+            {
+               desiredVelocityX.set(desiredVelocityX_Bias);
+               desiredHeadingDot.set(desiredHeadingDot_Bias);
+            }
+
+         }
+      });
+
+      headingDotConstant.set(0.5);
+      velocityXConstant.set(0.1);
+      desiredHeadingDot.set(desiredHeadingDot_Bias);
+
+      desiredHeadingDot.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            // Overwrite joystick's input if it is disabled for heading control.
+            if (isMultisenseControllingSpeedAndHeading.getBooleanValue())
+               desiredHeadingDot.set(valkyrieHeadingUpdater.currentHeadingDot);
+         }
+      });
+
       desiredVelocityX.set(desiredVelocityX_Bias);
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y), -0.2
-            + desiredVelocityX_Bias, 0.2 + desiredVelocityX_Bias, deadZone, true));
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y),
+            minVelocityX + desiredVelocityX_Bias, maxVelocityX + desiredVelocityX_Bias, deadZone, true));
       desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            if (!isJoystickControllingWalkingSpeed.getBooleanValue())
-               v.setValueFromDouble(ValkyrieTreadmill.getCurrentVelocity());
+            // Overwrite joystick's input if it is disabled for speed control.
+            if (isMultisenseControllingSpeedAndHeading.getBooleanValue())
+               v.setValueFromDouble(valkyrieHeadingUpdater.currentVelocityX);
             if (v.getValueAsDouble() < minVelocityX)
                v.setValueFromDouble(minVelocityX, false);
          }
       });
-      isJoystickControllingWalkingSpeed.set(true);
-      isJoystickControllingWalkingSpeed.addVariableChangedListener(new VariableChangedListener(){
-
-         @Override
-         public void variableChanged(YoVariable<?> v)
-         {
-            //If we are enabling joystick, reset the value to joystick control.
-            if (v.getValueAsDouble() != 0){
-               desiredVelocityX.set(desiredVelocityX_Bias);
-            }
-         }
-      });
-      //Variable to hold the treadmill duty from ValkyrieTreadmill
-      IntegerYoVariable treadmillDuty = new IntegerYoVariable("treadmillDuty", registry);
-      treadmillDuty.setStepSize(1);
-      treadmillDuty.addVariableChangedListener(new VariableChangedListener(){
-         @Override
-         public void variableChanged(YoVariable<?> v)
-         {
-            if (v.getValueAsDouble() < 0){
-               v.setValueFromDouble(0);
-            }
-            else if (v.getValueAsDouble() > 25){
-               v.setValueFromDouble(25);
-            }
-            ValkyrieTreadmill.duty = (int) v.getValueAsDouble();
-         }
-      });
-      treadmillDuty.set(0, true);
-      
-      //Variable to hold the treadmill velocity from ValkyrieTreadmill refereshed every second.
-      DoubleYoVariable treadmillVelocity = new DoubleYoVariable("treadmillVelocity", registry);
-      treadmillVelocity.setValueFromDouble(0.0);
 
       DoubleYoVariable desiredVelocityY = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
       desiredVelocityY.set(desiredVelocityY_Bias);
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X), -0.1
-            + desiredVelocityY_Bias, 0.1 + desiredVelocityY_Bias, deadZone, true));
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X),
+            -0.1 + desiredVelocityY_Bias, 0.1 + desiredVelocityY_Bias, deadZone, true));
 
-      DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
-      desiredHeadingDot.set(desiredHeadingDot_Bias);
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
-            -0.1 + desiredHeadingDot_Bias, 0.1 + desiredHeadingDot_Bias, deadZone, true));
+            minHeadingDot + desiredHeadingDot_Bias, maxHeadingDot + desiredHeadingDot_Bias, deadZone, signFlip));
 
       joystickUpdater.listComponents();
 
@@ -218,8 +224,8 @@ public class ValkyrieSliderBoard
             sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, ValkyrieSliderBoardSelectableJoints.values().length - 1);
 
             // sliders
-            sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry, generalizedSDFRobotModel.getJointHolder(jointName)
-                  .getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
+            sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
+                  generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
             sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 2000.0);
             sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 600.0);
 
@@ -292,8 +298,8 @@ public class ValkyrieSliderBoard
                            sliderBoardConfigurationManager.setKnob(9, turboName + "_effortFF", registry, -0.1, 0.1);
                            // sliders
                            sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
-                                 generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName)
-                                       .getUpperLimit());
+                                 generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(),
+                                 generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
                            sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 2000.0);
                            sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 600.0);
                            sliderBoardConfigurationManager.setSlider(4, "ki_" + pdControllerBaseName, registry, 0.0, 600.0);
@@ -328,8 +334,8 @@ public class ValkyrieSliderBoard
                               sliderBoardConfigurationManager.setKnob(9, turboName + "_effortFF", registry, -0.01, 0.01);
                               // sliders
                               sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
-                                    generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName)
-                                          .getUpperLimit());
+                                    generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(),
+                                    generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
                               sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 2000.0);
                               sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 600.0);
                               sliderBoardConfigurationManager.setSlider(4, "ki_" + pdControllerBaseName, registry, 0.0, 600.0);
@@ -450,8 +456,8 @@ public class ValkyrieSliderBoard
          sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, ValkyrieSliderBoardSelectableJoints.values().length - 1);
 
          // sliders
-         sliderBoardConfigurationManager.setSlider(1, jointName + CommonNames.q_d, registry,
-               generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
+         sliderBoardConfigurationManager.setSlider(1, jointName + CommonNames.q_d, registry, generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(),
+               generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
          sliderBoardConfigurationManager.setSlider(2, jointName + CommonNames.qd_d, registry, -9, 9);
 
          sliderBoardConfigurationManager.saveConfiguration(jointId.toString());
@@ -468,33 +474,160 @@ public class ValkyrieSliderBoard
       });
    }
 
-   public static class ValkyrieTreadmillWriter extends Thread
+   public static class MultisenseHeadingSubscriber extends RosFloat32MultiArraySubscriber
    {
-      YoVariableHolder registry;
+      YoVariableRegistry registry;
 
-      public ValkyrieTreadmillWriter(YoVariableHolder holder)
+      double angleRadians, magnitudeMeters;
+
+      public MultisenseHeadingSubscriber(RosMainNode rosnode, String msgTopic, YoVariableRegistry inputRegistry)
+      {
+         super();
+         registry = inputRegistry;
+         angleRadians = 0.0;
+         magnitudeMeters = 0.0;
+         DoubleYoVariable multisenseHeading = new DoubleYoVariable("multisenseHeading", registry);
+         DoubleYoVariable multisenseMagnitude = new DoubleYoVariable("multisenseMagnitude", registry);
+         multisenseHeading.setValueFromDouble(0.0);
+         multisenseMagnitude.setValueFromDouble(0.0);
+
+         rosnode.attachSubscriber(msgTopic, this);
+
+      }
+
+      @Override
+      public void onNewMessage(std_msgs.Float32MultiArray msg)
+      {
+         if (msg._TYPE.equals(this.getMessageType()))
+         {
+            java.util.List<std_msgs.MultiArrayDimension> dims = msg.getLayout().getDim();
+            float[] data = msg.getData();
+
+            if (dims.size() != 2)
+               System.out.println("ERROR: Multisense message data is not a 2d array.");
+
+            if (!(dims.get(0).getSize() == 1 && dims.get(1).getSize() == 2))
+               System.out.println("ERROR: Multisense message data is not a 1x2 vector array.");
+
+            magnitudeMeters = data[dims.get(0).getSize() * 0 + dims.get(1).getStride() * 0];
+            angleRadians = data[dims.get(0).getSize() * 0 + dims.get(1).getStride() * 1];
+
+            DoubleYoVariable vh = (DoubleYoVariable) registry.getVariable("multisenseHeading");
+            DoubleYoVariable vm = (DoubleYoVariable) registry.getVariable("multisenseMagnitude");
+            vh.setValueFromDouble(angleRadians);
+            vm.setValueFromDouble(magnitudeMeters);
+
+         }
+         else
+         {
+            System.out.println("ERROR: Invalid message. Expecting " + this.getMessageType());
+         }
+
+      }
+
+      @Override
+      public String toString()
+      {
+         return "<" + magnitudeMeters + "m, " + angleRadians + "rad>";
+      }
+
+      public double getAngleInDegrees()
+      {
+         return this.angleRadians * 180.0 / Math.PI;
+      }
+
+   }
+
+   public static class ValkyrieHeadingUpdater extends Thread
+   {
+      private final double EPSILON = 0.05;
+      YoVariableHolder registry;
+      double minHeadingDot, maxHeadingDot, minVeclocity, maxVelocity, currentHeadingDot, currentVelocityX;
+      boolean signFlip;
+
+      public ValkyrieHeadingUpdater(YoVariableHolder holder, double minHeadingDot, double maxHeadingDot, double minVelocity, double maxVelocity,
+            boolean signFlip)
       {
          registry = holder;
+         this.minHeadingDot = minHeadingDot;
+         this.maxHeadingDot = maxHeadingDot;
+         this.minVeclocity = minVelocity;
+         this.maxVelocity = maxVelocity;
+         if (signFlip)
+         {
+            this.minHeadingDot = -1 * maxHeadingDot;
+            this.maxHeadingDot = -1 * minHeadingDot;
+         }
+         this.currentHeadingDot = 0.0;
+         this.currentVelocityX = 0.0;
+         this.signFlip = signFlip;
       }
 
       public void run()
       {
          while (true)
          {
-            DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");         
-            BooleanYoVariable joystickControlsVelocityX = (BooleanYoVariable) registry.getVariable("joystickControlsVelocityX");
-            DoubleYoVariable treadmillVelocity = (DoubleYoVariable) registry.getVariable("treadmillVelocity");
-            if (joystickControlsVelocityX == null || treadmillVelocity == null || desiredVelocityX == null){
+            final DoubleYoVariable headingDotConstant = (DoubleYoVariable) registry.getVariable("headingDotConstant");
+            final DoubleYoVariable velocityXConstant = (DoubleYoVariable) registry.getVariable("velocityXConstant");
+            BooleanYoVariable multisenseControlsSpeedAndHeading = (BooleanYoVariable) registry.getVariable("isMultisenseControllingSpeedAndHeading");
+
+            DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
+            DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
+
+            DoubleYoVariable multisenseHeading = (DoubleYoVariable) registry.getVariable("multisenseHeading");
+            DoubleYoVariable multisenseMagnitude = (DoubleYoVariable) registry.getVariable("multisenseMagnitude");
+
+            if (multisenseControlsSpeedAndHeading == null || desiredHeadingDot == null || desiredVelocityX == null || multisenseHeading == null
+                  || multisenseMagnitude == null)
+            {
                continue;
             }
-            //Set our variable according to current velocity
-            treadmillVelocity.set(ValkyrieTreadmill.getCurrentVelocity());
-            //Update the desired velocity on val only if we disable joystick input
-            if (!joystickControlsVelocityX.getBooleanValue())
-               desiredVelocityX.set(ValkyrieTreadmill.getCurrentVelocity());
+
+            if (multisenseControlsSpeedAndHeading.getBooleanValue())
+            {
+               if (Math.abs(multisenseHeading.getDoubleValue()) > EPSILON)
+               {
+                  currentHeadingDot = multisenseHeading.getDoubleValue() * headingDotConstant.getDoubleValue();
+
+                  if (currentHeadingDot < minHeadingDot)
+                     currentHeadingDot = minHeadingDot;
+                  if (currentHeadingDot > maxHeadingDot)
+                     currentHeadingDot = maxHeadingDot;
+               }
+               else
+               {
+                  currentHeadingDot = 0.0;
+               }
+
+               double newVelocity = multisenseMagnitude.getDoubleValue() * velocityXConstant.getDoubleValue();
+               //--(!) stop at half a meter from centroid of obj
+               if (multisenseMagnitude.getValueAsDouble() > 0.5)
+               {
+                  //-- This precaution may not be crucial, but
+                  //-- ramp up velocity for large jumps
+                  double deltaVelocity = newVelocity - currentVelocityX;
+                  if (Math.abs(deltaVelocity) > .1)
+                     currentVelocityX += deltaVelocity / Math.abs(deltaVelocity) * 0.05;
+                  else
+                     currentVelocityX = newVelocity;
+
+                  if (currentVelocityX < minVeclocity)
+                     currentVelocityX = minVeclocity;
+                  if (currentVelocityX > maxVelocity)
+                     currentVelocityX = maxVelocity;
+               }
+               else
+               {
+                  currentVelocityX = 0.0;
+               }
+
+               desiredHeadingDot.set(currentHeadingDot);
+               desiredVelocityX.set(currentVelocityX);
+            }
+
             try
             {
-               Thread.sleep(1000);
+               Thread.sleep(100); // 10Hz
             }
             catch (InterruptedException e)
             {
@@ -502,5 +635,7 @@ public class ValkyrieSliderBoard
             }
          }
       }
+
    }
+
 }
