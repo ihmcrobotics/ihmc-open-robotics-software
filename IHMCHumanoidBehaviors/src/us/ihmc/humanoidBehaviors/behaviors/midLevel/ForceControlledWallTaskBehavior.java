@@ -116,8 +116,8 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		straightTrajectoryTime = new DoubleYoVariable("straightTrajectoryTime", registry);
 		circleTrajectorytime = new DoubleYoVariable("circularTrajectoryTime", registry);
 		//WARNING: INCREASE IF POSITION CONTROLLED IS APPLIED
-		//circleTrajectorytime.set(1.0);
 		circleTrajectorytime.set(1.0);
+		PrintTools.warn(this, "Circular trajectory time set to " + circleTrajectorytime.getDoubleValue() + "s");
 		
 		distanceToGoal = new DoubleYoVariable(getName()+ "distanceToGoal", registry);
 		straightLineControlCmd = new HandPosePacket(robotSide, Frame.WORLD, null, null, 1.0);
@@ -126,9 +126,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		rotationAxis = new FrameVector();
 
 		executionRotationMatrix = new Matrix3d();
-		
 		dropRotationMatrix = new Matrix3d();
-		
 		
 		startPosition = new FramePoint(chestFrame);
 		startCutPosition = new FramePoint(chestFrame);
@@ -434,4 +432,3 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		return false;
 	}
 }
-
