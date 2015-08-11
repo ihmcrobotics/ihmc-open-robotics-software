@@ -254,7 +254,7 @@ public class ManipulationControlModule
          {
         	 Vector3d forceConstraintVector = handPoseProvider.getForceConstraint(robotSide);
         	 double desiredTangentialForce = handPoseProvider.getTangentialForce(robotSide);
-        	 handControlModules.get(robotSide).moveInCircleUsingForceControl(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngleRightHandRule, controlHandAngleAboutAxis,
+        	 handControlModules.get(robotSide).moveInCircleForceControl(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngleRightHandRule, controlHandAngleAboutAxis,
         			 graspOffsetFromControlFrame, trajectoryTime, forceConstraintVector, desiredTangentialForce);
          }
          else
