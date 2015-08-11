@@ -6,8 +6,8 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.communication.net.ObjectConsumer;
-import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
+import us.ihmc.realtime.concurrent.ConcurrentRingBuffer;
 import us.ihmc.robotDataCommunication.VariableChangedMessage;
 import us.ihmc.robotDataCommunication.YoVariableHandShakeBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;

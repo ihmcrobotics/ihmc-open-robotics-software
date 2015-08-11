@@ -36,7 +36,7 @@ public class RegistryBuffer
       buffer.put(data, 0, variables.length);
    }
    
-   public static class Builder implements us.ihmc.concurrent.Builder<RegistryBuffer>
+   public static class Builder implements us.ihmc.realtime.concurrent.Builder<RegistryBuffer>
    {
       private final int variableOffset;
       private final List<YoVariable<?>> variables;

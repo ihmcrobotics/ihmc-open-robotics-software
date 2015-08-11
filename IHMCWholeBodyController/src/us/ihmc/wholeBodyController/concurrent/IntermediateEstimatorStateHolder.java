@@ -127,7 +127,7 @@ public class IntermediateEstimatorStateHolder
       }
    }
 
-   public static class Builder implements us.ihmc.concurrent.Builder<IntermediateEstimatorStateHolder>
+   public static class Builder implements us.ihmc.realtime.concurrent.Builder<IntermediateEstimatorStateHolder>
    {
 
       private final WholeBodyControllerParameters robotModel;

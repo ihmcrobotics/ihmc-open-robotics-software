@@ -11,7 +11,16 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.humanoidRobotics.model.RobotMotionStatusHolder;
+import us.ihmc.realtime.concurrent.ConcurrentRingBuffer;
+import us.ihmc.realtime.util.PeriodicThreadScheduler;
+import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
@@ -20,15 +29,6 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
-import us.ihmc.util.PeriodicThreadScheduler;
-import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.humanoidRobotics.model.RobotMotionStatusHolder;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RotationFunctions;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 // fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 
@@ -206,7 +206,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       robotConfigurationDataRingBuffer.commit();
    }
 
-   public static class RobotConfigurationDataBuilder implements us.ihmc.concurrent.Builder<RobotConfigurationData>
+   public static class RobotConfigurationDataBuilder implements us.ihmc.realtime.concurrent.Builder<RobotConfigurationData>
    {
       private final OneDoFJoint[] joints;
       private final ForceSensorDefinition[] forceSensorDefinitions;

@@ -32,12 +32,12 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.robotController.DRCSimGazeboThreadedRobotController;
+import us.ihmc.realtime.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
