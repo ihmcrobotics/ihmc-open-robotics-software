@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-//import javax.media.j3d.BranchGroup;
-
 public class GeometryTools
 {
+   public static final boolean DEBUG = false;
+   
    private static double EPSILON = 1e-6;
 
    /**
@@ -2092,5 +2092,160 @@ public class GeometryTools
       {
          return new Point2d[] {lonePoint, (lonePoint.distance(edgePoint1) < lonePoint.distance(edgePoint2)) ? edgePoint1 : edgePoint2};
       }
+   }
+   
+   /**
+    * from http://softsurfer.com/Archive/algorithm_0111/algorithm_0111.htm#Pseudo-Code:%20Clip%20Segment-Polygon
+    * Input: a 2D segment S from point P0 to point P1
+    * a 2D convex polygon W with n vertices V0,...,Vn-1,Vn=V0
+    */
+   public static boolean doesSegmentIntersectConvexPolygon2D(Point2d P0, Point2d P1, ConvexPolygon2d convexPolygon2d)
+   {
+      // if segment is a single point
+      if (P0.equals(P1))
+      {
+         return convexPolygon2d.isPointInside(P0);
+      }
+
+      // if either point is inside polygon
+      if (convexPolygon2d.isPointInside(P0, .0001) || convexPolygon2d.isPointInside(P1, .0001))
+         return true;
+
+      // if either point touches the polygon
+      if (convexPolygon2d.pointIsOnPerimeter(P0) || convexPolygon2d.pointIsOnPerimeter(P1))
+         return true;
+
+      return doesSegmentPassCompletelyThroughPolygon(P0, P1, convexPolygon2d);
+   }
+
+   private static boolean doesSegmentPassCompletelyThroughPolygon(Point2d P0, Point2d P1, ConvexPolygon2d convexPolygon2d)
+   {
+      // Initialize:
+      double tE = 0.0;    // for the maximum entering segment parameter;
+      double tL = 1.0;    // for the minimum leaving segment parameter;
+
+      // segment direction vector
+      Vector2d dS = new Vector2d(P1);
+      dS.sub(P0);
+
+      if (DEBUG)
+      {
+         System.out.println("dS = " + dS);
+      }
+
+      int numberOfVertices = convexPolygon2d.getNumberOfVertices();
+      if (DEBUG)
+      {
+         System.out.println("ccwPoints = ");
+
+         for (int i = 0; i < numberOfVertices; i++)
+         {
+            System.out.println(convexPolygon2d.getVertexCCW(i));
+         }
+      }
+
+      for (int i = 0; i < numberOfVertices; i++)
+      {
+         // edge vertices
+         Point2d V0 = new Point2d(convexPolygon2d.getVertexCCW(i));
+         if (DEBUG)
+         {
+            System.out.println("V0 = " + V0);
+         }
+
+         Point2d V1 = new Point2d(convexPolygon2d.getNextVertexCCW(i));
+         if (DEBUG)
+         {
+            System.out.println("V1 = " + V1);
+         }
+
+         // edge vector
+         Vector2d V0toV1 = new Vector2d(V1);
+         V0toV1.sub(V0);
+
+         if (DEBUG)
+         {
+            System.out.println("V0toV1 = " + V0toV1);
+         }
+
+         // outward normal of the edge
+         Vector2d ni = new Vector2d(V0toV1.y, -V0toV1.x);
+         if (DEBUG)
+         {
+            System.out.println("ni = " + ni);
+         }
+
+         Vector2d P0toVi = new Vector2d(P0);
+         P0toVi.sub(V0);
+
+         if (DEBUG)
+         {
+            System.out.println("P0toVi = " + P0toVi);
+         }
+
+         double N = -P0toVi.dot(ni);
+         if (DEBUG)
+         {
+            System.out.println("N = " + N);
+         }
+
+         double D = dS.dot(ni);
+         if (DEBUG)
+         {
+            System.out.println("D = " + D);
+         }
+
+         if (D == 0)
+         {
+            // S is parallel to the edge ei
+
+            if (N < 0)
+            {
+               // then P0 is outside the edge ei
+               return false;    // since S cannot intersect W;
+            }
+            else
+            {
+               // S cannot enter or leave W across edge ei
+               // ignore edge ei and process the next edge
+               continue;
+            }
+         }
+
+         double t = N / D;
+         if (DEBUG)
+         {
+            System.out.println("t = " + t);
+         }
+
+         if (D < 0)
+         {
+            // then segment S is entering W across edge ei
+            tE = Math.max(tE, t);
+
+            if (tE > tL)
+            {
+               // then segment S enters W after leaving
+               return false;    // since S cannot intersect W
+            }
+         }
+         else if (D > 0)
+         {
+            // then segment S is leaving W across edge ei
+            tL = Math.min(tL, t);
+
+            if (tL < tE)
+            {
+               // then segment S leaves W before entering
+               return false;    // since S cannot intersect W
+            }
+         }
+      }
+
+      // Output: [Note: to get here, one must have tE <= tL]
+      // there is a valid intersection of S with W
+      // from the entering point: P(tE) = P0 + tE * dS
+      // to the leaving point:    P(tL) = P0 + tL * dS
+      return true;
    }
 }
