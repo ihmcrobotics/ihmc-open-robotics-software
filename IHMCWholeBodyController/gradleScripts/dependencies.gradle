@@ -13,4 +13,5 @@ dependencies {
 	compile project(':SensorProcessing')
 	compile project(':SimulationConstructionSet')
 	compile project(':IHMCJavaToolkit')
+	compile project(':IHMCRoboticsToolkit')
 }

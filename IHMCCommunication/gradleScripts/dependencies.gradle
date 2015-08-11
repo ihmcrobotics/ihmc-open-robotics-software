@@ -12,4 +12,5 @@ dependencies {
 	compile project(':IHMCUtilities')
 	compile project(':IHMCHumanoidRobotics')
 	compile project(':IHMCJavaToolkit')
+	compile project(':IHMCRoboticsToolkit')
 }

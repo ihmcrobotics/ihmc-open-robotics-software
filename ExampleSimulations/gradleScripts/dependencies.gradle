@@ -8,4 +8,5 @@ dependencies {
 	compile project(':SimulationConstructionSet')
 	compile project(':Graphics3DAdapter')
 	compile project(':SensorProcessing')
+	compile project(':IHMCRoboticsToolkit')
 }

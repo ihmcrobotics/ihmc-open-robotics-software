@@ -26,7 +26,8 @@ dependencies {
     compile project(':IHMCCommunication')
     compile project(':ConvexOptimizationAdapter');
     compile project(':IHMCRealtime')
+    compile project(':IHMCRoboticsToolkit')
+    compile project(':IHMCJavaToolkit')
 
     testCompile project(':IHMCUtilities').sourceSets.test.output
-    compile project(':IHMCJavaToolkit')
 }

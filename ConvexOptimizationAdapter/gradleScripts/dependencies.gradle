@@ -9,6 +9,7 @@ dependencies {
         compile group: 'colt', name: 'colt', version: '1.2.0'
 	
 	compile project(':IHMCUtilities')
+	compile project(':IHMCRoboticsToolkit')
 	compile group: 'com.github.vincentfk', name:'joptimizer', version:'3.3.0'
 	compile 'org.apache.commons:commons-math3:3.4'
 }
