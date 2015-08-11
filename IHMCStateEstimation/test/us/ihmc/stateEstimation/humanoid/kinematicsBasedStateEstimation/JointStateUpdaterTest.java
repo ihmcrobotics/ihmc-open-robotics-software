@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
+package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
