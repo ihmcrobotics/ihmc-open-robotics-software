@@ -1,4 +1,4 @@
-package us.ihmc.graphics3DAdapter;
+package us.ihmc.graphics3DAdapter.graphics;
 
 import static org.junit.Assert.assertEquals;
 

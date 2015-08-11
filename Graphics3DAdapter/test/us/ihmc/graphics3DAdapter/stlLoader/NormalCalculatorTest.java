@@ -15,7 +15,7 @@
  *    
  *    Written by Jesper Smith with assistance from IHMC team members
  */
-package us.ihmc.graphics3DAdapter.jme.loaders;
+package us.ihmc.graphics3DAdapter.stlLoader;
 
 import static org.junit.Assert.assertTrue;
 
