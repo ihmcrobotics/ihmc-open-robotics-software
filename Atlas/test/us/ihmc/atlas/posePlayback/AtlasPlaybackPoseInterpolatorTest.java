@@ -13,14 +13,14 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPoseInterpolatorTest;
+import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPoseInterpolatorDRCTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 
 @BambooPlan(planType = {BambooPlanType.UI})
-public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorTest
+public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorDRCTest
 {
 
    @Override
