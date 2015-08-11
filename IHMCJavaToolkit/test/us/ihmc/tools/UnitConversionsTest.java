@@ -1,4 +1,4 @@
-package us.ihmc.robotics.units;
+package us.ihmc.tools;
 
 import org.junit.Test;
 import us.ihmc.tools.UnitConversions;
