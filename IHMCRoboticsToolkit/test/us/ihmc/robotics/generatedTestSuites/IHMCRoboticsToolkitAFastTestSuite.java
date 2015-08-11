@@ -55,7 +55,7 @@ import org.junit.runners.Suite;
    us.ihmc.robotics.geometry.shapes.Ellipsoid3dTest.class,
    us.ihmc.robotics.geometry.shapes.FrameBox3dTest.class,
    us.ihmc.robotics.geometry.shapes.FramePlane3dTest.class,
-   us.ihmc.robotics.geometry.shapes.LeastSquaresZPlaneFitterTest.class,
+   us.ihmc.robotics.geometry.LeastSquaresZPlaneFitterTest.class,
    us.ihmc.robotics.geometry.shapes.Plane3dTest.class,
    us.ihmc.robotics.geometry.shapes.QuickHull3DTest.class,
    us.ihmc.robotics.geometry.shapes.Ramp3dTest.class,
