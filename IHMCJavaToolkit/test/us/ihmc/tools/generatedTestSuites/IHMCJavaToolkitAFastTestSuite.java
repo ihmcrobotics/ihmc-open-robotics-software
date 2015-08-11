@@ -15,7 +15,8 @@ import org.junit.runners.Suite;
    us.ihmc.tools.random.RandomToolsTest.class,
    us.ihmc.tools.test.JUnitToolsTest.class,
    us.ihmc.tools.thread.ThreadToolsTest.class,
-   us.ihmc.tools.time.TimeToolsTest.class
+   us.ihmc.tools.time.TimeToolsTest.class,
+   us.ihmc.tools.UnitConversionsTest.class
 })
 
 public class IHMCJavaToolkitAFastTestSuite
