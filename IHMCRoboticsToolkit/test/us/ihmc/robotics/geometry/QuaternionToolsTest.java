@@ -1,6 +1,4 @@
-package us.ihmc.kalman.imu;
-
-import static org.junit.Assert.assertEquals;
+package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
@@ -9,10 +7,9 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import Jama.Matrix;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.robotics.geometry.QuaternionTools;
-import Jama.Matrix;
 
 public class QuaternionToolsTest
 {
@@ -120,72 +117,6 @@ public class QuaternionToolsTest
          }
       }
    }
-
-   @Ignore
-   @QuarantinedTest("Pretty old and uses Roll Pitch Yaw which is always flaky.")
-   @EstimatedDuration
-   @Test(timeout = 300000)
-   public void testBackAndForthTwo()
-   {
-      Random random = new Random(1776L);
-      int numberOfTests = 100000;
-
-      for (int i = 0; i < numberOfTests; i++)
-      {
-         double q0 = nextDouble(random, 0.0, 1.0);
-         double q1 = nextDouble(random, -1.0, 1.0);
-         double q2 = nextDouble(random, -1.0, 1.0);
-         double q3 = nextDouble(random, -1.0, 1.0);
-
-         double[][] quaternionArray = new double[][]
-         {
-            {q0}, {q1}, {q2}, {q3}
-         };
-         Matrix quaternion = new Matrix(quaternionArray);
-         FullIMUKalmanFilter.normalize(quaternion);
-
-         Matrix euler = new Matrix(3, 1);
-         Matrix quaternionBack = new Matrix(4, 1);
-
-         QuaternionTools.quaternionsToRollPitchYaw(quaternion, euler);
-         QuaternionTools.rollPitchYawToQuaternions(euler, quaternionBack);
-
-         boolean passed = true;
-         for (int j = 0; j < 4; j++)
-         {
-            // Quaternion is equivalent to negative quaternion (its reflexion)
-            if (quaternion.get(0, 0) * quaternionBack.get(0, 0) < 0.0)
-            {
-               quaternionBack = quaternionBack.times(-1.0);
-            }
-
-            double difference = quaternionBack.get(j, 0) - quaternion.get(j, 0);
-
-            passed = passed && (Math.abs(difference) < 1e-7);
-         }
-
-         if (!passed)
-         {
-            System.out.println("testBackAndForthTwo() Failed!!!\nquaternion:");
-            quaternion.print(10, 10);
-
-            System.out.println("euler:");
-            euler.print(10, 10);
-
-            System.out.println("quaternionBack:");
-            quaternionBack.print(10, 10);
-
-            throw new RuntimeException("testBackAndForthTwo() failed!");
-         }
-
-
-         for (int j = 0; j < 4; j++)
-         {
-            assertEquals(quaternion.get(j, 0), quaternionBack.get(j, 0), 1e-7);
-         }
-      }
-   }
-
 
    private double nextDouble(Random random, double min, double max)
    {
