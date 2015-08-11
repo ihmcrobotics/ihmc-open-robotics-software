@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.packets;
+package us.ihmc.darpaRoboticsChallenge.endToEndPacketTests;
 
 import static org.junit.Assert.assertEquals;
 
@@ -28,7 +28,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-public abstract class ArmJointTrajectoryPacketTest implements MultiRobotTestInterface
+public abstract class ArmJointTrajectoryPacketEndToEndTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private DRCSimulationTestHelper drcSimulationTestHelper;

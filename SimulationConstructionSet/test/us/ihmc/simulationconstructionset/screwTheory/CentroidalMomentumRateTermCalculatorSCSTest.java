@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController;
+package us.ihmc.simulationconstructionset.screwTheory;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -27,7 +27,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.tools.test.JUnitTools;
 
-public class CentroidalMomentumRateTermCalculatorTest
+public class CentroidalMomentumRateTermCalculatorSCSTest
 {
    private static final double EPSILON = 1.0e-5;
 
@@ -44,8 +44,6 @@ public class CentroidalMomentumRateTermCalculatorTest
 
    private final DenseMatrix64F aDotVNumerical = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
-
-//   @Ignore
 
 	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 30000)
@@ -67,8 +65,6 @@ public class CentroidalMomentumRateTermCalculatorTest
       assertAAndADotV(random, joints, elevator, robot,numberOfJoints);
    }
 
-//   @Ignore
-
 	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 30000)
    public void treeTest() throws UnreasonableAccelerationException
@@ -88,8 +84,6 @@ public class CentroidalMomentumRateTermCalculatorTest
 
       assertAAndADotV(random, joints, elevator, robot, numberOfJoints);
    }
-
-//   @Ignore
 
 	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 30000)
@@ -171,7 +165,6 @@ public class CentroidalMomentumRateTermCalculatorTest
 
          JUnitTools.assertMatrixEquals(aDotVNumerical, aDotVAnalytical, EPSILON);
          JUnitTools.assertMatrixEquals(a,aTermCalculator,EPSILON);
-         
       }
    }
 
@@ -186,7 +179,6 @@ public class CentroidalMomentumRateTermCalculatorTest
             printOutADotV();
             break;
          }
-         
    }
 
    private void printOutADotV()
