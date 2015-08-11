@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.controllerResponse;
+package us.ihmc.darpaRoboticsChallenge.endToEndPacketTests;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,7 +32,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertTrue;
 
-public abstract class HandPoseStatusTest implements MultiRobotTestInterface
+public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    

@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.simulationComparison;
+package us.ihmc.simulationconstructionset.util.simulationTesting;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -156,7 +156,6 @@ public class AllYoVariablesSimulationComparerTest
 		assertEquals(1, differences.size());
 		assertEquals(doubleYoVariable2, differences.get(0)[0]);
 		assertEquals(doubleYoVariable4, differences.get(0)[1]);
-		
 	}
 
 	@EstimatedDuration(duration = 0.4)
@@ -216,8 +215,5 @@ public class AllYoVariablesSimulationComparerTest
 		doubleYoVariable3.set(9);
 		doubleYoVariable4.set(92.02);
 		assertFalse(comparerWithLargeEpsilon.compare(scs1, scs2));
-		
 	}
-	
-
 }

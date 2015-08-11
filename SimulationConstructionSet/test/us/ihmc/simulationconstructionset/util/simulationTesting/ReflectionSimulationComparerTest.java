@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.simulationComparison;
+package us.ihmc.simulationconstructionset.util.simulationTesting;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
