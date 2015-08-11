@@ -4,7 +4,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.concurrent.Builder;
+import us.ihmc.realtime.concurrent.Builder;
 
 public class MicroStrainData
 {
