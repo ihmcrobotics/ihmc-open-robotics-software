@@ -5,6 +5,8 @@ import java.util.logging.Level;
 
 import javax.xml.bind.JAXBException;
 
+import com.martiansoftware.jsap.JSAPException;
+
 import us.ihmc.acsell.CostOfTransportCalculator;
 import us.ihmc.acsell.hardware.AcsellAffinity;
 import us.ihmc.acsell.hardware.AcsellSetup;
@@ -29,14 +31,14 @@ import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterfa
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.realtime.PriorityParameters;
-import us.ihmc.robotDataCommunication.YoVariableServer;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.util.PeriodicRealtimeThreadScheduler;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
-import us.ihmc.utilities.io.logging.LogTools;
+import us.ihmc.realtime.PriorityParameters;
+import us.ihmc.realtime.util.PeriodicRealtimeThreadScheduler;
+import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.utilities.io.logging.LogTools;
 import us.ihmc.wanderer.hardware.output.WandererOutputWriter;
 import us.ihmc.wanderer.hardware.sensorReader.WandererSensorReaderFactory;
 import us.ihmc.wanderer.parameters.WandererRobotModel;
@@ -47,8 +49,6 @@ import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotControll
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerFactory;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
-
-import com.martiansoftware.jsap.JSAPException;
 
 public class WandererControllerFactory
 {
