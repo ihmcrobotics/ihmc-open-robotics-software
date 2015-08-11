@@ -24,10 +24,11 @@ dependencies {
     compile project(':Graphics3DAdapter')
     compile project(':SimulationConstructionSet')
     compile project(':IHMCCommunication')
-    compile project(':ConvexOptimizationAdapter');
+    compile project(':ConvexOptimizationAdapter')
     compile project(':IHMCRealtime')
     compile project(':IHMCRoboticsToolkit')
     compile project(':IHMCJavaToolkit')
 
     testCompile project(':IHMCUtilities').sourceSets.test.output
+    testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
 }
