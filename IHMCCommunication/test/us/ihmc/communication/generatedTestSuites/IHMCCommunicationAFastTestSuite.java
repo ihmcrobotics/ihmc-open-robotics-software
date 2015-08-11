@@ -10,7 +10,7 @@ import org.junit.runners.Suite;
    us.ihmc.communication.kryo.KryoAnnotationTest.class,
    us.ihmc.communication.net.KryoStreamSerializerTest.class,
    us.ihmc.communication.net.local.InterprocessObjectCommunicatorTest.class,
-   us.ihmc.communication.packets.dataobjects.CapturabilityBasedStatusTest.class,
+   us.ihmc.communication.packets.walking.CapturabilityBasedStatusTest.class,
    us.ihmc.communication.packets.wholebody.JointAnglesPacketTest.class,
    us.ihmc.communication.streamingData.PersistentTCPClientTest.class,
    us.ihmc.communication.streamingData.PersistentTCPServerTest.class,
