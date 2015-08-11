@@ -9,9 +9,9 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.MeasurementModelElement;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.sensorProcessing.stateEstimation.measurementModelElements.MeasurementModelElement;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;

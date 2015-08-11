@@ -1,4 +1,4 @@
-package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
+package us.ihmc.sensorProcessing.stateEstimation.measurementModelElements;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

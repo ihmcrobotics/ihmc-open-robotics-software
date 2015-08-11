@@ -9,8 +9,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.MeasurementModelElement;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.sensorProcessing.stateEstimation.measurementModelElements.MeasurementModelElement;
 
 public class MeasurementModel
 {
