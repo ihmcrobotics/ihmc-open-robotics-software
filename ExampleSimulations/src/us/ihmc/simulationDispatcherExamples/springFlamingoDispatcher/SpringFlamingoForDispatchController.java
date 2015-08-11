@@ -4,7 +4,7 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public class SpringFlamingoController implements RobotController
+public class SpringFlamingoForDispatchController implements RobotController
 {
    // private SpringFlamingoRobot rob;
 
@@ -78,7 +78,7 @@ public class SpringFlamingoController implements RobotController
 
    private final int SUPPORT = 0, TOE_OFF = 1, SWING = 2, STRAIGHTEN = 3;
 
-   public SpringFlamingoController(SpringFlamingoRobot rob)
+   public SpringFlamingoForDispatchController(SpringFlamingoForDispatchRobot rob)
    {
       // this.rob = rob;
       initControl(rob);
@@ -89,7 +89,7 @@ public class SpringFlamingoController implements RobotController
       return this.controlVars;
    }
 
-   private void initControl(SpringFlamingoRobot rob)
+   private void initControl(SpringFlamingoForDispatchRobot rob)
    {
       // Get the variables that are stored with the robot:
 

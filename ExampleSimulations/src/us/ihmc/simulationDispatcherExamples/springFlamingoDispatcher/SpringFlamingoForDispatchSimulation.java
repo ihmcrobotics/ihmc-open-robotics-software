@@ -4,14 +4,14 @@ import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
-public class SpringFlamingoSimulation
+public class SpringFlamingoForDispatchSimulation
 {
    private SimulationConstructionSet sim;
    public static final double DT = 0.0004;
 
-   public SpringFlamingoSimulation()
+   public SpringFlamingoForDispatchSimulation()
    {
-      SpringFlamingoSimulationConstructor springFlamingoSimulationConstructor = new SpringFlamingoSimulationConstructor(4096, null);
+      SpringFlamingoForDispatchSimulationConstructor springFlamingoSimulationConstructor = new SpringFlamingoForDispatchSimulationConstructor(4096, null);
       Simulation springFlamingoSim = springFlamingoSimulationConstructor.constructSimulation(null, null);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
@@ -46,6 +46,6 @@ public class SpringFlamingoSimulation
 
    public static void main(String[] args)
    {
-      SpringFlamingoSimulation sim = new SpringFlamingoSimulation();
+      SpringFlamingoForDispatchSimulation sim = new SpringFlamingoForDispatchSimulation();
    }
 }
