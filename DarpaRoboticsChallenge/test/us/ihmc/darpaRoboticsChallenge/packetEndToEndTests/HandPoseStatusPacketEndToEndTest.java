@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.endToEndPacketTests;
+package us.ihmc.darpaRoboticsChallenge.packetEndToEndTests;
 
 import org.junit.After;
 import org.junit.Before;

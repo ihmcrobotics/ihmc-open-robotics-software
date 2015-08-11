@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
+package us.ihmc.darpaRoboticsChallenge.stateEstimationEndToEndTests;
 
 import static org.junit.Assert.assertTrue;
 
@@ -33,6 +33,16 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.util.OscillateFeetPerturber;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.humanoidRobotics.partNames.ArmJointName;
+import us.ihmc.humanoidRobotics.partNames.LegJointName;
+import us.ihmc.humanoidRobotics.partNames.SpineJointName;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.TransformTools;
+import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -47,20 +57,10 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
-import us.ihmc.humanoidRobotics.partNames.SpineJointName;
-import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
-import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.time.TimeTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -70,7 +70,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
-public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestInterface
+public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 

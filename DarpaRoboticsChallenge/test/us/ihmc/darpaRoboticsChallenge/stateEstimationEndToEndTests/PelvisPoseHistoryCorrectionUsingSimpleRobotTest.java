@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
+package us.ihmc.darpaRoboticsChallenge.stateEstimationEndToEndTests;
 
 import static org.junit.Assert.assertTrue;
 
