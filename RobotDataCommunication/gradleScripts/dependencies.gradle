@@ -23,4 +23,5 @@ dependencies {
 	compile project(':UserInterface')
 	compile project(':IHMCCommunication')
 	compile project(':IHMCJavaToolkit')
+	compile project(':IHMCRoboticsToolkit')
 }

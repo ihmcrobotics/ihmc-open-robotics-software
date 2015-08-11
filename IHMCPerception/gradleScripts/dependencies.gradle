@@ -29,4 +29,5 @@ dependencies {
     compile project(':UserInterface')
     compile project(':SDFLoader')
     compile project(':IHMCJavaToolkit')
+    compile project(':IHMCRoboticsToolkit')
 }

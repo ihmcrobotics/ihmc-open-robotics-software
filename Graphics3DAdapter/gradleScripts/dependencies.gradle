@@ -30,5 +30,6 @@ dependencies {
 	
 	compile project(':IHMCUtilities')
 	compile project(':IHMCJavaToolkit')
+	compile project(':IHMCRoboticsToolkit')
 	testCompile project(':IHMCUtilities').sourceSets.test.output
 }

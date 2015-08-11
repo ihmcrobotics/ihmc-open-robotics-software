@@ -6,4 +6,5 @@ dependencies {
 	//testCompile project(':IHMCUtilities').sourceSets.test.output
 	compile project(':IHMCYoUtilities')
 	compile project(':Graphics3DAdapter')
+	compile project(':IHMCRoboticsToolkit')
 }

@@ -59,4 +59,5 @@ dependencies {
 	compile project(':PathGeneration')
 	testCompile project(':PathGeneration').sourceSets.test.output
     compile project(':IHMCJavaToolkit')
+    compile project(':IHMCRoboticsToolkit')
   }

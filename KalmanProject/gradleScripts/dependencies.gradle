@@ -12,6 +12,7 @@ dependencies {
     compile project(':Graphics3DAdapter')
     compile project(':SimulationConstructionSet')
     compile project(':IHMCUtilities')
+    compile project(':IHMCRoboticsToolkit')
   
     
 }
