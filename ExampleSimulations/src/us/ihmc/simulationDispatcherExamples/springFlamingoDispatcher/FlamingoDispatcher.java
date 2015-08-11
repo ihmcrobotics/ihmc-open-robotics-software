@@ -44,7 +44,7 @@ public class FlamingoDispatcher
       M2SimulationConstructor m2SimulationConstructor1 = new M2SimulationConstructor();
 
       // Create Flamingo Simulation
-      SpringFlamingoSimulationConstructor flamingoSimulationConstructor1 = new SpringFlamingoSimulationConstructor();
+      SpringFlamingoForDispatchSimulationConstructor flamingoSimulationConstructor1 = new SpringFlamingoForDispatchSimulationConstructor();
       if (!FileTools.checkIfSerializable(flamingoSimulationConstructor1)) 
       {
          System.exit(-1);
@@ -98,7 +98,7 @@ public class FlamingoDispatcher
 
          int j = 0;
 
-         SimulationConstructor flamingoSimulationConstructor = new SpringFlamingoSimulationConstructor();
+         SimulationConstructor flamingoSimulationConstructor = new SpringFlamingoForDispatchSimulationConstructor();
          SimulationConstructor m2SimulationConstructor = new M2SimulationConstructor();
 
          while (true)

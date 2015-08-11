@@ -7,21 +7,21 @@ import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchedSimulationDescription;
 import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
 
-public class TestClient
+public class SpringFlamingoForDispatchTestClient
 {
    private String pwd = "***REMOVED***";
 
-   public TestClient()
+   public SpringFlamingoForDispatchTestClient()
    {
    }
 
 
    public void test()
    {
-      SpringFlamingoRobot flam = new SpringFlamingoRobot();
+      SpringFlamingoForDispatchRobot flam = new SpringFlamingoForDispatchRobot();
       Simulation sim = new Simulation(flam, 2);
 
-      DispatchedSimulationDescription description = new DispatchedSimulationDescription(new SpringFlamingoSimulationConstructor(), new String[] {"t", "v1"},
+      DispatchedSimulationDescription description = new DispatchedSimulationDescription(new SpringFlamingoForDispatchSimulationConstructor(), new String[] {"t", "v1"},
                                                        new String[] {"q_x",
               "q_z"});    // flam));
 
@@ -128,7 +128,7 @@ public class TestClient
 
    public static void main(String[] args)
    {
-      TestClient test = new TestClient();
+      SpringFlamingoForDispatchTestClient test = new SpringFlamingoForDispatchTestClient();
 
       test.test();
 

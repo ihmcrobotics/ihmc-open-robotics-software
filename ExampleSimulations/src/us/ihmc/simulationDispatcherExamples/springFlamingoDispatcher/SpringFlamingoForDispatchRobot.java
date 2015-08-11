@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.robotics.Axis;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public class SpringFlamingoRobot extends Robot    // implements java.io.Serializable
+public class SpringFlamingoForDispatchRobot extends Robot    // implements java.io.Serializable
 {
    private static final double UPPER_LEG_MASS = 0.4598;
    private static final double
@@ -67,7 +67,7 @@ public class SpringFlamingoRobot extends Robot    // implements java.io.Serializ
 
    ArrayList<GroundContactPoint> gcPoints = new ArrayList<GroundContactPoint>(4);
 
-   public SpringFlamingoRobot()
+   public SpringFlamingoForDispatchRobot()
    {
       super("SpringFlamingo");
       this.setGravity(0.0, 0.0, -9.81);

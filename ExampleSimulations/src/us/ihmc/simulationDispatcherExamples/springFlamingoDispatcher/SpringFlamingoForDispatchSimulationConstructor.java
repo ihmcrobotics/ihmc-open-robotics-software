@@ -7,18 +7,18 @@ import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public class SpringFlamingoSimulationConstructor implements SimulationConstructor, SimulationDoneCriterion
+public class SpringFlamingoForDispatchSimulationConstructor implements SimulationConstructor, SimulationDoneCriterion
 {
    private static final long serialVersionUID = 442059836887553232L;
    private DoubleYoVariable t;
    private int dataBufferSize = 2;
    private SimulationDoneCriterion doneCriterion = this;
 
-   public SpringFlamingoSimulationConstructor()
+   public SpringFlamingoForDispatchSimulationConstructor()
    {
    }
 
-   public SpringFlamingoSimulationConstructor(int dataBufferSize, SimulationDoneCriterion criterion)
+   public SpringFlamingoForDispatchSimulationConstructor(int dataBufferSize, SimulationDoneCriterion criterion)
    {
       this.dataBufferSize = dataBufferSize;
       this.doneCriterion = criterion;
@@ -26,8 +26,8 @@ public class SpringFlamingoSimulationConstructor implements SimulationConstructo
 
    public Simulation constructSimulation(String[] structuralParameterNames, double[] structuralParameterValues)
    {
-      SpringFlamingoRobot springFlamingo = new SpringFlamingoRobot();
-      SpringFlamingoController controller = new SpringFlamingoController(springFlamingo);
+      SpringFlamingoForDispatchRobot springFlamingo = new SpringFlamingoForDispatchRobot();
+      SpringFlamingoForDispatchController controller = new SpringFlamingoForDispatchController(springFlamingo);
       springFlamingo.setController(controller);
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
       springFlamingo.setGroundContactModel(new LinearGroundContactModel(springFlamingo, registry));
