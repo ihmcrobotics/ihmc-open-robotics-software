@@ -10,7 +10,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.kalman.YoKalmanFilter;
-import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.MeasurementModelElement;
+import us.ihmc.sensorProcessing.stateEstimation.measurementModelElements.MeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.ProcessModelElement;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 

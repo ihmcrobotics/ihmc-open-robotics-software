@@ -1,4 +1,4 @@
-package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
+package us.ihmc.sensorProcessing.stateEstimation.measurementModelElements;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
