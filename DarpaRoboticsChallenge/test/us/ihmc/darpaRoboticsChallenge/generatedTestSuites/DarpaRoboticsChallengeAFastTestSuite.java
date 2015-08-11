@@ -13,8 +13,8 @@ import org.junit.runners.Suite;
    us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.WheelRotationEstimatorTest.class,
    us.ihmc.darpaRoboticsChallenge.odometry.IcpCloud3DTest.class,
    us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdaterTest.class,
-   us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator.PelvisPoseHistoryCorrectionUsingSimpleRobotTest.class,
-   us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator.PelvisRotationalStateUpdaterTest.class
+   us.ihmc.darpaRoboticsChallenge.stateEstimationEndToEndTests.PelvisPoseHistoryCorrectionUsingSimpleRobotTest.class,
+   us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisRotationalStateUpdaterTest.class
 })
 
 public class DarpaRoboticsChallengeAFastTestSuite

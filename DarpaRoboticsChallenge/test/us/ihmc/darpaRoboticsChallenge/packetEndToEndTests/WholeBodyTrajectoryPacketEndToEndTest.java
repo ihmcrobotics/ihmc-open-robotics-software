@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.endToEndPacketTests;
+package us.ihmc.darpaRoboticsChallenge.packetEndToEndTests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
