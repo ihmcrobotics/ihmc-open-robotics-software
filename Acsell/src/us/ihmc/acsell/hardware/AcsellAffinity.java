@@ -2,8 +2,8 @@ package us.ihmc.acsell.hardware;
 
 import java.util.logging.Logger;
 
-import us.ihmc.realtime.affinity.CPUTopology;
-import us.ihmc.realtime.affinity.Processor;
+import us.ihmc.affinity.CPUTopology;
+import us.ihmc.affinity.Processor;
 
 public class AcsellAffinity
 {
@@ -25,7 +25,7 @@ public class AcsellAffinity
 
       log.config("Pinning control threads to processor 1 & 2.");
       setAffinity = true;
-      us.ihmc.realtime.affinity.Package socket = topology.getPackage(0);
+      us.ihmc.affinity.Package socket = topology.getPackage(0);
       estimatorThreadProcessor = socket.getCore(1).getDefaultProcessor();
       controlThreadProcessor = socket.getCore(2).getDefaultProcessor();
 
