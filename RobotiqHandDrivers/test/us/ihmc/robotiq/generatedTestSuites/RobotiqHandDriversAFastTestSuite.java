@@ -11,8 +11,8 @@ import org.junit.runners.Suite;
    us.ihmc.robotiq.communication.registers.GripperOptionRegisterTest.class,
    us.ihmc.robotiq.communication.registers.GripperStatusRegisterTest.class,
    us.ihmc.robotiq.communication.registers.ObjectDetectionRegisterTest.class,
-   us.ihmc.robotiq.communication.RobotiqReadResponseTest.class,
    us.ihmc.robotiq.communication.registers.RobotiqRegisterTest.class,
+   us.ihmc.robotiq.communication.RobotiqReadResponseTest.class,
    us.ihmc.robotiq.communication.RobotiqWriteRequestFactoryTest.class
 })
 
