@@ -15,8 +15,6 @@ import us.ihmc.acsell.hardware.state.UDPAcsellStateReader;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeMemory;
 import us.ihmc.realtime.RealtimeThread;
-import us.ihmc.realtime.util.PeriodicRealtimeThreadScheduler;
-import us.ihmc.realtime.util.PeriodicThreadScheduler;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
@@ -28,6 +26,8 @@ import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.state.StepprState;
 import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.util.PeriodicRealtimeThreadScheduler;
+import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 
