@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.matrixtest;
+package us.ihmc.simulationconstructionset.mathfunctions;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -10,7 +10,6 @@ import org.junit.Test;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import Jama.Matrix;
-
 
 public class MatrixTest
 {
