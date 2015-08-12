@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.kinematics;
+package us.ihmc.valkyrie.kinematics.util;
 
 //~--- non-JDK imports --------------------------------------------------------
 
