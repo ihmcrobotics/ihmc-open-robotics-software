@@ -5,13 +5,16 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.gazebo.GazeboControllerFactory;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 /**
  *
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
 public class AtlasGazeboControllerFactory
 {
-   public static void main(String[] args)
+   public static void main(String[] args) throws IOException, URISyntaxException
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.GAZEBO, false);
 
@@ -19,6 +22,6 @@ public class AtlasGazeboControllerFactory
 
       contactPointParameters.createHandKnobContactPoints();
 
-      new GazeboControllerFactory(robotModel);
+      new GazeboControllerFactory(robotModel, "/ihmc_ros", "atlas", "NONE");
    }
 }

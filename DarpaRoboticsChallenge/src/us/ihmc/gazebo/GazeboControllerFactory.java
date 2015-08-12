@@ -16,20 +16,20 @@ import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterfa
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.robotController.GazeboThreadedRobotController;
 import us.ihmc.realtime.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 public class GazeboControllerFactory
 {
@@ -39,7 +39,7 @@ public class GazeboControllerFactory
 
    private static final double gravity = -9.81;
 
-   public GazeboControllerFactory(DRCRobotModel robotModel)
+   public GazeboControllerFactory(DRCRobotModel robotModel, String nameSpace, String robotName, String tfPrefix) throws URISyntaxException, IOException
    {
       /*
        * Create registries
@@ -50,15 +50,15 @@ public class GazeboControllerFactory
       /*
        * Create network servers/clients
        */
-      PacketCommunicator drcNetworkProcessorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
+
+      PacketCommunicator controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
             new IHMCCommunicationKryoNetClassList());
-      
 
       //      KryoLocalPacketCommunicator packetCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboPluginController");
       YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler("GazeboYoVariableServer"), robotModel.getLogModelProvider(), robotModel.getLogSettings(),
             robotModel.getEstimatorDT());
 
-      GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
+      GlobalDataProducer dataProducer = new GlobalDataProducer(controllerCommunicator);
 
       /*
        * Create controllers
@@ -100,14 +100,14 @@ public class GazeboControllerFactory
       robotController.addController(estimatorThread, estimatorTicksPerSimulationTick, false);
       robotController.addController(controllerThread, controllerTicksPerSimulationTick, true);
 
-      try
-      {
-         drcNetworkProcessorServer.connect();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
+//      try
+//      {
+//         controllerCommunicator.connect();
+//      }
+//      catch (IOException e)
+//      {
+//         e.printStackTrace();
+//      }
 
       yoVariableServer.start();
 
@@ -118,16 +118,32 @@ public class GazeboControllerFactory
       Thread simulationThread = new Thread(robotController);
       simulationThread.start();
 
-      if (USE_GUI)
-      {
-         DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
-         URI rosURI = NetworkParameters.getROSURI();
-         networkModuleParameters.setRosUri(rosURI);
-         networkModuleParameters.enableUiModule(true);
-         networkModuleParameters.enableRosModule(true);
-         networkModuleParameters.enableLocalControllerCommunicator(true);
-         new DRCNetworkProcessor(robotModel, networkModuleParameters);
-      }
+//      String rosMasterUriEnv = System.getenv("ROS_MASTER_URI");
+//
+//      if(rosMasterUriEnv == null)
+//      {
+//         rosMasterUriEnv = "http://localhost:11311";
+//      }
+//
+//      URI rosMasterURI = new URI(rosMasterUriEnv);
+
+      URI rosMasterURI = NetworkParameters.getROSURI();
+
+//      PacketCommunicator gfe_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
+      SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
+
+      new ThePeoplesGloriousNetworkProcessor(rosMasterURI, controllerCommunicator, null, ppsOffsetProvider, robotModel, nameSpace + "/" + robotName, tfPrefix);
+
+//      if (USE_GUI)
+//      {
+//         DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
+//         URI rosURI = NetworkParameters.getROSURI();
+//         networkModuleParameters.setRosUri(rosURI);
+//         networkModuleParameters.enableUiModule(true);
+//         networkModuleParameters.enableRosModule(true);
+//         networkModuleParameters.enableLocalControllerCommunicator(true);
+//         new DRCNetworkProcessor(robotModel, networkModuleParameters);
+//      }
       try
       {
          simulationThread.join();
