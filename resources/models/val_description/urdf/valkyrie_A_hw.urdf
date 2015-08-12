@@ -2150,5 +2150,1105 @@
       <frame>child</frame>
     </sensor>
   </gazebo>
+  
+    
+  <actuator name="/pelvis/wj1" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/trunk/wj2" type="turbodriver_api/TurbodriverAPI_DRCv4_linear_ihmc"/>
+	<actuator name="/trunk/wj3" type="turbodriver_api/TurbodriverAPI_DRCv4_linear_ihmc"/>
+	<actuator name="/neck/j1" type="turbodriver_api/TurbodriverAPI_DRCv4"/>
+	<actuator name="/neck/j2" type="turbodriver_api/TurbodriverAPI_DRCv4"/>
+	<actuator name="/neck/j3" type="turbodriver_api/TurbodriverAPI_DRCv4"/>
+	<actuator name="/trunk/raj1" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/right_arm/j2" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/right_arm/j3" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/right_arm/j4" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/right_arm/j5" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/right_arm/forearm_driver1/wrist_right" type="forearm_api/WristAPI_DRCv1"/>
+	<actuator name="/right_arm/forearm_driver1/wrist_left" type="forearm_api/WristAPI_DRCv1"/>
+	<actuator name="/right_arm/forearm_driver1/thumb_roll" type="forearm_api/FingerAPI_DRCv1"/>
+	<actuator name="/right_arm/forearm_driver1/thumb_proximal" type="forearm_api/FingerAPI_DRCv1"/>
+	<actuator name="/right_arm/forearm_driver2/thumb_distal" type="forearm_api/FingerAPI_DRCv1"/>
+	<actuator name="/right_arm/forearm_driver2/index" type="forearm_api/FingerAPI_DRCv1"/>
+	<actuator name="/right_arm/forearm_driver2/middle" type="forearm_api/FingerAPI_DRCv1"/>
+	<actuator name="/right_arm/forearm_driver2/pinky" type="forearm_api/FingerAPI_DRCv1"/>
+	<actuator name="/trunk/laj1" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/left_arm/j2" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/left_arm/j3" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/left_arm/j4" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/left_arm/j5" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/left_arm/forearm_driver1/wrist_left" type="forearm_api/WristAPI_DRCv1"/>
+	<actuator name="/left_arm/forearm_driver1/wrist_right" type="forearm_api/WristAPI_DRCv1"/>
+	<actuator name="/left_arm/forearm_driver1/thumb_roll" type="forearm_api/FingerAPI_DRCv1"/>
+	<actuator name="/left_arm/forearm_driver1/thumb_proximal" type="forearm_api/FingerAPI_DRCv1"/>
+	<actuator name="/left_arm/forearm_driver2/thumb_distal" type="forearm_api/FingerAPI_DRCv1"/>
+	<actuator name="/left_arm/forearm_driver2/index" type="forearm_api/FingerAPI_DRCv1"/>
+	<actuator name="/left_arm/forearm_driver2/middle" type="forearm_api/FingerAPI_DRCv1"/>
+	<actuator name="/left_arm/forearm_driver2/pinky" type="forearm_api/FingerAPI_DRCv1"/>
+	<actuator name="/pelvis/rj1" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/right_leg/j2" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/right_leg/j3" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/right_leg/j4" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/right_leg/j5" type="turbodriver_api/TurbodriverAPI_DRCv4_linear_ihmc"/>
+	<actuator name="/right_leg/j6" type="turbodriver_api/TurbodriverAPI_DRCv4_linear_ihmc"/>
+	<actuator name="/pelvis/lj1" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/left_leg/j2" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/left_leg/j3" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/left_leg/j4" type="turbodriver_api/TurbodriverAPI_DRCv4_ihmc"/>
+	<actuator name="/left_leg/j5" type="turbodriver_api/TurbodriverAPI_DRCv4_linear_ihmc"/>
+	<actuator name="/left_leg/j6" type="turbodriver_api/TurbodriverAPI_DRCv4_linear_ihmc"/>
+	
+	<transmission name="TorsoYawTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="TorsoYaw"/>
+            <actuator data="data" name="/pelvis/wj1"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="TorsoYaw"/>
+            <actuator data="positionCommand" name="/pelvis/wj1"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="TorsoYaw"/>
+            <actuator data="velocityCommand" name="/pelvis/wj1"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="TorsoYaw"/>
+            <actuator data="effortCommand" name="/pelvis/wj1"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="TorsoYaw"/>
+            <actuator data="data" name="/pelvis/wj1"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="TorsoYaw"/>
+            <actuator data="positionCommand" name="/pelvis/wj1"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="TorsoYaw"/>
+            <actuator data="velocityCommand" name="/pelvis/wj1"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="TorsoYaw"/>
+            <actuator data="effortCommand" name="/pelvis/wj1"/>
+        </interface>
+    </transmission>
+    <transmission name="Waist" type="loadable_transmissions/ValkyriePushrodTransmission">
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="TorsoPitch"/>
+            <joint data="data" name="TorsoRoll"/>
+            <actuator data="data" name="/trunk/wj2"/>
+            <actuator data="data" name="/trunk/wj3"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="TorsoPitch"/>
+            <joint data="positionCommand" name="TorsoRoll"/>
+            <actuator data="positionCommand" name="/trunk/wj2"/>
+            <actuator data="positionCommand" name="/trunk/wj3"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="TorsoPitch"/>
+            <joint data="velocityCommand" name="TorsoRoll"/>
+            <actuator data="velocityCommand" name="/trunk/wj2"/>
+            <actuator data="velocityCommand" name="/trunk/wj3"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="TorsoPitch"/>
+            <joint data="effortCommand" name="TorsoRoll"/>
+            <actuator data="effortCommand" name="/trunk/wj2"/>
+            <actuator data="effortCommand" name="/trunk/wj3"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="TorsoPitch"/>
+            <joint data="data" name="TorsoRoll"/>
+            <actuator data="data" name="/trunk/wj2"/>
+            <actuator data="data" name="/trunk/wj3"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="TorsoPitch"/>
+            <joint data="positionCommand" name="TorsoRoll"/>
+            <actuator data="positionCommand" name="/trunk/wj2"/>
+            <actuator data="positionCommand" name="/trunk/wj3"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="TorsoPitch"/>
+            <joint data="velocityCommand" name="TorsoRoll"/>
+            <actuator data="velocityCommand" name="/trunk/wj2"/>
+            <actuator data="velocityCommand" name="/trunk/wj3"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="TorsoPitch"/>
+            <joint data="effortCommand" name="TorsoRoll"/>
+            <actuator data="effortCommand" name="/trunk/wj2"/>
+            <actuator data="effortCommand" name="/trunk/wj3"/>
+        </interface>
+        <parameterNamespace name="v1_waist"/>
+        <reflect data="1"/>
+    </transmission>
+    <transmission name="LowerNeckPitchTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="LowerNeckPitch"/>
+            <actuator data="data" name="/neck/j1"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="LowerNeckPitch"/>
+            <actuator data="positionCommand" name="/neck/j1"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="LowerNeckPitch"/>
+            <actuator data="velocityCommand" name="/neck/j1"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="LowerNeckPitch"/>
+            <actuator data="effortCommand" name="/neck/j1"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="LowerNeckPitch"/>
+            <actuator data="data" name="/neck/j1"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="LowerNeckPitch"/>
+            <actuator data="positionCommand" name="/neck/j1"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="LowerNeckPitch"/>
+            <actuator data="velocityCommand" name="/neck/j1"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="LowerNeckPitch"/>
+            <actuator data="effortCommand" name="/neck/j1"/>
+        </interface>
+    </transmission>
+    <transmission name="NeckYawTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="NeckYaw"/>
+            <actuator data="data" name="/neck/j2"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="NeckYaw"/>
+            <actuator data="positionCommand" name="/neck/j2"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="NeckYaw"/>
+            <actuator data="velocityCommand" name="/neck/j2"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="NeckYaw"/>
+            <actuator data="effortCommand" name="/neck/j2"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="NeckYaw"/>
+            <actuator data="data" name="/neck/j2"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="NeckYaw"/>
+            <actuator data="positionCommand" name="/neck/j2"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="NeckYaw"/>
+            <actuator data="velocityCommand" name="/neck/j2"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="NeckYaw"/>
+            <actuator data="effortCommand" name="/neck/j2"/>
+        </interface>
+    </transmission>
+    <transmission name="UpperNeckPitchTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="UpperNeckPitch"/>
+            <actuator data="data" name="/neck/j3"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="UpperNeckPitch"/>
+            <actuator data="positionCommand" name="/neck/j3"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="UpperNeckPitch"/>
+            <actuator data="velocityCommand" name="/neck/j3"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="UpperNeckPitch"/>
+            <actuator data="effortCommand" name="/neck/j3"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="UpperNeckPitch"/>
+            <actuator data="data" name="/neck/j3"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="UpperNeckPitch"/>
+            <actuator data="positionCommand" name="/neck/j3"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="UpperNeckPitch"/>
+            <actuator data="velocityCommand" name="/neck/j3"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="UpperNeckPitch"/>
+            <actuator data="effortCommand" name="/neck/j3"/>
+        </interface>
+    </transmission>
+    <transmission name="RightShoulderPitchTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="RightShoulderPitch"/>
+            <actuator data="data" name="/trunk/raj1"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="RightShoulderPitch"/>
+            <actuator data="positionCommand" name="/trunk/raj1"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="RightShoulderPitch"/>
+            <actuator data="velocityCommand" name="/trunk/raj1"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="RightShoulderPitch"/>
+            <actuator data="effortCommand" name="/trunk/raj1"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="RightShoulderPitch"/>
+            <actuator data="data" name="/trunk/raj1"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="RightShoulderPitch"/>
+            <actuator data="positionCommand" name="/trunk/raj1"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="RightShoulderPitch"/>
+            <actuator data="velocityCommand" name="/trunk/raj1"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="RightShoulderPitch"/>
+            <actuator data="effortCommand" name="/trunk/raj1"/>
+        </interface>
+    </transmission>
+    <transmission name="RightShoulderRollTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="RightShoulderRoll"/>
+            <actuator data="data" name="/right_arm/j2"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="RightShoulderRoll"/>
+            <actuator data="positionCommand" name="/right_arm/j2"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="RightShoulderRoll"/>
+            <actuator data="velocityCommand" name="/right_arm/j2"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="RightShoulderRoll"/>
+            <actuator data="effortCommand" name="/right_arm/j2"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="RightShoulderRoll"/>
+            <actuator data="data" name="/right_arm/j2"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="RightShoulderRoll"/>
+            <actuator data="positionCommand" name="/right_arm/j2"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="RightShoulderRoll"/>
+            <actuator data="velocityCommand" name="/right_arm/j2"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="RightShoulderRoll"/>
+            <actuator data="effortCommand" name="/right_arm/j2"/>
+        </interface>
+    </transmission>
+    <transmission name="RightShoulderYawTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="RightShoulderYaw"/>
+            <actuator data="data" name="/right_arm/j3"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="RightShoulderYaw"/>
+            <actuator data="positionCommand" name="/right_arm/j3"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="RightShoulderYaw"/>
+            <actuator data="velocityCommand" name="/right_arm/j3"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="RightShoulderYaw"/>
+            <actuator data="effortCommand" name="/right_arm/j3"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="RightShoulderYaw"/>
+            <actuator data="data" name="/right_arm/j3"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="RightShoulderYaw"/>
+            <actuator data="positionCommand" name="/right_arm/j3"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="RightShoulderYaw"/>
+            <actuator data="velocityCommand" name="/right_arm/j3"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="RightShoulderYaw"/>
+            <actuator data="effortCommand" name="/right_arm/j3"/>
+        </interface>
+    </transmission>
+    <transmission name="RightElbowPitchTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="RightElbowPitch"/>
+            <actuator data="data" name="/right_arm/j4"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="RightElbowPitch"/>
+            <actuator data="positionCommand" name="/right_arm/j4"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="RightElbowPitch"/>
+            <actuator data="velocityCommand" name="/right_arm/j4"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="RightElbowPitch"/>
+            <actuator data="effortCommand" name="/right_arm/j4"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="RightElbowPitch"/>
+            <actuator data="data" name="/right_arm/j4"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="RightElbowPitch"/>
+            <actuator data="positionCommand" name="/right_arm/j4"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="RightElbowPitch"/>
+            <actuator data="velocityCommand" name="/right_arm/j4"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="RightElbowPitch"/>
+            <actuator data="effortCommand" name="/right_arm/j4"/>
+        </interface>
+    </transmission>
+    <transmission name="RightForearmYawTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="RightForearmYaw"/>
+            <actuator data="data" name="/right_arm/j5"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="RightForearmYaw"/>
+            <actuator data="positionCommand" name="/right_arm/j5"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="RightForearmYaw"/>
+            <actuator data="velocityCommand" name="/right_arm/j5"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="RightForearmYaw"/>
+            <actuator data="effortCommand" name="/right_arm/j5"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="RightForearmYaw"/>
+            <actuator data="data" name="/right_arm/j5"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="RightForearmYaw"/>
+            <actuator data="positionCommand" name="/right_arm/j5"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="RightForearmYaw"/>
+            <actuator data="velocityCommand" name="/right_arm/j5"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="RightForearmYaw"/>
+            <actuator data="effortCommand" name="/right_arm/j5"/>
+        </interface>
+    </transmission>
+    <transmission name="Right_Wrist" type="loadable_transmissions/ValkyriePushrodTransmission">
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="RightWristPitch"/>
+            <joint data="data" name="RightWristRoll"/>
+            <actuator data="data" name="/right_arm/forearm_driver1/wrist_right"/>
+            <actuator data="data" name="/right_arm/forearm_driver1/wrist_left"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="RightWristPitch"/>
+            <joint data="positionCommand" name="RightWristRoll"/>
+            <actuator data="positionCommand" name="/right_arm/forearm_driver1/wrist_right"/>
+            <actuator data="positionCommand" name="/right_arm/forearm_driver1/wrist_left"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="RightWristPitch"/>
+            <joint data="velocityCommand" name="RightWristRoll"/>
+            <actuator data="velocityCommand" name="/right_arm/forearm_driver1/wrist_right"/>
+            <actuator data="velocityCommand" name="/right_arm/forearm_driver1/wrist_left"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="RightWristPitch"/>
+            <joint data="effortCommand" name="RightWristRoll"/>
+            <actuator data="effortCommand" name="/right_arm/forearm_driver1/wrist_right"/>
+            <actuator data="effortCommand" name="/right_arm/forearm_driver1/wrist_left"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="RightWristPitch"/>
+            <joint data="data" name="RightWristRoll"/>
+            <actuator data="data" name="/right_arm/forearm_driver1/wrist_right"/>
+            <actuator data="data" name="/right_arm/forearm_driver1/wrist_left"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="RightWristPitch"/>
+            <joint data="positionCommand" name="RightWristRoll"/>
+            <actuator data="positionCommand" name="/right_arm/forearm_driver1/wrist_right"/>
+            <actuator data="positionCommand" name="/right_arm/forearm_driver1/wrist_left"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="RightWristPitch"/>
+            <joint data="velocityCommand" name="RightWristRoll"/>
+            <actuator data="velocityCommand" name="/right_arm/forearm_driver1/wrist_right"/>
+            <actuator data="velocityCommand" name="/right_arm/forearm_driver1/wrist_left"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="RightWristPitch"/>
+            <joint data="effortCommand" name="RightWristRoll"/>
+            <actuator data="effortCommand" name="/right_arm/forearm_driver1/wrist_right"/>
+            <actuator data="effortCommand" name="/right_arm/forearm_driver1/wrist_left"/>
+        </interface>
+        <parameterNamespace name="v1_wrist"/>
+        <reflect data="1"/>
+    </transmission>
+    <transmission name="LeftShoulderPitchTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="LeftShoulderPitch"/>
+            <actuator data="data" name="/trunk/laj1"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="LeftShoulderPitch"/>
+            <actuator data="positionCommand" name="/trunk/laj1"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="LeftShoulderPitch"/>
+            <actuator data="velocityCommand" name="/trunk/laj1"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="LeftShoulderPitch"/>
+            <actuator data="effortCommand" name="/trunk/laj1"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="LeftShoulderPitch"/>
+            <actuator data="data" name="/trunk/laj1"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="LeftShoulderPitch"/>
+            <actuator data="positionCommand" name="/trunk/laj1"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="LeftShoulderPitch"/>
+            <actuator data="velocityCommand" name="/trunk/laj1"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="LeftShoulderPitch"/>
+            <actuator data="effortCommand" name="/trunk/laj1"/>
+        </interface>
+    </transmission>
+    <transmission name="LeftShoulderRollTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="LeftShoulderRoll"/>
+            <actuator data="data" name="/left_arm/j2"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="LeftShoulderRoll"/>
+            <actuator data="positionCommand" name="/left_arm/j2"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="LeftShoulderRoll"/>
+            <actuator data="velocityCommand" name="/left_arm/j2"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="LeftShoulderRoll"/>
+            <actuator data="effortCommand" name="/left_arm/j2"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="LeftShoulderRoll"/>
+            <actuator data="data" name="/left_arm/j2"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="LeftShoulderRoll"/>
+            <actuator data="positionCommand" name="/left_arm/j2"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="LeftShoulderRoll"/>
+            <actuator data="velocityCommand" name="/left_arm/j2"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="LeftShoulderRoll"/>
+            <actuator data="effortCommand" name="/left_arm/j2"/>
+        </interface>
+    </transmission>
+    <transmission name="LeftShoulderYawTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="LeftShoulderYaw"/>
+            <actuator data="data" name="/left_arm/j3"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="LeftShoulderYaw"/>
+            <actuator data="positionCommand" name="/left_arm/j3"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="LeftShoulderYaw"/>
+            <actuator data="velocityCommand" name="/left_arm/j3"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="LeftShoulderYaw"/>
+            <actuator data="effortCommand" name="/left_arm/j3"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="LeftShoulderYaw"/>
+            <actuator data="data" name="/left_arm/j3"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="LeftShoulderYaw"/>
+            <actuator data="positionCommand" name="/left_arm/j3"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="LeftShoulderYaw"/>
+            <actuator data="velocityCommand" name="/left_arm/j3"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="LeftShoulderYaw"/>
+            <actuator data="effortCommand" name="/left_arm/j3"/>
+        </interface>
+    </transmission>
+    <transmission name="LeftElbowPitchTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="LeftElbowPitch"/>
+            <actuator data="data" name="/left_arm/j4"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="LeftElbowPitch"/>
+            <actuator data="positionCommand" name="/left_arm/j4"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="LeftElbowPitch"/>
+            <actuator data="velocityCommand" name="/left_arm/j4"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="LeftElbowPitch"/>
+            <actuator data="effortCommand" name="/left_arm/j4"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="LeftElbowPitch"/>
+            <actuator data="data" name="/left_arm/j4"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="LeftElbowPitch"/>
+            <actuator data="positionCommand" name="/left_arm/j4"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="LeftElbowPitch"/>
+            <actuator data="velocityCommand" name="/left_arm/j4"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="LeftElbowPitch"/>
+            <actuator data="effortCommand" name="/left_arm/j4"/>
+        </interface>
+    </transmission>
+    <transmission name="LeftForearmYawTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="LeftForearmYaw"/>
+            <actuator data="data" name="/left_arm/j5"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="LeftForearmYaw"/>
+            <actuator data="positionCommand" name="/left_arm/j5"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="LeftForearmYaw"/>
+            <actuator data="velocityCommand" name="/left_arm/j5"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="LeftForearmYaw"/>
+            <actuator data="effortCommand" name="/left_arm/j5"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="LeftForearmYaw"/>
+            <actuator data="data" name="/left_arm/j5"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="LeftForearmYaw"/>
+            <actuator data="positionCommand" name="/left_arm/j5"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="LeftForearmYaw"/>
+            <actuator data="velocityCommand" name="/left_arm/j5"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="LeftForearmYaw"/>
+            <actuator data="effortCommand" name="/left_arm/j5"/>
+        </interface>
+    </transmission>
+    <transmission name="Left_Wrist" type="loadable_transmissions/ValkyriePushrodTransmission">
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="LeftWristPitch"/>
+            <joint data="data" name="LeftWristRoll"/>
+            <actuator data="data" name="/left_arm/forearm_driver1/wrist_left"/>
+            <actuator data="data" name="/left_arm/forearm_driver1/wrist_right"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="LeftWristPitch"/>
+            <joint data="positionCommand" name="LeftWristRoll"/>
+            <actuator data="positionCommand" name="/left_arm/forearm_driver1/wrist_left"/>
+            <actuator data="positionCommand" name="/left_arm/forearm_driver1/wrist_right"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="LeftWristPitch"/>
+            <joint data="velocityCommand" name="LeftWristRoll"/>
+            <actuator data="velocityCommand" name="/left_arm/forearm_driver1/wrist_left"/>
+            <actuator data="velocityCommand" name="/left_arm/forearm_driver1/wrist_right"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="LeftWristPitch"/>
+            <joint data="effortCommand" name="LeftWristRoll"/>
+            <actuator data="effortCommand" name="/left_arm/forearm_driver1/wrist_left"/>
+            <actuator data="effortCommand" name="/left_arm/forearm_driver1/wrist_right"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="LeftWristPitch"/>
+            <joint data="data" name="LeftWristRoll"/>
+            <actuator data="data" name="/left_arm/forearm_driver1/wrist_left"/>
+            <actuator data="data" name="/left_arm/forearm_driver1/wrist_right"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="LeftWristPitch"/>
+            <joint data="positionCommand" name="LeftWristRoll"/>
+            <actuator data="positionCommand" name="/left_arm/forearm_driver1/wrist_left"/>
+            <actuator data="positionCommand" name="/left_arm/forearm_driver1/wrist_right"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="LeftWristPitch"/>
+            <joint data="velocityCommand" name="LeftWristRoll"/>
+            <actuator data="velocityCommand" name="/left_arm/forearm_driver1/wrist_left"/>
+            <actuator data="velocityCommand" name="/left_arm/forearm_driver1/wrist_right"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="LeftWristPitch"/>
+            <joint data="effortCommand" name="LeftWristRoll"/>
+            <actuator data="effortCommand" name="/left_arm/forearm_driver1/wrist_left"/>
+            <actuator data="effortCommand" name="/left_arm/forearm_driver1/wrist_right"/>
+        </interface>
+        <parameterNamespace name="v1_wrist"/>
+        <reflect data="1"/>
+    </transmission>
+    <transmission name="RightHipYawTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="RightHipYaw"/>
+            <actuator data="data" name="/pelvis/rj1"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="RightHipYaw"/>
+            <actuator data="positionCommand" name="/pelvis/rj1"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="RightHipYaw"/>
+            <actuator data="velocityCommand" name="/pelvis/rj1"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="RightHipYaw"/>
+            <actuator data="effortCommand" name="/pelvis/rj1"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="RightHipYaw"/>
+            <actuator data="data" name="/pelvis/rj1"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="RightHipYaw"/>
+            <actuator data="positionCommand" name="/pelvis/rj1"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="RightHipYaw"/>
+            <actuator data="velocityCommand" name="/pelvis/rj1"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="RightHipYaw"/>
+            <actuator data="effortCommand" name="/pelvis/rj1"/>
+        </interface>
+    </transmission>
+    <transmission name="RightHipRollTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="RightHipRoll"/>
+            <actuator data="data" name="/right_leg/j2"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="RightHipRoll"/>
+            <actuator data="positionCommand" name="/right_leg/j2"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="RightHipRoll"/>
+            <actuator data="velocityCommand" name="/right_leg/j2"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="RightHipRoll"/>
+            <actuator data="effortCommand" name="/right_leg/j2"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="RightHipRoll"/>
+            <actuator data="data" name="/right_leg/j2"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="RightHipRoll"/>
+            <actuator data="positionCommand" name="/right_leg/j2"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="RightHipRoll"/>
+            <actuator data="velocityCommand" name="/right_leg/j2"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="RightHipRoll"/>
+            <actuator data="effortCommand" name="/right_leg/j2"/>
+        </interface>
+    </transmission>
+    <transmission name="RightHipPitchTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="RightHipPitch"/>
+            <actuator data="data" name="/right_leg/j3"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="RightHipPitch"/>
+            <actuator data="positionCommand" name="/right_leg/j3"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="RightHipPitch"/>
+            <actuator data="velocityCommand" name="/right_leg/j3"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="RightHipPitch"/>
+            <actuator data="effortCommand" name="/right_leg/j3"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="RightHipPitch"/>
+            <actuator data="data" name="/right_leg/j3"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="RightHipPitch"/>
+            <actuator data="positionCommand" name="/right_leg/j3"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="RightHipPitch"/>
+            <actuator data="velocityCommand" name="/right_leg/j3"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="RightHipPitch"/>
+            <actuator data="effortCommand" name="/right_leg/j3"/>
+        </interface>
+    </transmission>
+    <transmission name="RightKneePitchTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="RightKneePitch"/>
+            <actuator data="data" name="/right_leg/j4"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="RightKneePitch"/>
+            <actuator data="positionCommand" name="/right_leg/j4"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="RightKneePitch"/>
+            <actuator data="velocityCommand" name="/right_leg/j4"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="RightKneePitch"/>
+            <actuator data="effortCommand" name="/right_leg/j4"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="RightKneePitch"/>
+            <actuator data="data" name="/right_leg/j4"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="RightKneePitch"/>
+            <actuator data="positionCommand" name="/right_leg/j4"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="RightKneePitch"/>
+            <actuator data="velocityCommand" name="/right_leg/j4"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="RightKneePitch"/>
+            <actuator data="effortCommand" name="/right_leg/j4"/>
+        </interface>
+    </transmission>
+    <transmission name="Right_Ankle" type="loadable_transmissions/ValkyriePushrodTransmission">
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="RightAnklePitch"/>
+            <joint data="data" name="RightAnkleRoll"/>
+            <actuator data="data" name="/right_leg/j5"/>
+            <actuator data="data" name="/right_leg/j6"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="RightAnklePitch"/>
+            <joint data="positionCommand" name="RightAnkleRoll"/>
+            <actuator data="positionCommand" name="/right_leg/j5"/>
+            <actuator data="positionCommand" name="/right_leg/j6"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="RightAnklePitch"/>
+            <joint data="velocityCommand" name="RightAnkleRoll"/>
+            <actuator data="velocityCommand" name="/right_leg/j5"/>
+            <actuator data="velocityCommand" name="/right_leg/j6"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="RightAnklePitch"/>
+            <joint data="effortCommand" name="RightAnkleRoll"/>
+            <actuator data="effortCommand" name="/right_leg/j5"/>
+            <actuator data="effortCommand" name="/right_leg/j6"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="RightAnklePitch"/>
+            <joint data="data" name="RightAnkleRoll"/>
+            <actuator data="data" name="/right_leg/j5"/>
+            <actuator data="data" name="/right_leg/j6"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="RightAnklePitch"/>
+            <joint data="positionCommand" name="RightAnkleRoll"/>
+            <actuator data="positionCommand" name="/right_leg/j5"/>
+            <actuator data="positionCommand" name="/right_leg/j6"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="RightAnklePitch"/>
+            <joint data="velocityCommand" name="RightAnkleRoll"/>
+            <actuator data="velocityCommand" name="/right_leg/j5"/>
+            <actuator data="velocityCommand" name="/right_leg/j6"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="RightAnklePitch"/>
+            <joint data="effortCommand" name="RightAnkleRoll"/>
+            <actuator data="effortCommand" name="/right_leg/j5"/>
+            <actuator data="effortCommand" name="/right_leg/j6"/>
+        </interface>
+        <parameterNamespace name="v1_ankle"/>
+        <reflect data="1"/>
+    </transmission>
+    <transmission name="LeftHipYawTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="LeftHipYaw"/>
+            <actuator data="data" name="/pelvis/lj1"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="LeftHipYaw"/>
+            <actuator data="positionCommand" name="/pelvis/lj1"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="LeftHipYaw"/>
+            <actuator data="velocityCommand" name="/pelvis/lj1"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="LeftHipYaw"/>
+            <actuator data="effortCommand" name="/pelvis/lj1"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="LeftHipYaw"/>
+            <actuator data="data" name="/pelvis/lj1"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="LeftHipYaw"/>
+            <actuator data="positionCommand" name="/pelvis/lj1"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="LeftHipYaw"/>
+            <actuator data="velocityCommand" name="/pelvis/lj1"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="LeftHipYaw"/>
+            <actuator data="effortCommand" name="/pelvis/lj1"/>
+        </interface>
+    </transmission>
+    <transmission name="LeftHipRollTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="LeftHipRoll"/>
+            <actuator data="data" name="/left_leg/j2"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="LeftHipRoll"/>
+            <actuator data="positionCommand" name="/left_leg/j2"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="LeftHipRoll"/>
+            <actuator data="velocityCommand" name="/left_leg/j2"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="LeftHipRoll"/>
+            <actuator data="effortCommand" name="/left_leg/j2"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="LeftHipRoll"/>
+            <actuator data="data" name="/left_leg/j2"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="LeftHipRoll"/>
+            <actuator data="positionCommand" name="/left_leg/j2"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="LeftHipRoll"/>
+            <actuator data="velocityCommand" name="/left_leg/j2"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="LeftHipRoll"/>
+            <actuator data="effortCommand" name="/left_leg/j2"/>
+        </interface>
+    </transmission>
+    <transmission name="LeftHipPitchTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="LeftHipPitch"/>
+            <actuator data="data" name="/left_leg/j3"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="LeftHipPitch"/>
+            <actuator data="positionCommand" name="/left_leg/j3"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="LeftHipPitch"/>
+            <actuator data="velocityCommand" name="/left_leg/j3"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="LeftHipPitch"/>
+            <actuator data="effortCommand" name="/left_leg/j3"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="LeftHipPitch"/>
+            <actuator data="data" name="/left_leg/j3"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="LeftHipPitch"/>
+            <actuator data="positionCommand" name="/left_leg/j3"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="LeftHipPitch"/>
+            <actuator data="velocityCommand" name="/left_leg/j3"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="LeftHipPitch"/>
+            <actuator data="effortCommand" name="/left_leg/j3"/>
+        </interface>
+    </transmission>
+    <transmission name="LeftKneePitchTransmission" type="loadable_transmissions/ValkyrieSimpleTransmission">
+        <mechanicalReduction>1</mechanicalReduction>
+        <jointOffset>0</jointOffset>
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="LeftKneePitch"/>
+            <actuator data="data" name="/left_leg/j4"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="LeftKneePitch"/>
+            <actuator data="positionCommand" name="/left_leg/j4"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="LeftKneePitch"/>
+            <actuator data="velocityCommand" name="/left_leg/j4"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="LeftKneePitch"/>
+            <actuator data="effortCommand" name="/left_leg/j4"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="LeftKneePitch"/>
+            <actuator data="data" name="/left_leg/j4"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="LeftKneePitch"/>
+            <actuator data="positionCommand" name="/left_leg/j4"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="LeftKneePitch"/>
+            <actuator data="velocityCommand" name="/left_leg/j4"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="LeftKneePitch"/>
+            <actuator data="effortCommand" name="/left_leg/j4"/>
+        </interface>
+    </transmission>
+    <transmission name="Left_Ankle" type="loadable_transmissions/ValkyriePushrodTransmission">
+        <interface type="ActuatorToJointStateInterface">
+            <joint data="data" name="LeftAnklePitch"/>
+            <joint data="data" name="LeftAnkleRoll"/>
+            <actuator data="data" name="/left_leg/j5"/>
+            <actuator data="data" name="/left_leg/j6"/>
+        </interface>
+        <interface type="JointToActuatorPositionInterface">
+            <joint data="positionCommand" name="LeftAnklePitch"/>
+            <joint data="positionCommand" name="LeftAnkleRoll"/>
+            <actuator data="positionCommand" name="/left_leg/j5"/>
+            <actuator data="positionCommand" name="/left_leg/j6"/>
+        </interface>
+        <interface type="JointToActuatorVelocityInterface">
+            <joint data="velocityCommand" name="LeftAnklePitch"/>
+            <joint data="velocityCommand" name="LeftAnkleRoll"/>
+            <actuator data="velocityCommand" name="/left_leg/j5"/>
+            <actuator data="velocityCommand" name="/left_leg/j6"/>
+        </interface>
+        <interface type="JointToActuatorEffortInterface">
+            <joint data="effortCommand" name="LeftAnklePitch"/>
+            <joint data="effortCommand" name="LeftAnkleRoll"/>
+            <actuator data="effortCommand" name="/left_leg/j5"/>
+            <actuator data="effortCommand" name="/left_leg/j6"/>
+        </interface>
+        <interface type="JointToActuatorStateInterface">
+            <joint data="data" name="LeftAnklePitch"/>
+            <joint data="data" name="LeftAnkleRoll"/>
+            <actuator data="data" name="/left_leg/j5"/>
+            <actuator data="data" name="/left_leg/j6"/>
+        </interface>
+        <interface type="ActuatorToJointPositionInterface">
+            <joint data="positionCommand" name="LeftAnklePitch"/>
+            <joint data="positionCommand" name="LeftAnkleRoll"/>
+            <actuator data="positionCommand" name="/left_leg/j5"/>
+            <actuator data="positionCommand" name="/left_leg/j6"/>
+        </interface>
+        <interface type="ActuatorToJointVelocityInterface">
+            <joint data="velocityCommand" name="LeftAnklePitch"/>
+            <joint data="velocityCommand" name="LeftAnkleRoll"/>
+            <actuator data="velocityCommand" name="/left_leg/j5"/>
+            <actuator data="velocityCommand" name="/left_leg/j6"/>
+        </interface>
+        <interface type="ActuatorToJointEffortInterface">
+            <joint data="effortCommand" name="LeftAnklePitch"/>
+            <joint data="effortCommand" name="LeftAnkleRoll"/>
+            <actuator data="effortCommand" name="/left_leg/j5"/>
+            <actuator data="effortCommand" name="/left_leg/j6"/>
+        </interface>
+        <parameterNamespace name="v1_ankle"/>
+        <reflect data="-1"/>
+    </transmission>
+  
 </robot>
 
