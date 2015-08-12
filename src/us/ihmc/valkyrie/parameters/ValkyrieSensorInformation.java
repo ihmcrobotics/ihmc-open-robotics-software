@@ -11,7 +11,9 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorParameters;
+
 import org.apache.commons.lang3.tuple.ImmutableTriple;
+
 import us.ihmc.robotics.sensors.ContactSensorType;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -105,7 +107,12 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    /**
     * Multisense SL Parameters
     */
-   private static final String headLinkName = "Head";
+   
+   public static int MULTISENSE_SL_LEFT_CAMERA_ID = 0; 
+   public static int MULTISENSE_LIDAR_ID = 0;                    
+   public static int MULTISENSE_STEREO_ID = 0;        
+   
+   private static final String headLinkName = "multisense_root_link";
    private final DRCRobotCameraParameters[] cameraParamaters = new DRCRobotCameraParameters[3];
    
    private static final String multisenseCameraName = "stereo_camera_left";
@@ -123,7 +130,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
     */
    private static final String multisense_namespace = "/multisense";
    private final DRCRobotLidarParameters[] lidarParamaters = new DRCRobotLidarParameters[1];
-   private final int MULTISENSE_LIDAR_ID = 0;
 
    private static final double lidar_spindle_velocity = 2.183;
 
@@ -134,7 +140,8 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String lidarSensorName = "head_hokuyo_sensor";
    private static final String lidarJointTopic = multisense_namespace + "/joint_states";
    private static final String multisense_laser_topic_string = multisense_namespace+"/lidar_scan";
-   private static final String multisenseHandoffFrame = "head";
+   private static final String multisense_filtered_laser_as_point_cloud_topic_string = multisense_namespace+"/filtered_cloud";
+   private static final String multisenseHandoffFrame = "multisense_root_link";
    
    private static final String rightTrunkIMUSensor = "Torso_RightTorsoIMU";
    private static final String leftTrunkIMUSensor = "Torso_LeftTorsoIMU";
@@ -146,6 +153,14 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       transformFromHeadToCamera.setRotation(new Quat4d(0.99786, -5.2082e-05, -0.065403, -0.00079462));
       transformFromHeadToCamera.setTranslation(0.18335, 0.035, 0.0774);
    }
+   
+   private static final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTransformsForRos = new ArrayList<ImmutableTriple<String,String,RigidBodyTransform>>();
+   private static final String multisenseBaseLinkName = "multisense/head_root";
+   private static final ImmutableTriple<String, String, RigidBodyTransform> transformFromHeadToMultisense = new ImmutableTriple<String, String, RigidBodyTransform>(headLinkName, multisenseBaseLinkName , new RigidBodyTransform());
+   {
+      staticTransformsForRos.add(transformFromHeadToMultisense);
+   }
+  
    
    private static final HashMap<String, Integer> imuUSBSerialIds = new HashMap<>();
    static
@@ -171,7 +186,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
          pointCloudParamaters[POINT_CLOUD_SENSOR_ID] = new DRCRobotPointCloudParameters(pointCloudSensorName,pointCloudTopic,headLinkName,POINT_CLOUD_SENSOR_ID);
       }
 
-      lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(runningOnRealRobot, lidarSensorName, multisense_laser_topic_string, multisense_laser_topic_string,
+      lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(runningOnRealRobot, lidarSensorName, multisense_filtered_laser_as_point_cloud_topic_string, multisense_filtered_laser_as_point_cloud_topic_string,
             lidarJointName, lidarJointTopic, lidarPoseLink, multisenseHandoffFrame, lidarEndFrameInSdf, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
    }
    
@@ -331,6 +346,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    @Override
    public ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> getStaticTransformsForRos()
    {
-      return null;
+      return staticTransformsForRos;
    }
 }
