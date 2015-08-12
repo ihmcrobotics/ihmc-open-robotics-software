@@ -6,9 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.logging.Logger;
 
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
-import us.ihmc.realtime.concurrent.ConcurrentCopier;
 
 public class MicrostrainUDPPacketListener implements Runnable
 {
