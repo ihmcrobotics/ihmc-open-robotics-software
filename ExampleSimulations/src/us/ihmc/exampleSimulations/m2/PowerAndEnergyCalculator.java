@@ -67,7 +67,7 @@ public class PowerAndEnergyCalculator implements RobotController
    private double startTime;
    private boolean setStartTime = false;
 
-   private final HarmonicDriveEfficiencyCalculator harmonicDriveEfficiencyCalculator;
+   private final M2HarmonicDriveEfficiencyCalculator harmonicDriveEfficiencyCalculator;
 
    private String name;
 
@@ -80,7 +80,7 @@ public class PowerAndEnergyCalculator implements RobotController
       xPosition = (DoubleYoVariable)m2Robot.getVariable("q_x");
       yPosition = (DoubleYoVariable)m2Robot.getVariable("q_y");
 
-      harmonicDriveEfficiencyCalculator = new HarmonicDriveEfficiencyCalculator();
+      harmonicDriveEfficiencyCalculator = new M2HarmonicDriveEfficiencyCalculator();
 
       String[] prefixes = new String[] {"left_", "right_"};
       String[] listOfJointNames = new String[]
