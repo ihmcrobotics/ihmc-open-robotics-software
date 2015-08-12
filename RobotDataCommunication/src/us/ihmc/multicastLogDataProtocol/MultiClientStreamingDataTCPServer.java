@@ -6,10 +6,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
+import us.ihmc.concurrent.Builder;
+import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.realtime.concurrent.Builder;
-import us.ihmc.realtime.concurrent.ConcurrentRingBuffer;
 import us.ihmc.robotDataCommunication.YoVariableHandShakeBuilder;
 
 public class MultiClientStreamingDataTCPServer extends Thread
