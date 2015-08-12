@@ -272,11 +272,6 @@ public class LidarScanParametersTest
 
    }
    
-//   public LidarScanParameters(int pointsPerSweep, float sweepYawMin, float sweepYawMax, float timeIncrement, float minRange, float maxRange, float scanTime)
-//   {
-//      this(pointsPerSweep, sweepYawMin, sweepYawMax, timeIncrement, minRange, maxRange, scanTime, 0l);
-//   }
-   
    @EstimatedDuration(duration = 0.0)
    @Test(timeout = 30000)
    public void LidarScanParameters_10()
@@ -308,6 +303,41 @@ public class LidarScanParametersTest
          assertEquals(lidarScanParameters.getScanTimeNanos(), scanTime * 1e9, 100);
          assertEquals(lidarScanParameters.getTimestamp(), 0, 1e-7);
          assertEquals(lidarScanParameters.getAngleIncrement(), (maxYaw - minYaw)/pointsPerSweep, 1e-3);
+      }
+
+   }
+   
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
+   public void LidarScanParameters_11()
+   {
+      Random rand = new Random();
+
+      for (int i = 0; i < 10000; i++)
+      {
+         int pointsPerSweep = rand.nextInt();
+         int fov = (int) (rand.nextFloat() * Math.PI);
+         double minRange = rand.nextDouble();
+         double maxRange = rand.nextDouble();
+         double timeIncrement = rand.nextDouble();
+         double scanTime = rand.nextDouble();
+         long timeStamp = System.currentTimeMillis();
+         double minYaw = -fov / 2.0;
+         double maxYaw = fov / 2.0;
+         
+         LidarScanParameters lidarScanParameters = new LidarScanParameters(new Random(10));
+         
+         assertEquals(lidarScanParameters.getMaxRange(), 0.36817038, 1e-7);
+         assertEquals(lidarScanParameters.getMinRange(), 0.24411720, 1e-7);
+         assertEquals(lidarScanParameters.getPointsPerSweep(), -7.78209333E8, 1e-7);
+         assertEquals(lidarScanParameters.getFieldOfView(), -0.1551098, 1e-7);
+         assertEquals(lidarScanParameters.getSweepYawMin(), 0.41291266, 1e-7);
+         assertEquals(lidarScanParameters.getSweepYawMax(), 0.25780278, 1e-7);
+         assertEquals(lidarScanParameters.getTimeIncrement(), 0.059201955, 1e-7);
+         assertEquals(lidarScanParameters.getScanTime(), 0.67215943, 1e-7);
+         assertEquals(lidarScanParameters.getScanTimeNanos(), 0.67215943 * 1e9, 100);
+         assertEquals(lidarScanParameters.getTimestamp(), -4.9726833692714537E18, 1e-7);
+         assertEquals(lidarScanParameters.getAngleIncrement(), (0.25780278 - 0.41291266)/-7.78209333E8, 1e-7);
       }
 
    }
