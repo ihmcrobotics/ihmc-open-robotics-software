@@ -85,8 +85,16 @@ public class YoVariableHandshakeParser
       this.dt = yoProtoHandshake.getDt();
       if(registerYoVariables)
       {
-         registries = parseRegistries(yoProtoHandshake, registryPrefix);
-         variables = parseVariables(yoProtoHandshake, registries);
+         List<YoVariableRegistry> regs = parseRegistries(yoProtoHandshake, registryPrefix);
+         List<YoVariable<?>> vars = parseVariables(yoProtoHandshake, regs);
+
+         // don't replace those list objects (it's a big code mess), just populate them with received data
+
+         registries.clear();
+         registries.addAll(regs);
+
+         variables.clear();
+         variables.addAll(vars);
 
          addJointStates(yoProtoHandshake);
          addGraphicObjects(yoProtoHandshake);
@@ -116,6 +124,7 @@ public class YoVariableHandshakeParser
       return registryList;
    }
 
+   @SuppressWarnings("rawtypes")
    public static List<YoVariable<?>> parseVariables(YoProtoHandshake yoProtoHandshake, List<YoVariableRegistry> registryList)
    {
       List<YoVariable<?>> variableList = new ArrayList<>();
