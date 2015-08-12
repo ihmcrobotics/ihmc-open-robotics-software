@@ -4,15 +4,15 @@ import java.util.concurrent.TimeUnit;
 
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.realtime.concurrent.Builder;
-import us.ihmc.realtime.concurrent.ConcurrentRingBuffer;
-import us.ihmc.realtime.util.PeriodicThreadScheduler;
+import us.ihmc.concurrent.Builder;
+import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.util.PeriodicThreadScheduler;
 
 public class CapturabilityBasedStatusProducer implements Runnable
 {
