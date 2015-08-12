@@ -1,17 +1,20 @@
 package us.ihmc.robotics.lidar;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RigidBodyTransformTest;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.test.JUnitTools;
-import us.ihmc.tools.thread.RunnableThatThrows;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Random;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
+import us.ihmc.robotics.geometry.RigidBodyTransformTest;
+import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class LidarScanTest
 {
@@ -144,5 +147,26 @@ public class LidarScanTest
    {
       assertLidarScanTransformsEqual(lidarScan1, lidarScan2, transformTolerance);
       assertLidarScanRangesEqual(lidarScan1, lidarScan2, rangeTolerance);
+   }
+   
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
+   public void testConstructor()
+   {
+      Random random = new Random();
+      float[] ranges1;
+      LidarScan lidarScan1 = null;
+      for(int i = 0; i < 1000; i++)
+      {
+    	  ranges1 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
+
+          RigidBodyTransform randomTransform1 = RigidBodyTransform.generateRandomTransform(random);
+          RigidBodyTransform randomTransform2 = RigidBodyTransform.generateRandomTransform(random);
+
+          lidarScan1 = new LidarScan(new LidarScanParameters(), randomTransform1, randomTransform2, ranges1);
+
+      }
+      
+      assertEquals(lidarScan1.size(), 720, 1e-7f);
    }
 }
