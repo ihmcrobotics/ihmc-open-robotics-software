@@ -25,7 +25,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.realtime.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -46,6 +45,7 @@ import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotCo
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
+import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;

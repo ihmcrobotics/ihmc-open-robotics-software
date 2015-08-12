@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.realtime.concurrent.Builder;
-import us.ihmc.realtime.concurrent.ConcurrentCopier;
+import us.ihmc.concurrent.Builder;
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandJointAngleCommunicator
