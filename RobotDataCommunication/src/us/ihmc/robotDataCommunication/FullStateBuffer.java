@@ -3,8 +3,8 @@ package us.ihmc.robotDataCommunication;
 import java.nio.LongBuffer;
 import java.util.List;
 
-import us.ihmc.realtime.util.RealtimeTools;
 import us.ihmc.robotDataCommunication.jointState.JointHolder;
+import us.ihmc.util.RealtimeTools;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class FullStateBuffer extends RegistryBuffer
@@ -59,7 +59,7 @@ public class FullStateBuffer extends RegistryBuffer
       }
    }
 
-   public static class Builder implements us.ihmc.realtime.concurrent.Builder<FullStateBuffer>
+   public static class Builder implements us.ihmc.concurrent.Builder<FullStateBuffer>
    {
       private final List<JointHolder> jointHolders;
       private final int variableOffset;

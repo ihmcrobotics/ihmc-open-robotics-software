@@ -7,11 +7,11 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 
+import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.MultiClientStreamingDataTCPServer;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.realtime.concurrent.ConcurrentRingBuffer;
-import us.ihmc.realtime.util.PeriodicThreadScheduler;
+import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.compression.SnappyUtils;
 
 public class YoVariableProducer implements Runnable

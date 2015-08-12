@@ -31,7 +31,7 @@ public class VariableChangedMessage
       return val;
    }
 
-   public static class Builder implements us.ihmc.realtime.concurrent.Builder<VariableChangedMessage>
+   public static class Builder implements us.ihmc.concurrent.Builder<VariableChangedMessage>
    {
 
       public VariableChangedMessage newInstance()
