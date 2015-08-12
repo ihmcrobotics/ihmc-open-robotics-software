@@ -1,12 +1,13 @@
 package us.ihmc.robotics.sensors;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.tools.compare.GenericCRC32;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.tools.compare.GenericCRC32;
 
 public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly
 {
@@ -55,6 +56,7 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly
    }
 
    private final DenseMatrix64F tempWrench = new DenseMatrix64F(Wrench.SIZE, 1);
+   public boolean firstException = true;
 
    public void set(ForceSensorDataHolderReadOnly otherForceSensorDataHolder)
    {
@@ -62,8 +64,19 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly
       {
          final ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
          ForceSensorDataReadOnly otherForceSensorData = otherForceSensorDataHolder.get(forceSensorDefinition);
-         otherForceSensorData.packWrench(tempWrench);
-         forceSensors.get(forceSensorDefinition).setWrench(tempWrench);
+         if (otherForceSensorData == null)
+          {
+             if (firstException)
+             {
+                firstException = false;
+               System.err.println("Could not find the force sensor: " + forceSensorDefinition.getSensorName());
+             }
+          }
+          else
+          {
+             otherForceSensorData.packWrench(tempWrench);
+             forceSensors.get(forceSensorDefinition).setWrench(tempWrench);
+          }
       }
    }
 
