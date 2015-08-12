@@ -50,7 +50,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
  * @author Twan Koolen
  *
  */
-public class InverseDynamicsCalculatorTest
+public class InverseDynamicsCalculatorSCSTest
 {
    private static final boolean EXPLORE_AND_PRINT = false;
    

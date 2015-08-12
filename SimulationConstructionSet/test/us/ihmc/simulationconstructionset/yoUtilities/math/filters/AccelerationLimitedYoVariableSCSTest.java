@@ -21,7 +21,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.AccelerationLimitedYoVariable;
 import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoVariable;
 
-public class AccelerationLimitedYoVariableTest
+public class AccelerationLimitedYoVariableSCSTest
 {
    private static final boolean VISUALIZE = false;
    private static final boolean KEEPWINDOWSOPEN = false;

@@ -70,12 +70,12 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.util.simulationTesting.AllYoVariablesSimulationComparerTest.class,
    us.ihmc.simulationconstructionset.util.simulationTesting.ReflectionSimulationComparerTest.class,
    us.ihmc.simulationconstructionset.utilities.math.geometry.FindTentativeListOfPolygonsIntersectingTargetPolygonTest.class,
-   us.ihmc.simulationconstructionset.utilities.screwTheory.CentroidalMomentumMatrixTest.class,
-   us.ihmc.simulationconstructionset.utilities.screwTheory.InverseDynamicsCalculatorTest.class,
+   us.ihmc.simulationconstructionset.utilities.screwTheory.CentroidalMomentumMatrixSCSTest.class,
+   us.ihmc.simulationconstructionset.utilities.screwTheory.InverseDynamicsCalculatorSCSTest.class,
    us.ihmc.simulationconstructionset.whiteBoard.LocalYoWhiteBoardTest.class,
    us.ihmc.simulationconstructionset.whiteBoard.UDPYoWhiteBoardTest.class,
    us.ihmc.simulationconstructionset.whiteBoard.YoWhiteBoardTest.class,
-   us.ihmc.simulationconstructionset.yoUtilities.math.filters.AccelerationLimitedYoVariableTest.class,
+   us.ihmc.simulationconstructionset.yoUtilities.math.filters.AccelerationLimitedYoVariableSCSTest.class,
    us.ihmc.simulationconstructionset.YoVariableHolderImplementationNewTest.class,
    us.ihmc.simulationconstructionset.YoVariableHolderImplementationTest.class
 })
