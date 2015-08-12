@@ -10,6 +10,8 @@ import java.net.URISyntaxException;
  *
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
+
+// DOES NOT WORK YET :)
 public class ValkyrieGazeboControllerFactory
 {
    public static void main(String[] args) throws IOException, URISyntaxException
