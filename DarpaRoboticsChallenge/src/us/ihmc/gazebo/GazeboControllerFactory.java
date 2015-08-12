@@ -1,18 +1,10 @@
 package us.ihmc.gazebo;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ComponentBasedVariousWalkingProviderFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DataProducerVariousWalkingProviderFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -34,6 +26,10 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class GazeboControllerFactory
 {
@@ -104,14 +100,21 @@ public class GazeboControllerFactory
       robotController.addController(estimatorThread, estimatorTicksPerSimulationTick, false);
       robotController.addController(controllerThread, controllerTicksPerSimulationTick, true);
 
-//      try
-//      {
-//         controllerCommunicator.connect();
-//      }
-//      catch (IOException e)
-//      {
-//         e.printStackTrace();
-//      }
+      try
+      {
+         controllerCommunicator.connect();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+
+      URI rosMasterURI = NetworkParameters.getROSURI();
+
+      PacketCommunicator gfe_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
+      SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
+
+      new ThePeoplesGloriousNetworkProcessor(rosMasterURI, gfe_communicator, null, ppsOffsetProvider, robotModel, nameSpace + "/" + robotName, tfPrefix);
 
       yoVariableServer.start();
 
@@ -121,22 +124,6 @@ public class GazeboControllerFactory
 
       Thread simulationThread = new Thread(robotController);
       simulationThread.start();
-
-//      String rosMasterUriEnv = System.getenv("ROS_MASTER_URI");
-//
-//      if(rosMasterUriEnv == null)
-//      {
-//         rosMasterUriEnv = "http://localhost:11311";
-//      }
-//
-//      URI rosMasterURI = new URI(rosMasterUriEnv);
-
-      URI rosMasterURI = NetworkParameters.getROSURI();
-
-//      PacketCommunicator gfe_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
-      SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
-
-      new ThePeoplesGloriousNetworkProcessor(rosMasterURI, controllerCommunicator, null, ppsOffsetProvider, robotModel, nameSpace + "/" + robotName, tfPrefix);
 
 //      if (USE_GUI)
 //      {
