@@ -2,12 +2,12 @@ package us.ihmc.exampleSimulations.m2;
 
 import us.ihmc.robotics.trajectories.LinearInterpolater;
 
-public class HarmonicDriveEfficiencyCalculator
+public class M2HarmonicDriveEfficiencyCalculator
 {
    private LinearInterpolater linearInterpolaterViscousEfficiency;
    private LinearInterpolater linearInterpolaterCompensationCoef;
 
-   public HarmonicDriveEfficiencyCalculator()
+   public M2HarmonicDriveEfficiencyCalculator()
    {
       {
          // These are in rpm
