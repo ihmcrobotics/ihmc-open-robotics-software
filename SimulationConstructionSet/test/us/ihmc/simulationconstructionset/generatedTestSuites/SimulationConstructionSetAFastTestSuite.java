@@ -19,7 +19,7 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListenerTest.class,
    us.ihmc.simulationconstructionset.KinematicPointTest.class,
    us.ihmc.simulationconstructionset.LinkTest.class,
-   us.ihmc.simulationconstructionset.matrixtest.MatrixTest.class,
+   us.ihmc.simulationconstructionset.mathfunctions.MatrixTest.class,
    us.ihmc.simulationconstructionset.optimization.SimpleSimulationTest.class,
    us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetectorTest.class,
    us.ihmc.simulationconstructionset.physics.collision.gdx.GdxUtilTest.class,
