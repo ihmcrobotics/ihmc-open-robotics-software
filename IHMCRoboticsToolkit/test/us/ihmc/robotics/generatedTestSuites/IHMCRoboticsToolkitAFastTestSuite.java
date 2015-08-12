@@ -47,6 +47,7 @@ import org.junit.runners.Suite;
    us.ihmc.robotics.geometry.LineSegment3dTest.class,
    us.ihmc.robotics.geometry.PointToLineUnProjectorTest.class,
    us.ihmc.robotics.geometry.QuaternionRotationRelationshipTest.class,
+   us.ihmc.robotics.geometry.QuaternionToolsTest.class,
    us.ihmc.robotics.geometry.RigidBodyTransformTest.class,
    us.ihmc.robotics.geometry.RotationalInertiaCalculatorTest.class,
    us.ihmc.robotics.geometry.RotationFunctionsTest.class,

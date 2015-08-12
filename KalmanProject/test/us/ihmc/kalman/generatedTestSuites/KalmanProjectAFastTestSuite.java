@@ -7,7 +7,6 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.robotics.geometry.QuaternionToolsTest.class,
    us.ihmc.kalman.imu.testCases.KalmanFilterComparisonTest.class,
    us.ihmc.kalman.YoKalmanFilterTest.class
 })
