@@ -1,32 +1,32 @@
-LeftHipRotator: 0.0
-LeftHipAdductor: 0.0
-LeftHipExtensor: -0.0
-LeftKneeExtensor: -0.0
-LeftAnkleExtensor: -0.0
-LeftAnkle: 0.0
-RightHipRotator: 0.0
-RightHipAdductor: 0.0
-RightHipExtensor: -0.0
-RightKneeExtensor: -0.0
-RightAnkleExtensor: -0.0
-RightAnkle: 0.0
-WaistRotator: 0.0
-WaistExtensor: -0.0
-WaistLateralExtensor: 0.0
-LeftShoulderExtensor: 0.0
-LeftShoulderAdductor: -0.7
-LeftShoulderSupinator: 0.0
-LeftElbowExtensor: -0.0
-LeftForearmSupinator: 0.0
-LeftWristExtensor: 0.0
-LeftWrist: 0.0
-RightShoulderExtensor: 0.0
-RightShoulderAdductor: -0.7
-RightShoulderSupinator: 0.0
-RightElbowExtensor: 0.0
-RightForearmSupinator: 0.0
-RightWristExtensor: 0.0
-RightWrist: 0.0
-LowerNeckExtensor: -0.0
-NeckRotator: 0.0
-UpperNeckExtensor: 0.0
+LeftHipYaw : 0.0                 
+LeftHipRoll : 0.0                
+LeftHipPitch : -0.0               
+LeftKneePitch : 0.0               
+LeftAnklePitch : -0.0              
+LeftAnkleRoll : 0.0              
+RightHipYaw : 0.0                
+RightHipRoll : 0.0               
+RightHipPitch : -0.0              
+RightKneePitch : 0.0              
+RightAnklePitch : -0.0            
+RightAnkleRoll : 0.0            
+TorsoYaw : 0.0                  
+TorsoPitch : 0.0                
+TorsoRoll : 0.0                 
+LeftShoulderPitch : -0.0           
+LeftShoulderRoll : -0.0          
+LeftShoulderYaw : 0.0           
+LeftElbowPitch : -0.0             
+LeftForearmYaw : 0.0            
+LeftWristRoll : 0.0             
+LeftWristPitch : 0.0            
+LowerNeckPitch : 0.0            
+NeckYaw : 0.0                   
+UpperNeckPitch : 0.0            
+RightShoulderPitch : -0.0         
+RightShoulderRoll : 0.0         
+RightShoulderYaw : 0.0          
+RightElbowPitch : 0.0            
+RightForearmYaw : 0.0            
+RightWristRoll : 0.0            
+RightWristPitch : 0.0      
