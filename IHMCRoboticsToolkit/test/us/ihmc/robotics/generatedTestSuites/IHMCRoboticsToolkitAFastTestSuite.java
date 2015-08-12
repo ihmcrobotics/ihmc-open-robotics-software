@@ -142,7 +142,9 @@ import org.junit.runners.Suite;
    us.ihmc.robotics.trajectories.providers.ConstantPositionProviderTest.class,
    us.ihmc.robotics.trajectories.providers.CurrentPositionProviderTest.class,
    us.ihmc.robotics.trajectories.TrapezoidalVelocityTrajectoryTest.class,
-   us.ihmc.robotics.trajectories.WaypointMotionGeneratorTest.class
+   us.ihmc.robotics.trajectories.WaypointMotionGeneratorTest.class,
+   us.ihmc.robotics.lidar.LidarScanTest.class,
+   us.ihmc.robotics.lidar.LidarScanParametersTest.class
 })
 
 public class IHMCRoboticsToolkitAFastTestSuite
