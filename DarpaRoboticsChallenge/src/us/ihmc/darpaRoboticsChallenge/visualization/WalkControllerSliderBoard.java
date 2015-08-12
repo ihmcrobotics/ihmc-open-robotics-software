@@ -88,6 +88,22 @@ public class WalkControllerSliderBoard
 
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.WalkingDesireds.toString());
       sliderBoardConfigurationManager.clearControls();
+      
+      /* ICPAndCoPFun */
+      sliderBoardConfigurationManager.setButton(1, registry.getVariable("PelvisICPBasedTranslationManager", "manualModeICPOffset"));
+      sliderBoardConfigurationManager.setSlider(1, "desiredICPOffsetX", registry, -0.6, 0.6);
+      sliderBoardConfigurationManager.setKnob(1, "desiredICPOffsetY", registry, -0.6, 0.6);
+      
+      sliderBoardConfigurationManager.setSlider(2, "ChestComOffsetX", registry, -0.5, 0.5);
+      sliderBoardConfigurationManager.setKnob(2, "ChestComOffsetY", registry, -0.5, 0.5);
+      sliderBoardConfigurationManager.setSlider(3, "ChestComOffsetZ", registry, 0.0, 0.5);
+
+      sliderBoardConfigurationManager.setKnob(9, "desiredICPEccentricity", registry, 0, .9);
+      sliderBoardConfigurationManager.setKnob(10, "desiredICPAngle", registry, -Math.PI, Math.PI);
+      
+      sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.ICPAndCoPFun.toString());
+      sliderBoardConfigurationManager.clearControls();
+      
 
       /* Terrain Exploration Section */
       sliderBoardConfigurationManager.setSlider(1, "footCoPOffsetX", registry, -0.2, 0.2);
@@ -263,6 +279,6 @@ public class WalkControllerSliderBoard
 
    private enum SliderBoardMode
    {
-      WalkingGains, WalkingDesireds, TerrainExploration, HeadJointControl, LeftHandGrasping, RightHandGrasping
+      WalkingGains, WalkingDesireds, ICPAndCoPFun, TerrainExploration, HeadJointControl, LeftHandGrasping, RightHandGrasping
    };
 }
