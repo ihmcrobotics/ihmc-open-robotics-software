@@ -31,9 +31,8 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.tools.test.JUnitTools;
 
-public class CentroidalMomentumMatrixTest
+public class CentroidalMomentumMatrixSCSTest
 {
-
 	@EstimatedDuration
 	@Test(timeout=300000)
    public void testTree()
@@ -48,7 +47,7 @@ public class CentroidalMomentumMatrixTest
       double gravity = 0.0;
 
       int numberOfJoints = 3;
-      InverseDynamicsCalculatorTest.createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity,
+      InverseDynamicsCalculatorSCSTest.createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity,
             true, true, random);
       robot.updateVelocities();
 
