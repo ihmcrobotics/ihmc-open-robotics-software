@@ -17,6 +17,8 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.robotController.GazeboThreadedRobotController;
 import us.ihmc.robotDataCommunication.YoVariableServer;
@@ -109,12 +111,18 @@ public class GazeboControllerFactory
          e.printStackTrace();
       }
 
-      URI rosMasterURI = NetworkParameters.getROSURI();
+      DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
+      URI rosURI = NetworkParameters.getROSURI();
+      networkModuleParameters.setRosUri(rosURI);
+      networkModuleParameters.enableGFECommunicator(true);
+      networkModuleParameters.enableLocalControllerCommunicator(true);
+
+      new DRCNetworkProcessor(robotModel, networkModuleParameters);
 
       PacketCommunicator gfe_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
 
-      new ThePeoplesGloriousNetworkProcessor(rosMasterURI, gfe_communicator, null, ppsOffsetProvider, robotModel, nameSpace + "/" + robotName, tfPrefix);
+      new ThePeoplesGloriousNetworkProcessor(rosURI, gfe_communicator, null, ppsOffsetProvider, robotModel, nameSpace + "/" + robotName, tfPrefix);
 
       yoVariableServer.start();
 
@@ -127,12 +135,7 @@ public class GazeboControllerFactory
 
 //      if (USE_GUI)
 //      {
-//         DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
-//         URI rosURI = NetworkParameters.getROSURI();
-//         networkModuleParameters.setRosUri(rosURI);
-//         networkModuleParameters.enableUiModule(true);
-//         networkModuleParameters.enableRosModule(true);
-//         networkModuleParameters.enableLocalControllerCommunicator(true);
+
 //         new DRCNetworkProcessor(robotModel, networkModuleParameters);
 //      }
       try
