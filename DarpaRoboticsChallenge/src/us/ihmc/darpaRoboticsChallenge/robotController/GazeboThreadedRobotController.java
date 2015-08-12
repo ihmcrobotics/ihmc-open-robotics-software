@@ -4,14 +4,14 @@ import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotCo
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControllerExecutor;
 
-public class DRCSimGazeboThreadedRobotController extends AbstractThreadedRobotController implements Runnable
+public class GazeboThreadedRobotController extends AbstractThreadedRobotController implements Runnable
 {
 
    private volatile boolean running = true;
    
-   public DRCSimGazeboThreadedRobotController()
+   public GazeboThreadedRobotController()
    {
-      super(DRCSimGazeboThreadedRobotController.class.getSimpleName());
+      super(GazeboThreadedRobotController.class.getSimpleName());
    }
 
    @Override

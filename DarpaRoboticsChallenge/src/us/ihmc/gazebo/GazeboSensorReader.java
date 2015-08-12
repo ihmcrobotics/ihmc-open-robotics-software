@@ -1,4 +1,4 @@
-package us.ihmc.atlas.drcsimGazebo;
+package us.ihmc.gazebo;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -32,9 +32,9 @@ import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
-public class DRCSimGazeboSensorReader implements SensorReader
+public class GazeboSensorReader implements SensorReader
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("DRCSimSensorReader");
+   private final YoVariableRegistry registry = new YoVariableRegistry("GazeboSensorReader");
 
    private final SocketAddress address = new InetSocketAddress("127.0.0.1", 1234);
    private final ByteBuffer data;
@@ -58,9 +58,8 @@ public class DRCSimGazeboSensorReader implements SensorReader
    private final Vector3d angularVelocity = new Vector3d();
    private final DenseMatrix64F wrench = new DenseMatrix64F(6, 1);
 
-   public DRCSimGazeboSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, DRCRobotSensorInformation sensorInformation,
-         StateEstimatorParameters stateEstimatorParameters, RawJointSensorDataHolderMap rawJointSensorDataHolderMap,
-         YoVariableRegistry parentRegistry)
+   public GazeboSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, DRCRobotSensorInformation sensorInformation,
+         StateEstimatorParameters stateEstimatorParameters, RawJointSensorDataHolderMap rawJointSensorDataHolderMap, YoVariableRegistry parentRegistry)
    {
       this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, stateEstimatorParameters, registry);
 
@@ -91,7 +90,7 @@ public class DRCSimGazeboSensorReader implements SensorReader
    public void connect()
    {
       boolean isConnected = false;
-      System.out.println("[DRCSimGazeboSensorReader] Connecting to " + address);
+      System.out.println("[GazeboSensorReader] Connecting to " + address);
       
       while(!isConnected)
       {
@@ -123,7 +122,7 @@ public class DRCSimGazeboSensorReader implements SensorReader
          }
       }
 
-      System.out.println("[DRCSimGazeboSensorReader] Connecting to " + address);
+      System.out.println("[GazeboSensorReader] Connecting to " + address);
    }
    
    @Override

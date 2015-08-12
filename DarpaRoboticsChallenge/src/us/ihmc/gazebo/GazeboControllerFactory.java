@@ -1,23 +1,10 @@
-package us.ihmc.atlas.drcsimGazebo;
+package us.ihmc.gazebo;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ComponentBasedVariousWalkingProviderFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DataProducerVariousWalkingProviderFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -31,35 +18,34 @@ import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
-import us.ihmc.darpaRoboticsChallenge.robotController.DRCSimGazeboThreadedRobotController;
+import us.ihmc.darpaRoboticsChallenge.robotController.GazeboThreadedRobotController;
 import us.ihmc.realtime.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
-public class DRCSimGazeboControllerFactory
+import java.io.IOException;
+import java.net.URI;
+
+public class GazeboControllerFactory
 {
    private static final boolean USE_GUI = true;
 
-   private final AtlasSensorInformation sensorInformation;
+   private final DRCRobotSensorInformation sensorInformation;
 
    private static final double gravity = -9.81;
-   private static final boolean useRobotiqHands = false;
 
-   public DRCSimGazeboControllerFactory()
+   public GazeboControllerFactory(DRCRobotModel robotModel)
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.GAZEBO_ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.GAZEBO, false);
       /*
        * Create registries
        */
-      sensorInformation = (AtlasSensorInformation) robotModel.getSensorInformation();
+      sensorInformation = robotModel.getSensorInformation();
 
-      AtlasContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
-      contactPointParameters.createHandKnobContactPoints();
 
       /*
        * Create network servers/clients
@@ -69,7 +55,7 @@ public class DRCSimGazeboControllerFactory
       
 
       //      KryoLocalPacketCommunicator packetCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboPluginController");
-      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler("DRCSimGazeboYoVariableServer"), robotModel.getLogModelProvider(), robotModel.getLogSettings(),
+      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler("GazeboYoVariableServer"), robotModel.getLogModelProvider(), robotModel.getLogSettings(),
             robotModel.getEstimatorDT());
 
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
@@ -83,13 +69,13 @@ public class DRCSimGazeboControllerFactory
        */
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
-      DRCSimGazeboSensorReaderFactory sensorReaderFactory = new DRCSimGazeboSensorReaderFactory(sensorInformation, stateEstimatorParameters);
+      GazeboSensorReaderFactory sensorReaderFactory = new GazeboSensorReaderFactory(sensorInformation, stateEstimatorParameters);
 
       /*
        * Create output writer
        */
 
-      AtlasDRCSimGazeboOutputWriter outputWriter = new AtlasDRCSimGazeboOutputWriter(robotModel);
+      GazeboOutputWriter outputWriter = new GazeboOutputWriter(robotModel);
 
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(dataProducer);
       dataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
@@ -107,24 +93,12 @@ public class DRCSimGazeboControllerFactory
       /*
        * Setup threads
        */
-      DRCSimGazeboThreadedRobotController robotController = new DRCSimGazeboThreadedRobotController();
+      GazeboThreadedRobotController robotController = new GazeboThreadedRobotController();
       int estimatorTicksPerSimulationTick = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getEstimatorDT());
       int controllerTicksPerSimulationTick = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
 
       robotController.addController(estimatorThread, estimatorTicksPerSimulationTick, false);
       robotController.addController(controllerThread, controllerTicksPerSimulationTick, true);
-
-      if (useRobotiqHands)
-      {
-         boolean createCollisionMeshes = false;
-         SDFRobot sdfRobot = robotModel.createSdfRobot(createCollisionMeshes);
-         SimulatedRobotiqHandsController simulatedHandsController = (SimulatedRobotiqHandsController) robotModel.createSimulatedHandController(sdfRobot,
-               threadDataSynchronizer, dataProducer);
-         robotController.addController(simulatedHandsController, controllerTicksPerSimulationTick, true);
-
-         SideDependentList<List<OneDegreeOfFreedomJoint>> allFingerJoints = simulatedHandsController.getAllFingerJoints();
-         outputWriter.setFingerJointsProvider(allFingerJoints);
-      }
 
       try
       {
@@ -198,10 +172,5 @@ public class DRCSimGazeboControllerFactory
       }
 
       return controllerFactory;
-   }
-
-   public static void main(String[] args)
-   {
-      new DRCSimGazeboControllerFactory();
    }
 }

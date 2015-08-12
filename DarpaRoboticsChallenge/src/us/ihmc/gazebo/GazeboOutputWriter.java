@@ -1,4 +1,4 @@
-package us.ihmc.atlas.drcsimGazebo;
+package us.ihmc.gazebo;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -25,13 +25,13 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
+public class GazeboOutputWriter implements DRCOutputWriter
 {
    private final SocketAddress address = new InetSocketAddress("127.0.0.1", 1235);
 
    private SocketChannel channel;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(DRCSimGazeboSensorReaderFactory.class.getSimpleName());
+   private final YoVariableRegistry registry = new YoVariableRegistry(GazeboSensorReaderFactory.class.getSimpleName());
 
    private final int estimatorTicksPerControlTick;
    private final int estimatorFrequencyInHz;
@@ -41,7 +41,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
    // Since the finger joint controller doesn't set the OneDoFJoints used in this writer, this acts as an object communicator for finger joint angles
    private HashMap<String, OneDegreeOfFreedomJoint> fingerJointMap = null;
 
-   public AtlasDRCSimGazeboOutputWriter(AtlasRobotModel robotModel)
+   public GazeboOutputWriter(DRCRobotModel robotModel)
    {
       estimatorTicksPerControlTick = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
       estimatorFrequencyInHz = (int) (1.0 / robotModel.getEstimatorDT());
@@ -153,7 +153,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
 //      }
 
       boolean isConnected = false;
-      System.out.println("[AtlasDRCSimGazeboOutputWriter] Connecting to " + address);
+      System.out.println("[GazeboOutputWriter] Connecting to " + address);
       while(!isConnected)
       {
          try
@@ -185,7 +185,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
          }
       }
 
-      System.out.println("[AtlasDRCSimGazeboOutputWriter] Connected");
+      System.out.println("[GazeboOutputWriter] Connected");
       System.out.println("num of joints = " + joints.size());
    }
 
