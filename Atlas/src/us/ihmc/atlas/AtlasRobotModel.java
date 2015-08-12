@@ -405,9 +405,6 @@ public class AtlasRobotModel implements DRCRobotModel
             case ATLAS_UNPLUGGED_V5_NO_HANDS :
                break;
 
-            case GAZEBO_ATLAS_UNPLUGGED_V5_NO_HANDS :
-               break;
-
             default :
                break;
          }

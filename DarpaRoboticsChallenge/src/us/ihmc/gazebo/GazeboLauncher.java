@@ -1,8 +1,8 @@
-package us.ihmc.atlas.drcsimGazebo;
+package us.ihmc.gazebo;
 
 import us.ihmc.tools.thread.ThreadTools;
 
-public class DRCSimGazeboLauncher
+public class GazeboLauncher
 {
    public static final boolean RUN_CATKIN_MAKE = true;
    public enum InitialPose {STANDING, CAR_FRONT, CAR_LATER};
@@ -10,10 +10,10 @@ public class DRCSimGazeboLauncher
    
    public static void main(String[] args)
    {
-      new DRCSimGazeboLauncher();
+      new GazeboLauncher();
    }
 
-   public DRCSimGazeboLauncher()
+   public GazeboLauncher()
    {      
       runProcess();
    }
