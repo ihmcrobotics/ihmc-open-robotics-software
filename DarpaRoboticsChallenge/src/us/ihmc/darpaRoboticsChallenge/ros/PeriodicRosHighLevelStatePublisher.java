@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.HighLevelStateChangePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.realtime.util.PeriodicNonRealtimeThreadScheduler;
+import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosHighLevelStatePublisher;
 
