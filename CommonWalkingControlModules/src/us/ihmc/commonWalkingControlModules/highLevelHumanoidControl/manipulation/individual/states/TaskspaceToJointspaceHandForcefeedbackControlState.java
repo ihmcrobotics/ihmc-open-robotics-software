@@ -257,34 +257,6 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		fzFiltered.reset();
 	}
 
-	private void getTangentForce()
-	{
-		/**
-		 * Get force to project on tangent vector
-		 */
-		
-		
-		forceVectorInWorld.set(fxFiltered.getDoubleValue(), fyFiltered.getDoubleValue(), fzFiltered.getDoubleValue());
-
-		if (tangentTrajectoryVectorInWorld.length() > 0.0)
-		{
-			tangentTrajectoryVectorInWorld.normalize();
-			lastTangentTrajectoryVectorInWorld.set(tangentTrajectoryVectorInWorld);
-			currentTangentialForce.set(forceVectorInWorld.dot(tangentTrajectoryVectorInWorld));
-			if (SIMULATION)
-			{
-//				currentTangentialForce.add(ForceControlHelper.generateSinusoidalDisturbance(10.0, 0.1, currentTimeInState.getDoubleValue(), Math.PI / 3.0));
-//				currentTangentialForce.add(ForceControlHelper.generateDriftDisturbance(0.01, currentTimeInState.getDoubleValue()));
-			}
-		}
-		else
-		{
-//			lastTangentTrajectoryVectorInWorld.normalize();
-			currentTangentialForce.set(forceVectorInWorld.dot(lastTangentTrajectoryVectorInWorld));
-			currentTangentialForce.set(0.0);
-		}
-
-	}
 
 	private void mpaMpcControl()
 	{
@@ -314,7 +286,9 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		CutForceControlHelper.wristSensorUpdate(wristSensorWrench, worldFrame, fxRaw, fyRaw, fzRaw, fxFiltered, fyFiltered, fzFiltered,
 				massHandandDrill.getDoubleValue(), false, randomNumberGenerator);
 		
-		getTangentForce();
+		CutForceControlHelper.getTangentForce(forceVectorInWorld, currentTangentialForce, tangentTrajectoryVectorInWorld, lastTangentTrajectoryVectorInWorld,
+				fxFiltered.getDoubleValue(), fyFiltered.getDoubleValue(), fzFiltered.getDoubleValue(), false, currentTimeInState.getDoubleValue());
+		
 		mpcVelocity.set(0.0);
 
 		/**
@@ -393,7 +367,8 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		wristSensor.packWrench(wristSensorWrench);
 		CutForceControlHelper.wristSensorUpdate(wristSensorWrench, worldFrame, fxRaw, fyRaw, fzRaw, fxFiltered, fyFiltered, fzFiltered,
 				massHandandDrill.getDoubleValue(), false, randomNumberGenerator);
-		getTangentForce();
+		CutForceControlHelper.getTangentForce(forceVectorInWorld, currentTangentialForce, tangentTrajectoryVectorInWorld, lastTangentTrajectoryVectorInWorld,
+				fxFiltered.getDoubleValue(), fyFiltered.getDoubleValue(), fzFiltered.getDoubleValue(), false, currentTimeInState.getDoubleValue());
 
 //		poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue());
 //		poseTrajectoryGenerator.get(desiredPose);
