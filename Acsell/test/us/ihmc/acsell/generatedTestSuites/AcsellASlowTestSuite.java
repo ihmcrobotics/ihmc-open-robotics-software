@@ -7,10 +7,10 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.acsell.BonoFlatGroundWalkingKinematicFootSwitchTest.class
+   us.ihmc.acsell.BonoFlatGroundWalkingTest.class
 })
 
-public class AcsellAInDevelopmentTestSuite
+public class AcsellASlowTestSuite
 {
    public static void main(String[] args)
    {
