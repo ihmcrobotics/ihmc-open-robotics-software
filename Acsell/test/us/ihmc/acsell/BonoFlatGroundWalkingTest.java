@@ -12,7 +12,7 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 
-@BambooPlan(planType = BambooPlanType.InDevelopment)
+@BambooPlan(planType = BambooPlanType.Slow)
 public class BonoFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private BonoRobotModel robotModel;
