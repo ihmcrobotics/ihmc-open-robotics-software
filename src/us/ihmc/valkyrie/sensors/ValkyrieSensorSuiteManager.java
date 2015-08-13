@@ -86,6 +86,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
             rosMainNode, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, sensorURI, multisenseLeftEyeCameraParameters, multisenseLidarParameters,
             multisenseStereoParameters, shouldUseRosParameterSetters);
 
+      multiSenseSensorManager.initializeParameterListeners();
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
       rosMainNode.execute();
    }
