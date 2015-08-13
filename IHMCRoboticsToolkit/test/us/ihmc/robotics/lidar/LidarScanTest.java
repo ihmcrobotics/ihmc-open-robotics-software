@@ -18,7 +18,7 @@ import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class LidarScanTest
 {
-
+	
 	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 30000)
    public void testFlipNew()
@@ -164,9 +164,25 @@ public class LidarScanTest
           RigidBodyTransform randomTransform2 = RigidBodyTransform.generateRandomTransform(random);
 
           lidarScan1 = new LidarScan(new LidarScanParameters(), randomTransform1, randomTransform2, ranges1);
-
       }
       
       assertEquals(lidarScan1.size(), 720, 1e-7f);
+   }
+   
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
+   public void testConstructor2()
+   {
+      Random random = new Random();
+      float[] ranges1;
+      LidarScan lidarScan1 = null;
+      for(int i = 0; i < 1000; i++)
+      {
+    	  int id = random.nextInt();
+    	  ranges1 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
+          lidarScan1 = new LidarScan(new LidarScanParameters(), ranges1, id);
+          assertEquals(lidarScan1.size(), 720, 1e-7f);
+          assertEquals(lidarScan1.getSensorId(), id);
+      }
    }
 }
