@@ -9,7 +9,7 @@ import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment})
+@BambooPlan(planType = {BambooPlanType.Slow})
 public class AtlasHeadOrientationBehaviorTest extends DRCHeadOrientationBehaviorTest
 {
    private final AtlasRobotModel robotModel;
