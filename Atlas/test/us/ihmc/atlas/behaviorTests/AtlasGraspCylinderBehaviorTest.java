@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment})
+@BambooPlan(planType = {BambooPlanType.Slow})
 public class AtlasGraspCylinderBehaviorTest extends DRCGraspCylinderBehaviorTest
 {
    private final AtlasRobotModel robotModel;

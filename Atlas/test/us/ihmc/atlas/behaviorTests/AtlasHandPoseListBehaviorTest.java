@@ -8,8 +8,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 
-
-@BambooPlan(planType = {BambooPlanType.InDevelopment})
+@BambooPlan(planType = {BambooPlanType.Slow})
 public class AtlasHandPoseListBehaviorTest extends DRCHandPoseListBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -18,7 +17,6 @@ public class AtlasHandPoseListBehaviorTest extends DRCHandPoseListBehaviorTest
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
    }
-   
    
    @Override
    public DRCRobotModel getRobotModel()
@@ -31,5 +29,4 @@ public class AtlasHandPoseListBehaviorTest extends DRCHandPoseListBehaviorTest
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
-
 }
