@@ -97,8 +97,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    //Make pointCloudParameters null to not use point cloud in UI.
    private final DRCRobotPointCloudParameters[] pointCloudParamaters = new DRCRobotPointCloudParameters[1];
    public static final int POINT_CLOUD_SENSOR_ID = 0;
-   private static final String pointCloudSensorName = "/v1/Ibeo_sensor";
-   private static final String pointCloudTopic = "/v1/Ensenso/Points_in_world";
    
    private static int multisenseCameraId = 0;
    private static int leftHazardCameraId = 1;
@@ -112,12 +110,16 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    public static int MULTISENSE_LIDAR_ID = 0;                    
    public static int MULTISENSE_STEREO_ID = 0;        
    
+   private static final String multisense_namespace = "/multisense";
+   
    private static final String headLinkName = "multisense_root_link";
    private final DRCRobotCameraParameters[] cameraParamaters = new DRCRobotCameraParameters[3];
    
    private static final String multisenseCameraName = "stereo_camera_left";
-   private static final String foreheadCameraInfo = "/head/camera_info";
-   private static final String foreheadCameraTopic = "/head/image_color/compressed";
+   
+   private static final String left_camera_topic = multisense_namespace + "/left/image_rect_color/compressed";
+   private static final String left_info_camera_topic = multisense_namespace +"/left/image_rect_color/camera_info";//left/image_rect_color/camera_info
+   
    
    private static final String leftStereoCameraName = "/v1/LeftHazardCamera___default__";
    private static final String leftCameraTopic = "/v1/LeftHazardCamera/compressed";
@@ -128,7 +130,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    /**
     * LIDAR Parameters
     */
-   private static final String multisense_namespace = "/multisense";
    private final DRCRobotLidarParameters[] lidarParamaters = new DRCRobotLidarParameters[1];
 
    private static final double lidar_spindle_velocity = 2.183;
@@ -140,7 +141,8 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String lidarSensorName = "head_hokuyo_sensor";
    private static final String lidarJointTopic = multisense_namespace + "/joint_states";
    private static final String multisense_laser_topic_string = multisense_namespace+"/lidar_scan";
-   private static final String multisense_filtered_laser_as_point_cloud_topic_string = multisense_namespace+"/filtered_cloud";
+   private static final String multisense_near_Scan = multisense_namespace+"/near_scan";
+   private static final String multisense_height_map = multisense_namespace+"/height_map";
    private static final String multisenseHandoffFrame = "multisense_root_link";
    
    private static final String rightTrunkIMUSensor = "Torso_RightTorsoIMU";
@@ -153,14 +155,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       transformFromHeadToCamera.setRotation(new Quat4d(0.99786, -5.2082e-05, -0.065403, -0.00079462));
       transformFromHeadToCamera.setTranslation(0.18335, 0.035, 0.0774);
    }
-   
-   private static final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTransformsForRos = new ArrayList<ImmutableTriple<String,String,RigidBodyTransform>>();
-   private static final String multisenseBaseLinkName = "multisense/head_root";
-   private static final ImmutableTriple<String, String, RigidBodyTransform> transformFromHeadToMultisense = new ImmutableTriple<String, String, RigidBodyTransform>(headLinkName, multisenseBaseLinkName , new RigidBodyTransform());
-   {
-      staticTransformsForRos.add(transformFromHeadToMultisense);
-   }
-  
    
    private static final HashMap<String, Integer> imuUSBSerialIds = new HashMap<>();
    static
@@ -178,15 +172,11 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    public ValkyrieSensorInformation(boolean runningOnRealRobot)
    {
-      cameraParamaters[0] = new DRCRobotCameraParameters(null, multisenseCameraName,foreheadCameraTopic,headLinkName,foreheadCameraInfo,transformFromHeadToCamera, multisenseCameraId);
+      cameraParamaters[0] = new DRCRobotCameraParameters(null, multisenseCameraName,left_camera_topic,headLinkName,left_info_camera_topic,transformFromHeadToCamera, multisenseCameraId);
       cameraParamaters[1] = new DRCRobotCameraParameters(RobotSide.LEFT, leftStereoCameraName,leftCameraTopic,headLinkName,leftHazardCameraId);
       cameraParamaters[2] = new DRCRobotCameraParameters(RobotSide.RIGHT, rightStereoCameraName,rightCameraTopic,headLinkName,rightHazardCameraId);
-      if(pointCloudParamaters.length > 0)
-      {
-         pointCloudParamaters[POINT_CLOUD_SENSOR_ID] = new DRCRobotPointCloudParameters(pointCloudSensorName,pointCloudTopic,headLinkName,POINT_CLOUD_SENSOR_ID);
-      }
 
-      lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(runningOnRealRobot, lidarSensorName, multisense_filtered_laser_as_point_cloud_topic_string, multisense_filtered_laser_as_point_cloud_topic_string,
+      lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(runningOnRealRobot, lidarSensorName, multisense_near_Scan, multisense_height_map,
             lidarJointName, lidarJointTopic, lidarPoseLink, multisenseHandoffFrame, lidarEndFrameInSdf, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
    }
    
@@ -346,6 +336,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    @Override
    public ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> getStaticTransformsForRos()
    {
-      return staticTransformsForRos;
+      return null;
    }
 }
