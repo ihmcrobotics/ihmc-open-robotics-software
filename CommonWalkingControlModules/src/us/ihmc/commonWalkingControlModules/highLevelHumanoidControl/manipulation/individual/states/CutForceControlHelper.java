@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import java.util.Random;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -16,7 +18,7 @@ public class CutForceControlHelper {
 		
 	}
 	/**
-	 * 
+	 * Reads the forces from the sensors, compensates for gravity, stores the values in yoVariables and updates filtered variables.
 	 * @param wristSensorWrench
 	 * @param worldFrame
 	 * @param fxRaw
@@ -77,6 +79,44 @@ public class CutForceControlHelper {
 		fxFiltered.update();
 		fyFiltered.update();
 		fzFiltered.update();
+	}
+	
+	/**
+	 * Projects the filtered forces in world coordinates onto the tangent vector.
+	 * @param forceVectorInWorld
+	 * @param currentTangentialForce
+	 * @param tangentTrajectoryVectorInWorld
+	 * @param lastTangentTrajectoryVectorInWorld
+	 * @param fxFiltered
+	 * @param fyFiltered
+	 * @param fzFiltered
+	 * @param addDisturbances
+	 * @param timeForDisturbances
+	 */
+	static void getTangentForce(Vector3d forceVectorInWorld, DoubleYoVariable currentTangentialForce,
+			Vector3d tangentTrajectoryVectorInWorld, Vector3d lastTangentTrajectoryVectorInWorld,
+			Double fxFiltered, Double fyFiltered, Double fzFiltered,
+			boolean addDisturbances, double timeForDisturbances)
+	{
+		forceVectorInWorld.set(fxFiltered, fyFiltered, fzFiltered);
+
+		if (tangentTrajectoryVectorInWorld.length() > 0.0)
+		{
+			tangentTrajectoryVectorInWorld.normalize();
+			lastTangentTrajectoryVectorInWorld.set(tangentTrajectoryVectorInWorld);
+			currentTangentialForce.set(forceVectorInWorld.dot(tangentTrajectoryVectorInWorld));
+			if (addDisturbances)
+			{
+				currentTangentialForce.add(generateSinusoidalDisturbance(10.0, 0.1, timeForDisturbances, Math.PI / 3.0));
+				currentTangentialForce.add(generateDriftDisturbance(0.01, timeForDisturbances));
+			}
+		}
+		else
+		{
+//			currentTangentialForce.set(forceVectorInWorld.dot(lastTangentTrajectoryVectorInWorld));
+			currentTangentialForce.set(0.0);
+		}
+
 	}
 
 	/**
@@ -223,4 +263,5 @@ public class CutForceControlHelper {
 			return -amp;
 		}
 	}
+	
 }
