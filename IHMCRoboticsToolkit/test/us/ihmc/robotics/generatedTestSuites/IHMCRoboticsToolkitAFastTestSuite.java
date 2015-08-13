@@ -81,6 +81,7 @@ import org.junit.runners.Suite;
    us.ihmc.robotics.kinematics.TimeStampedTransform3DTest.class,
    us.ihmc.robotics.kinematics.TransformInterpolationCalculatorTest.class,
    us.ihmc.robotics.lidar.AbstractLidarScanTest.class,
+   us.ihmc.robotics.lidar.LidarScanParametersTest.class,
    us.ihmc.robotics.lidar.LidarScanTest.class,
    us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculatorTest.class,
    us.ihmc.robotics.linearAlgebra.MatrixOfCofactorsCalculatorInefficientTest.class,
@@ -142,9 +143,7 @@ import org.junit.runners.Suite;
    us.ihmc.robotics.trajectories.providers.ConstantPositionProviderTest.class,
    us.ihmc.robotics.trajectories.providers.CurrentPositionProviderTest.class,
    us.ihmc.robotics.trajectories.TrapezoidalVelocityTrajectoryTest.class,
-   us.ihmc.robotics.trajectories.WaypointMotionGeneratorTest.class,
-   us.ihmc.robotics.lidar.LidarScanTest.class,
-   us.ihmc.robotics.lidar.LidarScanParametersTest.class
+   us.ihmc.robotics.trajectories.WaypointMotionGeneratorTest.class
 })
 
 public class IHMCRoboticsToolkitAFastTestSuite
