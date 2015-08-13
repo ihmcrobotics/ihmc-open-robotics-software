@@ -12,11 +12,11 @@ import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.VideoA})
+@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.VideoA})
 public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
-
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+   
    @Override
    public DRCRobotModel getRobotModel()
    {
