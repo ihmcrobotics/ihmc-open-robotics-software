@@ -7,10 +7,11 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasPelvisLowGainsTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasWallWorldTest.class
 })
 
-public class AtlasSInDevelopmentTestSuite
+public class AtlasGSlowTestSuite
 {
    public static void main(String[] args)
    {
