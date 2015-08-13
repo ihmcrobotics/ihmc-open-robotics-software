@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
+import javax.vecmath.Vector3d;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,8 +34,6 @@ public class CutForceControlHelperTest {
 	private final DoubleYoVariable C2adapted = new DoubleYoVariable("c2", registry);
 	private static final double VELOCITYERROR = 10e-2;
 	private static final double EPSILON = 10e-6;
-	
-	
 	
 	@Before
 	public void showMemoryUsageBeforeTest()
@@ -68,9 +68,10 @@ public class CutForceControlHelperTest {
 	/**
 	 * Test that the MPA algorithm settles to a possible set of parameters C1,C2 to represent the desired F(v).
 	 * Note that the adapted parameters do not necessarily correspond to the real values.
+	 * The selection range for c2 and v has to be chosen small since they are in the exponent of the function.
 	 */
 	@EstimatedDuration
-	@Test(timeout = 30000)
+	@Test(timeout = 300000)
 	public void testModelParameterAdaption()
 	{
 		C1 = RandomTools.generateRandomDouble(randomNumberGenerator, 80.0, 120.0);
@@ -93,7 +94,7 @@ public class CutForceControlHelperTest {
 	 * Test the ramp function that scales the weigthing matrix.
 	 */
 	@EstimatedDuration
-	@Test(timeout = 3000000)
+	@Test(timeout = 300000)
 	public void testAdaptW()
 	{
 		final double w10 = RandomTools.generateRandomDouble(randomNumberGenerator, 0.1, 50.0);
@@ -125,5 +126,58 @@ public class CutForceControlHelperTest {
 		assertEquals(w10/2.0, w11.getDoubleValue(), EPSILON);
 		assertEquals(w20/2.0, w22.getDoubleValue(), EPSILON);
 	}
+	/**
+	 * Test the getTangentForce method using geometric considerations.
+	 */
+	@EstimatedDuration
+	@Test(timeout = 300000)
+	public void testGetTangentForce()
+	{
+		final Vector3d lastTangentVector = RandomTools.generateRandomVector(randomNumberGenerator);
+		final Vector3d tangentVector = RandomTools.generateRandomVector(randomNumberGenerator);
+		final Vector3d forceVector = new Vector3d();
 	
+		
+		final Vector3d eX = new Vector3d(1.0, 0.0, 0.0);
+		final Vector3d eY = new Vector3d(0.0, 1.0, 0.0);
+		final Vector3d eZ = new Vector3d(0.0, 0.0, 1.0);
+		
+		
+		DoubleYoVariable currentTangentialForce = new DoubleYoVariable("Ftang", registry);
+		
+		double fxFiltered = RandomTools.generateRandomDouble(randomNumberGenerator, 10.0);
+		
+		
+		double fyFiltered = RandomTools.generateRandomDouble(randomNumberGenerator, 10.0);
+		double fzFiltered = RandomTools.generateRandomDouble(randomNumberGenerator, 10.0);
+		
+		// Projection on world base vectors
+		CutForceControlHelper.getTangentForce(forceVector, currentTangentialForce, eX, lastTangentVector, fxFiltered, fyFiltered, fzFiltered, false, 0.0);
+		assertEquals(forceVector.getX(), fxFiltered, EPSILON);
+		assertEquals(currentTangentialForce.getDoubleValue(), fxFiltered, EPSILON);
+		
+		CutForceControlHelper.getTangentForce(forceVector, currentTangentialForce, eY, lastTangentVector, fxFiltered, fyFiltered, fzFiltered, false, 0.0);
+		assertEquals(forceVector.getY(), fyFiltered, EPSILON);
+		assertEquals(currentTangentialForce.getDoubleValue(), fyFiltered, EPSILON);
+		
+		CutForceControlHelper.getTangentForce(forceVector, currentTangentialForce, eZ, lastTangentVector, fxFiltered, fyFiltered, fzFiltered, false, 0.0);
+		assertEquals(forceVector.getZ(), fzFiltered, EPSILON);
+		assertEquals(currentTangentialForce.getDoubleValue(), fzFiltered, EPSILON);
+		
+		// Projection on random tangent vector
+		CutForceControlHelper.getTangentForce(forceVector, currentTangentialForce, tangentVector, lastTangentVector, fxFiltered, fyFiltered, fzFiltered, false, 0.0);
+		
+		assertEquals(forceVector.dot(tangentVector), currentTangentialForce.getDoubleValue(), EPSILON);
+		assertEquals(currentTangentialForce.getDoubleValue(), fxFiltered * tangentVector.getX() + fyFiltered * tangentVector.getY() + fzFiltered * tangentVector.getZ(), EPSILON);
+		
+		//Make sure old tangent vector is updated
+		assertEquals(lastTangentVector.getX(), tangentVector.getX(), EPSILON);
+		assertEquals(lastTangentVector.getY(), tangentVector.getY(), EPSILON);
+		assertEquals(lastTangentVector.getZ(), tangentVector.getZ(), EPSILON);
+		
+		//Make sure set to zero when tangent vector is zero
+		tangentVector.set(0.0, 0.0, 0.0);
+		CutForceControlHelper.getTangentForce(forceVector, currentTangentialForce, tangentVector, lastTangentVector, fxFiltered, fyFiltered, fzFiltered, false, 0.0);
+		assertEquals(currentTangentialForce.getDoubleValue(), 0.0, EPSILON);
+	}
 }
