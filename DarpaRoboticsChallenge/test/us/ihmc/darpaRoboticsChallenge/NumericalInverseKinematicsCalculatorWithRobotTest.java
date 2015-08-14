@@ -261,8 +261,10 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          System.out.println("Maximal Solving Time: " + maximumTimeMillis + " ms");
       }
       
-      assertTrue(averageTimeMillis < 4.0);
-      assertTrue(maximumTimeMillis < 400.0);
+      final double maximumTimeMillisMax = 600.0;
+      final double averageTimeMillisMax = 4.0;
+      assertTrue("Average Solving Time > " + averageTimeMillisMax + " ms", averageTimeMillis < averageTimeMillisMax);
+      assertTrue("Maximal Solving Time > " + maximumTimeMillisMax + " ms", maximumTimeMillis < maximumTimeMillisMax);
       
       //NumericalInverseKinematicCalculator is much faster than the DDogLegOne, so use the following when running it...
 //      assertTrue(averageTimeMillis < 0.04);
