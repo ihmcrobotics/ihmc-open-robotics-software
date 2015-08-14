@@ -8,12 +8,10 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 
 public class AtlasOptimizationMomentumControlModuleTest extends DRCOptimizationMomentumControlModuleTest
 {
-
    @Override
    public DRCRobotModel getRobotModel()
    {
       return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
-      
    }
 
    @Override
@@ -21,5 +19,4 @@ public class AtlasOptimizationMomentumControlModuleTest extends DRCOptimizationM
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
-
 }
