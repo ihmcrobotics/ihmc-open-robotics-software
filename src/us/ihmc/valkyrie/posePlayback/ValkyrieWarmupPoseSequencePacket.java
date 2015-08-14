@@ -78,6 +78,8 @@ public class ValkyrieWarmupPoseSequencePacket implements PosePlaybackPacket
       {
          Map<String, Double> jointGains = gainMap.get(joint.getName());
          
+         System.out.println(joint.getName());
+         
          kps.put(joint, jointGains.get("kp"));
          kds.put(joint, jointGains.get("kd"));
       }
