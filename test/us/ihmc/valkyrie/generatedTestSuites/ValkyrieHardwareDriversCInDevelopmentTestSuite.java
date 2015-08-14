@@ -7,10 +7,10 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.valkyrie.ValkyrieObstacleCourseEveryBuildTest.class
+   us.ihmc.valkyrie.ValkyriePushRecoveryTest.class
 })
 
-public class ValkyrieHardwareDriversBFastTestSuite
+public class ValkyrieHardwareDriversCInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {

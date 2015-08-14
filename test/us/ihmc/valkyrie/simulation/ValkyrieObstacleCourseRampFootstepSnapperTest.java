@@ -21,5 +21,4 @@ public class ValkyrieObstacleCourseRampFootstepSnapperTest extends DRCObstacleCo
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
-
 }

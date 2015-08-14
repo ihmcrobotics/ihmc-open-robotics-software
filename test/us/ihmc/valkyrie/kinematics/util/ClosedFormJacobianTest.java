@@ -7,12 +7,15 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobian;
 import us.ihmc.valkyrie.kinematics.transmissions.InterpolatedPushRodTransmission;
 import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
 import us.ihmc.valkyrie.kinematics.util.ClosedFormJacobian;
 
+@BambooPlan(planType = BambooPlanType.InDevelopment)
 public class ClosedFormJacobianTest 
 {
     private static final boolean DEBUG                                     = false;

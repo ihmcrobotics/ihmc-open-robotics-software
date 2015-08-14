@@ -7,7 +7,9 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.valkyrie.ValkyriePushRecoveryTest.class
+   us.ihmc.valkyrie.kinematics.transmissions.ComparePushRodTransmissionsTest.class,
+   us.ihmc.valkyrie.kinematics.util.ClosedFormJacobianTest.class,
+   us.ihmc.valkyrie.simulation.ValkyriePosePlaybackDemoTest.class
 })
 
 public class ValkyrieHardwareDriversAInDevelopmentTestSuite
