@@ -39,9 +39,10 @@ public class MathToolsTest
    {
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
-   public void testConstructor() throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException 
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
+   public void testConstructor()
+           throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       // Screw you clover, I can test the private constructor(!)
       assertEquals(1, MathTools.class.getDeclaredConstructors().length);
@@ -51,8 +52,11 @@ public class MathToolsTest
       constructor.newInstance();
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class)
+   @EstimatedDuration(duration = 0.0)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testClipToMinMaxWrongBounds()
    {
       double min = 1.0;
@@ -60,15 +64,25 @@ public class MathToolsTest
       MathTools.clipToMinMax(5.0, min, max);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testClipToMinMaxNaN()
    {
       assertTrue(Double.isNaN(MathTools.clipToMinMax(Double.NaN, 0.0, 1.0)));
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
+   public void testCheckIfInRange()
+   {
+      assertTrue(MathTools.isInsideBoundsInclusive(5, 0, 6));
+      assertTrue(MathTools.isInsideBoundsInclusive(6, 0, 6));
+      assertTrue(MathTools.isInsideBoundsInclusive(0, 0, 6));
+      assertFalse(MathTools.isInsideBoundsInclusive(7, 0, 6));
+   }
+
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testClipToMinMax()
    {
       for (int i = 0; i < 10; i++)
@@ -93,8 +107,8 @@ public class MathToolsTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void squareTest()
    {
       double[] randomValues = RandomTools.generateRandomDoubleArray(random, 25, 10.0);
@@ -134,8 +148,8 @@ public class MathToolsTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void signTest()
    {
       double[] randomValues = RandomTools.generateRandomDoubleArray(random, 25, 10.0);
@@ -149,8 +163,8 @@ public class MathToolsTest
       assertEquals(1.0, MathTools.sign(0.0), 1e-12);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void sumDoublesTest()
    {
       double[] posVals = new double[25];
@@ -172,8 +186,8 @@ public class MathToolsTest
       assertEquals(MathTools.sumDoubles(negValsList), -37.5, 1e-12);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void sumIntegerTest()
    {
       int[] posVals = new int[25];
@@ -195,8 +209,8 @@ public class MathToolsTest
       assertEquals(MathTools.sumIntegers(negValsList), -25);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void dotPlusTest()
    {
       double[] randomValues = RandomTools.generateRandomDoubleArray(random, 25, 10.0);
@@ -212,8 +226,8 @@ public class MathToolsTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testIsInsideBounds()
    {
       double[] randomValues = RandomTools.generateRandomDoubleArray(random, 25, 12.5);
@@ -237,8 +251,11 @@ public class MathToolsTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class)
+   @EstimatedDuration(duration = 0.0)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testIsInsideBoundsWrongBounds()
    {
       double min = 1.0;
@@ -246,8 +263,8 @@ public class MathToolsTest
       MathTools.isInsideBoundsExclusive(5.0, min, max);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testIsInsideBoundsInclusive()
    {
       double[] randomValues = RandomTools.generateRandomDoubleArray(random, 25, 12.5);
@@ -268,14 +285,17 @@ public class MathToolsTest
 
       assertTrue(MathTools.isInsideBoundsInclusive(10.0, -10.0, 10.0));
       assertTrue(MathTools.isInsideBoundsInclusive(-10.0, -10.0, 10.0));
-      
-      
+
+
       assertTrue(MathTools.isInsideBoundsInclusive(5.0, 5.0, 5.0));
 
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class)
+   @EstimatedDuration(duration = 0.0)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testIsInsideBoundsWrongBoundsInclusive()
    {
       double min = 1.0;
@@ -283,11 +303,14 @@ public class MathToolsTest
       MathTools.isInsideBoundsInclusive(5.0, min, max);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testMin()
    {
-      double[] numbers = { -1.0, -4.0, 4.0, 3.0, 0.0, 1.0, -2.0, -5.0, -3.0, 2.0, 2.0, 3.0, 5.0, 5.0 };
+      double[] numbers =
+      {
+         -1.0, -4.0, 4.0, 3.0, 0.0, 1.0, -2.0, -5.0, -3.0, 2.0, 2.0, 3.0, 5.0, 5.0
+      };
 
       assertEquals(MathTools.min(numbers), -5.0, 1e-34);
 
@@ -301,11 +324,14 @@ public class MathToolsTest
       assertTrue(Double.isNaN(MathTools.min(numbers)));
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testMax()
    {
-      double[] numbers = { -1.0, -4.0, 4.0, 3.0, 0.0, 1.0, -2.0, -5.0, -3.0, 2.0, 2.0, 3.0, 5.0, 5.0 };
+      double[] numbers =
+      {
+         -1.0, -4.0, 4.0, 3.0, 0.0, 1.0, -2.0, -5.0, -3.0, 2.0, 2.0, 3.0, 5.0, 5.0
+      };
 
       assertEquals(MathTools.max(numbers), 5.0, 1e-34);
 
@@ -319,14 +345,17 @@ public class MathToolsTest
       assertTrue(Double.isNaN(MathTools.max(numbers)));
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testMeanArray()
    {
-      double numbers[] = { -1.0, -4.0, 4.0, 3.0, 0.0, 1.0, -2.0, -5.0, -3.0, 2.0, 2.0, 3.0, 5.0, 5.0 };
+      double numbers[] =
+      {
+         -1.0, -4.0, 4.0, 3.0, 0.0, 1.0, -2.0, -5.0, -3.0, 2.0, 2.0, 3.0, 5.0, 5.0
+      };
       assertEquals(0.7143, MathTools.mean(numbers), 1e-4);
 
-      assertEquals(5.0, MathTools.mean(new double[] { 5.0 }), 1e-34);
+      assertEquals(5.0, MathTools.mean(new double[] {5.0}), 1e-34);
 
       numbers[4] = Double.POSITIVE_INFINITY;
       assertTrue(Double.isInfinite(MathTools.mean(numbers)));
@@ -339,15 +368,18 @@ public class MathToolsTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testMeanArrayList()
    {
-      Double numbersArray[] = { -1.0, -4.0, 4.0, 3.0, 0.0, 1.0, -2.0, -5.0, -3.0, 2.0, 2.0, 3.0, 5.0, 5.0 };
+      Double numbersArray[] =
+      {
+         -1.0, -4.0, 4.0, 3.0, 0.0, 1.0, -2.0, -5.0, -3.0, 2.0, 2.0, 3.0, 5.0, 5.0
+      };
       ArrayList<Double> numbers = new ArrayList<Double>(Arrays.asList(numbersArray));
       assertEquals(0.7143, MathTools.mean(numbers), 1e-4);
 
-      assertEquals(5.0, MathTools.mean(new double[] { 5.0 }), 1e-34);
+      assertEquals(5.0, MathTools.mean(new double[] {5.0}), 1e-34);
 
       numbers.set(4, Double.POSITIVE_INFINITY);
       assertTrue(Double.isInfinite(MathTools.mean(numbers)));
@@ -360,33 +392,36 @@ public class MathToolsTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class)
+   @EstimatedDuration(duration = 0.0)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testCheckIfInRangeFalse()
    {
       MathTools.checkIfInRange(5.0, -3.0, 2.0);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testCheckIfInRangeTrue()
    {
       MathTools.checkIfInRange(1.0, -3.0, 2.0);
       MathTools.checkIfInRange(5.0, 5.0, 5.0);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testDiff()
    {
-      double[] array = { 45, -11, 7 };
-      double[] expectedReturn = { -56, 18 };
+      double[] array = {45, -11, 7};
+      double[] expectedReturn = {-56, 18};
       double[] actualReturn = MathTools.diff(array);
       assertEquals(expectedReturn[0], actualReturn[0], 1e-12);
       assertEquals(expectedReturn[1], actualReturn[1], 1e-12);
 
-      double[] array2 = { -20, 1, -2.9 };
-      double[] expectedReturn2 = { 21, -3.9 };
+      double[] array2 = {-20, 1, -2.9};
+      double[] expectedReturn2 = {21, -3.9};
       double[] actualReturn2 = MathTools.diff(array2);
 
       assertEquals(expectedReturn2[0], actualReturn2[0], 1e-12);
@@ -394,8 +429,8 @@ public class MathToolsTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testEpsilonEquals()
    {
       double v1 = 2.0;
@@ -416,8 +451,8 @@ public class MathToolsTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testPercentEquals()
    {
       double v1 = 1.0;
@@ -449,8 +484,8 @@ public class MathToolsTest
       assertEquals(expectedReturn, actualReturn);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testDiffFrameVector()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -472,8 +507,11 @@ public class MathToolsTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class)
+   @EstimatedDuration(duration = 0.0)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testDiffFrameVectorDifferentFrames()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -485,41 +523,47 @@ public class MathToolsTest
       MathTools.diff(vectors);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000) 
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testCheckIsEqual()
    {
       MathTools.checkIfEqual(1, 1);
       MathTools.checkIfEqual(-2, -2);
-      
+
       MathTools.checkIfEqual(2.0, 2.001, 0.1);
       MathTools.checkIfEqual(-2.0, -2.001, 0.1);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class) 
+   @EstimatedDuration(duration = 0.0)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testCheckIsEqualNaN()
    {
       MathTools.checkIfEqual(Double.NaN, Double.NaN, 1e-12);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class)
+   @EstimatedDuration(duration = 0.0)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testCheckIsEqualInt()
    {
       MathTools.checkIfEqual(2, 4);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testIsGreaterThan()
    {
       assertTrue(MathTools.isGreaterThan(2.00011000, 2.00010000, 8));
       assertFalse(MathTools.isGreaterThan(2.00011000, 2.00010000, 4));
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testIsGreaterThanOrEqualTo()
    {
       assertTrue(MathTools.isGreaterThanOrEqualTo(2.00011000, 2.00010000, 8));
@@ -528,8 +572,8 @@ public class MathToolsTest
       assertFalse(MathTools.isGreaterThanOrEqualTo(2.00019000, 2.00020000, 5));
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testIsLessThan()
    {
       assertFalse(MathTools.isLessThan(2.00011000, 2.00010000, 8));
@@ -538,8 +582,8 @@ public class MathToolsTest
       assertTrue(MathTools.isLessThan(2.00019000, 2.00020000, 5));
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testIsLessThanOrEqualTo()
    {
       assertFalse(MathTools.isLessThanOrEqualTo(2.00011000, 2.00010000, 8));
@@ -548,50 +592,53 @@ public class MathToolsTest
       assertTrue(MathTools.isLessThanOrEqualTo(2.00019000, 2.00020000, 5));
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000,expected = RuntimeException.class)
+   @EstimatedDuration(duration = 0.0)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testCheckIsEqualDouble()
    {
       MathTools.checkIfEqual(2.0, 2.001, 0.0001);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testGcd()
    {
       Random random = new Random(12890471L);
-      for(int i = 0; i < 1000; i++)
+      for (int i = 0; i < 1000; i++)
       {
          long a = random.nextInt(Integer.MAX_VALUE);
          long b = random.nextInt(Integer.MAX_VALUE);
-         
+
          long c = MathTools.gcd(a, b);
-                  
-         assertTrue(a % c == 0 && b % c == 0);
+
+         assertTrue((a % c == 0) && (b % c == 0));
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testLcm()
    {
       Random random = new Random(1240898L);
-      for(int i = 0; i < 1000; i++)
+      for (int i = 0; i < 1000; i++)
       {
          long a = random.nextInt(Integer.MAX_VALUE);
          long b = random.nextInt(Integer.MAX_VALUE);
-         
+
          long c = MathTools.lcm(a, b);
-         
-         assertTrue(c % a == 0 && c % b == 0);
+
+         assertTrue((c % a == 0) && (c % b == 0));
       }
-      
+
       long c = MathTools.lcm(12, 18, 6, 3, 4);
       assertEquals(36, c);
-      
+
    }
-	
-	@EstimatedDuration(duration = 0.0)
+
+   @EstimatedDuration(duration = 0.0)
    @Test(timeout = 30000)
    public void testArePointsInOrderColinear()
    {
@@ -606,7 +653,7 @@ public class MathToolsTest
       /** @todo fill in the test code */
    }
 
-	@EstimatedDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 30000)
    public void testArePointsInOrderColinear2()
    {
@@ -655,75 +702,75 @@ public class MathToolsTest
       }
    }
 
-//   @EstimatedDuration
-//   @Test(timeout = 300000)
-//   public void testDiff1()
-//   {
-//     ArrayList array = null;
-//     MathTools.diff(array);
+// @EstimatedDuration
+// @Test(timeout = 300000)
+// public void testDiff1()
+// {
+//   ArrayList array = null;
+//   MathTools.diff(array);
 //
-//     ArrayList expectedReturn = array;
-//     ArrayList actualReturn = mathTools.diff(array);
-//     assertTrue("Test Failed", actualReturn[0] == expectedReturn[0]
-//                && actualReturn[1] == expectedReturn[1]);
-//   }
+//   ArrayList expectedReturn = array;
+//   ArrayList actualReturn = mathTools.diff(array);
+//   assertTrue("Test Failed", actualReturn[0] == expectedReturn[0]
+//              && actualReturn[1] == expectedReturn[1]);
+// }
 
-//   @EstimatedDuration
-//   @Test(timeout = 300000)
-//   public void testDiffWithAlphaFilter()
-//   {
-//      ArrayList array = null;
-//      double alpha = 0.0;
-//      double dt = 0.0;
-//      ArrayList expectedReturn = null;
-//      ArrayList actualReturn = mathTools.diffWithAlphaFilter(array, alpha, dt);
-//      assertEquals("return value", expectedReturn, actualReturn);
+// @EstimatedDuration
+// @Test(timeout = 300000)
+// public void testDiffWithAlphaFilter()
+// {
+//    ArrayList array = null;
+//    double alpha = 0.0;
+//    double dt = 0.0;
+//    ArrayList expectedReturn = null;
+//    ArrayList actualReturn = mathTools.diffWithAlphaFilter(array, alpha, dt);
+//    assertEquals("return value", expectedReturn, actualReturn);
 //
-//   }
+// }
 
-//   @EstimatedDuration
-//   @Test(timeout = 300000)
-//   public void testGetQuaternionFromTransform3D()
-//   {
-//      Transform3D transform3D = null;
-//      Quat4d q1 = null;
-//      mathTools.getQuaternionFromTransform3D(transform3D, q1);
+// @EstimatedDuration
+// @Test(timeout = 300000)
+// public void testGetQuaternionFromTransform3D()
+// {
+//    Transform3D transform3D = null;
+//    Quat4d q1 = null;
+//    mathTools.getQuaternionFromTransform3D(transform3D, q1);
 //
-//   }
+// }
 
-//   @EstimatedDuration
-//   @Test(timeout = 300000)
-//   public void testLoadTransform() throws IOException
-//   {
-//      BufferedReader bufferedReader = null;
-//      Transform3D expectedReturn = null;
-//      Transform3D actualReturn = mathTools.loadTransform(bufferedReader);
-//      assertEquals("return value", expectedReturn, actualReturn);
+// @EstimatedDuration
+// @Test(timeout = 300000)
+// public void testLoadTransform() throws IOException
+// {
+//    BufferedReader bufferedReader = null;
+//    Transform3D expectedReturn = null;
+//    Transform3D actualReturn = mathTools.loadTransform(bufferedReader);
+//    assertEquals("return value", expectedReturn, actualReturn);
 //
-//   }
+// }
 
-//   @EstimatedDuration
-//   @Test(timeout = 300000)
-//   public void testSaveTransform()
-//   {
-//      Transform3D transform3D = null;
-//      PrintWriter printWriter = null;
-//      mathTools.saveTransform(transform3D, printWriter);
+// @EstimatedDuration
+// @Test(timeout = 300000)
+// public void testSaveTransform()
+// {
+//    Transform3D transform3D = null;
+//    PrintWriter printWriter = null;
+//    mathTools.saveTransform(transform3D, printWriter);
 //
-//   }
+// }
 
-//   @EstimatedDuration
-//   @Test(timeout = 300000)
-//   public void testSplitArrayIntoEqualishParts()
-//   {
-//      ArrayList array = null;
-//      int numberOfParts = 0;
-//      ArrayList expectedReturn = null;
-//      ArrayList actualReturn = mathTools.splitArrayIntoEqualishParts(array, numberOfParts);
-//      assertEquals("return value", expectedReturn, actualReturn);
-//   }
+// @EstimatedDuration
+// @Test(timeout = 300000)
+// public void testSplitArrayIntoEqualishParts()
+// {
+//    ArrayList array = null;
+//    int numberOfParts = 0;
+//    ArrayList expectedReturn = null;
+//    ArrayList actualReturn = mathTools.splitArrayIntoEqualishParts(array, numberOfParts);
+//    assertEquals("return value", expectedReturn, actualReturn);
+// }
 
-	@EstimatedDuration(duration = 0.0)
+   @EstimatedDuration(duration = 0.0)
    @Test(timeout = 30000)
    public void testProjectionOntoPlane()
    {
@@ -741,27 +788,45 @@ public class MathToolsTest
       assertEquals(p.getY(), proj.getY(), Double.MIN_VALUE);
       assertEquals(0.1, proj.getZ(), 10e-10);
    }
-   
-	@EstimatedDuration(duration = 0.0)
+
+   @EstimatedDuration(duration = 0.0)
    @Test(timeout = 30000)
    public void testRoundToGivenPrecision()
    {
       double longDouble = 0.12345678910111213;
-      
+
       double roundedNumber = MathTools.roundToGivenPrecision(longDouble, 1e-7);
       assertEquals(roundedNumber, 0.1234567, 1e-14);
-      
+
       roundedNumber = MathTools.roundToGivenPrecision(longDouble, 1e-3);
       assertEquals(roundedNumber, 0.123, 1e-14);
-      
+
       Vector3d preciseVector = new Vector3d(0.12345678910111213, 100.12345678910111213, 1000.12345678910111213);
       Vector3d roundedVector = new Vector3d(preciseVector);
-     
+
       MathTools.roundToGivenPrecision(roundedVector, 1e-7);
       JUnitTools.assertTuple3dEquals(new Vector3d(0.1234567, 100.1234567, 1000.1234567), roundedVector, 1e-12);
-      
+
       MathTools.roundToGivenPrecision(roundedVector, 1e-3);
       JUnitTools.assertTuple3dEquals(new Vector3d(0.123, 100.123, 1000.123), roundedVector, 1e-14);
    }
+
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
+   public void testIsFinite()
+   {
+      Random rand = new Random();
+      for (int i = 0; i < 1000; i++)
+      {
+         assertTrue(MathTools.isFinite(rand.nextFloat() * 1000));
+         assertFalse(MathTools.isFinite(rand.nextFloat() / 0.0));
+         
+         assertTrue(MathTools.isFinite(new Vector3d(rand.nextDouble()*1000, rand.nextDouble()*1000, rand.nextDouble()*1000)));
+         assertFalse(MathTools.isFinite(new Vector3d(rand.nextDouble()/0.0, rand.nextDouble()/0.0, rand.nextDouble()/0.0)));
+
+      }
+
+   }
+
 
 }
