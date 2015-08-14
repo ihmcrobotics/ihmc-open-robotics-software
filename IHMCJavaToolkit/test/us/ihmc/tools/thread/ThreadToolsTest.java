@@ -46,7 +46,7 @@ public class ThreadToolsTest
    @Test(timeout = 30000)
    public void testRunCommandLineEchoOutput()
    {
-      if (System.getProperty("IS_BAMBOO") != null)
+      if (System.getProperty("build.type") != null)
          return;
 
       final StringBuilder commandLineOutput = new StringBuilder();
