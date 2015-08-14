@@ -2,8 +2,11 @@ package us.ihmc.robotics.lidar;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+
+import javax.vecmath.Point3d;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Assert;
@@ -263,6 +266,38 @@ public class LidarScanTest
               assertEquals(lidarScan1.getScanParameters().getScanTime(), 0, 1e-7);
               assertEquals(lidarScan1.getScanParameters().getScanTimeNanos(), 0 * 1E9, 1e-7);
               assertEquals(lidarScan1.getScanParameters().getTimestamp(), 0, 1e-7);
+          }
+      }
+   }
+   
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetAllPoints()
+   {
+      Random random = new Random();
+      float[] ranges1;
+      LidarScan lidarScan1 = null;
+      for(int i = 0; i < 10; i++)
+      {
+    	  int id = random.nextInt();
+    	  ranges1 = RandomTools.generateRandomFloatArray(random, 100, 0, 5000);
+          int pointsPerSweep = 1080;
+          int fov = (int) (random.nextFloat() * Math.PI);
+          double minRange = random.nextDouble();
+          double maxRange = random.nextDouble();
+
+          LidarScanParameters lidarScanParameters = new LidarScanParameters(pointsPerSweep, fov, minRange, maxRange);
+          lidarScan1 = new LidarScan(lidarScanParameters, new RigidBodyTransform(), new RigidBodyTransform(), ranges1, id);
+          
+          ArrayList<Point3d> list = lidarScan1.getAllPoints();
+          assertEquals(list.size(), 100, 1e-7);
+          assertEquals(lidarScan1.getAllPoints3f().size(), 100, 1e-7);
+          
+          for(int j = 0; j < list.size(); j++)
+          {
+              assertEquals(list.get(j).x, lidarScan1.getAllPoints3f().get(j).x, 1e-3);
+              assertEquals(list.get(j).y, lidarScan1.getAllPoints3f().get(j).y, 1e-3);
+              assertEquals(list.get(j).z, lidarScan1.getAllPoints3f().get(j).z, 1e-3);
           }
       }
    }
