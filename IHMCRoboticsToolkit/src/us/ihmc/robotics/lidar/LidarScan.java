@@ -13,7 +13,7 @@ import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class LidarScan 
+public class LidarScan
 {
    public LidarScanParameters params;
    public RigidBodyTransform worldTransformStart;
@@ -21,17 +21,17 @@ public class LidarScan
    public RigidBodyTransform localTransformStart;
    public RigidBodyTransform localTransformEnd;
    public RigidBodyTransform averageTransform;
-   
+
    @Optional("TranformationInterpolationCalculator")
    private final TransformInterpolationCalculator transformInterpolationCalculator = new TransformInterpolationCalculator();
-   
+
    public float[] ranges;
    public int sensorId;
 
    public LidarScan()
    {
    }
-   
+
    public LidarScan(LidarScanParameters params, float[] ranges, int sensorId)
    {
       this.params = params;
@@ -46,7 +46,7 @@ public class LidarScan
       this.ranges = ranges;
       this.sensorId = sensorId;
    }
-   
+
    public LidarScan(LidarScanParameters params, RigidBodyTransform start, RigidBodyTransform end, float[] ranges)
    {
       this.params = params;
@@ -62,9 +62,10 @@ public class LidarScan
       {
          points.add(getPoint(i, ranges[i]));
       }
+
       return points;
    }
-   
+
    public ArrayList<Point3f> getAllPoints3f()
    {
       ArrayList<Point3f> points = new ArrayList<Point3f>();
@@ -85,7 +86,7 @@ public class LidarScan
    {
       return getPoint(index, ranges[index]);
    }
-   
+
    public Point3f getPoint3f(int index)
    {
       return getPoint3f(index, ranges[index]);
@@ -97,10 +98,11 @@ public class LidarScan
    }
 
    /**
-   *
-   * @param index of the point with respect to {@link #getPoint(int)}
-   * @return
-   */   public float getRange(int i)
+    *
+    * @param index of the point with respect to {@link #getPoint(int)}
+    * @return
+    */
+   public float getRange(int i)
    {
       return ranges[i];
    }
@@ -112,7 +114,7 @@ public class LidarScan
 
    public LidarScan getCopy()
    {
-      return new LidarScan(getParams(), ranges.clone(),sensorId);
+      return new LidarScan(getParams(), ranges.clone(), sensorId);
    }
 
    public int getSensorId()
@@ -123,17 +125,17 @@ public class LidarScan
    public LidarScan flipNew()
    {
       float[] flippedRanges = Arrays.copyOf(ranges, ranges.length);
-      
+
       ArrayUtils.reverse(flippedRanges);
-      
+
       return new LidarScan(getParams(), getEndTransform(), getStartTransform(), flippedRanges, sensorId);
    }
-   
+
    public LidarScanParameters getParams()
    {
       return params;
    }
-   
+
    /* SETTERS */
 
    public void setWorldTransforms(RigidBodyTransform start, RigidBodyTransform end)
@@ -143,7 +145,7 @@ public class LidarScan
       this.averageTransform = new RigidBodyTransform();
       transformInterpolationCalculator.computeInterpolation(worldTransformStart, worldTransformEnd, averageTransform, .5);
    }
-   
+
    public LidarScanParameters getScanParameters()
    {
       return params;
@@ -170,7 +172,7 @@ public class LidarScan
 
       return new Ray3d(unitSegment.getPointA(), unitSegment.getDirection());
    }
-   
+
 
    /* PRIVATE/PROTECTED FUNCTIONS */
    protected Point3d getPoint(int index, float range)
@@ -183,7 +185,7 @@ public class LidarScan
 
       return p;
    }
-   
+
    protected Point3f getPoint3f(int index, float range)
    {
       Point3f p = new Point3f(range, 0.0f, 0.0f);
@@ -230,8 +232,9 @@ public class LidarScan
       return sweepTransform;
    }
 
-   public long getScanTimeStamp() {
-	   return params.getTimestamp();
+   public long getScanTimeStamp()
+   {
+      return params.getTimestamp();
    }
 
    public long getScanEndTime()
