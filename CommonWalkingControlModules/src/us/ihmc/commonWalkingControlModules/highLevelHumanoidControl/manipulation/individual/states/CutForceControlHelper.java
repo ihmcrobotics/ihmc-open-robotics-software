@@ -17,6 +17,7 @@ public class CutForceControlHelper {
 	{
 		
 	}
+	
 	/**
 	 * Reads the forces from the sensors, compensates for gravity, stores the values in yoVariables and updates filtered variables.
 	 * @param wristSensorWrench
@@ -113,10 +114,8 @@ public class CutForceControlHelper {
 		}
 		else
 		{
-//			currentTangentialForce.set(forceVectorInWorld.dot(lastTangentTrajectoryVectorInWorld));
 			currentTangentialForce.set(0.0);
 		}
-
 	}
 
 	/**
