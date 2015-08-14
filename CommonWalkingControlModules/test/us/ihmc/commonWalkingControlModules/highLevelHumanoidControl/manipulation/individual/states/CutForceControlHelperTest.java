@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -10,11 +11,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 public class CutForceControlHelperTest {
 	/**
@@ -23,17 +27,26 @@ public class CutForceControlHelperTest {
 	YoVariableRegistry registry = new YoVariableRegistry("testregistry");
 	private final long random = System.currentTimeMillis();
 	private Random randomNumberGenerator = new Random(random);
-	private double v;
-	private double F;
-	private double C1;
-	private double C2;
+
 	private final DoubleYoVariable epsilon = new DoubleYoVariable("epsilon", registry);
 	private final DoubleYoVariable w11 = new DoubleYoVariable("w11", registry);
 	private final DoubleYoVariable w22 = new DoubleYoVariable("w22", registry);
 	private final DoubleYoVariable C1adapted = new DoubleYoVariable("c1", registry);
 	private final DoubleYoVariable C2adapted = new DoubleYoVariable("c2", registry);
+	
+	private final DoubleYoVariable fxRaw = new DoubleYoVariable("fx", registry);
+	private final DoubleYoVariable fyRaw = new DoubleYoVariable("fy", registry);
+	private final DoubleYoVariable fzRaw = new DoubleYoVariable("fz", registry);
+	
+	private final double alpha = 0.3;
+	private final AlphaFilteredYoVariable fxFiltered = new AlphaFilteredYoVariable("fxFiltered", registry, alpha, fxRaw);
+	private final AlphaFilteredYoVariable fyFiltered = new AlphaFilteredYoVariable("fyFiltered", registry, alpha, fyRaw);
+	private final AlphaFilteredYoVariable fzFiltered = new AlphaFilteredYoVariable("fzFiltered", registry, alpha, fzRaw);
+	
 	private static final double VELOCITYERROR = 10e-2;
 	private static final double EPSILON = 10e-6;
+	
+	
 	
 	@Before
 	public void showMemoryUsageBeforeTest()
@@ -50,15 +63,15 @@ public class CutForceControlHelperTest {
 	/**
 	 * Test the exponential character of the force model.
 	 */
-	@EstimatedDuration
-	@Test(timeout = 30000)
+	@EstimatedDuration(duration = 2.0)
+	@Test(timeout = 300000)
 	public void testExponentialForceModel()
 	{
-		C1 = RandomTools.generateRandomDouble(randomNumberGenerator, 80.0, 120.0);
-		C2 = RandomTools.generateRandomDouble(randomNumberGenerator, 0.01, 10.0);
-		v = RandomTools.generateRandomDouble(randomNumberGenerator, 0.001, 10.0);
+		double C1 = RandomTools.generateRandomDouble(randomNumberGenerator, 80.0, 120.0);
+		double C2 = RandomTools.generateRandomDouble(randomNumberGenerator, 0.01, 10.0);
+		double v = RandomTools.generateRandomDouble(randomNumberGenerator, 0.001, 10.0);
 		
-		F = CutForceControlHelper.exponentialForceModel(v, C1, C2);
+		double F = CutForceControlHelper.exponentialForceModel(v, C1, C2);
 		double C2_hat = 1.0/v *Math.log(F / C1 + 1.0);
 		
 		assertEquals(CutForceControlHelper.exponentialForceModel(0.0, C1, C2), 0.0, EPSILON);
@@ -70,30 +83,30 @@ public class CutForceControlHelperTest {
 	 * Note that the adapted parameters do not necessarily correspond to the real values.
 	 * The selection range for c2 and v has to be chosen small since they are in the exponent of the function.
 	 */
-	@EstimatedDuration
+	@EstimatedDuration(duration = 2.0)
 	@Test(timeout = 300000)
 	public void testModelParameterAdaption()
 	{
-		C1 = RandomTools.generateRandomDouble(randomNumberGenerator, 80.0, 120.0);
-		C2 = RandomTools.generateRandomDouble(randomNumberGenerator, 0.01, 2.0);
+		double C1 = RandomTools.generateRandomDouble(randomNumberGenerator, 80.0, 120.0);
+		double C2 = RandomTools.generateRandomDouble(randomNumberGenerator, 0.01, 2.0);
 		
 		C1adapted.set(RandomTools.generateRandomDouble(randomNumberGenerator, 80.0, 120.0));
 		C2adapted.set(RandomTools.generateRandomDouble(randomNumberGenerator, 0.01, 2.0));
-		v = RandomTools.generateRandomDouble(randomNumberGenerator, 0.005, 10.0);
+		double v = RandomTools.generateRandomDouble(randomNumberGenerator, 0.005, 10.0);
 		epsilon.set(0.0);
 		
 		while(Math.abs(CutForceControlHelper.exponentialForceModel(v, C1adapted.getDoubleValue(), C2adapted.getDoubleValue()) - CutForceControlHelper.exponentialForceModel(v, C1, C2)) > VELOCITYERROR)
 		{
 			double realForce = CutForceControlHelper.exponentialForceModel(v, C1, C2);
 			double modelForce = CutForceControlHelper.exponentialForceModel(v, C1adapted.getDoubleValue(), C2adapted.getDoubleValue());
-			CutForceControlHelper.modelParameterAdaption(realForce, modelForce, v, epsilon, C1adapted, C2adapted, 0.001, 0.001);
+			CutForceControlHelper.modelParameterAdaption(realForce, modelForce, v, epsilon, C1adapted, C2adapted, 0.001, 0.005);
 		}
 	}
 	
 	/**
 	 * Test the ramp function that scales the weigthing matrix.
 	 */
-	@EstimatedDuration
+	@EstimatedDuration(duration = 2.0)
 	@Test(timeout = 300000)
 	public void testAdaptW()
 	{
@@ -129,7 +142,7 @@ public class CutForceControlHelperTest {
 	/**
 	 * Test the getTangentForce method using geometric considerations.
 	 */
-	@EstimatedDuration
+	@EstimatedDuration(duration = 2.0)
 	@Test(timeout = 300000)
 	public void testGetTangentForce()
 	{
@@ -179,5 +192,32 @@ public class CutForceControlHelperTest {
 		tangentVector.set(0.0, 0.0, 0.0);
 		CutForceControlHelper.getTangentForce(forceVector, currentTangentialForce, tangentVector, lastTangentVector, fxFiltered, fyFiltered, fzFiltered, false, 0.0);
 		assertEquals(currentTangentialForce.getDoubleValue(), 0.0, EPSILON);
+	}
+	@EstimatedDuration(duration = 2.0)
+	@Test(timeout = 300000)
+	public void testWristSensorUpdate()
+	{
+		ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+		ReferenceFrame randomFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame", randomNumberGenerator, worldFrame);
+		Wrench testWrench = new Wrench(randomFrame, randomFrame);
+		double mass = RandomTools.generateRandomDouble(randomNumberGenerator, 0.1, 10.0);
+		double fzEmpty = RandomTools.generateRandomDouble(randomNumberGenerator, 5.0);
+		
+		CutForceControlHelper.wristSensorUpdate(testWrench, worldFrame, fxRaw, fyRaw, fzRaw, fxFiltered, fyFiltered, fzFiltered, mass, false, randomNumberGenerator);
+		
+		// Check if reference frame is changed
+		assertTrue(testWrench.getExpressedInFrame() == worldFrame);
+		
+		// Check gravity constant
+		assertEquals(CutForceControlHelper.GRAVITY, 9.81, EPSILON);
+		
+		// Check gravity compensation in z direction
+		testWrench.changeFrame(worldFrame);
+		testWrench.setLinearPartZ(fzEmpty);
+		testWrench.changeBodyFrameAttachedToSameBody(worldFrame);
+		CutForceControlHelper.wristSensorUpdate(testWrench, worldFrame, fxRaw, fyRaw, fzRaw, fxFiltered, fyFiltered, fzFiltered, mass, false, randomNumberGenerator);
+		
+		assertEquals(testWrench.getLinearPartZ() + mass * CutForceControlHelper.GRAVITY, fzRaw.getDoubleValue(), EPSILON);
+
 	}
 }
