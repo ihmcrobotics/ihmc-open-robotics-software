@@ -53,10 +53,7 @@ public class MathToolsTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testClipToMinMaxWrongBounds()
    {
       double min = 1.0;
@@ -252,10 +249,7 @@ public class MathToolsTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testIsInsideBoundsWrongBounds()
    {
       double min = 1.0;
@@ -292,10 +286,7 @@ public class MathToolsTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testIsInsideBoundsWrongBoundsInclusive()
    {
       double min = 1.0;
@@ -393,10 +384,7 @@ public class MathToolsTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIfInRangeFalse()
    {
       MathTools.checkIfInRange(5.0, -3.0, 2.0);
@@ -508,10 +496,7 @@ public class MathToolsTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testDiffFrameVectorDifferentFrames()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -535,20 +520,14 @@ public class MathToolsTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIsEqualNaN()
    {
       MathTools.checkIfEqual(Double.NaN, Double.NaN, 1e-12);
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIsEqualInt()
    {
       MathTools.checkIfEqual(2, 4);
@@ -593,10 +572,7 @@ public class MathToolsTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIsEqualDouble()
    {
       MathTools.checkIfEqual(2.0, 2.001, 0.0001);
