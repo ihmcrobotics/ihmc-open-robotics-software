@@ -390,30 +390,4 @@ public class LidarScanParametersTest
          assertFalse(lidarScanParameters.equals(null));
       }
    }
-   
-//   @EstimatedDuration(duration = 0.0)
-//   @Test(timeout = 30000)
-//   public void testEquals_2()
-//   {
-//      Random rand = new Random();
-//
-//      for (int i = 0; i < 10000; i++)
-//      {
-//         int pointsPerSweep = rand.nextInt();
-//         int fov = (int) (rand.nextFloat() * Math.PI);
-//         double minRange = rand.nextDouble();
-//         double maxRange = rand.nextDouble();
-//         double timeIncrement = rand.nextDouble();
-//         double scanTime = rand.nextDouble();
-//         long timeStamp = System.currentTimeMillis();
-//         double minYaw = -fov / 2.0;
-//         double maxYaw = fov / 2.0;
-//         
-//         LidarScanParameters lidarScanParameters = new LidarScanParameters(new Random(10));
-//         LidarScanParameters lidarScanParameters2 = new LidarScanParameters(new Random(1));
-//
-//         assertFalse(lidarScanParameters.equals(lidarScanParameters2));
-//      }
-//   }
-
 }
