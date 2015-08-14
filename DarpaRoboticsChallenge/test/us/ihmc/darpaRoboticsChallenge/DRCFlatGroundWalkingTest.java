@@ -134,7 +134,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       else
          walkingTimeDuration = defaultWalkingTimeDuration;
 
-      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1500.0);
       track.attachControllerFailureListener(blockingSimulationRunner.createControllerFailureListener());
 
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
