@@ -30,6 +30,9 @@ public class SimulateCutforceController implements RobotController
    private final Point3d handControlFramePositionInWorld;
    private final Vector3d wristToHandControlFrame;
    private final Vector3d tangentVector;
+   private final Vector3d forceVector;
+   private final Vector3d climbingForceVector;
+   private final Vector3d xAxisVector;
    private final Vector3d tangentionalVelocity;
    
    private final DoubleYoVariable efpHandControlFrameVelocity;
@@ -42,7 +45,6 @@ public class SimulateCutforceController implements RobotController
    private final RigidBodyTransform transform;
    
    private final static double gGRAVITY = 9.81;
-   
    
    //TODO estimate:
    private DoubleYoVariable quadraticForceCoeff;
@@ -58,16 +60,16 @@ public class SimulateCutforceController implements RobotController
       this.sdfFullRobotModel = sdfFullRobotModel;
       this.robotSide = robotSide;
       
-   
-      
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       
       wristJoint = robot.getJoint(sdfFullRobotModel.getHand(this.robotSide).getParentJoint().getName());
-      
       transform = new RigidBodyTransform();
       wristToHandControlFrame = new Vector3d();
       tangentVector = new Vector3d();
+      forceVector = new Vector3d();
       tangentionalVelocity = new Vector3d();
+      climbingForceVector = new Vector3d();
+      xAxisVector = new Vector3d(1.0, 0.0, 0.0);
       
       efpHandControlFrameVelocity = new DoubleYoVariable("cutforceSimulatorVelocity", registry);
       
@@ -110,8 +112,6 @@ public class SimulateCutforceController implements RobotController
       yoGraphicsListRegistry.registerYoGraphic("drillToolTipViz", yoToolTip);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       
-      
-      //
       quadraticForceCoeff = new DoubleYoVariable("quadraticForceCoeff", registry);
       quadraticForceCoeff.set(1000.0);
             
@@ -160,17 +160,16 @@ public class SimulateCutforceController implements RobotController
       
 //      efpGravity.setForce(0.0, 0.0, -gGRAVITY * MASSDRILL);
 //      efpGravity.setForce(0.0, 0.0, 0.0);
-//      efpWrist.setForce(exponentialCutForceModel(efpHandControlFrame.getVelocityVector()));
-      efpWrist.setForce(quadraticCutForceModel(efpHandControlFrame.getVelocityVector()));
+//      efpWrist.setForce(exponentialCutForceModel(efpHandControlFrame));
+      efpWrist.setForce(quadraticCutForceModel(efpHandControlFrame));
       
    }
    
-   private Vector3d quadraticCutForceModel(Vector3d toolTipVelocity)
+   private Vector3d quadraticCutForceModel(ExternalForcePoint forcePoint)
    {
-	   tangentVector.set(toolTipVelocity);
-	   tangentionalVelocity.set(toolTipVelocity);
-	  //System.out.println(this.sdfRobot.getTime());
-	     
+	   tangentVector.set(forcePoint.getVelocityVector());
+	   tangentionalVelocity.set(forcePoint.getVelocityVector());
+	   
 	   if(this.sdfRobot.getTime() >=13 && this.sdfRobot.getTime() <= 17)
 	   {
 		   quadraticForceCoeff.set(10000.0);
@@ -179,15 +178,24 @@ public class SimulateCutforceController implements RobotController
 	   {
 		   quadraticForceCoeff.set(1000.0);
 	   }
-	     if(tangentVector.length() != 0.0)
+	     if(tangentVector.length() != 0.0 && forcePoint.getPositionPoint().getZ() > 0.75 && forcePoint.getPositionPoint().getX() > 0.5)
 	     {
 	    	tangentionalVelocity.setX(0.0);
 	    	tangentVector.setX(0.0);
 	        tangentVector.normalize();
+	        climbingForceVector.cross(tangentVector, xAxisVector);
+	        
 	        tangentVector.scale(-1.0);
-	        tangentVector.scale(quadraticForceCoeff.getDoubleValue() * Math.pow(toolTipVelocity.length(), 2));
+	        tangentVector.scale(quadraticForceCoeff.getDoubleValue() * Math.pow(forcePoint.getVelocityVector().length(), 2));
+	        climbingForceVector.scale(tangentionalVelocity.length() * 100.0);
+	        
 	        efpHandControlFrameVelocity.set(tangentionalVelocity.length());
-	        return tangentVector;
+	        
+	        forceVector.set(tangentVector);
+//	        forceVector.add(climbingForceVector);
+	        
+	        return forceVector;
+	        
 	     }
 	     else
 	     {
@@ -196,11 +204,10 @@ public class SimulateCutforceController implements RobotController
    }
    
    
-   private Vector3d exponentialCutForceModel(Vector3d toolTipVelocity)
+   private Vector3d exponentialCutForceModel(ExternalForcePoint forcePoint)
    {
-	   tangentVector.set(toolTipVelocity);
-	   tangentionalVelocity.set(toolTipVelocity);
-	   
+	   tangentVector.set(forcePoint.getVelocityVector());
+	   tangentionalVelocity.set(forcePoint.getVelocityVector());
 	     
 	     if(tangentVector.length() != 0.0)
 	     {
