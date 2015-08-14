@@ -1,0 +1,16 @@
+function array = getTrimmedArray(x)
+
+numberOfZeros = 2;
+endIndex = length(x);
+for i=1:endIndex
+    if i<(endIndex-numberOfZeros)
+    
+    
+    
+    end
+            
+
+
+
+
+end
