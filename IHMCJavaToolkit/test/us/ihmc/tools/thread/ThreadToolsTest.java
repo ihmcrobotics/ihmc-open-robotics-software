@@ -9,8 +9,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.tools.thread.ThreadTools;
 
 public class ThreadToolsTest
 {
@@ -48,8 +46,11 @@ public class ThreadToolsTest
    @Test(timeout = 30000)
    public void testRunCommandLineEchoOutput()
    {
+      if (System.getProperty("IS_BAMBOO") != null)
+         return;
+
       final StringBuilder commandLineOutput = new StringBuilder();
-      
+
       PrintStream commandOutput = new PrintStream(new OutputStream()
       {
          @Override
@@ -58,10 +59,9 @@ public class ThreadToolsTest
             commandLineOutput.append((char) b);
          }
       });
-      
+
       ThreadTools.runCommandLine("echo Hi", commandOutput);
-      
-      if (System.getProperty("IS_BAMBOO") == null)
-         Assert.assertTrue("Output not correct: " + commandLineOutput.toString(), commandLineOutput.toString().matches("Hi\\s*"));
+
+      Assert.assertTrue("Output not correct: " + commandLineOutput.toString(), commandLineOutput.toString().matches("Hi\\s*"));
    }
 }
