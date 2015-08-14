@@ -4,7 +4,6 @@ dependencies
 	testCompile group: 'org.yaml', name: 'snakeyaml', version: '1.13'
 	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
 	['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
-	compile group: 'us.ihmc.thirdparty', name: 'joptimizer', version: '3.3.0-jdk5'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.2'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'colt', name: 'colt', version: '1.2.0'
