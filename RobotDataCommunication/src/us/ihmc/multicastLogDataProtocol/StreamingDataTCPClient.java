@@ -15,7 +15,7 @@ import us.ihmc.robotDataCommunication.LogDataHeader;
 
 public class StreamingDataTCPClient extends Thread
 {
-   public static final int TIMEOUT = 20000;
+   public static final int TIMEOUT = 45000;
    private volatile boolean running = false;
 
    private final InetSocketAddress address;
