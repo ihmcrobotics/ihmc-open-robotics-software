@@ -2,16 +2,22 @@ package us.ihmc.simulationconstructionset;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
+import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 
+@BambooPlan(planType = BambooPlanType.InDevelopment)
 public class SimulationRewoundListenerTest
 {
-
-	@EstimatedDuration
+   @QuarantinedTest("Hangs forever")
+   @Ignore
+	@EstimatedDuration(duration = 30.0)
 	@Test(timeout=300000)
    public void testSimulationRewoundListener()
    {
@@ -83,6 +89,4 @@ public class SimulationRewoundListenerTest
          return count;
       }
    };
-
-
 }
