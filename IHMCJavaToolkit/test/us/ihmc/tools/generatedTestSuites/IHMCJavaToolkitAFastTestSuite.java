@@ -8,6 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.tools.ArrayToolsTest.class,
+   us.ihmc.tools.compare.GenericCRC32Test.class,
    us.ihmc.tools.containers.ContainerToolsTest.class,
    us.ihmc.tools.FormattingToolsTest.class,
    us.ihmc.tools.io.StreamGobblerTest.class,
