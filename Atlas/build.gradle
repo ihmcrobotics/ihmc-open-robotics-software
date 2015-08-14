@@ -61,8 +61,8 @@ startScripts {
         simWindowsScriptLogger.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCLogger").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher")
 
         def simUnixScriptGazebo = file(outputDir.canonicalPath + "/IHMCAtlasGazeboController")
-        simUnixScriptLogger.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasGazeboController").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.atlas.gazebo.AtlasGazeboControllerFactory")
-        simUnixScriptLogger.setExecutable(true)
+        simUnixScriptGazebo.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasGazeboController").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.atlas.gazebo.AtlasGazeboControllerFactory")
+        simUnixScriptGazebo.setExecutable(true)
     	
     }
 }
