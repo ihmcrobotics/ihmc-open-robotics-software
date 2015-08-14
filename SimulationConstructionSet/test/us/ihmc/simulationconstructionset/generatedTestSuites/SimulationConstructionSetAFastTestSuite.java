@@ -31,7 +31,6 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculatorTest.class,
    us.ihmc.simulationconstructionset.simulatedSensors.SimulatedIMURawSensorReaderTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetProcessDataCallTest.class,
-   us.ihmc.simulationconstructionset.SimulationRewoundListenerTest.class,
    us.ihmc.simulationconstructionset.torqueSpeedCurve.TypicalTorqueSpeedCurveTest.class,
    us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataCheckerTest.class,
    us.ihmc.simulationconstructionset.util.dataProcessors.ValueDataCheckerParametersTest.class,
