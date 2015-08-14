@@ -16,14 +16,15 @@ buildscript {
 
 	  maven{
 		  url "https://bengal.ihmc.us/nexus/content/repositories/central/"
-		  classpath "com.monochromeroad.gradle-plugins:gradle-aws-s3-sync:0.5"
 	  }
   }  
   dependencies {
+      classpath "com.monochromeroad.gradle-plugins:gradle-aws-s3-sync:0.5"
       classpath 'org.hidetake:gradle-ssh-plugin:0.3.12'
   }
 }
 
+apply plugin: 'application'
 applicationName = "IHMCValkyrieAPI"
 mainClassName = "us.ihmc.valkyrie.ValkyrieROSAPISimulator"
 applicationDefaultJvmArgs = ["-Xmx4g"]
@@ -33,8 +34,8 @@ startScripts {
 
 	doLast {
 		def simUnixScriptGazebo = file(outputDir.canonicalPath + "/IHMCValkyrieGazeboController")
-		simUnixScriptLogger.text = unixScript.text.replace("IHMCValkyrieAPI", "IHMCValkyrieGazeboController").replace("us.ihmc.valkyrie.ValkyrieROSAPISimulator", "us.ihmc.valkyrie.gazebo.ValkyrieGazeboControllerFactory")
-		simUnixScriptLogger.setExecutable(true)
+		simUnixScriptGazebo.text = unixScript.text.replace("IHMCValkyrieAPI", "IHMCValkyrieGazeboController").replace("us.ihmc.valkyrie.ValkyrieROSAPISimulator", "us.ihmc.valkyrie.gazebo.ValkyrieGazeboControllerFactory")
+		simUnixScriptGazebo.setExecutable(true)
 	}
 }
 
