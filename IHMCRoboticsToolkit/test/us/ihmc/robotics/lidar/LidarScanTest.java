@@ -185,4 +185,85 @@ public class LidarScanTest
           assertEquals(lidarScan1.getSensorId(), id);
       }
    }
+   
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetRanges()
+   {
+      Random random = new Random();
+      float[] ranges1;
+      LidarScan lidarScan1 = null;
+      for(int i = 0; i < 1000; i++)
+      {
+    	  int id = random.nextInt();
+    	  ranges1 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
+          lidarScan1 = new LidarScan(new LidarScanParameters(), ranges1, id);
+          assertEquals(lidarScan1.getRanges().length, ranges1.length, 1e-7f);
+          
+          for(int j = 0; j < ranges1.length; j++)
+          {
+              assertEquals(lidarScan1.getRanges()[j], ranges1[j], 1e-7f);
+          }
+      }
+   }
+   
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetCopy()
+   {
+      Random random = new Random();
+      float[] ranges1;
+      LidarScan lidarScan1 = null;
+      for(int i = 0; i < 1000; i++)
+      {
+    	  int id = random.nextInt();
+    	  ranges1 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
+          lidarScan1 = new LidarScan(new LidarScanParameters(), ranges1, id);
+          LidarScan lidarScanCopy = lidarScan1.getCopy();
+          
+          for(int j = 0; j < ranges1.length; j++)
+          {
+              assertEquals(lidarScan1.getRanges()[j], lidarScanCopy.getRanges()[j], 1e-7f);
+          }
+      }
+   }
+   
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
+   public void testScanParameters()
+   {
+      Random random = new Random();
+      float[] ranges1;
+      LidarScan lidarScan1 = null;
+      for(int i = 0; i < 1000; i++)
+      {
+    	  int id = random.nextInt();
+    	  ranges1 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
+    	  
+          int pointsPerSweep = random.nextInt();
+          int fov = (int) (random.nextFloat() * Math.PI);
+          double minRange = random.nextDouble();
+          double maxRange = random.nextDouble();
+
+          LidarScanParameters lidarScanParameters = new LidarScanParameters(pointsPerSweep, fov, minRange, maxRange);
+    	  
+          lidarScan1 = new LidarScan(lidarScanParameters, ranges1, id);
+          LidarScan lidarScanCopy = lidarScan1.getCopy();
+          
+          for(int j = 0; j < ranges1.length; j++)
+          {
+              assertEquals(lidarScan1.getRanges()[j], lidarScanCopy.getRanges()[j], 1e-7f);
+              assertEquals(lidarScan1.getScanParameters().getMaxRange(), maxRange, 1e-7);
+              assertEquals(lidarScan1.getScanParameters().getMinRange(), minRange, 1e-7);
+              assertEquals(lidarScan1.getScanParameters().getPointsPerSweep(), pointsPerSweep, 1e-7);
+              assertEquals(lidarScan1.getScanParameters().getFieldOfView(), fov, 1e-7);
+              assertEquals(lidarScan1.getScanParameters().getSweepYawMin(), -fov / 2.0, 1e-7);
+              assertEquals(lidarScan1.getScanParameters().getSweepYawMax(), fov / 2.0, 1e-7);
+              assertEquals(lidarScan1.getScanParameters().getTimeIncrement(), 0, 1e-7);
+              assertEquals(lidarScan1.getScanParameters().getScanTime(), 0, 1e-7);
+              assertEquals(lidarScan1.getScanParameters().getScanTimeNanos(), 0 * 1E9, 1e-7);
+              assertEquals(lidarScan1.getScanParameters().getTimestamp(), 0, 1e-7);
+          }
+      }
+   }
 }

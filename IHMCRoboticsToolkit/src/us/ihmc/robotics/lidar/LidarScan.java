@@ -230,7 +230,7 @@ public class LidarScan
       return sweepTransform;
    }
 
-   public long getScanStartTime() {
+   public long getScanTimeStamp() {
 	   return params.getTimestamp();
    }
 
