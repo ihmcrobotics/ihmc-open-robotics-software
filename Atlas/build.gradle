@@ -59,6 +59,10 @@ startScripts {
 
         def simWindowsScriptLogger = file(outputDir.canonicalPath + "/IHMCLogger.bat")
         simWindowsScriptLogger.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCLogger").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher")
+
+        def simUnixScriptGazebo = file(outputDir.canonicalPath + "/IHMCAtlasGazeboController")
+        simUnixScriptLogger.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasGazeboController").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.atlas.gazebo.AtlasGazeboControllerFactory")
+        simUnixScriptLogger.setExecutable(true)
     	
     }
 }
@@ -87,7 +91,7 @@ task awsDeploySim(type: S3Sync, dependsOn: distTar) {
         accessKey awsAccessKey
         secretKey awsSecretKey
 
-        def verManifestFile = new File("${buildDir}/distributions/version")
+        def verManifestFile = new File("${buildDir}/distributions/atlas-version")
 
         verManifestFile.text = version
     }
