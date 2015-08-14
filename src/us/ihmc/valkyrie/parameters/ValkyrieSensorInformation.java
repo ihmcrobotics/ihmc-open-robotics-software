@@ -153,7 +153,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    static
    {
       transformFromHeadToCamera.setRotation(new Quat4d(0.99786, -5.2082e-05, -0.065403, -0.00079462));
-      transformFromHeadToCamera.setTranslation(0.18335, 0.035, 0.0774);
+      transformFromHeadToCamera.setTranslation(0.18385, -0.035, 0.077337);
    }
    
    private static final HashMap<String, Integer> imuUSBSerialIds = new HashMap<>();
@@ -298,7 +298,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    @Override
    public boolean isMultisenseHead()
    {
-      return false;
+      return true;
    }
 
    @Override
