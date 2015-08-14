@@ -112,12 +112,14 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    private static final String multisense_namespace = "/multisense";
    
+   private static final String multisense_camera_frame_name = "multisense/left_camera_frame";
    private static final String headLinkName = "multisense_root_link";
    private final DRCRobotCameraParameters[] cameraParamaters = new DRCRobotCameraParameters[3];
    
    private static final String multisenseCameraName = "stereo_camera_left";
    
-   private static final String left_camera_topic = multisense_namespace + "/left/image_rect_color/compressed";
+   private static final String left_camera_topic = multisense_namespace + "/left/image_rect_color";
+   private static final String left_camera_compressed_topic = left_camera_topic + "/compressed";
    private static final String left_info_camera_topic = multisense_namespace +"/left/image_rect_color/camera_info";//left/image_rect_color/camera_info
    
    
@@ -172,12 +174,21 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    public ValkyrieSensorInformation(boolean runningOnRealRobot)
    {
-      cameraParamaters[0] = new DRCRobotCameraParameters(null, multisenseCameraName,left_camera_topic,headLinkName,left_info_camera_topic,transformFromHeadToCamera, multisenseCameraId);
       cameraParamaters[1] = new DRCRobotCameraParameters(RobotSide.LEFT, leftStereoCameraName,leftCameraTopic,headLinkName,leftHazardCameraId);
       cameraParamaters[2] = new DRCRobotCameraParameters(RobotSide.RIGHT, rightStereoCameraName,rightCameraTopic,headLinkName,rightHazardCameraId);
 
-      lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(runningOnRealRobot, lidarSensorName, multisense_near_Scan, multisense_height_map,
-            lidarJointName, lidarJointTopic, lidarPoseLink, multisenseHandoffFrame, lidarEndFrameInSdf, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
+      if(runningOnRealRobot)
+      {
+         lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(runningOnRealRobot, lidarSensorName, multisense_near_Scan, multisense_height_map,
+               lidarJointName, lidarJointTopic, lidarPoseLink, multisenseHandoffFrame, lidarEndFrameInSdf, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
+         cameraParamaters[0] = new DRCRobotCameraParameters(null, multisenseCameraName,left_camera_compressed_topic,headLinkName,left_info_camera_topic,transformFromHeadToCamera, multisenseCameraId);
+      }
+      else
+      {
+         lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(runningOnRealRobot, lidarSensorName, multisense_laser_topic_string, multisense_laser_topic_string,
+               lidarJointName, lidarJointTopic, lidarPoseLink, multisenseHandoffFrame, lidarEndFrameInSdf, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
+         cameraParamaters[0] = new DRCRobotCameraParameters(null, multisenseCameraName,left_camera_topic,multisense_camera_frame_name,left_info_camera_topic,transformFromHeadToCamera, multisenseCameraId);
+      }
    }
    
    public static String getUrdfFeetForceSensorName(RobotSide side)
