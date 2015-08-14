@@ -76,8 +76,9 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
 
       scs.addButton(showRegisterViewer);
       scs.addButton(showControlModePanel);
-      
-      new ValkyrieSliderBoard(scs, registry, valkyrieRobotModel, valkyrieSliderBoardType);
+
+      // TODO The sliderboard throws an NPE when scrubbing, at least in Sim. If this is okay on the real robot then feel free to uncomment. -- Doug
+//      new ValkyrieSliderBoard(scs, registry, valkyrieRobotModel, valkyrieSliderBoardType);
    }
    
    public static void main(String[] args)
