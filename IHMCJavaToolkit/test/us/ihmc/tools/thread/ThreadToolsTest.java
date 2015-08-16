@@ -6,11 +6,9 @@ import java.io.PrintStream;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
 
 public class ThreadToolsTest
 {
@@ -44,14 +42,16 @@ public class ThreadToolsTest
    /**
     * Tests capturing the output of an echo.
     */
-   @QuarantinedTest("Not working on Bamboo")
-   @Ignore
    @EstimatedDuration(duration = 0.1)
    @Test(timeout = 30000)
    public void testRunCommandLineEchoOutput()
    {
-      if (System.getProperty("build.type") != null)
+      String bambooJobName = System.getProperty("BAMBOO_JOB_NAME");
+      if (bambooJobName != null)
+      {
+         System.out.println("Not compatable with Bamboo. Job name: " + bambooJobName);
          return;
+      }
 
       final StringBuilder commandLineOutput = new StringBuilder();
 
