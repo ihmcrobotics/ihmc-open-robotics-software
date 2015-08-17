@@ -110,7 +110,7 @@ public class MathToolsTest
    {
       assertTrue(Double.isNaN(MathTools.clipToMinMax(Double.NaN, 0.0, 1.0)));
    }
-   
+
 
 
    @EstimatedDuration(duration = 0.0)
@@ -121,6 +121,16 @@ public class MathToolsTest
       assertTrue(MathTools.isInsideBoundsInclusive(6, 0, 6));
       assertTrue(MathTools.isInsideBoundsInclusive(0, 0, 6));
       assertFalse(MathTools.isInsideBoundsInclusive(7, 0, 6));
+   }
+
+   @EstimatedDuration(duration = 0.0)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
+   public void testCheckIfInRange_2()
+   {
+      MathTools.checkIfInRange(-5, -1, 1);
    }
 
    @EstimatedDuration(duration = 0.0)
@@ -686,7 +696,7 @@ public class MathToolsTest
       assertEquals(36, c);
 
    }
-   
+
    @EstimatedDuration(duration = 0.0)
    @Test(
       timeout = 30000,
@@ -694,11 +704,8 @@ public class MathToolsTest
    )
    public void testLcm_2()
    {
-	   Random rand = new Random();
-	   for(int i = 0; i < 100; i++)
-	   {
-		   long c = MathTools.lcm(rand.nextLong());
-	   }
+      Random rand = new Random();
+      long c = MathTools.lcm(rand.nextLong());
    }
 
    @EstimatedDuration(duration = 0.0)
