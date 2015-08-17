@@ -255,6 +255,13 @@ public class RotationFunctions
 	   return ypr[0];
    }
    
+   public static double getPitchFromQuaternion(Quat4d rotationToPack)
+   {
+      double[] ypr = new double[3];
+      setYawPitchRollBasedOnQuaternion(ypr, rotationToPack);
+      return ypr[1];
+   }
+   
    public static void quaternionToMatrix(DenseMatrix64F matrix, Quat4d quaternion, int rowStart)
    {
       int index = rowStart;
@@ -739,4 +746,6 @@ public class RotationFunctions
       // the algorithm did not converge after 10 iterations
       throw new NotARotationMatrixException(LocalizedFormats.UNABLE_TO_ORTHOGONOLIZE_MATRIX, i - 1);
    }
+
+   
 }
