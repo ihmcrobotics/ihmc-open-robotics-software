@@ -53,7 +53,10 @@ public class MathToolsTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testClipToMinMaxWrongBounds()
    {
       double min = 1.0;
@@ -63,10 +66,52 @@ public class MathToolsTest
 
    @EstimatedDuration(duration = 0.0)
    @Test(timeout = 30000)
+   public void testClipToMinMax_2()
+   {
+      Random rand = new Random();
+      for (int i = 0; i < 1000; i++)
+      {
+         double max = rand.nextDouble() * 1000.0;
+         double clippedVal = MathTools.clipToMinMax(max * 2.0, max);
+         assertEquals(clippedVal, max, 1e-7);
+
+         max = rand.nextDouble() * 1000.0;
+         clippedVal = MathTools.clipToMinMax(max * -2.0, max);
+         assertEquals(clippedVal, -max, 1e-7);
+
+         max = rand.nextDouble() * 1000.0;
+         clippedVal = MathTools.clipToMinMax((float) (max * 2.0), (float) max);
+         assertEquals(clippedVal, max, 1e-4);
+
+         max = rand.nextDouble() * 1000.0;
+         clippedVal = MathTools.clipToMinMax((float) (max * -2.0), (float) max);
+         assertEquals(clippedVal, -max, 1e-4);
+      }
+   }
+
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
+   public void testIsNumber()
+   {
+      Random rand = new Random();
+      for (int i = 0; i < 1000; i++)
+      {
+         assertTrue(MathTools.isNumber(rand.nextDouble() * 1000.0));
+         assertFalse(MathTools.containsNaN(new Vector3d(rand.nextDouble() * 1000.0, rand.nextDouble() * 1000.0, rand.nextDouble() * 1000.0)));
+      }
+
+      assertFalse(MathTools.isNumber(Double.NaN));
+      assertTrue(MathTools.containsNaN(new Vector3d(Double.NaN, Double.NaN, Double.NaN)));
+   }
+
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testClipToMinMaxNaN()
    {
       assertTrue(Double.isNaN(MathTools.clipToMinMax(Double.NaN, 0.0, 1.0)));
    }
+   
+
 
    @EstimatedDuration(duration = 0.0)
    @Test(timeout = 30000)
@@ -249,7 +294,10 @@ public class MathToolsTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testIsInsideBoundsWrongBounds()
    {
       double min = 1.0;
@@ -286,7 +334,10 @@ public class MathToolsTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testIsInsideBoundsWrongBoundsInclusive()
    {
       double min = 1.0;
@@ -384,7 +435,10 @@ public class MathToolsTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testCheckIfInRangeFalse()
    {
       MathTools.checkIfInRange(5.0, -3.0, 2.0);
@@ -427,7 +481,7 @@ public class MathToolsTest
       boolean expectedReturn = true;
       boolean actualReturn = MathTools.epsilonEquals(v1, v2, epsilon);
       assertEquals(expectedReturn, actualReturn);
-      
+
       v1 = Double.NaN;
       v2 = Double.NaN;
       epsilon = 3.0;
@@ -503,7 +557,10 @@ public class MathToolsTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testDiffFrameVectorDifferentFrames()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -527,14 +584,20 @@ public class MathToolsTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testCheckIsEqualNaN()
    {
       MathTools.checkIfEqual(Double.NaN, Double.NaN, 1e-12);
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testCheckIsEqualInt()
    {
       MathTools.checkIfEqual(2, 4);
@@ -579,7 +642,10 @@ public class MathToolsTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
    public void testCheckIsEqualDouble()
    {
       MathTools.checkIfEqual(2.0, 2.001, 0.0001);
@@ -619,6 +685,20 @@ public class MathToolsTest
       long c = MathTools.lcm(12, 18, 6, 3, 4);
       assertEquals(36, c);
 
+   }
+   
+   @EstimatedDuration(duration = 0.0)
+   @Test(
+      timeout = 30000,
+      expected = RuntimeException.class
+   )
+   public void testLcm_2()
+   {
+	   Random rand = new Random();
+	   for(int i = 0; i < 100; i++)
+	   {
+		   long c = MathTools.lcm(rand.nextLong());
+	   }
    }
 
    @EstimatedDuration(duration = 0.0)
@@ -803,9 +883,9 @@ public class MathToolsTest
       {
          assertTrue(MathTools.isFinite(rand.nextFloat() * 1000));
          assertFalse(MathTools.isFinite(rand.nextFloat() / 0.0));
-         
-         assertTrue(MathTools.isFinite(new Vector3d(rand.nextDouble()*1000, rand.nextDouble()*1000, rand.nextDouble()*1000)));
-         assertFalse(MathTools.isFinite(new Vector3d(rand.nextDouble()/0.0, rand.nextDouble()/0.0, rand.nextDouble()/0.0)));
+
+         assertTrue(MathTools.isFinite(new Vector3d(rand.nextDouble() * 1000, rand.nextDouble() * 1000, rand.nextDouble() * 1000)));
+         assertFalse(MathTools.isFinite(new Vector3d(rand.nextDouble() / 0.0, rand.nextDouble() / 0.0, rand.nextDouble() / 0.0)));
 
       }
 
