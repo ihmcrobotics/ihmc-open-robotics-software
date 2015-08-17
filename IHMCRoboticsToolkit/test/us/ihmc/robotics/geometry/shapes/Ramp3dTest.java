@@ -57,6 +57,7 @@ public class Ramp3dTest
       Ramp3d ramp3d = new Ramp3d(transform, 1.0, 1.0, 1.0);
       Point3d pointToCheck = new Point3d(2.0, 0.0, 4.0);
       assertFalse(ramp3d.isInsideOrOnSurface(pointToCheck));
+      assertEquals(Math.toRadians(45.0), ramp3d.getRampIncline(), 1e-7);
    }
 
 	@EstimatedDuration(duration = 0.0)
