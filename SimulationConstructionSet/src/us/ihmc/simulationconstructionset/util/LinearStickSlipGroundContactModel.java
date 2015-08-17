@@ -425,8 +425,20 @@ public class LinearStickSlipGroundContactModel implements GroundContactModel
          
          // The following is a little inefficient since we call checkIfInside twice for any point that is slipping, but 
          // cleaner than letting the next tick know we need to update the surface normal due to a slip...
-         boolean isInside = groundProfile3D.checkIfInside(groundContactPoint.getX(), groundContactPoint.getY(), groundContactPoint.getZ(), intersectionPositionInWorld,
-        		 surfaceNormalTemp);
+         boolean isInside;
+         if (groundProfile3D == null)
+         {
+            isInside = (groundContactPoint.getZ() < 0.0);
+            intersectionPositionInWorld.set(groundContactPoint.getX(), groundContactPoint.getY(), 0.0);
+            surfaceNormalTemp.set(0.0, 0.0, 1.0);
+         }
+         else
+         {
+            // TODO: We'll be using the surface normal at the current point, rather than at the touchdown point. We might want to store the touchdown normal and use it instead...
+            isInside = groundProfile3D.checkIfInside(groundContactPoint.getX(), groundContactPoint.getY(), groundContactPoint.getZ(), intersectionPositionInWorld,
+                surfaceNormalTemp);
+         }
+         
          if (isInside) groundContactPoint.setSurfaceNormal(surfaceNormalTemp);
       }
       else
