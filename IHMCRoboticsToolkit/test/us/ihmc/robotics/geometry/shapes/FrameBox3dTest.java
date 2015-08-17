@@ -12,10 +12,10 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+
+import java.util.Random;
 
 public class FrameBox3dTest
 {
@@ -132,6 +132,31 @@ public class FrameBox3dTest
       box.getClosestPointAndNormalAt(returnedPoint, returnedNormal, pointOnYFace);
       assertTrue(expectedPoint.epsilonEquals(returnedPoint, 1e-14));
       assertTrue(expectedNormal.epsilonEquals(returnedNormal, 1e-14));
+   }
+   
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
+   public void testIsInsideOrOnSurface()
+   {
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      FrameBox3d box = new FrameBox3d(worldFrame);
+
+      FramePoint pointOnXFace = new FramePoint(worldFrame);
+      pointOnXFace.set(0.4, 0.3, -0.1);
+      
+      assertTrue(box.isInsideOrOnSurface(pointOnXFace, 1e-7));
+
+
+      FramePoint pointOnYFace = new FramePoint(worldFrame);
+      pointOnYFace.set(-0.2, 0.4, -0.1);
+      
+      assertTrue(box.isInsideOrOnSurface(pointOnYFace, 1e-7));
+      
+      FramePoint pointOutsideBox = new FramePoint(worldFrame);
+      pointOutsideBox.set(10, 10, 10);
+      
+      assertFalse(box.isInsideOrOnSurface(pointOutsideBox, 1e-7));
    }
 
    @EstimatedDuration(duration = 0.1)
