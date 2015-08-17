@@ -427,6 +427,13 @@ public class MathToolsTest
       boolean expectedReturn = true;
       boolean actualReturn = MathTools.epsilonEquals(v1, v2, epsilon);
       assertEquals(expectedReturn, actualReturn);
+      
+      v1 = Double.NaN;
+      v2 = Double.NaN;
+      epsilon = 3.0;
+      expectedReturn = true;
+      actualReturn = MathTools.epsilonEquals(v1, v2, epsilon);
+      assertTrue(actualReturn);
 
       /** @todo fill in the test code */
 
