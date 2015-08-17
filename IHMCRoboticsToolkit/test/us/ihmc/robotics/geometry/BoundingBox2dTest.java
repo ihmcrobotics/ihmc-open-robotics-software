@@ -15,8 +15,8 @@ public class BoundingBox2dTest
 {
    double epsilon = 0.00001;
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testGetMinPoint()
    {
       Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
@@ -31,8 +31,61 @@ public class BoundingBox2dTest
       assertEquals(minPoint, lowerLeftPoint);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetMinPoint_2()
+   {
+      Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
+      Point2d upperRightPoint = new Point2d(2.0, 2.0);
+      BoundingBox2d boundingBox2d = new BoundingBox2d(lowerLeftPoint.x, lowerLeftPoint.y, upperRightPoint.x, upperRightPoint.y);
+
+      Point2d minPoint = boundingBox2d.getMinPoint();
+      assertEquals(minPoint, lowerLeftPoint);
+
+      minPoint = new Point2d();
+      boundingBox2d.getMinPoint(minPoint);
+      assertEquals(minPoint, lowerLeftPoint);
+   }
+
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetMinPoint_3()
+   {
+      Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
+      Point2d upperRightPoint = new Point2d(2.0, 2.0);
+      BoundingBox2d boundingBox2d = new BoundingBox2d();
+      boundingBox2d.set(lowerLeftPoint.x, lowerLeftPoint.y, upperRightPoint.x, upperRightPoint.y);
+
+      Point2d minPoint = boundingBox2d.getMinPoint();
+      assertEquals(minPoint, lowerLeftPoint);
+
+      minPoint = new Point2d();
+      boundingBox2d.getMinPoint(minPoint);
+      assertEquals(minPoint, lowerLeftPoint);
+   }
+   
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000, expected=RuntimeException.class)
+   public void testGetMinPoint_4()
+   {
+      Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
+      Point2d upperRightPoint = new Point2d(2.0, 2.0);
+      BoundingBox2d boundingBox2d = new BoundingBox2d();
+      boundingBox2d.set(4.0, lowerLeftPoint.y, upperRightPoint.x, upperRightPoint.y);
+   }
+   
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000, expected=RuntimeException.class)
+   public void testGetMinPoint_5()
+   {
+      Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
+      Point2d upperRightPoint = new Point2d(2.0, 2.0);
+      BoundingBox2d boundingBox2d = new BoundingBox2d();
+      boundingBox2d.set(lowerLeftPoint.x, 4.0, upperRightPoint.x, upperRightPoint.y);
+   }
+
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testGetMaxPoint()
    {
       Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
@@ -47,14 +100,13 @@ public class BoundingBox2dTest
       assertEquals(maxPoint, upperRightPoint);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testGetCenterPointCopy()
    {
       Random random = new Random(7);
       for (int i = 0; i < 100; i++)
       {
-
          // create a random center point
          double centerX = random.nextDouble();
          double centerY = random.nextDouble();
@@ -75,8 +127,8 @@ public class BoundingBox2dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testIsFullyAbove()
    {
       Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
@@ -88,8 +140,8 @@ public class BoundingBox2dTest
       assertTrue(boundingBox2d.isBoxAtOrAbove(0.0));
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testIsFullyBelow()
    {
       Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
@@ -101,8 +153,8 @@ public class BoundingBox2dTest
       assertFalse(boundingBox2d.isBoxAtOrBelow(1.0));
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testIsFullyLeft()
    {
       Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
@@ -114,8 +166,8 @@ public class BoundingBox2dTest
       assertFalse(boundingBox2d.isBoxAtOrLeftOf(1.0));
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testIsFullyRight() throws Exception
    {
       Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
@@ -127,14 +179,13 @@ public class BoundingBox2dTest
       assertFalse(boundingBox2d.isBoxAtOrRightOf(1.0));
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testIsInside()
    {
       Random random = new Random(7);
       for (int i = 0; i < 100; i++)
       {
-
          // create a random center point
          double centerX = random.nextDouble();
          double centerY = random.nextDouble();
@@ -180,8 +231,8 @@ public class BoundingBox2dTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testIntersects()
    {
       Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
@@ -225,8 +276,8 @@ public class BoundingBox2dTest
       assertFalse(boundingBox2dA.intersects(boundingBox2dG));
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testConstructors()
    {
       Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
@@ -259,15 +310,15 @@ public class BoundingBox2dTest
    }
 
    // @todo test things like passing in null in the constructor
-//   public void testAnomalies()
-//   {
-//      Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
-//      Point2d upperRightPoint = null;
-//      BoundingBox2d boundingBox2dA = new BoundingBox2d(lowerLeftPoint, upperRightPoint);
-//   }
+// public void testAnomalies()
+// {
+//    Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
+//    Point2d upperRightPoint = null;
+//    BoundingBox2d boundingBox2dA = new BoundingBox2d(lowerLeftPoint, upperRightPoint);
+// }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testGetPointGivenParameters()
    {
       Random random = new Random(125L);
@@ -275,19 +326,19 @@ public class BoundingBox2dTest
       Point2d upperRightPoint = new Point2d(lowerLeftPoint);
       upperRightPoint.add(new Vector2d(random.nextDouble(), random.nextDouble()));
       BoundingBox2d boundingBox2d = new BoundingBox2d(lowerLeftPoint, upperRightPoint);
-      
+
       Point2d point = new Point2d();
 
       boundingBox2d.getPointGivenParameters(point, 0.0, 0.0);
       assertTrue(lowerLeftPoint.epsilonEquals(point, 0.0));
-      
+
       boundingBox2d.getPointGivenParameters(point, 1.0, 1.0);
       assertTrue(upperRightPoint.epsilonEquals(point, 0.0));
 
       boundingBox2d.getPointGivenParameters(point, 1.0, 0.0);
       assertEquals(upperRightPoint.getX(), point.getX(), 0.0);
       assertEquals(lowerLeftPoint.getY(), point.getY(), 0.0);
-      
+
       boundingBox2d.getPointGivenParameters(point, 0.0, 1.0);
       assertEquals(lowerLeftPoint.getX(), point.getX(), 0.0);
       assertEquals(upperRightPoint.getY(), point.getY(), 0.0);
