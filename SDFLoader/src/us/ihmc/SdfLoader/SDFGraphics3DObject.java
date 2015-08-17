@@ -243,7 +243,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
       }
 
       System.out.println(meshPath);
-      throw new RuntimeException("Resource not found");
+      throw new RuntimeException("Resource not found: " + meshPath);
    }
 
    private String tryConversion(String meshPath, String resourceDirectory)
