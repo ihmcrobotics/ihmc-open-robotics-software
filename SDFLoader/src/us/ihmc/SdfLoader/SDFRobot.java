@@ -125,7 +125,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
       for (SDFJointHolder child : rootLink.getChildren())
       {
-//         PrintTools.info("Joint name: " + child.getName());
+         // System.out.println("Joint name: " + child.getName());
          
          Set<String> lastSimulatedJoints;
 
