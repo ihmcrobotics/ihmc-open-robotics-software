@@ -19,9 +19,8 @@ import static org.junit.Assert.assertTrue;
 
 public class FrameBox3dTest
 {
-
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testDistance()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -33,17 +32,33 @@ public class FrameBox3dTest
 
       FramePoint pointOnTheEdgeBetweenXandY = new FramePoint(worldFrame);
       pointOnTheEdgeBetweenXandY.set(2.0, 2.0, 0.0);
-      expectedDistance = Math.sqrt(2.0)*1.5;
+      expectedDistance = Math.sqrt(2.0) * 1.5;
       assertEquals(expectedDistance, box.distance(pointOnTheEdgeBetweenXandY), 1e-14);
 
       FramePoint pointOnTheVertexBetweenXandYandZ = new FramePoint(worldFrame);
       pointOnTheVertexBetweenXandYandZ.set(-2.0, -3.5, -5.1);
       expectedDistance = Math.sqrt(MathTools.square(-1.5) + MathTools.square(-3.0) + MathTools.square(-4.6));
       assertEquals(expectedDistance, box.distance(pointOnTheVertexBetweenXandYandZ), 1e-14);
+
+      box = new FrameBox3d(worldFrame, 1, 1, 1);
+      pointOnZFace = new FramePoint(worldFrame);
+      pointOnZFace.set(0.0, 0.0, 2.0);
+      expectedDistance = 1.5;
+      assertEquals(expectedDistance, box.distance(pointOnZFace), 1e-14);
+
+      pointOnTheEdgeBetweenXandY = new FramePoint(worldFrame);
+      pointOnTheEdgeBetweenXandY.set(2.0, 2.0, 0.0);
+      expectedDistance = Math.sqrt(2.0) * 1.5;
+      assertEquals(expectedDistance, box.distance(pointOnTheEdgeBetweenXandY), 1e-14);
+
+      pointOnTheVertexBetweenXandYandZ = new FramePoint(worldFrame);
+      pointOnTheVertexBetweenXandYandZ.set(-2.0, -3.5, -5.1);
+      expectedDistance = Math.sqrt(MathTools.square(-1.5) + MathTools.square(-3.0) + MathTools.square(-4.6));
+      assertEquals(expectedDistance, box.distance(pointOnTheVertexBetweenXandYandZ), 1e-14);
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testOrthogonalProjection()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -74,10 +89,24 @@ public class FrameBox3dTest
       FramePoint point = new FramePoint(pointOnTheVertexBetweenMinusXandMinusYandZ);
       box.orthogonalProjection(point);
       assertTrue(point.epsilonEquals(expectedPoint, 1e-14));
+
+      ReferenceFrame frame = new ReferenceFrame("testFrame", ReferenceFrame.getWorldFrame())
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            setTransformToParent(transformToParent);
+         }
+      };
+      frame.update();
+      box.changeFrame(frame);
+      
+      assertTrue(box.getReferenceFrame().getName().contains(frame.getName()));
+
    }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testgetClosestPointAndNormalAt()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -105,19 +134,19 @@ public class FrameBox3dTest
       assertTrue(expectedNormal.epsilonEquals(returnedNormal, 1e-14));
    }
 
-	@EstimatedDuration(duration = 0.1)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000)
    public void testApplyTransform()
    {
-	  ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(562346L);
       int nBoxes = 100;
       int nTestsPerBox = 1000;
       for (int boxNumber = 0; boxNumber < nBoxes; boxNumber++)
       {
-         FrameBox3d box = createRandomBox(worldFrame,random);
+         FrameBox3d box = createRandomBox(worldFrame, random);
          RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
-         FrameBox3d boxTransformed = new FrameBox3d(box); 
+         FrameBox3d boxTransformed = new FrameBox3d(box);
          boxTransformed.applyTransform(transform);
          FrameBox3d biggerBox = new FrameBox3d(box);
          biggerBox.scale(2.0);
@@ -127,24 +156,26 @@ public class FrameBox3dTest
          {
             vertices[i] = new Point3d();
          }
+
          biggerBox.computeVertices(vertices);
-      
+
          for (int testNumber = 0; testNumber < nTestsPerBox; testNumber++)
          {
             Point3d point = getRandomConvexCombination(random, vertices);
             Point3d pointTransformed = new Point3d(point);
             transform.transform(pointTransformed);
-            
-            Assert.assertEquals(box.isInsideOrOnSurface(new FramePoint(worldFrame,point)), boxTransformed.isInsideOrOnSurface(new FramePoint(worldFrame,pointTransformed)));            
+
+            Assert.assertEquals(box.isInsideOrOnSurface(new FramePoint(worldFrame, point)),
+                                boxTransformed.isInsideOrOnSurface(new FramePoint(worldFrame, pointTransformed)));
          }
       }
-   }   
+   }
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testSetTransform3DAndGetters()
    {
-	  ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();	   
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(351235L);
       FrameBox3d box = new FrameBox3d(worldFrame);
       RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
@@ -161,7 +192,7 @@ public class FrameBox3dTest
 
       Matrix3d matrixBack = new Matrix3d();
       FramePoint CenterBack = new FramePoint(worldFrame);
-      
+
       box.getRotation(matrixBack);
       assertTrue(matrix.epsilonEquals(matrixBack, 0.0));
       assertTrue(matrix.epsilonEquals(box.getRotationCopy(), 0.0));
@@ -169,9 +200,12 @@ public class FrameBox3dTest
       box.getCenter(CenterBack);
       assertTrue(vector.epsilonEquals(new Vector3d(CenterBack.getVectorCopy()), 0.0));
       assertTrue(vector.epsilonEquals(box.getCenterCopy().getVectorCopy(), 0.0));
+
+      assertTrue(vector.epsilonEquals(new Vector3d(box.getCenter().getVectorCopy()), 0.0));
+      assertTrue(vector.epsilonEquals(box.getCenterCopy().getVectorCopy(), 0.0));
    }
 
-   
+
    private static FrameBox3d createRandomBox(ReferenceFrame referenceFrame, Random random)
    {
       RigidBodyTransform configuration = RigidBodyTransform.generateRandomTransform(random);
@@ -181,7 +215,7 @@ public class FrameBox3dTest
 
       return new FrameBox3d(referenceFrame, configuration, lengthX, widthY, heightZ);
    }
-   
+
    private static Point3d getRandomConvexCombination(Random random, Point3d[] vertices)
    {
       double[] weightings = new double[vertices.length];
@@ -203,8 +237,9 @@ public class FrameBox3dTest
          tempPoint.scale(weightings[j]);
          pointToTest.add(tempPoint);
       }
+
       return pointToTest;
    }
 
-   
+
 }
