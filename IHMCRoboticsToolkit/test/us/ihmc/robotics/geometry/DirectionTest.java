@@ -17,6 +17,10 @@ public class DirectionTest
       Direction xDirection = Direction.X;
       Direction yDirection = Direction.Y;
       Direction zDirection = Direction.Z;
+      
+      assertEquals(xDirection.getIndex(), 0, 1e-7);
+      assertEquals(yDirection.getIndex(), 1, 1e-7);
+      assertEquals(zDirection.getIndex(), 2, 1e-7);
 
       assertEquals(3, Direction.values().length);
       assertEquals(2, Direction.values2D().length);
