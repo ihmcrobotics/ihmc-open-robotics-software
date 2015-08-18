@@ -13,11 +13,11 @@ import us.ihmc.communication.packets.DetectedObjectPacket;
 import us.ihmc.communication.packets.sensing.MultisenseTest;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.lidarTests.IHMCMocapDataClient;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap.MocapToStateEstimatorFrameConverter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap.RosConnectedZeroPoseRobotConfigurationDataProducer;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.RosMainNode;
-import LidarTests.IHMCMocapDataClient;
 
 public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbodiesListener
 {
