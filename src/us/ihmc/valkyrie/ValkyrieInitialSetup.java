@@ -5,6 +5,7 @@ import java.util.List;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -43,7 +44,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFRobot>
       }
    }
    
-   private void setActuatorPositions(SDFRobot robot, DRCRobotJointMap jointMap)
+   private void setActuatorPositions(SDFBaseRobot robot, DRCRobotJointMap jointMap)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
