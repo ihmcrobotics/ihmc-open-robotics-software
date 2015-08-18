@@ -1,6 +1,6 @@
 package us.ihmc.SdfLoader;
 
-enum JointType
+enum SDFJointType
 {
    REVOLUTE,
    PRISMATIC
