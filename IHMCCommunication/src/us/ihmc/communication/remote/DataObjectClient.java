@@ -6,10 +6,6 @@ import java.net.Socket;
 
 import us.ihmc.tools.thread.ThreadTools;
 
-/**
- * User: Matt
- * Date: 12/7/12
- */
 public class DataObjectClient extends DataObjectTransponder
 {
    private String host;
