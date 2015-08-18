@@ -16,7 +16,6 @@ public class Step5Simulation
       Step5IDandSCSRobot v5Robot = new Step5IDandSCSRobot();
       
       //Controller 
-      //Step5IDController v5Controller = new Step5IDController(v5Robot, "v5Robot", deltaT);
       Step5Controller v5Controller = new Step5Controller(v5Robot, "v5Robot", deltaT);
       v5Robot.setController(v5Controller);
       

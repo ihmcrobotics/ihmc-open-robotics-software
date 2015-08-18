@@ -3,8 +3,8 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.JointNames;
-import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.LinkNames;
+import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.Step5RobotParameters.JointNames;
+import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.Step5RobotParameters.LinkNames;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

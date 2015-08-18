@@ -14,7 +14,7 @@ import us.ihmc.yoUtilities.stateMachines.State;
 import us.ihmc.yoUtilities.stateMachines.StateTransition;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
-public class Step5Controller implements RobotController
+public class Step5WalkingController implements RobotController
 {
 
    //Variables
@@ -43,9 +43,14 @@ public class Step5Controller implements RobotController
    private double ffComponent = -38.0 * 9.81;
    private Vector3d velocityToPack = new Vector3d();
 
-   
+   // State Machine
+   private enum States
+   {
+      SUPPORT, TOE_OFF, SWING, STRAIGHTEN
+   }
+
    // Controllers and Gains
-   public Step5Controller(Step5IDandSCSRobot rob, String name, double deltaT)
+   public Step5WalkingController(Step5IDandSCSRobot rob, String name, double deltaT)
    {
       this.rob = rob;
       this.name = name;
@@ -98,9 +103,9 @@ public class Step5Controller implements RobotController
          ankleTau.set(controllerAnkle.compute(rob.getAnklePitch(robotSide), desiredAnklePitch.getDoubleValue(), -rob.getAnkleVelocity(robotSide), 0.0, deltaT));
          rob.setKneeTau(robotSide, ankleTau.getDoubleValue());
 
-    /**
-     * 1
-     */
+         /**
+          * 1
+          */
          
 //         if (robotSide == RobotSide.RIGHT)
 //         {
@@ -178,6 +183,83 @@ public class Step5Controller implements RobotController
          rob.applyTorques(); //Note: this is getting called twice, one per side
       }
    }
+
+   /////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * State Machine
+    */
+
+   //   private void setUpStateMachine()
+   //   {
+   //         // States and Actions:
+   //         State<States> leftSupportState = new SupportState(RobotSide.LEFT, States.SUPPORT);
+   //         State<States> rightSupportState = new SupportState(RobotSide.RIGHT, States.SUPPORT);  
+   //         State<States> leftToeOffState = new ToeOffState(RobotSide.LEFT, States.TOE_OFF);
+   //         State<States> rightToeOffState = new ToeOffState(RobotSide.RIGHT, States.TOE_OFF);
+   //         State<States> leftSwingState = new SwingState(RobotSide.LEFT, States.SWING);
+   //         State<States> rightSwingState = new SwingState(RobotSide.RIGHT, States.SWING);
+   //         State<States> leftStraightenState = new StraightenState(RobotSide.LEFT, States.STRAIGHTEN);
+   //         State<States> rightStraightenState = new StraightenState(RobotSide.RIGHT, States.STRAIGHTEN);
+   //
+   //         // Transition Conditions:
+   //         StateTransitionCondition leftHealUnloaded = new HealUnloadedCondition(RobotSide.LEFT);
+   //         StateTransitionCondition leftFootUnloaded = new FootUnloadedCondition(RobotSide.LEFT);
+   //         StateTransitionCondition leftFootTouchedDown = new FootTouchedDownCondition(RobotSide.LEFT);
+   //
+   //         StateTransitionCondition rightHealUnloaded = new HealUnloadedCondition(RobotSide.RIGHT);
+   //         StateTransitionCondition rightFootUnloaded = new FootUnloadedCondition(RobotSide.RIGHT);
+   //         StateTransitionCondition rightFootTouchedDown = new FootTouchedDownCondition(RobotSide.RIGHT);
+   //
+   //         // Left State Transitions:
+   //         StateTransition<States> leftSupportToToeOff = new StateTransition<States>(States.TOE_OFF, leftHealUnloaded);
+   //         leftSupportToToeOff.addTimePassedCondition(min_support_time);
+   //         leftSupportState.addStateTransition(leftSupportToToeOff);
+   //
+   //         StateTransition<States> leftToeOffToSwing = new StateTransition<States>(States.SWING, leftFootUnloaded);
+   //         leftToeOffState.addStateTransition(leftToeOffToSwing);
+   //
+   //         StateTransition<States> leftSwingToStraighten = new StateTransition<States>(States.STRAIGHTEN, swing_time);
+   //         leftSwingState.addStateTransition(leftSwingToStraighten);
+   //
+   //         StateTransition<States> leftStraightenToSupport = new StateTransition<States>(States.SUPPORT, leftFootTouchedDown);
+   //         leftStraightenState.addStateTransition(leftStraightenToSupport);
+   //
+   //         // Right State Transitions:
+   //         StateTransition<States> rightSupportToToeOff = new StateTransition<States>(States.TOE_OFF, rightHealUnloaded);
+   //         rightSupportToToeOff.addTimePassedCondition(min_support_time);
+   //         rightSupportState.addStateTransition(rightSupportToToeOff);
+   //
+   //         StateTransition<States> rightToeOffToSwing = new StateTransition<States>(States.SWING, rightFootUnloaded);
+   //         rightToeOffState.addStateTransition(rightToeOffToSwing);
+   //
+   //         StateTransition<States> rightSwingToStraighten = new StateTransition<States>(States.STRAIGHTEN, swing_time);
+   //         rightSwingState.addStateTransition(rightSwingToStraighten);
+   //
+   //         StateTransition<States> rightStraightenToSupport = new StateTransition<States>(States.SUPPORT, rightFootTouchedDown);
+   //         rightStraightenState.addStateTransition(rightStraightenToSupport);
+   //
+   //
+   //         // Assemble the Left State Machine:
+   //         leftStateMachine.addState(leftSupportState);
+   //         leftStateMachine.addState(leftToeOffState);
+   //         leftStateMachine.addState(leftSwingState);
+   //         leftStateMachine.addState(leftStraightenState);
+   //
+   //
+   //         // Assemble the Right State Machine:
+   //         rightStateMachine.addState(rightSupportState);
+   //         rightStateMachine.addState(rightToeOffState);
+   //         rightStateMachine.addState(rightSwingState);
+   //         rightStateMachine.addState(rightStraightenState);
+   //
+   //         // Set the Initial States:
+   //
+   //         leftStateMachine.setCurrentState(States.STRAIGHTEN);
+   //         rightStateMachine.setCurrentState(States.SUPPORT);
+   //   }
+   //
+   //  
 
    /////////////////////////////////////////////////////////////////////////////////////////////
 
