@@ -2,7 +2,7 @@ package us.ihmc.steppr.hardware.controllers;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
 import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.controllers.PDController;
@@ -23,7 +23,7 @@ public class StepprPDJointController implements StepprController
    
 
    @Override
-   public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
+   public void setFullRobotModel(SDFBaseFullRobotModel fullRobotModel)
    {
       for(OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {

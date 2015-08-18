@@ -5,11 +5,9 @@ import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import com.jme3.math.Transform;
-
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
@@ -57,6 +55,8 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
+
+import com.jme3.math.Transform;
 
 public class BonoRobotModel implements DRCRobotModel
 {
@@ -234,7 +234,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SDFFullRobotModel createFullRobotModel()
+   public SDFFullHumanoidRobotModel createFullRobotModel()
    {
       return loader.createFullRobotModel(getJointMap());
    }
