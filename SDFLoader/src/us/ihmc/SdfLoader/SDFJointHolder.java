@@ -16,7 +16,7 @@ public class SDFJointHolder
    
    // Data from SDF
    private final String name;
-   private final JointType type;
+   private final SDFJointType type;
    private final Vector3d axisInModelFrame;
    
    private final boolean hasLimits;
@@ -57,11 +57,11 @@ public class SDFJointHolder
 
       if (typeString.equalsIgnoreCase("revolute"))
       {
-         type = JointType.REVOLUTE;
+         type = SDFJointType.REVOLUTE;
       }
       else if (typeString.equalsIgnoreCase("prismatic"))
       {
-         type = JointType.PRISMATIC;
+         type = SDFJointType.PRISMATIC;
       }
       else
       {
@@ -227,7 +227,7 @@ public class SDFJointHolder
       return name;
    }
 
-   public JointType getType()
+   public SDFJointType getType()
    {
       return type;
    }
