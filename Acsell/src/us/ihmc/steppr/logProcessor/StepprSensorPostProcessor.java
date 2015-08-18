@@ -31,7 +31,7 @@ import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.model.RobotMotionStatusHolder;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -61,7 +61,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final FullRobotModel estimatorFullRobotModel;
+   private final FullHumanoidRobotModel estimatorFullRobotModel;
    private final LogDataRawSensorMap rawSensorMap;
    private final StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private final SensorProcessing postProcessedSensors;
