@@ -6,8 +6,8 @@ import java.util.HashSet;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
@@ -32,7 +32,7 @@ public class ValkyrieSDFLoadingDemo
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(false, false);
       
-      SDFRobot valkyrieRobot = robotModel.createSdfRobot(false);
+      SDFBaseRobot valkyrieRobot = robotModel.createSdfRobot(false);
       valkyrieRobot.setPositionInWorld(new Vector3d());
       
       if (SHOW_ELLIPSOIDS)
@@ -56,7 +56,7 @@ public class ValkyrieSDFLoadingDemo
       scs.startOnAThread();
    }
 
-   private void addIntertialEllipsoidsToVisualizer(SDFRobot valkyrieRobot)
+   private void addIntertialEllipsoidsToVisualizer(SDFBaseRobot valkyrieRobot)
    {
       ArrayList<Joint> joints = new ArrayList<>();
       joints.add(valkyrieRobot.getRootJoint());
@@ -88,7 +88,7 @@ public class ValkyrieSDFLoadingDemo
       return links;
    }
 
-   public void addJointAxis(SDFRobot valkyrieRobot)
+   public void addJointAxis(SDFBaseRobot valkyrieRobot)
    {
 
       ArrayList<OneDegreeOfFreedomJoint> joints = new ArrayList<>(Arrays.asList(valkyrieRobot.getOneDoFJoints()));

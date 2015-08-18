@@ -7,7 +7,7 @@ package us.ihmc.valkyrie.visualizer;
 import javax.swing.JButton;
 
 import us.ihmc.CoM.LinkComIDActionListener;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -22,7 +22,7 @@ public class ValkyrieSystemIdentificationSCSUI
 
       // initialize SCS
      DRCRobotModel robotModel = new ValkyrieRobotModel(true,false);
-      final SDFRobot robot =robotModel.createSdfRobot(false);
+      final SDFBaseRobot robot =robotModel.createSdfRobot(false);
       
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setDataBufferSize(65536);

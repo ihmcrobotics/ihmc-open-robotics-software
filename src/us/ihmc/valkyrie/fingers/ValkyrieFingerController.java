@@ -2,8 +2,8 @@ package us.ihmc.valkyrie.fingers;
 
 import java.util.LinkedHashMap;
 
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
@@ -59,7 +59,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
     * @param globalDataProducer
     * @param yoVariableRegistry 
     */
-   public ValkyrieFingerController(DRCRobotModel robotModel, SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer, YoVariableRegistry controllerRegistry)
+   public ValkyrieFingerController(DRCRobotModel robotModel, SDFBaseRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer, YoVariableRegistry controllerRegistry)
    {
       this.isRunningOnRealRobot = robotModel.getStateEstimatorParameters().isRunningOnRealRobot();
       PrintTools.debug(DEBUG, "Running on real robot: " + isRunningOnRealRobot);
