@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.fingers;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.robotics.MathTools;
@@ -54,7 +54,7 @@ public class ValkyrieFingerSetController implements RobotController
    private final EnumYoVariable<FingerState> desiredFingerState;
    private StateMachine<GraspState> stateMachine;
          
-   public ValkyrieFingerSetController(RobotSide robotSide, DoubleYoVariable yoTime, DoubleYoVariable trajectoryTime, SDFBaseFullRobotModel fullRobotModel, boolean runningOnRealRobot, YoVariableRegistry parentRegistry,  YoVariableRegistry controllerRegistry)
+   public ValkyrieFingerSetController(RobotSide robotSide, DoubleYoVariable yoTime, DoubleYoVariable trajectoryTime, SDFFullRobotModel fullRobotModel, boolean runningOnRealRobot, YoVariableRegistry parentRegistry,  YoVariableRegistry controllerRegistry)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       this.controllerRegistry = controllerRegistry;
@@ -93,7 +93,7 @@ public class ValkyrieFingerSetController implements RobotController
       setupStateMachine();
    }
 
-   private void mapJointsAndVariables(SDFBaseFullRobotModel fullRobotModel)
+   private void mapJointsAndVariables(SDFFullRobotModel fullRobotModel)
    {
       for (ValkyrieRealRobotFingerJoint jointEnum : ValkyrieRealRobotFingerJoint.values)
       {
