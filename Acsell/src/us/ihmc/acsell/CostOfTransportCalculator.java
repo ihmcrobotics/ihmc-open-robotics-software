@@ -2,7 +2,7 @@ package us.ihmc.acsell;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.tools.time.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -28,7 +28,7 @@ public class CostOfTransportCalculator implements RobotVisualizer
    private final DoubleYoVariable averageVelocity; 
    private final DoubleYoVariable costOfTransport;
    
-   private BaseFullRobotModel fullRobotModel;
+   private FullRobotModel fullRobotModel;
    private DoubleYoVariable totalWorkVariable;
    
    private final int samples;
@@ -124,7 +124,7 @@ public class CostOfTransportCalculator implements RobotVisualizer
    }
 
    @Override
-   public void setMainRegistry(YoVariableRegistry registry, BaseFullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       PrintTools.info(this, "Initializing cost of transport calculator. Robot mass is " + robotMass + "kg");
       registry.addChild(this.registry);
