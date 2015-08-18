@@ -3,7 +3,7 @@ package us.ihmc.acsell.network;
 import java.io.IOException;
 import java.net.URI;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -15,7 +15,7 @@ public class AcsellSensorSuiteManager implements DRCSensorSuiteManager
    private final PacketCommunicator sensorSuitePacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER,
          new IHMCCommunicationKryoNetClassList());
    
-   public AcsellSensorSuiteManager(SDFBaseFullRobotModel sdfFullRobotModel, boolean useSimulatedSensors)
+   public AcsellSensorSuiteManager(SDFFullRobotModel sdfFullRobotModel, boolean useSimulatedSensors)
    {
    }
    

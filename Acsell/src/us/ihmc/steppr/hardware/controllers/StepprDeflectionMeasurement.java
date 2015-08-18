@@ -2,7 +2,7 @@ package us.ihmc.steppr.hardware.controllers;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -22,7 +22,7 @@ public class StepprDeflectionMeasurement implements StepprController
    private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableForceOutput", registry);
 
    @Override
-   public void setFullRobotModel(SDFBaseFullRobotModel fullRobotModel)
+   public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
    {
       for (StepprJoint joint : StepprJoint.values)
       {
