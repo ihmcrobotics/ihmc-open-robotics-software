@@ -21,7 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -104,7 +104,7 @@ public class ValkyriePosePlaybackDemoTest
       int numberOfPoses = 5;
       double trajectoryTime = 1.0;
       ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false, false);
-      BaseFullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
+      FullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
       PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket("PoseSequences/valkerena.poseSequence", fullRobotModel, 1.0);
 
       SimulationConstructionSet scs = startPosePlaybackSim(posePlaybackPacket);
@@ -127,7 +127,7 @@ public class ValkyriePosePlaybackDemoTest
       double delayTime = 0.25;
       double trajectoryTime = 1.0;
       ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false, false);
-      BaseFullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
+      FullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
       List<OneDoFJoint> jointToControl = Arrays.asList(fullRobotModel.getOneDoFJoints());
       PosePlaybackPacket posePlaybackPacket = createRandomPosePlaybackPacket(fullRobotModel, jointToControl, numberOfPoses, delayTime, trajectoryTime);
 
@@ -149,7 +149,7 @@ public class ValkyriePosePlaybackDemoTest
       double delayTime = 0.25;
       double trajectoryTime = 1.0;
       ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false, false);
-      BaseFullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
+      FullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
       ArrayList<OneDoFJoint> jointToControl = new ArrayList<>(Arrays.asList(fullRobotModel.getOneDoFJoints()));
       int numberOfUncontrolledJoints = RandomTools.generateRandomInt(random, 2, jointToControl.size() / 2);
       for (int i = 0; i < numberOfUncontrolledJoints; i++)
@@ -200,7 +200,7 @@ public class ValkyriePosePlaybackDemoTest
       }
    }
 
-   private PosePlaybackPacket createRandomPosePlaybackPacket(final BaseFullRobotModel fullRobotModel, final List<OneDoFJoint> jointToControl,
+   private PosePlaybackPacket createRandomPosePlaybackPacket(final FullRobotModel fullRobotModel, final List<OneDoFJoint> jointToControl,
          final int numberOfPoses, final double delayBeforePoses, final double trajectoryTime)
    {
       PosePlaybackPacket posePlaybackPacket = new PosePlaybackPacket()
