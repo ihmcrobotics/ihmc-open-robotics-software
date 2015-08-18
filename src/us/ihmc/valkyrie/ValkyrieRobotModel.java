@@ -10,7 +10,7 @@ import com.jme3.math.Vector3f;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
@@ -272,7 +272,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public ScsCollisionConfigure getPhysicsConfigure(SDFBaseRobot robotModel)
+   public ScsCollisionConfigure getPhysicsConfigure(SDFRobot robotModel)
    {
       return null;
    }
@@ -285,7 +285,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    //For Sim Only
    @Override
-   public void setJointDamping(SDFBaseRobot simulatedRobot)
+   public void setJointDamping(SDFRobot simulatedRobot)
    {
       System.err.println("Joint Damping not setup for Valkyrie. ValkyrieRobotModel setJointDamping!");
    }
@@ -400,7 +400,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public MultiThreadedRobotControlElement createSimulatedHandController(SDFBaseRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer)
+   public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer)
    {
 	   return null;
       //return new ValkyrieFingerController(this, simulatedRobot, threadDataSynchronizer, globalDataProducer, null);
