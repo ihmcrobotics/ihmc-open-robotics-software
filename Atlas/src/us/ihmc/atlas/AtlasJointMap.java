@@ -21,6 +21,7 @@ import java.util.Set;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.JointRole;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;

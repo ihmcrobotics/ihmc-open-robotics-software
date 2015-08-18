@@ -9,8 +9,8 @@ import javax.vecmath.Quat4d;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.JointRole;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFJointNameMap.JointRole;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;

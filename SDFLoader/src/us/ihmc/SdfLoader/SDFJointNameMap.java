@@ -17,11 +17,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface SDFJointNameMap extends RobotSpecificJointNames
 {
-   public enum JointRole
-   {
-      LEG, ARM, SPINE, NECK;
-   }
-
    public String getModelName();
 
    public JointRole getJointRole(String jointName);
