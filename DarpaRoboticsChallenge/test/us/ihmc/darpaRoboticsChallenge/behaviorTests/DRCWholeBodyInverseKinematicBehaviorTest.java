@@ -10,7 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.util.PacketControllerTools;
@@ -83,7 +83,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
 
    private DoubleYoVariable yoTime;
 
-   private SDFFullRobotModel fullRobotModel;
+   private SDFFullHumanoidRobotModel fullRobotModel;
    private WholeBodyControllerParameters wholeBodyControllerParameters;
 
    private ArmJointName[] armJointNames;

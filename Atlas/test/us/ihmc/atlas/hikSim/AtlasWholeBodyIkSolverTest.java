@@ -10,12 +10,15 @@ import java.util.regex.Pattern;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.simulationconstructionset.Robot;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
@@ -42,7 +45,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
    public WholeBodyIkSolverTestHelper getWholeBodyIkSolverTestHelper()
    {
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
-      SDFFullRobotModel actualRobotModel = atlasRobotModel.createFullRobotModel();
+      SDFFullHumanoidRobotModel actualRobotModel = atlasRobotModel.createFullRobotModel();
       wholeBodySolver = new AtlasWholeBodyIK(atlasRobotModel);
 
       initializeFullRobotModelJointAngles(actualRobotModel, atlasRobotModel);
@@ -118,7 +121,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
      catch(Exception e) { e.printStackTrace(); } 
    }
 
-   private void initializeFullRobotModelJointAngles(SDFFullRobotModel fullRobotModelToInitialize, AtlasRobotModel atlasRobotModel)
+   private void initializeFullRobotModelJointAngles(SDFBaseFullRobotModel fullRobotModelToInitialize, AtlasRobotModel atlasRobotModel)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

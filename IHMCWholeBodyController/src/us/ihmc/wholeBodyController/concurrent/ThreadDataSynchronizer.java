@@ -2,7 +2,7 @@ package us.ihmc.wholeBodyController.concurrent;
 
 import java.util.Arrays;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -14,14 +14,14 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
 {
-   private final SDFFullRobotModel estimatorFullRobotModel;
+   private final SDFFullHumanoidRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder estimatorForceSensorDataHolder;
    private final ContactSensorHolder estimatorContactSensorHolder;
    private final RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap;
    private final CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder;
    private final RobotMotionStatusHolder estimatorRobotMotionStatusHolder;
 
-   private final SDFFullRobotModel controllerFullRobotModel;
+   private final SDFFullHumanoidRobotModel controllerFullRobotModel;
    private final ForceSensorDataHolder controllerForceSensorDataHolder;
    private final ContactSensorHolder controllerContactSensorHolder;
    private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
@@ -95,7 +95,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
    }
 
    @Override
-   public SDFFullRobotModel getEstimatorFullRobotModel()
+   public SDFFullHumanoidRobotModel getEstimatorFullRobotModel()
    {
       return estimatorFullRobotModel;
    }
@@ -107,7 +107,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
    }
 
    @Override
-   public SDFFullRobotModel getControllerFullRobotModel()
+   public SDFFullHumanoidRobotModel getControllerFullRobotModel()
    {
       return controllerFullRobotModel;
    }

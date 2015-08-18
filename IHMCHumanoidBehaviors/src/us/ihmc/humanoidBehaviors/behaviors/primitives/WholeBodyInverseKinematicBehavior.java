@@ -2,7 +2,8 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
@@ -26,8 +27,8 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
 
    private final WholeBodyIKPacketCreator wholeBodyNetworkModule;
    private final WholeBodyIkSolver wholeBodyIKSolver;
-   private final SDFFullRobotModel actualFullRobotModel;
-   private final SDFFullRobotModel desiredFullRobotModel;
+   private final SDFFullHumanoidRobotModel actualFullRobotModel;
+   private final SDFFullHumanoidRobotModel desiredFullRobotModel;
    private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
 
    private final DoubleYoVariable yoTime;
@@ -38,7 +39,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    private final BooleanYoVariable hasSolutionBeenFound;
 
    public WholeBodyInverseKinematicBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
-         WholeBodyControllerParameters wholeBodyControllerParameters, SDFFullRobotModel actualFullRobotModel, DoubleYoVariable yoTime)
+         WholeBodyControllerParameters wholeBodyControllerParameters, SDFFullHumanoidRobotModel actualFullRobotModel, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
       wholeBodyNetworkModule = new WholeBodyIKPacketCreator(wholeBodyControllerParameters);
@@ -94,7 +95,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       }
    }
    
-   public SDFFullRobotModel getDesiredFullRobotModel()
+   public SDFFullHumanoidRobotModel getDesiredFullRobotModel()
    {
       return desiredFullRobotModel;
    }

@@ -17,7 +17,7 @@ import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Subscriber;
 
 import sensor_msgs.JointState;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
@@ -40,7 +40,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
    private Subscriber<JointState> jointSubscriber;
 
    private final DRCRobotModel robotModel;
-   private final SDFFullRobotModel fullRobotModel;
+   private final SDFFullHumanoidRobotModel fullRobotModel;
    private final ForceSensorDefinition[] forceSensorDefinitions;
    private final HumanoidReferenceFrames referenceFrames;
    private final ReferenceFrame pelvisFrame;

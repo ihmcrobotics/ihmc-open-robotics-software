@@ -47,7 +47,7 @@ public class AtlasStatisticsDisplay
       try
       {
     	  Class<?> clazz = Class.forName("us.ihmc.humanoidOperatorInterface.networking.StatisticsDisplay");
-    	  Constructor<?> constructor = clazz.getDeclaredConstructor(us.ihmc.SdfLoader.SDFFullRobotModel.class);
+    	  Constructor<?> constructor = clazz.getDeclaredConstructor(us.ihmc.SdfLoader.SDFFullHumanoidRobotModel.class);
     	  constructor.newInstance(model.createFullRobotModel());
       }
       catch (ClassNotFoundException e)

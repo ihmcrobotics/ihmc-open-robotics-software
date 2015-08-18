@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
@@ -26,8 +26,8 @@ public class WholeBodyIKTrajectoryBehavior extends BehaviorInterface
    
    private final WholeBodyIkSolver wholeBodyIKSolver;
    private final WholeBodyTrajectory wholeBodyTrajectory;
-   private final SDFFullRobotModel actualFullRobotModel;
-   private final SDFFullRobotModel desiredFullRobotModel;
+   private final SDFFullHumanoidRobotModel actualFullRobotModel;
+   private final SDFFullHumanoidRobotModel desiredFullRobotModel;
    private final DoubleYoVariable yoTime;
    
    private WholeBodyTrajectoryPacket wholeBodyTrajectoryPacket;
@@ -35,7 +35,7 @@ public class WholeBodyIKTrajectoryBehavior extends BehaviorInterface
    private double startTime;
 
    public WholeBodyIKTrajectoryBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
-         WholeBodyControllerParameters wholeBodyControllerParameters, SDFFullRobotModel actualFullRobotModel, DoubleYoVariable yoTime)
+         WholeBodyControllerParameters wholeBodyControllerParameters, SDFFullHumanoidRobotModel actualFullRobotModel, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
       wholeBodyIKSolver = wholeBodyControllerParameters.createWholeBodyIkSolver();

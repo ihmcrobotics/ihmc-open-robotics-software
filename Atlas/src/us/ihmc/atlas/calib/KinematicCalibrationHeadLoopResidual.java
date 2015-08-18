@@ -15,7 +15,8 @@ import javax.vecmath.Vector3d;
 
 import org.ddogleg.optimization.functions.FunctionNtoM;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -34,7 +35,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    boolean isLeft;
 
    //robot model and data
-   private final SDFFullRobotModel fullRobotModel;
+   private final SDFFullHumanoidRobotModel fullRobotModel;
    private final ArrayList<Map<String, Object>> qdata;
    private final ArrayList<Map<String, Double>> q;
    private final List<String> calJointNames;
@@ -58,7 +59,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
 
    public final RobotSide activeSide;
 
-   public KinematicCalibrationHeadLoopResidual(SDFFullRobotModel fullRobotModel,
+   public KinematicCalibrationHeadLoopResidual(SDFFullHumanoidRobotModel fullRobotModel,
                                                boolean isLeft,
                                                IntrinsicParameters intrinsic,
                                                PlanarCalibrationTarget calibGrid,
@@ -76,7 +77,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       this.calJointNames = getOrderedArmJointsNames(fullRobotModel, isLeft);
    }
 
-   public static List<String> getOrderedArmJointsNames(SDFFullRobotModel fullRobotModel, boolean isLeft)
+   public static List<String> getOrderedArmJointsNames(SDFBaseFullRobotModel fullRobotModel, boolean isLeft)
    {
       final OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
 

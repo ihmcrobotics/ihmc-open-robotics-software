@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -70,7 +70,7 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
    }
 
    @Override
-   public void setFullRobotModel(SDFFullRobotModel fullRobotModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setFullRobotModel(SDFFullHumanoidRobotModel fullRobotModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       super.setFullRobotModel(fullRobotModel);
 

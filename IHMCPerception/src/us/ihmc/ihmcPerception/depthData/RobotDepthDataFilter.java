@@ -2,7 +2,7 @@ package us.ihmc.ihmcPerception.depthData;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -14,7 +14,7 @@ public class RobotDepthDataFilter extends DepthDataFilter
    private final FullHumanoidRobotModel fullRobotModel;
 
 
-   public RobotDepthDataFilter(SDFFullRobotModel fullRobotModel)
+   public RobotDepthDataFilter(SDFFullHumanoidRobotModel fullRobotModel)
    {
       super();
       this.fullRobotModel = fullRobotModel;

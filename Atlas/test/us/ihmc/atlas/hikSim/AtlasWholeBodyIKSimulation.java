@@ -1,7 +1,7 @@
 package us.ihmc.atlas.hikSim;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -30,7 +30,7 @@ public class AtlasWholeBodyIKSimulation
 
    private GroundProfile3D groundProfile = new FlatGroundProfile(-10.0, 1000, -6.0 / 2.0, 6.0 / 2.0, 0);
 
-   private final SDFFullRobotModel fullRobotModel;
+   private final SDFFullHumanoidRobotModel fullRobotModel;
    private final SDFRobot scsRobot;
 //   private final AtlasRobotModel atlasRobotModel;
 

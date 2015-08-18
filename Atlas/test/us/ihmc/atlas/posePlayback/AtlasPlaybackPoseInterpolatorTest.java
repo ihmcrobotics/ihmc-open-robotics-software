@@ -6,7 +6,7 @@ import java.io.StringReader;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -43,7 +43,7 @@ public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorD
    public void testFromExample()
    {
       DRCRobotModel robotModel = getRobotModel();
-      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
       
       StringBuffer stringBuffer = new StringBuffer();

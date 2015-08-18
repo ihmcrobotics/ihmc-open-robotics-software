@@ -1,6 +1,6 @@
 package us.ihmc.atlas.hikSim;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
@@ -21,7 +21,7 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
    {
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
 
-      SDFFullRobotModel actualRobotModel =  atlasRobotModel.createFullRobotModel();
+      SDFFullHumanoidRobotModel actualRobotModel =  atlasRobotModel.createFullRobotModel();
 
       for (RobotSide robotSide : RobotSide.values)
       {

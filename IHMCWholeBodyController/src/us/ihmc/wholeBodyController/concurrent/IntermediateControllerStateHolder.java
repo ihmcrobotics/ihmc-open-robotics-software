@@ -1,6 +1,6 @@
 package us.ihmc.wholeBodyController.concurrent;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
 import us.ihmc.tools.compare.GenericCRC32;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJointDesiredAccelerationChecksum;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJointDesiredAccelerationCopier;
@@ -18,10 +18,10 @@ public class IntermediateControllerStateHolder
    private final InverseDynamicsJointDesiredAccelerationChecksum controllerChecksum;
    private final InverseDynamicsJointDesiredAccelerationChecksum estimatorChecksum;
    
-   public IntermediateControllerStateHolder(WholeBodyControllerParameters wholeBodyControlParameters, SDFFullRobotModel estimatorModel,
-         SDFFullRobotModel controllerModel)
+   public IntermediateControllerStateHolder(WholeBodyControllerParameters wholeBodyControlParameters, SDFBaseFullRobotModel estimatorModel,
+         SDFBaseFullRobotModel controllerModel)
    {
-      SDFFullRobotModel intermediateModel = wholeBodyControlParameters.createFullRobotModel();
+      SDFBaseFullRobotModel intermediateModel = wholeBodyControlParameters.createFullRobotModel();
 
       controllerToIntermediateCopier = new InverseDynamicsJointDesiredAccelerationCopier(controllerModel.getElevator(), intermediateModel.getElevator());
       intermediateToEstimatorCopier = new InverseDynamicsJointDesiredAccelerationCopier(intermediateModel.getElevator(), estimatorModel.getElevator());
@@ -66,11 +66,11 @@ public class IntermediateControllerStateHolder
    public static class Builder implements us.ihmc.concurrent.Builder<IntermediateControllerStateHolder>
    {
 
-      private final SDFFullRobotModel estimatorModel;
-      private final SDFFullRobotModel controllerModel;
+      private final SDFBaseFullRobotModel estimatorModel;
+      private final SDFBaseFullRobotModel controllerModel;
       private final WholeBodyControllerParameters wholeBodyControlParameters;
 
-      public Builder(WholeBodyControllerParameters wholeBodyControlParameters, SDFFullRobotModel estimatorModel, SDFFullRobotModel controllerModel)
+      public Builder(WholeBodyControllerParameters wholeBodyControlParameters, SDFBaseFullRobotModel estimatorModel, SDFBaseFullRobotModel controllerModel)
       {
          this.wholeBodyControlParameters = wholeBodyControlParameters;
          this.estimatorModel = estimatorModel;

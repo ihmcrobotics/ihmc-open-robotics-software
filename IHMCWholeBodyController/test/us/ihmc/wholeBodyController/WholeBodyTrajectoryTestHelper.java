@@ -1,16 +1,16 @@
 package us.ihmc.wholeBodyController;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.simulationconstructionset.Robot;
 
 public class WholeBodyTrajectoryTestHelper
 {
    private WholeBodyControllerParameters wholeBodyControllerParameters;
    private Robot robot;
-   private SDFFullRobotModel sdfFullRobotModel;
+   private SDFFullHumanoidRobotModel sdfFullRobotModel;
    private WholeBodyIkSolver wholeBodyIkSolver;
    
-   public WholeBodyTrajectoryTestHelper(WholeBodyControllerParameters wholeBodyControllerParameters, Robot robot, SDFFullRobotModel sdfFullRobotModel, WholeBodyIkSolver wholeBodyIkSolver)
+   public WholeBodyTrajectoryTestHelper(WholeBodyControllerParameters wholeBodyControllerParameters, Robot robot, SDFFullHumanoidRobotModel sdfFullRobotModel, WholeBodyIkSolver wholeBodyIkSolver)
    {
       this.wholeBodyControllerParameters = wholeBodyControllerParameters;
       this.robot = robot;
@@ -28,7 +28,7 @@ public class WholeBodyTrajectoryTestHelper
       return robot;
    }
    
-   public SDFFullRobotModel getActualRobotModel()
+   public SDFFullHumanoidRobotModel getActualRobotModel()
    {
       return sdfFullRobotModel;
    }

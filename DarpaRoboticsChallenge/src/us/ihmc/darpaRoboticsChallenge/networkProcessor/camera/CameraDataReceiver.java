@@ -9,7 +9,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import boofcv.struct.calib.IntrinsicParameters;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoHandler;
@@ -28,7 +28,7 @@ public abstract class CameraDataReceiver extends Thread
    private final ArrayList<DRCStereoListener> stereoListeners = new ArrayList<DRCStereoListener>();
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
 
-   private final SDFFullRobotModel fullRobotModel;
+   private final SDFFullHumanoidRobotModel fullRobotModel;
    private ReferenceFrame cameraFrame;
 
    private final Point3d cameraPosition = new Point3d();

@@ -15,7 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
@@ -116,7 +116,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       ThreadTools.sleep(1000);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-      SDFFullRobotModel fullRobotModel = drcSimulationTestHelper.getDRCSimulationFactory().getThreadDataSynchronizer().getControllerFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getDRCSimulationFactory().getThreadDataSynchronizer().getControllerFullRobotModel();
 
       FootstepDataList corruptedFootstepDataList = createFootstepsForWalkingUpRamp(scriptedFootstepGenerator);
       

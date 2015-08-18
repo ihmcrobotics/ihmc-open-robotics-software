@@ -1,8 +1,9 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
 import static org.junit.Assert.assertTrue;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
@@ -59,7 +60,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
 
 
    @Override
-   public InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFFullRobotModel controllersFullRobotModel, SDFRobot robot)
+   public InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFBaseFullRobotModel controllersFullRobotModel, SDFRobot robot)
    {
       return null;
 //      InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener = new FancyInverseDynamicsCalculatorListener(controllersFullRobotModel, robot);
@@ -71,12 +72,12 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
       private final boolean visualize = true;
       private final double gravityZ = 9.81;
       private final DRCInverseDynamicsCalculatorTestHelper atlasInverseDynamicsCalculatorTestHelper;
-      private final SDFFullRobotModel controllersFullRobotModel;
+      private final SDFBaseFullRobotModel controllersFullRobotModel;
       private final SimulationConstructionSet scs;
       private final SDFHumanoidRobot robot, simulatedRobot;
       private boolean firstTick = true;
 
-      public FancyInverseDynamicsCalculatorListener(SDFFullRobotModel controllersFullRobotModel, SDFHumanoidRobot simulatedRobot)
+      public FancyInverseDynamicsCalculatorListener(SDFFullHumanoidRobotModel controllersFullRobotModel, SDFHumanoidRobot simulatedRobot)
       {
          this.controllersFullRobotModel = controllersFullRobotModel;
          this.simulatedRobot = simulatedRobot;
@@ -101,7 +102,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
       @Override
       public void inverseDynamicsCalculatorIsDone(InverseDynamicsCalculator inverseDynamicsCalculator)
       {
-         SDFFullRobotModel fullRobotModelInAtlasInverseDynamicsCalculatorTestHelper = atlasInverseDynamicsCalculatorTestHelper.getFullRobotModel();
+         SDFBaseFullRobotModel fullRobotModelInAtlasInverseDynamicsCalculatorTestHelper = atlasInverseDynamicsCalculatorTestHelper.getFullRobotModel();
          fullRobotModelInAtlasInverseDynamicsCalculatorTestHelper.updateFrames();
          
          // Either of these two seem to work. Matching full robot model gives near exact results. Matching robot state gives really close results.

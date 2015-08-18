@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -113,10 +113,10 @@ public abstract class ArmJointTrajectoryPacketEndToEndTest implements MultiRobot
          drcSimulationTestHelper.simulateAndBlock(endWaypointTime - startWaypointTime);
          System.out.println("done - check if target reached");
          
-         SDFFullRobotModel fullRobotModel = drcSimulationTestHelper.getSDFFullRobotModel();
+         SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getSDFFullRobotModel();
          SDFRobot sdfRobot = drcSimulationTestHelper.getRobot();
          
-         ArrayList<OneDoFJoint> armJoints = fullRobotModel.armJointIDsList.get(packet.robotSide);
+         ArrayList<OneDoFJoint> armJoints = fullRobotModel.getArmJointIDs(packet.robotSide);
          
          for (int jointIdx = 0; jointIdx < armJoints.size(); jointIdx++)
          {
