@@ -23,6 +23,7 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.FingerName;
+import us.ihmc.humanoidRobotics.partNames.JointRole;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.humanoidRobotics.partNames.LimbName;
 import us.ihmc.humanoidRobotics.partNames.NeckJointName;
