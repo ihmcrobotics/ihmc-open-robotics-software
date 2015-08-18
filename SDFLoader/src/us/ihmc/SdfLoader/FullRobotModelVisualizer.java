@@ -7,8 +7,10 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
@@ -28,14 +30,14 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    private final String name;
    private final SDFRobot robot;
    private final double updateDT;
-   private final FullRobotModel fullRobot;
+   private final BaseFullRobotModel fullRobot;
 
    private SimulationConstructionSet scs;
    private YoVariableRegistry robotRegistry;
    private SixDoFJoint rootJoint;
    private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
   
-   public FullRobotModelVisualizer(SimulationConstructionSet scs, FullRobotModel fullRobotModel, double updateDT)
+   public FullRobotModelVisualizer(SimulationConstructionSet scs, BaseFullRobotModel fullRobotModel, double updateDT)
    {   
       this.fullRobot = fullRobotModel;
       this.scs = scs;
@@ -67,7 +69,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    }
    
    @Override
-   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void setMainRegistry(YoVariableRegistry registry, BaseFullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.rootJoint = fullRobotModel.getRootJoint();
       

@@ -34,6 +34,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -104,7 +105,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
 
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      BaseFullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
       numberOfArmJoints = armJointNames.length;

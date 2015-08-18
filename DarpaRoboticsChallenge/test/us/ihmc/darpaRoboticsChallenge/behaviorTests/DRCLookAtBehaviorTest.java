@@ -27,7 +27,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoUtilities.time.GlobalTimer;
@@ -156,7 +156,7 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
 
    private LookAtBehavior testLookAtBehavior(double trajectoryTime, Quat4d desiredHeadQuat) throws SimulationExceededMaximumTimeException
    {
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      BaseFullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       FramePose initialHeadPose = getCurrentHeadPose(fullRobotModel);
       Point3d desiredLookAtPoint = computeDesiredLookAtPoint(initialHeadPose, desiredHeadQuat);
@@ -224,7 +224,7 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
       return desiredHeadQuat;
    }
 
-   private FramePose getCurrentHeadPose(FullRobotModel fullRobotModel)
+   private FramePose getCurrentHeadPose(BaseFullRobotModel fullRobotModel)
    {
       FramePose ret = new FramePose();
 

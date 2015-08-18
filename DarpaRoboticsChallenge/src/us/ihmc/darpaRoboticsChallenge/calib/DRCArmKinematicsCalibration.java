@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.alg.geo.PerspectiveOps;
@@ -25,7 +25,7 @@ import boofcv.struct.image.ImageFloat32;
  */
 public class DRCArmKinematicsCalibration
 {
-   FullRobotModel robotModel;
+   BaseFullRobotModel robotModel;
 
    PlanarCalibrationDetector detector = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(5, 6));
    PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(5, 6, 0.01);

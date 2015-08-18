@@ -17,8 +17,10 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -312,7 +314,7 @@ public class WholeBodyIkSolverTestHelper
       return handArrayList;
    }
 
-   public FullRobotModel getActualFullRobotModel()
+   public BaseFullRobotModel getActualFullRobotModel()
    {
       return actualRobotModel;
    }

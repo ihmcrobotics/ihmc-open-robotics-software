@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MultiContactTestHumanoidController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -46,7 +46,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelBehav
 
       double comProportionalGain = 100.0;
       double dampingRatio = 1.0;
-      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      BaseFullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       double comDerivativeGain = GainCalculator.computeDampingForSecondOrderSystem(totalMass, comProportionalGain, dampingRatio);
       momentumRateOfChangeControlModule.setProportionalGains(comProportionalGain, comProportionalGain, comProportionalGain);

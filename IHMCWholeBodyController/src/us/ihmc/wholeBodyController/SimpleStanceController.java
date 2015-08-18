@@ -27,7 +27,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -77,7 +77,7 @@ public class SimpleStanceController implements RobotController
    private final AxisAngleOrientationController pelvisOrientationController;
    private final CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule;
    private final CenterOfMassJacobian centerOfMassJacobian;
-   private final FullRobotModel fullRobotModel;
+   private final BaseFullRobotModel fullRobotModel;
    private final ReferenceFrame centerOfMassFrame;
    private final YoFrameVector desiredPelvisAngularAcceleration;
    private final Map<OneDoFJoint, DoubleYoVariable> desiredJointAccelerationYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();

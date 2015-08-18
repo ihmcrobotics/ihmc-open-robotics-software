@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
@@ -206,7 +207,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       }
    }
 
-   public FullRobotModel getFullRobotModel()
+   public BaseFullRobotModel getFullRobotModel()
    {
       return fullRobotModel;
    }

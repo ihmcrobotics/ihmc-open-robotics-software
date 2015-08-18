@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceCons
 import us.ihmc.communication.packets.dataobjects.LowLevelDrivingAction;
 import us.ihmc.communication.packets.driving.LowLevelDrivingStatus;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -111,7 +111,7 @@ public class DrivingFootControlModule
    private final RigidBody elevator;
 
 
-   public DrivingFootControlModule(FullRobotModel fullRobotModel, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
+   public DrivingFootControlModule(BaseFullRobotModel fullRobotModel, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
                                    DrivingReferenceFrames drivingReferenceFrames, double dt, DoubleYoVariable yoTime, TwistCalculator twistCalculator,
                                    YoVariableRegistry parentRegistry, GlobalDataProducer statusProducer,
                                    YoGraphicsListRegistry yoGraphicsListRegistry)
