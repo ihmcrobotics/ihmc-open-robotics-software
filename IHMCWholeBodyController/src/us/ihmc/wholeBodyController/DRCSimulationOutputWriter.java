@@ -3,7 +3,7 @@ package us.ihmc.wholeBodyController;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -29,7 +29,7 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
    private final ArrayList<RawOutputWriter> rawOutputWriters = new ArrayList<RawOutputWriter>();
 
-   public DRCSimulationOutputWriter(SDFBaseRobot robot)
+   public DRCSimulationOutputWriter(SDFRobot robot)
    {
       super(robot);
    }

@@ -57,7 +57,7 @@ import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUp
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.tools.FormattingTools;
 
-public class SDFBaseRobot extends Robot implements OneDegreeOfFreedomJointHolder
+public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 {
 
    protected static final boolean SHOW_CONTACT_POINTS = true;
@@ -71,7 +71,7 @@ public class SDFBaseRobot extends Robot implements OneDegreeOfFreedomJointHolder
    private final LinkedHashMap<String, SDFCamera> cameras = new LinkedHashMap<String, SDFCamera>();
    protected final LinkedHashMap<Joint, ArrayList<GroundContactPoint>> jointToGroundContactPointsMap = new LinkedHashMap<Joint, ArrayList<GroundContactPoint>>();
 
-   public SDFBaseRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
+   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
          boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       super(generalizedSDFRobotModel.getName());

@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.yoUtilities.controllers.PIDController;
@@ -19,7 +19,7 @@ public class PIDLidarTorqueController implements RobotController
    private final double controlDT;
    private final OneDegreeOfFreedomJoint  lidarJoint;
 
-   public PIDLidarTorqueController(SDFBaseRobot robot, String jointName, double desiredSpindleSpeed, double controlDT)
+   public PIDLidarTorqueController(SDFRobot robot, String jointName, double desiredSpindleSpeed, double controlDT)
    {
       this.controlDT = controlDT;
       this.lidarJoint = robot.getOneDegreeOfFreedomJoint(jointName);

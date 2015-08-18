@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
@@ -226,7 +226,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public ScsCollisionConfigure getPhysicsConfigure(SDFBaseRobot sdfRobot)
+   public ScsCollisionConfigure getPhysicsConfigure(SDFRobot sdfRobot)
    {
       return new AtlasPhysicsEngineConfiguration(getJointMap(), sdfRobot);
    }
@@ -248,7 +248,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public void setJointDamping(SDFBaseRobot simulatedRobot)
+   public void setJointDamping(SDFRobot simulatedRobot)
    {
       AtlasDampingParameters.setDampingParameters(simulatedRobot, getDRCHandType(), getJointMap());
    }
@@ -423,7 +423,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public MultiThreadedRobotControlElement createSimulatedHandController(SDFBaseRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
+   public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
            GlobalDataProducer globalDataProducer)
    {
       switch (getDRCHandType())

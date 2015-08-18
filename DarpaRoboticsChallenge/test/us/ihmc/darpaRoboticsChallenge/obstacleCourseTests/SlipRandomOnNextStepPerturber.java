@@ -4,7 +4,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Random;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
@@ -27,7 +27,7 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
    }
 
    private final SideDependentList<GroundContactPointsSlipper> groundContactPointsSlippers;
-   private final SDFBaseRobot robot;
+   private final SDFRobot robot;
    private final BooleanYoVariable slipNextStep;
    private final DoubleYoVariable minSlipAfterTimeDelta, maxSlipAfterTimeDelta, nextSlipAfterTimeDelta;
    private final DoubleYoVariable minSlipPercentSlipPerTick, maxSlipPercentSlipPerTick, nextSlipPercentSlipPerTick;

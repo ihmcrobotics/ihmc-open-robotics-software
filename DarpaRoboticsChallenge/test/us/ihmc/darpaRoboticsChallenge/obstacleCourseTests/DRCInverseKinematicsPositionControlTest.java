@@ -16,7 +16,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JointPositionControllerFactory;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
@@ -115,7 +115,7 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
          armJointIndices.put(armJointNames[i], i);
       }
       
-      SDFBaseRobot robot = drcSimulationTestHelper.getRobot();
+      SDFRobot robot = drcSimulationTestHelper.getRobot();
       
       double robotFloatingHeight = 0.1;
       LockPelvisController controller = new LockPelvisController(robot, drcSimulationTestHelper.getSimulationConstructionSet(), drcSimulationTestHelper.getControllerFullRobotModel(), robotFloatingHeight);
@@ -529,12 +529,12 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
       private final DoubleYoVariable desiredHeight = new DoubleYoVariable("desiredHeight", registry);
       private final double robotMass, robotWeight;
 
-      private final SDFBaseRobot robot;
+      private final SDFRobot robot;
 
       private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       private final ArrayList<YoGraphicPosition> efp_positionViz = new ArrayList<>();
 
-      public LockPelvisController(SDFBaseRobot robot, SimulationConstructionSet scs, SDFFullRobotModel sdfFullRobotModel, double desiredHeight)
+      public LockPelvisController(SDFRobot robot, SimulationConstructionSet scs, SDFFullRobotModel sdfFullRobotModel, double desiredHeight)
       {
          this.robot = robot;
          robotMass = robot.computeCenterOfMass(new Point3d());

@@ -28,7 +28,7 @@ import us.ihmc.tools.FormattingTools;
 
 
 
-public class SDFHumanoidRobot extends SDFBaseRobot
+public class SDFHumanoidRobot extends SDFRobot
 {
    
    private final SideDependentList<String> jointsBeforeFeet = new SideDependentList<String>();

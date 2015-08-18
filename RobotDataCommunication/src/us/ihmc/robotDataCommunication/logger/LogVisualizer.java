@@ -15,7 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
@@ -224,7 +224,7 @@ public class LogVisualizer
       return scs;
    }
 
-   public SDFBaseRobot getSDFRobot()
+   public SDFRobot getSDFRobot()
    {
       return robot;
    }

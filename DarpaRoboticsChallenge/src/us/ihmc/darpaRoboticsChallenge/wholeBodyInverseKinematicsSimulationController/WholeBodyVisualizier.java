@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -11,7 +11,7 @@ public class WholeBodyVisualizier
    {
       //model = AtlasRobotModelFactory.selectSimulationModelFromFlag(args);
    
-      SDFBaseRobot simulatedRobot = robotModel.createSdfRobot(false);
+      SDFRobot simulatedRobot = robotModel.createSdfRobot(false);
 
       scs = new SimulationConstructionSet(simulatedRobot);
       scs.startOnAThread();

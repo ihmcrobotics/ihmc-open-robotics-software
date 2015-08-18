@@ -10,7 +10,7 @@ import javax.vecmath.AxisAngle4d;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.JointAnglesWriter;
@@ -68,7 +68,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    private InverseKinematicsStepListener inverseKinematicsStepListener;
 
    private SimulationConstructionSet scs;
-   private SDFBaseRobot sdfRobot;
+   private SDFRobot sdfRobot;
    private JointAnglesWriter jointAnglesWriter;
 
    private final YoFramePoint testPositionForwardKinematics = new YoFramePoint("testPositionForwardKinematics", ReferenceFrame.getWorldFrame(), registry);
