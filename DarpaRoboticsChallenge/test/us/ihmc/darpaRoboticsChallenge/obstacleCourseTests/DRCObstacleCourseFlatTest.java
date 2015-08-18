@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
@@ -358,7 +358,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
-      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp();
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1002L);
       slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[]{0.01, 0.01, 0.0}, new double[]{0.06, 0.06, 0.005});
@@ -401,7 +401,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp();
       
       int ticksPerPerturbation = 10;
@@ -446,7 +446,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", null, selectedLocation, simulationTestingParameters, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp();
       
       int ticksPerPerturbation = 10;
@@ -521,7 +521,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCLongStepsMaxHeightPauseAndRestartTest", scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
 
-      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
 
       SlipOnNextStepPerturber slipOnEachStepPerturber = new SlipOnNextStepPerturber(robot, RobotSide.LEFT);
       slipOnEachStepPerturber.setAmountToSlipNextStep(getFootSlipVector());
@@ -564,7 +564,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSideStepsWithSlippingTest", scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
 
-      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
 
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1000L);
       slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[]{0.0, 0.0, 0.0}, new double[]{0.04, 0.04, 0.01});

@@ -17,7 +17,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
@@ -125,7 +125,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
    private BehaviorCommunicationBridge communicationBridge;
    private DoubleYoVariable yoTime;
 
-   private SDFRobot robot;
+   private SDFHumanoidRobot robot;
    private FullRobotModel fullRobotModel;
    private HumanoidReferenceFrames referenceFrames;
    private WalkingControllerParameters walkingControllerParameters;
@@ -443,7 +443,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       return targetMidFeetPose;
    }
 
-   private FramePose2d getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(SDFRobot robot)
+   private FramePose2d getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(SDFHumanoidRobot robot)
    {
       FramePose midFeetPose = getRobotMidFeetPose(robot);
 
@@ -453,7 +453,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       return ret;
    }
 
-   private FramePose getRobotMidFeetPose(SDFRobot robot)
+   private FramePose getRobotMidFeetPose(SDFHumanoidRobot robot)
    {
       FramePose leftFootPose = getRobotFootPose(robot, RobotSide.LEFT);
       FramePose rightFootPose = getRobotFootPose(robot, RobotSide.RIGHT);
@@ -464,7 +464,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       return ret;
    }
 
-   private FramePose getRobotFootPose(SDFRobot robot, RobotSide robotSide)
+   private FramePose getRobotFootPose(SDFHumanoidRobot robot, RobotSide robotSide)
    {
       List<GroundContactPoint> gcPoints = robot.getFootGroundContactPoints(robotSide);
       Joint ankleJoint = gcPoints.get(0).getParentJoint();

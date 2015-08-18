@@ -14,7 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
@@ -85,7 +85,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private RobotDataReceiver robotDataReceiver;
-   private SDFRobot robot;
+   private SDFHumanoidRobot robot;
    private FullRobotModel fullRobotModel;
 
    @Before
@@ -398,7 +398,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       return footstep;
    }
 
-   private FramePose2d getRobotFootPose2d(SDFRobot robot, RobotSide robotSide)
+   private FramePose2d getRobotFootPose2d(SDFHumanoidRobot robot, RobotSide robotSide)
    {
       List<GroundContactPoint> gcPoints = robot.getFootGroundContactPoints(robotSide);
       Joint ankleJoint = gcPoints.get(0).getParentJoint();

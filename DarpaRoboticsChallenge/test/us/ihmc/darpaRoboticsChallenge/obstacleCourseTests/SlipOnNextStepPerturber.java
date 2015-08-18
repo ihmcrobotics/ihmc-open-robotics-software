@@ -5,7 +5,7 @@ import java.util.List;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFBaseRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
 import us.ihmc.simulationconstructionset.util.perturbance.GroundContactPointsSlipper;
@@ -30,7 +30,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
    private final YoFrameVector amountToSlipNextStep;
    private final YoFrameOrientation rotationToSlipNextStep;
 
-   public SlipOnNextStepPerturber(SDFRobot robot, RobotSide robotSide)
+   public SlipOnNextStepPerturber(SDFHumanoidRobot robot, RobotSide robotSide)
    {
       super(robotSide.getCamelCaseNameForStartOfExpression() + "SlipOnEachStepPerturber");
 

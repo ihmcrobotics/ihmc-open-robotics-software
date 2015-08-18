@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFBaseRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
@@ -126,7 +126,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
    private final String simpleFlatGroundScriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
    private DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack;
    private boolean sendPelvisCorrectionPackets = true;
-   private SDFRobot robot;
+   private SDFHumanoidRobot robot;
    private SimulationConstructionSet simulationConstructionSet;
    private ExternalPelvisPoseCreator externalPelvisPosePublisher;
 
@@ -787,7 +787,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       return pelvisCorrectorSource;
    }
 
-   private OscillateFeetPerturber generateFeetPertuber(final SimulationConstructionSet simulationConstructionSet, SDFRobot robot, int ticksPerPerturbation)
+   private OscillateFeetPerturber generateFeetPertuber(final SimulationConstructionSet simulationConstructionSet, SDFHumanoidRobot robot, int ticksPerPerturbation)
    {
       OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * (ticksPerPerturbation));
       oscillateFeetPerturber.setTranslationMagnitude(new double[] { 0.008, 0.012, 0.005 });

@@ -3,13 +3,13 @@ package us.ihmc.darpaRoboticsChallenge.initialSetup;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFBaseRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
+public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRobot>
 {
    private double groundZ;
    private final RigidBodyTransform rootToWorld = new RigidBodyTransform();
@@ -25,14 +25,14 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRo
       this.groundZ = groundZ;
    }
 
-   public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(SDFHumanoidRobot robot, DRCRobotJointMap jointMap)
    {
       setArmJointPositions(robot);
       setLegJointPositions(robot);
       setPositionInWorld(robot);
    }
    
-   protected void setPositionInWorld(SDFRobot robot)
+   protected void setPositionInWorld(SDFHumanoidRobot robot)
    {
       robot.update();
       robot.getRootJointToWorldTransform(rootToWorld);

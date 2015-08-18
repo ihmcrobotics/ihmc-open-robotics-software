@@ -10,7 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule.QPSolverFlavor;
@@ -132,7 +132,7 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
       boolean drawGroundProfile = false;
 
       double rampEndX = combinedTerrainObjectAndRampEndX.getRight();
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0001, 0); //slighly off ground
+      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0001, 0); //slighly off ground
       robotInitialSetup.setOffset(new Vector3d(0, StartingYOffsetFromCenter, 0));
 
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, null, combinedTerrainObject, drawGroundProfile,
@@ -245,7 +245,7 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
 
    private DRCFlatGroundWalkingTrack setupSimulationTrack(WalkingControllerParameters drcControlParameters, ArmControllerParameters armControllerParameters,
          GroundProfile3D groundProfile, GroundProfile3D groundProfile3D, boolean drawGroundProfile, boolean useVelocityAndHeadingScript,
-         boolean cheatWithGroundHeightAtForFootstep, DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
+         boolean cheatWithGroundHeightAtForFootstep, DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup)
    {
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
 

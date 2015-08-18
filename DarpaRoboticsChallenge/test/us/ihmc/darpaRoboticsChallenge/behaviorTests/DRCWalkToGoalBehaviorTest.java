@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -110,7 +110,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
    private BehaviorCommunicationBridge communicationBridge;
 
-   private SDFRobot robot;
+   private SDFHumanoidRobot robot;
    private FullRobotModel fullRobotModel;
 
    private PacketCommunicator behaviorCommunicatorServer;
@@ -286,7 +286,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       return ret;
    }
 
-   private FramePose2d getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(SDFRobot robot)
+   private FramePose2d getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(SDFHumanoidRobot robot)
    {
       FramePose midFeetPose = getRobotMidFeetPose(robot);
 
@@ -296,7 +296,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       return ret;
    }
 
-   private FramePose getRobotMidFeetPose(SDFRobot robot)
+   private FramePose getRobotMidFeetPose(SDFHumanoidRobot robot)
    {
       FramePose leftFootPose = getRobotFootPose(robot, RobotSide.LEFT);
       FramePose rightFootPose = getRobotFootPose(robot, RobotSide.RIGHT);
@@ -307,7 +307,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       return ret;
    }
 
-   private FramePose getRobotFootPose(SDFRobot robot, RobotSide robotSide)
+   private FramePose getRobotFootPose(SDFHumanoidRobot robot, RobotSide robotSide)
    {
       List<GroundContactPoint> gcPoints = robot.getFootGroundContactPoints(robotSide);
       Joint ankleJoint = gcPoints.get(0).getParentJoint();

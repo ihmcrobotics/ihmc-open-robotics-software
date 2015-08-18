@@ -28,7 +28,7 @@ import us.ihmc.tools.FormattingTools;
 
 
 
-public class SDFRobot extends SDFBaseRobot
+public class SDFHumanoidRobot extends SDFBaseRobot
 {
    
    private final SideDependentList<String> jointsBeforeFeet = new SideDependentList<String>();
@@ -37,12 +37,12 @@ public class SDFRobot extends SDFBaseRobot
 
    private final SideDependentList<ArrayList<GroundContactPoint>> handGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
    
-   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   public SDFHumanoidRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
    {
       this(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, true, true);
    }
 
-   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
+   public SDFHumanoidRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
          boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       super(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);

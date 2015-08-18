@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import us.ihmc.SdfLoader.SDFBaseRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
 import us.ihmc.simulationconstructionset.util.perturbance.GroundContactPointsSlipper;
@@ -46,13 +46,13 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
    private double probabilitySlip = 0.0;
    private final Random random = new Random();
 
-   public SlipRandomOnNextStepPerturber(SDFRobot robot, long randomSeed)
+   public SlipRandomOnNextStepPerturber(SDFHumanoidRobot robot, long randomSeed)
    {
       this(robot);
       this.random.setSeed(randomSeed);
    }
 
-   public SlipRandomOnNextStepPerturber(SDFRobot robot)
+   public SlipRandomOnNextStepPerturber(SDFHumanoidRobot robot)
    {
       super("SlipRandomOnNextStepPerturber");
       String name = "SlipRandom";

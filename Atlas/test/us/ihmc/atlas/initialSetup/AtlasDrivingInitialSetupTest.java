@@ -9,7 +9,7 @@ import java.util.Properties;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -29,7 +29,7 @@ public class AtlasDrivingInitialSetupTest
    public void testLoadFile()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(version, AtlasRobotModel.AtlasTarget.SIM, false);
-      SDFRobot robot = robotModel.createSdfRobot(false);
+      SDFHumanoidRobot robot = robotModel.createSdfRobot(false);
       DRCRobotJointMap jointMap = new AtlasJointMap(version);
       
       AtlasInitialSetupFromFile initialSetup = new AtlasInitialSetupFromFile("initialDrivingSetup");

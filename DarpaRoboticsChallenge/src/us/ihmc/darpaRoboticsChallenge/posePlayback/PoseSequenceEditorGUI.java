@@ -9,7 +9,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.model.FullRobotModel;
@@ -31,7 +31,7 @@ public class PoseSequenceEditorGUI extends JFrame
       buttonPanelInit();
    }
 
-   public PoseSequenceEditorGUI(YoVariableRegistry registry, SDFRobot sdfRobot, FullRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
+   public PoseSequenceEditorGUI(YoVariableRegistry registry, SDFHumanoidRobot sdfRobot, FullRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
    {
       super("Pose sequence editor");
       setSize(1400, 600);

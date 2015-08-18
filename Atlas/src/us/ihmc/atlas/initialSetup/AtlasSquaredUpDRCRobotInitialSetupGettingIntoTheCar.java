@@ -5,7 +5,7 @@ import java.util.Map;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -23,7 +23,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 // TODO: Temporary initial setup for testing the grasping control
-public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCRobotInitialSetup<SDFRobot>
+public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCRobotInitialSetup<SDFHumanoidRobot>
 {
    private enum Methods
    {
@@ -48,7 +48,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
    }
 
    @Override
-   public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(SDFHumanoidRobot robot, DRCRobotJointMap jointMap)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

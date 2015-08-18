@@ -6,7 +6,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.SwingWorker;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -39,7 +39,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
    private final DiagnosticsWhenHangingController controller;
    private final boolean computeTorqueOffsetsBasedOnAverages;
    
-   public HumanoidDiagnosticsWhenHangingSimulation(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, DRCRobotModel model, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, boolean computeTorqueOffsetsBasedOnAverages)
+   public HumanoidDiagnosticsWhenHangingSimulation(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, DRCRobotModel model, DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup, boolean computeTorqueOffsetsBasedOnAverages)
    {
       this.computeTorqueOffsetsBasedOnAverages = computeTorqueOffsetsBasedOnAverages;
       

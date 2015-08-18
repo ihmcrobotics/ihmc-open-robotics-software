@@ -18,12 +18,12 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_kny;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
+public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRobot>
 {
 
    private double groundZ;
@@ -35,7 +35,7 @@ public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements DRCRobotIniti
       this.groundZ = groundZ;
    }
 
-   public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(SDFHumanoidRobot robot, DRCRobotJointMap jointMap)
    {
       double thighPitch = 0.0;
       double forwardLean = 0.0;

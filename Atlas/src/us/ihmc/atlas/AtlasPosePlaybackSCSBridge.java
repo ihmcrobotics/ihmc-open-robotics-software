@@ -3,7 +3,7 @@ package us.ihmc.atlas;
 import java.io.IOException;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PosePlaybackSCSBridge;
 import us.ihmc.humanoidRobotics.model.FullRobotModel;
@@ -47,7 +47,7 @@ public class AtlasPosePlaybackSCSBridge
          return;
       }
 
-      SDFRobot sdfRobot = model.createSdfRobot(false);
+      SDFHumanoidRobot sdfRobot = model.createSdfRobot(false);
       FullRobotModel fullRobotModel = model.createFullRobotModel();
       SDFFullRobotModel fullRobotModelForSlider = model.createFullRobotModel();
 

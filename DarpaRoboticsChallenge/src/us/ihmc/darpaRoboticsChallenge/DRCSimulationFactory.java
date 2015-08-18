@@ -11,7 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap.JointRole;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.communication.packets.StampedPosePacket;
@@ -71,7 +71,7 @@ public class DRCSimulationFactory
    private static final double gravity = -9.81;
 
    private final SimulationConstructionSet scs;
-   private final SDFRobot simulatedRobot;
+   private final SDFHumanoidRobot simulatedRobot;
    private final MomentumBasedControllerFactory controllerFactory;
    
    private DRCEstimatorThread drcEstimatorThread;
@@ -87,7 +87,7 @@ public class DRCSimulationFactory
    private GlobalDataProducer globalDataProducer;
    
    public DRCSimulationFactory(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, CommonAvatarEnvironmentInterface environment,
-         DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+         DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
          GlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
@@ -164,8 +164,8 @@ public class DRCSimulationFactory
    }
    
    private void createRobotController(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, GlobalDataProducer globalDataProducer,
-         SDFRobot simulatedRobot, SimulationConstructionSet scs, DRCSCSInitialSetup scsInitialSetup,
-         DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
+         SDFHumanoidRobot simulatedRobot, SimulationConstructionSet scs, DRCSCSInitialSetup scsInitialSetup,
+         DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup)
    {
       StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters();
 
@@ -301,8 +301,8 @@ public class DRCSimulationFactory
       simulatedRobot.setController(simulatedDRCRobotTimeProvider);
    }
    
-   private static void initializeEstimatorToActual(DRCEstimatorThread drcStateEstimator, DRCRobotInitialSetup<SDFRobot> robotInitialSetup,
-         SDFRobot simulatedRobot, DRCRobotJointMap jointMap)
+   private static void initializeEstimatorToActual(DRCEstimatorThread drcStateEstimator, DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup,
+         SDFHumanoidRobot simulatedRobot, DRCRobotJointMap jointMap)
    {
       // The following is to get the initial CoM position from the robot. 
       // It is cheating for now, and we need to move to where the 
@@ -374,7 +374,7 @@ public class DRCSimulationFactory
       globalDataProducer = null;
    }
 
-   public SDFRobot getRobot()
+   public SDFHumanoidRobot getRobot()
    {
       return simulatedRobot;
    }

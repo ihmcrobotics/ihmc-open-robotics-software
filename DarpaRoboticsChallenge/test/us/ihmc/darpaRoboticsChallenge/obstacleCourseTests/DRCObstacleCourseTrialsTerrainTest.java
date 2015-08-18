@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -108,7 +108,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOntoSlopes(simulationConstructionSet);
 
-      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1201L);
       slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[] {0.02, 0.03, 0.0}, new double[] {0.025, 0.035, 0.005});
       slipRandomOnEachStepPerturber.setRotationRangeToSlipNextStep(new double[] {0.02, 0.01, 0.0}, new double[] {0.2, 0.05, 0.01});
@@ -185,7 +185,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverHurdles(simulationConstructionSet);
 
-      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1201L);
       slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[] {0.03, 0.03, 0.0}, new double[] {0.04, 0.06, 0.005});
       slipRandomOnEachStepPerturber.setRotationRangeToSlipNextStep(new double[] {0.0, 0.0, 0.0}, new double[] {0.2, 0.05, 0.02});

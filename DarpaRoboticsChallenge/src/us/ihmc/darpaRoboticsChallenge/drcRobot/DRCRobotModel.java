@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.drcRobot;
 import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.SDFBaseRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.HeightCalculatorParameters;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -53,7 +53,7 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
 
    public abstract DRCRobotSensorInformation getSensorInformation();
 
-   public abstract DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
+   public abstract DRCRobotInitialSetup<SDFHumanoidRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
 
    public abstract ScsCollisionConfigure getPhysicsConfigure(SDFBaseRobot robotModel);
 

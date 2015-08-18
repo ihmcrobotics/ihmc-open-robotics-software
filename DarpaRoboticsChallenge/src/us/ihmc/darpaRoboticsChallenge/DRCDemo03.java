@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemoEnvironmentWithBoxAndSteeringWheel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -19,7 +19,7 @@ public abstract class DRCDemo03
    private static final boolean SHOW_HEIGHTMAP = false;
    private final DRCDemoEnvironmentWithBoxAndSteeringWheel environment;
 
-   public DRCDemo03(DRCGuiInitialSetup guiInitialSetup, DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
+   public DRCDemo03(DRCGuiInitialSetup guiInitialSetup, DRCRobotModel robotModel, DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup)
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 

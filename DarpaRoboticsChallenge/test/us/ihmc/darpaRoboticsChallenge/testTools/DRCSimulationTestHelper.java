@@ -11,7 +11,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -56,7 +56,7 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 public class DRCSimulationTestHelper
 {
    private final SimulationConstructionSet scs;
-   private final SDFRobot sdfRobot;
+   private final SDFHumanoidRobot sdfRobot;
    private final DRCSimulationFactory drcSimulationFactory;
    protected final PacketCommunicator controllerCommunicator;
    private final CommonAvatarEnvironmentInterface testEnvironment;
@@ -96,7 +96,7 @@ public class DRCSimulationTestHelper
    
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName,
          DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
-         DRCNetworkModuleParameters drcNetworkModuleParameters, HighLevelBehaviorFactory highLevelBehaviorFactoryToAdd, DRCRobotInitialSetup<SDFRobot> initialSetup)
+         DRCNetworkModuleParameters drcNetworkModuleParameters, HighLevelBehaviorFactory highLevelBehaviorFactoryToAdd, DRCRobotInitialSetup<SDFHumanoidRobot> initialSetup)
    {
       this.controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       this.testEnvironment = commonAvatarEnvironmentInterface;
@@ -225,7 +225,7 @@ public class DRCSimulationTestHelper
       }
    }
 
-   public SDFRobot getRobot()
+   public SDFHumanoidRobot getRobot()
    {
       return sdfRobot;
    }
