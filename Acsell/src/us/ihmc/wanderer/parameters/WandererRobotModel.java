@@ -8,7 +8,7 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.acsell.network.AcsellSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -180,7 +180,7 @@ public class WandererRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
+   public DRCRobotInitialSetup<SDFHumanoidRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       return new WandererInitialSetup(groundHeight, initialYaw);
    }
@@ -241,7 +241,7 @@ public class WandererRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SDFRobot createSdfRobot(boolean createCollisionMeshes)
+   public SDFHumanoidRobot createSdfRobot(boolean createCollisionMeshes)
    { 
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;
