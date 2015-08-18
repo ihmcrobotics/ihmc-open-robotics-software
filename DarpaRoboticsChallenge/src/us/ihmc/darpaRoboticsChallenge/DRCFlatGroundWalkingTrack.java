@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 
 
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class DRCFlatGroundWalkingTrack
@@ -49,7 +49,7 @@ public class DRCFlatGroundWalkingTrack
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
-      DRCRobotContactPointParameters contactPointParameters = model.getContactPointParameters();
+      RobotContactPointParameters contactPointParameters = model.getContactPointParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
       DRCRobotSensorInformation sensorInformation = model.getSensorInformation();

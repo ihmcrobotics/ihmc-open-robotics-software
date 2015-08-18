@@ -33,7 +33,7 @@ public interface DRCRobotJointMap extends SDFJointNameMap
 
    public abstract String[] getPositionControlledJointsForSimulation();
 
-   public abstract DRCRobotContactPointParameters getContactPointParameters();
+   public abstract RobotContactPointParameters getContactPointParameters();
 
    public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry);
 }

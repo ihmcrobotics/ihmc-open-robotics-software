@@ -53,7 +53,7 @@ import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotContr
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.wholeBodyController.DRCControllerThread;
-import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -98,7 +98,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
    private final ReferenceFrame rootFrame;
 
-   public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, DRCRobotContactPointParameters contactPointParameters,
+   public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, RobotContactPointParameters contactPointParameters,
          StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
          PeriodicThreadScheduler scheduler, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity)
    {
@@ -288,7 +288,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    private DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullRobotModel estimatorFullRobotModel, DRCRobotSensorInformation sensorInformation,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
-         DRCRobotContactPointParameters contactPointParamaters, ForceSensorDataHolder estimatorForceSensorDataHolderToUpdate, ContactSensorHolder contactSensorHolder,
+         RobotContactPointParameters contactPointParamaters, ForceSensorDataHolder estimatorForceSensorDataHolderToUpdate, ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderFromController, RobotMotionStatusHolder robotMotionStatusFromController,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
