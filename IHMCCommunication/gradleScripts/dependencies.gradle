@@ -10,7 +10,6 @@ dependencies {
 	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.9'
 	
 	compile project(':IHMCUtilities')
-	compile project(':IHMCHumanoidRobotics')
 	compile project(':IHMCJavaToolkit')
 	compile project(':IHMCRoboticsToolkit')
 }
