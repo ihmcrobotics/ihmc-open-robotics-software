@@ -3,7 +3,7 @@ package us.ihmc.atlas.initialSetup;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
@@ -14,7 +14,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class AtlasSimInitialSetup implements DRCRobotInitialSetup<SDFRobot>
+public class AtlasSimInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRobot>
 {
    private double groundZ;
    private double initialYaw;
@@ -36,7 +36,7 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<SDFRobot>
    }
 
    @Override
-   public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(SDFHumanoidRobot robot, DRCRobotJointMap jointMap)
    {
       if(!robotInitialized)
       {

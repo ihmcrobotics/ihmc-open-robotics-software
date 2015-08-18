@@ -1,6 +1,6 @@
 package us.ihmc.atlas;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.atlas.initialSetup.VRCTask1InVehicleHovering;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo03;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
@@ -12,7 +12,7 @@ import com.martiansoftware.jsap.JSAPException;
 public class AtlasDemo03 extends DRCDemo03
 {
    public AtlasDemo03(DRCGuiInitialSetup guiInitialSetup,
-         DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
+         DRCRobotModel robotModel, DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup)
    {
       super(guiInitialSetup, robotModel, robotInitialSetup);
    }
@@ -36,7 +36,7 @@ public class AtlasDemo03 extends DRCDemo03
 //      String ipAddress = null;
 //      int portNumber = -1;
       
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new VRCTask1InVehicleHovering(0.0); // new VRCTask1InVehicleInitialSetup(-0.03); // DrivingDRCRobotInitialSetup();
+      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = new VRCTask1InVehicleHovering(0.0); // new VRCTask1InVehicleInitialSetup(-0.03); // DrivingDRCRobotInitialSetup();
       new AtlasDemo03(guiInitialSetup, model, robotInitialSetup);
    }
 }

@@ -7,7 +7,7 @@ import javax.swing.JFileChooser;
 
 import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
@@ -39,7 +39,7 @@ public class VisualizePoseWorkspace
       this.controlDT = robotModel.getControllerDT();
       
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
+      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
 
       interpolator = new PlaybackPoseInterpolator(registry);
 
@@ -69,11 +69,11 @@ public class VisualizePoseWorkspace
 
    private class CaptureSnapshotListener implements VariableChangedListener
    {
-      private final SDFRobot sdfRobot;
+      private final SDFHumanoidRobot sdfRobot;
       private final SimulationConstructionSet scs;
       private PlaybackPose previousPose;
 
-      public CaptureSnapshotListener(SDFRobot sdfRobot, SimulationConstructionSet scs)
+      public CaptureSnapshotListener(SDFHumanoidRobot sdfRobot, SimulationConstructionSet scs)
       {
          this.sdfRobot = sdfRobot;
          this.scs = scs;

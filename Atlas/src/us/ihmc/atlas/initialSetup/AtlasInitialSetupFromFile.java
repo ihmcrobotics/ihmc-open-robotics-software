@@ -9,7 +9,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFBaseRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
@@ -19,7 +19,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFRobot>
+public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFHumanoidRobot>
 {
    private String initialConditionsFileName;
    
@@ -34,7 +34,7 @@ public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFRobot>
    }
 
    @Override
-   public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(SDFHumanoidRobot robot, DRCRobotJointMap jointMap)
    {
       if (robotInitialized) 
          return;

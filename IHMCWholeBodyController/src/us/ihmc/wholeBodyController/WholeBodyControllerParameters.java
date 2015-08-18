@@ -2,7 +2,7 @@ package us.ihmc.wholeBodyController;
  
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -24,7 +24,7 @@ public interface WholeBodyControllerParameters extends SDFFullRobotModelFactory
 	
 	public double getControllerDT();
 
-	public SDFRobot createSdfRobot(boolean createCollisionMeshes);
+	public SDFHumanoidRobot createSdfRobot(boolean createCollisionMeshes);
 	
 	public abstract GeneralizedSDFRobotModel getGeneralizedRobotModel();
 	

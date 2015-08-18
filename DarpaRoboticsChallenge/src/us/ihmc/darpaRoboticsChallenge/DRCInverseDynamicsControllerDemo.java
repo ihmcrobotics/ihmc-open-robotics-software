@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -35,7 +35,7 @@ public class DRCInverseDynamicsControllerDemo
 {
    private final DRCSimulationFactory drcSimulation;
 
-   public DRCInverseDynamicsControllerDemo(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+   public DRCInverseDynamicsControllerDemo(DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
          DRCSCSInitialSetup scsInitialSetup, DRCRobotModel model)
    {
       double dt = scsInitialSetup.getDT();

@@ -62,11 +62,11 @@ public class SDFWorldLoader
       return groundProfile;
    }
 
-   public ImmutablePair<SDFRobot, SDFFullRobotModel> createRobotAndRemoveFromWorld(SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   public ImmutablePair<SDFHumanoidRobot, SDFFullRobotModel> createRobotAndRemoveFromWorld(SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
    {
       removeVisualFromWorld(sdfJointNameMap.getModelName());
 
-      ImmutablePair<SDFRobot, SDFFullRobotModel> ret = new ImmutablePair<SDFRobot, SDFFullRobotModel>(jaxbSDFLoader.createRobot(sdfJointNameMap, useCollisionMeshes),
+      ImmutablePair<SDFHumanoidRobot, SDFFullRobotModel> ret = new ImmutablePair<SDFHumanoidRobot, SDFFullRobotModel>(jaxbSDFLoader.createRobot(sdfJointNameMap, useCollisionMeshes),
             jaxbSDFLoader.createFullRobotModel(sdfJointNameMap));
 
       return ret;

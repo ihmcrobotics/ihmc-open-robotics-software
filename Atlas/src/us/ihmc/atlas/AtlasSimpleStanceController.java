@@ -1,7 +1,7 @@
 package us.ihmc.atlas;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
@@ -54,10 +54,10 @@ public class AtlasSimpleStanceController
 
       DRCRobotJointMap jointMap = model.getJointMap();
       SDFFullRobotModel fullRobotModel = model.createFullRobotModel();
-      SDFRobot robot = model.createSdfRobot(false);
+      SDFHumanoidRobot robot = model.createSdfRobot(false);
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
-      DRCRobotInitialSetup<SDFRobot> intialSetup = model.getDefaultRobotInitialSetup(0, 0);
+      DRCRobotInitialSetup<SDFHumanoidRobot> intialSetup = model.getDefaultRobotInitialSetup(0, 0);
       intialSetup.initializeRobot(robot, jointMap);
       WalkingControllerParameters walkingControlParams = model.getWalkingControllerParameters();
       double footForward = walkingControlParams.getFootForwardOffset();

@@ -17,7 +17,7 @@ public class SDFRobotTest
       JaxbSDFLoader loader = new JaxbSDFLoader(getClass().getClassLoader().getResourceAsStream("sdfRobotTest.sdf"), null);
       
       GeneralizedSDFRobotModel generalizedSDFRobotModel = loader.getGeneralizedSDFRobotModel("atlas");
-      new SDFRobot(generalizedSDFRobotModel, null, true);
+      new SDFHumanoidRobot(generalizedSDFRobotModel, null, true);
    }
 
 }

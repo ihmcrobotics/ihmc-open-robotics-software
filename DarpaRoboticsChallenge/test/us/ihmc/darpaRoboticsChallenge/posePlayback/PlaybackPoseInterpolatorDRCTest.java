@@ -7,7 +7,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
@@ -32,7 +32,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       DRCRobotModel robotModel = getRobotModel();
 
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
+      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
 
       double delay = 0.3;
       double trajectoryTime = 1.0;
@@ -47,7 +47,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
    {
       DRCRobotModel robotModel = getRobotModel();
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
+      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
       
       int numberOfPoses = 5;
       double delay = 0.3;
@@ -81,7 +81,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
    {
       DRCRobotModel robotModel = getRobotModel();
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
+      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
       PlaybackPoseSequenceReader.appendFromFile(sequence, "testSequence2.poseSequence");
@@ -94,7 +94,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
    {
       DRCRobotModel robotModel = getRobotModel();
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
+      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
       PlaybackPoseSequenceReader.appendFromFile(sequence, "tenPoses.poseSequence");
@@ -104,7 +104,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
    }
 
 
-   public void playASequence(SDFRobot sdfRobot, PlaybackPoseSequence sequence)
+   public void playASequence(SDFHumanoidRobot sdfRobot, PlaybackPoseSequence sequence)
    {
       YoVariableRegistry registry = new YoVariableRegistry("PosePlaybackSmoothPoseInterpolatorTest");
       PlaybackPoseInterpolator interpolator = new PlaybackPoseInterpolator(registry);

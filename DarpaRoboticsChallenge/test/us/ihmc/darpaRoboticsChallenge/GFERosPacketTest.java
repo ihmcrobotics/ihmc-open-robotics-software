@@ -15,7 +15,7 @@ import org.ros.RosCore;
 import org.ros.internal.message.Message;
 
 import us.ihmc.SdfLoader.SDFBaseRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -141,8 +141,8 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
       packetRouter.attachPacketCommunicator(PacketDestination.GFE, gfe_communicator_client);
       packetRouter.attachPacketCommunicator(PacketDestination.CONTROLLER, controllerCommunicatorClient);
       
-      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
+      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
       DRCSimulationOutputWriter outputWriter = new DRCSimulationOutputWriter(sdfRobot);
       GlobalDataProducer globalDataProducer = new GlobalDataProducer(controllerCommunicatorServer);
@@ -237,8 +237,8 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
          throw new RuntimeException(e);
       }
 	   
-	   SDFRobot sdfRobot = robotModel.createSdfRobot(false);
-	   DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+	   SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
+	   DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
 	   robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
 	   DRCSimulationOutputWriter outputWriter = new DRCSimulationOutputWriter(sdfRobot);
 	   GlobalDataProducer globalDataProducer = new GlobalDataProducer(packetCommunicatorServer);

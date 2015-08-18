@@ -7,7 +7,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
@@ -44,7 +44,7 @@ public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorD
    {
       DRCRobotModel robotModel = getRobotModel();
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
+      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
       
       StringBuffer stringBuffer = new StringBuffer();
       stringBuffer

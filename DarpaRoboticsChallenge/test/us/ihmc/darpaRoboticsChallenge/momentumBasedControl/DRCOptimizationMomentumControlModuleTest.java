@@ -21,7 +21,7 @@ import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -83,11 +83,11 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
+      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
       
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
-      DRCRobotInitialSetup<SDFRobot> intialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+      DRCRobotInitialSetup<SDFHumanoidRobot> intialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       initializeRobot(fullRobotModel, sdfRobot, referenceFrames, intialSetup, jointMap);
 
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
@@ -176,11 +176,11 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      SDFRobot robot = robotModel.createSdfRobot(false);
+      SDFHumanoidRobot robot = robotModel.createSdfRobot(false);
       
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
-      DRCRobotInitialSetup<SDFRobot> intialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+      DRCRobotInitialSetup<SDFHumanoidRobot> intialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       initializeRobot(fullRobotModel, robot, referenceFrames, intialSetup, jointMap);
 
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
@@ -319,7 +319,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       }
    }
 
-   private void initializeRobot(SDFFullRobotModel fullRobotModel, SDFRobot robot, HumanoidReferenceFrames referenceFrames, DRCRobotInitialSetup<SDFRobot> intialSetup, DRCRobotJointMap jointMap)
+   private void initializeRobot(SDFFullRobotModel fullRobotModel, SDFHumanoidRobot robot, HumanoidReferenceFrames referenceFrames, DRCRobotInitialSetup<SDFHumanoidRobot> intialSetup, DRCRobotJointMap jointMap)
    {
       intialSetup.initializeRobot(robot, jointMap);
       SDFPerfectSimulatedSensorReader sensorReader = new SDFPerfectSimulatedSensorReader(robot, fullRobotModel, referenceFrames);

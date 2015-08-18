@@ -3,7 +3,7 @@ package us.ihmc.atlas.ObstacleCourseTests;
 import static org.junit.Assert.assertTrue;
 import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -73,10 +73,10 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
       private final DRCInverseDynamicsCalculatorTestHelper atlasInverseDynamicsCalculatorTestHelper;
       private final SDFFullRobotModel controllersFullRobotModel;
       private final SimulationConstructionSet scs;
-      private final SDFRobot robot, simulatedRobot;
+      private final SDFHumanoidRobot robot, simulatedRobot;
       private boolean firstTick = true;
 
-      public FancyInverseDynamicsCalculatorListener(SDFFullRobotModel controllersFullRobotModel, SDFRobot simulatedRobot)
+      public FancyInverseDynamicsCalculatorListener(SDFFullRobotModel controllersFullRobotModel, SDFHumanoidRobot simulatedRobot)
       {
          this.controllersFullRobotModel = controllersFullRobotModel;
          this.simulatedRobot = simulatedRobot;

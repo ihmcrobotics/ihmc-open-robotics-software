@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.initialSetup.MultiContactDRCRobotInitialSetup;
 import us.ihmc.atlas.initialSetup.PushUpDRCRobotInitialSetup;
@@ -67,7 +67,7 @@ public class AtlasMultiContact
    {
       RobotSide[] footContactSides;
       RobotSide[] handContactSides;
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup;
+      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup;
       switch (task)
       {
       case PUSHUP:
