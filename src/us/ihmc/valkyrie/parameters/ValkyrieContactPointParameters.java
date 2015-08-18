@@ -19,10 +19,10 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class ValkyrieContactPointParameters extends DRCRobotContactPointParameters
+public class ValkyrieContactPointParameters extends RobotContactPointParameters
 {
    private final ContactableBodiesFactory contactableBodiesFactory = new ContactableBodiesFactory();
 
