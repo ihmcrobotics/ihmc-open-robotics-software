@@ -42,7 +42,7 @@ import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.humanoidRobotics.partNames.NeckJointName;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -419,7 +419,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel)
+   public OutputProcessor getOutputProcessor(BaseFullRobotModel controllerFullRobotModel)
    {
       return null;
    }
