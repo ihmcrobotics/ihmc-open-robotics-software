@@ -26,4 +26,5 @@ dependencies {
 	compile project(':Plotting')
 	compile project(':IHMCCommunication')
 	compile project(':IHMCRoboticsToolkit')
+	compile project(':IHMCHumanoidRobotics')
 }

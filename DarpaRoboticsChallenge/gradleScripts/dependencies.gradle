@@ -55,6 +55,7 @@ dependencies {
 	compile project(':ROSJavaGeometry')
 	compile project(':IHMCCommunication')
 	compile project(':IHMCHumanoidBehaviors')
+	compile project(':IHMCHumanoidRobotics')
 	compile project(':Planning')
     compile project(':IHMCPerception')
     compile project(':IHMCWholeBodyController')
