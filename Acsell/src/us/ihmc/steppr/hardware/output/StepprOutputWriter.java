@@ -2,7 +2,8 @@ package us.ihmc.steppr.hardware.output;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.acsell.hardware.command.UDPAcsellOutputWriter;
 import us.ihmc.acsell.springs.HystereticSpringCalculator;
@@ -92,7 +93,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    public StepprOutputWriter(DRCRobotModel robotModel)
    {
 
-      SDFFullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
+      SDFBaseFullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
       standPrepJoints = StepprUtil.createJointMap(standPrepFullRobotModel.getOneDoFJoints());
 
       tauControllerOutput = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
@@ -330,7 +331,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    }
 
    @Override
-   public void setFullRobotModel(SDFFullRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setFullRobotModel(SDFFullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       wholeBodyControlJoints = StepprUtil.createJointMap(controllerModel.getOneDoFJoints());
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;

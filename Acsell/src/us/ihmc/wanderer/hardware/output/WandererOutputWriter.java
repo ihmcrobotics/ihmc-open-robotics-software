@@ -2,7 +2,8 @@ package us.ihmc.wanderer.hardware.output;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.acsell.hardware.command.UDPAcsellOutputWriter;
 import us.ihmc.acsell.springs.HystereticSpringProperties;
@@ -91,7 +92,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    public WandererOutputWriter(DRCRobotModel robotModel)
    {
 
-      SDFFullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
+      SDFBaseFullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
       standPrepJoints = WandererUtil.createJointMap(standPrepFullRobotModel.getOneDoFJoints());
 
       tauControllerOutput = new EnumMap<WandererJoint, DoubleYoVariable>(WandererJoint.class);
@@ -341,7 +342,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    }
 
    @Override
-   public void setFullRobotModel(SDFFullRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setFullRobotModel(SDFFullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       wholeBodyControlJoints = WandererUtil.createJointMap(controllerModel.getOneDoFJoints());
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;

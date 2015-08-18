@@ -2,7 +2,7 @@ package us.ihmc.steppr.hardware.controllers;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.utilities.maps.EnumDoubleMap;
 import us.ihmc.robotics.MathTools;
@@ -47,7 +47,7 @@ public class StepprStandPrep implements StepprController
    private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableStandPrepOutput", registry);
 
    @Override
-   public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
+   public void setFullRobotModel(SDFBaseFullRobotModel fullRobotModel)
    {
       for (StepprJoint joint : StepprJoint.values)
       {
