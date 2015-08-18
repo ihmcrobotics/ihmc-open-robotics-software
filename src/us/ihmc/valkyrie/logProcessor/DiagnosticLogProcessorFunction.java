@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorFunction;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorHelper;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.humanoidRobotics.partNames.SpineJointName;
@@ -25,7 +25,7 @@ public class DiagnosticLogProcessorFunction implements LogDataProcessorFunction
    private final ArrayList<OneDoFJoint> oneDoFJoints = new ArrayList<OneDoFJoint>();
    private final LinkedHashMap<OneDoFJoint, DiagnosticsWhenHangingHelper> helpers = new LinkedHashMap<OneDoFJoint, DiagnosticsWhenHangingHelper>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> tauOutput = new LinkedHashMap<>();
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final LogDataProcessorHelper logDataProcessorHelper;
 
    public DiagnosticLogProcessorFunction(LogDataProcessorHelper logDataProcessorHelper)

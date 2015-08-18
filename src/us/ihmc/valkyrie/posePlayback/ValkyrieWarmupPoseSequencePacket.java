@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
 import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -27,7 +27,7 @@ public class ValkyrieWarmupPoseSequencePacket implements PosePlaybackPacket
    private final LinkedHashMap<OneDoFJoint, Double> kds = new LinkedHashMap<>();
    private final PlaybackPoseSequence playbackPoseSequence;
 
-   public ValkyrieWarmupPoseSequencePacket(FullRobotModel fullRobotModel, double initialGainScaling)
+   public ValkyrieWarmupPoseSequencePacket(FullHumanoidRobotModel fullRobotModel, double initialGainScaling)
    {
       @SuppressWarnings("unchecked")
       Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "gains.yaml");
