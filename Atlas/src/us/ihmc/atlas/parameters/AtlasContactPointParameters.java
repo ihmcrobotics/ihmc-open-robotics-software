@@ -24,10 +24,10 @@ import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCHandType;
-import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class AtlasContactPointParameters extends DRCRobotContactPointParameters
+public class AtlasContactPointParameters extends RobotContactPointParameters
 {
    private final ContactableBodiesFactory contactableBodiesFactory = new ContactableBodiesFactory();
    private final Vector3d pelvisBoxOffset = new Vector3d(-0.100000, 0.000000, -0.150000);

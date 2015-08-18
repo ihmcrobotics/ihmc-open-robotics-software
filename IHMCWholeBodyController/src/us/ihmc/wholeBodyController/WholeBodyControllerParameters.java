@@ -20,7 +20,7 @@ public interface WholeBodyControllerParameters extends SDFFullRobotModelFactory
 	
 	public WalkingControllerParameters getMultiContactControllerParameters();
 	
-	public DRCRobotContactPointParameters getContactPointParameters();
+	public RobotContactPointParameters getContactPointParameters();
 	
 	public double getControllerDT();
 
