@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.simulation;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCInverseDynamicsControllerDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
@@ -17,7 +17,7 @@ public class ValkyrieInverseDynamicsControllerDemo
       DRCRobotModel model = new ValkyrieRobotModel(false, false);
       double groundHeight = 0.0;
       double initialYaw = 0.0;
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight + 0.3, initialYaw);
+      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight + 0.3, initialYaw);
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, true);
       GroundProfile3D groundProfile = new FlatGroundProfile(groundHeight);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, model.getSimulateDT());

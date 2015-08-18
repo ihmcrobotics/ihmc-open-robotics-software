@@ -13,7 +13,7 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -260,7 +260,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
+   public DRCRobotInitialSetup<SDFHumanoidRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       return new ValkyrieInitialSetup(groundHeight, initialYaw);
    }
@@ -327,14 +327,14 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SDFRobot createSdfRobot(boolean createCollisionMeshes)
+   public SDFHumanoidRobot createSdfRobot(boolean createCollisionMeshes)
    { 
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;
       SDFJointNameMap jointMap = getJointMap();
       boolean enableJointDamping = getEnableJointDamping();
 
-      SDFRobot sdfRobot =  loader.createRobot(jointMap.getModelName(), jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      SDFHumanoidRobot sdfRobot =  loader.createRobot(jointMap.getModelName(), jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
 
       if (PRINT_MODEL)
       {
