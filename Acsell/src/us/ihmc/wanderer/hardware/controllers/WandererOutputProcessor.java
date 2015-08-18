@@ -11,7 +11,7 @@ import us.ihmc.wanderer.hardware.WandererJoint;
 import us.ihmc.wanderer.hardware.WandererUtil;
 import us.ihmc.wanderer.hardware.configuration.WandererAnkleKinematicParameters;
 import us.ihmc.wanderer.hardware.configuration.WandererFourbarProperties;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -34,7 +34,7 @@ public class WandererOutputProcessor implements OutputProcessor
    private final AcsellFourbarCalculator rightFourbar;
    private EnumMap<WandererJoint, OneDoFJoint> wholeBodyControlJoints;
 
-   public WandererOutputProcessor(BaseFullRobotModel controllerFullRobotModel)
+   public WandererOutputProcessor(FullRobotModel controllerFullRobotModel)
    {
       wholeBodyControlJoints = WandererUtil.createJointMap(controllerFullRobotModel.getOneDoFJoints());
 
