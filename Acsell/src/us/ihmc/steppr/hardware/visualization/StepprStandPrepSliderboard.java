@@ -3,7 +3,7 @@ package us.ihmc.steppr.hardware.visualization;
 import java.util.EnumMap;
 
 import net.java.games.input.Component;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.acsell.treadmill.TreadmillJoystickEventListener;
 import us.ihmc.acsell.treadmill.TreadmillSerialManager;
 import us.ihmc.robotDataCommunication.YoVariableClient;
@@ -97,7 +97,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
          StandPrepVariables variables = new StandPrepVariables(setpoint, registry);
 
          StepprJoint aJoint = setpoint.getJoints()[0];
-         OneDegreeOfFreedomJoint oneDoFJoint = ((SDFRobot)robot).getOneDegreeOfFreedomJoint(aJoint.getSdfName());
+         OneDegreeOfFreedomJoint oneDoFJoint = ((SDFBaseRobot)robot).getOneDegreeOfFreedomJoint(aJoint.getSdfName());
          sliderBoardConfigurationManager.setKnob(1, selectedJointPair, 0, StepprJoint.values.length);
          sliderBoardConfigurationManager.setSlider(1, variables.q_d, oneDoFJoint.getJointLowerLimit(), oneDoFJoint.getJointUpperLimit());
          sliderBoardConfigurationManager.setSlider(2, variables.kp, 0, 100 * aJoint.getRatio() * aJoint.getRatio());

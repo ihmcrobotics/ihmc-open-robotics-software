@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
@@ -41,7 +42,9 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.steppr.hardware.controllers.StepprOutputProcessor;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.partNames.NeckJointName;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -190,7 +193,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public void setJointDamping(SDFRobot simulatedRobot)
+   public void setJointDamping(SDFBaseRobot simulatedRobot)
    {
       System.err.println("Joint Damping not setup for Bono. BonoRobotModel setJointDamping!");
    }
@@ -214,7 +217,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public ScsCollisionConfigure getPhysicsConfigure(SDFRobot robotModel)
+   public ScsCollisionConfigure getPhysicsConfigure(SDFBaseRobot robotModel)
    {
       return null;
    }
@@ -302,7 +305,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
+   public MultiThreadedRobotControlElement createSimulatedHandController(SDFBaseRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
          GlobalDataProducer globalDataProducersw)
    {
       return null;

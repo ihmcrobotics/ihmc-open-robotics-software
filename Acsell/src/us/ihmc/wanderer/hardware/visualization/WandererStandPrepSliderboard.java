@@ -3,7 +3,7 @@ package us.ihmc.wanderer.hardware.visualization;
 import java.util.EnumMap;
 
 import net.java.games.input.Component;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.acsell.treadmill.TreadmillJoystickEventListener;
 import us.ihmc.acsell.treadmill.TreadmillSerialManager;
 import us.ihmc.robotDataCommunication.YoVariableClient;
@@ -97,7 +97,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
          StandPrepVariables variables = new StandPrepVariables(setpoint, registry);
 
          WandererJoint aJoint = setpoint.getJoints()[0];
-         OneDegreeOfFreedomJoint oneDoFJoint = ((SDFRobot)robot).getOneDegreeOfFreedomJoint(aJoint.getSdfName());
+         OneDegreeOfFreedomJoint oneDoFJoint = ((SDFBaseRobot)robot).getOneDegreeOfFreedomJoint(aJoint.getSdfName());
          sliderBoardConfigurationManager.setKnob(1, selectedJointPair, 0, WandererJoint.values.length);
          sliderBoardConfigurationManager.setSlider(1, variables.q_d, oneDoFJoint.getJointLowerLimit(), oneDoFJoint.getJointUpperLimit());
          sliderBoardConfigurationManager.setSlider(2, variables.kp, 0, 20 * aJoint.getRatio() * aJoint.getRatio());
