@@ -9,7 +9,7 @@ public enum RobotQuadrant
    FRONT_LEFT(RobotEnd.FRONT, RobotSide.LEFT),
    FRONT_RIGHT(RobotEnd.FRONT, RobotSide.RIGHT);
    
-   public static final RobotQuadrant[] values = new RobotQuadrant[] {BACK_LEFT, BACK_RIGHT, FRONT_LEFT, FRONT_RIGHT};
+   public static final RobotQuadrant[] values = values();
    
    private final RobotEnd end;
    private final RobotSide side;
