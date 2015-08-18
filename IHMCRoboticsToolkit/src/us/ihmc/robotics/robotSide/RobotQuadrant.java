@@ -2,21 +2,19 @@ package us.ihmc.robotics.robotSide;
 
 import java.awt.Color;
 
-import sun.applet.AppletIllegalArgumentException;
-
-public class RobotQuadrant
+public enum RobotQuadrant
 {
-   public static final RobotQuadrant BACK_LEFT = new RobotQuadrant(RobotEnd.BACK, RobotSide.LEFT);
-   public static final RobotQuadrant BACK_RIGHT = new RobotQuadrant(RobotEnd.BACK, RobotSide.RIGHT);
-   public static final RobotQuadrant FRONT_LEFT = new RobotQuadrant(RobotEnd.FRONT, RobotSide.LEFT);
-   public static final RobotQuadrant FRONT_RIGHT = new RobotQuadrant(RobotEnd.FRONT, RobotSide.RIGHT);
+   BACK_LEFT(RobotEnd.BACK, RobotSide.LEFT),
+   BACK_RIGHT(RobotEnd.BACK, RobotSide.RIGHT),
+   FRONT_LEFT(RobotEnd.FRONT, RobotSide.LEFT),
+   FRONT_RIGHT(RobotEnd.FRONT, RobotSide.RIGHT);
    
    public static final RobotQuadrant[] values = new RobotQuadrant[] {BACK_LEFT, BACK_RIGHT, FRONT_LEFT, FRONT_RIGHT};
    
    private final RobotEnd end;
    private final RobotSide side;
    
-   public static RobotQuadrant getQuadrant(RobotEnd robotEnd, RobotSide robotSide)
+   public static final RobotQuadrant getQuadrant(RobotEnd robotEnd, RobotSide robotSide)
    {
       if (robotEnd == RobotEnd.BACK)
       {
@@ -42,7 +40,7 @@ public class RobotQuadrant
       }
    }
    
-   public static RobotQuadrant getDiagonalOppositeQuadrant(RobotQuadrant robotQuadrant)
+   public static final RobotQuadrant getDiagonalOppositeQuadrant(RobotQuadrant robotQuadrant)
    {
       if (robotQuadrant.getEnd() == RobotEnd.BACK)
       {
@@ -68,7 +66,7 @@ public class RobotQuadrant
       }
    }
    
-   public static RobotQuadrant getAcrossBodyQuadrant(RobotQuadrant robotQuadrant)
+   public static final RobotQuadrant getAcrossBodyQuadrant(RobotQuadrant robotQuadrant)
    {
       if (robotQuadrant.getEnd() == RobotEnd.BACK)
       {
