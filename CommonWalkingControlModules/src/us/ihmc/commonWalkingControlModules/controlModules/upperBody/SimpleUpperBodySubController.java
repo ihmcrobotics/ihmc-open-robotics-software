@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.tools.containers.ContainerTools;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.humanoidRobotics.partNames.NeckJointName;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -30,7 +30,7 @@ public class SimpleUpperBodySubController implements UpperBodySubController
    private final NeckJointName[] neckJointNames;
    private final double controlDT;
 
-   public SimpleUpperBodySubController(FullRobotModel fullRobotModel, ProcessedSensorsInterface processedSensors, double controlDT, ArmControlModule armControlModule, SpineControlModule spineControlModule,
+   public SimpleUpperBodySubController(BaseFullRobotModel fullRobotModel, ProcessedSensorsInterface processedSensors, double controlDT, ArmControlModule armControlModule, SpineControlModule spineControlModule,
            YoVariableRegistry parentRegistry)
    {
       this.processedSensors = processedSensors;

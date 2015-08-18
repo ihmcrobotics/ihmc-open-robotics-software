@@ -6,6 +6,7 @@ import java.util.Random;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -102,7 +103,7 @@ public class PosePlaybackExampleSequence
 //    return sequence;
 // }
 
-   public static PlaybackPoseSequence createRandomPlaybackPoseSequence(Random random, FullRobotModel fullRobotModel, int numberOfPoses, double poseDelay, double trajectoryTime)
+   public static PlaybackPoseSequence createRandomPlaybackPoseSequence(Random random, BaseFullRobotModel fullRobotModel, int numberOfPoses, double poseDelay, double trajectoryTime)
    {
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
 
@@ -114,7 +115,7 @@ public class PosePlaybackExampleSequence
       return sequence;
    }
 
-   public static PlaybackPose createRandomPosePlaybackRobotPose(Random random, FullRobotModel fullRobotModel, double poseDelay, double trajectoryTime)
+   public static PlaybackPose createRandomPosePlaybackRobotPose(Random random, BaseFullRobotModel fullRobotModel, double poseDelay, double trajectoryTime)
    {
       LinkedHashMap<OneDoFJoint, Double> pose = new LinkedHashMap<>();
 

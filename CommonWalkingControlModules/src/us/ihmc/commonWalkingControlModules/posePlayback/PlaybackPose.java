@@ -6,7 +6,7 @@ import java.util.Set;
 
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJointHolder;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class PlaybackPose
@@ -15,7 +15,7 @@ public class PlaybackPose
    private double playBackDelayBeforePose = 1.0;
    private double playBackDuration = 1.0;
 
-   public PlaybackPose(FullRobotModel fullRobotModel, OneDegreeOfFreedomJointHolder oneDegreeOfFreedomJointHolder)
+   public PlaybackPose(BaseFullRobotModel fullRobotModel, OneDegreeOfFreedomJointHolder oneDegreeOfFreedomJointHolder)
    {
       playbackPoseMap = new LinkedHashMap<OneDoFJoint, Double>();
       OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
@@ -31,7 +31,7 @@ public class PlaybackPose
       }
    }
 
-   public PlaybackPose(FullRobotModel fullRobotModel, OneDegreeOfFreedomJointHolder oneDegreeOfFreedomJointHolder, double playBackDelayBeforePose,
+   public PlaybackPose(BaseFullRobotModel fullRobotModel, OneDegreeOfFreedomJointHolder oneDegreeOfFreedomJointHolder, double playBackDelayBeforePose,
                        double playbackDuration)
    {
       this(fullRobotModel, oneDegreeOfFreedomJointHolder);

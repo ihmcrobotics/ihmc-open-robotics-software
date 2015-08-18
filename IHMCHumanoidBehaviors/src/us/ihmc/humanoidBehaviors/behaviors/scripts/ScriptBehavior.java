@@ -45,7 +45,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateWrapper;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -92,14 +92,14 @@ public class ScriptBehavior extends BehaviorInterface
    private final HighLevelStateBehavior highLevelStateBehavior;
    public final FingerStateBehavior fingerStateBehavior;
 
-   public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
+   public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, BaseFullRobotModel fullRobotModel, DoubleYoVariable yoTime)
    {
       this(outgoingCommunicationBridge, fullRobotModel, yoTime, null, null);
 
       PrintTools.debug(this, "Warning: FootPosePackets and FootstepDataList packets are not supported when using this constructor!");
    }
 
-   public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime,
+   public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, BaseFullRobotModel fullRobotModel, DoubleYoVariable yoTime,
          BooleanYoVariable doubleSupport, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);

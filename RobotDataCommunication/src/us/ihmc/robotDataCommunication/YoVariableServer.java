@@ -17,7 +17,8 @@ import us.ihmc.robotDataCommunication.jointState.JointHolder;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -224,7 +225,7 @@ public class YoVariableServer implements RobotVisualizer
    }
 
    @Override
-   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void setMainRegistry(YoVariableRegistry registry, BaseFullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       if(fullRobotModel != null)
       {

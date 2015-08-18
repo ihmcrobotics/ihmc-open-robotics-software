@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
@@ -122,7 +123,7 @@ public class FootControlHelper
             registry, momentumBasedController.getDynamicGraphicObjectsListRegistry());
 
 
-      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      BaseFullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       RigidBody pelvis = fullRobotModel.getPelvis();
       RevoluteJoint[] legJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(pelvis, foot), RevoluteJoint.class);
       jacobianId = momentumBasedController.getOrCreateGeometricJacobian(legJoints, foot.getBodyFixedFrame());

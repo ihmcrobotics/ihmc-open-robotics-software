@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 
 public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTestInterface
 {
@@ -48,7 +48,7 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
       Robot robot = testHelper.getRobot();
       SimulationConstructionSet scs = testHelper.getSimulationConstructionSet();
       SimulationTestingParameters simulationTestingParameters = testHelper.getSimulationTestingParameters();
-      FullRobotModel fullRobotModel = testHelper.getFullRobotModel();
+      BaseFullRobotModel fullRobotModel = testHelper.getFullRobotModel();
 
       for (int i = 0; i < numberOfTicks; i++)
       {
@@ -121,7 +121,7 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
       Robot robot = testHelper.getRobot();
       SimulationConstructionSet scs = testHelper.getSimulationConstructionSet();
       SimulationTestingParameters simulationTestingParameters = testHelper.getSimulationTestingParameters();
-      FullRobotModel fullRobotModel = testHelper.getFullRobotModel();
+      BaseFullRobotModel fullRobotModel = testHelper.getFullRobotModel();
 
       for (int i = 0; i < numberOfTicks; i++)
       {

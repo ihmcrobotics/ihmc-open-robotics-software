@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -29,7 +29,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
    private final DoubleYoVariable q_qx, q_qy, q_qz, q_qs;
    private final DoubleYoVariable q_x, q_y, q_z;
 
-   private final FullRobotModel fullRobotModel;
+   private final BaseFullRobotModel fullRobotModel;
 
    private final ArrayList<YoVariable<?>> corruptorVariables;
    private final ArrayList<DoubleYoVariable> torqueOffsetVariables;
@@ -433,7 +433,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
          @Override
          public void processData()
          {
-            FullRobotModel fullRobotModel = controller.getFullRobotModel();
+            BaseFullRobotModel fullRobotModel = controller.getFullRobotModel();
 
             totalTorqueScore.set(0.0);
 

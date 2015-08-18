@@ -9,12 +9,12 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ICPAndMomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
 
 public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehaviorFactory
 {
-   private FullRobotModel fullRobotModel;
+   private BaseFullRobotModel fullRobotModel;
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    private DRCOutputWriterWithTorqueOffsets outputWriterWithTorqueOffsets;
    private boolean transitionRequested = false;
@@ -31,7 +31,7 @@ public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehavio
       this.robotIsHanging = robotIsHanging;
    }
 
-   public FullRobotModel getFullRobotModel()
+   public BaseFullRobotModel getFullRobotModel()
    {
       return fullRobotModel;
    }

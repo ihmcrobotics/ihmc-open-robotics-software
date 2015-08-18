@@ -12,7 +12,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.kalman.YoKalmanFilter;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -93,7 +93,7 @@ public class MassMatrixEstimatingToolRigidBody
    
    
    
-   public MassMatrixEstimatingToolRigidBody(String name, final InverseDynamicsJoint wristJoint, final FullRobotModel fullRobotModel, double gravity, 
+   public MassMatrixEstimatingToolRigidBody(String name, final InverseDynamicsJoint wristJoint, final BaseFullRobotModel fullRobotModel, double gravity, 
          double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.registry = new YoVariableRegistry(name);

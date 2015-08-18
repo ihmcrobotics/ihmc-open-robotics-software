@@ -25,7 +25,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.HorizontalScan;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -798,7 +798,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       return getRootJoint();
    }
 
-   public void copyWholeBodyStateFromFullRobotModel(FullRobotModel modelToCopyFrom, boolean copyRootJointToo)
+   public void copyWholeBodyStateFromFullRobotModel(BaseFullRobotModel modelToCopyFrom, boolean copyRootJointToo)
    {
       OneDoFJoint[] oneDoFJoints = modelToCopyFrom.getOneDoFJoints();
       for (OneDoFJoint otherJoint: oneDoFJoints)
