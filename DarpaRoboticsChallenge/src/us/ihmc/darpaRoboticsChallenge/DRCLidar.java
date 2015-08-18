@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
@@ -20,7 +20,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class DRCLidar
 {
-   private static LidarMount getSensor(SDFRobot robot, String sensorName)
+   private static LidarMount getSensor(SDFBaseRobot robot, String sensorName)
    {
       ArrayList<LidarMount> lidarSensors = robot.getSensors(LidarMount.class);
       

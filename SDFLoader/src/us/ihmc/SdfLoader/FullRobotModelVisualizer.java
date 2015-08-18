@@ -26,7 +26,7 @@ import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 public class FullRobotModelVisualizer implements RobotVisualizer
 {
    private final String name;
-   private final SDFRobot robot;
+   private final SDFBaseRobot robot;
    private final double updateDT;
    private final FullRobotModel fullRobot;
 
@@ -39,14 +39,14 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    {   
       this.fullRobot = fullRobotModel;
       this.scs = scs;
-      this.robot = (SDFRobot) scs.getRobots()[0];
+      this.robot = (SDFBaseRobot) scs.getRobots()[0];
       this.name = robot.getName() + "Simulated";    
       this.updateDT = updateDT;
       this.robotRegistry = robot.getRobotsYoVariableRegistry();
       this.setMainRegistry(robotRegistry, fullRobotModel, null);
    }
 
-   public SDFRobot getSDFRobot()
+   public SDFBaseRobot getSDFRobot()
    {
       return robot;
    }

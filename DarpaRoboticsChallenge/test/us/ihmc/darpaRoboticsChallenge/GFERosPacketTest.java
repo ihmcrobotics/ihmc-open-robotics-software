@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.ros.RosCore;
 import org.ros.internal.message.Message;
 
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -299,7 +300,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 	   }
    }
    
-   private AbstractThreadedRobotController createController(DRCRobotModel robotModel, GlobalDataProducer dataProducer, DRCSimulationOutputWriter outputWriter, SDFRobot sdfRobot)
+   private AbstractThreadedRobotController createController(DRCRobotModel robotModel, GlobalDataProducer dataProducer, DRCSimulationOutputWriter outputWriter, SDFBaseRobot sdfRobot)
    {
 	   YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 	   double gravity = -9.7925;

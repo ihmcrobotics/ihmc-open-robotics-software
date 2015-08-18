@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
@@ -13,7 +13,9 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -34,7 +36,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorOutputMapReadOnly, SensorRawOutputMapReadOnly
 {
    private final String name;
-   private final SDFRobot robot;
+   private final SDFBaseRobot robot;
    private final SixDoFJoint rootJoint;
    private final CommonHumanoidReferenceFrames referenceFrames;
 
@@ -49,18 +51,18 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
 
-   public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
+   public SDFPerfectSimulatedSensorReader(SDFBaseRobot robot, FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel, null, referenceFrames);
    }
 
-   public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolderToUpdate,
+   public SDFPerfectSimulatedSensorReader(SDFBaseRobot robot, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolderToUpdate,
          CommonHumanoidReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel.getRootJoint(), forceSensorDataHolderToUpdate, referenceFrames);
    }
 
-   public SDFPerfectSimulatedSensorReader(SDFRobot robot, SixDoFJoint rootJoint, ForceSensorDataHolder forceSensorDataHolderToUpdate,
+   public SDFPerfectSimulatedSensorReader(SDFBaseRobot robot, SixDoFJoint rootJoint, ForceSensorDataHolder forceSensorDataHolderToUpdate,
          CommonHumanoidReferenceFrames referenceFrames)
    {
       name = robot.getName() + "SimulatedSensorReader";
@@ -189,7 +191,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       }
    }
 
-   protected void packRootTransform(SDFRobot robot, RigidBodyTransform transformToPack)
+   protected void packRootTransform(SDFBaseRobot robot, RigidBodyTransform transformToPack)
    {
       robot.getRootJointToWorldTransform(transformToPack);
    }

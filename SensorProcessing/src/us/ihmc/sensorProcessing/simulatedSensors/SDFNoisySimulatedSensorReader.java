@@ -5,7 +5,7 @@ import java.util.Random;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -24,7 +24,7 @@ public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorRead
    private final Quat4d rotationFilter = new Quat4d();
    private final Vector3d positionFilter = new Vector3d();
 
-   public SDFNoisySimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
+   public SDFNoisySimulatedSensorReader(SDFBaseRobot robot, FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
    {
       super(robot, fullRobotModel, referenceFrames);
    }
@@ -45,7 +45,7 @@ public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorRead
    }
 
    @Override
-   protected void packRootTransform(SDFRobot robot, RigidBodyTransform transformToPack)
+   protected void packRootTransform(SDFBaseRobot robot, RigidBodyTransform transformToPack)
    {
       super.packRootTransform(robot, transformToPack);
       rotationError.w = 1;

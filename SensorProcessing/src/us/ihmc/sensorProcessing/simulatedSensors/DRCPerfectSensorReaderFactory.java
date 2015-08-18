@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.IMUMount;
@@ -20,13 +20,13 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
 {
-   private final SDFRobot robot;
+   private final SDFBaseRobot robot;
 
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private final DRCPerfectSensorReader perfectSensorReader;
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
 
-   public DRCPerfectSensorReaderFactory(SDFRobot robot, ForceSensorDataHolder forceSensorDataHolderToUpdate, double estimateDT)
+   public DRCPerfectSensorReaderFactory(SDFBaseRobot robot, ForceSensorDataHolder forceSensorDataHolderToUpdate, double estimateDT)
    {
       this.robot = robot;
       perfectSensorReader = new DRCPerfectSensorReader(estimateDT);

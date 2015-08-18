@@ -2,6 +2,7 @@ package us.ihmc.atlas;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
@@ -54,7 +55,7 @@ public class AtlasPushRecoveryTrack
       DRCFlatGroundWalkingTrack track = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
             cheatWithGroundHeightAtForFootstep, model);
 
-      SDFRobot robot = track.getDrcSimulation().getRobot();
+      SDFBaseRobot robot = track.getDrcSimulation().getRobot();
       SDFFullRobotModel fullRobotModel = model.createFullRobotModel();
       DRCPushRobotController pushRobotController = new DRCPushRobotController(robot, fullRobotModel);
 

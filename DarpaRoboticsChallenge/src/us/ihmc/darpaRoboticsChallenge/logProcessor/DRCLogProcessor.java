@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import javax.swing.JButton;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataCommunication.logger.LogVisualizer;
@@ -20,7 +20,7 @@ public abstract class DRCLogProcessor
    private final Plotter plotter;
 
    private final LogDataProcessorWrapper logDataProcessorWrapper;
-   private final SDFRobot sdfRobot;
+   private final SDFBaseRobot sdfRobot;
 
    protected final SimulationConstructionSet scs;
    protected final DRCRobotModel drcRobotModel;

@@ -13,7 +13,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.communication.packets.walking.FootstepDataList;
@@ -117,7 +117,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       
       // Make sure that the hands are on the target...
-      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      SDFBaseRobot robot = drcSimulationTestHelper.getRobot();
       DoubleYoVariable leftArmZForce = (DoubleYoVariable) robot.getVariable("gc_l_arm_wrx_0_fZ");
       DoubleYoVariable rightArmZForce = (DoubleYoVariable) robot.getVariable("gc_r_arm_wrx_0_fZ");
       assertTrue(leftArmZForce.getDoubleValue() > 50.0);

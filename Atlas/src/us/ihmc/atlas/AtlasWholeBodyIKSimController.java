@@ -2,11 +2,13 @@ package us.ihmc.atlas;
 
 import java.util.ArrayList;
 
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.WholeBodyIKSimController;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -17,13 +19,13 @@ public class AtlasWholeBodyIKSimController extends WholeBodyIKSimController
 
    protected final ArrayList<ImmutablePair<RobotSide, RigidBodyTransform>> queuedTargets =  new ArrayList<ImmutablePair<RobotSide, RigidBodyTransform>>();
 
-   public AtlasWholeBodyIKSimController(SDFRobot robot, SDFFullRobotModel fullRobotModel, DRCRobotModel atlasRobotModel) throws Exception
+   public AtlasWholeBodyIKSimController(SDFBaseRobot robot, SDFFullRobotModel fullRobotModel, DRCRobotModel atlasRobotModel) throws Exception
    {
       super(robot, fullRobotModel, atlasRobotModel);
    }
 
    @Override
-   public void setInitialJointAngles(SDFRobot scsRobot, SDFFullRobotModel fullRobotModel, DRCRobotModel atlasRobotModel)
+   public void setInitialJointAngles(SDFBaseRobot scsRobot, SDFFullRobotModel fullRobotModel, DRCRobotModel atlasRobotModel)
    {
       // Avoid singularities at startup
       for (RobotSide robotSide : RobotSide.values)

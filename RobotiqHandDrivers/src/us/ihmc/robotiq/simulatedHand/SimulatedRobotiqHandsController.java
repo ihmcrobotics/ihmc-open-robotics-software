@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.dataobjects.HandJointName;
@@ -60,7 +60,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
 
    private final SideDependentList<Boolean> hasRobotiqHand = new SideDependentList<Boolean>(false, false);
 
-   public SimulatedRobotiqHandsController(SDFRobot simulatedRobot, DRCRobotModel robotModel, ThreadDataSynchronizerInterface threadDataSynchronizer,
+   public SimulatedRobotiqHandsController(SDFBaseRobot simulatedRobot, DRCRobotModel robotModel, ThreadDataSynchronizerInterface threadDataSynchronizer,
          GlobalDataProducer globalDataProducer)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
