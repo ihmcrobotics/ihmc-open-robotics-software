@@ -1,7 +1,6 @@
-package us.ihmc.communication.packets.driving;
+package us.ihmc.communication.packets;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.dataobjects.LowLevelDrivingAction;
 
 public class LowLevelDrivingCommand extends Packet<LowLevelDrivingCommand>
 {

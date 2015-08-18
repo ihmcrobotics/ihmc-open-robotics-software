@@ -16,13 +16,12 @@ import org.junit.Test;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.KryoStreamDeSerializer;
 import us.ihmc.communication.net.KryoStreamSerializer;
-import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
+import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.utilities.io.files.FileTools;
-import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.utilities.io.files.FileTools;
 
 @BambooPlan(planType = BambooPlanType.Fast)
 public class CapturabilityBasedStatusTest

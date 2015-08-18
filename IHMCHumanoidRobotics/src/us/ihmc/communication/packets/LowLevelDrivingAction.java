@@ -1,4 +1,4 @@
-package us.ihmc.communication.packets.dataobjects;
+package us.ihmc.communication.packets;
 
 public enum LowLevelDrivingAction
 {

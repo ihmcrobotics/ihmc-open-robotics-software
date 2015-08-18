@@ -1,4 +1,4 @@
-package us.ihmc.imageProcessing.driving;
+package us.ihmc.darpaRoboticsChallenge.driving.imageProcessing;
 
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point2D_I32;

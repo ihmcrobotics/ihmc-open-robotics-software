@@ -1,4 +1,4 @@
-package us.ihmc.imageProcessing.driving;
+package us.ihmc.darpaRoboticsChallenge.driving.imageProcessing;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

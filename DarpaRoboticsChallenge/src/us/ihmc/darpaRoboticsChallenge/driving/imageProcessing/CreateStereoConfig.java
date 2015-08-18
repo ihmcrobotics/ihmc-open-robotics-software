@@ -1,4 +1,4 @@
-package us.ihmc.imageProcessing.driving;
+package us.ihmc.darpaRoboticsChallenge.driving.imageProcessing;
 
 import georegression.struct.se.Se3_F64;
 import boofcv.io.UtilIO;
