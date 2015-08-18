@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JointPositionControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.LockPelvisController;
@@ -29,7 +30,7 @@ public class DRCSteeringWheelDemo
       simStarter.startSimulation(networkParameters, true);
       
       drcSimulationFactory = simStarter.getDRCSimulationFactory();
-      SDFRobot robot = drcSimulationFactory.getRobot();
+      SDFBaseRobot robot = drcSimulationFactory.getRobot();
       
       LockPelvisController controller = new LockPelvisController(robot, drcSimulationFactory.getSimulationConstructionSet(), model.createFullRobotModel(), 0.0);
       robot.setController(controller);

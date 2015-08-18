@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.logProcessor;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -47,7 +47,7 @@ public class LogDataProcessorHelper
    
    private final SimulationConstructionSet scs;
 
-   public LogDataProcessorHelper(DRCRobotModel model, SimulationConstructionSet scs, SDFRobot sdfRobot)
+   public LogDataProcessorHelper(DRCRobotModel model, SimulationConstructionSet scs, SDFBaseRobot sdfRobot)
    {
       this.scs = scs;
       fullRobotModel = model.createFullRobotModel();

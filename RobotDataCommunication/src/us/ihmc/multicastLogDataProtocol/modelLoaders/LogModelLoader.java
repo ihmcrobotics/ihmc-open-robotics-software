@@ -1,11 +1,11 @@
 package us.ihmc.multicastLogDataProtocol.modelLoaders;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 
 public interface LogModelLoader
 {
    public void load(String modelName, byte[] model, String[] resourceDirectories, byte[] resourceZip);
-   public SDFRobot createRobot();
+   public SDFBaseRobot createRobot();
    
    public String getModelName();
    public byte[] getModel();

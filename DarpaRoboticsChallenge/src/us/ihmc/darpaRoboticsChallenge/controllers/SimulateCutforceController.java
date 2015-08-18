@@ -3,8 +3,8 @@ package us.ihmc.darpaRoboticsChallenge.controllers;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FramePose;
@@ -37,7 +37,7 @@ public class SimulateCutforceController implements RobotController
    
    private final DoubleYoVariable efpHandControlFrameVelocity;
   
-   private final SDFRobot sdfRobot;
+   private final SDFBaseRobot sdfRobot;
    private final SDFFullRobotModel sdfFullRobotModel;
    private final RobotSide robotSide;
    
@@ -54,7 +54,7 @@ public class SimulateCutforceController implements RobotController
    private final FramePose wristJointPose, handControlFramePose;
    private final YoFramePose yoWristJointPose, yoHandControlFramePose;
    
-   public SimulateCutforceController(SDFRobot robot, SDFFullRobotModel sdfFullRobotModel, RobotSide robotSide, SimulationConstructionSet scs)
+   public SimulateCutforceController(SDFBaseRobot robot, SDFFullRobotModel sdfFullRobotModel, RobotSide robotSide, SimulationConstructionSet scs)
    {
       this.sdfRobot = robot;
       this.sdfFullRobotModel = sdfFullRobotModel;

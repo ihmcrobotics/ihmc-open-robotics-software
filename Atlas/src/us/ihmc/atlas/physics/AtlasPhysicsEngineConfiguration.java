@@ -2,7 +2,7 @@ package us.ihmc.atlas.physics;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -29,9 +29,9 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
    private static final int GROUP_FEET = 0xFFFFFFFF;
 
    private DRCRobotJointMap jointMap;
-   private SDFRobot sdfRobot;
+   private SDFBaseRobot sdfRobot;
 
-   public AtlasPhysicsEngineConfiguration(DRCRobotJointMap jointMap, SDFRobot sdfRobot)
+   public AtlasPhysicsEngineConfiguration(DRCRobotJointMap jointMap, SDFBaseRobot sdfRobot)
    {
       this.jointMap = jointMap;
       this.sdfRobot = sdfRobot;

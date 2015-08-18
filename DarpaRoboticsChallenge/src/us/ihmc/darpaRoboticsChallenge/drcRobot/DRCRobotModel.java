@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
 import java.util.LinkedHashMap;
 
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.HeightCalculatorParameters;
@@ -19,7 +20,9 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.humanoidRobotics.partNames.NeckJointName;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -52,13 +55,13 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
 
    public abstract DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
 
-   public abstract ScsCollisionConfigure getPhysicsConfigure(SDFRobot robotModel);
+   public abstract ScsCollisionConfigure getPhysicsConfigure(SDFBaseRobot robotModel);
 
    public abstract void setEnableJointDamping(boolean enableJointDamping);
 
    public abstract boolean getEnableJointDamping();
 
-   public abstract void setJointDamping(SDFRobot simulatedRobot);
+   public abstract void setJointDamping(SDFBaseRobot simulatedRobot);
 
    public abstract HandModel getHandModel();
 
@@ -78,7 +81,7 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
 
    public abstract SideDependentList<HandCommandManager> createHandCommandManager();
 
-   public abstract MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot,
+   public abstract MultiThreadedRobotControlElement createSimulatedHandController(SDFBaseRobot simulatedRobot,
            ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer);
 
    public abstract DRCHandType getDRCHandType();

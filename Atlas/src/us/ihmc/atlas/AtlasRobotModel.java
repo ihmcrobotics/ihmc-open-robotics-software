@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
@@ -53,7 +54,9 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.NeckJointName;
@@ -223,7 +226,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public ScsCollisionConfigure getPhysicsConfigure(SDFRobot sdfRobot)
+   public ScsCollisionConfigure getPhysicsConfigure(SDFBaseRobot sdfRobot)
    {
       return new AtlasPhysicsEngineConfiguration(getJointMap(), sdfRobot);
    }
@@ -245,7 +248,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public void setJointDamping(SDFRobot simulatedRobot)
+   public void setJointDamping(SDFBaseRobot simulatedRobot)
    {
       AtlasDampingParameters.setDampingParameters(simulatedRobot, getDRCHandType(), getJointMap());
    }
@@ -420,7 +423,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
+   public MultiThreadedRobotControlElement createSimulatedHandController(SDFBaseRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
            GlobalDataProducer globalDataProducer)
    {
       switch (getDRCHandType())
