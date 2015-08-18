@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.Map;
 
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.controllers.YoPIDGains;
@@ -22,7 +22,7 @@ public interface ArmControllerParameters
 
    public abstract boolean doLowLevelPositionControl();
 
-   public abstract Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide);
+   public abstract Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide);
    
    public abstract double getWristHandCenterOffset();
 }

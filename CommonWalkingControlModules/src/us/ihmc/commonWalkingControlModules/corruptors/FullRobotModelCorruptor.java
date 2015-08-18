@@ -6,7 +6,7 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.humanoidRobotics.partNames.RobotSpecificJointNames;
@@ -31,12 +31,12 @@ public class FullRobotModelCorruptor
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ArrayList<VariableChangedListener> variableChangedListeners = new ArrayList<VariableChangedListener>();
 
-   public FullRobotModelCorruptor(final FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
+   public FullRobotModelCorruptor(final FullHumanoidRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
    {
       this("", fullRobotModel, parentRegistry);
    }
 
-   public FullRobotModelCorruptor(String namePrefix, final FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
+   public FullRobotModelCorruptor(String namePrefix, final FullHumanoidRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
    {
       RobotSpecificJointNames robotSpecificJointNames = fullRobotModel.getRobotSpecificJointNames();
       LegJointName[] legJointNames = robotSpecificJointNames.getLegJointNames();

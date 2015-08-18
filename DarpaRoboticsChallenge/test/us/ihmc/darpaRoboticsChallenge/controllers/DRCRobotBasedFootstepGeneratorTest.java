@@ -25,7 +25,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -47,7 +47,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
 
    public static final ReferenceFrame WORLD_FRAME = HumanoidReferenceFrames.getWorldFrame();
    private List<Footstep> footSteps = new ArrayList<Footstep>();
-   private FullRobotModel fullRobotModel;
+   private FullHumanoidRobotModel fullRobotModel;
    private HumanoidReferenceFrames referenceFrames;
    private SideDependentList<ContactablePlaneBody> contactableFeet;
    private SideDependentList<RigidBody> feet;

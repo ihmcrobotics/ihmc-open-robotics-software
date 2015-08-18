@@ -19,7 +19,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseRelativeToCurrentTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.RotateHandAboutAxisTask;
 import us.ihmc.robotics.Axis;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -35,7 +35,7 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
 {
    private static final boolean DEBUG = false;
 
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 

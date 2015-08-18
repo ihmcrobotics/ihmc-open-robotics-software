@@ -41,7 +41,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -96,7 +96,7 @@ public class MomentumBasedController
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final ReferenceFrame centerOfMassFrame;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
@@ -223,7 +223,7 @@ public class MomentumBasedController
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListeners = new ArrayList<>();
    private final ArrayList<RobotMotionStatusChangedListener> robotMotionStatusChangedListeners = new ArrayList<>();
 
-   public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonHumanoidReferenceFrames referenceFrames,
+   public MomentumBasedController(FullHumanoidRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonHumanoidReferenceFrames referenceFrames,
                                   SideDependentList<FootSwitchInterface> footSwitches, SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ,
                                   TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet,
                                   SideDependentList<ContactablePlaneBody> handsWithFingersBentBack, SideDependentList<ContactablePlaneBody> thighs,
@@ -1309,7 +1309,7 @@ public class MomentumBasedController
       return controlDT;
    }
 
-   public FullRobotModel getFullRobotModel()
+   public FullHumanoidRobotModel getFullRobotModel()
    {
       return fullRobotModel;
    }

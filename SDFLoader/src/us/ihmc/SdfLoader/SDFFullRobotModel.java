@@ -21,7 +21,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.tools.containers.ContainerTools;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.FingerName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
@@ -43,7 +43,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
-public class SDFFullRobotModel implements FullRobotModel
+public class SDFFullRobotModel implements FullHumanoidRobotModel
 {
    private final SDFJointNameMap sdfJointNameMap;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

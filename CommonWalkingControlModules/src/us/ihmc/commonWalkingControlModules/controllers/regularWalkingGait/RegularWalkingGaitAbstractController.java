@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.humanoidRobotics.partNames.NeckJointName;
@@ -86,9 +86,9 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
    private final DoubleYoVariable timeInMidSwing = new DoubleYoVariable("timeInMidSwing", childRegistry);
 
    private final String name;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
-   public RegularWalkingGaitAbstractController(String name, RobotSpecificJointNames robotJointNames, FullRobotModel fullRobotModel, DoubleYoVariable time,
+   public RegularWalkingGaitAbstractController(String name, RobotSpecificJointNames robotJointNames, FullHumanoidRobotModel fullRobotModel, DoubleYoVariable time,
            ProcessedOutputsInterface processedOutputs, DoEveryTickSubController doEveryTickSubController, StanceSubController stanceSubController,
            SwingSubController swingSubController, UpperBodySubController upperBodySubController, CommonHumanoidReferenceFrames referenceFrames,
            YoVariableRegistry controllerRegistry, RobotSide initialLoadingLeg)

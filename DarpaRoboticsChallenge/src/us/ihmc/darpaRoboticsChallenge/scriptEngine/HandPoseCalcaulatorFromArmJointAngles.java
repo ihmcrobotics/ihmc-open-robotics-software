@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -19,7 +19,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
  */
 public class HandPoseCalcaulatorFromArmJointAngles
 {
-   private FullRobotModel fullRobotModel;
+   private FullHumanoidRobotModel fullRobotModel;
    private SideDependentList<EnumMap<ArmJointName, OneDoFJoint>> oneDoFJoints = SideDependentList.createListOfEnumMaps(ArmJointName.class);
    private DRCRobotJointMap jointMap;
 

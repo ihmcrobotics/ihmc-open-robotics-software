@@ -32,7 +32,7 @@ import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -622,7 +622,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
    private WalkToLocationBehavior createNewWalkToLocationBehavior()
    {
       BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       HumanoidReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();
 

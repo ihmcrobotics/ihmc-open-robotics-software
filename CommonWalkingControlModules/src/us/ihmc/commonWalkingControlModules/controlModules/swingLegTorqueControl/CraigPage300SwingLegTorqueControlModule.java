@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.GUISetterUpper;
 import us.ihmc.simulationconstructionset.gui.GUISetterUpperRegistry;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -47,7 +47,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
    private final ProcessedSensorsInterface processedSensors;
 
    private final CommonHumanoidReferenceFrames referenceFrames;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final CouplingRegistry couplingRegistry;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -84,7 +84,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
 
 
    public CraigPage300SwingLegTorqueControlModule(LegJointName[] legJointNames, ProcessedSensorsInterface processedSensors,
-           CommonHumanoidReferenceFrames referenceFrames, FullRobotModel fullRobotModel, CouplingRegistry couplingRegistry,
+           CommonHumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel, CouplingRegistry couplingRegistry,
            LegInverseKinematicsCalculator inverseKinematicsCalculator, SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators,
            SideDependentList<DesiredJointAccelerationCalculatorInWorldFrame> desiredJointAccelerationCalculators,
            SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators, YoVariableRegistry parentRegistry,

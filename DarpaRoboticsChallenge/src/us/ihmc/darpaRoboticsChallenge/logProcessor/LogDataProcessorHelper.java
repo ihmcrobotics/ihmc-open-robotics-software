@@ -13,7 +13,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -28,7 +28,7 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
 public class LogDataProcessorHelper
 {
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final FullInverseDynamicsStructure inverseDynamicsStructure;
    private final HumanoidReferenceFrames referenceFrames;
    private final SDFPerfectSimulatedSensorReader sensorReader;
@@ -165,7 +165,7 @@ public class LogDataProcessorHelper
       twistCalculator.compute();
    }
 
-   public FullRobotModel getFullRobotModel()
+   public FullHumanoidRobotModel getFullRobotModel()
    {
       return fullRobotModel;
    }

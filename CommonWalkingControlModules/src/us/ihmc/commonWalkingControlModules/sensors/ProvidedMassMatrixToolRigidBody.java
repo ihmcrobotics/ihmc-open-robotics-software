@@ -8,7 +8,7 @@ import javax.vecmath.Matrix3d;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -66,7 +66,7 @@ public class ProvidedMassMatrixToolRigidBody
    private final FrameVector temporaryVector = new FrameVector();
    private final SpatialAccelerationVector toolAcceleration = new SpatialAccelerationVector();
    
-   public ProvidedMassMatrixToolRigidBody(RobotSide robotSide, final FullRobotModel fullRobotModel, double gravity, 
+   public ProvidedMassMatrixToolRigidBody(RobotSide robotSide, final FullHumanoidRobotModel fullRobotModel, double gravity, 
          ArmControllerParameters armControllerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       String name = robotSide.getCamelCaseNameForStartOfExpression() + "Tool";

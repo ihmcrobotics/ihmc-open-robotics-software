@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.humanoidRobotics.partNames.NeckJointName;
@@ -136,7 +136,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final SideDependentList<YoFramePose> handIKs = new SideDependentList<>();
 
    private final SDFRobot sdfRobot;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final SDFPerfectSimulatedSensorReader reader;
    private final SDFPerfectSimulatedOutputWriter writer;
 
@@ -152,12 +152,12 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    
    private final BooleanYoVariable controlFingers = new BooleanYoVariable("controlFingers", registry);
 
-   public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs, SDFRobot sdfRobot, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs, SDFRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(false, scs, sdfRobot, fullRobotModel, yoGraphicsListRegistry);
    }
    
-   public DRCRobotMidiSliderBoardPositionManipulation(boolean controlFingers, SimulationConstructionSet scs, SDFRobot sdfRobot, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public DRCRobotMidiSliderBoardPositionManipulation(boolean controlFingers, SimulationConstructionSet scs, SDFRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.scs = scs;
       this.fullRobotModel = fullRobotModel;

@@ -17,7 +17,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.GUISetterUpper;
 import us.ihmc.simulationconstructionset.gui.GUISetterUpperRegistry;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -38,7 +38,7 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
    private final ProcessedSensorsInterface processedSensors;
 
    private final CommonHumanoidReferenceFrames referenceFrames;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final CouplingRegistry couplingRegistry;
    private final SideDependentList<EnumMap<LegJointName, DoubleYoVariable>> desiredYoLegJointPositions =
       SideDependentList.createListOfEnumMaps(LegJointName.class);
@@ -64,7 +64,7 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
 
 
    public CraigPage300SwingLegTorqueControlOnlyModule(LegJointName[] legJointNames, ProcessedSensorsInterface processedSensors,
-           CommonHumanoidReferenceFrames referenceFrames, FullRobotModel fullRobotModel, CouplingRegistry couplingRegistry,
+           CommonHumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel, CouplingRegistry couplingRegistry,
            SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators, SideDependentList<LegJointPositionControlModule> legJointPositionControlModules, YoVariableRegistry parentRegistry,
            GUISetterUpperRegistry guiSetterUpperRegistry)
    {

@@ -57,7 +57,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.MathTools;
@@ -467,7 +467,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       commandRecorder.stopRecording();
    }
 
-   private FramePose getCurrentHandPose(FullRobotModel fullRobotModel, RobotSide robotSide)
+   private FramePose getCurrentHandPose(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide)
    {
       drcBehaviorTestHelper.updateRobotModel();
       fullRobotModel.updateFrames();
@@ -537,7 +537,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private HandPosePacket createHandPosePacket(RobotSide robotside)
    {
       drcBehaviorTestHelper.updateRobotModel();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       ReferenceFrame handFrame = fullRobotModel.getHandControlFrame(robotside);
       FramePose currentHandPose = new FramePose();
@@ -560,7 +560,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private FootstepDataList createFootStepDataList(Vector2d walkDeltaXY, HumanoidReferenceFrames referenceFrames)
    {
       drcBehaviorTestHelper.updateRobotModel();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       FootstepDataList footsepDataList = new FootstepDataList();
 
@@ -643,7 +643,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private double[] getCurrentArmPose(RobotSide robotSide)
    {
       drcBehaviorTestHelper.updateRobotModel();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       double[] armPose = new double[numberOfArmJoints];
 
@@ -740,7 +740,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private double clipDesiredJointQToJointLimits(RobotSide robotSide, ArmJointName armJointName, double desiredJointAngle)
    {
       drcBehaviorTestHelper.updateRobotModel();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       double q;
       double qMin = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitLower();

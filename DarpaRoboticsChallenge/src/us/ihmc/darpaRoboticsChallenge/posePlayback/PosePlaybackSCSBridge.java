@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -81,7 +81,7 @@ public class PosePlaybackSCSBridge
 
    // private final BagOfBalls balls = new BagOfBalls(500, 0.01, YoAppearance.AliceBlue(), registry, yoGraphicsListRegistry);
 
-   public PosePlaybackSCSBridge(SDFHumanoidRobot sdfRobot, FullRobotModel fullRobotModel, FullRobotModel fullRobotModelForSlider, double controlDT) throws IOException
+   public PosePlaybackSCSBridge(SDFHumanoidRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModel fullRobotModelForSlider, double controlDT) throws IOException
    {
       this.sdfRobot = sdfRobot;
       this.fullRobotModel = fullRobotModel;
@@ -170,11 +170,11 @@ public class PosePlaybackSCSBridge
 
    private class CaptureSnapshotListener implements VariableChangedListener
    {
-      private final FullRobotModel fullRobotModel;
+      private final FullHumanoidRobotModel fullRobotModel;
 
       private final ModularRobotController controller;
 
-      public CaptureSnapshotListener(FullRobotModel fullRobotModel, ModularRobotController controller)
+      public CaptureSnapshotListener(FullHumanoidRobotModel fullRobotModel, ModularRobotController controller)
       {
          this.fullRobotModel = fullRobotModel;
          this.controller = controller;

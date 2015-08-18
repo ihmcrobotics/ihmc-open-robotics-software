@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -26,7 +26,7 @@ public abstract class ProvidedMassMatrixToolRigidBodyTest
    @Test(timeout = 120000)
    public void testprovidedMassMatrixToolRigidBody()
    {
-      FullRobotModel fullRobotModel = getFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = getFullRobotModel();
       
       ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
       
@@ -43,7 +43,7 @@ public abstract class ProvidedMassMatrixToolRigidBodyTest
       assertTrue(toolWrench.getLinearPart().epsilonEquals(new Vector3d(0.0, 0.0, - mass * gravity), 10e-5));
    }
 
-   public abstract FullRobotModel getFullRobotModel();
+   public abstract FullHumanoidRobotModel getFullRobotModel();
    
    public abstract ArmControllerParameters getArmControllerParameters();
 }

@@ -3,7 +3,7 @@ package us.ihmc.wholeBodyController;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.humanoidRobotics.partNames.SpineJointName;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -38,13 +38,13 @@ public class CenterOfMassCalibrationTool implements Updatable
    private final YoGraphicCoordinateSystem spinePitchZUpFrameViz;
    private final YoGraphicCoordinateSystem leftHipPitchFrameViz, leftHipPitchZUpFrameViz;
 
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final ForceSensorDataHolderReadOnly forceSensorDataHolder;
    private final SideDependentList<ForceSensorDataReadOnly> ankleForceSensors = new SideDependentList<>();
    
    private final DoubleYoVariable leftKneeTorqueCheck = new DoubleYoVariable("leftKneeTorqueCheck", registry);
    
-   public CenterOfMassCalibrationTool(FullRobotModel fullRobotModel, ForceSensorDataHolderReadOnly forceSensorDataHolder, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public CenterOfMassCalibrationTool(FullHumanoidRobotModel fullRobotModel, ForceSensorDataHolderReadOnly forceSensorDataHolder, YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoVariableRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;

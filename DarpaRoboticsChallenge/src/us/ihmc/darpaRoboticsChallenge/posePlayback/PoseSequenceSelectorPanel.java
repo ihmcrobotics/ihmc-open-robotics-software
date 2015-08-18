@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceRead
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
@@ -32,7 +32,7 @@ public class PoseSequenceSelectorPanel extends JPanel
 
    private final YoVariableRegistry registry;
    private final SDFHumanoidRobot sdfRobot;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final DRCRobotMidiSliderBoardPositionManipulation sliderBoard;
 
    private final JTable table;
@@ -102,7 +102,7 @@ public class PoseSequenceSelectorPanel extends JPanel
       add(scrollPane);
    }
 
-   public PoseSequenceSelectorPanel(YoVariableRegistry registry, SDFHumanoidRobot sdfRobot, FullRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
+   public PoseSequenceSelectorPanel(YoVariableRegistry registry, SDFHumanoidRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
    {
       super(new GridLayout(1, 0));
 

@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.commonWalkingControlModules.trajectories.JointSpaceTrajectoryGenerator;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -48,7 +48,7 @@ public class JointSpaceSwingSubController implements SwingSubController
          LegJointName.KNEE, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
 
    private final YoVariableRegistry registry;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final BodyPositionInTimeEstimator bodyPositionInTimeEstimator;
    private final JointSpaceTrajectoryGenerator jointSpaceTrajectoryGenerator;
@@ -98,7 +98,7 @@ public class JointSpaceSwingSubController implements SwingSubController
    private final YoFrameVector positionInSupportLegAnkleZUp;
 
    public JointSpaceSwingSubController(String name, ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
-         FullRobotModel fullRobotModel, SideDependentList<FootSwitchInterface> footSwitches, CommonHumanoidReferenceFrames referenceFrames,
+         FullHumanoidRobotModel fullRobotModel, SideDependentList<FootSwitchInterface> footSwitches, CommonHumanoidReferenceFrames referenceFrames,
          DesiredFootstepCalculator desiredFootstepCalculator, CouplingRegistry couplingRegistry, LegInverseKinematicsCalculator inverseKinematicsCalculator,
          SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator,
          DesiredHeadingControlModule desiredHeadingControlModule, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry,

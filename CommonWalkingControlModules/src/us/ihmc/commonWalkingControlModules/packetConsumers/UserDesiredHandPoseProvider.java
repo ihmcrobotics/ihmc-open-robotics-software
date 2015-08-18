@@ -10,7 +10,7 @@ import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -53,9 +53,9 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    private final ReferenceFrame chestFrame;
 
    private final SideDependentList<ReferenceFrame> packetReferenceFrames;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
-   public UserDesiredHandPoseProvider(FullRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame, YoVariableRegistry parentRegistry)
+   public UserDesiredHandPoseProvider(FullHumanoidRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame, YoVariableRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       chestFrame = fullRobotModel.getChest().getBodyFixedFrame();

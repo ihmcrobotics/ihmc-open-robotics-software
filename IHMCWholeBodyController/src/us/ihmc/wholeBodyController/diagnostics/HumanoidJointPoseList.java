@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hu
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidLegPose;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidSpinePose;
 import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.humanoidRobotics.partNames.SpineJointName;
@@ -38,7 +38,7 @@ public class HumanoidJointPoseList
       parentRegistry.addChild(registry);
    }
    
-   public SideDependentList<ArrayList<OneDoFJoint>> getArmJoints(FullRobotModel fullRobotModel)
+   public SideDependentList<ArrayList<OneDoFJoint>> getArmJoints(FullHumanoidRobotModel fullRobotModel)
    {
       SideDependentList<ArrayList<OneDoFJoint>> ret = new SideDependentList<ArrayList<OneDoFJoint>>();
 
@@ -62,7 +62,7 @@ public class HumanoidJointPoseList
       if (oneDoFJoint != null) oneDoFJoints.add(oneDoFJoint);
    }
    
-   public SideDependentList<ArrayList<OneDoFJoint>> getLegJoints(FullRobotModel fullRobotModel)
+   public SideDependentList<ArrayList<OneDoFJoint>> getLegJoints(FullHumanoidRobotModel fullRobotModel)
    {
       SideDependentList<ArrayList<OneDoFJoint>> ret = new SideDependentList<ArrayList<OneDoFJoint>>();
 

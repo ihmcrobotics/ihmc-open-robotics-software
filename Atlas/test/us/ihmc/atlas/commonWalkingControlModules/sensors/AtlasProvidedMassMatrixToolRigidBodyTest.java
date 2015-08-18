@@ -7,7 +7,7 @@ import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
 import us.ihmc.atlas.parameters.AtlasDefaultArmConfigurations;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBodyTest;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
@@ -19,7 +19,7 @@ public class AtlasProvidedMassMatrixToolRigidBodyTest extends ProvidedMassMatrix
    RobotSide side = RobotSide.LEFT;
    
    @Override
-   public FullRobotModel getFullRobotModel()
+   public FullHumanoidRobotModel getFullRobotModel()
    {
       SDFFullRobotModel fullRobotModel = new AtlasRobotModel(version, AtlasRobotModel.AtlasTarget.SIM, false).createFullRobotModel();
       

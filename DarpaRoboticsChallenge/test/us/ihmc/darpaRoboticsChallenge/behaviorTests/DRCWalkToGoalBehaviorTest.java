@@ -44,7 +44,7 @@ import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -111,7 +111,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
    private BehaviorCommunicationBridge communicationBridge;
 
    private SDFHumanoidRobot robot;
-   private FullRobotModel fullRobotModel;
+   private FullHumanoidRobotModel fullRobotModel;
 
    private PacketCommunicator behaviorCommunicatorServer;
 

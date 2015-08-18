@@ -5,7 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -27,7 +27,7 @@ public class SwingFullLegJacobian
     * Constructs a new SwingFullLegJacobian, for the given side of the robot
     * @param parentRegistry TODO
     */
-   public SwingFullLegJacobian(RobotSide robotSide, FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
+   public SwingFullLegJacobian(RobotSide robotSide, FullHumanoidRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(robotSide.getSideNameFirstLetter() + getClass().getSimpleName());
       this.robotSide = robotSide;

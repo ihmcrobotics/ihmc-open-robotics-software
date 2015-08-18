@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -35,7 +35,7 @@ public class PosePlaybackExampleSequence
       -0.8547244094488189, 0.0, 0.0, 0.0, 0.0, -0.7283629133858267, 0.0, 0.0, 0.0, 0.0, 0.0, 0.7063789763779529, 0.0, 0.0, 0.0, 0.0
    };
 
-   public static PlaybackPoseSequence createExamplePoseSequenceMoveArm(FullRobotModel fullRobotModel, double poseDelay, double trajectoryTime)
+   public static PlaybackPoseSequence createExamplePoseSequenceMoveArm(FullHumanoidRobotModel fullRobotModel, double poseDelay, double trajectoryTime)
    {
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
 

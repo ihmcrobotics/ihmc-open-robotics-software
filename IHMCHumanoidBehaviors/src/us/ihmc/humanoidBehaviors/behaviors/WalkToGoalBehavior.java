@@ -20,7 +20,7 @@ import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
@@ -44,7 +44,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue  = new ConcurrentListeningQueue<FootstepStatus>();;
 	private final BooleanYoVariable isDone;
 	private final BooleanYoVariable hasInputBeenSet;
-	private final FullRobotModel fullRobotModel;
+	private final FullHumanoidRobotModel fullRobotModel;
 
 	private FootstepData startFootstep;
 	private ArrayList<FootstepData> goalFootsteps = new ArrayList<FootstepData>();
@@ -71,7 +71,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
    private RobotSide lastSide = null;
 
 
-	public WalkToGoalBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime, double ankleHeight)
+	public WalkToGoalBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, DoubleYoVariable yoTime, double ankleHeight)
 	{
 		super(outgoingCommunicationBridge);
 		DEBUG.set(true);

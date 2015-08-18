@@ -18,7 +18,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -58,7 +58,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected final OneDoFJoint[] unconstrainedJoints;
    protected final OneDoFJoint[] allOneDoFjoints;
 
-   protected final FullRobotModel fullRobotModel;
+   protected final FullHumanoidRobotModel fullRobotModel;
    protected final MomentumBasedController momentumBasedController;
    protected final WalkingControllerParameters walkingControllerParameters;
 

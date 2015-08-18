@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.manipulation.HandstepPacket;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -19,9 +19,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class DesiredHandstepProvider implements PacketConsumer<HandstepPacket>, HandstepProvider
 {
    private final AtomicReference<HandstepPacket> handstepPacket = new AtomicReference<HandstepPacket>();
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
-   public DesiredHandstepProvider(FullRobotModel fullRobotModel)
+   public DesiredHandstepProvider(FullHumanoidRobotModel fullRobotModel)
    {
       this.fullRobotModel = fullRobotModel;
    }

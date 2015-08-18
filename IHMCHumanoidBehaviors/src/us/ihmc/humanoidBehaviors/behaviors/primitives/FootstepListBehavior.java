@@ -16,7 +16,7 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -250,7 +250,7 @@ public class FootstepListBehavior extends BehaviorInterface
    private final Point3d previousFootStepLocation = new Point3d();
    private final Point3d nextFootStepLocation = new Point3d();
 
-   public ArrayList<Double> getFootstepLengths(FootstepDataList footStepList, FullRobotModel fullRobotModel,
+   public ArrayList<Double> getFootstepLengths(FootstepDataList footStepList, FullHumanoidRobotModel fullRobotModel,
          WalkingControllerParameters walkingControllerParameters)
    {
       ArrayList<Double> footStepLengths = new ArrayList<Double>();
@@ -278,7 +278,7 @@ public class FootstepListBehavior extends BehaviorInterface
       return footStepLengths;
    }
 
-   public boolean areFootstepsTooFarApart(FootstepDataList footStepList, FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters)
+   public boolean areFootstepsTooFarApart(FootstepDataList footStepList, FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters)
    {
       for (double stepLength : getFootstepLengths(footStepList, fullRobotModel, walkingControllerParameters))
       {

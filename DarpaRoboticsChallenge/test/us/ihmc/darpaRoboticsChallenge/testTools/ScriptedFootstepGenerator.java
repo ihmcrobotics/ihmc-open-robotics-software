@@ -12,7 +12,7 @@ import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -26,7 +26,7 @@ public class ScriptedFootstepGenerator
 {
    private final SideDependentList<ContactablePlaneBody> bipedFeet;
 
-   public ScriptedFootstepGenerator(HumanoidReferenceFrames referenceFrames, FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters)
+   public ScriptedFootstepGenerator(HumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters)
    {
       this.bipedFeet = setupBipedFeet(referenceFrames, fullRobotModel, walkingControllerParameters);
    }
@@ -111,7 +111,7 @@ public class ScriptedFootstepGenerator
       return footstep;
    }
 
-   public SideDependentList<ContactablePlaneBody> setupBipedFeet(HumanoidReferenceFrames referenceFrames, FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters)
+   public SideDependentList<ContactablePlaneBody> setupBipedFeet(HumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters)
    {
       double footForward, footBack, footWidth;
 

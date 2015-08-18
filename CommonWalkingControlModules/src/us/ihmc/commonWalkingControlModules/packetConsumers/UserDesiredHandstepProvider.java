@@ -4,7 +4,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.HandstepHelper;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
@@ -34,7 +34,7 @@ public class UserDesiredHandstepProvider implements HandstepProvider
 
    private final HandstepHelper handstepHelper;
    
-   public UserDesiredHandstepProvider(FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry,
+   public UserDesiredHandstepProvider(FullHumanoidRobotModel fullRobotModel, YoVariableRegistry parentRegistry,
                                       YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.handstepHelper = new HandstepHelper(fullRobotModel); 
