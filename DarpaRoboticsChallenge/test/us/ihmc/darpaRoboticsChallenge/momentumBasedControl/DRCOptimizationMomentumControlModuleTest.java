@@ -20,7 +20,7 @@ import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
@@ -280,7 +280,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       return accelerationSelection;
    }
 
-   private void constrainPelvis(Random random, SDFBaseFullRobotModel fullRobotModel, OptimizationMomentumControlModule momentumControlModule,
+   private void constrainPelvis(Random random, SDFFullRobotModel fullRobotModel, OptimizationMomentumControlModule momentumControlModule,
                                 Map<GeometricJacobian, TaskspaceConstraintData> taskspaceConstraintDataMap)
    {
       RigidBody pelvis = fullRobotModel.getRootJoint().getSuccessor();

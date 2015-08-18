@@ -15,7 +15,7 @@ import javax.vecmath.Vector3d;
 
 import org.ddogleg.optimization.functions.FunctionNtoM;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -77,7 +77,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       this.calJointNames = getOrderedArmJointsNames(fullRobotModel, isLeft);
    }
 
-   public static List<String> getOrderedArmJointsNames(SDFBaseFullRobotModel fullRobotModel, boolean isLeft)
+   public static List<String> getOrderedArmJointsNames(SDFFullRobotModel fullRobotModel, boolean isLeft)
    {
       final OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
 

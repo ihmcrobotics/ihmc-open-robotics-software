@@ -3,7 +3,7 @@ package us.ihmc.atlas.handControl.sandia;
 import java.util.ArrayList;
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.FingerJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -95,7 +95,7 @@ public class SandiaHandModel
    private final OneDoFJoint wristJoint;
    private final RobotSide robotSide;
 
-   public SandiaHandModel(SDFBaseFullRobotModel fullRobotModel, ForceSensorDataReadOnly forceSensorDataForController, RobotSide robotSide)
+   public SandiaHandModel(SDFFullRobotModel fullRobotModel, ForceSensorDataReadOnly forceSensorDataForController, RobotSide robotSide)
    {
       this.robotSide = robotSide;
       String prefix = robotSide == RobotSide.LEFT ? "left_" : "right_";
@@ -108,7 +108,7 @@ public class SandiaHandModel
       wristJoint = fullRobotModel.getOneDoFJointByName(robotSide.getShortLowerCaseName() + "_arm_wrx");
    }
 
-   private FingerJoint addFingerJoint(String name,  SDFBaseFullRobotModel fullRobotModel)
+   private FingerJoint addFingerJoint(String name,  SDFFullRobotModel fullRobotModel)
    {
       FingerJoint fingerJoint = new FingerJoint(name);
       OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(name);
@@ -116,7 +116,7 @@ public class SandiaHandModel
       return fingerJoint;
    }
 
-   private void addFingerJoints(SDFBaseFullRobotModel fullRobotModel, String prefix, SandiaFingerName finger)
+   private void addFingerJoints(SDFFullRobotModel fullRobotModel, String prefix, SandiaFingerName finger)
    {
       EnumMap<SandiaFingerJointName, FingerJoint> fingerJoints = new EnumMap<SandiaFingerJointName, FingerJoint>(SandiaFingerJointName.class);
       fingerJoints.put(SandiaFingerJointName.BASEJOINT, addFingerJoint(prefix + "_j0", fullRobotModel));

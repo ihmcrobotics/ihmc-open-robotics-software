@@ -35,7 +35,7 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.tools.containers.ContainerTools;
 
-public class SDFBaseFullRobotModel implements FullRobotModel
+public class SDFFullRobotModel implements FullRobotModel
 {
 
    protected final SDFJointNameMap sdfJointNameMap;
@@ -61,7 +61,7 @@ public class SDFBaseFullRobotModel implements FullRobotModel
    private final HashMap<String, OneDoFJoint> lidarJoints = new HashMap<>();
    private final HashMap<String, ReferenceFrame> sensorFrames = new HashMap<String, ReferenceFrame>();
 
-   public SDFBaseFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+   public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       super();
       this.rootLink = rootLink;

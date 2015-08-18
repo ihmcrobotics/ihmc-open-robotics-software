@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.controllers;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -39,7 +39,7 @@ public class SimulateCutforceController implements RobotController
    private final DoubleYoVariable efpHandControlFrameVelocity;
   
    private final SDFRobot sdfRobot;
-   private final SDFBaseFullRobotModel sdfFullRobotModel;
+   private final SDFFullRobotModel sdfFullRobotModel;
    private final RobotSide robotSide;
    
    private final Joint wristJoint;

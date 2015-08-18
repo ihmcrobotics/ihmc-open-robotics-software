@@ -2,7 +2,7 @@ package us.ihmc.atlas;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -26,7 +26,7 @@ public class AtlasWholeBodyIKSimController extends WholeBodyIKSimController
    }
 
    @Override
-   public void setInitialJointAngles(SDFRobot scsRobot, SDFBaseFullRobotModel fullRobotModel, DRCRobotModel atlasRobotModel)
+   public void setInitialJointAngles(SDFRobot scsRobot, SDFFullRobotModel fullRobotModel, DRCRobotModel atlasRobotModel)
    {
       // Avoid singularities at startup
       for (RobotSide robotSide : RobotSide.values)

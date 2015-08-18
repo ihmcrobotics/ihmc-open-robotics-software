@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -25,7 +25,7 @@ public class WholeBodyPacketBehavior extends BehaviorInterface
    private final WholeBodyIKPacketCreator wholeBodyNetworkModule;
    private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
 
-   private SDFBaseFullRobotModel desiredFullRobotModel;
+   private SDFFullRobotModel desiredFullRobotModel;
 
    public WholeBodyPacketBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime,
          WholeBodyControllerParameters wholeBodyControllerParameters)
@@ -47,7 +47,7 @@ public class WholeBodyPacketBehavior extends BehaviorInterface
       wholeBodyNetworkModule = new WholeBodyIKPacketCreator(wholeBodyControllerParameters);
    }
 
-   public void setInputs(SDFBaseFullRobotModel desiredFullRobotModel, double trajectoryDuration)
+   public void setInputs(SDFFullRobotModel desiredFullRobotModel, double trajectoryDuration)
    {
       this.desiredFullRobotModel = desiredFullRobotModel;
       this.trajectoryTime.set(trajectoryDuration);

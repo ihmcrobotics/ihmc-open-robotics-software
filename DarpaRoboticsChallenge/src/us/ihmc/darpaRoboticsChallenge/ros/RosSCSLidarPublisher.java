@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.ros;
 
 import org.ros.message.Time;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
@@ -22,7 +22,7 @@ public class RosSCSLidarPublisher implements ObjectConsumer<SimulatedLidarScanPa
    public RosSCSLidarPublisher(ObjectCommunicator localObjectCommunicator,
          RosMainNode rosMainNode,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
-         SDFBaseFullRobotModel fullRobotModel,
+         SDFFullRobotModel fullRobotModel,
          DRCRobotLidarParameters[] lidarParameters)
    {
       nSensors = lidarParameters.length;

@@ -6,7 +6,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.util.PacketControllerTools;
@@ -60,7 +60,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    private final SDFFullHumanoidRobotModel actualFullRobotModel;
    private final WholeBodyIkSolver wholeBodyIKSolver;
    private final SDFFullHumanoidRobotModel graspingDebrisRobot;
-   private final SDFBaseFullRobotModel approachingDebrisRobot;
+   private final SDFFullRobotModel approachingDebrisRobot;
    private final DoubleYoVariable yoTime;
 
    private RigidBodyTransform debrisTransform;
@@ -201,7 +201,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       handPose.getOrientation(desiredGraspOrientationToPack);
    }
 
-   public void computeWholeBodyIK(SDFFullHumanoidRobotModel actualRobotModel, SDFBaseFullRobotModel desiredRobotModelToPack, int numberOfReseeds,
+   public void computeWholeBodyIK(SDFFullHumanoidRobotModel actualRobotModel, SDFFullRobotModel desiredRobotModelToPack, int numberOfReseeds,
          FramePose endEffectorPose, double positionTolerance, double orientationTolerance, ControlledDoF controlledDofs)
    {
       wholeBodyIKSolver.getConfiguration().setNumberOfControlledDoF(robotSide, controlledDofs);

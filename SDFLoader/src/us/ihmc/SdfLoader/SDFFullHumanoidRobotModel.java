@@ -23,7 +23,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class SDFFullHumanoidRobotModel extends SDFBaseFullRobotModel implements FullHumanoidRobotModel
+public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements FullHumanoidRobotModel
 {
    private SideDependentList<EnumMap<ArmJointName, OneDoFJoint>> armJointLists;
    private SideDependentList<EnumMap<LegJointName, OneDoFJoint>> legJointLists;

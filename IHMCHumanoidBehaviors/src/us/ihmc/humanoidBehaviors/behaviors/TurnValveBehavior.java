@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.behaviors.TurnValvePacket;
@@ -60,7 +60,7 @@ public class TurnValveBehavior extends BehaviorInterface
    public static final double howFarToStandToTheRightOfValve = 2.0 * robotSideOfHandToUse.negateIfRightSide(0.13); //0.13
    public static final double howFarToStandBackFromValve = 1.25 * 0.64; //0.64
 
-   private final SDFBaseFullRobotModel fullRobotModel;
+   private final SDFFullRobotModel fullRobotModel;
    private final HumanoidReferenceFrames referenceFrames;
 
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
