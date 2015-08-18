@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceRead
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -117,7 +117,7 @@ public class VisualizePoseWorkspace
    {
       private final SimulationConstructionSet scs;
 
-      public LoadSequenceListener(BaseFullRobotModel fullRobotModel, SDFRobot sdfRobot, SimulationConstructionSet scs)
+      public LoadSequenceListener(FullRobotModel fullRobotModel, SDFRobot sdfRobot, SimulationConstructionSet scs)
       {
          this.scs = scs;
       }

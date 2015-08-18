@@ -43,7 +43,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -229,7 +229,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       mockUIPacketCommunicatorServer.send(requestTestBehaviorPacket);
    }
 
-   private BehaviorDisptacher setupBehaviorDispatcher(BaseFullRobotModel fullRobotModel, PacketCommunicator behaviorCommunicator,
+   private BehaviorDisptacher setupBehaviorDispatcher(FullRobotModel fullRobotModel, PacketCommunicator behaviorCommunicator,
          RobotDataReceiver robotDataReceiver, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new HumanoidBehaviorControlModeSubscriber();

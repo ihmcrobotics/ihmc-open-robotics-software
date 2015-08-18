@@ -18,7 +18,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -92,7 +92,7 @@ public class ICPAndMomentumBasedController
       this.capturabilityBasedStatusProducer = capturabilityBasedStatusProducer;
       this.icpBasedLinearMomentumRateOfChangeControlModule = icpBasedLinearMomentumRateOfChangeControlModule;
 
-      BaseFullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
 
       double gravityZ = momentumBasedController.getGravityZ();

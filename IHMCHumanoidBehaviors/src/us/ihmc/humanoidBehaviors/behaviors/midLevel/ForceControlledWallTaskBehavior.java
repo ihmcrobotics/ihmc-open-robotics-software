@@ -16,7 +16,7 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -43,7 +43,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 	protected Status status;
 	private BooleanYoVariable isDone;
 
-	private final BaseFullRobotModel fullrobotModel;
+	private final FullRobotModel fullrobotModel;
 	private final DoubleYoVariable yoTime;
 	private final YoGraphicsListRegistry visualizerYoGraphicsRegistry;
 	private final YoGraphicCoordinateSystem yoTrajectoryControlFrame;

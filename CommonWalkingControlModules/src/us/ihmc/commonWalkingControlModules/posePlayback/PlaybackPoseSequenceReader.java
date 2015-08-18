@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -45,7 +45,7 @@ public class PlaybackPoseSequenceReader
 
    public static void appendFromFile(PlaybackPoseSequence posePlaybackRobotPoseSequence, Reader reader)
    {
-      BaseFullRobotModel fullRobotModel = posePlaybackRobotPoseSequence.getFullRobotModel();
+      FullRobotModel fullRobotModel = posePlaybackRobotPoseSequence.getFullRobotModel();
 
       try
       {
@@ -109,7 +109,7 @@ public class PlaybackPoseSequenceReader
 
    }
 
-   public static PlaybackPoseSequence readFromFile(BaseFullRobotModel fullRobotModel, String fileName)
+   public static PlaybackPoseSequence readFromFile(FullRobotModel fullRobotModel, String fileName)
    {
       PlaybackPoseSequence ret = new PlaybackPoseSequence(fullRobotModel);
       appendFromFile(ret, fileName);
@@ -117,7 +117,7 @@ public class PlaybackPoseSequenceReader
       return ret;
    }
 
-   public static PlaybackPoseSequence readFromInputStream(BaseFullRobotModel fullRobotModel, InputStream inputStream)
+   public static PlaybackPoseSequence readFromInputStream(FullRobotModel fullRobotModel, InputStream inputStream)
    {
       PlaybackPoseSequence ret = new PlaybackPoseSequence(fullRobotModel);
 

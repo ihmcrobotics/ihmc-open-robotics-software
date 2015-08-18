@@ -6,7 +6,7 @@ import java.util.HashSet;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -26,7 +26,7 @@ public class JointPDHighLevelHumanoidController extends HighLevelBehavior
    private final HashMap<OneDoFJoint, YoFunctionGenerator> functionGenerators;
    private final HashSet<OneDoFJoint> jointsBeenControlled = new HashSet<OneDoFJoint>();
    private final DoubleYoVariable alphaQD;
-   private final BaseFullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
 
    public final static HighLevelState controllerState = HighLevelState.JOINT_PD_CONTROL;
 

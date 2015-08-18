@@ -12,7 +12,7 @@ import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
 import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -62,7 +62,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    private final PacketCommunicator controllerCommunicator;
 
-   public WristForceSensorFilteredUpdatable(RobotSide robotSide, BaseFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo,
+   public WristForceSensorFilteredUpdatable(RobotSide robotSide, FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo,
          ForceSensorDataHolder forceSensorDataHolder, double DT, PacketCommunicator behaviorPacketCommunicator, YoVariableRegistry registry)
    {
       this.DT = DT;

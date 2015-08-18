@@ -7,7 +7,7 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -51,7 +51,7 @@ public class PosePlaybackController extends HighLevelBehavior
    
    private final double controlDT;
 
-   public PosePlaybackController(BaseFullRobotModel fullRobotModel, DoubleYoVariable yoTime, double controlDT)
+   public PosePlaybackController(FullRobotModel fullRobotModel, DoubleYoVariable yoTime, double controlDT)
    {
       super(controllerState);
 

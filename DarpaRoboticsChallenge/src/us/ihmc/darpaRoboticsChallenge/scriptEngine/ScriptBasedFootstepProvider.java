@@ -23,7 +23,7 @@ import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -55,7 +55,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    private final DoubleYoVariable time;
    private final DoubleYoVariable scriptEventStartTime, scriptEventDuration;
 
-   private final BaseFullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
 
    public ScriptBasedFootstepProvider(ScriptFileLoader scriptFileLoader, DoubleYoVariable time, SideDependentList<ContactablePlaneBody> bipedFeet,
          FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters, YoVariableRegistry registry)

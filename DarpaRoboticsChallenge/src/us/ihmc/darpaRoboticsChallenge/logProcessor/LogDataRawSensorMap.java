@@ -9,7 +9,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -36,7 +36,7 @@ public class LogDataRawSensorMap
    private final LinkedHashMap<String, YoFrameVector> rawIMUAngularVelocityMap = new LinkedHashMap<>();
    private final LinkedHashMap<String, YoFrameVector> rawIMULinearAccelerationMap = new LinkedHashMap<>();
 
-   public LogDataRawSensorMap(BaseFullRobotModel fullRobotModel, YoVariableHolder yoVariableHolder)
+   public LogDataRawSensorMap(FullRobotModel fullRobotModel, YoVariableHolder yoVariableHolder)
    {
       stateEstimatorSensorDefinitions = buildStateEstimatorSensorDefinitions(fullRobotModel);
 
@@ -80,7 +80,7 @@ public class LogDataRawSensorMap
       }
    }
 
-   private StateEstimatorSensorDefinitions buildStateEstimatorSensorDefinitions(BaseFullRobotModel fullRobotModel)
+   private StateEstimatorSensorDefinitions buildStateEstimatorSensorDefinitions(FullRobotModel fullRobotModel)
    {
       InverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();

@@ -7,7 +7,7 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
@@ -25,7 +25,7 @@ public class SDFPerfectSimulatedOutputWriter
       this.robot = robot;
    }
    
-   public SDFPerfectSimulatedOutputWriter(SDFRobot robot, BaseFullRobotModel fullRobotModel)
+   public SDFPerfectSimulatedOutputWriter(SDFRobot robot, FullRobotModel fullRobotModel)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
@@ -37,7 +37,7 @@ public class SDFPerfectSimulatedOutputWriter
    {
    }
    
-   public void setFullRobotModel(BaseFullRobotModel fullRobotModel)
+   public void setFullRobotModel(FullRobotModel fullRobotModel)
    {
       revoluteJoints.clear();
       OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();

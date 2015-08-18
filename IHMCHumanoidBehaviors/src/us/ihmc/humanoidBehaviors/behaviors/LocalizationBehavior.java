@@ -7,14 +7,14 @@ import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class LocalizationBehavior extends BehaviorInterface {
 	
-	private final BaseFullRobotModel fullRobotModel;
+	private final FullRobotModel fullRobotModel;
 	private ScriptBehavior scriptBehavior;
 	//private String scriptName = "us/ihmc/atlas/scripts/TestLocalization.xml";
 	//private String scriptName = "us/ihmc/atlas/scripts/ShortScriptForLooping.xml";
@@ -25,7 +25,7 @@ public class LocalizationBehavior extends BehaviorInterface {
 	private ScriptBehaviorInputPacket receivedScriptBehavior;
 	private boolean firstRun = false;
 	
-	public LocalizationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, BaseFullRobotModel fullRobotModel, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, WalkingControllerParameters walkingControllerParameters)
+	public LocalizationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, WalkingControllerParameters walkingControllerParameters)
 	   {
 	      super(outgoingCommunicationBridge);
 	      
