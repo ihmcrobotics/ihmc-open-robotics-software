@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -13,7 +13,7 @@ public class FootTwistCalculator
 {
    private final ProcessedSensorsInterface processedSensors;
    private final RobotSide robotSide;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final Twist tempTwist = new Twist();
    private final RigidBody pelvis;
    private final ReferenceFrame footFrame;

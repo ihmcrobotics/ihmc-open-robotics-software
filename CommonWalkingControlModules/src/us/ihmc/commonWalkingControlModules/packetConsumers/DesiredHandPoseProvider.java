@@ -17,7 +17,7 @@ import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.communication.packets.manipulation.StopMotionPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -61,7 +61,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    private final int numberOfArmJoints;
 
    private final SideDependentList<ReferenceFrame> packetReferenceFrames;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
    private final PacketConsumer<StopMotionPacket> handPauseCommandConsumer;
    private final PacketConsumer<HandPoseListPacket> handPoseListConsumer;
@@ -70,7 +70,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    private final PacketConsumer<ArmJointTrajectoryPacket> armJointTrajectoryPacketConsumer;
    private final GlobalDataProducer globalDataProducer;
 
-   public DesiredHandPoseProvider(FullRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame,
+   public DesiredHandPoseProvider(FullHumanoidRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame,
          GlobalDataProducer globalDataProducer)
    {
       this.fullRobotModel = fullRobotModel;

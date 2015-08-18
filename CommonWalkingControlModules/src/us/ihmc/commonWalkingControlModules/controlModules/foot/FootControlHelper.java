@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceCons
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.MathTools;
@@ -219,7 +219,7 @@ public class FootControlHelper
 
    private void computeJointsAlignmentFactor()
    {
-      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW).getJointAxis(hipYawAxis);
       fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL).getJointAxis(ankleRollAxis);
 

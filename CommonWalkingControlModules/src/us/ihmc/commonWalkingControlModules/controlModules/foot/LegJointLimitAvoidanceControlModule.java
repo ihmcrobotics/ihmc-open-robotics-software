@@ -7,7 +7,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.geometry.*;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -37,7 +37,7 @@ public class LegJointLimitAvoidanceControlModule
    private static final double maxRandomSearchScalar = 1.0;
 
    private final DoubleYoVariable percentJointRangeForThreshold;
-   private FullRobotModel robotModel;
+   private FullHumanoidRobotModel robotModel;
    private RigidBody base;
    private OneDoFJoint[] robotJoints;
    private OneDoFJoint[] ikJoints;

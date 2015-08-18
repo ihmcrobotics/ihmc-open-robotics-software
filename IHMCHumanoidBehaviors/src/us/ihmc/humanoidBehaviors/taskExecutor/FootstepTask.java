@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 import java.util.ArrayList;
 
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LimbName;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -18,7 +18,7 @@ public class FootstepTask extends BehaviorTask
    private final FootstepListBehavior footstepListBehavior;
    private ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
 
-   public FootstepTask(FullRobotModel fullRobotModel, RobotSide robotSide, FootstepListBehavior footstepListBehavior, FramePose footPose, DoubleYoVariable yoTime)
+   public FootstepTask(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide, FootstepListBehavior footstepListBehavior, FramePose footPose, DoubleYoVariable yoTime)
    {
       super(footstepListBehavior, yoTime);
       ReferenceFrame soleFrame;

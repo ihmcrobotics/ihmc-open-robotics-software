@@ -35,7 +35,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -86,7 +86,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private RobotDataReceiver robotDataReceiver;
    private SDFHumanoidRobot robot;
-   private FullRobotModel fullRobotModel;
+   private FullHumanoidRobotModel fullRobotModel;
 
    @Before
    public void setUp()

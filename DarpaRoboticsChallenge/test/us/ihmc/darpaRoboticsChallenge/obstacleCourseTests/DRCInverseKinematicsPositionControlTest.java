@@ -44,7 +44,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.MathTools;
@@ -352,7 +352,7 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
    
    private double[] getArmJointLimits(RobotSide robotSide, ArmJointName armJointName)
    {
-      FullRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       double qMin = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitLower();
       double qMax = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitUpper();
       
@@ -408,7 +408,7 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
 
    private double clipDesiredJointQToJointLimits(RobotSide robotSide, ArmJointName armJointName, double desiredJointAngle)
    {
-      FullRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       double q;
       double qMin = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitLower();

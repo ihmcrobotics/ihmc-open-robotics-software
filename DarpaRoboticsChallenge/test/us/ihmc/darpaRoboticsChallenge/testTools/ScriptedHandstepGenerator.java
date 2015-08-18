@@ -5,14 +5,14 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.HandstepHelper;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ScriptedHandstepGenerator
 {
    private final HandstepHelper handstepHelper;
 
-   public ScriptedHandstepGenerator(FullRobotModel fullRobotModel)
+   public ScriptedHandstepGenerator(FullHumanoidRobotModel fullRobotModel)
    {
       handstepHelper = new HandstepHelper(fullRobotModel);
    }

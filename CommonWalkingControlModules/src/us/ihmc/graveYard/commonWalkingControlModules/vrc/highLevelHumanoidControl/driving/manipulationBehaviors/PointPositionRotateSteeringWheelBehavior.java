@@ -4,7 +4,7 @@ import javax.vecmath.Matrix3d;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -56,7 +56,7 @@ public class PointPositionRotateSteeringWheelBehavior
    private final RigidBody elevator;
 
    public PointPositionRotateSteeringWheelBehavior(double dt, RobotSide robotSide, HandControlModule individualHandControlModule,
-                                                   ReferenceFrame creepyGripHandPositionControlFrame, FullRobotModel fullRobotModel,
+                                                   ReferenceFrame creepyGripHandPositionControlFrame, FullHumanoidRobotModel fullRobotModel,
                                                    ReferenceFrame steeringWheelFrame, MomentumBasedController momentumBasedController,
                                                    YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {

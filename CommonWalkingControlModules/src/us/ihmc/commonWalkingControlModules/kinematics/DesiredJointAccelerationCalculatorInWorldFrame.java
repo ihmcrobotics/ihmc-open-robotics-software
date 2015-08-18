@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.kinematics;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -18,7 +18,7 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
    private final YoVariableRegistry registry;
    private final RobotSide swingSide;
    private final SwingFullLegJacobian swingLegJacobian;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
    private final InverseDynamicsJoint rootJoint;
    private final ReferenceFrame footFrame;
@@ -30,7 +30,7 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
 
    private final DesiredJointAccelerationCalculator desiredJointAccelerationCalculator;
 
-   public DesiredJointAccelerationCalculatorInWorldFrame(LegJointName[] legJointNames, SwingFullLegJacobian swingLegJacobian, FullRobotModel fullRobotModel,
+   public DesiredJointAccelerationCalculatorInWorldFrame(LegJointName[] legJointNames, SwingFullLegJacobian swingLegJacobian, FullHumanoidRobotModel fullRobotModel,
            CommonHumanoidReferenceFrames referenceFrames, RobotSide robotSide, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(robotSide.getCamelCaseNameForStartOfExpression() + getClass().getSimpleName());

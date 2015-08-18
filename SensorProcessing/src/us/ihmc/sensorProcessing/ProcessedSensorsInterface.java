@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing;
 import java.util.HashMap;
 
 import us.ihmc.sensorProcessing.sensors.FingerForceSensors;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.humanoidRobotics.partNames.NeckJointName;
@@ -58,7 +58,7 @@ public interface ProcessedSensorsInterface extends FingerForceSensors
 
    public abstract double getNeckJointPosition(NeckJointName neckJointName);
    public abstract double getNeckJointVelocity(NeckJointName neckJointName);
-   public abstract FullRobotModel getFullRobotModel();
+   public abstract FullHumanoidRobotModel getFullRobotModel();
    
    public abstract FrameVector getBodyVelocity();
    public abstract FrameVector getCenterOfMassVelocityInFrame(ReferenceFrame referenceFrame);

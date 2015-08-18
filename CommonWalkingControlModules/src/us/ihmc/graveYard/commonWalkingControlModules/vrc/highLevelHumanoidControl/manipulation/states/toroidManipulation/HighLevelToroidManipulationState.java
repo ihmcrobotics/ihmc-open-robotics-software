@@ -3,7 +3,7 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.TorusPoseProvider;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.ManipulableToroid;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -25,7 +25,7 @@ public class HighLevelToroidManipulationState implements Task
    private final ManipulableToroid manipulableToroid;
    private final ToroidManipulationStateMachine toroidManipulationStateMachine;
 
-   public HighLevelToroidManipulationState(double controlDT, DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
+   public HighLevelToroidManipulationState(double controlDT, DoubleYoVariable yoTime, FullHumanoidRobotModel fullRobotModel, TwistCalculator twistCalculator,
            SideDependentList<ReferenceFrame> handPositionControlFrames, SideDependentList<Integer> jacobianIds,
            TorusPoseProvider torusPoseProvider, MomentumBasedController momentumBasedController, YoGraphicsListRegistry yoGraphicsListRegistry,
            YoVariableRegistry parentRegistry)

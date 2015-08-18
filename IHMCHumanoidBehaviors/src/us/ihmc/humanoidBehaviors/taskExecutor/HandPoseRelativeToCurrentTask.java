@@ -4,7 +4,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -18,7 +18,7 @@ public class HandPoseRelativeToCurrentTask extends BehaviorTask
    private final HandPoseBehavior handPoseBehavior;
 
    private final RobotSide robotSide;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final double trajectoryTime;
 
    private final double distanceToMove;
@@ -26,13 +26,13 @@ public class HandPoseRelativeToCurrentTask extends BehaviorTask
 
    private final boolean stopHandIfCollision;
 
-   public HandPoseRelativeToCurrentTask(RobotSide robotSide, double distanceToMoveAlongCurrentOrientation, FullRobotModel fullRobotModel, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior,
+   public HandPoseRelativeToCurrentTask(RobotSide robotSide, double distanceToMoveAlongCurrentOrientation, FullHumanoidRobotModel fullRobotModel, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior,
          double trajectoryTime)
    {
       this(robotSide, null, distanceToMoveAlongCurrentOrientation, fullRobotModel, yoTime, handPoseBehavior, trajectoryTime, false);
    }
    
-   public HandPoseRelativeToCurrentTask(RobotSide robotSide, Vector3d directionToMoveInWorld, double distanceToMove, FullRobotModel fullRobotModel, DoubleYoVariable yoTime,
+   public HandPoseRelativeToCurrentTask(RobotSide robotSide, Vector3d directionToMoveInWorld, double distanceToMove, FullHumanoidRobotModel fullRobotModel, DoubleYoVariable yoTime,
          HandPoseBehavior handPoseBehavior, double trajectoryTime, boolean stopHandIfCollision)
    {
       super(handPoseBehavior, yoTime);

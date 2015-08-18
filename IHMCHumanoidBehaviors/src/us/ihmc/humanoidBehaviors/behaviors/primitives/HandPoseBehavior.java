@@ -14,7 +14,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.robotics.Axis;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -101,7 +101,7 @@ public class HandPoseBehavior extends BehaviorInterface
       setInput(PacketControllerTools.createHandPosePacket(frame, pose, robotSide, trajectoryTime), stopHandIfCollision);
    }
    
-   public void aimPalmNormalAtPoint(RobotSide robotSide, FramePoint targetToAimAt, FullRobotModel fullRobotModel, double trajectoryTime)
+   public void aimPalmNormalAtPoint(RobotSide robotSide, FramePoint targetToAimAt, FullHumanoidRobotModel fullRobotModel, double trajectoryTime)
    {              
       this.robotSide = robotSide;
       fullRobotModel.updateFrames();
@@ -110,7 +110,7 @@ public class HandPoseBehavior extends BehaviorInterface
       setInput(PacketControllerTools.createHandPosePacket(Frame.WORLD, desiredHandFrame.getTransformToWorldFrame(), robotSide, trajectoryTime));
    }
    
-   public void orientHandToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullRobotModel fullRobotModel, double trajectoryTime)
+   public void orientHandToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullHumanoidRobotModel fullRobotModel, double trajectoryTime)
    {
       this.robotSide = robotSide;
       fullRobotModel.updateFrames();
@@ -119,7 +119,7 @@ public class HandPoseBehavior extends BehaviorInterface
       setInput(PacketControllerTools.createHandPosePacket(Frame.WORLD, desiredHandFrame.getTransformToWorldFrame(), robotSide, trajectoryTime));
    }
    
-   public void orientAndMoveHandToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullRobotModel fullRobotModel, double trajectoryTime)
+   public void orientAndMoveHandToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullHumanoidRobotModel fullRobotModel, double trajectoryTime)
    {
       this.robotSide = robotSide;
       fullRobotModel.updateFrames();
@@ -129,7 +129,7 @@ public class HandPoseBehavior extends BehaviorInterface
       setInput(PacketControllerTools.createHandPosePacket(Frame.WORLD, frameOrientedForGrasping.getTransformToWorldFrame(), robotSide, trajectoryTime));
    }
    
-   public static ReferenceFrame orientAndTranslateHandFrameToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullRobotModel fullRobotModel)
+   public static ReferenceFrame orientAndTranslateHandFrameToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullHumanoidRobotModel fullRobotModel)
    {
       fullRobotModel.updateFrames();
       
@@ -146,7 +146,7 @@ public class HandPoseBehavior extends BehaviorInterface
       return new TransformReferenceFrame("desiredHandFrame", ReferenceFrame.getWorldFrame(), desiredHandTransformToWorld);
    }
    
-   public static ReferenceFrame orientHandFrameToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullRobotModel fullRobotModel)
+   public static ReferenceFrame orientHandFrameToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullHumanoidRobotModel fullRobotModel)
    {
       fullRobotModel.updateFrames();
       

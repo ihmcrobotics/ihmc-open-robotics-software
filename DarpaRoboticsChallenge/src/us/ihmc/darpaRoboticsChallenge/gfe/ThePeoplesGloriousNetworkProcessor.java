@@ -19,7 +19,7 @@ import us.ihmc.pathGeneration.footstepGenerator.TimestampedPoseFootStepGenerator
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
@@ -52,7 +52,7 @@ public class ThePeoplesGloriousNetworkProcessor
 
    private final NodeConfiguration nodeConfiguration;
    private final MessageFactory messageFactory;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator gfe_communicator, ObjectCommunicator sensorCommunicator, PPSTimestampOffsetProvider ppsOffsetProvider, 
                                              DRCRobotModel robotModel, String namespace, String tfPrefix) throws IOException
@@ -147,7 +147,7 @@ public class ThePeoplesGloriousNetworkProcessor
       }
    }
 
-   private void setupInputs(String namespace, RobotDataReceiver robotDataReceiver, FullRobotModel fullRobotModel)
+   private void setupInputs(String namespace, RobotDataReceiver robotDataReceiver, FullHumanoidRobotModel fullRobotModel)
    {
       Map<String, Class> inputPacketList = IHMCRosApiMessageMap.INPUT_PACKET_MESSAGE_NAME_MAP;
 

@@ -25,7 +25,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -71,7 +71,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    {
       YoVariableRegistry registry = new YoVariableRegistry("SwingHeightTestController");
       Random random = new Random();
-      FullRobotModel estimatorModel;
+      FullHumanoidRobotModel estimatorModel;
       DoubleYoVariable maxFootHeight = new DoubleYoVariable("maxFootHeight", registry);
       DoubleYoVariable leftFootHeight = new DoubleYoVariable("leftFootHeight", registry);
       DoubleYoVariable rightFootHeight = new DoubleYoVariable("rightFootHeight", registry);
@@ -79,7 +79,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       FramePoint leftFootOrigin;
       FramePoint rightFootOrigin;
 
-      public TestController(FullRobotModel estimatorModel)
+      public TestController(FullHumanoidRobotModel estimatorModel)
       {
          this.estimatorModel = estimatorModel;
       }
@@ -149,7 +149,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          simulationTestingParameters.setRunMultiThreaded(false);
          drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation, simulationTestingParameters,
                  getRobotModel());
-         FullRobotModel estimatorRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+         FullHumanoidRobotModel estimatorRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
          TestController testController = new TestController(estimatorRobotModel);
          drcSimulationTestHelper.getRobot().setController(testController, 1);
 

@@ -54,7 +54,7 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LimbName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
@@ -138,7 +138,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final IntegerYoVariable numberOfCyclesToRun;
    private final DoubleYoVariable minCoMHeightOffset, maxCoMHeightOffset;
    private final int numberOfArmJoints;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
    //Icp Offset generator variables
    private final BooleanYoVariable isIcpOffsetSenderEnabled;
@@ -263,7 +263,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final BooleanYoVariable steeringWheelControlRotationAxis;
    private final BooleanYoVariable steeringWheelExecuteGraspingFirst;
 
-   public DiagnosticBehavior(FullRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime,
+   public DiagnosticBehavior(FullHumanoidRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
          WholeBodyControllerParameters wholeBodyControllerParameters, YoFrameConvexPolygon2d yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {

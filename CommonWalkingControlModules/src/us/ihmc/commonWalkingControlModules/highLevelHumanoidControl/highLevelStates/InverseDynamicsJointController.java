@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -88,7 +88,7 @@ public class InverseDynamicsJointController extends HighLevelBehavior
    private final TwistCalculator twistCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final SixDoFJoint rootJoint;
    
    private final RigidBody pelvis;
@@ -738,12 +738,12 @@ public class InverseDynamicsJointController extends HighLevelBehavior
 
       private final YoVariableRegistry registry;
 
-      public GravityCompensationSliderBoard(SimulationConstructionSet scs, FullRobotModel fullRobotModel, YoVariableRegistry registry)
+      public GravityCompensationSliderBoard(SimulationConstructionSet scs, FullHumanoidRobotModel fullRobotModel, YoVariableRegistry registry)
       {
          this(scs, fullRobotModel, registry, null, 0.0, 0.0);
       }
 
-      public GravityCompensationSliderBoard(SimulationConstructionSet scs, FullRobotModel fullRobotModel, final YoVariableRegistry registry,
+      public GravityCompensationSliderBoard(SimulationConstructionSet scs, FullHumanoidRobotModel fullRobotModel, final YoVariableRegistry registry,
             String varNameForLastSlider, double varMinValue, double varMaxValue)
       {
          this.registry = registry;

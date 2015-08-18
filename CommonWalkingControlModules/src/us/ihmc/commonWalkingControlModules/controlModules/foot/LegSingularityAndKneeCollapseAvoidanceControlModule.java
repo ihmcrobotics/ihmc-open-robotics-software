@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -175,7 +175,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       controlDT = momentumBasedController.getControlDT();
       yoTime = momentumBasedController.getYoTime();
 
-      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
       hipPitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH);
       frameBeforeHipPitchJoint = hipPitchJoint.getFrameBeforeJoint();

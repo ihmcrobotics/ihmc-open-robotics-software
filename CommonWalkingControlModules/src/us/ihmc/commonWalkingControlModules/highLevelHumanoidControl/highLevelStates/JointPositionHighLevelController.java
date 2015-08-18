@@ -33,7 +33,7 @@ import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.communication.packets.wholebody.MultiJointAnglePacket;
 import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.humanoidRobotics.partNames.NeckJointName;
@@ -81,7 +81,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
 
    private final OneDoFJoint[] jointsBeingControlled;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
    public final static HighLevelState controllerState = HighLevelState.JOINT_POSITION_CONTROL;
 

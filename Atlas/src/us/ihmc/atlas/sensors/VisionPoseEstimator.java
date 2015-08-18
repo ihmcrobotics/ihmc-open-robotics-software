@@ -32,7 +32,7 @@ import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import boofcv.struct.calib.IntrinsicParameters;
@@ -123,7 +123,7 @@ public class VisionPoseEstimator implements DRCStereoListener
 
    private void startPlaneDetector()
    {
-      final FullRobotModel fullRobotModel = modelFactory.createFullRobotModel();
+      final FullHumanoidRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       final int pointDropFactor = 4;
       final float searchRadius = 2.0f;
       executorService.submit(new Runnable()

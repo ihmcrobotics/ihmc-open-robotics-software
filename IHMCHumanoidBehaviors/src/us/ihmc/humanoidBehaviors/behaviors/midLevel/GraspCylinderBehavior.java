@@ -12,7 +12,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GraspCylinderTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.OrientPalmToGraspCylinderTask;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -24,7 +24,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class GraspCylinderBehavior extends BehaviorInterface
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
    private final ComHeightBehavior comHeightBehavior;
@@ -38,7 +38,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
 
    private RobotSide robotSide = null;
 
-   public GraspCylinderBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
+   public GraspCylinderBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
          DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);

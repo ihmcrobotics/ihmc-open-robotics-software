@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LimbName;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -30,9 +30,9 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
    private final DoubleYoVariable footPoseRollCheck = new DoubleYoVariable("footPoseRollCheck", registry);
 
    
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
-   public UserDesiredFootPoseProvider(FullRobotModel fullRobotModel, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
+   public UserDesiredFootPoseProvider(FullHumanoidRobotModel fullRobotModel, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
 

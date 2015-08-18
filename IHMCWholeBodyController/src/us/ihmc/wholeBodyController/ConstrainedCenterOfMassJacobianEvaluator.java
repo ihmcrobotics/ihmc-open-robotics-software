@@ -13,7 +13,7 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.linearAlgebra.ColumnSpaceProjector;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -73,7 +73,7 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
    private final YoFrameVector centroidalAngularMomentumPlus;
    private final DenseMatrix64F momentumSelectionMatrix;
 
-   public ConstrainedCenterOfMassJacobianEvaluator(FullRobotModel fullRobotModel)
+   public ConstrainedCenterOfMassJacobianEvaluator(FullHumanoidRobotModel fullRobotModel)
    {
       constrainedCenterOfMassJacobianCalculator = new ConstrainedCenterOfMassJacobianCalculator(fullRobotModel.getRootJoint());
 

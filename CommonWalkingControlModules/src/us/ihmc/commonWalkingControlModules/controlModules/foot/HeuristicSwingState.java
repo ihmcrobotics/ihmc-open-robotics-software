@@ -9,7 +9,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -77,7 +77,7 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
       ReferenceFrame footFrame = contactableFoot.getFrameAfterParentJoint();
       initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
 
-      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       knee = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
       joints.remove(knee);
       gimpedJacobianId = momentumBasedController.getOrCreateGeometricJacobian(joints.toArray(new InverseDynamicsJoint[joints.size()]), jacobian.getJacobianFrame());

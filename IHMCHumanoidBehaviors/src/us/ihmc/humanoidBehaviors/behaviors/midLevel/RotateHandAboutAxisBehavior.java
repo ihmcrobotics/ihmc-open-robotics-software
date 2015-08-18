@@ -4,7 +4,7 @@ import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.robotics.Axis;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -18,9 +18,9 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class RotateHandAboutAxisBehavior extends HandPoseBehavior
 {
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
-   public RotateHandAboutAxisBehavior(String namePrefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
+   public RotateHandAboutAxisBehavior(String namePrefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
          DoubleYoVariable yoTime)
    {
       super(namePrefix, outgoingCommunicationBridge, yoTime);

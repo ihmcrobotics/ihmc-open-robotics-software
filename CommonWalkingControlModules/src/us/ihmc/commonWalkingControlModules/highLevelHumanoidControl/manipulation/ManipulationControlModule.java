@@ -21,7 +21,7 @@ import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBo
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -53,7 +53,7 @@ public class ManipulationControlModule
    private final SideDependentList<HandControlModule> handControlModules;
 
    private final ArmControllerParameters armControlParameters;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
    private final HandPoseProvider handPoseProvider;
    private final HandstepProvider handstepProvider;
@@ -116,7 +116,7 @@ public class ManipulationControlModule
       parentRegistry.addChild(registry);
    }
 
-   private void createFrameVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, FullRobotModel fullRobotModel, String listName, boolean enable)
+   private void createFrameVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, FullHumanoidRobotModel fullRobotModel, String listName, boolean enable)
    {
       YoGraphicsList list = new YoGraphicsList(listName);
       if (yoGraphicsListRegistry != null)

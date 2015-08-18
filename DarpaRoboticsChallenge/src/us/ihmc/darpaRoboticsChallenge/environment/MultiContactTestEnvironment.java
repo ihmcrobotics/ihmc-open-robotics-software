@@ -21,7 +21,7 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerra
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -42,7 +42,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       SDFHumanoidRobot robotForEnvironmentSetup = robotModel.createSdfRobot(DRCConfigParameters.USE_COLLISIONS_MESHS_FOR_VISUALIZATION);
       robotInitialSetup.initializeRobot(robotForEnvironmentSetup, jointMap);
       robotForEnvironmentSetup.update();
-      FullRobotModel fullRobotModelForEnvironmentSetup = robotModel.createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModelForEnvironmentSetup = robotModel.createFullRobotModel();
 
       CommonHumanoidReferenceFrames referenceFramesForEnvironmentSetup = new HumanoidReferenceFrames(fullRobotModelForEnvironmentSetup);
       SDFPerfectSimulatedSensorReader sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReader(robotForEnvironmentSetup,
@@ -55,7 +55,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       combinedTerrainObject = createCombinedTerrainObject(referenceFramesForEnvironmentSetup, fullRobotModelForEnvironmentSetup, invisibleContactablePlaneHandContactPointTransforms);
    }
 
-   private CombinedTerrainObject3D createCombinedTerrainObject(CommonHumanoidReferenceFrames referenceFramesForEnvironmentSetup, FullRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> invisibleContactablePlaneHandContactPointTransforms)
+   private CombinedTerrainObject3D createCombinedTerrainObject(CommonHumanoidReferenceFrames referenceFramesForEnvironmentSetup, FullHumanoidRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> invisibleContactablePlaneHandContactPointTransforms)
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       for (RobotSide robotSide : footContactSides)

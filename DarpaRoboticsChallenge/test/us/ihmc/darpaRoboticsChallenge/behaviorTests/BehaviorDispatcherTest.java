@@ -59,7 +59,7 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -126,7 +126,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
    private DoubleYoVariable yoTime;
 
    private SDFHumanoidRobot robot;
-   private FullRobotModel fullRobotModel;
+   private FullHumanoidRobotModel fullRobotModel;
    private HumanoidReferenceFrames referenceFrames;
    private WalkingControllerParameters walkingControllerParameters;
 
@@ -203,7 +203,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       return ret;
    }
 
-   private BehaviorDisptacher setupBehaviorDispatcher(FullRobotModel fullRobotModel, BehaviorCommunicationBridge communicationBridge,
+   private BehaviorDisptacher setupBehaviorDispatcher(FullHumanoidRobotModel fullRobotModel, BehaviorCommunicationBridge communicationBridge,
          YoGraphicsListRegistry yoGraphicsListRegistry, PacketCommunicator behaviorCommunicatorServer, YoVariableRegistry registry)
    {
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));

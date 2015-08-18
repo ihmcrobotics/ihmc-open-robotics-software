@@ -11,7 +11,7 @@ import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContro
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation.states.ToroidManipulationState;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation.states.ToroidManipulationStateInterface;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -92,7 +92,7 @@ public class ToroidManipulationStateMachine
    private final SideDependentList<ReferenceFrame> handPositionControlFrames;
 
 
-   public ToroidManipulationStateMachine(DoubleYoVariable simulationTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
+   public ToroidManipulationStateMachine(DoubleYoVariable simulationTime, FullHumanoidRobotModel fullRobotModel, TwistCalculator twistCalculator,
            final ManipulableToroid toroidUpdater, SideDependentList<ReferenceFrame> handPositionControlFrames,
            SideDependentList<Integer> jacobianIds, double gravityZ, MomentumBasedController momentumBasedController,
            double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)

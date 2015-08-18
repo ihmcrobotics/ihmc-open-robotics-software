@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocitie
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -29,7 +29,7 @@ public class PDPlusIDSwingLegTorqueControlOnlyModule implements SwingLegTorqueCo
    private final ProcessedSensorsInterface processedSensors;
    
    private final CommonHumanoidReferenceFrames referenceFrames;
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final CouplingRegistry couplingRegistry;
    private final SideDependentList<LegJointPositions> desiredLegJointPositions = new SideDependentList<LegJointPositions>();
    private final SideDependentList<LegJointVelocities> desiredLegJointVelocities = new SideDependentList<LegJointVelocities>();
@@ -41,7 +41,7 @@ public class PDPlusIDSwingLegTorqueControlOnlyModule implements SwingLegTorqueCo
 
    
    public PDPlusIDSwingLegTorqueControlOnlyModule(LegJointName[] legJointNames, ProcessedSensorsInterface processedSensors,
-         CommonHumanoidReferenceFrames referenceFrames, FullRobotModel fullRobotModel, CouplingRegistry couplingRegistry,
+         CommonHumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel, CouplingRegistry couplingRegistry,
          SideDependentList<LegJointPositionControlModule> legJointPositionControlModules, 
          SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators, YoVariableRegistry parentRegistry)
    {

@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.frames;
 import java.util.EnumMap;
 
 import us.ihmc.tools.containers.ContainerTools;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.humanoidRobotics.partNames.LimbName;
@@ -31,7 +31,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  */
 public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 {
-   private final FullRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -49,7 +49,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private final MidFrameZUpFrame midFeetZUpFrame;
    private final ReferenceFrame centerOfMassFrame;
 
-   public HumanoidReferenceFrames(FullRobotModel fullRobotModel)
+   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel)
    {
       this.fullRobotModel = fullRobotModel;
 

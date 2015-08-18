@@ -6,7 +6,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PosePlaybackSCSBridge;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -48,7 +48,7 @@ public class AtlasPosePlaybackSCSBridge
       }
 
       SDFHumanoidRobot sdfRobot = model.createSdfRobot(false);
-      FullRobotModel fullRobotModel = model.createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = model.createFullRobotModel();
       SDFFullRobotModel fullRobotModelForSlider = model.createFullRobotModel();
 
       new PosePlaybackSCSBridge(sdfRobot, fullRobotModel, fullRobotModelForSlider, model.getControllerDT());

@@ -1,7 +1,7 @@
 package us.ihmc.wholeBodyController;
 
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.humanoidRobotics.partNames.SpineJointName;
@@ -9,7 +9,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class WholeBodyUtils
 {
-   static public JointAnglesPacket createJointAnglesPacketFromFullModel( FullRobotModel fullRobotModel,
+   static public JointAnglesPacket createJointAnglesPacketFromFullModel( FullHumanoidRobotModel fullRobotModel,
          boolean leftLeg, boolean rightLeg, boolean spine, boolean leftArm, boolean rightArm, double trajectoryTime)
    {
       JointAnglesPacket packet = new JointAnglesPacket(
