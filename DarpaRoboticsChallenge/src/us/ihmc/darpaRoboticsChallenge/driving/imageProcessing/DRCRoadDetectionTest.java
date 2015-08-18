@@ -1,7 +1,7 @@
 
 
 
-package us.ihmc.imageProcessing;
+package us.ihmc.darpaRoboticsChallenge.driving.imageProcessing;
 
 import georegression.struct.line.LineParametric2D_F32;
 import georegression.struct.point.Point2D_F32;
@@ -29,11 +29,6 @@ import javax.vecmath.Point2d;
 
 import jxl.format.RGB;
 import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
-import us.ihmc.imageProcessing.driving.LanePositionEstimator;
-import us.ihmc.imageProcessing.driving.LanePositionIndicatorPanel;
-import us.ihmc.imageProcessing.driving.ObstaclePositionEstimator;
-import us.ihmc.imageProcessing.driving.SteeringInputEstimator;
-import us.ihmc.imageProcessing.driving.VanishingPointDetector;
 import us.ihmc.imageProcessing.utilities.BoundsPainter;
 import us.ihmc.imageProcessing.utilities.LinePainter;
 import us.ihmc.imageProcessing.utilities.PaintableImageViewer;

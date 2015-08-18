@@ -3,9 +3,9 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContr
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.dataobjects.LowLevelDrivingAction;
-import us.ihmc.communication.packets.driving.LowLevelDrivingCommand;
-import us.ihmc.communication.packets.driving.LowLevelDrivingStatus;
+import us.ihmc.communication.packets.LowLevelDrivingAction;
+import us.ihmc.communication.packets.LowLevelDrivingCommand;
+import us.ihmc.communication.packets.LowLevelDrivingStatus;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.DrivingInterface;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.DrivingInterface.GearName;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleModelObjects;

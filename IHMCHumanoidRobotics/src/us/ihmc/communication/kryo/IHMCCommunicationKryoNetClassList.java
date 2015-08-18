@@ -11,6 +11,7 @@ import javax.vecmath.Vector3f;
 
 import org.ejml.data.DenseMatrix64F;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.BumStatePacket;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
@@ -19,6 +20,9 @@ import us.ihmc.communication.packets.HighLevelStateChangePacket;
 import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.LegCompliancePacket;
+import us.ihmc.communication.packets.LowLevelDrivingAction;
+import us.ihmc.communication.packets.LowLevelDrivingCommand;
+import us.ihmc.communication.packets.LowLevelDrivingStatus;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.SCSListenerPacket;
@@ -49,12 +53,9 @@ import us.ihmc.communication.packets.dataobjects.BlindWalkingSpeed;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.packets.dataobjects.IMUPacket;
-import us.ihmc.communication.packets.dataobjects.LowLevelDrivingAction;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.driving.DrivingStatePacket;
 import us.ihmc.communication.packets.driving.DrivingTrajectoryPacket;
-import us.ihmc.communication.packets.driving.LowLevelDrivingCommand;
-import us.ihmc.communication.packets.driving.LowLevelDrivingStatus;
 import us.ihmc.communication.packets.driving.VehiclePosePacket;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
@@ -142,15 +143,14 @@ import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPac
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.communication.remote.serialization.JointConfigurationData;
 import us.ihmc.humanoidRobotics.model.RobotMotionStatus;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.robotSide.RobotSide;
-import boofcv.struct.calib.IntrinsicParameters;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class IHMCCommunicationKryoNetClassList extends NetClassList
-{
+{   
    public IHMCCommunicationKryoNetClassList()
    {
       registerPacketClass(Packet.class);
@@ -305,6 +305,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Driving
       registerPacketClass(LowLevelDrivingCommand.class);
       registerPacketClass(LowLevelDrivingStatus.class);
+      registerPacketClass(LowLevelDrivingCommand.class);
       registerPacketField(LowLevelDrivingAction.class);
 
       //hand joint and control packets
@@ -345,7 +346,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(DepthDataStateCommand.class);
       registerPacketClass(DepthDataClearCommand.class);
       registerPacketClass(DepthDataFilterParameters.class);
-      registerPacketClass(LowLevelDrivingCommand.class);
       registerPacketClass(DrivingTrajectoryPacket.class);
       registerPacketField(DrivingTrajectoryPacket.Length.class);
       registerPacketClass(DrivingStatePacket.class);
@@ -436,6 +436,5 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(DrillDetectionPacket.class);
       
       registerPacketClass(BatchedDesiredSteeringAngleAndSingleJointAnglePacket.class);
-       
    }
 }
