@@ -6,7 +6,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
@@ -44,7 +44,7 @@ public class WholeBodyIKPacketCreator
       this.desiredToPreviewInverseDynamicsJointStateCopier = new InverseDynamicsJointStateCopier(outgoingSDFFullRobotModel.getElevator(), outgoingSDFFullRobotModel.getElevator());
    }
 
-   public void createPackets(SDFBaseFullRobotModel desiredSdfFullRobotModel, double trajectoryTime, ArrayList<Packet> packetArrayToPack)
+   public void createPackets(SDFFullRobotModel desiredSdfFullRobotModel, double trajectoryTime, ArrayList<Packet> packetArrayToPack)
    {
       updateOutgoingSDFFullRobotModelToDesired(desiredSdfFullRobotModel);
       desiredReferenceFrames.updateFrames();
@@ -104,7 +104,7 @@ public class WholeBodyIKPacketCreator
       return translationOffset.getZ() - nominalComHeight;
    }
 
-   private void updateOutgoingSDFFullRobotModelToDesired(SDFBaseFullRobotModel desiredSdfRobotModel)
+   private void updateOutgoingSDFFullRobotModelToDesired(SDFFullRobotModel desiredSdfRobotModel)
    {
       desiredToPreviewInverseDynamicsJointStateCopier.setRigidBodies(desiredSdfRobotModel.getElevator(), outgoingSDFFullRobotModel.getElevator());
       desiredToPreviewInverseDynamicsJointStateCopier.copy();

@@ -1,7 +1,7 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
 import static org.junit.Assert.assertTrue;
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
@@ -60,7 +60,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
 
 
    @Override
-   public InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFBaseFullRobotModel controllersFullRobotModel, SDFRobot robot)
+   public InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFFullRobotModel controllersFullRobotModel, SDFRobot robot)
    {
       return null;
 //      InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener = new FancyInverseDynamicsCalculatorListener(controllersFullRobotModel, robot);
@@ -72,7 +72,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
       private final boolean visualize = true;
       private final double gravityZ = 9.81;
       private final DRCInverseDynamicsCalculatorTestHelper atlasInverseDynamicsCalculatorTestHelper;
-      private final SDFBaseFullRobotModel controllersFullRobotModel;
+      private final SDFFullRobotModel controllersFullRobotModel;
       private final SimulationConstructionSet scs;
       private final SDFHumanoidRobot robot, simulatedRobot;
       private boolean firstTick = true;
@@ -102,7 +102,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
       @Override
       public void inverseDynamicsCalculatorIsDone(InverseDynamicsCalculator inverseDynamicsCalculator)
       {
-         SDFBaseFullRobotModel fullRobotModelInAtlasInverseDynamicsCalculatorTestHelper = atlasInverseDynamicsCalculatorTestHelper.getFullRobotModel();
+         SDFFullRobotModel fullRobotModelInAtlasInverseDynamicsCalculatorTestHelper = atlasInverseDynamicsCalculatorTestHelper.getFullRobotModel();
          fullRobotModelInAtlasInverseDynamicsCalculatorTestHelper.updateFrames();
          
          // Either of these two seem to work. Matching full robot model gives near exact results. Matching robot state gives really close results.

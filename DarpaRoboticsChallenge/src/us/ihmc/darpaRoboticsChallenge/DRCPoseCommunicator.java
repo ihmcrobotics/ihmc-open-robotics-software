@@ -7,7 +7,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -58,7 +58,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
    private final ConcurrentRingBuffer<RobotConfigurationData> robotConfigurationDataRingBuffer;
 
-   public DRCPoseCommunicator(SDFBaseFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer, SensorReader sensorReader,
+   public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer, SensorReader sensorReader,
          GlobalDataProducer dataProducer, SensorOutputMapReadOnly sensorOutputMapReadOnly, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly, RobotMotionStatusHolder robotMotionStatusFromController, DRCRobotSensorInformation sensorInformation, PeriodicThreadScheduler scheduler)
    {
       this.dataProducer = dataProducer;
@@ -92,7 +92,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       startWriterThread();
    }
 
-   private void setupForceSensorMassCompensators(SDFBaseFullRobotModel estimatorModel)
+   private void setupForceSensorMassCompensators(SDFFullRobotModel estimatorModel)
    {
       ForceSensorDefinition[] forceSensorDefinitions = estimatorModel.getForceSensorDefinitions();
 

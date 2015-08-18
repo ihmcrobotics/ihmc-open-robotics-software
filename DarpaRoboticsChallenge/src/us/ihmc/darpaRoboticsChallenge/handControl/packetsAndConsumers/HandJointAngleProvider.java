@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.dataobjects.HandJointName;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
@@ -23,7 +23,7 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
    private ArrayList<GraphicsUpdatable> graphicsToUpdate = new ArrayList<GraphicsUpdatable>();
    private HandModel handModel;
 
-   public HandJointAngleProvider(SDFBaseFullRobotModel fullRobotModel, HandModel handModel)
+   public HandJointAngleProvider(SDFFullRobotModel fullRobotModel, HandModel handModel)
    {     
       this.handModel = handModel;
 

@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -121,7 +121,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
      catch(Exception e) { e.printStackTrace(); } 
    }
 
-   private void initializeFullRobotModelJointAngles(SDFBaseFullRobotModel fullRobotModelToInitialize, AtlasRobotModel atlasRobotModel)
+   private void initializeFullRobotModelJointAngles(SDFFullRobotModel fullRobotModelToInitialize, AtlasRobotModel atlasRobotModel)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

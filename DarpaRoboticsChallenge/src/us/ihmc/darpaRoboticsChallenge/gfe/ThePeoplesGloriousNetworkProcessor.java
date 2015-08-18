@@ -4,7 +4,7 @@ import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -101,7 +101,7 @@ public class ThePeoplesGloriousNetworkProcessor
 
    private void setupOutputs(String namespace, String tfPrefix)
    {
-      SDFBaseFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotJointMap jointMap = robotModel.getJointMap();
 
@@ -131,7 +131,7 @@ public class ThePeoplesGloriousNetworkProcessor
       System.setErr(printStreamBridge);
    }
 
-   private void publishSimulatedCameraAndLidar(SDFBaseFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, RosRobotConfigurationDataPublisher robotConfigurationPublisher)
+   private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, RosRobotConfigurationDataPublisher robotConfigurationPublisher)
    {
       if (sensorInformation.getCameraParameters().length > 0)
       {

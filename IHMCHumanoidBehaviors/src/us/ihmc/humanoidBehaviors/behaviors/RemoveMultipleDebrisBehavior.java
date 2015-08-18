@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.behaviors.DebrisData;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorDebrisPacket;
@@ -35,7 +35,7 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
    private final ConcurrentListeningQueue<HumanoidBehaviorDebrisPacket> inputListeningQueue = new ConcurrentListeningQueue<HumanoidBehaviorDebrisPacket>();
    private final BooleanYoVariable isDone;
    private final BooleanYoVariable haveInputsBeenSet;
-   private final SDFBaseFullRobotModel fullRobotModel;
+   private final SDFFullRobotModel fullRobotModel;
 
    private final ArrayList<DebrisData> debrisDataList = new ArrayList<>();
    private final ArrayList<DebrisData> sortedDebrisDataList = new ArrayList<>();
