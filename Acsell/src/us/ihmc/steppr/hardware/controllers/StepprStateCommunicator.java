@@ -1,6 +1,6 @@
 package us.ihmc.steppr.hardware.controllers;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class StepprStateCommunicator implements StepprController
@@ -12,7 +12,7 @@ public class StepprStateCommunicator implements StepprController
    }
 
    @Override
-   public void setFullRobotModel(SDFBaseFullRobotModel fullRobotModel)
+   public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
    {
       // Do nothing
    }

@@ -2,7 +2,7 @@ package us.ihmc.wanderer.hardware.controllers;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.wanderer.hardware.WandererJoint;
 import us.ihmc.utilities.maps.EnumDoubleMap;
 import us.ihmc.robotics.MathTools;
@@ -52,7 +52,7 @@ public class WandererStandPrep implements WandererController
    private final DoubleYoVariable springTime = new DoubleYoVariable("springTime",registry);
 
    @Override
-   public void setFullRobotModel(SDFBaseFullRobotModel fullRobotModel)
+   public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
    {
       for (WandererJoint joint : WandererJoint.values)
       {

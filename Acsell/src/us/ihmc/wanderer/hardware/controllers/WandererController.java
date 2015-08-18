@@ -1,11 +1,11 @@
 package us.ihmc.wanderer.hardware.controllers;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public interface WandererController
 {
-   public void setFullRobotModel(SDFBaseFullRobotModel fullRobotModel);
+   public void setFullRobotModel(SDFFullRobotModel fullRobotModel);
    public void initialize(long timestamp);
    public void doControl(long timestamp);
    public YoVariableRegistry getYoVariableRegistry();

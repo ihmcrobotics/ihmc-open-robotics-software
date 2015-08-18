@@ -2,7 +2,7 @@ package us.ihmc.steppr.hardware.output;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.acsell.hardware.command.UDPAcsellOutputWriter;
@@ -93,7 +93,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    public StepprOutputWriter(DRCRobotModel robotModel)
    {
 
-      SDFBaseFullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
+      SDFFullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
       standPrepJoints = StepprUtil.createJointMap(standPrepFullRobotModel.getOneDoFJoints());
 
       tauControllerOutput = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
