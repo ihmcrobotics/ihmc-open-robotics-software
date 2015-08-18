@@ -11,7 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
@@ -177,7 +177,7 @@ public class ValkyriePosePlaybackDemoTest
       double groundHeight = 0.0;
       double initialYaw = 0.0;
       ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false, false);
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = valkyrieRobotModel.getDefaultRobotInitialSetup(groundHeight + floatingHeight, initialYaw);
+      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = valkyrieRobotModel.getDefaultRobotInitialSetup(groundHeight + floatingHeight, initialYaw);
       GroundProfile3D groundProfile = new FlatGroundProfile(groundHeight);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, valkyrieRobotModel.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(true);

@@ -8,7 +8,7 @@ import javax.swing.JButton;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.darpaRoboticsChallenge.diagnostics.HumanoidDiagnosticsWhenHangingSimulation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -37,7 +37,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       DRCRobotModel robotModel = new ValkyrieRobotModelWithHoist(false, false);
       double groundZ = 0.0;
       double initialYaw = 0.0;
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw);
+      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw);
       
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
       humanoidJointPoseList.createPoseSetters();
@@ -310,9 +310,9 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       }
       
       @Override
-      public SDFRobot createSdfRobot(boolean createCollisionMeshes)
+      public SDFHumanoidRobot createSdfRobot(boolean createCollisionMeshes)
       {
-         SDFRobot robot = super.createSdfRobot(createCollisionMeshes);
+         SDFHumanoidRobot robot = super.createSdfRobot(createCollisionMeshes);
          
          Joint joint = robot.getJoint("TorsoRoll");
          

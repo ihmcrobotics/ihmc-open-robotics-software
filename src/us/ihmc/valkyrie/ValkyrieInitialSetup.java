@@ -6,7 +6,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFBaseRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFRobot>
+public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRobot>
 {
    private double groundZ;
    private double initialYaw;
@@ -34,7 +34,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFRobot>
    }
 
    @Override
-   public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(SDFHumanoidRobot robot, DRCRobotJointMap jointMap)
    {
       if(!robotInitialized)
       {
@@ -77,7 +77,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFRobot>
       robot.update();
    }
    
-   private void positionRobotInWorld(SDFRobot robot)
+   private void positionRobotInWorld(SDFHumanoidRobot robot)
    {
       robot.getRootJointToWorldTransform(rootToWorld);
       rootToWorld.get(rotation, positionInWorld);
@@ -94,7 +94,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFRobot>
       robot.update();
    }
    
-   private double getPelvisToFoot(SDFRobot robot)
+   private double getPelvisToFoot(SDFHumanoidRobot robot)
    {
       List<GroundContactPoint> contactPoints = robot.getFootGroundContactPoints(RobotSide.LEFT);
       double height = Double.POSITIVE_INFINITY;
