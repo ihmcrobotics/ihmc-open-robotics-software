@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.fingers;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -20,7 +20,7 @@ public enum ValkyrieSimulatedFingerJoint
       return (RevoluteJoint) fullRobotModel.getOneDoFJointByName(getJointName(robotSide));
    }
    
-   public PinJoint getRelatedPinJoint(RobotSide robotSide, SDFBaseRobot sdfRobot)
+   public PinJoint getRelatedPinJoint(RobotSide robotSide, SDFRobot sdfRobot)
    {
       return (PinJoint) sdfRobot.getOneDegreeOfFreedomJoint(getJointName(robotSide));
    }
