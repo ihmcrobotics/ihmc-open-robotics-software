@@ -1,7 +1,7 @@
 package us.ihmc.steppr.simulation;
 
 import net.java.games.input.Component;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.acsell.treadmill.TreadmillJoystickEventListener;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
@@ -41,7 +41,7 @@ public class BonoFlatGroundWalkingTrack
       scsInitialSetup.setInitializeEstimatorToActual(true);
 
       double initialYaw = 0.3;
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
+      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
       boolean useVelocityAndHeadingScript = !USE_JOYSTICK_CONTROLLER;
       boolean cheatWithGroundHeightAtForFootstep = false;
 

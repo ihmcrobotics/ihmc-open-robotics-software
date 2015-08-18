@@ -1,7 +1,7 @@
 package us.ihmc.wanderer.simulation;
 
 import net.java.games.input.Component;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
@@ -39,7 +39,7 @@ public class WandererFlatGroundWalkingTrack
       scsInitialSetup.setInitializeEstimatorToActual(true);
 
       double initialYaw = 0.3;
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
+      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
       boolean useVelocityAndHeadingScript = !USE_JOYSTICK_CONTROLLER;
       boolean cheatWithGroundHeightAtForFootstep = false;
 

@@ -8,7 +8,7 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFBaseRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.steppr.controlParameters.BonoArmControlParameters;
 import us.ihmc.steppr.controlParameters.BonoCapturePointPlannerParameters;
 import us.ihmc.steppr.controlParameters.BonoStateEstimatorParameters;
@@ -180,7 +180,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
+   public DRCRobotInitialSetup<SDFHumanoidRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       return new BonoInitialSetup(groundHeight, initialYaw);
    }
@@ -241,7 +241,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SDFRobot createSdfRobot(boolean createCollisionMeshes)
+   public SDFHumanoidRobot createSdfRobot(boolean createCollisionMeshes)
    { 
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;
