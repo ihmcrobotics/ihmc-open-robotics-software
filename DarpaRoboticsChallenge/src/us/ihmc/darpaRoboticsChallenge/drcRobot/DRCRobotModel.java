@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
 import java.util.LinkedHashMap;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.HeightCalculatorParameters;
@@ -55,13 +55,13 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
 
    public abstract DRCRobotInitialSetup<SDFHumanoidRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
 
-   public abstract ScsCollisionConfigure getPhysicsConfigure(SDFBaseRobot robotModel);
+   public abstract ScsCollisionConfigure getPhysicsConfigure(SDFRobot robotModel);
 
    public abstract void setEnableJointDamping(boolean enableJointDamping);
 
    public abstract boolean getEnableJointDamping();
 
-   public abstract void setJointDamping(SDFBaseRobot simulatedRobot);
+   public abstract void setJointDamping(SDFRobot simulatedRobot);
 
    public abstract HandModel getHandModel();
 
@@ -81,7 +81,7 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
 
    public abstract SideDependentList<HandCommandManager> createHandCommandManager();
 
-   public abstract MultiThreadedRobotControlElement createSimulatedHandController(SDFBaseRobot simulatedRobot,
+   public abstract MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot,
            ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer);
 
    public abstract DRCHandType getDRCHandType();

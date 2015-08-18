@@ -13,17 +13,17 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 public class SDFPerfectSimulatedOutputWriter 
 {
    private final String name;
-   protected final SDFBaseRobot robot;
+   protected final SDFRobot robot;
    protected ImmutablePair<FloatingJoint, SixDoFJoint> rootJointPair;
    protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
    
-   public SDFPerfectSimulatedOutputWriter(SDFBaseRobot robot)
+   public SDFPerfectSimulatedOutputWriter(SDFRobot robot)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
    }
    
-   public SDFPerfectSimulatedOutputWriter(SDFBaseRobot robot, FullRobotModel fullRobotModel)
+   public SDFPerfectSimulatedOutputWriter(SDFRobot robot, FullRobotModel fullRobotModel)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;

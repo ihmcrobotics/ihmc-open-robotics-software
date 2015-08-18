@@ -6,7 +6,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -44,7 +44,7 @@ public class DRCPushRobotController implements RobotController
    
    private final YoGraphicVector forceVisualizer;
    
-   public DRCPushRobotController(SDFBaseRobot pushableRobot, FullRobotModel fullRobotModel)
+   public DRCPushRobotController(SDFRobot pushableRobot, FullRobotModel fullRobotModel)
    {
       yoTime = pushableRobot.getYoTime();
       forcePoint = new ExternalForcePoint("pushTheRobot", new Vector3d(0, 0, 0.3), pushableRobot);

@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
@@ -22,7 +22,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
    private final GroundContactPointsSlipper groundContactPointsSlipper;
    private final List<GroundContactPoint> groundContactPoints;
 
-   private final SDFBaseRobot robot;
+   private final SDFRobot robot;
 
    private final EnumYoVariable<SlipState> slipState;
    private final BooleanYoVariable slipNextStep;

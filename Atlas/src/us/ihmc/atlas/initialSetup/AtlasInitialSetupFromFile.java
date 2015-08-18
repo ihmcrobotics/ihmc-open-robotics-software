@@ -8,7 +8,7 @@ import java.util.Properties;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
@@ -112,7 +112,7 @@ public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFHumano
       robotInitialized = true;
    }
    
-   private void setRobotAngle(String jointName, Properties properties, SDFBaseRobot robot)
+   private void setRobotAngle(String jointName, Properties properties, SDFRobot robot)
    {
       if(jointName == null) return;
       

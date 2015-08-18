@@ -14,7 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
@@ -129,7 +129,7 @@ public abstract class WholeBodyTrajectoryPacketEndToEndTest implements MultiRobo
          System.out.println("done - check if target reached");
          
          SDFFullRobotModel fullRobotModel = drcSimulationTestHelper.getSDFFullRobotModel();
-         SDFBaseRobot sdfRobot = drcSimulationTestHelper.getRobot();
+         SDFRobot sdfRobot = drcSimulationTestHelper.getRobot();
          
          // check if both arms reached target
          for (RobotSide robotSide : RobotSide.values)

@@ -8,7 +8,7 @@ import javax.vecmath.Quat4d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap.JointRole;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
@@ -144,7 +144,7 @@ public class DRCSimulationFactory
 //      setupJointDamping(simulatedRobot, drcRobotModel);
    }
 
-   private Robot[] setupEnvironmentAndListSimulatedRobots(SDFBaseRobot simulatedRobot, CommonAvatarEnvironmentInterface environment)
+   private Robot[] setupEnvironmentAndListSimulatedRobots(SDFRobot simulatedRobot, CommonAvatarEnvironmentInterface environment)
    {
       List<Robot> allSimulatedRobotList = new ArrayList<Robot>();
       allSimulatedRobotList.add(simulatedRobot);

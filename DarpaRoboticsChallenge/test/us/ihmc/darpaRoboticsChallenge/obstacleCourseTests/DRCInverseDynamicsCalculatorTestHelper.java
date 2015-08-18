@@ -12,7 +12,7 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -189,7 +189,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       }
    }
 
-   public void setRobotTorquesToMatchFullRobotModelButCheckAgainstOtherRobot(SDFBaseRobot otherRobot, double epsilon)
+   public void setRobotTorquesToMatchFullRobotModelButCheckAgainstOtherRobot(SDFRobot otherRobot, double epsilon)
    {
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
@@ -222,7 +222,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       }
    }
 
-   public void setRobotTorquesToMatchOtherRobot(SDFBaseRobot otherRobot)
+   public void setRobotTorquesToMatchOtherRobot(SDFRobot otherRobot)
    {
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
@@ -375,7 +375,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       }
    }
 
-   public void setRobotStateToMatchOtherRobot(SDFBaseRobot otherRobot)
+   public void setRobotStateToMatchOtherRobot(SDFRobot otherRobot)
    {
       otherRobot.update();
 
@@ -681,7 +681,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       setRobotsExternalForcesToMatchFullRobotModel(inverseDynamicsCalculator);
    }
 
-   public void setRobotsExternalForcesToMatchOtherRobot(SDFBaseRobot otherRobot)
+   public void setRobotsExternalForcesToMatchOtherRobot(SDFRobot otherRobot)
    {
       ArrayList<GroundContactPoint> otherGroundContactPoints = otherRobot.getAllGroundContactPoints();
       ArrayList<GroundContactPoint> groundContactPoints = robot.getAllGroundContactPoints();

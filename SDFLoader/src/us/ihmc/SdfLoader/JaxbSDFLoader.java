@@ -93,7 +93,7 @@ public class JaxbSDFLoader
       return createRobot(sdfJointNameMap.getModelName(), sdfJointNameMap, useCollisionMeshes);
    }
    
-   public SDFBaseRobot createRobot(String modelName, boolean useCollisionMeshes)
+   public SDFRobot createRobot(String modelName, boolean useCollisionMeshes)
    {
       return createRobot(modelName, null, useCollisionMeshes);
    }

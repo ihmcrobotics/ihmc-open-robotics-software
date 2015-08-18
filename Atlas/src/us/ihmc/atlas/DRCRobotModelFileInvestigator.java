@@ -3,7 +3,7 @@ package us.ihmc.atlas;
 import java.io.File;
 import java.io.PrintWriter;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
@@ -18,7 +18,7 @@ public class DRCRobotModelFileInvestigator
 
          PrintWriter printWriter = new PrintWriter(file);
 
-         final SDFBaseRobot robot = model.createSdfRobot(false);
+         final SDFRobot robot = model.createSdfRobot(false);
 
          printWriter.println(robot);
          printWriter.close();

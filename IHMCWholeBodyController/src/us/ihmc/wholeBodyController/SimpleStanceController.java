@@ -9,7 +9,7 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -89,7 +89,7 @@ public class SimpleStanceController implements RobotController
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final MomentumRateOfChangeData momentumRateOfChangeData;
 
-   public SimpleStanceController(SDFBaseRobot robot, SDFFullRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, double controlDT,
+   public SimpleStanceController(SDFRobot robot, SDFFullRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, double controlDT,
                                  InverseDynamicsJoint[] jointsToOptimize, double gravityZ, double footForward, double footBack, double footWidth)
    {
       this.sensorReader = new SDFPerfectSimulatedSensorReader(robot, fullRobotModel, referenceFrames);

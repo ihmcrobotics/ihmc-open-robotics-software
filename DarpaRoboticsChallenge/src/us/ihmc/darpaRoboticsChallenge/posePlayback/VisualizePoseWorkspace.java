@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import javax.swing.JFileChooser;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
@@ -117,7 +117,7 @@ public class VisualizePoseWorkspace
    {
       private final SimulationConstructionSet scs;
 
-      public LoadSequenceListener(FullRobotModel fullRobotModel, SDFBaseRobot sdfRobot, SimulationConstructionSet scs)
+      public LoadSequenceListener(FullRobotModel fullRobotModel, SDFRobot sdfRobot, SimulationConstructionSet scs)
       {
          this.scs = scs;
       }

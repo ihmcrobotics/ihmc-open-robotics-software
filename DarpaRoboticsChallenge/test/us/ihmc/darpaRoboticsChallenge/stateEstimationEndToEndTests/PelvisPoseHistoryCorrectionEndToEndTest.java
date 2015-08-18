@@ -14,7 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.communication.packets.StampedPosePacket;
@@ -753,7 +753,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       return success;
    }
 
-   private Runnable createPelvisCorrectorProducerUsingSCSActual(final SDFBaseRobot robot,
+   private Runnable createPelvisCorrectorProducerUsingSCSActual(final SDFRobot robot,
          final ExternalPelvisPoseCreator externalPelvisPoseCreator)
    {
       Runnable pelvisCorrectorSource = new Runnable()

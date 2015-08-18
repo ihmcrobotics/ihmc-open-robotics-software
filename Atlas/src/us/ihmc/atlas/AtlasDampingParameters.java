@@ -1,6 +1,6 @@
 package us.ihmc.atlas;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.ros.AtlasOrderedJointMap;
 import us.ihmc.atlas.ros.ROSSandiaJointMap;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -130,7 +130,7 @@ public class AtlasDampingParameters
       throw new RuntimeException("Joint not found: " + name);
    }
    
-   public static void setDampingParameters(SDFBaseRobot simulatedRobot, DRCHandType handModel, DRCRobotJointMap jointMap)
+   public static void setDampingParameters(SDFRobot simulatedRobot, DRCHandType handModel, DRCRobotJointMap jointMap)
    {
       String[] orderedJointNames = jointMap.getOrderedJointNames();
       for (int i = 0; i < orderedJointNames.length; i++)
