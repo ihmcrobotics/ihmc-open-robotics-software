@@ -1,4 +1,4 @@
-package LidarTests;
+package us.ihmc.darpaRoboticsChallenge.lidarTests;
 
 import java.util.ArrayList;
 
