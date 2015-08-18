@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.fingers;
 
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -15,7 +15,7 @@ public enum ValkyrieSimulatedFingerJoint
    
    public static final ValkyrieSimulatedFingerJoint[] values = ValkyrieSimulatedFingerJoint.values();
    
-   public RevoluteJoint getRelatedRevoluteJoint(RobotSide robotSide, SDFFullRobotModel fullRobotModel)
+   public RevoluteJoint getRelatedRevoluteJoint(RobotSide robotSide, SDFBaseFullRobotModel fullRobotModel)
    {
       return (RevoluteJoint) fullRobotModel.getOneDoFJointByName(getJointName(robotSide));
    }

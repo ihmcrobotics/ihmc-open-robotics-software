@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.reachabilityMap;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.ReachabilityMapListener;
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.ReachabilitySphereMapCalculator;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.JointAnglesWriter;
@@ -17,7 +17,7 @@ public class ValkyrieReachabilitySphereMapSimulation
    public ValkyrieReachabilitySphereMapSimulation()
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(false, false);
-      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFRobot sdfRobot = robotModel.createSdfRobot(false);
       final JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(sdfRobot, fullRobotModel);
 

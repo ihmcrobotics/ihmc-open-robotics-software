@@ -8,7 +8,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -30,7 +30,7 @@ public class ValkyrieFullRobotModelVisualizer
       
       GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
 //      jaxbSDFLoader.createRobot(jointMap, false);
-      SDFFullRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
+      SDFBaseFullRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
       
 //      sdfFullRobotModel.getRootJoint().setRotation(0.5, 1.0, 0.8);
 //      for(OneDoFJoint joint : sdfFullRobotModel.getOneDoFJoints())

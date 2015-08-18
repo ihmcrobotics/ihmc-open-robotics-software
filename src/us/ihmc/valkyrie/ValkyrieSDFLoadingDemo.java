@@ -6,8 +6,8 @@ import java.util.HashSet;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
@@ -43,7 +43,7 @@ public class ValkyrieSDFLoadingDemo
       if (SHOW_COORDINATES_AT_JOINT_ORIGIN)
          addJointAxis(valkyrieRobot);
 
-      SDFFullRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
+      SDFBaseFullRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
       
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       CommonInertiaEllipsoidsVisualizer inertiaVis = new CommonInertiaEllipsoidsVisualizer(sdfFullRobotModel.getElevator(), yoGraphicsListRegistry);

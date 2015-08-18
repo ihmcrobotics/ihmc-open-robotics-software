@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.simulation;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
@@ -48,7 +48,7 @@ public class ValkyriePushRecoveryTrack
             cheatWithGroundHeightAtForFootstep, model);
 
       SDFRobot robot = track.getDrcSimulation().getRobot();
-      SDFFullRobotModel fullRobotModel = model.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = model.createFullRobotModel();
       DRCPushRobotController pushRobotController = new DRCPushRobotController(robot, fullRobotModel);
 
       pushRobotController.addPushButtonToSCS(track.getSimulationConstructionSet());
