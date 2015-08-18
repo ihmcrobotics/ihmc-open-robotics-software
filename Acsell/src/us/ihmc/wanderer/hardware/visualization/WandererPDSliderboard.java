@@ -2,7 +2,7 @@ package us.ihmc.wanderer.hardware.visualization;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.SDFBaseRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.simulationconstructionset.IndexChangedListener;
@@ -61,7 +61,7 @@ public class WandererPDSliderboard extends SCSVisualizer implements IndexChanged
       {
          JointVariables variables = new JointVariables(joint, registry);
 
-         OneDegreeOfFreedomJoint oneDoFJoint = ((SDFBaseRobot) robot).getOneDegreeOfFreedomJoint(joint.getSdfName());
+         OneDegreeOfFreedomJoint oneDoFJoint = ((SDFRobot) robot).getOneDegreeOfFreedomJoint(joint.getSdfName());
          sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, WandererJoint.values.length);
          sliderBoardConfigurationManager.setSlider(1, variables.q_d, oneDoFJoint.getJointLowerLimit(), oneDoFJoint.getJointUpperLimit());
          sliderBoardConfigurationManager.setSlider(2, variables.qd_d, -1, 1);
