@@ -19,7 +19,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -74,7 +74,7 @@ public class PosePlaybackSCSBridge
    private final PoseSequenceEditorGUI poseSequenceEditorGUI;
 
    private final SDFHumanoidRobot sdfRobot;
-   private final BaseFullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
    private final SimulationConstructionSet scs;
    
    private final double controlDT;
@@ -276,9 +276,9 @@ public class PosePlaybackSCSBridge
 
    private class LoadSequenceFromFileListener implements VariableChangedListener
    {
-      private final BaseFullRobotModel fullRobotModel;
+      private final FullRobotModel fullRobotModel;
       
-      public LoadSequenceFromFileListener(BaseFullRobotModel fullRobotModel)
+      public LoadSequenceFromFileListener(FullRobotModel fullRobotModel)
       { 
          this.fullRobotModel = fullRobotModel;
       }
@@ -380,7 +380,7 @@ public class PosePlaybackSCSBridge
       }
    }
 
-   private boolean initPlaybackFromFile(BaseFullRobotModel fullRobotModel, PlaybackPoseSequence sequence)
+   private boolean initPlaybackFromFile(FullRobotModel fullRobotModel, PlaybackPoseSequence sequence)
    {
       boolean successful = true;
       JFileChooser chooser = new JFileChooser(new File("PoseSequences"));

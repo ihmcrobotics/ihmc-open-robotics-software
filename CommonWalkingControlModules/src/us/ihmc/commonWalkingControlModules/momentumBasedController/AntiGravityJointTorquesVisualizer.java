@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -30,7 +30,7 @@ public class AntiGravityJointTorquesVisualizer
    private final OneDoFJoint[] allOneDoFJoints;
    private final Wrench tempWrench = new Wrench();
 
-   public AntiGravityJointTorquesVisualizer(BaseFullRobotModel fullRobotModel, TwistCalculator twistCalculator, SideDependentList<WrenchBasedFootSwitch> wrenchBasedFootSwitches, YoVariableRegistry parentRegistry, double gravity)
+   public AntiGravityJointTorquesVisualizer(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, SideDependentList<WrenchBasedFootSwitch> wrenchBasedFootSwitches, YoVariableRegistry parentRegistry, double gravity)
    {
       SpatialAccelerationVector rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(twistCalculator.getRootBody(), gravity);
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), rootAcceleration, new LinkedHashMap<RigidBody, Wrench>(), new ArrayList<InverseDynamicsJoint>(), false, false, twistCalculator);

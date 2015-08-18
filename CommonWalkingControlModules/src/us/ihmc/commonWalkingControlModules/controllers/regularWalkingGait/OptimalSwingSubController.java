@@ -22,7 +22,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -124,7 +124,7 @@ public class OptimalSwingSubController implements SwingSubController
    private final BooleanYoVariable useUpperBodyPositionEstimation = new BooleanYoVariable("useUpperBodyPositionEstimation", registry);
 
    public OptimalSwingSubController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
-         CommonHumanoidReferenceFrames referenceFrames, BaseFullRobotModel fullRobotModel, DesiredFootstepCalculator desiredFootstepCalculator,
+         CommonHumanoidReferenceFrames referenceFrames, FullRobotModel fullRobotModel, DesiredFootstepCalculator desiredFootstepCalculator,
          SideDependentList<FootSwitchInterface> footSwitches, CouplingRegistry couplingRegistry, SwingParameters swingParameters, LegTorqueData legTorqueData,
          SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, DesiredHeadingControlModule desiredHeadingControlModule,
          SideDependentList<LegJointPositionControlModule> legJointPositionControlModules, YoGraphicsListRegistry yoGraphicsListRegistry,

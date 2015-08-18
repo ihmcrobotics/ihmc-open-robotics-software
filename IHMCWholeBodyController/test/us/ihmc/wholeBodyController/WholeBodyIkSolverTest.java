@@ -21,7 +21,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -74,7 +74,7 @@ public abstract class WholeBodyIkSolverTest
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
 
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -107,7 +107,7 @@ public abstract class WholeBodyIkSolverTest
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
 
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -137,7 +137,7 @@ public abstract class WholeBodyIkSolverTest
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
 
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -168,7 +168,7 @@ public abstract class WholeBodyIkSolverTest
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
 
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -198,7 +198,7 @@ public abstract class WholeBodyIkSolverTest
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
 
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -232,7 +232,7 @@ public abstract class WholeBodyIkSolverTest
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
 
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -262,7 +262,7 @@ public abstract class WholeBodyIkSolverTest
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
 
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -292,7 +292,7 @@ public abstract class WholeBodyIkSolverTest
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
 
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -325,7 +325,7 @@ public abstract class WholeBodyIkSolverTest
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
 
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -356,7 +356,7 @@ public abstract class WholeBodyIkSolverTest
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
 
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -388,7 +388,7 @@ public abstract class WholeBodyIkSolverTest
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
 
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -427,7 +427,7 @@ public abstract class WholeBodyIkSolverTest
          return; // skip test
       }
 
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -466,7 +466,7 @@ public abstract class WholeBodyIkSolverTest
          return; // skip test
       }
       
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -503,7 +503,7 @@ public abstract class WholeBodyIkSolverTest
          return; // skip test
       }
       
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -539,7 +539,7 @@ public abstract class WholeBodyIkSolverTest
          return; // skip test
       }
 
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -574,7 +574,7 @@ public abstract class WholeBodyIkSolverTest
          return; // skip test
       }
       
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
@@ -617,7 +617,7 @@ public abstract class WholeBodyIkSolverTest
       }
 
       
-      BaseFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);

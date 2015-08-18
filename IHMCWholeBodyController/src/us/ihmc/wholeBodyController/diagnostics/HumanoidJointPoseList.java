@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidArmPose;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidLegPose;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidSpinePose;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
@@ -83,7 +83,7 @@ public class HumanoidJointPoseList
       return ret;
    }
    
-   public ArrayList<OneDoFJoint> getSpineJoints(BaseFullRobotModel fullRobotModel)
+   public ArrayList<OneDoFJoint> getSpineJoints(FullRobotModel fullRobotModel)
    {
       ArrayList<OneDoFJoint> spineJoints = new ArrayList<OneDoFJoint>();
 

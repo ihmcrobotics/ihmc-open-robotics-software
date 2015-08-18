@@ -2,15 +2,15 @@ package us.ihmc.commonWalkingControlModules.posePlayback;
 
 import java.util.ArrayList;
 
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 
 public class PlaybackPoseSequence
 {
    private final ArrayList<PlaybackPose> poseSequence = new ArrayList<PlaybackPose>();
 
-   private final BaseFullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
 
-   public PlaybackPoseSequence(BaseFullRobotModel fullRobotModel)
+   public PlaybackPoseSequence(FullRobotModel fullRobotModel)
    {
       this.fullRobotModel = fullRobotModel;
    }
@@ -20,7 +20,7 @@ public class PlaybackPoseSequence
       poseSequence.add(playbackPose);
    }
 
-   public BaseFullRobotModel getFullRobotModel()
+   public FullRobotModel getFullRobotModel()
    {
       return fullRobotModel;
    }

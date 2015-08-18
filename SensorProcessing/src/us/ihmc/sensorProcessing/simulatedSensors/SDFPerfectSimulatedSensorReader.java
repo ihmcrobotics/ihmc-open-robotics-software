@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -51,12 +51,12 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
 
-   public SDFPerfectSimulatedSensorReader(SDFRobot robot, BaseFullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
+   public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel, null, referenceFrames);
    }
 
-   public SDFPerfectSimulatedSensorReader(SDFRobot robot, BaseFullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolderToUpdate,
+   public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolderToUpdate,
          CommonHumanoidReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel.getRootJoint(), forceSensorDataHolderToUpdate, referenceFrames);

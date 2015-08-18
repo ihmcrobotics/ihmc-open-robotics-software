@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.robotController.ModularSensorProcessor;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.model.RobotMotionStatus;
 import us.ihmc.humanoidRobotics.model.RobotMotionStatusChangedListener;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -285,7 +285,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       return modularRobotController;
    }
 
-   public static FullInverseDynamicsStructure createInverseDynamicsStructure(BaseFullRobotModel fullRobotModel)
+   public static FullInverseDynamicsStructure createInverseDynamicsStructure(FullRobotModel fullRobotModel)
    {
       RigidBody elevator = fullRobotModel.getElevator();
       SixDoFJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
@@ -460,7 +460,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       return robotController;
    }
 
-   public BaseFullRobotModel getFullRobotModel()
+   public FullRobotModel getFullRobotModel()
    {
       return controllerFullRobotModel;
    }

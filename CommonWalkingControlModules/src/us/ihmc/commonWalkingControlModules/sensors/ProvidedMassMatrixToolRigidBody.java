@@ -7,7 +7,7 @@ import javax.vecmath.Matrix3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -56,7 +56,7 @@ public class ProvidedMassMatrixToolRigidBody
    
    private final DoubleYoVariable objectMass;
    
-   private final BaseFullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
    private final double gravity;
    private InverseDynamicsCalculator inverseDynamicsCalculator;
    private final SixDoFJoint toolJoint;

@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 public interface WholeBodyControllerParameters extends SDFFullRobotModelFactory
@@ -28,7 +28,7 @@ public interface WholeBodyControllerParameters extends SDFFullRobotModelFactory
 	
 	public abstract GeneralizedSDFRobotModel getGeneralizedRobotModel();
 	
-	public OutputProcessor getOutputProcessor(BaseFullRobotModel controllerFullRobotModel);
+	public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel);
 	
 	public abstract WholeBodyIkSolver createWholeBodyIkSolver();
 	

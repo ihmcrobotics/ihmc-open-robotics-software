@@ -9,7 +9,7 @@ import us.ihmc.pathGeneration.footstepGenerator.TurnInPlaceFootstepGenerator;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -23,7 +23,7 @@ public class TurnInPlaceBehavior extends BehaviorInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final boolean DEBUG = false;
-   private final BaseFullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
    private final HumanoidReferenceFrames referenceFrames;
 
    private double swingTime;

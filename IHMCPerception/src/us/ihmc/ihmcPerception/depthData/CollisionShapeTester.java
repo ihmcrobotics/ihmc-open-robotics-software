@@ -6,7 +6,7 @@ import java.util.List;
 import javax.vecmath.Point3d;
 
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -14,7 +14,7 @@ public class CollisionShapeTester
 {
    private final ArrayList<TrackingCollisionShape> trackingCollisionShapes = new ArrayList<>();
 
-   public CollisionShapeTester(BaseFullRobotModel fullRobotModel, CollisionBoxProvider collissionBoxProvider)
+   public CollisionShapeTester(FullRobotModel fullRobotModel, CollisionBoxProvider collissionBoxProvider)
    {
       addJoint(collissionBoxProvider, fullRobotModel.getRootJoint());
 
