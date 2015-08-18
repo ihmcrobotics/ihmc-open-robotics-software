@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
-import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
+import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -67,7 +67,7 @@ public class ValkyrieWarmupPoseSequencePacket implements PosePlaybackPacket
    }
    
    
-   public ValkyrieWarmupPoseSequencePacket(String filename, BaseFullRobotModel fullRobotModel, double initialGainScaling)
+   public ValkyrieWarmupPoseSequencePacket(String filename, FullRobotModel fullRobotModel, double initialGainScaling)
    {
       @SuppressWarnings("unchecked")
       Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "gains.yaml");
