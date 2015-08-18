@@ -21,7 +21,7 @@ import javax.vecmath.Vector3d;
 
 import org.apache.batik.dom.util.HashTable;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -78,7 +78,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasRobotModel.AtlasTarget.SIM, false);
       DRCRobotJointMap jointMap = model.getJointMap();
       ArmJointName[] joints = jointMap.getArmJointNames();
-      SDFFullRobotModel robotModel = model.createFullRobotModel();
+      SDFFullHumanoidRobotModel robotModel = model.createFullRobotModel();
       boolean showGUIAndSaveSCSVideo = false;
       boolean showCameraVideo = false;
 

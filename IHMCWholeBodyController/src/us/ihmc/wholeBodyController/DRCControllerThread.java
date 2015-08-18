@@ -2,7 +2,7 @@ package us.ihmc.wholeBodyController;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
@@ -71,7 +71,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final DoubleYoVariable controllerTime = new DoubleYoVariable("controllerTime", registry);
    private final BooleanYoVariable firstTick = new BooleanYoVariable("firstTick", registry);
 
-   private final SDFFullRobotModel controllerFullRobotModel;
+   private final SDFFullHumanoidRobotModel controllerFullRobotModel;
    private final OutputProcessor outputProcessor;
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
 
@@ -201,7 +201,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       return fullRobotModelCorruptor;
    }
 
-   public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, OutputProcessor outputProcessor,
+   public static RobotController createMomentumBasedController(SDFFullHumanoidRobotModel controllerModel, OutputProcessor outputProcessor,
          HumanoidReferenceFrames referenceFramesForController, DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory,
          DoubleYoVariable yoTime, double controlDT, double gravity, ForceSensorDataHolderReadOnly forceSensorDataHolderForController, ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,

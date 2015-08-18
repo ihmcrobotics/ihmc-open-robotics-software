@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.vecmath.Point3d;
 
 import sensor_msgs.PointCloud2;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.sensing.MultisenseMocapExperimentPacket;
@@ -36,7 +36,7 @@ public class MultisensePointCloudReceiver extends RosPointCloudSubscriber
       this.testInfo = testInfo;
       this.frame = testInfo.getFrame();
       
-      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
       HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
       

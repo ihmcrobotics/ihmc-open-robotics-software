@@ -20,7 +20,8 @@ import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -82,7 +83,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       
-      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
       
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -175,7 +176,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
-      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFHumanoidRobot robot = robotModel.createSdfRobot(false);
       
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -279,7 +280,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       return accelerationSelection;
    }
 
-   private void constrainPelvis(Random random, SDFFullRobotModel fullRobotModel, OptimizationMomentumControlModule momentumControlModule,
+   private void constrainPelvis(Random random, SDFBaseFullRobotModel fullRobotModel, OptimizationMomentumControlModule momentumControlModule,
                                 Map<GeometricJacobian, TaskspaceConstraintData> taskspaceConstraintDataMap)
    {
       RigidBody pelvis = fullRobotModel.getRootJoint().getSuccessor();
@@ -319,7 +320,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       }
    }
 
-   private void initializeRobot(SDFFullRobotModel fullRobotModel, SDFHumanoidRobot robot, HumanoidReferenceFrames referenceFrames, DRCRobotInitialSetup<SDFHumanoidRobot> intialSetup, DRCRobotJointMap jointMap)
+   private void initializeRobot(SDFFullHumanoidRobotModel fullRobotModel, SDFHumanoidRobot robot, HumanoidReferenceFrames referenceFrames, DRCRobotInitialSetup<SDFHumanoidRobot> intialSetup, DRCRobotJointMap jointMap)
    {
       intialSetup.initializeRobot(robot, jointMap);
       SDFPerfectSimulatedSensorReader sensorReader = new SDFPerfectSimulatedSensorReader(robot, fullRobotModel, referenceFrames);
@@ -341,7 +342,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       return contactStates;
    }
 
-   private SideDependentList<ContactablePlaneBody> createFeet(SDFFullRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControlParamaters)
+   private SideDependentList<ContactablePlaneBody> createFeet(SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControlParamaters)
    {
       double footForward = walkingControlParamaters.getFootForwardOffset();
       double footBack = walkingControlParamaters.getFootBackwardOffset();

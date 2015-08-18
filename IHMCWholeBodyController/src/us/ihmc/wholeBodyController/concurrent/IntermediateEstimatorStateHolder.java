@@ -2,7 +2,7 @@ package us.ihmc.wholeBodyController.concurrent;
 
 import java.util.Arrays;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMapCopier;
 import us.ihmc.tools.compare.GenericCRC32;
@@ -45,7 +45,7 @@ public class IntermediateEstimatorStateHolder
          ContactSensorHolder estimatorContactSensorHolder, ContactSensorHolder controllerContactSensorHolder,
          RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap, RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap)
    {
-      SDFFullRobotModel intermediateModel = wholeBodyControlParameters.createFullRobotModel();
+      SDFFullHumanoidRobotModel intermediateModel = wholeBodyControlParameters.createFullRobotModel();
       RigidBody intermediateRootBody = intermediateModel.getElevator();
 
       estimatorChecksum = new InverseDynamicsJointStateChecksum(estimatorRootBody, estimatorChecksumCalculator);

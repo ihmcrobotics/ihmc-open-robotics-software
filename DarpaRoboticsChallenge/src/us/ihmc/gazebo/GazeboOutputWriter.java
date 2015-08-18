@@ -13,7 +13,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -105,7 +105,7 @@ public class GazeboOutputWriter implements DRCOutputWriter
    }
 
    @Override
-   public void setFullRobotModel(SDFFullRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setFullRobotModel(SDFFullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       joints.addAll(Arrays.asList(controllerModel.getOneDoFJoints()));
       Collections.sort(joints, new Comparator<OneDoFJoint>()

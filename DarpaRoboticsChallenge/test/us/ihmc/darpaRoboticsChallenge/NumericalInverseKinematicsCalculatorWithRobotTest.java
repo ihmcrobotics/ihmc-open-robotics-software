@@ -11,7 +11,7 @@ import javax.vecmath.AxisAngle4d;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.JointAnglesWriter;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -61,7 +61,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    private final EnumMap<JointNames, Double> jointAnglesInitial = new EnumMap<JointNames, Double>(JointNames.class);
 
    private final ArrayList<Long> solvingTime = new ArrayList<Long>();
-   private final SDFFullRobotModel fullRobotModel;
+   private final SDFFullHumanoidRobotModel fullRobotModel;
    private final ReferenceFrame worldFrame;
    private GeometricJacobian leftHandJacobian;
    private InverseKinematicsCalculator inverseKinematicsCalculator;

@@ -16,7 +16,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -88,8 +88,8 @@ public abstract class WholeBodyTrajectoryTest
    {
       WholeBodyTrajectoryTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyTrajectoryTestHelper();
 
-      SDFFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualRobotModel();
-      SDFFullRobotModel desiredRobotModel = wholeBodyTrajectoryTestHelper.getRobotModel().createFullRobotModel();
+      SDFFullHumanoidRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualRobotModel();
+      SDFFullHumanoidRobotModel desiredRobotModel = wholeBodyTrajectoryTestHelper.getRobotModel().createFullRobotModel();
       WholeBodyIkSolver wbSolver = wholeBodyTrajectoryTestHelper.getWholeBodyIkSolver();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
@@ -211,8 +211,8 @@ public abstract class WholeBodyTrajectoryTest
    {
       WholeBodyTrajectoryTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyTrajectoryTestHelper();
 
-      SDFFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualRobotModel();
-      SDFFullRobotModel desiredRobotModel = wholeBodyTrajectoryTestHelper.getRobotModel().createFullRobotModel();
+      SDFFullHumanoidRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualRobotModel();
+      SDFFullHumanoidRobotModel desiredRobotModel = wholeBodyTrajectoryTestHelper.getRobotModel().createFullRobotModel();
       WholeBodyIkSolver wbSolver = wholeBodyTrajectoryTestHelper.getWholeBodyIkSolver();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
@@ -328,8 +328,8 @@ public abstract class WholeBodyTrajectoryTest
    {
       WholeBodyTrajectoryTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyTrajectoryTestHelper();
 
-      SDFFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualRobotModel();
-      SDFFullRobotModel desiredRobotModel = wholeBodyTrajectoryTestHelper.getRobotModel().createFullRobotModel();
+      SDFFullHumanoidRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualRobotModel();
+      SDFFullHumanoidRobotModel desiredRobotModel = wholeBodyTrajectoryTestHelper.getRobotModel().createFullRobotModel();
       WholeBodyIkSolver wbSolver = wholeBodyTrajectoryTestHelper.getWholeBodyIkSolver();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);

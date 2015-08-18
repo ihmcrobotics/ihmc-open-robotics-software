@@ -7,7 +7,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
@@ -45,13 +46,13 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
    private final BooleanYoVariable isObjectTooFar = new BooleanYoVariable("isObjectTooFar", registry);
    private final DoubleYoVariable yoTime;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final SDFFullRobotModel fullRobotModel;
+   private final SDFBaseFullRobotModel fullRobotModel;
    private final ReferenceFrame midZupFrame;
 
    private RobotSide grabSide;
    private FramePoint graspPosition;
 
-   public RemoveSingleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
+   public RemoveSingleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullHumanoidRobotModel fullRobotModel,
          HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);

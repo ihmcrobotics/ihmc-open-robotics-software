@@ -6,7 +6,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
@@ -56,10 +57,10 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    private final BooleanYoVariable hasTasksBeenSetUp = new BooleanYoVariable("hasTasksBeenSetUp" + behaviorName, registry);
 
    private final ReferenceFrame midFeetZUpFrame;
-   private final SDFFullRobotModel actualFullRobotModel;
+   private final SDFFullHumanoidRobotModel actualFullRobotModel;
    private final WholeBodyIkSolver wholeBodyIKSolver;
-   private final SDFFullRobotModel graspingDebrisRobot;
-   private final SDFFullRobotModel approachingDebrisRobot;
+   private final SDFFullHumanoidRobotModel graspingDebrisRobot;
+   private final SDFBaseFullRobotModel approachingDebrisRobot;
    private final DoubleYoVariable yoTime;
 
    private RigidBodyTransform debrisTransform;
@@ -68,7 +69,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    private RobotSide robotSide;
    private Quat4d rotationToBePerformedInWorldFrame = new Quat4d();
 
-   public GraspPieceOfDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
+   public GraspPieceOfDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullHumanoidRobotModel fullRobotModel,
          ReferenceFrame midFeetZUpFrame, WholeBodyControllerParameters wholeBodyControllerParameters, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
@@ -156,7 +157,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
             new ChestOrientationTask(PacketControllerTools.createGoToHomeChestOrientationPacket(trajectoryTime), yoTime, chestOrientationBehavior));
    }
 
-   private void computeDesiredApproachPose(FramePose approachPoseToPack, SDFFullRobotModel graspingDebrisRobot)
+   private void computeDesiredApproachPose(FramePose approachPoseToPack, SDFFullHumanoidRobotModel graspingDebrisRobot)
    {
       approachPoseToPack.setToZero(graspingDebrisRobot.getHandControlFrame(robotSide));
       approachPoseToPack.setX(-offsetToThePointOfGrabbing);
@@ -200,7 +201,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       handPose.getOrientation(desiredGraspOrientationToPack);
    }
 
-   public void computeWholeBodyIK(SDFFullRobotModel actualRobotModel, SDFFullRobotModel desiredRobotModelToPack, int numberOfReseeds,
+   public void computeWholeBodyIK(SDFFullHumanoidRobotModel actualRobotModel, SDFBaseFullRobotModel desiredRobotModelToPack, int numberOfReseeds,
          FramePose endEffectorPose, double positionTolerance, double orientationTolerance, ControlledDoF controlledDofs)
    {
       wholeBodyIKSolver.getConfiguration().setNumberOfControlledDoF(robotSide, controlledDofs);

@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
@@ -347,8 +347,8 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
       WholeBodyIkSolver wbSolver = createRobotSpecificWholeBodyIKSolver();         
       wbSolver.getConfiguration().setNumberOfControlledDoF(RobotSide.RIGHT, ControlledDoF.DOF_3P);
       wbSolver.getConfiguration().setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_3P);
-      SDFFullRobotModel actualRobot = new SDFFullRobotModel(drcSimulationTestHelper.getSDFFullRobotModel());
-      SDFFullRobotModel finalRobotState = new SDFFullRobotModel(actualRobot);
+      SDFFullHumanoidRobotModel actualRobot = new SDFFullHumanoidRobotModel(drcSimulationTestHelper.getSDFFullRobotModel());
+      SDFFullHumanoidRobotModel finalRobotState = new SDFFullHumanoidRobotModel(actualRobot);
       
       RigidBodyTransform rBT1 = new RigidBodyTransform(new Matrix4d(0.05, 1.00, -0.03, 0.335, 0.98, -0.05, 0.21, 0.044, 0.21, -0.04, -0.98, 0.907, 0.0, 0.0, 0.0, 1.0));
       RigidBodyTransform lBT1 = new RigidBodyTransform(new Matrix4d(0.00, 0.57, -0.82, 0.193,-0.91, -0.34, -0.24, 0.17, -0.41, 0.75, 0.52, 0.742, 0.0, 0.0, 0.0, 1.0));

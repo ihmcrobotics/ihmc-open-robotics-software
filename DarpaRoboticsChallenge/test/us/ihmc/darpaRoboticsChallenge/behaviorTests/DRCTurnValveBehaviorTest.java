@@ -14,7 +14,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.behaviors.TurnValvePacket;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
@@ -391,7 +391,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
    private TurnValveBehavior createNewTurnValveBehavior()
    {
       BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
-      SDFFullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       HumanoidReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       DoubleYoVariable yoTime = drcBehaviorTestHelper.getYoTime();
       CapturePointUpdatable capturePointUpdatable = drcBehaviorTestHelper.getCapturePointUpdatable();

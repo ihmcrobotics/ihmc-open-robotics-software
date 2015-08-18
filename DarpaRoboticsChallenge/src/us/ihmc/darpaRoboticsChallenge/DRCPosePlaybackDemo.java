@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -98,7 +98,7 @@ public class DRCPosePlaybackDemo
 		private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 		private final ArrayList<YoGraphicPosition> efp_positionViz = new ArrayList<>();
 
-		public HoldRobotInTheAir(SDFRobot robot, SimulationConstructionSet scs, SDFFullRobotModel sdfFullRobotModel)
+		public HoldRobotInTheAir(SDFRobot robot, SimulationConstructionSet scs, SDFBaseFullRobotModel sdfFullRobotModel)
 		{
 			this.robot = robot;
 			robotMass = robot.computeCenterOfMass(new Point3d());

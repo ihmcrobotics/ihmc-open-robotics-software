@@ -1,7 +1,7 @@
 package us.ihmc.atlas.reachabilityMap;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -23,7 +23,7 @@ public class AtlasReachabilitySphereMapSimulation
    public AtlasReachabilitySphereMapSimulation()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
-      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFRobot sdfRobot = robotModel.createSdfRobot(false);
       final JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(sdfRobot, fullRobotModel);
 

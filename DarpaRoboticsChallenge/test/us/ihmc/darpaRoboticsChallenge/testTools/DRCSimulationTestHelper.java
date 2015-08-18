@@ -10,7 +10,7 @@ import java.util.Random;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
@@ -184,14 +184,14 @@ public class DRCSimulationTestHelper
       controllerFactory.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
-   public SDFFullRobotModel getControllerFullRobotModel()
+   public SDFFullHumanoidRobotModel getControllerFullRobotModel()
    {
       return drcSimulationFactory.getControllerFullRobotModel();
    }
 
-   public SDFFullRobotModel getSDFFullRobotModel()
+   public SDFFullHumanoidRobotModel getSDFFullRobotModel()
    {
-      return (SDFFullRobotModel) fullRobotModel;
+      return (SDFFullHumanoidRobotModel) fullRobotModel;
    }
 
    public CommonAvatarEnvironmentInterface getTestEnviroment()

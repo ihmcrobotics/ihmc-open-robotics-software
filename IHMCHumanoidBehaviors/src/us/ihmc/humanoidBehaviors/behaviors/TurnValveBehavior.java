@@ -2,7 +2,8 @@ package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.behaviors.TurnValvePacket;
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
@@ -59,7 +60,7 @@ public class TurnValveBehavior extends BehaviorInterface
    public static final double howFarToStandToTheRightOfValve = 2.0 * robotSideOfHandToUse.negateIfRightSide(0.13); //0.13
    public static final double howFarToStandBackFromValve = 1.25 * 0.64; //0.64
 
-   private final SDFFullRobotModel fullRobotModel;
+   private final SDFBaseFullRobotModel fullRobotModel;
    private final HumanoidReferenceFrames referenceFrames;
 
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
@@ -87,7 +88,7 @@ public class TurnValveBehavior extends BehaviorInterface
    private final double minDistanceForWalkingBetweenValveTurns = 0.1;
    private final double minYawDeltaForWalkingBetweenValveTurns = Math.toRadians(5.0);
 
-   public TurnValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
+   public TurnValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullHumanoidRobotModel fullRobotModel,
          HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, BooleanYoVariable tippingDetectedBoolean,
          WholeBodyControllerParameters wholeBodyControllerParameters)
    {

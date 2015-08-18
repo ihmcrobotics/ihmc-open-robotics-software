@@ -7,7 +7,7 @@ import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.IMUPacket;
@@ -23,7 +23,7 @@ import us.ihmc.humanoidRobotics.model.FullRobotModelUtils;
 public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnable
 {
    private final PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ZERO_POSE_PRODUCER, new IHMCCommunicationKryoNetClassList());
-   private final SDFFullRobotModel fullRobotModel;
+   private final SDFFullHumanoidRobotModel fullRobotModel;
    private final ForceSensorDefinition[] forceSensorDefinitions;
    private long timeStamp = 0;
    

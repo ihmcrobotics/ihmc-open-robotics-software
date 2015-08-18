@@ -7,7 +7,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -40,7 +40,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
 {
    private final WholeBodyIkSolver wholeBodyIKSolver;
    private final WholeBodyIKPacketCreator wholeBodyIKPacketCreator;
-   private final SDFFullRobotModel actualRobotModel;
+   private final SDFFullHumanoidRobotModel actualRobotModel;
    private final PacketCommunicator fieldObjectCommunicator;
    private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
    private final ArrayList<FramePose> desiredReferenceFrameList = new ArrayList<FramePose>();
@@ -52,7 +52,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
    private final YoGraphicShape yoGraphicsShapeDesired;
    private final boolean random = false;
    private final double ERROR_DISTANCE_TOLERANCE = 0.005;
-   private final SDFFullRobotModel desiredFullRobotModel;
+   private final SDFFullHumanoidRobotModel desiredFullRobotModel;
    private final YoGraphicShape yoGraphicsShapeActual;
    private final YoFramePoint framePoint2;
    private final YoFrameOrientation frameOrientation2;

@@ -6,7 +6,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator;
@@ -31,7 +31,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
    {
       DRCRobotModel robotModel = getRobotModel();
 
-      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
 
       double delay = 0.3;
@@ -46,7 +46,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
    public void testRandomExample()
    {
       DRCRobotModel robotModel = getRobotModel();
-      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
       
       int numberOfPoses = 5;
@@ -80,7 +80,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
    public void testLoadingAndPlayingASequence()
    {
       DRCRobotModel robotModel = getRobotModel();
-      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
@@ -93,7 +93,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
    public void testLoadingAndPlayingAnotherSequence()
    {
       DRCRobotModel robotModel = getRobotModel();
-      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);

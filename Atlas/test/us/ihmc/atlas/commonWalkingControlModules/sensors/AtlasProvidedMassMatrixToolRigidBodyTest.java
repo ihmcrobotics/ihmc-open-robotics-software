@@ -1,6 +1,6 @@
 package us.ihmc.atlas.commonWalkingControlModules.sensors;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
@@ -21,7 +21,7 @@ public class AtlasProvidedMassMatrixToolRigidBodyTest extends ProvidedMassMatrix
    @Override
    public FullHumanoidRobotModel getFullRobotModel()
    {
-      SDFFullRobotModel fullRobotModel = new AtlasRobotModel(version, AtlasRobotModel.AtlasTarget.SIM, false).createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = new AtlasRobotModel(version, AtlasRobotModel.AtlasTarget.SIM, false).createFullRobotModel();
       
       fullRobotModel.setJointAngles(side, LimbName.ARM, config.getArmDefaultConfigurationJointAngles(ArmConfigurations.HOME, side));
       fullRobotModel.updateFrames();

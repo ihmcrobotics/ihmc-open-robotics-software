@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveGraspLocation;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveTurnDirection;
@@ -54,7 +54,7 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
    private final double maxObservedWristForce = 0.0;
    private final double maxObservedCapturePointError = 0.0;
 
-   public GraspTurnAndUnGraspValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
+   public GraspTurnAndUnGraspValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullHumanoidRobotModel fullRobotModel,
          HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
          BooleanYoVariable tippingDetectedBoolean, boolean useWholeBodyInverseKinematics)
    {

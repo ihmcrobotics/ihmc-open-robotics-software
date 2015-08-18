@@ -7,7 +7,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import org.ros.message.Time;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -72,7 +72,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
          final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
          DRCRobotJointMap jointMap, String rosNameSpace, RosTfPublisher tfPublisher)
    {
-      SDFFullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
       this.forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       this.imuDefinitions = fullRobotModel.getIMUDefinitions();
       this.rosMainNode = rosMainNode;

@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -77,7 +77,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
 
    private DoubleYoVariable yoTime;
    private SDFRobot robot;
-   private SDFFullRobotModel fullRobotModel;
+   private SDFFullHumanoidRobotModel fullRobotModel;
    private DRCRobotModel drcRobotModel;
 
    private ReferenceFrame midFeetZUpFrame;

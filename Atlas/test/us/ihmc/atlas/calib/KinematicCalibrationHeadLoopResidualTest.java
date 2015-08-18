@@ -23,7 +23,7 @@ import org.ddogleg.optimization.UtilOptimize;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -53,7 +53,7 @@ public class KinematicCalibrationHeadLoopResidualTest
 
    private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
    DRCRobotJointMap jointMap = robotModel.getJointMap();
-   SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+   SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
    RigidBodyTransform imageToCamera = new RigidBodyTransform(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
 
@@ -270,7 +270,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       }
    }
 
-   private RigidBodyTransform computeKinematicsTargetToCamera(SDFFullRobotModel fullRobotModel, ReferenceFrame cameraImageFrame, RigidBodyTransform targetToEE)
+   private RigidBodyTransform computeKinematicsTargetToCamera(SDFFullHumanoidRobotModel fullRobotModel, ReferenceFrame cameraImageFrame, RigidBodyTransform targetToEE)
    {
 
       ReferenceFrame leftEEFrame = fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);

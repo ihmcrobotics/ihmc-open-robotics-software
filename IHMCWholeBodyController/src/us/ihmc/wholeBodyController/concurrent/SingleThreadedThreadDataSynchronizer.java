@@ -2,7 +2,7 @@ package us.ihmc.wholeBodyController.concurrent;
 
 import java.util.Arrays;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -16,7 +16,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
 public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchronizerInterface
 {
-   private final SDFFullRobotModel estimatorFullRobotModel;
+   private final SDFFullHumanoidRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder estimatorForceSensorDataHolder;
    private final RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap;
    private final CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder;
@@ -24,7 +24,7 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    private final ContactSensorHolder estimatorContactSensorHolder;
    private final DesiredJointDataHolder estimatorDesiredJointDataHolder;
 
-   private final SDFFullRobotModel controllerFullRobotModel;
+   private final SDFFullHumanoidRobotModel controllerFullRobotModel;
    private final ForceSensorDataHolder controllerForceSensorDataHolder;
    private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
    private final CenterOfPressureDataHolder controllerCenterOfPressureDataHolder;
@@ -91,7 +91,7 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    }
 
    @Override
-   public SDFFullRobotModel getEstimatorFullRobotModel()
+   public SDFFullHumanoidRobotModel getEstimatorFullRobotModel()
    {
       return estimatorFullRobotModel;
    }
@@ -103,7 +103,7 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    }
 
    @Override
-   public SDFFullRobotModel getControllerFullRobotModel()
+   public SDFFullHumanoidRobotModel getControllerFullRobotModel()
    {
       return controllerFullRobotModel;
    }

@@ -3,7 +3,7 @@ package us.ihmc.wholeBodyController;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -61,7 +61,7 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter
    }
 
    @Override
-   public void setFullRobotModel(SDFFullRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setFullRobotModel(SDFFullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       drcOutputWriter.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
 

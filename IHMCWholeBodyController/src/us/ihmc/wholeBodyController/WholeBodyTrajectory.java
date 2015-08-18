@@ -8,7 +8,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.Vector64F;
@@ -36,16 +36,16 @@ public class WholeBodyTrajectory
    private double maxJointVelocity;
    private double maxJointAcceleration;
    private double maxDistanceInTaskSpaceBetweenWaypoints;
-   private final SDFFullRobotModel currentRobotModel;
+   private final SDFFullHumanoidRobotModel currentRobotModel;
    private final HashMap<String,Integer> jointNameToTrajectoryIndex = new HashMap<String,Integer>();
    private final HashMap<String, Double> desiredJointAngles = new HashMap<String, Double> ();
    private RigidBodyTransform worldToFoot; 
-   private final SDFFullRobotModel fullRobotModel;
+   private final SDFFullHumanoidRobotModel fullRobotModel;
    private double minimumExecutionTime = 0.5;
 
-   public WholeBodyTrajectory(SDFFullRobotModel fullRobotModel, double maxJointVelocity, double maxJointAcceleration, double maxDistanceInTaskSpaceBetweenWaypoints)
+   public WholeBodyTrajectory(SDFFullHumanoidRobotModel fullRobotModel, double maxJointVelocity, double maxJointAcceleration, double maxDistanceInTaskSpaceBetweenWaypoints)
    {
-      currentRobotModel = new SDFFullRobotModel( fullRobotModel );
+      currentRobotModel = new SDFFullHumanoidRobotModel( fullRobotModel );
       this.fullRobotModel = fullRobotModel;
 
       this.maxJointVelocity = maxJointVelocity;
@@ -65,8 +65,8 @@ public class WholeBodyTrajectory
 
    public TrajectoryND createTaskSpaceTrajectory(
          final WholeBodyIkSolver wbSolver,  
-         final SDFFullRobotModel initialRobotState,
-         final SDFFullRobotModel finalRoboState
+         final SDFFullHumanoidRobotModel initialRobotState,
+         final SDFFullHumanoidRobotModel finalRoboState
          ) throws Exception
    {
       int N = wbSolver.getNumberOfJoints();
@@ -260,7 +260,7 @@ public class WholeBodyTrajectory
    public WholeBodyTrajectoryPacket convertTrajectoryToPacket(
          TrajectoryND wbTrajectory)
    {
-      int numJointsPerArm = currentRobotModel.armJointIDsList.get(RobotSide.LEFT).size();
+      int numJointsPerArm = currentRobotModel.getArmJointIDs(RobotSide.LEFT).size();
       int numWaypoints    = wbTrajectory.getNumWaypoints();
 
       WholeBodyTrajectoryPacket packet = new WholeBodyTrajectoryPacket(numWaypoints ,numJointsPerArm);
@@ -276,7 +276,7 @@ public class WholeBodyTrajectory
          //-----  check if this is part of the arms ---------
 
          int jointIdx = 0 ;
-         for(OneDoFJoint armJoint: currentRobotModel.armJointIDsList.get( RobotSide.LEFT) )
+         for(OneDoFJoint armJoint: currentRobotModel.getArmJointIDs( RobotSide.LEFT) )
          {   
             int index = jointNameToTrajectoryIndex.get( armJoint.getName() );
             packet.leftArmTrajectory.trajectoryPoints[w].positions[jointIdx] = jointsWaypoint.position[index];
@@ -286,7 +286,7 @@ public class WholeBodyTrajectory
          packet.leftArmTrajectory.trajectoryPoints[w].time = packet.timeAtWaypoint[w];
 
          jointIdx = 0 ;
-         for(OneDoFJoint armJoint: currentRobotModel.armJointIDsList.get( RobotSide.RIGHT) )
+         for(OneDoFJoint armJoint: currentRobotModel.getArmJointIDs( RobotSide.RIGHT) )
          {   
             int index = jointNameToTrajectoryIndex.get( armJoint.getName() );
             packet.rightArmTrajectory.trajectoryPoints[w].positions[jointIdx] = jointsWaypoint.position[index];
@@ -371,7 +371,7 @@ public class WholeBodyTrajectory
       for (int n = 0; n < numWaypoints; n++)
       {
          int J = 0;
-         for(OneDoFJoint armJoint: fullRobotModel.armJointIDsList.get(RobotSide.RIGHT))
+         for(OneDoFJoint armJoint: fullRobotModel.getArmJointIDs(RobotSide.RIGHT))
          {   
             if (!MathTools.epsilonEquals(packet.rightArmTrajectory.trajectoryPoints[n].positions[J], armJoint.getQ(), epsilon))
             {
@@ -381,7 +381,7 @@ public class WholeBodyTrajectory
          }
          
          J = 0;
-         for(OneDoFJoint armJoint: fullRobotModel.armJointIDsList.get(RobotSide.LEFT))
+         for(OneDoFJoint armJoint: fullRobotModel.getArmJointIDs(RobotSide.LEFT))
          {   
             if (!MathTools.epsilonEquals(packet.leftArmTrajectory.trajectoryPoints[n].positions[J], armJoint.getQ(), epsilon))
             {

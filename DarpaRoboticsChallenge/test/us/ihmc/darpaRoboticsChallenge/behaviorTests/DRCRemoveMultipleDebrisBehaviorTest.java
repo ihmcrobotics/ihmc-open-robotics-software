@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.behaviors.DebrisData;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -54,7 +54,7 @@ public abstract class DRCRemoveMultipleDebrisBehaviorTest implements MultiRobotT
 
    private DoubleYoVariable yoTime;
    private SDFRobot robot;
-   private SDFFullRobotModel fullRobotModel;
+   private SDFFullHumanoidRobotModel fullRobotModel;
    private DRCRobotModel drcRobotModel;
 
    private ArrayList<ContactableSelectableBoxRobot> debrisRobots;

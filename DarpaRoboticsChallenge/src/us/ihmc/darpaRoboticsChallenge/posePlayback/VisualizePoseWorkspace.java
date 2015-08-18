@@ -6,7 +6,7 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator;
@@ -24,7 +24,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class VisualizePoseWorkspace
 {
-   private final SDFFullRobotModel fullRobotModelForSlider;
+   private final SDFFullHumanoidRobotModel fullRobotModelForSlider;
    
    private PlaybackPoseSequence posePlaybackRobotPoseSequence;
 

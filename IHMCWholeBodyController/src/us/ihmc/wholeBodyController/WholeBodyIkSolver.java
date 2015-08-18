@@ -17,9 +17,9 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.robotics.hierarchicalKinematics.*;
-import us.ihmc.robotics.hierarchicalKinematics.HierarchicalTaskBodyPose;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.dataStructures.Vector64F;
@@ -231,7 +231,7 @@ abstract public class WholeBodyIkSolver
       private final RobotModel        urdfModel;
 
       /** This model is used to store the result of the solver and/or as initial state for the next update. */
-      private final SDFFullRobotModel cachedModel;
+      private final SDFFullHumanoidRobotModel cachedModel;
 
       protected final HierarchicalKinematicSolver hierarchicalSolver;
 
@@ -523,7 +523,7 @@ abstract public class WholeBodyIkSolver
          subscribers.add( listener );
       }
 
-      public double calculateCenterOfMassError(SDFFullRobotModel actualSdfModel )
+      public double calculateCenterOfMassError(SDFFullHumanoidRobotModel actualSdfModel )
       {
          ReferenceFrame leftSole = actualSdfModel.getSoleFrame(LEFT);
          ReferenceFrame rightSole = actualSdfModel.getSoleFrame(RIGHT);
@@ -559,7 +559,7 @@ abstract public class WholeBodyIkSolver
        * @param modelToCheck the model.
        * @return true, if there is a self collision.
        */
-      public boolean checkCollisions(SDFFullRobotModel modelToCheck)
+      public boolean checkCollisions(SDFBaseFullRobotModel modelToCheck)
       {
          HashMap<String,RigidBodyTransform> bodyTransforms = new HashMap<String,RigidBodyTransform>();
          for( OneDoFJoint joint : modelToCheck.getOneDoFJoints())
@@ -578,7 +578,7 @@ abstract public class WholeBodyIkSolver
          return new WholeBodyConfiguration(parameters);
       }
 
-      public ComputeResult compute(SDFFullRobotModel actualSdfModel,  Map<String, Double> anglesToUseAsInitialState,  Map<String, Double> outputAngles) throws Exception
+      public ComputeResult compute(SDFFullHumanoidRobotModel actualSdfModel,  Map<String, Double> anglesToUseAsInitialState,  Map<String, Double> outputAngles) throws Exception
       {
          for (int i = 0; i < numOfJoints; i++)
          { 
@@ -604,7 +604,7 @@ abstract public class WholeBodyIkSolver
          return ret;
       }
 
-      public ComputeResult compute(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack, ComputeOption opt) throws Exception
+      public ComputeResult compute(SDFFullHumanoidRobotModel actualSdfModel, SDFBaseFullRobotModel desiredRobotModelToPack, ComputeOption opt) throws Exception
       {
          if( desiredRobotModelToPack == actualSdfModel)
          {
@@ -674,7 +674,7 @@ abstract public class WholeBodyIkSolver
          return ret;
       }
 
-      public SDFFullRobotModel getCachedModel()
+      public SDFFullHumanoidRobotModel getCachedModel()
       {
          return cachedModel;
       }
@@ -812,7 +812,7 @@ abstract public class WholeBodyIkSolver
       /**
        * Gets the root frame of a certain instance of SDFFullRobotModel.
        */
-      public ReferenceFrame  getRootFrame( SDFFullRobotModel actualSdfModel)
+      public ReferenceFrame  getRootFrame( SDFBaseFullRobotModel actualSdfModel)
       {
          if( feetTarget.get(getSideOfTheFootRoot()) != null && parameters.getLockLevel() == LockLevel.CONTROL_MANUALLY )
          {
@@ -950,13 +950,13 @@ abstract public class WholeBodyIkSolver
          hierarchicalSolver.setVerbosityLevel(level);
       }
 
-      public void updateCachedModelModel( SDFFullRobotModel sdfModel)
+      public void updateCachedModelModel( SDFBaseFullRobotModel sdfModel)
       {
          cachedModel.copyAllJointsButKeepOneFootFixed(sdfModel.getOneDoFJoints(), getSideOfTheFootRoot());
          movePelvisToHaveOverlappingFeet( sdfModel, cachedModel );
       }
 
-      private void adjustAllTargets(SDFFullRobotModel actualRobotModel)
+      private void adjustAllTargets(SDFBaseFullRobotModel actualRobotModel)
       {
          Quat4d quat = new Quat4d();
          Vector3d pos = new Vector3d();
@@ -1001,7 +1001,7 @@ abstract public class WholeBodyIkSolver
          }
       }
 
-      private void adjustDesiredCOM(SDFFullRobotModel actualSdfModel )
+      private void adjustDesiredCOM(SDFFullHumanoidRobotModel actualSdfModel )
       {
          ReferenceFrame leftSole = actualSdfModel.getSoleFrame(LEFT);
          ReferenceFrame rightSole = actualSdfModel.getSoleFrame(RIGHT);
@@ -1028,7 +1028,7 @@ abstract public class WholeBodyIkSolver
          taskJointsPose.setTarget(preferredAngles);
       }
 
-      private void checkIfArmShallStayQuiet(SDFFullRobotModel actualSdfModel)
+      private void checkIfArmShallStayQuiet(SDFBaseFullRobotModel actualSdfModel)
       {
          for( RobotSide side: RobotSide.values())
          {         
@@ -1058,7 +1058,7 @@ abstract public class WholeBodyIkSolver
          }
       }
 
-      private void checkIfLegsAndWaistNeedToBeLocked(SDFFullRobotModel actualSdfModel)
+      private void checkIfLegsAndWaistNeedToBeLocked(SDFBaseFullRobotModel actualSdfModel)
       {
          boolean enableLeg   = true;
          boolean enableWaistZ  = true;
@@ -1135,7 +1135,7 @@ abstract public class WholeBodyIkSolver
          }
       }
 
-      synchronized private ComputeResult computeImpl(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack, boolean continueUntilPoseConverged)
+      synchronized private ComputeResult computeImpl(SDFFullHumanoidRobotModel actualSdfModel, SDFBaseFullRobotModel desiredRobotModelToPack, boolean continueUntilPoseConverged)
       {    
          movePelvisToHaveOverlappingFeet( actualSdfModel, cachedModel );
 
@@ -1215,7 +1215,7 @@ abstract public class WholeBodyIkSolver
          return result;
       }
 
-      private void controlPelvis(SDFFullRobotModel actualSdfModel)
+      private void controlPelvis(SDFBaseFullRobotModel actualSdfModel)
       {
          Vector64F weightForRotationOnly; 
 
@@ -1236,7 +1236,7 @@ abstract public class WholeBodyIkSolver
          taskPelvisPose.setWeightsTaskSpace( weightForRotationOnly );
       }
 
-      private void enableJointWeights(SDFFullRobotModel actualSdfModel, int index, boolean enable)
+      private void enableJointWeights(SDFBaseFullRobotModel actualSdfModel, int index, boolean enable)
       {
          double val = enable ? 1 : 0; 
 
@@ -1321,7 +1321,7 @@ abstract public class WholeBodyIkSolver
          return q_out;
       }
 
-      private void movePelvisToHaveOverlappingFeet(SDFFullRobotModel referenceModel, SDFFullRobotModel followerModel)
+      private void movePelvisToHaveOverlappingFeet(SDFBaseFullRobotModel referenceModel, SDFBaseFullRobotModel followerModel)
       {
          referenceModel.updateFrames();
          followerModel.updateFrames();

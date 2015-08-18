@@ -119,18 +119,18 @@ public class JaxbSDFLoader
       generalizedSDFRobotModels.get(jointMap.getModelName()).addContactSensor(sensorName, parentJointName, type);
    }
    
-   public SDFFullRobotModel createFullRobotModel(SDFJointNameMap sdfJointNameMap)
+   public SDFFullHumanoidRobotModel createFullRobotModel(SDFJointNameMap sdfJointNameMap)
    {
       return  createFullRobotModel(sdfJointNameMap, new String[0]);
    }
 
-   public SDFFullRobotModel createFullRobotModel(SDFJointNameMap sdfJointNameMap, String[] sensorFramesToTrack)
+   public SDFFullHumanoidRobotModel createFullRobotModel(SDFJointNameMap sdfJointNameMap, String[] sensorFramesToTrack)
    {
       if(sdfJointNameMap != null)
       {
          String modelName = sdfJointNameMap.getModelName();
          checkModelName(modelName);
-         return new SDFFullRobotModel(generalizedSDFRobotModels.get(modelName).getRootLinks().get(0), sdfJointNameMap, sensorFramesToTrack);
+         return new SDFFullHumanoidRobotModel(generalizedSDFRobotModels.get(modelName).getRootLinks().get(0), sdfJointNameMap, sensorFramesToTrack);
       }
       else
       {

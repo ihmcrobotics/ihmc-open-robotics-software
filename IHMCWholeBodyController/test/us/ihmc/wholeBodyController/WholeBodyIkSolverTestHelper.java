@@ -12,7 +12,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
@@ -37,8 +37,8 @@ public class WholeBodyIkSolverTestHelper
 {
    private final int NUMBER_OF_REGRESSION_POSES = 5;
 
-   private SDFFullRobotModel actualRobotModel;
-   private SDFFullRobotModel desiredRobotModel;
+   private SDFFullHumanoidRobotModel actualRobotModel;
+   private SDFFullHumanoidRobotModel desiredRobotModel;
    
    private WholeBodyIkSolver hikSolver;
    private Robot robot;
@@ -60,7 +60,7 @@ public class WholeBodyIkSolverTestHelper
    private FullRobotModelVisualizer modelVisualizer;
    private BagOfBalls bagOfBalls;
 
-   public WholeBodyIkSolverTestHelper(WholeBodyControllerParameters robotModel, SDFFullRobotModel actualRobotModel, WholeBodyIkSolver solver, Robot robot,
+   public WholeBodyIkSolverTestHelper(WholeBodyControllerParameters robotModel, SDFFullHumanoidRobotModel actualRobotModel, WholeBodyIkSolver solver, Robot robot,
                                       WholeBodyHalfCylinderTargetParameters wholeBodyHalfCylinderTargetParameters)
    {
       this.actualRobotModel = actualRobotModel;

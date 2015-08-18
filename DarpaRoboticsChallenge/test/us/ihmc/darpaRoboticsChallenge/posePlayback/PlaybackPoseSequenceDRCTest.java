@@ -8,7 +8,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
@@ -23,7 +23,7 @@ public abstract class PlaybackPoseSequenceDRCTest implements MultiRobotTestInter
    public void testReadAndWriteWithRandomSequence()
    {
       DRCRobotModel robotModel = getRobotModel();
-      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
       int numberOfPoses = 5;
       double delay = 0.3;

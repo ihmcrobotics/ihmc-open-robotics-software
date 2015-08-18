@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules;
 import java.io.IOException;
 import java.net.URI;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -91,7 +91,7 @@ public class RosModule
       printIfDebug("Finished creating ROS Module.");
    }
 
-   private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, ObjectCommunicator localObjectCommunicator)
+   private void publishSimulatedCameraAndLidar(SDFBaseFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, ObjectCommunicator localObjectCommunicator)
    {
       if (sensorInformation.getCameraParameters().length > 0)
       {

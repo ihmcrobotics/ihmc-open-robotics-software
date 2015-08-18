@@ -10,7 +10,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
@@ -89,7 +89,7 @@ public class SimpleStanceController implements RobotController
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final MomentumRateOfChangeData momentumRateOfChangeData;
 
-   public SimpleStanceController(SDFRobot robot, SDFFullRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, double controlDT,
+   public SimpleStanceController(SDFRobot robot, SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, double controlDT,
                                  InverseDynamicsJoint[] jointsToOptimize, double gravityZ, double footForward, double footBack, double footWidth)
    {
       this.sensorReader = new SDFPerfectSimulatedSensorReader(robot, fullRobotModel, referenceFrames);
@@ -352,7 +352,7 @@ public class SimpleStanceController implements RobotController
       return getName();
    }
 
-   private SideDependentList<ContactablePlaneBody> createFeet(SDFFullRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, double footForward,
+   private SideDependentList<ContactablePlaneBody> createFeet(SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, double footForward,
            double footBack, double footWidth)
    {
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
@@ -384,7 +384,7 @@ public class SimpleStanceController implements RobotController
       return contactStates;
    }
 
-   public static InverseDynamicsJoint[] createJointsToOptimize(SDFFullRobotModel fullRobotModel)
+   public static InverseDynamicsJoint[] createJointsToOptimize(SDFFullHumanoidRobotModel fullRobotModel)
    {
       List<InverseDynamicsJoint> joints = new ArrayList<InverseDynamicsJoint>();
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());

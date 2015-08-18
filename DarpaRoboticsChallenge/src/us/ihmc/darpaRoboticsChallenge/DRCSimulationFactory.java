@@ -8,8 +8,9 @@ import javax.vecmath.Quat4d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -273,7 +274,7 @@ public class DRCSimulationFactory
          for (String jointName : positionControlledJoints)
          {
             OneDegreeOfFreedomJoint simulatedJoint = simulatedRobot.getOneDegreeOfFreedomJoint(jointName);
-            SDFFullRobotModel controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
+            SDFBaseFullRobotModel controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
             OneDoFJoint controllerJoint = controllerFullRobotModel.getOneDoFJointByName(jointName);
             
             JointRole jointRole = jointMap.getJointRole(jointName);
@@ -394,7 +395,7 @@ public class DRCSimulationFactory
       return threadDataSynchronizer;
    }
    
-   public SDFFullRobotModel getControllerFullRobotModel()
+   public SDFFullHumanoidRobotModel getControllerFullRobotModel()
    {
       return threadDataSynchronizer.getControllerFullRobotModel();
    }

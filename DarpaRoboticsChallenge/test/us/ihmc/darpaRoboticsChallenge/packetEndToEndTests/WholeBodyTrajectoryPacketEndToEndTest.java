@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
@@ -128,7 +128,7 @@ public abstract class WholeBodyTrajectoryPacketEndToEndTest implements MultiRobo
          drcSimulationTestHelper.simulateAndBlock(endWaypointTime - startWaypointTime);
          System.out.println("done - check if target reached");
          
-         SDFFullRobotModel fullRobotModel = drcSimulationTestHelper.getSDFFullRobotModel();
+         SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getSDFFullRobotModel();
          SDFRobot sdfRobot = drcSimulationTestHelper.getRobot();
          
          // check if both arms reached target
@@ -149,7 +149,7 @@ public abstract class WholeBodyTrajectoryPacketEndToEndTest implements MultiRobo
                continue;
             }
             
-            ArrayList<OneDoFJoint> armJoints = fullRobotModel.armJointIDsList.get(robotSide);
+            ArrayList<OneDoFJoint> armJoints = fullRobotModel.getArmJointIDs(robotSide);
             for (int jointIdx = 0; jointIdx < armJoints.size(); jointIdx++)
             {
                OneDegreeOfFreedomJoint joint = sdfRobot.getOneDegreeOfFreedomJoint(armJoints.get(jointIdx).getName());

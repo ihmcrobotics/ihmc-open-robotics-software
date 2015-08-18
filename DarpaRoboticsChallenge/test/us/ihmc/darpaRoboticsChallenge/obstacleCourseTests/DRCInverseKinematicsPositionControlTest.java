@@ -16,8 +16,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JointPositionControllerFactory;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
@@ -534,7 +534,7 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
       private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       private final ArrayList<YoGraphicPosition> efp_positionViz = new ArrayList<>();
 
-      public LockPelvisController(SDFRobot robot, SimulationConstructionSet scs, SDFFullRobotModel sdfFullRobotModel, double desiredHeight)
+      public LockPelvisController(SDFRobot robot, SimulationConstructionSet scs, SDFBaseFullRobotModel sdfFullRobotModel, double desiredHeight)
       {
          this.robot = robot;
          robotMass = robot.computeCenterOfMass(new Point3d());

@@ -16,7 +16,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
@@ -169,7 +169,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
       HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
-      SDFFullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
       FramePose desiredHandPose = new FramePose(chestFrame);
       desiredHandPose.setPosition(0.6, 0.2, -0.4);

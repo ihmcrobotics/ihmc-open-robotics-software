@@ -1,6 +1,6 @@
 package us.ihmc.atlas;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
@@ -53,7 +53,7 @@ public class AtlasSimpleStanceController
       }
 
       DRCRobotJointMap jointMap = model.getJointMap();
-      SDFFullRobotModel fullRobotModel = model.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = model.createFullRobotModel();
       SDFHumanoidRobot robot = model.createSdfRobot(false);
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 

@@ -14,7 +14,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -54,7 +54,7 @@ public class CalibUtil
       return jointNames;
    }
 
-   public static void setRobotModelFromData(SDFFullRobotModel fullRobotModel, Map<String, Double> qmap)
+   public static void setRobotModelFromData(SDFBaseFullRobotModel fullRobotModel, Map<String, Double> qmap)
    {
       OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
 
@@ -72,7 +72,7 @@ public class CalibUtil
       }
    }
 
-   public static void setRobotModelFromData(SDFFullRobotModel fullRobotModel, Map<String, Double> qmap, Map<String, Double> qbias)
+   public static void setRobotModelFromData(SDFBaseFullRobotModel fullRobotModel, Map<String, Double> qmap, Map<String, Double> qbias)
    {
       OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
 

@@ -12,7 +12,7 @@ import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -37,7 +37,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    final ReferenceFrame cameraFrame;
 
    protected final Map<String, Double> qbias = new HashMap<>();
-   protected final SDFFullRobotModel fullRobotModel;
+   protected final SDFFullHumanoidRobotModel fullRobotModel;
 
    protected final OneDoFJoint[] joints;
    protected final ArrayList<Map<String, Double>> q = new ArrayList<>();

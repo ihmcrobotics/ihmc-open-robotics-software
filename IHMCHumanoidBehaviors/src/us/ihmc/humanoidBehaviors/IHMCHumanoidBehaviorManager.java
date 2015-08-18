@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors;
 import java.io.IOException;
 import java.util.Arrays;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
@@ -87,7 +87,7 @@ public class IHMCHumanoidBehaviorManager
          yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.BEHAVIOR, BEHAVIOR_YO_VARIABLE_SERVER_DT);
       }
 
-      SDFFullRobotModel fullRobotModel = wholeBodyControllerParameters.createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = wholeBodyControllerParameters.createFullRobotModel();
       BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(behaviorPacketCommunicator, registry);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -163,7 +163,7 @@ public class IHMCHumanoidBehaviorManager
     * @param forceSensorDataHolder Holds the force sensor data
     * @param ankleHeight 
     */
-   private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, SDFFullRobotModel fullRobotModel,
+   private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, SDFFullHumanoidRobotModel fullRobotModel,
          SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry,
          CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters)
@@ -217,7 +217,7 @@ public class IHMCHumanoidBehaviorManager
       }
    }
 
-   private void createAndRegisterAutomaticDiagnostic(BehaviorDisptacher dispatcher, SDFFullRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+   private void createAndRegisterAutomaticDiagnostic(BehaviorDisptacher dispatcher, SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
          DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, CapturePointUpdatable capturePointUpdatable,
          WholeBodyControllerParameters wholeBodyControllerParameters, double timeToWait, YoGraphicsListRegistry yoGraphicsListRegistry)
    {

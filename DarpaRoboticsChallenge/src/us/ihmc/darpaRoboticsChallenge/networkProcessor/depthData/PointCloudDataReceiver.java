@@ -10,7 +10,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.PacketConsumer;
@@ -39,7 +39,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class PointCloudDataReceiver extends Thread implements NetStateListener
 {
-   private final SDFFullRobotModel fullRobotModel;
+   private final SDFFullHumanoidRobotModel fullRobotModel;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final DepthDataFilter depthDataFilter;
