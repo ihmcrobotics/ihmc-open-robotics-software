@@ -11,7 +11,7 @@ import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprUtil;
 import us.ihmc.steppr.hardware.configuration.StepprAnkleKinematicParameters;
 import us.ihmc.steppr.hardware.configuration.StepprFourbarProperties;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.humanoidRobotics.model.BaseFullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -34,7 +34,7 @@ public class StepprOutputProcessor implements OutputProcessor
    private final AcsellFourbarCalculator rightFourbar;
    private EnumMap<StepprJoint, OneDoFJoint> wholeBodyControlJoints;
 
-   public StepprOutputProcessor(FullRobotModel controllerFullRobotModel)
+   public StepprOutputProcessor(BaseFullRobotModel controllerFullRobotModel)
    {
       wholeBodyControlJoints = StepprUtil.createJointMap(controllerFullRobotModel.getOneDoFJoints());
 
