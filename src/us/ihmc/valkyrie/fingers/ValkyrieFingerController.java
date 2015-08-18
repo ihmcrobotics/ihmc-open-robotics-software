@@ -2,7 +2,7 @@ package us.ihmc.valkyrie.fingers;
 
 import java.util.LinkedHashMap;
 
-import us.ihmc.SdfLoader.SDFBaseFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.communication.packets.dataobjects.FingerState;
@@ -32,7 +32,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final boolean isRunningOnRealRobot;
-   private final SDFBaseFullRobotModel fullRobotModel;
+   private final SDFFullRobotModel fullRobotModel;
    
    private final DoubleYoVariable fingerControllerTime = new DoubleYoVariable("fingerControllerTime", registry);
    private final LongYoVariable lastEstimatorStartTime = new LongYoVariable("lastEstimatorStartTime", registry);
