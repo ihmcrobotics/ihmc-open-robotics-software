@@ -7,4 +7,5 @@ dependencies
     compile project(':IHMCJavaToolkit')
     compile project(':IHMCRoboticsToolkit')
     compile project(':IHMCCommunication')
+    compile project(':IHMCYoUtilities')
 }

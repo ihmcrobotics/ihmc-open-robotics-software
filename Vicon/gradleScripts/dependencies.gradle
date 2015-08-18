@@ -1,8 +1,7 @@
-dependencies {
+dependencies
+{
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: '1.5.2'
-	
-	
 	
 	compile project(':SimulationConstructionSet')
 	compile project(':IHMCUtilities')
@@ -11,4 +10,5 @@ dependencies {
 	compile project(':Graphics3DAdapter')
 	compile project(':UserInterface')
 	compile project(':IHMCRoboticsToolkit')
+	compile project(':IHMCHumanoidRobotics')
 }
