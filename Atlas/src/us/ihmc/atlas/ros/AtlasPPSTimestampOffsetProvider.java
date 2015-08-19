@@ -5,12 +5,12 @@ import java.util.concurrent.atomic.AtomicLong;
 import multisense_ros.StampedPps;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.tools.time.TimeTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosTimestampSubscriber;
-import us.ihmc.tools.time.TimeTools;
 
-public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
+public class AtlasPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffsetProvider
 {
    public static final boolean DEBUG = false;
 
@@ -85,7 +85,7 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
       return offsetIsDetermined;
    }
 
-   public synchronized static PPSTimestampOffsetProvider getInstance(AtlasSensorInformation sensorInformation)
+   public synchronized static DRCROSPPSTimestampOffsetProvider getInstance(AtlasSensorInformation sensorInformation)
    {
       if (instance == null)
          instance = new AtlasPPSTimestampOffsetProvider(sensorInformation);

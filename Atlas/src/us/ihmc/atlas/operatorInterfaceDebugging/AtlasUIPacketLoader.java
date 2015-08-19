@@ -5,12 +5,12 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Scanner;
 
-import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.KryoStreamDeSerializer;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.io.printing.PrintTools;
