@@ -7,5 +7,6 @@ dependencies
     compile project(':IHMCJavaToolkit')
     compile project(':IHMCRoboticsToolkit')
     compile project(':IHMCCommunication')
+    testCompile project(':IHMCCommunication').sourceSets.test.output
     compile project(':IHMCYoUtilities')
 }
