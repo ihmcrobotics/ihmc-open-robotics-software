@@ -34,6 +34,8 @@ dependencies {
     compile project(':IHMCUtilities')
     compile project(':CommonWalkingControlModules')
     compile project(':DarpaRoboticsChallenge')
+    compile project(':IHMCHumanoidRobotics')
+    testCompile project(':IHMCHumanoidRobotics').sourceSets.test.output
     testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
     testCompile project(':CommonWalkingControlModules').sourceSets.test.output
     testCompile project(':IHMCHumanoidOperatorInterface').sourceSets.test.output
