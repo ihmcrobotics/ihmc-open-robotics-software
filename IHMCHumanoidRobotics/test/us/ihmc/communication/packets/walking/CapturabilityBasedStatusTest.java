@@ -13,9 +13,9 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.KryoStreamDeSerializer;
 import us.ihmc.communication.net.KryoStreamSerializer;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;

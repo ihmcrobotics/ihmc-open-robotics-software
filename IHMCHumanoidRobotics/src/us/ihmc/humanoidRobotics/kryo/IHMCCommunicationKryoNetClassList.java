@@ -1,4 +1,4 @@
-package us.ihmc.communication.kryo;
+package us.ihmc.humanoidRobotics.kryo;
 
 import java.util.ArrayList;
 
@@ -18,6 +18,7 @@ import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.communication.packets.DetectedObjectPacket;
 import us.ihmc.communication.packets.HighLevelStateChangePacket;
 import us.ihmc.communication.packets.HighLevelStatePacket;
+import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.LegCompliancePacket;
 import us.ihmc.communication.packets.LowLevelDrivingAction;
@@ -26,6 +27,7 @@ import us.ihmc.communication.packets.LowLevelDrivingStatus;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.SCSListenerPacket;
+import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.bdi.BDIBehaviorCommandPacket;
 import us.ihmc.communication.packets.bdi.BDIBehaviorStatusPacket;
@@ -52,7 +54,6 @@ import us.ihmc.communication.packets.dataobjects.BlindWalkingDirection;
 import us.ihmc.communication.packets.dataobjects.BlindWalkingSpeed;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.communication.packets.dataobjects.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.driving.DrivingStatePacket;
 import us.ihmc.communication.packets.driving.DrivingTrajectoryPacket;
@@ -109,7 +110,6 @@ import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.communication.packets.sensing.RawIMUPacket;
 import us.ihmc.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
-import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.sensing.StateEstimatorModePacket;
 import us.ihmc.communication.packets.sensing.TestbedClientPacket;
 import us.ihmc.communication.packets.sensing.TestbedServerPacket;
