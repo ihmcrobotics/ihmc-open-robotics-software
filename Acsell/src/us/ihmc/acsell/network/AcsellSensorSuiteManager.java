@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 
 public class AcsellSensorSuiteManager implements DRCSensorSuiteManager
 {
