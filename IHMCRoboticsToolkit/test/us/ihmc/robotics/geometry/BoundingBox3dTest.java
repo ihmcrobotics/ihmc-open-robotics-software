@@ -82,10 +82,7 @@ public class BoundingBox3dTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testVerifyBounds()
    {
       Point3d lowerLeftPoint = new Point3d(0.0, 0.1, 0.6);
@@ -94,10 +91,7 @@ public class BoundingBox3dTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testVerifyBounds_2()
    {
       Point3d lowerLeftPoint = new Point3d(0.0, 0.1, 0.6);
@@ -106,10 +100,7 @@ public class BoundingBox3dTest
    }
 
    @EstimatedDuration(duration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testVerifyBounds_3()
    {
       Point3d lowerLeftPoint = new Point3d(0.0, 0.1, 0.6);
