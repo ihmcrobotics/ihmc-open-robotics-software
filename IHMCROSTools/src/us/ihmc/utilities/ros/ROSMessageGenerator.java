@@ -1,7 +1,5 @@
 package us.ihmc.utilities.ros;
 
-
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -23,7 +21,6 @@ import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.tools.DocumentedEnum;
-import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 
 public class ROSMessageGenerator
 {
@@ -34,21 +31,7 @@ public class ROSMessageGenerator
    {
       this.overwriteSubMessages = overwriteSubMessages;
    }
-
-   public static void main(String... args) throws Exception
-   {
-      generate();
-   }
-
-   public static void generate() throws Exception
-   {
-      ROSMessageGenerator messageGenerator = new ROSMessageGenerator(true);
-      for (Class clazz : IHMCRosApiMessageMap.PACKET_LIST)
-      {
-         messageGenerator.createNewRosMessage(clazz, true);
-      }
-   }
-
+   
    public String createNewRosMessage(Class clazz, boolean overwrite) throws Exception
    {
       if (clazz == null)
