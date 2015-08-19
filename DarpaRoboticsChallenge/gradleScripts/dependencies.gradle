@@ -67,6 +67,7 @@ dependencies {
 
 	testCompile project(':CommonWalkingControlModules').sourceSets.test.output
 	testCompile project(':IHMCUtilities').sourceSets.test.output
+	testCompile project(':IHMCHumanoidRobotics').sourceSets.test.output
 	testCompile project(':IHMCJavaToolkit').sourceSets.test.output
 	testCompile project(':IHMCCommunication').sourceSets.test.output
 	testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
