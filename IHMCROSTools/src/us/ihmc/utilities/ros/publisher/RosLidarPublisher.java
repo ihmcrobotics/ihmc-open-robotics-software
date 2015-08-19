@@ -3,7 +3,7 @@ package us.ihmc.utilities.ros.publisher;
 import org.ros.message.Time;
 
 import std_msgs.Header;
-import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
+import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 
 public class RosLidarPublisher extends RosTopicPublisher<sensor_msgs.LaserScan>

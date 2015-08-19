@@ -1,13 +1,14 @@
 package us.ihmc.utilities.ros.publisher;
 
-import geometry_msgs.Quaternion;
-import geometry_msgs.Vector3;
-import org.ros.message.Time;
-import std_msgs.Header;
-import us.ihmc.communication.packets.dataobjects.IMUPacket;
-
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
+
+import org.ros.message.Time;
+
+import geometry_msgs.Quaternion;
+import geometry_msgs.Vector3;
+import std_msgs.Header;
+import us.ihmc.communication.packets.IMUPacket;
 
 public class RosImuPublisher extends RosTopicPublisher<sensor_msgs.Imu>
 {

@@ -1,8 +1,5 @@
 package us.ihmc.utilities.ros.publisher;
 
-import ihmc_msgs.BatchRawImuData;
-import ihmc_msgs.RawImuData;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,8 +9,10 @@ import javax.vecmath.Vector3f;
 
 import org.ros.message.Time;
 
+import ihmc_msgs.BatchRawImuData;
+import ihmc_msgs.RawImuData;
 import std_msgs.Header;
-import us.ihmc.communication.packets.dataobjects.IMUPacket;
+import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.tools.time.TimeTools;
 

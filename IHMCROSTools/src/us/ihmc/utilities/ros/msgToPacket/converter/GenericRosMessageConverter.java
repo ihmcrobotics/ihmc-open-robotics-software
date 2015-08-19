@@ -1,18 +1,14 @@
 package us.ihmc.utilities.ros.msgToPacket.converter;
 
-import com.google.common.base.CaseFormat;
-import us.ihmc.communication.packetAnnotations.IgnoreField;
-
-/**
- * Created by agrabertilton on 4/23/15.
- */
-import geometry_msgs.Point;
-import geometry_msgs.Pose;
-import geometry_msgs.Quaternion;
-import geometry_msgs.Vector3;
-
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -26,13 +22,21 @@ import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
-import us.ihmc.communication.packets.Packet;
+import com.google.common.base.CaseFormat;
+
+/**
+ * Created by agrabertilton on 4/23/15.
+ */
+import geometry_msgs.Point;
+import geometry_msgs.Pose;
+import geometry_msgs.Quaternion;
+import geometry_msgs.Vector3;
+import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RotationFunctions;
-import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class GenericRosMessageConverter
 {
@@ -391,19 +395,6 @@ public class GenericRosMessageConverter
       return methodName;
    }
 
-
-   public static Packet convertRosMsgToPacket(Message message)
-           throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, SecurityException, InstantiationException
-   {
-      String messageType = message.toRawMessage().getType();
-      Class packetClass = IHMCRosApiMessageMap.PACKET_MESSAGE_NAME_MAP.get(messageType);
-      Constructor<Packet> emptyConstructor = packetClass.getDeclaredConstructor();
-      Packet outputPacket = emptyConstructor.newInstance();
-      convertToPacket(message, outputPacket);
-
-      return outputPacket;
-   }
-
    public static void convertToPacket(Message message, Object outputPacket)
            throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, SecurityException, InstantiationException
    {
@@ -710,7 +701,7 @@ public class GenericRosMessageConverter
    }
 
 
-   private static Vector3 convertVector3dToVector3(Vector3d vector3d)
+   public static Vector3 convertVector3dToVector3(Vector3d vector3d)
    {
       geometry_msgs.Vector3 value = messageFactory.newFromType("geometry_msgs/Vector3");
 
@@ -720,7 +711,7 @@ public class GenericRosMessageConverter
 
       return value;
    }
-   private static Vector3 convertVector3fToVector3(Vector3f vector3f){
+   public static Vector3 convertVector3fToVector3(Vector3f vector3f){
       geometry_msgs.Vector3 value = messageFactory.newFromType("geometry_msgs/Vector3");
 
       value.setX(vector3f.getX());
@@ -799,5 +790,15 @@ public class GenericRosMessageConverter
    private static boolean isIgnoredField(Field field)
    {
       return field.isAnnotationPresent(IgnoreField.class);
+   }
+   
+   public static <E extends Enum<E>> E convertByteToEnum(Class<E> enumClass, byte ordinal)
+   {
+      return enumClass.getEnumConstants()[ordinal];
+   }
+   
+   public static byte convertEnumToByte(Enum<?> val)
+   {
+      return (byte)val.ordinal();
    }
 }

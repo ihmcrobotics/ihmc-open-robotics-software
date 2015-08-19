@@ -6,7 +6,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.utilities.ros.msgToPacket.converter.ROSMessageConverterTest.class,
+//   us.ihmc.darpaRoboticsChallenge.ros.ROSMessageConverterTest.class,
 //   us.ihmc.utilities.ros.RosServiceClientTest.class
 })
 
