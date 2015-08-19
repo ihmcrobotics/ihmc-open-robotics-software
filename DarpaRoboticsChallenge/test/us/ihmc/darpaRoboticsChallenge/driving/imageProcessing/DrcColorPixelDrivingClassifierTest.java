@@ -1,4 +1,4 @@
-package us.ihmc.imageProcessing.driving;
+package us.ihmc.darpaRoboticsChallenge.driving.imageProcessing;
 
 import static org.junit.Assert.fail;
 
