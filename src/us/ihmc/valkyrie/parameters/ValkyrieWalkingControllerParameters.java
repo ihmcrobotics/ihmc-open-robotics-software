@@ -266,7 +266,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public boolean controlHeadAndHandsWithSliders()
    {
-      return runningOnRealRobot;
+//      return runningOnRealRobot;
+      return false;
    }
 
    // USE THESE FOR Real Robot and sims when controlling pelvis height instead of CoM.
@@ -883,10 +884,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
             "LeftThumbPitch1",       
             "LeftThumbPitch2",       
             "LeftThumbPitch3",
-            "UpperNeckPitch",
-            "LowerNeckPitch",
-            "NeckYaw"};
-
+//            "UpperNeckPitch",
+//            "LowerNeckPitch",
+//            "NeckYaw"
+             };
+            
       return jointsToIgnore;
    }
 
