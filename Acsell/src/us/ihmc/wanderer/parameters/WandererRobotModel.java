@@ -26,6 +26,7 @@ import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.humanoidRobotics.model.FullRobotModel;
@@ -44,7 +45,6 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
-import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.wanderer.controlParameters.WandererArmControlParameters;
 import us.ihmc.wanderer.controlParameters.WandererCapturePointPlannerParameters;
 import us.ihmc.wanderer.controlParameters.WandererStateEstimatorParameters;
@@ -274,7 +274,7 @@ public class WandererRobotModel implements DRCRobotModel
    }
 
    @Override
-   public PPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
+   public DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
    {
       return new AlwaysZeroOffsetPPSTimestampOffsetProvider();
    }
