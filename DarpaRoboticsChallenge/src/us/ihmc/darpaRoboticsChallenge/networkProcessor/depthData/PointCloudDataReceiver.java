@@ -23,6 +23,7 @@ import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.communication.packets.sensing.MultisenseMocapExperimentPacket;
 import us.ihmc.communication.packets.sensing.MultisenseTest;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
+import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
@@ -33,7 +34,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 

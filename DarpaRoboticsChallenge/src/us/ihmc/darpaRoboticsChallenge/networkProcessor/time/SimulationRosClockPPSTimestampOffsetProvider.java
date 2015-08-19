@@ -3,11 +3,12 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.time;
 import org.ros.message.Time;
 
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosClockPublisher;
 
-public class SimulationRosClockPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
+public class SimulationRosClockPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffsetProvider
 {
 
    private RosClockPublisher clockPubisher;
@@ -33,6 +34,7 @@ public class SimulationRosClockPPSTimestampOffsetProvider implements PPSTimestam
       return timeStamp;
    }
 
+   @Override
    public void attachToRosMainNode(RosMainNode rosMainNode)
    {
       rosMainNode.attachPublisher("/clock", clockPubisher);

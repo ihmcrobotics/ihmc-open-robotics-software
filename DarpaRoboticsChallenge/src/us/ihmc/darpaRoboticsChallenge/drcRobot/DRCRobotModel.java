@@ -2,38 +2,37 @@ package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
 import java.util.LinkedHashMap;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import com.jme3.math.Transform;
+
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.HeightCalculatorParameters;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
-import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
+import us.ihmc.humanoidRobotics.partNames.NeckJointName;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.pathGeneration.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import us.ihmc.humanoidRobotics.partNames.NeckJointName;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
-
-import com.jme3.math.Transform;
 
 public interface DRCRobotModel extends WholeBodyControllerParameters
 {
@@ -75,7 +74,7 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
    
    public abstract double getStandPrepAngle(String jointName);
 
-   public abstract PPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
+   public abstract DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
 
    public abstract DRCSensorSuiteManager getSensorSuiteManager();
 

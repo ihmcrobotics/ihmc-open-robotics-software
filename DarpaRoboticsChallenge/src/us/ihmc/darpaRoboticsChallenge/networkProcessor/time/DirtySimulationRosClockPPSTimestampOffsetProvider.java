@@ -3,12 +3,11 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.time;
 import org.ros.time.WallTimeProvider;
 
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 
-public class DirtySimulationRosClockPPSTimestampOffsetProvider implements
-      PPSTimestampOffsetProvider {
-   
+public class DirtySimulationRosClockPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffsetProvider
+{
    private WallTimeProvider wallTimeProvider;
    
    public DirtySimulationRosClockPPSTimestampOffsetProvider()
@@ -28,11 +27,6 @@ public class DirtySimulationRosClockPPSTimestampOffsetProvider implements
       return timeStamp;
    }
 
-   public void attachToRosMainNode(RosMainNode rosMainNode)
-   {
-
-   }
-
    public boolean offsetIsDetermined() {
       return true;
    }
@@ -47,5 +41,10 @@ public class DirtySimulationRosClockPPSTimestampOffsetProvider implements
    public void receivedPacket(RobotConfigurationData packet)
    {
       
+   }
+
+   @Override
+   public void attachToRosMainNode(RosMainNode rosMainNode)
+   {
    }
 }

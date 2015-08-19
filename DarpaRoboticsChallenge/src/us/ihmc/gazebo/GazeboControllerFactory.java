@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
@@ -22,6 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.robotController.GazeboThreadedRobotController;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;

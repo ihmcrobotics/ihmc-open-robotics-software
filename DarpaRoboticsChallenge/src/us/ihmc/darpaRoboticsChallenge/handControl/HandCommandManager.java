@@ -3,10 +3,10 @@ package us.ihmc.darpaRoboticsChallenge.handControl;
 import java.io.IOException;
 
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 import us.ihmc.robotics.robotSide.RobotSide;
 

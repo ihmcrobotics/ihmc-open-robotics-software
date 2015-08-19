@@ -3,6 +3,8 @@ evaluationDependsOn(':IHMCRoboticsToolkit')
 evaluationDependsOn(':IHMCJavaToolkit')
 evaluationDependsOn(':CommonWalkingControlModules')
 evaluationDependsOn(':IHMCCommunication')
+evaluationDependsOn(':IHMCHumanoidRobotics')
+evaluationDependsOn(':IHMCROSTools')
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'

@@ -11,12 +11,12 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudSource;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.RosPointCloudReceiver;
+import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class MultiSenseSensorManager

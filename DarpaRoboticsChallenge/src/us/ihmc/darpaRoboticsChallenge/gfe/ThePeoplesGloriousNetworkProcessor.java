@@ -1,5 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge.gfe;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Map;
+
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
@@ -8,41 +13,45 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.*;
+import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
+import us.ihmc.communication.packets.HighLevelStateChangePacket;
+import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.ros.*;
+import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.ros.IHMCPacketToMsgPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMap;
+import us.ihmc.darpaRoboticsChallenge.ros.PeriodicRosHighLevelStatePublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosCapturabilityBasedStatusPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosRobotConfigurationDataPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.subscriber.IHMCMsgToPacketSubscriber;
+import us.ihmc.darpaRoboticsChallenge.ros.subscriber.RequestControllerStopSubscriber;
+import us.ihmc.darpaRoboticsChallenge.ros.subscriber.RosArmJointTrajectorySubscriber;
+import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.ihmcPerception.IHMCProntoRosLocalizationUpdateSubscriber;
 import us.ihmc.ihmcPerception.RosLocalizationPoseCorrectionSubscriber;
 import us.ihmc.pathGeneration.footstepGenerator.TimestampedPoseFootStepGenerator;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
-import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
-import us.ihmc.utilities.ros.publisher.IHMCPacketToMsgPublisher;
 import us.ihmc.utilities.ros.publisher.PrintStreamToRosBridge;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
-import us.ihmc.utilities.ros.subscriber.IHMCMsgToPacketSubscriber;
-import us.ihmc.utilities.ros.subscriber.RequestControllerStopSubscriber;
-import us.ihmc.utilities.ros.subscriber.RosArmJointTrajectorySubscriber;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Map;
 
 public class ThePeoplesGloriousNetworkProcessor
 {
    private static final String nodeName = "/controller";
 
-   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
+   private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RosMainNode rosMainNode;
    private final DRCRobotModel robotModel;
    private final PacketCommunicator controllerCommunicationBridge;
@@ -55,7 +64,7 @@ public class ThePeoplesGloriousNetworkProcessor
    private final MessageFactory messageFactory;
    private final FullHumanoidRobotModel fullRobotModel;
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator gfe_communicator, ObjectCommunicator sensorCommunicator, PPSTimestampOffsetProvider ppsOffsetProvider, 
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator gfe_communicator, ObjectCommunicator sensorCommunicator, DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, 
                                              DRCRobotModel robotModel, String namespace, String tfPrefix) throws IOException
    {
       this.rosMainNode = new RosMainNode(rosUri, namespace + nodeName);
