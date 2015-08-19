@@ -7,13 +7,11 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.communication.net.KryoObjectCommunicatorTest.class,
    us.ihmc.communication.networkProcessor.NetworkProcessorTest.class,
-   us.ihmc.communication.remote.serialization.JointConfigurationDataSenderTest.class,
-   us.ihmc.communication.streamingData.StreamingDataTCPServerTest.class
+   us.ihmc.communication.remote.serialization.JointConfigurationDataSenderTest.class
 })
 
-public class IHMCCommunicationAFlakyTestSuite
+public class IHMCHumanoidRoboticsAFlakyTestSuite
 {
    public static void main(String[] args)
    {

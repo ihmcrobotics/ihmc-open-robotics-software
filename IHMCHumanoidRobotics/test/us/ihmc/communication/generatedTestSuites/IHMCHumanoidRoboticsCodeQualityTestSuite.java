@@ -11,7 +11,7 @@ import org.junit.runners.Suite;
    us.ihmc.communication.packets.PacketCodeQualityTest.class
 })
 
-public class IHMCCommunicationCodeQualityTestSuite
+public class IHMCHumanoidRoboticsCodeQualityTestSuite
 {
    public static void main(String[] args)
    {
