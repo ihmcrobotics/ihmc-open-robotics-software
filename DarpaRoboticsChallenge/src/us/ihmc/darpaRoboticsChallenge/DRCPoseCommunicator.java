@@ -8,7 +8,7 @@ import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.packets.dataobjects.IMUPacket;
+import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.ConcurrentRingBuffer;

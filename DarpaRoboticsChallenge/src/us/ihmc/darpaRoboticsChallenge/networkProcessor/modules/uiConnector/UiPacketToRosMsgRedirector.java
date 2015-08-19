@@ -14,9 +14,9 @@ import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.ros.IHMCPacketToMsgPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMap;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
-import us.ihmc.utilities.ros.publisher.IHMCPacketToMsgPublisher;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 
 public class UiPacketToRosMsgRedirector implements GlobalPacketConsumer

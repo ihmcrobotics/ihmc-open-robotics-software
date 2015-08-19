@@ -5,9 +5,9 @@ import org.ros.message.Time;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
-import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
+import us.ihmc.communication.packets.SimulatedLidarScanPacket;
+import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
-import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosLidarPublisher;
 

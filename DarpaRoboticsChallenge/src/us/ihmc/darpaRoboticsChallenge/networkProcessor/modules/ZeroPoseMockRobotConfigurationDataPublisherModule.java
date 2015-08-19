@@ -8,9 +8,8 @@ import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.dataobjects.IMUPacket;
+import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -18,6 +17,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.model.RobotMotionStatus;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.model.FullRobotModelUtils;
 
 public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnable

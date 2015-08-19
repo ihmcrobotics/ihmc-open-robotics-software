@@ -2,10 +2,11 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.time;
 
 
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 
-public class AlwaysZeroOffsetPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
+public class AlwaysZeroOffsetPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffsetProvider
 {
    public long getCurrentTimestampOffset()
    {
@@ -15,11 +16,6 @@ public class AlwaysZeroOffsetPPSTimestampOffsetProvider implements PPSTimestampO
    public long adjustTimeStampToRobotClock(long timeStamp)
    {
       return timeStamp;
-   }
-
-   public void attachToRosMainNode(RosMainNode rosMainNode)
-   {
-      return;
    }
 
    public boolean offsetIsDetermined()
@@ -37,5 +33,10 @@ public class AlwaysZeroOffsetPPSTimestampOffsetProvider implements PPSTimestampO
    public void receivedPacket(RobotConfigurationData packet)
    {
       
+   }
+
+   @Override
+   public void attachToRosMainNode(RosMainNode rosMainNode)
+   {
    }
 }

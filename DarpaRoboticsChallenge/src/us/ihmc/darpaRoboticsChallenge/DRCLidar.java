@@ -6,7 +6,7 @@ import java.util.Arrays;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
+import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.graphics3DAdapter.GPULidar;
 import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
