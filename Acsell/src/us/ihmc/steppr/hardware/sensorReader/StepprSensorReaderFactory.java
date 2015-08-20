@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.acsell.hardware.sensorReader.AcsellSensorReader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
@@ -17,7 +18,6 @@ import us.ihmc.steppr.hardware.StepprUtil;
 import us.ihmc.steppr.hardware.state.StepprState;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
-import us.ihmc.humanoidRobotics.model.DesiredJointDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
