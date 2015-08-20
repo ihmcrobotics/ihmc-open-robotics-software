@@ -7,7 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.communication.packets.dataobjects.RobotConfigurationDataTest.class,
+//   us.ihmc.atlas.packets.AtlasRobotConfigurationDataTest.class,
    us.ihmc.communication.packets.PacketCodeQualityTest.class
 })
 
