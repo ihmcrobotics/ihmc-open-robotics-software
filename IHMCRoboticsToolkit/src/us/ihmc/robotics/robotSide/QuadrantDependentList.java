@@ -1,11 +1,28 @@
 package us.ihmc.robotics.robotSide;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class QuadrantDependentList<V> extends LinkedHashMap<RobotQuadrant, V> implements Iterable<V>
 {
+   public QuadrantDependentList()
+   {
+      super();
+   }
+   
+   public QuadrantDependentList(V frontLeftObject, V frontRightObject, V backLeftObject, V backRightObject)
+   {
+      super();
+      this.put(RobotQuadrant.FRONT_LEFT, frontLeftObject);
+      this.put(RobotQuadrant.FRONT_RIGHT, frontRightObject);
+      this.put(RobotQuadrant.BACK_LEFT, backLeftObject);
+      this.put(RobotQuadrant.BACK_RIGHT, backRightObject);
+   }
+   
    public V get(RobotQuadrant key)
    {
       return super.get(key);
@@ -70,5 +87,20 @@ public class QuadrantDependentList<V> extends LinkedHashMap<RobotQuadrant, V> im
       {
          throw new UnsupportedOperationException("Cannot remove elements from a QuadrantDependentList.");
       }
+   }
+   
+   public static <K extends Enum<K>, V> QuadrantDependentList<EnumMap<K, V>> createListOfEnumMaps(Class<K> keyType)
+   {
+      return new QuadrantDependentList<EnumMap<K, V>>(new EnumMap<K, V>(keyType), new EnumMap<K, V>(keyType),new EnumMap<K, V>(keyType),new EnumMap<K, V>(keyType));
+   }
+
+   public static <K, V> QuadrantDependentList<Map<K, V>> createListOfHashMaps()
+   {
+      return new QuadrantDependentList<Map<K, V>>(new LinkedHashMap<K, V>(), new LinkedHashMap<K, V>(),new LinkedHashMap<K, V>(),new LinkedHashMap<K, V>());
+   }
+   
+   public static <V> QuadrantDependentList<ArrayList<V>> createListOfArrayLists()
+   {
+      return new QuadrantDependentList<ArrayList<V>>(new ArrayList<V>(), new ArrayList<V>(), new ArrayList<V>(), new ArrayList<V>());
    }
 }
