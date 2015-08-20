@@ -46,7 +46,7 @@ public class ThreadToolsTest
    @Test(timeout = 30000)
    public void testRunCommandLineEchoOutput()
    {
-      String bambooJobName = System.getProperty("BAMBOO_JOB_NAME");
+      String bambooJobName = System.getenv("BAMBOO_JOB_NAME");
       if (bambooJobName != null)
       {
          System.out.println("Not compatable with Bamboo. Job name: " + bambooJobName);
