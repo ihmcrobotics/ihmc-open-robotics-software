@@ -2,15 +2,14 @@ package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
 
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class SDFPerfectSimulatedOutputWriter 
 {

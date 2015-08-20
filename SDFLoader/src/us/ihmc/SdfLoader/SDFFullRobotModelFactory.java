@@ -1,6 +1,6 @@
 package us.ihmc.SdfLoader;
 
-import us.ihmc.humanoidRobotics.model.FullRobotModelFactory;
+import us.ihmc.SdfLoader.models.FullRobotModelFactory;
 
 public interface SDFFullRobotModelFactory extends FullRobotModelFactory
 {
