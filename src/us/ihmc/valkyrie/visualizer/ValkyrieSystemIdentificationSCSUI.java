@@ -6,11 +6,11 @@ package us.ihmc.valkyrie.visualizer;
 
 import javax.swing.JButton;
 
-import us.ihmc.CoM.LinkComIDActionListener;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.systemIdentification.com.LinkComIDActionListener;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieSystemIdentificationSCSUI
