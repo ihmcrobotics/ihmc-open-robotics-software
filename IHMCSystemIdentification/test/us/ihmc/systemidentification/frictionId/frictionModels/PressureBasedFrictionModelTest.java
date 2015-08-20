@@ -1,6 +1,9 @@
-package us.ihmc.FrictionID.frictionModels;
+package us.ihmc.systemidentification.frictionId.frictionModels;
 
 import org.junit.Test;
+
+import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionModel;
+import us.ihmc.systemIdentification.frictionId.frictionModels.PressureBasedFrictionModel;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 import static org.junit.Assert.assertEquals;

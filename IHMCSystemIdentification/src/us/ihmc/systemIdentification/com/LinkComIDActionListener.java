@@ -1,4 +1,4 @@
-package us.ihmc.CoM;
+package us.ihmc.systemIdentification.com;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

@@ -1,9 +1,11 @@
-package us.ihmc.FrictionID.frictionModels;
+package us.ihmc.systemidentification.frictionId.frictionModels;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import us.ihmc.systemIdentification.frictionId.frictionModels.AsymmetricCoulombViscousStribeckFrictionModel;
+import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionModel;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class AsymmetricCoulombViscousStribeckFrictionModelTest

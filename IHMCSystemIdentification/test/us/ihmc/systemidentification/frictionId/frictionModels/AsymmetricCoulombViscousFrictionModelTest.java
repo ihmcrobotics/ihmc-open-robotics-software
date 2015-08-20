@@ -1,13 +1,21 @@
-package us.ihmc.FrictionID.frictionModels;
+package us.ihmc.systemidentification.frictionId.frictionModels;
 
 import org.junit.Test;
+
+import us.ihmc.systemIdentification.frictionId.frictionModels.AsymmetricCoulombViscousFrictionModel;
+import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionModel;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 import static org.junit.Assert.assertEquals;
 
-public class NoCompensationFrictionModelTest
+public class AsymmetricCoulombViscousFrictionModelTest
 {
    private static double epsilon = 1e-10;
+
+   private double positiveCoulomb = 5.5;
+   private double positiveViscous = 0.2;
+   private double negativeCoulomb = 6.1;
+   private double negativeViscous = 0.21;
 
    private double positiveVelocity = 1.2;
    private double negativeVelocity = -1.5;
@@ -17,14 +25,15 @@ public class NoCompensationFrictionModelTest
 	@Test(timeout = 30000)
    public void testConstructorAndFormula()
    {
-      NoCompensationFrictionModel model = new NoCompensationFrictionModel();
+      AsymmetricCoulombViscousFrictionModel model = new AsymmetricCoulombViscousFrictionModel(positiveCoulomb, positiveViscous,
+            negativeCoulomb, negativeViscous);
 
       FrictionModel frictionModel = model.getFrictionModel();
-      assertEquals(FrictionModel.OFF, frictionModel);
+      assertEquals(FrictionModel.ASYMMETRIC_COULOMB_VISCOUS, frictionModel);
 
       model.computeFrictionForce(positiveVelocity);
       double friction = model.getFrictionForce();
-      assertEquals(0.0, friction, epsilon);
+      assertEquals(5.74, friction, epsilon);
 
       model.computeFrictionForce(zeroVelocity);
       double friction2 = model.getFrictionForce();
@@ -32,6 +41,6 @@ public class NoCompensationFrictionModelTest
 
       model.computeFrictionForce(negativeVelocity);
       double friction3 = model.getFrictionForce();
-      assertEquals(0.0, friction3, epsilon);
+      assertEquals(-6.415, friction3, epsilon);
    }
 }

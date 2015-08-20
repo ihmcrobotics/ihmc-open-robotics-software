@@ -1,4 +1,4 @@
-package us.ihmc.FrictionID.frictionModels;
+package us.ihmc.systemIdentification.frictionId.frictionModels;
 
 /**
  * 
