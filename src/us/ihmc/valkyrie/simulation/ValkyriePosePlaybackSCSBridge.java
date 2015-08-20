@@ -6,7 +6,7 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PosePlaybackSCSBridge;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 

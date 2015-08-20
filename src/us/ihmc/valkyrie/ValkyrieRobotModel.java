@@ -31,8 +31,8 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPST
 import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
-import us.ihmc.humanoidRobotics.partNames.NeckJointName;
+import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;

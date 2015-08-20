@@ -9,8 +9,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlG
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.humanoidRobotics.partNames.NeckJointName;
-import us.ihmc.humanoidRobotics.partNames.SpineJointName;
+import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;

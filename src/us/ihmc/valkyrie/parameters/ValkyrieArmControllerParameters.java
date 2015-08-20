@@ -3,9 +3,9 @@ package us.ihmc.valkyrie.parameters;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.controllers.YoIndependentSE3PIDGains;
