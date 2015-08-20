@@ -448,5 +448,23 @@ public class SDFFullRobotModel implements FullRobotModel
          }
       }
    }
+   
+   public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+   {
+      oneDoFJointsToPack.clear();
+      InverseDynamicsJoint parent = oneDoFJointAtEndOfChain;
+
+      while (parent != rootJoint)
+      {
+         if (parent instanceof OneDoFJoint)
+         {
+            oneDoFJointsToPack.add((OneDoFJoint) parent);
+         }
+
+         parent = parent.getPredecessor().getParentJoint();
+      }
+
+      Collections.reverse(oneDoFJointsToPack);
+   }
 
 }
