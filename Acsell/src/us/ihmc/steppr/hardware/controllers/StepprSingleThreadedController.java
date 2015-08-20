@@ -6,6 +6,7 @@ import java.util.EnumMap;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.acsell.hardware.AcsellSetup;
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.acsell.hardware.command.UDPAcsellOutputWriter;
@@ -29,7 +30,6 @@ import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 
 public class StepprSingleThreadedController extends RealtimeThread
 {
