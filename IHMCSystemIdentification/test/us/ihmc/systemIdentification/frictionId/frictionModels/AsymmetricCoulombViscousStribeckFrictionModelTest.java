@@ -1,4 +1,4 @@
-package us.ihmc.systemIdentification2.frictionId.frictionModels;
+package us.ihmc.systemIdentification.frictionId.frictionModels;
 
 import static org.junit.Assert.assertEquals;
 
