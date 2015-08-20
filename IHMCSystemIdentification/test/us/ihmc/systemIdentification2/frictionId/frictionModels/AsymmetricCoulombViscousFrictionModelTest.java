@@ -1,4 +1,4 @@
-package us.ihmc.systemidentification.frictionId.frictionModels;
+package us.ihmc.systemIdentification2.frictionId.frictionModels;
 
 import org.junit.Test;
 
