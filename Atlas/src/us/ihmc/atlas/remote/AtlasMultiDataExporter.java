@@ -22,6 +22,7 @@ import javax.vecmath.Vector3d;
 import org.apache.batik.dom.util.HashTable;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -41,7 +42,6 @@ import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.gui.SwingUtils;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;

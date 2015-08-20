@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandCollisionDetectedPacket;
@@ -14,7 +15,6 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.robotics.Axis;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;

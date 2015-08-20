@@ -2,10 +2,10 @@ package us.ihmc.commonWalkingControlModules.kinematics;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
-import us.ihmc.humanoidRobotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

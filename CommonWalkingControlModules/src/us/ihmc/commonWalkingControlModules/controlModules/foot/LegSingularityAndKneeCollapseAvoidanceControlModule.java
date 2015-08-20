@@ -3,13 +3,13 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;

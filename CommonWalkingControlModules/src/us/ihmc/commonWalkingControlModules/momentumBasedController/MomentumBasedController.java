@@ -11,6 +11,8 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
@@ -41,8 +43,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;

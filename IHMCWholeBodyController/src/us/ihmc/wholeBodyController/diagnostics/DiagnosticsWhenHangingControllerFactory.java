@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ICPAndMomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
 
 public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehaviorFactory

@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -25,7 +26,6 @@ import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.humanoidRobotics.model.FullRobotModelUtils;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

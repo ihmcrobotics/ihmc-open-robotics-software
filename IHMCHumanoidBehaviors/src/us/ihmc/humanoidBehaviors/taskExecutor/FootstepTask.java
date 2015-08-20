@@ -2,9 +2,9 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import java.util.ArrayList;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.partNames.LimbName;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

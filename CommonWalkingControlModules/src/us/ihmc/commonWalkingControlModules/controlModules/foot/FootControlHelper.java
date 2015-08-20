@@ -7,6 +7,9 @@ import javax.vecmath.Point2d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -16,9 +19,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;

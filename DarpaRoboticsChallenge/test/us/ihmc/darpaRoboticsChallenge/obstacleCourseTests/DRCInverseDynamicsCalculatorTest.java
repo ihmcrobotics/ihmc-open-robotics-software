@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 
 public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTestInterface
 {

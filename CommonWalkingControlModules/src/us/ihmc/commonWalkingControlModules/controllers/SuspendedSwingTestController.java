@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controllers;
 
+import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.DoEveryTickSubController;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SwingSubController;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;

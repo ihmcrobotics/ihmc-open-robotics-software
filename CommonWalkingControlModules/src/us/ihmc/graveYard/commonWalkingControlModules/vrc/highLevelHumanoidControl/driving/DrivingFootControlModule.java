@@ -5,13 +5,13 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.communication.packets.LowLevelDrivingAction;
 import us.ihmc.communication.packets.LowLevelDrivingStatus;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;

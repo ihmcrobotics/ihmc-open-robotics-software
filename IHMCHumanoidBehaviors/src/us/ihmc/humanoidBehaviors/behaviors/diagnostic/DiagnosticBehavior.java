@@ -10,6 +10,8 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidArmPose;
 import us.ihmc.communication.packets.StampedPosePacket;
@@ -54,8 +56,6 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.partNames.LimbName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;

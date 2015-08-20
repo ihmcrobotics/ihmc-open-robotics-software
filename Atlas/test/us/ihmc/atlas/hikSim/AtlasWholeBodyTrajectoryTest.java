@@ -1,13 +1,13 @@
 package us.ihmc.atlas.hikSim;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyTrajectoryTest;

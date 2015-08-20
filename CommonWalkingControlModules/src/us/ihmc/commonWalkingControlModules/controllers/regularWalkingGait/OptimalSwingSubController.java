@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 import java.util.ArrayList;
 import java.util.EnumMap;
 
+import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SwingLegTorqueControlOnlyModule;
 import us.ihmc.commonWalkingControlModules.controlModules.LegJointPositionControlModule;
@@ -22,8 +24,6 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;

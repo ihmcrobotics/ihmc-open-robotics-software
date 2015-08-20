@@ -8,6 +8,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.communication.packets.walking.FootstepData;
@@ -20,7 +21,6 @@ import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;

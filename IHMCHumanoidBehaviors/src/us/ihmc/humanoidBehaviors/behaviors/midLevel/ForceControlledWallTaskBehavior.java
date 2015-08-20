@@ -5,6 +5,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.communication.packets.behaviors.WallTaskBehaviorData;
 import us.ihmc.communication.packets.behaviors.WallTaskBehaviorData.Commands;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
@@ -16,8 +18,6 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;

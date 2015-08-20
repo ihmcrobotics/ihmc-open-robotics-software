@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.alg.geo.PerspectiveOps;

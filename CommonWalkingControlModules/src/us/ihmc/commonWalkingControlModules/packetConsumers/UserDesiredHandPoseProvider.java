@@ -6,12 +6,12 @@ import java.util.Map;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

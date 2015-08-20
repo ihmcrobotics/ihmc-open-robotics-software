@@ -18,7 +18,7 @@ import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.model.RobotMotionStatus;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.humanoidRobotics.model.FullRobotModelUtils;
+import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 
 public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnable
 {

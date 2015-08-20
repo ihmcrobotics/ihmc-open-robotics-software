@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.posePlayback;
 
 import java.util.ArrayList;
 
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 
 public class PlaybackPoseSequence
 {

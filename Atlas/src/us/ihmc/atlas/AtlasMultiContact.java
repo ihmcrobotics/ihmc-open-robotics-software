@@ -6,6 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.initialSetup.MultiContactDRCRobotInitialSetup;
 import us.ihmc.atlas.initialSetup.PushUpDRCRobotInitialSetup;
@@ -38,8 +40,6 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

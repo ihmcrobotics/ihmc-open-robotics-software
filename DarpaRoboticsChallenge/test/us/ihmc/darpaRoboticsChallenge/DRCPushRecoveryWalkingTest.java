@@ -25,13 +25,13 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
-import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
+import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterface

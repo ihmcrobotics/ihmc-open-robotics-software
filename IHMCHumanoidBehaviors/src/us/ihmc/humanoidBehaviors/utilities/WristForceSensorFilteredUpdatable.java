@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.codehaus.jackson.map.RuntimeJsonMappingException;
 
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandCollisionDetectedPacket;
@@ -12,7 +13,6 @@ import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
 import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;

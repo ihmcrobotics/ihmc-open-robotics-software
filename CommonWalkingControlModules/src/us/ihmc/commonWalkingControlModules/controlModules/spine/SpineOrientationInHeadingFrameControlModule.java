@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.controlModules.spine;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.humanoidRobotics.partNames.SpineJointName;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

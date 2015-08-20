@@ -10,13 +10,13 @@ import java.util.Properties;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.partNames.ArmJointName;
+import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
-import us.ihmc.humanoidRobotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 

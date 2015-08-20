@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
-import us.ihmc.humanoidRobotics.partNames.NeckJointName;
+import us.ihmc.SdfLoader.partNames.NeckJointName;
 
 
 

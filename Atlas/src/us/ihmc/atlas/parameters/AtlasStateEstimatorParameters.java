@@ -9,9 +9,10 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
-import us.ihmc.humanoidRobotics.partNames.SpineJointName;
+
+import us.ihmc.SdfLoader.partNames.ArmJointName;
+import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
-import us.ihmc.humanoidRobotics.partNames.SpineJointName;
+import us.ihmc.SdfLoader.partNames.SpineJointName;
 
 
 

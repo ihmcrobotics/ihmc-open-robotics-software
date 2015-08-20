@@ -8,10 +8,11 @@ import javax.vecmath.Quat4d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.communication.packets.StampedPosePacket;
@@ -26,7 +27,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.humanoidRobotics.partNames.JointRole;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

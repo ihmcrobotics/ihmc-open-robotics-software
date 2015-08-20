@@ -6,11 +6,11 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
-import us.ihmc.humanoidRobotics.partNames.RobotSpecificJointNames;
-import us.ihmc.humanoidRobotics.partNames.SpineJointName;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.partNames.ArmJointName;
+import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
+import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

@@ -24,14 +24,14 @@ import us.ihmc.simulationconstructionset.robotController.ModularSensorProcessor;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.humanoidRobotics.model.RobotMotionStatus;
 import us.ihmc.humanoidRobotics.model.RobotMotionStatusChangedListener;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.humanoidRobotics.model.RobotMotionStatusHolder;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -47,7 +47,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
+import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.time.ExecutionTimer;
 
 public class DRCControllerThread implements MultiThreadedRobotControlElement

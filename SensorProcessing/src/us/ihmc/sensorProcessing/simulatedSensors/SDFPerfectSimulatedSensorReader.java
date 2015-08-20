@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
@@ -20,7 +21,6 @@ import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

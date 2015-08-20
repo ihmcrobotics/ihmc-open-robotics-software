@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ICPAndMomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackController;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 

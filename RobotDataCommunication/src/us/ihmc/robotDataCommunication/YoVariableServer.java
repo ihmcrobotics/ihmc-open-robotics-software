@@ -18,13 +18,13 @@ import us.ihmc.robotDataCommunication.logger.LogSettings;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
+import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 
 
 public class YoVariableServer implements RobotVisualizer

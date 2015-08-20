@@ -6,13 +6,13 @@ import java.util.Map;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.partNames.ArmJointName;
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;

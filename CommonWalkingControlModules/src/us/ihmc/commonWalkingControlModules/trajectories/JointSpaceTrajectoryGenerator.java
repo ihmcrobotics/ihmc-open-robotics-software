@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.kinematics.BodyPositionInTimeEstimator;
 import us.ihmc.commonWalkingControlModules.kinematics.LegInverseKinematicsCalculator;
 import us.ihmc.commonWalkingControlModules.kinematics.SwingLegAnglesAtEndOfStepEstimator;
@@ -13,7 +14,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;

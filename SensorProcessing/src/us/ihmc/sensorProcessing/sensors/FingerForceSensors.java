@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.sensors;
 
-import us.ihmc.humanoidRobotics.partNames.FingerName;
+import us.ihmc.SdfLoader.partNames.FingerName;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 

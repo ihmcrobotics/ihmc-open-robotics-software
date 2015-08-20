@@ -6,18 +6,18 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJointStateCopier;
 

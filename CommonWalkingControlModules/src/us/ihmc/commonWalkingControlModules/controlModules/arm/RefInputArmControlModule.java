@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.controlModules.arm;
 
 import java.util.EnumMap;
 
+import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.ArmControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmTorques;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface RefInputArmControlModule extends ArmControlModule

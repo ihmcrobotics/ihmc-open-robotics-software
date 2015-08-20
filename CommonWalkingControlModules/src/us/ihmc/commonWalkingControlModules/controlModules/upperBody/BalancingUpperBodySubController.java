@@ -6,6 +6,7 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector2d;
 
+import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.ArmControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineLungingControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.UpperBodySubController;
@@ -17,7 +18,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.tools.containers.ContainerTools;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.partNames.NeckJointName;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;

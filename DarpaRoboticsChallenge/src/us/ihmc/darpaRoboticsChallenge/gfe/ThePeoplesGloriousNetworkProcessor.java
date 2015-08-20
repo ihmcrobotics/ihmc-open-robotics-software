@@ -34,7 +34,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.RequestControllerStopSubscriber;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.RosArmJointTrajectorySubscriber;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.ihmcPerception.IHMCProntoRosLocalizationUpdateSubscriber;
 import us.ihmc.ihmcPerception.RosLocalizationPoseCorrectionSubscriber;
 import us.ihmc.pathGeneration.footstepGenerator.TimestampedPoseFootStepGenerator;

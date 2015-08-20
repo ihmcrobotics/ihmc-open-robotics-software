@@ -19,8 +19,8 @@ import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.humanoidRobotics.model.FullRobotModel;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;

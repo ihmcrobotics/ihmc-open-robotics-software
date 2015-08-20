@@ -9,7 +9,7 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.partNames.NeckJointName;
+import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
