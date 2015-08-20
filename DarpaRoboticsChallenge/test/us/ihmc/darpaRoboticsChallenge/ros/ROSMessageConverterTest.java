@@ -50,7 +50,7 @@ public class ROSMessageConverterTest
          }
       }
       
-      assertEquals("Packets not translated correctly: " + packetTranslationResults, 0, packetTranslationResults.keySet());
+      assertEquals("Packets not translated correctly: " + packetTranslationResults, 0, packetTranslationResults.keySet().size());
    }
 
 //   @EstimatedDuration(duration = 0.1)

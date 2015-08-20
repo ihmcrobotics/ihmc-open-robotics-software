@@ -51,7 +51,6 @@ public class IHMCRosApiMessageMap
       HandPosePacket.class,
       ComHeightPacket.class,
       FootPosePacket.class,
-      FootstepData.class,
       FootstepDataList.class,
       ChestOrientationPacket.class,
       HeadOrientationPacket.class,
@@ -69,7 +68,8 @@ public class IHMCRosApiMessageMap
 
    public static final Class[] OUTPUT_PACKET_LIST =
    {
-      FootstepStatus.class
+      FootstepStatus.class,
+      RobotConfigurationData.class
    };
 
    public static final Map<String, Class> PACKET_MESSAGE_NAME_MAP;
@@ -87,7 +87,6 @@ public class IHMCRosApiMessageMap
       PACKET_TO_TOPIC_MAP.put(HandPosePacket.class, "/control/hand_pose");
       PACKET_TO_TOPIC_MAP.put(ComHeightPacket.class, "/control/com_height");
       PACKET_TO_TOPIC_MAP.put(FootPosePacket.class, "/control/foot_pose");
-      PACKET_TO_TOPIC_MAP.put(FootstepData.class, "/control/footstep");
       PACKET_TO_TOPIC_MAP.put(FootstepDataList.class, "/control/footstep_list");
       PACKET_TO_TOPIC_MAP.put(ChestOrientationPacket.class, "/control/chest_orientation");
       PACKET_TO_TOPIC_MAP.put(HeadOrientationPacket.class, "/control/head_orientation");

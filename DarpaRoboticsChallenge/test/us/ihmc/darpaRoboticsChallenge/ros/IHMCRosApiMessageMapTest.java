@@ -1,20 +1,18 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+import org.junit.Before;
+import org.junit.Test;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooPlanType;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMap;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @BambooPlan(planType = BambooPlanType.Fast)
 public class IHMCRosApiMessageMapTest
@@ -39,19 +37,11 @@ public class IHMCRosApiMessageMapTest
    @Test(timeout = 1000)
    public void testPacketsAreClassified()
    {
-      assertEquals(packetClasses.size(), inputPacketClasses.size() + outputPacketClasses.size());
-      
-      for(Class clazz : IHMCRosApiMessageMap.PACKET_LIST)
+      assertEquals(IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.keySet().size(), inputPacketClasses.size() + outputPacketClasses.size());
+
+      for(Class clazz : IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.keySet())
       {
          assertTrue(inputPacketClasses.contains(clazz) || outputPacketClasses.contains(clazz));
       }
-   }
-   
-   @EstimatedDuration(duration = 0.01)
-   @Test(timeout = 1000)
-   public void testPacketsHaveTopics()
-   {
-      Set<Class> packetsWithRosTopics = IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.keySet();
-      assertTrue(packetsWithRosTopics.containsAll(packetClasses));
    }
 }

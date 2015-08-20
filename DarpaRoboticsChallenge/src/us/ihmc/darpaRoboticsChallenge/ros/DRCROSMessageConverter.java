@@ -75,11 +75,7 @@ public class DRCROSMessageConverter
       else if(packet instanceof FootPosePacket)
          return convertToRosMessage((FootPosePacket)packet);
       else if(packet instanceof FootstepData)
-      {
-         ArrayList<FootstepData> footstepDataArrayList = new ArrayList<>();
-         footstepDataArrayList.add((FootstepData)packet);
-         return convertToRosMessage(new FootstepDataList(footstepDataArrayList, 0.0, 0.0));
-      }
+         return convertToRosMessage((FootstepData)packet);
       else if(packet instanceof FootstepDataList)
          return convertToRosMessage((FootstepDataList)packet);
       else if(packet instanceof FootstepStatus)
@@ -123,12 +119,7 @@ public class DRCROSMessageConverter
       else if(message instanceof FootPosePacketMessage)
          return convertToPacket((FootPosePacketMessage) message);
       else if(message instanceof FootstepDataMessage)
-      {
-         FootstepDataListMessage footstepDataListMessage = messageFactory.newFromType("ihmc_msgs/FootstepDataListMessage");
-         footstepDataListMessage.getFootstepDataList().add((FootstepDataMessage)message);
-
-         return convertToPacket(footstepDataListMessage);
-      }
+         return convertToPacket((FootstepDataMessage) message);
       else if(message instanceof FootstepDataListMessage)
          return convertToPacket((FootstepDataListMessage)message);
       else if(message instanceof FootstepStatusMessage)
@@ -353,13 +344,6 @@ public class DRCROSMessageConverter
       }
       ret.setTrajectoryType(convertEnumToByte(packet.getTrajectoryType()));
       ret.setSwingHeight(packet.getSwingHeight());
-
-//      System.out.println("RobotSide: " + ret.getRobotSide());
-//      System.out.println("Location: " + ret.getLocation().getX() + " " + ret.getLocation().getY() + " " + ret.getLocation().getZ());
-//      System.out.println("Orientation: " + ret.getOrientation().getX() + " " + ret.getOrientation().getY() + " " + + ret.getOrientation().getZ() + " " + ret.getOrientation().getW());
-//      System.out.println("Contact points: " + ret.getPredictedContactPoints().size());
-//      System.out.println("Trajectory: " + ret.getTrajectoryType());
-//      System.out.println("Swing height: " + ret.getSwingHeight());
 
       return ret;
    }
