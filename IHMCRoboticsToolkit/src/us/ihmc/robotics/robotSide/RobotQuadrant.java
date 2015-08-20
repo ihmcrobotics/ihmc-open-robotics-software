@@ -2,6 +2,8 @@ package us.ihmc.robotics.robotSide;
 
 import java.awt.Color;
 
+import us.ihmc.tools.FormattingTools;
+
 public enum RobotQuadrant
 {
    BACK_LEFT(RobotEnd.BACK, RobotSide.LEFT),
@@ -208,6 +210,37 @@ public enum RobotQuadrant
          else
          {
             return 1;
+         }
+      }
+   }
+   
+   public String getCamelCaseNameForStartOfExpression()
+   {
+      return FormattingTools.lowerCaseFirstLetter(getCamelCaseNameForMiddleOfExpression());
+   }
+
+   public String getCamelCaseNameForMiddleOfExpression()
+   {
+      if (side == RobotSide.RIGHT)
+      {
+         if (end == RobotEnd.BACK)
+         {
+            return "backRight";
+         }
+         else
+         {
+            return "frontRight";
+         }
+      }
+      else
+      {
+         if (end == RobotEnd.BACK)
+         {
+            return "backLeft";
+         }
+         else
+         {
+            return "frontLeft";
          }
       }
    }
