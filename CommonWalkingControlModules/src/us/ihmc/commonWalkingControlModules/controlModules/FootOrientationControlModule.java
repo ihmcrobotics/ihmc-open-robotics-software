@@ -4,7 +4,7 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;

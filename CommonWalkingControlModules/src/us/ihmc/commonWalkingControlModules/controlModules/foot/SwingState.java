@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.PushRecoveryTrajectoryGe
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGenerator;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -25,6 +24,7 @@ import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;

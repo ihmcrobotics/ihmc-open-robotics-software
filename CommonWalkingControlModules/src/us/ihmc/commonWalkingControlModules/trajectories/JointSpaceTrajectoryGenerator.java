@@ -12,8 +12,10 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointPositions
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
+
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;

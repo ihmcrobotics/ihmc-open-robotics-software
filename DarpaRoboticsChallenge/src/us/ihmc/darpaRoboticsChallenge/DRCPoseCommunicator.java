@@ -12,7 +12,7 @@ import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.humanoidRobotics.model.RobotMotionStatusHolder;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;

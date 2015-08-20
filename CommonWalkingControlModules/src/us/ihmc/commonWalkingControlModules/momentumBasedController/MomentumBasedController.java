@@ -37,12 +37,12 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwi
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
-import us.ihmc.humanoidRobotics.model.RobotMotionStatus;
-import us.ihmc.humanoidRobotics.model.RobotMotionStatusChangedListener;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;

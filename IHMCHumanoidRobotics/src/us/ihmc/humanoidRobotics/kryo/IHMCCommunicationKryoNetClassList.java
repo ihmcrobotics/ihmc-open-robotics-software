@@ -142,12 +142,12 @@ import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.communication.remote.serialization.JointConfigurationData;
-import us.ihmc.humanoidRobotics.model.RobotMotionStatus;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
 public class IHMCCommunicationKryoNetClassList extends NetClassList
 {   

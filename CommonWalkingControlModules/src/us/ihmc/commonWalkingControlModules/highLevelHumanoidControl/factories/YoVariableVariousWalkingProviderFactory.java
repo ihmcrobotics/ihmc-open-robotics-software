@@ -43,8 +43,8 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalcula
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

@@ -37,7 +37,7 @@ import us.ihmc.commonWalkingControlModules.packetProviders.SystemErrControlStatu
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
-import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.robotics.robotSide.SideDependentList;

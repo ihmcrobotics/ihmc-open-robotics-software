@@ -4,8 +4,10 @@ import us.ihmc.CapturePointCalculator.LinearInvertedPendulumCapturePointCalculat
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
+
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;

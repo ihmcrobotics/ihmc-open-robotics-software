@@ -42,7 +42,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationP
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.humanoidRobotics.model.RobotMotionStatus;
+
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -57,6 +57,7 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;

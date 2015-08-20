@@ -27,7 +27,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.humanoidRobotics.model.RobotMotionStatus;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

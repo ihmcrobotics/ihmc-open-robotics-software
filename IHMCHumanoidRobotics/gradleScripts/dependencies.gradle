@@ -10,4 +10,5 @@ dependencies
     testCompile project(':IHMCCommunication').sourceSets.test.output
     compile project(':IHMCYoUtilities')
     compile project(':SDFLoader')
+    compile project(':SensorProcessing')
 }

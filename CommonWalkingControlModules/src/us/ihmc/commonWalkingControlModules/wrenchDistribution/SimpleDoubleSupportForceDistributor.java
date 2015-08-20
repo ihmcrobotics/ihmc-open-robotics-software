@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DoubleSupportForceDistributor;
-import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class SimpleDoubleSupportForceDistributor implements DoubleSupportForceDistributor
 {
