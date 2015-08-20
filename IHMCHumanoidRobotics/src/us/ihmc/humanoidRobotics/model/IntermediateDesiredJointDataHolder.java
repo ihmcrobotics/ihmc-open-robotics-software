@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.model;
 
-import us.ihmc.humanoidRobotics.model.DesiredJointDataHolder.DesiredJointData;
+import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
+import us.ihmc.sensorProcessing.model.DesiredJointDataHolder.DesiredJointData;
 
 public class IntermediateDesiredJointDataHolder
 {

@@ -25,12 +25,12 @@ import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotContr
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.humanoidRobotics.model.RobotMotionStatus;
-import us.ihmc.humanoidRobotics.model.RobotMotionStatusChangedListener;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.humanoidRobotics.model.RobotMotionStatusHolder;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
