@@ -27,7 +27,7 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 
-@BambooPlan(planType = BambooPlanType.CodeQuality)
+@BambooPlan(planType = BambooPlanType.Fast)
 public class AtlasRobotConfigurationDataTest
 {
 
