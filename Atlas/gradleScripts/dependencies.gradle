@@ -54,6 +54,7 @@ dependencies {
     compile project(':ROSJava')
     compile project(':SDFLoader')
     compile project(':SensorProcessing')
+    testCompile project(':SensorProcessing').sourceSets.test.output
     compile project(':SimulationConstructionSet')
     compile project(':UserInterface')
     compile project(':Planning')
