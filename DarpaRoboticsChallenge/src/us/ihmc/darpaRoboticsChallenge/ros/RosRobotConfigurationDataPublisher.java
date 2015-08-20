@@ -18,7 +18,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
-import us.ihmc.humanoidRobotics.model.FullRobotModelUtils;
+import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

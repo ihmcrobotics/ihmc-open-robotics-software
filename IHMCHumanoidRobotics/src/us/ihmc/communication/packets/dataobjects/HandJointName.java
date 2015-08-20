@@ -1,6 +1,6 @@
 package us.ihmc.communication.packets.dataobjects;
 
-import us.ihmc.humanoidRobotics.partNames.FingerName;
+import us.ihmc.SdfLoader.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface HandJointName

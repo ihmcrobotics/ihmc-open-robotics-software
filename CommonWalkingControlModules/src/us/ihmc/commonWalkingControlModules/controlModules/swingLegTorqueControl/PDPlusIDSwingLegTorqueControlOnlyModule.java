@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.swingLegTorqueControl
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SwingLegTorqueControlOnlyModule;
 import us.ihmc.commonWalkingControlModules.controlModules.LegJointPositionControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
@@ -11,8 +13,6 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocitie
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.humanoidRobotics.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;

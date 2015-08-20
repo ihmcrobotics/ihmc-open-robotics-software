@@ -13,6 +13,7 @@ import javax.vecmath.Point3d;
 import com.esotericsoftware.kryo.Kryo;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -28,7 +29,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudSourc
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
-import us.ihmc.humanoidRobotics.model.FullRobotModelUtils;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class PointCloudDataReceiverSimulation implements Runnable, PacketConsumer<PointCloudWorldPacket>

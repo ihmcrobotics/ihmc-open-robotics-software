@@ -1,17 +1,17 @@
 package us.ihmc.atlas;
 
+import static us.ihmc.SdfLoader.partNames.ArmJointName.*;
+import static us.ihmc.SdfLoader.partNames.LegJointName.ANKLE_PITCH;
+import static us.ihmc.SdfLoader.partNames.LegJointName.ANKLE_ROLL;
+import static us.ihmc.SdfLoader.partNames.LegJointName.HIP_PITCH;
+import static us.ihmc.SdfLoader.partNames.LegJointName.HIP_ROLL;
+import static us.ihmc.SdfLoader.partNames.LegJointName.HIP_YAW;
+import static us.ihmc.SdfLoader.partNames.LegJointName.KNEE;
+import static us.ihmc.SdfLoader.partNames.NeckJointName.LOWER_NECK_PITCH;
+import static us.ihmc.SdfLoader.partNames.SpineJointName.SPINE_PITCH;
+import static us.ihmc.SdfLoader.partNames.SpineJointName.SPINE_ROLL;
+import static us.ihmc.SdfLoader.partNames.SpineJointName.SPINE_YAW;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.*;
-import static us.ihmc.humanoidRobotics.partNames.ArmJointName.*;
-import static us.ihmc.humanoidRobotics.partNames.LegJointName.ANKLE_PITCH;
-import static us.ihmc.humanoidRobotics.partNames.LegJointName.ANKLE_ROLL;
-import static us.ihmc.humanoidRobotics.partNames.LegJointName.HIP_PITCH;
-import static us.ihmc.humanoidRobotics.partNames.LegJointName.HIP_ROLL;
-import static us.ihmc.humanoidRobotics.partNames.LegJointName.HIP_YAW;
-import static us.ihmc.humanoidRobotics.partNames.LegJointName.KNEE;
-import static us.ihmc.humanoidRobotics.partNames.NeckJointName.LOWER_NECK_PITCH;
-import static us.ihmc.humanoidRobotics.partNames.SpineJointName.SPINE_PITCH;
-import static us.ihmc.humanoidRobotics.partNames.SpineJointName.SPINE_ROLL;
-import static us.ihmc.humanoidRobotics.partNames.SpineJointName.SPINE_YAW;
 
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -21,16 +21,17 @@ import java.util.Set;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.partNames.ArmJointName;
+import us.ihmc.SdfLoader.partNames.JointRole;
+import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.SdfLoader.partNames.LimbName;
+import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
-import us.ihmc.humanoidRobotics.partNames.JointRole;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
-import us.ihmc.humanoidRobotics.partNames.LimbName;
-import us.ihmc.humanoidRobotics.partNames.NeckJointName;
-import us.ihmc.humanoidRobotics.partNames.SpineJointName;
+
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;

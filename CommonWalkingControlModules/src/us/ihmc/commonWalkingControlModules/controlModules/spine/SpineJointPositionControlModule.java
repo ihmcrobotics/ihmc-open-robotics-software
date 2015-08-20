@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.controlModules.spine;
 
 import java.util.EnumMap;
 
+import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.tools.containers.ContainerTools;
-import us.ihmc.humanoidRobotics.partNames.SpineJointName;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

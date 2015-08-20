@@ -1,17 +1,18 @@
 package us.ihmc.wholeBodyController;
 
-import us.ihmc.SdfLoader.SDFJointNameMap;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
-import us.ihmc.humanoidRobotics.partNames.LegJointName;
-import us.ihmc.humanoidRobotics.partNames.NeckJointName;
-import us.ihmc.humanoidRobotics.partNames.SpineJointName;
+
+import us.ihmc.SdfLoader.SDFJointNameMap;
+import us.ihmc.SdfLoader.partNames.ArmJointName;
+import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-
-import java.util.List;
 
 public interface DRCRobotJointMap extends SDFJointNameMap
 {

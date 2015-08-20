@@ -3,12 +3,12 @@ package us.ihmc.darpaRoboticsChallenge.ros.subscriber;
 import java.util.ArrayList;
 
 import trajectory_msgs.JointTrajectory;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.JointTrajectoryPoint;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.time.TimeTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;

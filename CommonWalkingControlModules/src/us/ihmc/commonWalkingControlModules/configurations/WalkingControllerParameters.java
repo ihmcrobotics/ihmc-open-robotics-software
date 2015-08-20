@@ -2,11 +2,12 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.LinkedHashMap;
 
+import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.humanoidRobotics.partNames.NeckJointName;
+
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;

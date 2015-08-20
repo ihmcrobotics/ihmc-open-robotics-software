@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
-import us.ihmc.humanoidRobotics.partNames.ArmJointName;
+import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ArmJointPositions

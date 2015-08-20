@@ -29,7 +29,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.humanoidRobotics.model.RobotMotionStatus;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.humanoidRobotics.partNames.NeckJointName;
+import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.RosTools;

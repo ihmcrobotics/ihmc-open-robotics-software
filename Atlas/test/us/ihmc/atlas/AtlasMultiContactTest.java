@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.atlas.AtlasMultiContact.MultiContactTask;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
@@ -21,7 +22,6 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 
 @BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.VideoA})
 public class AtlasMultiContactTest

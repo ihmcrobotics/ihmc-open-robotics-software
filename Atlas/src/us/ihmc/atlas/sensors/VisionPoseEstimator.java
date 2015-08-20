@@ -22,6 +22,7 @@ import javax.vecmath.Vector3d;
 import org.opencv.core.Rect;
 
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.DetectedObjectPacket;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
@@ -32,7 +33,7 @@ import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
+
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import boofcv.struct.calib.IntrinsicParameters;

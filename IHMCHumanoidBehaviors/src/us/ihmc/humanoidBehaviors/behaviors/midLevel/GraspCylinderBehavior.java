@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.midLevel;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packets.behaviors.GraspCylinderPacket;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
@@ -12,7 +13,6 @@ import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GraspCylinderTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.OrientPalmToGraspCylinderTask;
-import us.ihmc.humanoidRobotics.model.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
