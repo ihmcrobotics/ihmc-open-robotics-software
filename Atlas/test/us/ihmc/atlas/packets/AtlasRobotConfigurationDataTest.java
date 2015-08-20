@@ -1,4 +1,4 @@
-package us.ihmc.communication.packets.dataobjects;
+package us.ihmc.atlas.packets;
 
 import static org.junit.Assert.assertTrue;
 
@@ -11,6 +11,8 @@ import org.junit.Test;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
 
+import us.ihmc.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -26,7 +28,7 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 
 @BambooPlan(planType = BambooPlanType.CodeQuality)
-public class RobotConfigurationDataTest
+public class AtlasRobotConfigurationDataTest
 {
 
    /**
