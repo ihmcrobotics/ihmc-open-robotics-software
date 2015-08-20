@@ -1,4 +1,4 @@
-package us.ihmc.CoM;
+package us.ihmc.systemIdentification.com;
 
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;

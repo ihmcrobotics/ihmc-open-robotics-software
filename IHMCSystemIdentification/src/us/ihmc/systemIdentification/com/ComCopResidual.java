@@ -6,7 +6,7 @@
  *  When the robot is static, the projection of CoM on the flatground should be equal to CoP
  *  
  */
-package us.ihmc.CoM;
+package us.ihmc.systemIdentification.com;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
