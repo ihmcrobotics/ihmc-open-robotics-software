@@ -2,6 +2,8 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -26,7 +28,7 @@ public class DRCSCSInitialSetup
    private boolean drawGroundProfile = false;
 
    private int simulationDataBufferSize = 16000;
-   private double gravity = -9.81;
+   private Vector3d gravity = new Vector3d(0.0, 0.0,-9.81);
    private boolean runMultiThreaded = true;
    
 //   private SensorNoiseParameters simulatedSensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
@@ -176,7 +178,7 @@ public class DRCSCSInitialSetup
       return recordFrequency;
    }
 
-   public double getGravity()
+   public Vector3d getGravity()
    {
       return gravity;
    }
@@ -242,6 +244,12 @@ public class DRCSCSInitialSetup
    {
       this.drawGroundProfile = drawGroundProfile;
    }
+
+public void setGravity(Vector3d gravity) 
+{
+	this.gravity = new Vector3d(gravity);
+	
+}
 
 
 }

@@ -116,6 +116,7 @@ public class DRCSimulationFactory
       scs = new SimulationConstructionSet(allSimulatedRobots, guiInitialSetup.getGraphics3DAdapter(), simulationConstructionSetParameters);
       scs.setDT(drcRobotModel.getSimulateDT(), 1);
       
+      simulatedRobot.setGravity(scsInitialSetup.getGravity());
       createRobotController(drcRobotModel, controllerFactory, globalDataProducer, simulatedRobot, scs, scsInitialSetup, robotInitialSetup);
 
       SimulatedRobotCenterOfMassVisualizer simulatedRobotCenterOfMassVisualizer = new SimulatedRobotCenterOfMassVisualizer(simulatedRobot, drcRobotModel.getSimulateDT());
