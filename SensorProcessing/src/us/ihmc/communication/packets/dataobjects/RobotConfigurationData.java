@@ -9,18 +9,20 @@ import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
+import us.ihmc.communication.packetAnnotations.ClassDocumentation;
+import us.ihmc.communication.packetAnnotations.IgnoreField;
+import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.IMUPacket;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.random.RandomTools;
 
-public class RobotConfigurationData extends Packet<RobotConfigurationData>
+@ClassDocumentation(documentation = "Full configuration data for the robot")
+public class RobotConfigurationData extends IHMCRosApiPacket<RobotConfigurationData>
 {
    public long timestamp = 0;
    public long sensorHeadPPSTimestamp;
@@ -36,6 +38,7 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
    
    public Vector3f pelvisLinearAcceleration = new Vector3f();
 //   public DenseMatrix64F[] momentAndForceDataAllForceSensors;
+   @IgnoreField
    public float[][] momentAndForceDataAllForceSensors;
    public IMUPacket[] imuSensorData;
    public RobotMotionStatus robotMotionStatus;

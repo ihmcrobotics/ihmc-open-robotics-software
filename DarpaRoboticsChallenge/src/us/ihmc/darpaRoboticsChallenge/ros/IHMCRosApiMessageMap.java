@@ -43,7 +43,8 @@ public class IHMCRosApiMessageMap
       AtlasDesiredPumpPSIPacket.class,
       MultiJointAnglePacket.class,
       HandComplianceControlParametersPacket.class,
-      LegCompliancePacket.class
+      LegCompliancePacket.class,
+      RobotConfigurationData.class
    };
 
    public static final Class[] INPUT_PACKET_LIST =
