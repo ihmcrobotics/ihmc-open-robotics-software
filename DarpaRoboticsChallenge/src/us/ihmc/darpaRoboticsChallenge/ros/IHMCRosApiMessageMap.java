@@ -44,7 +44,7 @@ public class IHMCRosApiMessageMap
       MultiJointAnglePacket.class,
       HandComplianceControlParametersPacket.class,
       LegCompliancePacket.class,
-      RobotConfigurationData.class
+//      RobotConfigurationData.class
    };
 
    public static final Class[] INPUT_PACKET_LIST =
@@ -70,7 +70,7 @@ public class IHMCRosApiMessageMap
    public static final Class[] OUTPUT_PACKET_LIST =
    {
       FootstepStatus.class,
-      RobotConfigurationData.class
+//      RobotConfigurationData.class
    };
 
    public static final Map<String, Class> PACKET_MESSAGE_NAME_MAP;
