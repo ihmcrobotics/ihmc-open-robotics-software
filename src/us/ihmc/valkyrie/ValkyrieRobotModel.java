@@ -353,7 +353,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public double getSimulateDT()
    {
-      return 0.00003875;
+      return 0.0001; //0.00003875;
    }
 
    @Override
