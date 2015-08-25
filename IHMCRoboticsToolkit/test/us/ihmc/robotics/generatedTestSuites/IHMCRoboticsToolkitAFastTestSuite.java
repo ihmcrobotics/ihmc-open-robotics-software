@@ -58,7 +58,7 @@ import org.junit.runners.Suite;
    us.ihmc.robotics.geometry.shapes.FrameBox3dTest.class,
    us.ihmc.robotics.geometry.shapes.FramePlane3dTest.class,
    us.ihmc.robotics.geometry.shapes.Plane3dTest.class,
-   us.ihmc.robotics.geometry.shapes.QuickHull3DTest.class,
+   us.ihmc.robotics.geometry.shapes.QuickHull3DWrapperTest.class,
    us.ihmc.robotics.geometry.shapes.Ramp3dTest.class,
    us.ihmc.robotics.geometry.shapes.Sphere3dTest.class,
    us.ihmc.robotics.geometry.shapes.Torus3dTest.class,

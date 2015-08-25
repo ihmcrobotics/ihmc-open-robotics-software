@@ -1,23 +1,28 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-import java.awt.*;
-import java.util.Random;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Color;
+import java.util.Random;
+
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
+import javax.vecmath.Vector3d;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooPlanType;
+
+@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.UI})
 public class HumanEvaluationLine2dTest
 {
    private final boolean WAIT_FOR_BUTTON_PUSH = false;
@@ -30,8 +35,6 @@ public class HumanEvaluationLine2dTest
    private Line2d line2dPointVector = new Line2d(point1, vector);
    private Line2d line2dPointPoint = new Line2d(point1, point2);
    private Line2d line2dLine2d = new Line2d(line2dPointPoint);
-
-
 
    @Before
    public void setUp() throws Exception
@@ -75,6 +78,8 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testIsOnLeftSideOfLine()
    {
+	   BambooPlanType.assumeRunningOnPlan(BambooPlanType.UI);
+	   
       double xMin = -1.0;
       double xMax = 1.0;
       double yMin = -1.0;
@@ -119,6 +124,8 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testIsInFrontOfLine()
    {
+      BambooPlanType.assumeRunningOnPlan(BambooPlanType.UI);
+      
       // illegal method call:
       Line2d line = new Line2d(new Point2d(0.0, 0.0), new Vector2d(1.0, 0.0));
 
@@ -177,6 +184,8 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testApplyTransform()
    {
+      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      
       RigidBodyTransform transform = new RigidBodyTransform();
 
       // pure translation:
@@ -205,6 +214,8 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testContainsEpsilon()
    {
+      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+	   
       // Test will fail if you change epsilon too much.
 
       double epsilon = 1E-12;
@@ -235,6 +246,8 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testGetNormalizedVectorCopy()
    {
+      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      
       Vector2d vector = new Vector2d();
       line2dPointPoint.getNormalizedVector(vector);
       assertNotSame("Normalized vector copy is not a copy of the normalized vector", line2dPointPoint.normalizedVector,
@@ -249,6 +262,8 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testGetSlope()
    {
+      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      
       double slope = line2dPointPoint.getSlope();
       double scaleFactor = 10.0 * random.nextDouble() - 5.0;
       Point2d shouldBeOnLine = new Point2d(point1.x + scaleFactor * (point2.x - point1.x), point1.y + scaleFactor * (point2.y - point1.y));
@@ -262,6 +277,8 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testInteriorBisector()
    {
+      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      
       Point2d somePoint = new Point2d(random.nextDouble(), random.nextDouble());
       Vector2d vector1 = new Vector2d(1.0, 0.0);
       Vector2d vector2 = new Vector2d(0.0, 1.0);
@@ -312,6 +329,8 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testNegateDirection()
    {
+      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      
       Line2d someLine = new Line2d(line2dPointPoint);
 
       Vector2d directionVectorBefore = someLine.normalizedVector;
@@ -329,6 +348,8 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testNegateDirectionCopy()
    {
+      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      
       Line2d someLine = new Line2d(line2dPointPoint);
 
       Vector2d directionVectorBefore = someLine.normalizedVector;
@@ -349,6 +370,8 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testPerpendicularVector()
    {
+      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      
       Line2d line;
       Vector2d vector;
       Vector2d vectorPerp;
@@ -366,9 +389,10 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testZeroLength()
    {
+      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      
       Vector2d directionAndLength = new Vector2d(0.0, 0.0);
       Point2d start = new Point2d(1.0, 1.0);
       new Line2d(start, directionAndLength);
    }
-
 }
