@@ -2,15 +2,23 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
+
+import org.ros.internal.message.Message;
+import org.ros.message.MessageFactory;
+import org.ros.node.NodeConfiguration;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.ros.IHMCPacketToMsgPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMap;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotConfigurationDataPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
@@ -77,6 +85,8 @@ public class RosModule
 //      setupFootstepServiceClient();
 //      setupFootstepPathPlannerService();
 
+      setupROSEchoPublisher(rosMainNode, rosTopicPrefix);
+      
       try
       {
          rosModulePacketCommunicator.connect();
@@ -127,6 +137,38 @@ public class RosModule
 //      footstepPathPlannerService = new ADStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), rosModulePacketCommunicator);
 //      rosModulePacketCommunicator.attachListener(FootstepPlanRequestPacket.class, footstepPathPlannerService);
 //   }
+   
+   private void setupROSEchoPublisher(RosMainNode rosMainNode, String namespace)
+   {
+      
+      PacketCommunicator uiPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
+      try
+      {
+         uiPacketCommunicator.connect();
+      }
+      catch (IOException e1)
+      {
+         // local communicator, no error handling neccessary
+      }
+      NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate();
+      MessageFactory messageFactory = nodeConfiguration.getTopicMessageFactory();
+      
+      Map<String, Class> outputPacketList = IHMCRosApiMessageMap.INPUT_PACKET_MESSAGE_NAME_MAP;
+
+      for (Map.Entry<String, Class> e : outputPacketList.entrySet())
+      {
+         Message message = messageFactory.newFromType(e.getKey());
+
+         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false,
+               uiPacketCommunicator, e.getValue());
+         String topic = IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(e.getValue());
+         topic = topic.replaceFirst("control", "output");
+         rosMainNode.attachPublisher(namespace + topic, publisher);
+      }
+
+      
+   }
+
 
    private void printIfDebug(String str)
    {

@@ -166,15 +166,34 @@ public class DRCROSMessageConverter
    {
       WholeBodyTrajectoryPacket ret = new WholeBodyTrajectoryPacket(message.getNumWaypoints(), message.getNumJointsPerArm());
 
+      if(message.getPelvisWorldPosition().size() == 0)
+         ret.pelvisWorldPosition = null;
+      if(message.getPelvisLinearVelocity().size() == 0)
+         ret.pelvisLinearVelocity = null;
+      if(message.getPelvisAngularVelocity().size() == 0)
+         ret.pelvisAngularVelocity = null;
+      if(message.getPelvisWorldOrientation().size() == 0)
+         ret.pelvisWorldOrientation = null;
+      if(message.getChestWorldOrientation().size() == 0)
+         ret.chestWorldOrientation = null;
+      if(message.getChestAngularVelocity().size() == 0)
+         ret.chestAngularVelocity = null;
+      
       for (int i = 0; i < message.getNumWaypoints(); i++)
       {
          ret.timeAtWaypoint[i] = message.getTimeAtWaypoint()[i];
-         ret.pelvisWorldPosition[i] = convertVector3ToPoint3d(message.getPelvisWorldPosition().get(i));
-         ret.pelvisLinearVelocity[i] = convertVector3ToVector3d(message.getPelvisLinearVelocity().get(i));
-         ret.pelvisAngularVelocity[i] = convertVector3ToVector3d(message.getPelvisAngularVelocity().get(i));
-         ret.pelvisWorldOrientation[i] = convertQuaternionToQuat4d(message.getPelvisWorldOrientation().get(i));
-         ret.chestWorldOrientation[i] = convertQuaternionToQuat4d(message.getChestWorldOrientation().get(i));
-         ret.chestAngularVelocity[i] = convertVector3ToVector3d(message.getChestAngularVelocity().get(i));
+         if(ret.pelvisWorldPosition != null)
+            ret.pelvisWorldPosition[i] = convertVector3ToPoint3d(message.getPelvisWorldPosition().get(i));
+         if(ret.pelvisLinearVelocity != null)
+            ret.pelvisLinearVelocity[i] = convertVector3ToVector3d(message.getPelvisLinearVelocity().get(i));
+         if(ret.pelvisAngularVelocity!= null)
+            ret.pelvisAngularVelocity[i] = convertVector3ToVector3d(message.getPelvisAngularVelocity().get(i));
+         if(ret.pelvisWorldOrientation != null)
+            ret.pelvisWorldOrientation[i] = convertQuaternionToQuat4d(message.getPelvisWorldOrientation().get(i));
+         if(ret.chestWorldOrientation != null)
+            ret.chestWorldOrientation[i] = convertQuaternionToQuat4d(message.getChestWorldOrientation().get(i));
+         if(ret.chestAngularVelocity != null)
+            ret.chestAngularVelocity[i] = convertVector3ToVector3d(message.getChestAngularVelocity().get(i));
       }
       
       ret.rightArmTrajectory = convertToPacket(message.getRightArmTrajectory());
@@ -197,12 +216,18 @@ public class DRCROSMessageConverter
       
       for (int i = 0; i < packet.numWaypoints; i++)
       {
-         pelvisWorldPositions.add(convertPoint3dToVector3(packet.pelvisWorldPosition[i]));
-         pelvisLinearVelocity.add(convertVector3dToVector3(packet.pelvisLinearVelocity[i]));
-         pelvisAngularVelocity.add(convertVector3dToVector3(packet.pelvisAngularVelocity[i]));
-         pelvisWorldOrientation.add(convertQuat4dToQuaternion(packet.pelvisWorldOrientation[i]));
-         chestWorldOrientation.add(convertQuat4dToQuaternion(packet.chestWorldOrientation[i]));
-         chestAngularVelocity.add(convertVector3dToVector3(packet.chestAngularVelocity[i]));
+         if(packet.pelvisWorldPosition != null)
+            pelvisWorldPositions.add(convertPoint3dToVector3(packet.pelvisWorldPosition[i]));
+         if(packet.pelvisLinearVelocity != null)
+            pelvisLinearVelocity.add(convertVector3dToVector3(packet.pelvisLinearVelocity[i]));
+         if(packet.pelvisAngularVelocity != null)
+            pelvisAngularVelocity.add(convertVector3dToVector3(packet.pelvisAngularVelocity[i]));
+         if(packet.pelvisWorldOrientation != null)
+            pelvisWorldOrientation.add(convertQuat4dToQuaternion(packet.pelvisWorldOrientation[i]));
+         if(packet.chestWorldOrientation != null)
+            chestWorldOrientation.add(convertQuat4dToQuaternion(packet.chestWorldOrientation[i]));
+         if(packet.chestAngularVelocity != null)
+            chestAngularVelocity.add(convertVector3dToVector3(packet.chestAngularVelocity[i]));
       }
       
       ret.setTimeAtWaypoint(packet.timeAtWaypoint);
