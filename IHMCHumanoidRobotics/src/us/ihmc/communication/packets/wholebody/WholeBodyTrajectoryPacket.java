@@ -4,46 +4,81 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
+
+import us.ihmc.communication.TransformableDataObject;
+import us.ihmc.communication.packetAnnotations.ClassDocumentation;
+import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
-import us.ihmc.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.random.RandomTools;
 
-import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
-
-public class WholeBodyTrajectoryPacket extends Packet<WholeBodyTrajectoryPacket>
+@ClassDocumentation("Send whole body trajectories to the robot. A best effort is \n" +
+               "made to execute the trajectory while balance is kept.\n"
+               + "Internally the first waypoint at time 0.0 is set to the current\n"
+               + "position, do not provide a waypoint at time 0.0.\n"
+               + "Positions and orientations are set to null if no motion is desired\n"
+               + "velocities are set to null if they are zero")
+public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTrajectoryPacket>
         implements VisualizablePacket, TransformableDataObject<WholeBodyTrajectoryPacket>
 {
-   // internally the first waypoint at time 0.0 is set to the current position
-   // do not provide a waypoint at time 0.0
 
-   // positions and orientations are set to null if no motion is desired
-   // velocities are set to null if they are zero
-
+   @FieldDocumentation("Sequence of desired time at the waypoints of the trajecotry. \n"
+         + "The execution starts at 0. Do not proivde time 0.0\n"
+         + "Should be numWaypoint elements long")
    public double[] timeAtWaypoint;
+   
+   @FieldDocumentation("Sequence of desired positions of the pelvis in world coordinates. \n"
+           + "Provide null if no motion is desired\n"
+           + "Should be numWaypoints elements long")
    public Point3d[] pelvisWorldPosition;
+   
+   @FieldDocumentation("Sequence of desired velocities of the pelvis. \n"
+         + "Provide null if zero velocity is required\n"
+         + "Should be numWaypoints elements long")
    public Vector3d[] pelvisLinearVelocity;
+   @FieldDocumentation("Sequence of desired angular velocities of the pelvis. \n"
+         + "Provide null if zero angular velocity is desired\n"
+         + "Should be numWaypoints elements long")
    public Vector3d[] pelvisAngularVelocity;
 
+   @FieldDocumentation("Sequence of desired quaternion (x,y,z,w) orientations of the pelvis in world coordinates. \n"
+         + "Provide null if no motion is desired\n"
+         + "Should be numWaypoints elements long")
    public Quat4d[] pelvisWorldOrientation;
+   @FieldDocumentation("Sequence of desired quaternion (x,y,z,w) orientations of the chest in world coordinates. \n"
+         + "Provide null if no motion is desired\n"
+         + "Should be numWaypoints elements long")
    public Quat4d[] chestWorldOrientation;
+   
+   @FieldDocumentation("Sequence of desired angular velocities of the chest. \n"
+         + "Provide null if zero velocity is desired\n"
+         + "Should be numWaypoints elements long")
    public Vector3d[] chestAngularVelocity;
 
+   @FieldDocumentation("Arm trajectory for the right arm. Should have numWaypoints waypoints.")
    public ArmJointTrajectoryPacket rightArmTrajectory;
+
+   @FieldDocumentation("Arm trajectory for the left arm. Should have numWaypoints waypoints.")
    public ArmJointTrajectoryPacket leftArmTrajectory;
 
+   @FieldDocumentation("Number of waypoints in the trajectory. Should be at least 1")
    public int numWaypoints = 0;
+   
+   @FieldDocumentation("Number of joints in a single arm")
    public int numJointsPerArm = 0;
 
    @IgnoreField
@@ -228,6 +263,33 @@ public class WholeBodyTrajectoryPacket extends Packet<WholeBodyTrajectoryPacket>
       allocatePelvisTrajectory();
    }
 
+   public WholeBodyTrajectoryPacket(Random random)
+   {
+      this(random.nextInt(128) + 1, random.nextInt(16) + 1);
+      
+      for(int i = 0; i < numWaypoints; i++)
+      {
+         if(i == 0)
+         {
+            timeAtWaypoint[i] = random.nextDouble();            
+         }
+         else
+         {
+            timeAtWaypoint[i] = random.nextDouble() + timeAtWaypoint[i - 1];
+         }
+         
+         pelvisWorldPosition[i] = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         pelvisLinearVelocity[i] = RandomTools.generateRandomVector(random);
+         pelvisAngularVelocity[i] = RandomTools.generateRandomVector(random);
+         pelvisWorldOrientation[i] = RandomTools.generateRandomQuaternion(random);
+         
+         chestWorldOrientation[i] = RandomTools.generateRandomQuaternion(random);
+         chestAngularVelocity[i] = RandomTools.generateRandomVector(random);
+      }
+      
+      rightArmTrajectory = new ArmJointTrajectoryPacket(random, RobotSide.RIGHT, this.numWaypoints);
+      leftArmTrajectory = new ArmJointTrajectoryPacket(random, RobotSide.LEFT, this.numWaypoints);
+   }
 
    public void allocateArmTrajectories()
    {
