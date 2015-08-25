@@ -69,10 +69,12 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
          + "Should be numWaypoints elements long")
    public Vector3d[] chestAngularVelocity;
 
-   @FieldDocumentation("Arm trajectory for the right arm. Should have numWaypoints waypoints.")
+   @FieldDocumentation("Arm trajectory for the right arm. Should have numWaypoints waypoints.\n"
+         + "Time in trajectory_points should match the corresponding element of timeAtWaypoint")
    public ArmJointTrajectoryPacket rightArmTrajectory;
 
-   @FieldDocumentation("Arm trajectory for the left arm. Should have numWaypoints waypoints.")
+   @FieldDocumentation("Arm trajectory for the left arm. Should have numWaypoints waypoints.\n"
+         + "Time in trajectory_points should match the corresponding element of timeAtWaypoint")
    public ArmJointTrajectoryPacket leftArmTrajectory;
 
    @FieldDocumentation("Number of waypoints in the trajectory. Should be at least 1")

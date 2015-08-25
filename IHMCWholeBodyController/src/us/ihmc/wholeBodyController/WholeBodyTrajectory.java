@@ -357,8 +357,6 @@ public class WholeBodyTrajectory
       Quat4d chestOrientation = new Quat4d();
       chestToWorld.get(chestOrientation, chestPosition);
       
-      boolean rightArmPositionContent = false;
-      boolean leftArmPositionContent = false;
       
       boolean pelvisLinearVelocityContent = false;
       boolean pelvisWorldPositionContent = false;
@@ -370,27 +368,9 @@ public class WholeBodyTrajectory
       
       for (int n = 0; n < numWaypoints; n++)
       {
-         int J = 0;
-         for(OneDoFJoint armJoint: fullRobotModel.getArmJointIDs(RobotSide.RIGHT))
-         {   
-            if (!MathTools.epsilonEquals(packet.rightArmTrajectory.trajectoryPoints[n].positions[J], armJoint.getQ(), epsilon))
-            {
-               rightArmPositionContent = true;
-            }
-            J++;
-         }
+      
          
-         J = 0;
-         for(OneDoFJoint armJoint: fullRobotModel.getArmJointIDs(RobotSide.LEFT))
-         {   
-            if (!MathTools.epsilonEquals(packet.leftArmTrajectory.trajectoryPoints[n].positions[J], armJoint.getQ(), epsilon))
-            {
-               leftArmPositionContent = true;
-            }
-            J++;
-         }
-         
-         if(!packet.pelvisLinearVelocity[n].epsilonEquals(zeroVector, epsilon));
+         if(!packet.pelvisLinearVelocity[n].epsilonEquals(zeroVector, epsilon))
          {
             pelvisLinearVelocityContent = true;
          }
@@ -404,7 +384,7 @@ public class WholeBodyTrajectory
          }
          if(!packet.pelvisAngularVelocity[n].epsilonEquals(zeroVector, epsilon))
          {
-            pelvisLinearVelocityContent = true;
+            pelvisAngularVelocityContent = true;
          }
          
          if(!packet.chestWorldOrientation[n].epsilonEquals(chestOrientation, epsilon))
@@ -417,16 +397,6 @@ public class WholeBodyTrajectory
          }
       }
       
-      if (!rightArmPositionContent)
-      {
-//         System.out.println("no right arm position content");
-         packet.rightArmTrajectory = null;
-      }
-      if (!leftArmPositionContent)
-      {
-//         System.out.println("no left arm position content");
-         packet.leftArmTrajectory = null;
-      }
       if (!pelvisLinearVelocityContent)
       {
 //         System.out.println("no pelvis linear velocity");
