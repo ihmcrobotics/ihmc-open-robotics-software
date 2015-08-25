@@ -12,11 +12,11 @@ import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationFunctions;
 
-@ClassDocumentation(documentation = "This message gives the desired head orientation of the robot in world coordinates.")
+@ClassDocumentation("This message gives the desired head orientation of the robot in world coordinates.")
 public class HeadOrientationPacket extends IHMCRosApiPacket<HeadOrientationPacket> implements VisualizablePacket
 {
    public Quat4d orientation;
-   @FieldDocumentation(documentation = "trajectoryTime specifies how fast or how slow to move to the desired pose")
+   @FieldDocumentation("trajectoryTime specifies how fast or how slow to move to the desired pose")
    public double trajectoryTime;
 
    public HeadOrientationPacket()

@@ -10,17 +10,17 @@ import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.MathTools;
 
 
-@ClassDocumentation(documentation = "Sub-Packet for a point in an arm joint trajectory. It works similar to the\n"
+@ClassDocumentation("Sub-Packet for a point in an arm joint trajectory. It works similar to the\n"
                                   + "trajectory_msgs/JointTrajectoryPoint message.")
 public class JointTrajectoryPoint extends IHMCRosApiPacket<JointTrajectoryPoint>
 {
-   @FieldDocumentation(documentation = "Arm joint angles for this waypoint in order. For Atlas the controller assumes\n"
+   @FieldDocumentation("Arm joint angles for this waypoint in order. For Atlas the controller assumes\n"
                                      + "joint angles will be given in the following order: shoulder pitch, shoulder\n"
                                      + "roll, elbow pitch, elbow roll, wrist pitch, wrist roll")
    public double[] positions;
-   @FieldDocumentation(documentation = "Arm joint angular velocities for this waypoint in order.")
+   @FieldDocumentation("Arm joint angular velocities for this waypoint in order.")
    public double[] velocities;
-   @FieldDocumentation(documentation = "Time at which the waypoint is reached after the controller recieved the packet.\n"
+   @FieldDocumentation("Time at which the waypoint is reached after the controller recieved the packet.\n"
                                      + "A value of zero is not allowed.")
    public double time;
    

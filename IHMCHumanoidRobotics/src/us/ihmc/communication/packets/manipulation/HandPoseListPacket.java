@@ -17,9 +17,9 @@ public class HandPoseListPacket extends Packet<HandPoseListPacket> implements Tr
    // TODO Implement for actual hand pose
    public DataType dataType;
 
-   @FieldDocumentation(documentation = "trajectoryTime specifies how fast to move the hand to the desired position")
+   @FieldDocumentation("trajectoryTime specifies how fast to move the hand to the desired position")
    public double trajectoryTime;
-   @FieldDocumentation(documentation = "jointAngles specifies the desired individual arm joint angles. For Atlas, those are:\n"
+   @FieldDocumentation("jointAngles specifies the desired individual arm joint angles. For Atlas, those are:\n"
          + "shoulder pitch, shoulder roll, elbow pitch, elbow roll, wrist pitch, wrist roll.  jointAngles must contain more than one arm pose, for trajectory generator")
    public double[][] jointAngles;
    

@@ -21,7 +21,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.random.RandomTools;
 
-@ClassDocumentation(documentation = "Full configuration data for the robot")
+@ClassDocumentation("Full configuration data for the robot")
 public class RobotConfigurationData extends IHMCRosApiPacket<RobotConfigurationData>
 {
    public long timestamp = 0;

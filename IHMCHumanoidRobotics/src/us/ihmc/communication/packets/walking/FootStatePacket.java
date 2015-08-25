@@ -6,7 +6,7 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation(documentation = "This message tells the controller whether a foot is load bearing.")
+@ClassDocumentation("This message tells the controller whether a foot is load bearing.")
 public class FootStatePacket extends IHMCRosApiPacket<FootStatePacket>
 {
    public RobotSide robotSide;

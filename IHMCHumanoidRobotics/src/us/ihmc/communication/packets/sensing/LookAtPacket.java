@@ -9,7 +9,7 @@ import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-@ClassDocumentation(documentation = "This message specifies a point in world coordinates for the robot to look at.\n"
+@ClassDocumentation("This message specifies a point in world coordinates for the robot to look at.\n"
                                   + "The controller will attempt to orient the head such that the point is within\n"
                                   + "the FOV of the camera using a combination of the neck and pelvis joints. If the\n"
                                   + "point is outside the combined range of the available joints, the robot will\n"

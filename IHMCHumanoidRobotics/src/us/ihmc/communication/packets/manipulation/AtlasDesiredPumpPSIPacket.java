@@ -10,7 +10,7 @@ import java.util.Random;
  *
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-@ClassDocumentation(documentation = "Send a request to change the desired PSI of the Atlas hydraulic pump.")
+@ClassDocumentation("Send a request to change the desired PSI of the Atlas hydraulic pump.")
 public class AtlasDesiredPumpPSIPacket extends IHMCRosApiPacket<AtlasDesiredPumpPSIPacket>
 {
    public int desiredPumpPSI;

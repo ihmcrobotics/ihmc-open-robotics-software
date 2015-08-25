@@ -9,17 +9,17 @@ import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.MathTools;
 
-@ClassDocumentation(documentation = "This message sets the robot's center of mass height.")
+@ClassDocumentation("This message sets the robot's center of mass height.")
 public class ComHeightPacket extends IHMCRosApiPacket<ComHeightPacket> implements VisualizablePacket
 {
    public static final double MIN_COM_HEIGHT = -0.33; //-0.40
    public static final double MAX_COM_HEIGHT = 0.14;
 
-   @FieldDocumentation(documentation = "heightOffset specifies CoM height relative to the default starting height, which is\n"
+   @FieldDocumentation("heightOffset specifies CoM height relative to the default starting height, which is\n"
                                      + "about 78.9 cm off the ground e.g. heightOffset = -0.1 will put the CoM at about\n"
                                      + "68.9 cm above ground level")
    public double heightOffset;
-   @FieldDocumentation(documentation = "trajectoryTime specifies how fast or how slow to move to the desired pose")
+   @FieldDocumentation("trajectoryTime specifies how fast or how slow to move to the desired pose")
    public double trajectoryTime;
 
    public ComHeightPacket()

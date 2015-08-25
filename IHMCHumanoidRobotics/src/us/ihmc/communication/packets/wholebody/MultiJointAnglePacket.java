@@ -7,7 +7,7 @@ import us.ihmc.tools.random.RandomTools;
 
 import java.util.Random;
 
-@ClassDocumentation(documentation = "This message contains wraps up multiple SingleJointAnglePackets so they will be"
+@ClassDocumentation("This message contains wraps up multiple SingleJointAnglePackets so they will be"
 		+ "executed simultaneusly.")
 public class MultiJointAnglePacket extends IHMCRosApiPacket<MultiJointAnglePacket> implements VisualizablePacket
 {

@@ -23,14 +23,14 @@ import us.ihmc.robotics.geometry.TransformTools;
  * User: Matt
  * Date: 2/18/13
  */
-@ClassDocumentation(documentation = "This message sets the orientation of the robot's chest in world coordinates.")
+@ClassDocumentation("This message sets the orientation of the robot's chest in world coordinates.")
 public class ChestOrientationPacket extends IHMCRosApiPacket<ChestOrientationPacket> implements TransformableDataObject<ChestOrientationPacket>, VisualizablePacket
 {
    public Quat4d orientation;
-   @FieldDocumentation(documentation = "trajectoryTime specifies how fast or how slow to move to the desired pose")
+   @FieldDocumentation("trajectoryTime specifies how fast or how slow to move to the desired pose")
    public double trajectoryTime;
 
-   @FieldDocumentation(documentation = "toHomePosition can be used to move the chest back to its default starting position")
+   @FieldDocumentation("toHomePosition can be used to move the chest back to its default starting position")
    public boolean toHomeOrientation;
    
    @IgnoreField

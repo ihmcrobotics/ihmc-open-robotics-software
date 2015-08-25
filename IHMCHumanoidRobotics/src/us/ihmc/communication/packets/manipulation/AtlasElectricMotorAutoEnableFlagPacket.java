@@ -10,7 +10,7 @@ import us.ihmc.communication.packets.PacketDestination;
  *
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-@ClassDocumentation(documentation = "Automates the process of powering each of the electric motors in the Atlas forearm")
+@ClassDocumentation("Automates the process of powering each of the electric motors in the Atlas forearm")
 public class AtlasElectricMotorAutoEnableFlagPacket extends IHMCRosApiPacket<AtlasElectricMotorAutoEnableFlagPacket>
 {
    public boolean shouldAutoEnable;

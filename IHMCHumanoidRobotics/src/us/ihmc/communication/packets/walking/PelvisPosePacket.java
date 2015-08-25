@@ -19,20 +19,20 @@ import us.ihmc.robotics.geometry.TransformTools;
  * User: Matt
  * Date: 2/18/13
  */
-@ClassDocumentation(documentation = "This message gives the desired pelvis pose of the robot in world coordinates.")
+@ClassDocumentation("This message gives the desired pelvis pose of the robot in world coordinates.")
 public class PelvisPosePacket extends IHMCRosApiPacket<PelvisPosePacket> implements TransformableDataObject<PelvisPosePacket>, VisualizablePacket
 {
    /** Desired pelvis orientation. Set it to {@code null} to NOT control it. */
-   @FieldDocumentation(documentation = "orientation can be set to null to NOT control it.")
+   @FieldDocumentation("orientation can be set to null to NOT control it.")
    public Quat4d orientation;
    /** Desired pelvis position. Set it to {@code null} to NOT control it. */
-   @FieldDocumentation(documentation = "position can be set to null to NOT control it.")
+   @FieldDocumentation("position can be set to null to NOT control it.")
    public Point3d position;
    /** Desired trajectory time. Can be set to 0sec. */
-   @FieldDocumentation(documentation = "trajectoryTime specifies how fast or how slow to move to the desired pose")
+   @FieldDocumentation("trajectoryTime specifies how fast or how slow to move to the desired pose")
    public double trajectoryTime;
 
-   @FieldDocumentation(documentation = "toHomePosition can be used to move the pelvis back to its default starting position")
+   @FieldDocumentation("toHomePosition can be used to move the pelvis back to its default starting position")
    public boolean toHomePosition;
 
    public PelvisPosePacket()

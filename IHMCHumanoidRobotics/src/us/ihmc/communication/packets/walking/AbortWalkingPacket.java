@@ -6,7 +6,7 @@ import us.ihmc.communication.packets.IHMCRosApiPacket;
 /**
  * Created by agrabertilton on 4/28/15.
  */
-@ClassDocumentation(documentation = "This message is used to abort walking, forcing the robot to switch back to double support and clear the footstep list.")
+@ClassDocumentation("This message is used to abort walking, forcing the robot to switch back to double support and clear the footstep list.")
 
 public class AbortWalkingPacket extends IHMCRosApiPacket<FootStatePacket>
 {

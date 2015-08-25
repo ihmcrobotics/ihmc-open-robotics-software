@@ -6,13 +6,13 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 
-@ClassDocumentation(documentation = "This message notifies the user of a change in the high level state. This message's primary\n"
+@ClassDocumentation("This message notifies the user of a change in the high level state. This message's primary\n"
                                   + "use is to signal a requested state change is completed.")
 public class HighLevelStateChangePacket extends IHMCRosApiPacket<HighLevelStateChangePacket>
 {
-   @FieldDocumentation(documentation = "initialState gives the controller's state prior to transition")
+   @FieldDocumentation("initialState gives the controller's state prior to transition")
    public HighLevelState initialState;
-   @FieldDocumentation(documentation = "endState gives the state the controller has transitioned into")
+   @FieldDocumentation("endState gives the state the controller has transitioned into")
    public HighLevelState endState;
    
    public HighLevelStateChangePacket()

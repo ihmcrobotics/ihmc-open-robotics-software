@@ -9,13 +9,13 @@ import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation(documentation = "Packet for executing an arm joint trajectory. It works similar to the\n"
+@ClassDocumentation("Packet for executing an arm joint trajectory. It works similar to the\n"
                                   + "trajectory_msgs/JointTrajectory message.")
 public class ArmJointTrajectoryPacket extends IHMCRosApiPacket<ArmJointTrajectoryPacket> implements VisualizablePacket
 {
-   @FieldDocumentation(documentation = "Specifies the side of the robot that will execute the trajectory")
+   @FieldDocumentation("Specifies the side of the robot that will execute the trajectory")
    public RobotSide robotSide;
-   @FieldDocumentation(documentation = "List of points in the trajectory")
+   @FieldDocumentation("List of points in the trajectory")
    public JointTrajectoryPoint[] trajectoryPoints;
    
    public ArmJointTrajectoryPacket()

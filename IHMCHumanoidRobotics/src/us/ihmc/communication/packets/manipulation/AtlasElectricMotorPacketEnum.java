@@ -7,7 +7,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 /**
 * Created by dstephen on 3/26/15.
 */
-@ClassDocumentation(documentation = "Enum for the various joints in the Atlas forearm. Note the joint names correspond to their\n"
+@ClassDocumentation("Enum for the various joints in the Atlas forearm. Note the joint names correspond to their\n"
                                   + "orientation in the canonical 'zero pose' where the arms are held out perpendicular to the\n"
                                   + "sides of the robot.")
 public enum AtlasElectricMotorPacketEnum implements DocumentedEnum<AtlasElectricMotorPacketEnum>
