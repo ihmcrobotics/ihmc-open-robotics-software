@@ -61,22 +61,22 @@ public class ROSMessageGenerator
             System.out.println("Message Created: " + messageFile.getName());
             PrintStream fileStream = new PrintStream(messageFile);
 
-            String outBuffer = "## " + messageName + System.lineSeparator();
+            String outBuffer = "## " + messageName + "\n";
             ClassDocumentation annotation = (ClassDocumentation) clazz.getAnnotation(ClassDocumentation.class);
             if (annotation != null)
             {
                String[] annotationString = annotation.value().split("\r?\n|\r");
                for (String line : annotationString)
                {
-                  outBuffer += "# " + line + System.lineSeparator();
+                  outBuffer += "# " + line + "\n";
                }
             }
             else
             {
-               outBuffer += "# No Documentation Annotation Found" + System.lineSeparator();
+               outBuffer += "# No Documentation Annotation Found" + "\n";
             }
 
-            outBuffer += System.lineSeparator();
+            outBuffer += "\n";
 
             Field[] fields = clazz.getFields();
             Set<String> enumsAlreadyDocumented = new TreeSet<String>();
@@ -104,7 +104,7 @@ public class ROSMessageGenerator
                }
 
                String formattedFieldName = camelCaseToLowerCaseWithUnderscores(field.getName());
-               outBuffer += " " + formattedFieldName + System.lineSeparator() + System.lineSeparator();
+               outBuffer += " " + formattedFieldName + "\n" + "\n";
             }
 
             fileStream.println(outBuffer);
