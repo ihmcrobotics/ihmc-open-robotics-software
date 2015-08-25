@@ -12,43 +12,43 @@ import us.ihmc.tools.FormattingTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation(documentation = "This message commands the IHMC joint position controller to move Atlas's joints to the desired angles.")
+@ClassDocumentation("This message commands the IHMC joint position controller to move Atlas's joints to the desired angles.")
 public class JointAnglesPacket extends IHMCRosApiPacket<JointAnglesPacket> implements VisualizablePacket
 {
-   @FieldDocumentation(documentation = "trajectoryTime specifies how fast or how slow to move to the desired joint angles")
+   @FieldDocumentation("trajectoryTime specifies how fast or how slow to move to the desired joint angles")
    public double trajectoryTime;
-   @FieldDocumentation(documentation = "neckJointAngle neck_ry")
+   @FieldDocumentation("neckJointAngle neck_ry")
    public double neckJointAngle;
-   @FieldDocumentation(documentation = "spineJointAngles back_bky back_bkx back_bkz")
+   @FieldDocumentation("spineJointAngles back_bky back_bkx back_bkz")
    public double[] spineJointAngle;
-   @FieldDocumentation(documentation = "rightLegJointAngle r_leg_hpz r_leg_hpx r_leg_hpy r_leg_kny r_leg_aky r_leg_akx")
+   @FieldDocumentation("rightLegJointAngle r_leg_hpz r_leg_hpx r_leg_hpy r_leg_kny r_leg_aky r_leg_akx")
    public double[] rightLegJointAngle;
-   @FieldDocumentation(documentation = "leftLegJointAngle l_leg_hpz l_leg_hpx l_leg_hpy l_leg_kny l_leg_aky l_leg_akx")
+   @FieldDocumentation("leftLegJointAngle l_leg_hpz l_leg_hpx l_leg_hpy l_leg_kny l_leg_aky l_leg_akx")
    public double[] leftLegJointAngle;
-   @FieldDocumentation(documentation = "rightArmJointAngle r_arm_shz r_arm_shx r_arm_ely r_arm_elx r_arm_wry r_arm_wrx r_arm_wry2")
+   @FieldDocumentation("rightArmJointAngle r_arm_shz r_arm_shx r_arm_ely r_arm_elx r_arm_wry r_arm_wrx r_arm_wry2")
    public double[] rightArmJointAngle;
-   @FieldDocumentation(documentation = "leftArmJointAngle l_arm_shz l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx l_arm_wry2")
+   @FieldDocumentation("leftArmJointAngle l_arm_shz l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx l_arm_wry2")
    public double[] leftArmJointAngle;
 
-   @FieldDocumentation(documentation = "spineJointLimits back_bky back_bkx back_bkz")
+   @FieldDocumentation("spineJointLimits back_bky back_bkx back_bkz")
    public int[] spineTorqueLimit;
-   @FieldDocumentation(documentation = "rightLegJointTorqueLimit r_leg_hpz r_leg_hpx r_leg_hpy r_leg_kny r_leg_aky r_leg_akx")
+   @FieldDocumentation("rightLegJointTorqueLimit r_leg_hpz r_leg_hpx r_leg_hpy r_leg_kny r_leg_aky r_leg_akx")
    public int[] rightLegTorqueLimit;
-   @FieldDocumentation(documentation = "leftLegJointTorqueLimit l_leg_hpz l_leg_hpx l_leg_hpy l_leg_kny l_leg_aky l_leg_akx")
+   @FieldDocumentation("leftLegJointTorqueLimit l_leg_hpz l_leg_hpx l_leg_hpy l_leg_kny l_leg_aky l_leg_akx")
    public int[] leftLegTorqueLimit;
-   @FieldDocumentation(documentation = "rightArmTorqueLimit l_arm_shz l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx l_arm_wry2")
+   @FieldDocumentation("rightArmTorqueLimit l_arm_shz l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx l_arm_wry2")
    public int[] rightArmTorqueLimit;
-   @FieldDocumentation(documentation = "leftArmTorqueLimit l_arm_shz l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx l_arm_wry2")
+   @FieldDocumentation("leftArmTorqueLimit l_arm_shz l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx l_arm_wry2")
    public int[] leftArmTorqueLimit;
    
-   @FieldDocumentation(documentation = "keepLeftHandInTaskspacePosition specifies whether the position controller should try to maintain the left hand position in task space")
+   @FieldDocumentation("keepLeftHandInTaskspacePosition specifies whether the position controller should try to maintain the left hand position in task space")
    public boolean keepLeftHandInTaskspacePosition;
    
-   @FieldDocumentation(documentation = "keepRightHandInTaskspacePosition specifies whether the position controller should try to maintain the right hand position in task space")
+   @FieldDocumentation("keepRightHandInTaskspacePosition specifies whether the position controller should try to maintain the right hand position in task space")
    public boolean keepRightHandInTaskspacePosition;
    
    @IgnoreField
-   @FieldDocumentation(documentation = "if flattenFeetAtTheEnd is true, the ankles will move at the end of the trajectory to adapt to the inclination of the ground")
+   @FieldDocumentation("if flattenFeetAtTheEnd is true, the ankles will move at the end of the trajectory to adapt to the inclination of the ground")
    public boolean flattenFeetAtTheEnd;
    
    public JointAnglesPacket()

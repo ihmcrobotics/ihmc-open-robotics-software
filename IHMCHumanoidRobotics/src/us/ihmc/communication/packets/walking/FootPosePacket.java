@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation(documentation = "This message commands the controller to move the desired foot to a given location\n"
+@ClassDocumentation("This message commands the controller to move the desired foot to a given location\n"
                                   + "and orientation in world coordinates. This message is not intended to specify footsteps\n"
                                   + "as the controller will use a straight-line trajectory when moving the foot from its\n"
                                   + "current to desired location/orientation")
@@ -28,7 +28,7 @@ public class FootPosePacket extends IHMCRosApiPacket<FootPosePacket> implements 
 
    public Point3d position;
    public Quat4d orientation;
-   @FieldDocumentation(documentation = "trajectoryTime specifies how fast or how slow to move to the desired pose")
+   @FieldDocumentation("trajectoryTime specifies how fast or how slow to move to the desired pose")
    public double trajectoryTime;
 
    public FootPosePacket()

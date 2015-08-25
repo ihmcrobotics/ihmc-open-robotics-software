@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface FieldDocumentation
 {
-	String documentation();
+	String value();
 }

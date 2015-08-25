@@ -13,7 +13,7 @@ public class HandRotateAboutAxisPacket extends Packet<HandRotateAboutAxisPacket>
 {
    public RobotSide robotSide;
 
-   @FieldDocumentation(documentation = "trajectoryTime specifies how fast to move the hand to the desired position")
+   @FieldDocumentation("trajectoryTime specifies how fast to move the hand to the desired position")
    public double trajectoryTime;
 
    public Point3d rotationAxisOriginInWorld;

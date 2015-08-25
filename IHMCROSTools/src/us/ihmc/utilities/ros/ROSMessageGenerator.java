@@ -65,7 +65,7 @@ public class ROSMessageGenerator
             ClassDocumentation annotation = (ClassDocumentation) clazz.getAnnotation(ClassDocumentation.class);
             if (annotation != null)
             {
-               String[] annotationString = annotation.documentation().split("\r?\n|\r");
+               String[] annotationString = annotation.value().split("\r?\n|\r");
                for (String line : annotationString)
                {
                   outBuffer += "# " + line + System.lineSeparator();
@@ -152,10 +152,10 @@ public class ROSMessageGenerator
       FieldDocumentation fieldAnnotation = field.getAnnotation(FieldDocumentation.class);
       if (fieldAnnotation != null)
       {
-         String[] annotationString = fieldAnnotation.documentation().split("\r?\n|\r");
+         String[] annotationString = fieldAnnotation.value().split("\r?\n|\r");
          for (String line : annotationString)
          {
-            buffer += "# " + line + System.lineSeparator();
+            buffer += "# " + line + "\n";
          }
       }
 
@@ -202,7 +202,7 @@ public class ROSMessageGenerator
             {
                List<Object> documentedValues = Arrays.asList(enumList[0].getDocumentedValues());
 
-               buffer += "# Options for " + varName + System.lineSeparator();
+               buffer += "# Options for " + varName + "\n";
 
                for (int i = 0; i < documentedValues.size(); i++)
                {
@@ -217,7 +217,7 @@ public class ROSMessageGenerator
                   DocumentedEnum<Object> documentedEnum = (DocumentedEnum<Object>) Enum.valueOf(clazz, documentedValues.get(i).toString());
                   String documentation = documentedEnum.getDocumentation(documentedValues.get(i));
                   buffer += " # " + documentation;
-                  buffer += System.lineSeparator();
+                  buffer += "\n";
                }
 
                buffer += "uint8";
@@ -287,7 +287,7 @@ public class ROSMessageGenerator
 //       String[] annotationString = annotaionString.split("\r?\n|\r");
 //       for(String line : annotationString)
 //       {
-//               printBuffer += "# " + line + System.lineSeparator();
+//               printBuffer += "# " + line + "\n";
 //       }
 // }
 }

@@ -27,7 +27,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
  *
  */
 
-@ClassDocumentation(documentation = "This message commands the controller to move an arm end effector to a given\n"
+@ClassDocumentation("This message commands the controller to move an arm end effector to a given\n"
                                   + "position and orientation. On Atlas, the end effector position is considered\n"
                                   + "as the end of the hand attachment plate, which is about 10 cm from the end\n"
                                   + "of the wrist. The position/orientation may be specified in world frame, chest\n"
@@ -87,23 +87,23 @@ public class HandPosePacket extends IHMCRosApiPacket<HandPosePacket> implements 
    }
 
    public RobotSide robotSide;
-   @FieldDocumentation(documentation = "data_type specifies whether or not the IHMC Controller should use the pose fields\n"
+   @FieldDocumentation("data_type specifies whether or not the IHMC Controller should use the pose fields\n"
                                      + "or the joint angles array for computing control output for the arms")
    public DataType dataType; 
-   @FieldDocumentation(documentation = "when using HAND_POSE datatype commands, specify whether the pose should be held in world or chest frame. "
+   @FieldDocumentation("when using HAND_POSE datatype commands, specify whether the pose should be held in world or chest frame. "
          + "Note that regardless of the frame specified here the position and orientation must be expressed in world frame.")
    public Frame referenceFrame;
 
-   @FieldDocumentation(documentation = "to_home_position can be used to move the arm end effectors back to their starting\n"
+   @FieldDocumentation("to_home_position can be used to move the arm end effectors back to their starting\n"
                                      + "position, defined as down and beside the robot with slightly bent elbows")
    public boolean toHomePosition;
-   @FieldDocumentation(documentation = "the position component of a HAND_POSE type message. See the data_type field.")
+   @FieldDocumentation("the position component of a HAND_POSE type message. See the data_type field.")
    public Point3d position;
-   @FieldDocumentation(documentation = "the orientation component of a HAND_POSE type message. See the data_type field.")
+   @FieldDocumentation("the orientation component of a HAND_POSE type message. See the data_type field.")
    public Quat4d orientation;
-   @FieldDocumentation(documentation = "trajectory_time specifies how fast or how slow to move to the desired pose")
+   @FieldDocumentation("trajectory_time specifies how fast or how slow to move to the desired pose")
    public double trajectoryTime;
-   @FieldDocumentation(documentation = "joint_angles specifies the desired arm joint angles in order for a JOINT_ANGLES type messages."
+   @FieldDocumentation("joint_angles specifies the desired arm joint angles in order for a JOINT_ANGLES type messages."
                                      + "For Atlas V5 the controller assumes joint angles will be given in the following order:\n"
                                      + "shoulder yaw, shoulder roll, elbow pitch, elbow roll, upper wrist pitch, wrist roll, lower wrist pitch")
    public double[] jointAngles;
@@ -122,7 +122,7 @@ public class HandPosePacket extends IHMCRosApiPacket<HandPosePacket> implements 
    @IgnoreField
    public double percentOfTrajectoryWithHandOrientationBeingControlled = Double.NaN;
    
-   @FieldDocumentation(documentation = "Specifies whether or not the orientation of the hand should be controller during HAND_POSE commands.\n")
+   @FieldDocumentation("Specifies whether or not the orientation of the hand should be controller during HAND_POSE commands.\n")
    public boolean controlOrientation;
    
    public HandPosePacket()

@@ -16,7 +16,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
  * User: Matt
  * Date: 1/18/13
  */
-@ClassDocumentation(documentation = "This message gives the status of the current footstep from the controller as well as the position\n"
+@ClassDocumentation("This message gives the status of the current footstep from the controller as well as the position\n"
                                   + "and orientation of the footstep in world cooredinates. ")
 public class FootstepStatus extends IHMCRosApiPacket<FootstepStatus>
 {
@@ -47,18 +47,18 @@ public class FootstepStatus extends IHMCRosApiPacket<FootstepStatus>
    }
 
    public Status status;
-   @FieldDocumentation(documentation = "footstepIndex starts at 0 and monotonically increases with each completed footstep in a given\n"
+   @FieldDocumentation("footstepIndex starts at 0 and monotonically increases with each completed footstep in a given\n"
                                      + "FootstepDataListMessage.")
    public int footstepIndex;
 
    public RobotSide robotSide;
-   @FieldDocumentation(documentation = "actualFootPositionInWorld gives the position of where the foot actually landed as opposed\n"
+   @FieldDocumentation("actualFootPositionInWorld gives the position of where the foot actually landed as opposed\n"
                                      + "to the desired position sent to the controller")
    public Point3d actualFootPositionInWorld;
-   @FieldDocumentation(documentation = "actualFootOrientationInWorld gives the orientation the foot is actually in as opposed to"
+   @FieldDocumentation("actualFootOrientationInWorld gives the orientation the foot is actually in as opposed to"
                                      + "the desired orientation sent to the controller\n")
    public Quat4d actualFootOrientationInWorld;
-   @FieldDocumentation(documentation = "isDoneWalking will be set to true when in double-support and there are no footsteps queued. If\n"
+   @FieldDocumentation("isDoneWalking will be set to true when in double-support and there are no footsteps queued. If\n"
                                      + "isDoneWalking is set to true, the rest of the fields in this packet should be ignored")
    public boolean isDoneWalking;
 

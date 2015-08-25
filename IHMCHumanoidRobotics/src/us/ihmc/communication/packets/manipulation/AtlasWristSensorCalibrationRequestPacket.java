@@ -7,7 +7,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 
-@ClassDocumentation(documentation = "Request taring of the wrist force/torque sensors.")
+@ClassDocumentation("Request taring of the wrist force/torque sensors.")
 public class AtlasWristSensorCalibrationRequestPacket extends IHMCRosApiPacket<AtlasWristSensorCalibrationRequestPacket>
 {
    public RobotSide robotSide;

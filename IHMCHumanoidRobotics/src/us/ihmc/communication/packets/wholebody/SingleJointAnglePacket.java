@@ -6,7 +6,7 @@ import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.MathTools;
 
-@ClassDocumentation(documentation = "This message contains a desired joint angle for a single joint.")
+@ClassDocumentation("This message contains a desired joint angle for a single joint.")
 public class SingleJointAnglePacket extends IHMCRosApiPacket<SingleJointAnglePacket> implements VisualizablePacket
 {   
    public String jointName;

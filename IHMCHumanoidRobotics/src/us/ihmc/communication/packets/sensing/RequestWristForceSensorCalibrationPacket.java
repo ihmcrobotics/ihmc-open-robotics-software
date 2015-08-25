@@ -3,7 +3,7 @@ package us.ihmc.communication.packets.sensing;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.Packet;
 
-@ClassDocumentation(documentation = "This message will request a calibration the wrist force sensors to the IHMC controller (does not do BDI calibration).\n"
+@ClassDocumentation("This message will request a calibration the wrist force sensors to the IHMC controller (does not do BDI calibration).\n"
 		                            + "It is strongly suggested to perform the calibration when the hands are not moving nor interacting with the environment.")
 public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWristForceSensorCalibrationPacket>
 {

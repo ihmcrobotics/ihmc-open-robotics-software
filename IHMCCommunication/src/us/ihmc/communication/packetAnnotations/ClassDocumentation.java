@@ -13,5 +13,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface ClassDocumentation {
-   String documentation() default "No Documentation For This Class Is Recorded.";
+   String value() default "No Documentation For This Class Is Recorded.";
 }

@@ -18,15 +18,15 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation(documentation = "This message commands the controller to execute a list of footsteps. See FootstepDataMessage\n"
+@ClassDocumentation("This message commands the controller to execute a list of footsteps. See FootstepDataMessage\n"
                                   + "for information about defining a footstep.")
 public class FootstepDataList extends IHMCRosApiPacket<FootstepDataList> implements TransformableDataObject<FootstepDataList>, Iterable<FootstepData>, VisualizablePacket
 {
    public ArrayList<FootstepData> footstepDataList = new ArrayList<FootstepData>();
 
-   @FieldDocumentation(documentation = "swingTime is the time spent in single-support when stepping")
+   @FieldDocumentation("swingTime is the time spent in single-support when stepping")
    public double swingTime = 0.0;
-   @FieldDocumentation(documentation = "transferTime is the time spent in double-support between steps")
+   @FieldDocumentation("transferTime is the time spent in double-support between steps")
    public double transferTime = 0.0;
 
    public FootstepDataList()

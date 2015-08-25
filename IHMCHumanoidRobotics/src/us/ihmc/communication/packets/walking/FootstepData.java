@@ -23,7 +23,7 @@ import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation(documentation = "This message specifies the position, orientation and side (left or right) of a desired footstep in\n"
+@ClassDocumentation("This message specifies the position, orientation and side (left or right) of a desired footstep in\n"
                                   + "world frame")
 public class FootstepData extends IHMCRosApiPacket<FootstepData> implements TransformableDataObject<FootstepData>
 {
@@ -32,7 +32,7 @@ public class FootstepData extends IHMCRosApiPacket<FootstepData> implements Tran
    public Point3d location;
    public Quat4d orientation;
    
-   @FieldDocumentation(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
+   @FieldDocumentation("predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
                                      + "the world. A value of null will default to using the entire foot. Contact points should be specified\n"
                                      + "in foot sole frame, where the origin is at the center of the foot. Order of the points does not matter.\n"
                                      + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n"
@@ -43,10 +43,10 @@ public class FootstepData extends IHMCRosApiPacket<FootstepData> implements Tran
                                      + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
    public ArrayList<Point2d> predictedContactPoints;
 
-   @FieldDocumentation(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is to default to basic.\n")
+   @FieldDocumentation("This contains information on what the swing trajectory should be for each step. Recomended is to default to basic.\n")
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
 
-   @FieldDocumentation(documentation = "Contains information on how high the robot should step. This affects only basic and obstacle clearance trajectories."
+   @FieldDocumentation("Contains information on how high the robot should step. This affects only basic and obstacle clearance trajectories."
          + "Recommended values are between 0.1 (default) and 0.25.\n")
    public double swingHeight = 0;
 
