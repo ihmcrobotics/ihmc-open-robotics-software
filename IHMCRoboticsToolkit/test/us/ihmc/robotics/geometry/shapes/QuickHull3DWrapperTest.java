@@ -19,10 +19,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by agrabertilton on 1/17/15.
- */
-public class QuickHull3DTest
+public class QuickHull3DWrapperTest
 {
 	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 30000)
