@@ -2482,7 +2482,7 @@ public class ConvexPolygon2d implements Geometry2d
       if (vertexIndex < 0)
          throw new IndexOutOfBoundsException("vertexIndex < 0");
       if (vertexIndex >= numberOfVertices)
-         throw new IndexOutOfBoundsException("vertexIndex >= numberOfVertices");
+         throw new IndexOutOfBoundsException("vertexIndex >= numberOfVertices. numberOfVertices = " + numberOfVertices);
    }
 
    protected int getMidEdgeOppositeClockwiseOrdering(int leftEdgeIndex, int rightEdgeIndex)
