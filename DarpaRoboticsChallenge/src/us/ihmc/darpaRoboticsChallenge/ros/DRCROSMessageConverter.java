@@ -10,6 +10,8 @@ import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
+import geometry_msgs.Quaternion;
+import geometry_msgs.Vector3;
 import ihmc_msgs.ArmJointTrajectoryPacketMessage;
 import ihmc_msgs.AtlasDesiredPumpPSIPacketMessage;
 import ihmc_msgs.AtlasElectricMotorEnablePacketMessage;
@@ -32,6 +34,7 @@ import ihmc_msgs.MultiJointAnglePacketMessage;
 import ihmc_msgs.PauseCommandMessage;
 import ihmc_msgs.Point2dMessage;
 import ihmc_msgs.SingleJointAnglePacketMessage;
+import ihmc_msgs.WholeBodyTrajectoryPacketMessage;
 import us.ihmc.communication.packets.HighLevelStateChangePacket;
 import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.LegCompliancePacket;
@@ -57,6 +60,7 @@ import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.communication.packets.wholebody.MultiJointAnglePacket;
 import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
+import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -106,6 +110,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((HandComplianceControlParametersPacket) packet);
       else if (packet instanceof LegCompliancePacket)
          return convertToRosMessage((LegCompliancePacket) packet);
+      else if (packet instanceof WholeBodyTrajectoryPacket)
+         return convertToRosMessage((WholeBodyTrajectoryPacket) packet);
       else
          return null;
    }
@@ -150,8 +156,68 @@ public class DRCROSMessageConverter
          return convertToPacket((HandComplianceControlParametersPacketMessage) message);
       else if (message instanceof LegCompliancePacketMessage)
          return convertToPacket((LegCompliancePacketMessage) message);
+      else if (message instanceof WholeBodyTrajectoryPacketMessage)
+         return convertToPacket((WholeBodyTrajectoryPacketMessage) message);
       else
          return null;
+   }
+
+   private static Packet<?> convertToPacket(WholeBodyTrajectoryPacketMessage message)
+   {
+      WholeBodyTrajectoryPacket ret = new WholeBodyTrajectoryPacket(message.getNumWaypoints(), message.getNumJointsPerArm());
+
+      for (int i = 0; i < message.getNumWaypoints(); i++)
+      {
+         ret.timeAtWaypoint[i] = message.getTimeAtWaypoint()[i];
+         ret.pelvisWorldPosition[i] = convertVector3ToPoint3d(message.getPelvisWorldPosition().get(i));
+         ret.pelvisLinearVelocity[i] = convertVector3ToVector3d(message.getPelvisLinearVelocity().get(i));
+         ret.pelvisAngularVelocity[i] = convertVector3ToVector3d(message.getPelvisAngularVelocity().get(i));
+         ret.pelvisWorldOrientation[i] = convertQuaternionToQuat4d(message.getPelvisWorldOrientation().get(i));
+         ret.chestWorldOrientation[i] = convertQuaternionToQuat4d(message.getChestWorldOrientation().get(i));
+         ret.chestAngularVelocity[i] = convertVector3ToVector3d(message.getChestAngularVelocity().get(i));
+      }
+      
+      ret.rightArmTrajectory = convertToPacket(message.getRightArmTrajectory());
+      ret.leftArmTrajectory = convertToPacket(message.getLeftArmTrajectory());
+
+      return ret;
+   }
+   
+   public static WholeBodyTrajectoryPacketMessage convertToRosMessage(WholeBodyTrajectoryPacket packet)
+   {
+      WholeBodyTrajectoryPacketMessage ret = messageFactory.newFromType("ihmc_msgs/WholeBodyTrajectoryPacketMessage");
+      ret.setNumWaypoints(packet.numWaypoints);
+      ret.setNumJointsPerArm(packet.numJointsPerArm);
+      ArrayList<Vector3> pelvisWorldPositions = new ArrayList<>();
+      ArrayList<Vector3> pelvisLinearVelocity = new ArrayList<>();
+      ArrayList<Vector3> pelvisAngularVelocity = new ArrayList<>();
+      ArrayList<Quaternion> pelvisWorldOrientation = new ArrayList<>();
+      ArrayList<Quaternion> chestWorldOrientation = new ArrayList<>();
+      ArrayList<Vector3> chestAngularVelocity = new ArrayList<>();
+      
+      for (int i = 0; i < packet.numWaypoints; i++)
+      {
+         pelvisWorldPositions.add(convertPoint3dToVector3(packet.pelvisWorldPosition[i]));
+         pelvisLinearVelocity.add(convertVector3dToVector3(packet.pelvisLinearVelocity[i]));
+         pelvisAngularVelocity.add(convertVector3dToVector3(packet.pelvisAngularVelocity[i]));
+         pelvisWorldOrientation.add(convertQuat4dToQuaternion(packet.pelvisWorldOrientation[i]));
+         chestWorldOrientation.add(convertQuat4dToQuaternion(packet.chestWorldOrientation[i]));
+         chestAngularVelocity.add(convertVector3dToVector3(packet.chestAngularVelocity[i]));
+      }
+      
+      ret.setTimeAtWaypoint(packet.timeAtWaypoint);
+      ret.setPelvisWorldPosition(pelvisWorldPositions);
+      ret.setPelvisLinearVelocity(pelvisLinearVelocity);
+      ret.setPelvisAngularVelocity(pelvisAngularVelocity);
+      ret.setPelvisWorldOrientation(pelvisWorldOrientation);
+      ret.setChestWorldOrientation(chestWorldOrientation);
+      ret.setChestAngularVelocity(chestAngularVelocity);
+      
+      ret.setRightArmTrajectory(convertToRosMessage(packet.rightArmTrajectory));
+      ret.setLeftArmTrajectory(convertToRosMessage(packet.leftArmTrajectory));
+      
+      return ret;
+      
    }
 
    public static HandComplianceControlParametersPacket convertToPacket(HandComplianceControlParametersPacketMessage message)

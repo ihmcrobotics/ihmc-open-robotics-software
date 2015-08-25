@@ -18,6 +18,7 @@ import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.communication.packets.wholebody.MultiJointAnglePacket;
+import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 
 /**
  * Created by agrabertilton on 10/10/14.
@@ -44,7 +45,7 @@ public class IHMCRosApiMessageMap
       MultiJointAnglePacket.class,
       HandComplianceControlParametersPacket.class,
       LegCompliancePacket.class,
-//      RobotConfigurationData.class
+      WholeBodyTrajectoryPacket.class
    };
 
    public static final Class[] INPUT_PACKET_LIST =
@@ -64,7 +65,8 @@ public class IHMCRosApiMessageMap
       AtlasDesiredPumpPSIPacket.class,
       MultiJointAnglePacket.class,
       HandComplianceControlParametersPacket.class,
-      LegCompliancePacket.class
+      LegCompliancePacket.class,
+      WholeBodyTrajectoryPacket.class
    };
 
    public static final Class[] OUTPUT_PACKET_LIST =
@@ -101,6 +103,7 @@ public class IHMCRosApiMessageMap
       PACKET_TO_TOPIC_MAP.put(MultiJointAnglePacket.class, "/control/multi_joint_angles");
       PACKET_TO_TOPIC_MAP.put(HandComplianceControlParametersPacket.class, "/control/hand_compliance_control_parameters");
       PACKET_TO_TOPIC_MAP.put(LegCompliancePacket.class, "/control/leg_compliance_control_parameters");
+      PACKET_TO_TOPIC_MAP.put(WholeBodyTrajectoryPacket.class, "/control/whole_body_trajectory");
 
       //outputs
       PACKET_TO_TOPIC_MAP.put(FootstepStatus.class, "/output/footstep_status");

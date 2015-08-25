@@ -75,8 +75,11 @@ public class ArmJointTrajectoryPacket extends IHMCRosApiPacket<ArmJointTrajector
    
    public ArmJointTrajectoryPacket(Random random)
    {
-      this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
-      int numberOfPoints = random.nextInt(10);
+      this(random, random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT, random.nextInt(16) + 1);
+   }
+   public ArmJointTrajectoryPacket(Random random, RobotSide robotSide, int numberOfPoints)
+   {
+      this.robotSide = robotSide;
       this.trajectoryPoints = new JointTrajectoryPoint[numberOfPoints];
       for (int i = 0; i < numberOfPoints; i++)
       {
