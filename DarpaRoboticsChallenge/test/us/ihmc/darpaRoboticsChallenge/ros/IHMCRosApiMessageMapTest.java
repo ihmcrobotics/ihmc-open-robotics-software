@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@BambooPlan(planType = BambooPlanType.Fast)
+@BambooPlan(planType = BambooPlanType.InDevelopment)
 public class IHMCRosApiMessageMapTest
 {
    final Set<Class> packetClasses = new HashSet<>();

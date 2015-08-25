@@ -22,7 +22,7 @@ import us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter;
 /**
  * Created by agrabertilton on 4/23/15.
  */
-@BambooAnnotations.BambooPlan(planType = BambooPlanType.Flaky)
+@BambooAnnotations.BambooPlan(planType = BambooPlanType.InDevelopment)
 public class GenericROSMessageConverterTest
 {
    private int numberOfTimesToRunEachPacketType = 1000;
