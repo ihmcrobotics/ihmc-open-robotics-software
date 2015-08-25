@@ -42,30 +42,30 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
    public double[] timeAtWaypoint;
    
    @FieldDocumentation("Sequence of desired positions of the pelvis in world coordinates. \n"
-           + "Provide null if no motion is desired\n"
+           + "Provide an empty list if no motion is desired\n"
            + "Should be numWaypoints elements long")
    public Point3d[] pelvisWorldPosition;
    
    @FieldDocumentation("Sequence of desired velocities of the pelvis. \n"
-         + "Provide null if zero velocity is required\n"
+         + "Provide an empty list if zero velocity is required\n"
          + "Should be numWaypoints elements long")
    public Vector3d[] pelvisLinearVelocity;
    @FieldDocumentation("Sequence of desired angular velocities of the pelvis. \n"
-         + "Provide null if zero angular velocity is desired\n"
+         + "Provide an empty list if zero angular velocity is desired\n"
          + "Should be numWaypoints elements long")
    public Vector3d[] pelvisAngularVelocity;
 
    @FieldDocumentation("Sequence of desired quaternion (x,y,z,w) orientations of the pelvis in world coordinates. \n"
-         + "Provide null if no motion is desired\n"
+         + "Provide an empty list if no motion is desired\n"
          + "Should be numWaypoints elements long")
    public Quat4d[] pelvisWorldOrientation;
    @FieldDocumentation("Sequence of desired quaternion (x,y,z,w) orientations of the chest in world coordinates. \n"
-         + "Provide null if no motion is desired\n"
+         + "Provide an empty list if no motion is desired\n"
          + "Should be numWaypoints elements long")
    public Quat4d[] chestWorldOrientation;
    
    @FieldDocumentation("Sequence of desired angular velocities of the chest. \n"
-         + "Provide null if zero velocity is desired\n"
+         + "Provide an empty list if zero velocity is desired\n"
          + "Should be numWaypoints elements long")
    public Vector3d[] chestAngularVelocity;
 
@@ -278,6 +278,7 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
             timeAtWaypoint[i] = random.nextDouble() + timeAtWaypoint[i - 1];
          }
          
+         
          pelvisWorldPosition[i] = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
          pelvisLinearVelocity[i] = RandomTools.generateRandomVector(random);
          pelvisAngularVelocity[i] = RandomTools.generateRandomVector(random);
@@ -286,6 +287,14 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
          chestWorldOrientation[i] = RandomTools.generateRandomQuaternion(random);
          chestAngularVelocity[i] = RandomTools.generateRandomVector(random);
       }
+      
+      pelvisWorldPosition = random.nextBoolean() ? null : pelvisWorldPosition;
+      pelvisLinearVelocity = random.nextBoolean() ? null : pelvisLinearVelocity;
+      pelvisAngularVelocity = random.nextBoolean() ? null : pelvisAngularVelocity;
+      pelvisWorldOrientation = random.nextBoolean() ? null : pelvisWorldOrientation;
+      
+      chestWorldOrientation = random.nextBoolean() ? null : chestWorldOrientation;
+      chestAngularVelocity = random.nextBoolean() ? null : chestAngularVelocity;
       
       rightArmTrajectory = new ArmJointTrajectoryPacket(random, RobotSide.RIGHT, this.numWaypoints);
       leftArmTrajectory = new ArmJointTrajectoryPacket(random, RobotSide.LEFT, this.numWaypoints);
@@ -355,25 +364,60 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
             return false;
          }
 
-         if (this.pelvisWorldPosition[w].epsilonEquals(otherTrajectory.pelvisWorldPosition[w], epsilon) == false)
+         if(this.pelvisWorldPosition == null)
+         {
+            return otherTrajectory.pelvisWorldPosition == null;
+         }
+         else if (this.pelvisWorldPosition[w].epsilonEquals(otherTrajectory.pelvisWorldPosition[w], epsilon) == false)
          {
             return false;
          }
 
-         if (this.pelvisWorldOrientation[w].epsilonEquals(otherTrajectory.pelvisWorldOrientation[w], epsilon) == false)
+         if(this.pelvisWorldOrientation == null)
+         {
+            return otherTrajectory.pelvisWorldOrientation == null;
+         }
+         else if (this.pelvisWorldOrientation[w].epsilonEquals(otherTrajectory.pelvisWorldOrientation[w], epsilon) == false)
          {
             return false;
          }
 
-         if (this.chestWorldOrientation[w].epsilonEquals(otherTrajectory.chestWorldOrientation[w], epsilon) == false)
+         if(this.chestWorldOrientation == null)
+         {
+            return otherTrajectory.chestWorldOrientation == null;
+         }
+         else if (this.chestWorldOrientation[w].epsilonEquals(otherTrajectory.chestWorldOrientation[w], epsilon) == false)
+         {
+            return false;
+         }
+         
+         if(this.chestAngularVelocity == null)
+         {
+            return otherTrajectory.chestAngularVelocity == null;
+         }
+         else if (this.chestAngularVelocity[w].epsilonEquals(otherTrajectory.chestAngularVelocity[w], epsilon) == false)
          {
             return false;
          }
 
-         if (this.pelvisLinearVelocity[w].epsilonEquals(otherTrajectory.pelvisLinearVelocity[w], epsilon) == false)
+         if(this.pelvisLinearVelocity == null)
+         {
+            return otherTrajectory.pelvisLinearVelocity == null;
+         }
+         else if (this.pelvisLinearVelocity[w].epsilonEquals(otherTrajectory.pelvisLinearVelocity[w], epsilon) == false)
          {
             return false;
          }
+         if(this.pelvisAngularVelocity == null)
+         {
+            return otherTrajectory.pelvisAngularVelocity == null;
+         }
+         else if (this.pelvisAngularVelocity[w].epsilonEquals(otherTrajectory.pelvisAngularVelocity[w], epsilon) == false)
+         {
+            return false;
+         }
+         
+         
       }
 
       return true;
