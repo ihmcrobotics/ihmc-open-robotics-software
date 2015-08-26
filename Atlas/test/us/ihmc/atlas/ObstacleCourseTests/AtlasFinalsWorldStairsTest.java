@@ -25,23 +25,23 @@ import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCFinalsEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
+import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.RotationFunctions;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.thread.ThreadTools;
 
 /**
  * Created by agrabertilton on 4/15/15.
  */
-@BambooAnnotations.BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoA})
+@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoA})
 public class AtlasFinalsWorldStairsTest
 {
    protected SimulationTestingParameters simulationTestingParameters;

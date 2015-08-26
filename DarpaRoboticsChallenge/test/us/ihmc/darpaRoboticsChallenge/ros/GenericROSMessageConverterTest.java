@@ -11,13 +11,13 @@ import org.ros.internal.message.Message;
 
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.tools.agileTesting.BambooAnnotations;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter;
 
-@BambooAnnotations.BambooPlan(planType = BambooPlanType.InDevelopment)
+@BambooPlan(planType = BambooPlanType.InDevelopment)
 public class GenericROSMessageConverterTest
 {
    private int numberOfTimesToRunEachPacketType = 1000;
