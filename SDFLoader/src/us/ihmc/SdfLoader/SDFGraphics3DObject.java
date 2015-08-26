@@ -1,5 +1,6 @@
 package us.ihmc.SdfLoader;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -258,16 +259,23 @@ public class SDFGraphics3DObject extends Graphics3DObject
 //            System.out.println("AUTH: " + meshURI.getAuthority());
 //            System.out.println("ID: " + id);
          URL resource = getClass().getClassLoader().getResource(id);
+         // Path relative to class root
          if (resource != null)
          {
             return id;
          }
+         // Absolute path
+    	   File f = new File(id);
+         if (f.exists())
+         {
+        	 return id;
+         }         
       }
       catch (URISyntaxException e)
       {
          System.err.println("Malformed resource path in .SDF file for path: " + meshPath);
       }
-
+      
       return null;
    }
 }
