@@ -47,7 +47,7 @@ public class ThreadToolsTest
    @Test(timeout = 30000)
    public void testRunCommandLineEchoOutput()
    {
-      BambooPlanType.assumeNotRunningOnBamboo();
+      BambooPlanType.assumeRunningLocally();
 
       final StringBuilder commandLineOutput = new StringBuilder();
 
