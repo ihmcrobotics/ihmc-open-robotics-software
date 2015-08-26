@@ -23,7 +23,7 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.VideoA})
+@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoA})
 public class AtlasMultiContactTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   

@@ -6,7 +6,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.VideoA})
+@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoA})
 public class AtlasPushRecoveryMultiStepTest extends DRCPushRecoveryMultiStepTest
 {
    @Override
@@ -33,6 +33,5 @@ public class AtlasPushRecoveryMultiStepTest extends DRCPushRecoveryMultiStepTest
    {
       forceMagnitude = -700.0;
       forceDuration = 0.2;
-      
    }
 }
