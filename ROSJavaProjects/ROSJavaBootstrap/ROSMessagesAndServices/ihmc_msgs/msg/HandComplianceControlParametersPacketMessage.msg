@@ -51,6 +51,9 @@ geometry_msgs/Vector3 desired_torque
 # We have found that wrenchDeadzones = {10.0, 0.5} does not affect much the position control accuracy of the hand but still gives good compliance.
 float32[] wrench_deadzones
 
+# A unique id for the current message. This can be a timestamp or sequence number.
+# Only the unique id in the top level message is used, the unique id in nested messages is ignored.
+# Use /output/last_received_message for feedback about when the last message was received.
 int64 unique_id
 
 
