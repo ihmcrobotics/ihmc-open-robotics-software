@@ -57,8 +57,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-
-
 	@EstimatedDuration(duration = 44.2)
 	@Test(timeout = 1200000)
    public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
@@ -315,7 +313,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 	@EstimatedDuration
    @Ignore
    @QuarantinedTest("Need to rerecord")
-   @Test(timeout=1200000)
+   @Test(timeout = 1200000)
    public void testTrialsTerrainUpSlantedCinderblocksScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
