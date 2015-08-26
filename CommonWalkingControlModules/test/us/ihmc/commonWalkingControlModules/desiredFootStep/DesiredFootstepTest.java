@@ -27,20 +27,23 @@ import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.thread.ThreadTools;
 
+@BambooPlan(planType = BambooPlanType.Fast)
 public class DesiredFootstepTest
 {
    private static final RobotSide robotSide = RobotSide.LEFT;
@@ -64,18 +67,20 @@ public class DesiredFootstepTest
     * @throws IOException 
     */
 
-	@EstimatedDuration(duration = 2.0)
-	@Test(timeout = 30000) //(
+   @EstimatedDuration(duration = 2.0)
+   @Test(timeout = 30000)
    public void testPassingFootstepData() throws IOException
    {
+      Random random = new Random(5642769L);
+      
       // setup comms
-	   NetworkPorts port = NetworkPorts.createRandomTestPort();
-//      QueueBasedStreamingDataProducer<FootstepData> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepData>("FootstepData");
+      NetworkPorts port = NetworkPorts.createRandomTestPort(random);
+      //      QueueBasedStreamingDataProducer<FootstepData> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepData>("FootstepData");
       PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
       FootstepDataConsumer footstepDataConsumer = new FootstepDataConsumer();
       PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepData.class, footstepDataConsumer, port);
       ThreadTools.sleep(SLEEP_TIME);
-//      queueBasedStreamingDataProducer.startProducingData();
+      //      queueBasedStreamingDataProducer.startProducingData();
 
       // create test footsteps
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
@@ -83,7 +88,7 @@ public class DesiredFootstepTest
       {
          FootstepData footstepData = new FootstepData(footstep);
          tcpServer.send(footstepData);
-//         queueBasedStreamingDataProducer.queueDataToSend(footstepData);
+         //         queueBasedStreamingDataProducer.queueDataToSend(footstepData);
       }
 
       ThreadTools.sleep(SLEEP_TIME);
@@ -97,24 +102,24 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-	@EstimatedDuration(duration = 1.9)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 1.9)
+   @Test(timeout = 30000)
    public void testPassingFootstepPath() throws IOException
    {
       Random random = new Random(1582l);
       // setup comms
-      NetworkPorts port = NetworkPorts.createRandomTestPort();
-//      QueueBasedStreamingDataProducer<FootstepDataList> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>("FootstepDataList");
+      NetworkPorts port = NetworkPorts.createRandomTestPort(random);
+      //      QueueBasedStreamingDataProducer<FootstepDataList> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>("FootstepDataList");
       PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
 
       FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer();
       PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepDataList.class, footstepPathConsumer, port);
       ThreadTools.sleep(SLEEP_TIME);
-//      queueBasedStreamingDataProducer.startProducingData();
+      //      queueBasedStreamingDataProducer.startProducingData();
 
       // create test footsteps
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
-      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps,random.nextDouble(), random.nextDouble());
+      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, random.nextDouble(), random.nextDouble());
 
       tcpServer.send(footstepsData);
       ThreadTools.sleep(SLEEP_TIME);
@@ -127,23 +132,24 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-	@EstimatedDuration(duration = 1.9)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 1.9)
+   @Test(timeout = 30000)
    public void testPassingPauseCommand() throws IOException
    {
+      Random random = new Random(5642568L);
+      
       // setup comms
-	   NetworkPorts port = NetworkPorts.createRandomTestPort();
-//      QueueBasedStreamingDataProducer<PauseCommand> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<PauseCommand>("PauseCommand");
+      NetworkPorts port = NetworkPorts.createRandomTestPort(random);
+      //      QueueBasedStreamingDataProducer<PauseCommand> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<PauseCommand>("PauseCommand");
       PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
 
       PauseConsumer pauseConsumer = new PauseConsumer();
       PacketCommunicator tcpClient = createStreamingDataConsumer(PauseCommand.class, pauseConsumer, port);
       ThreadTools.sleep(SLEEP_TIME);
-//      queueBasedStreamingDataProducer.startProducingData();
+      //      queueBasedStreamingDataProducer.startProducingData();
 
       // create test commands
       ArrayList<Boolean> commands = new ArrayList<Boolean>();
-      Random random = new Random(77);
       int numberToTest = 100;
       for (int i = 0; i < numberToTest; i++)
       {
@@ -167,19 +173,21 @@ public class DesiredFootstepTest
       }
    }
 
-	@EstimatedDuration(duration = 3.4)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 3.4)
+   @Test(timeout = 30000)
    public void testPassingFootstepPathAndPauseCommands() throws IOException
    {
+      Random random = new Random(5632469L);
+      
       // Create one server for two types of data
-	   NetworkPorts pathPort = NetworkPorts.createRandomTestPort();
+      NetworkPorts pathPort = NetworkPorts.createRandomTestPort(random);
 
-//      QueueBasedStreamingDataProducer<FootstepDataList> pathQueueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>("FootstepDataList");
+      //      QueueBasedStreamingDataProducer<FootstepDataList> pathQueueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>("FootstepDataList");
 
-//      QueueBasedStreamingDataProducer<PauseCommand> pauseQueueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<PauseCommand>("PauseCommand");
+      //      QueueBasedStreamingDataProducer<PauseCommand> pauseQueueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<PauseCommand>("PauseCommand");
 
-      PacketCommunicator streamingDataTCPServer = createAndStartStreamingDataTCPServer( pathPort);
-//      pauseQueueBasedStreamingDataProducer.addConsumer(streamingDataTCPServer);
+      PacketCommunicator streamingDataTCPServer = createAndStartStreamingDataTCPServer(pathPort);
+      //      pauseQueueBasedStreamingDataProducer.addConsumer(streamingDataTCPServer);
 
       // create one client for two types of data
       FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer();
@@ -189,10 +197,8 @@ public class DesiredFootstepTest
       streamingDataTCPClient.attachListener(PauseCommand.class, pauseConsumer);
 
       ThreadTools.sleep(SLEEP_TIME);
-//      pathQueueBasedStreamingDataProducer.startProducingData();
-//      pauseQueueBasedStreamingDataProducer.startProducingData();
-
-      Random random = new Random(777);
+      //      pathQueueBasedStreamingDataProducer.startProducingData();
+      //      pauseQueueBasedStreamingDataProducer.startProducingData();
 
       // send test footstep path
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
@@ -238,12 +244,14 @@ public class DesiredFootstepTest
       }
    }
 
-	@EstimatedDuration(duration = 1.9)
-	@Test(timeout = 30000)
+   @EstimatedDuration(duration = 1.9)
+   @Test(timeout = 30000)
    public void testPassingFootstepStatus() throws IOException
    {
+      Random random = new Random(3642569L);
+      
       // setup comms
-      NetworkPorts port = NetworkPorts.createRandomTestPort();
+      NetworkPorts port = NetworkPorts.createRandomTestPort(random);
       PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
 
       FootstepStatusConsumer footstepStatusConsumer = new FootstepStatusConsumer();
@@ -251,7 +259,6 @@ public class DesiredFootstepTest
       ThreadTools.sleep(SLEEP_TIME);
 
       // create test footsteps
-      Random random = new Random(777);
       ArrayList<FootstepStatus> sentFootstepStatus = new ArrayList<FootstepStatus>();
       for (int i = 0; i < 50; i++)
       {
@@ -296,15 +303,12 @@ public class DesiredFootstepTest
       return netClassList;
    }
 
-   private PacketCommunicator createAndStartStreamingDataTCPServer(NetworkPorts port)
-         throws IOException
+   private PacketCommunicator createAndStartStreamingDataTCPServer(NetworkPorts port) throws IOException
    {
-
-      
 
       PacketCommunicator server = PacketCommunicator.createTCPPacketCommunicatorServer(port, getNetClassList());
       server.connect();
-//      queueBasedStreamingDataProducer.addConsumer(server);
+      //      queueBasedStreamingDataProducer.addConsumer(server);
       return server;
    }
 
@@ -326,8 +330,7 @@ public class DesiredFootstepTest
          RigidBody endEffector = createRigidBody(robotSide);
          ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createRandomContactablePlaneBodyForTests(random, endEffector);
 
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0), new Quat4d(random.nextDouble(),
-               random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0), new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
@@ -346,7 +349,8 @@ public class DesiredFootstepTest
          Footstep sentFootstep = sentFootsteps.get(i);
          Footstep receivedFootstep = receivedFootsteps.get(i);
 
-         if (!sentFootstep.epsilonEquals(receivedFootstep, 1e-4)){
+         if (!sentFootstep.epsilonEquals(receivedFootstep, 1e-4))
+         {
             System.out.println("Test Broken");
          }
          assertTrue(sentFootstep.epsilonEquals(receivedFootstep, 1e-4));
@@ -363,8 +367,7 @@ public class DesiredFootstepTest
       }
    }
 
-   private static FootstepDataList convertFootstepsToFootstepData(ArrayList<Footstep> footsteps, double swingTime,
-         double transferTime)
+   private static FootstepDataList convertFootstepsToFootstepData(ArrayList<Footstep> footsteps, double swingTime, double transferTime)
    {
       FootstepDataList footstepsData = new FootstepDataList(swingTime, transferTime);
 
@@ -384,8 +387,7 @@ public class DesiredFootstepTest
       public void receivedPacket(FootstepData packet)
       {
          RigidBody endEffector = createRigidBody(packet.getRobotSide());
-         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector,
-               ReferenceFrame.getWorldFrame());
+         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());
 
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), packet.getLocation(), packet.getOrientation());
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);

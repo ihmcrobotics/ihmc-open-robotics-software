@@ -30,7 +30,8 @@ public class JointConfigurationDataSenderTest
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
 
-   private static final NetworkPorts TCP_PORT = NetworkPorts.createRandomTestPort();
+   private static final Random random = new Random(5842369L);
+   private static final NetworkPorts TCP_PORT = NetworkPorts.createRandomTestPort(random);
    private static final String HOST = "localhost";
 
 	@EstimatedDuration(duration = 30.0)

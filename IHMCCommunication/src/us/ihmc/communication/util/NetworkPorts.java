@@ -47,9 +47,9 @@ public class NetworkPorts
       return new NetworkPorts(port.getPort() + 100);
    }
 
-   public static NetworkPorts createRandomTestPort()
+   public static NetworkPorts createRandomTestPort(Random random)
    {
-      return new NetworkPorts(new Random().nextInt(65535 - 1025) + 1025);
+      return new NetworkPorts(random.nextInt(65535 - 1025) + 1025);
    }
    
    private final int port;
