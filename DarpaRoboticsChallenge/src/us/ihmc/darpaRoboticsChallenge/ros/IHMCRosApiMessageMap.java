@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.LegCompliancePacket;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
 import us.ihmc.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
@@ -80,7 +81,7 @@ public class IHMCRosApiMessageMap
    public static final Class[] OUTPUT_PACKET_LIST =
    {
       FootstepStatus.class,
-//      RobotConfigurationData.class
+      RobotConfigurationData.class
    };
 
    public static final Map<String, Class> PACKET_MESSAGE_NAME_MAP;
@@ -119,6 +120,7 @@ public class IHMCRosApiMessageMap
 
       //outputs
       PACKET_TO_TOPIC_MAP.put(FootstepStatus.class, "/output/footstep_status");
+      PACKET_TO_TOPIC_MAP.put(RobotConfigurationData.class, "/output/joint_states");
    }
 
    private static Map<String, Class> setupMaps(Class[] packetList)
