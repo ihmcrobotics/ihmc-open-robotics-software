@@ -15,23 +15,23 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterface
@@ -205,24 +205,26 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-   //      @Test(timeout = 300000)
-   public void testPelvisZTranslation() throws SimulationExceededMaximumTimeException
-   {
-      //FIXME: This z-translation is not supported by PelvisPoseBehavior; already handled by ComHeightBehavior.  
-      BambooTools.reportTestStartedMessage();
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      Vector3d desiredDirection = new Vector3d(0, 0, 1);
-      FramePose currentPelvisPose = getCurrentPelvisPose();
-      PelvisPosePacket pelvisPosePacket = createTranslationOnlyPelvisPosePacket(desiredDirection, currentPelvisPose);
-
-      PelvisPoseBehavior pelvisPoseBehavior = testPelvisPoseBehavior(pelvisPosePacket);
-
-      assertTrue(pelvisPoseBehavior.isDone());
-
-      BambooTools.reportTestFinishedMessage();
-   }
+//   @Ignore
+//   @EstimatedDuration(duration = 50.0)
+//   @Test(timeout = 300000)
+//   public void testPelvisZTranslation() throws SimulationExceededMaximumTimeException
+//   {
+//      //FIXME: This z-translation is not supported by PelvisPoseBehavior; already handled by ComHeightBehavior.  
+//      BambooTools.reportTestStartedMessage();
+//      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+//      assertTrue(success);
+//
+//      Vector3d desiredDirection = new Vector3d(0, 0, 1);
+//      FramePose currentPelvisPose = getCurrentPelvisPose();
+//      PelvisPosePacket pelvisPosePacket = createTranslationOnlyPelvisPosePacket(desiredDirection, currentPelvisPose);
+//
+//      PelvisPoseBehavior pelvisPoseBehavior = testPelvisPoseBehavior(pelvisPosePacket);
+//
+//      assertTrue(pelvisPoseBehavior.isDone());
+//
+//      BambooTools.reportTestFinishedMessage();
+//   }
 
    private PelvisPosePacket createRotationOnlyPelvisPosePacket(Vector3d rotationAxis, double rotationAngle)
    {
