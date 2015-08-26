@@ -11,4 +11,6 @@ uint8 robot_side
 # List of points in the trajectory
 JointTrajectoryPointMessage[] trajectory_points
 
+int64 unique_id
+
 

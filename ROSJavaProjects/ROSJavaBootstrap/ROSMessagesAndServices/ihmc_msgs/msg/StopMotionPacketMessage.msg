@@ -1,4 +1,6 @@
 ## StopMotionPacketMessage
-# No Documentation Annotation Found
+# Stop the execution of a Whole Body Trajectory
+
+int64 unique_id
 
 

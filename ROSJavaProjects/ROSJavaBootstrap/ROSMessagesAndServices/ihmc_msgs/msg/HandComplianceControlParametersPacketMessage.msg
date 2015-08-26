@@ -51,4 +51,6 @@ geometry_msgs/Vector3 desired_torque
 # We have found that wrenchDeadzones = {10.0, 0.5} does not affect much the position control accuracy of the hand but still gives good compliance.
 float32[] wrench_deadzones
 
+int64 unique_id
+
 

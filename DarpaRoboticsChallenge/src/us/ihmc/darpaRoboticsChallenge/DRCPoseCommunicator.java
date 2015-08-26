@@ -10,8 +10,10 @@ import javax.vecmath.Vector3f;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -35,6 +37,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public class DRCPoseCommunicator implements RawOutputWriter
 {
    private final int WORKER_SLEEP_TIME_MILLIS = 1;
+   private final IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
 
 //   private final ScheduledExecutorService writeExecutor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("DRCPoseCommunicator"));
    private final PeriodicThreadScheduler scheduler;
@@ -202,6 +205,20 @@ public class DRCPoseCommunicator implements RawOutputWriter
       state.setRobotMotionStatus(robotMotionStatusFromController.getCurrentRobotMotionStatus());
 
       state.setAuxiliaryRobotData(sensorRawOutputMapReadOnly.getAuxiliaryRobotData());
+      
+      LastPacket lastPacket = dataProducer.getLastPacket();
+      if(lastPacket != null)
+      {
+         state.setLastReceivedPacketTypeID(netClassList.getID(lastPacket.getPacket()));
+         state.setLastReceivedPacketUniqueId(lastPacket.getUniqueId());
+         state.setLastReceivedPacketRobotTimestamp(lastPacket.getReceivedTimestamp());
+      }
+      else
+      {
+         state.setLastReceivedPacketTypeID(-1);
+         state.setLastReceivedPacketUniqueId(-1);
+         state.setLastReceivedPacketRobotTimestamp(-1);
+      }
       
       robotConfigurationDataRingBuffer.commit();
    }

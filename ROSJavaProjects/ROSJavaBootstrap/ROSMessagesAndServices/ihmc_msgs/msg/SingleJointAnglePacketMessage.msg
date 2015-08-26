@@ -7,4 +7,6 @@ float64 angle
 
 float64 trajcetory_time
 
+int64 unique_id
+
 

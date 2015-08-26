@@ -9,11 +9,12 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
+import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class GlobalDataProducer
@@ -21,16 +22,19 @@ public class GlobalDataProducer
    private final PacketCommunicator communicator;
    private final ConcurrentLinkedQueue<Packet<?>> queuedData = new ConcurrentLinkedQueue<Packet<?>>();
    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("GlobalDataProducer"));
-
+   private final AtomicLastPacketHolder lastPacketHolder = new AtomicLastPacketHolder();
+  
    public GlobalDataProducer(PacketCommunicator communicator)
    {
       this.communicator = communicator;
       executor.scheduleAtFixedRate(new DataProducerImpl(), 0, 1, TimeUnit.MILLISECONDS);
    }
 
+   @SuppressWarnings("unchecked")
    public <T extends Packet<?>> void attachListener(Class<T> clazz, PacketConsumer<T> listener)
    {
       communicator.attachListener(clazz, listener);
+      communicator.attachListener(clazz, lastPacketHolder);
    }
 
    public void queueDataToSend(Packet<?> packet)
@@ -51,6 +55,11 @@ public class GlobalDataProducer
    public void stop()
    {
       executor.shutdown();
+   }
+   
+   public LastPacket getLastPacket()
+   {
+      return lastPacketHolder.getLastPacket();
    }
 
    /**
@@ -80,6 +89,11 @@ public class GlobalDataProducer
    public void send(CapturabilityBasedStatus status)
    {
       communicator.send(status);
+   }
+   
+   public void setRobotTime(long time)
+   {
+      lastPacketHolder.setRobotTime(time);
    }
 
    private class DataProducerImpl implements Runnable

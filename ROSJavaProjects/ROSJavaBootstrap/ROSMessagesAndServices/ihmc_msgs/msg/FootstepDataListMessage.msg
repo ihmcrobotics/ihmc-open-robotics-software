@@ -10,4 +10,6 @@ float64 swing_time
 # transferTime is the time spent in double-support between steps
 float64 transfer_time
 
+int64 unique_id
+
 

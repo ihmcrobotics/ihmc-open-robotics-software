@@ -27,4 +27,6 @@ geometry_msgs/Quaternion actual_foot_orientation_in_world
 # isDoneWalking is set to true, the rest of the fields in this packet should be ignored
 bool is_done_walking
 
+int64 unique_id
+
 

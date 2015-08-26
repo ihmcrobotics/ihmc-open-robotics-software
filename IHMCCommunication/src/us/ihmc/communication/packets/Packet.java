@@ -7,12 +7,15 @@ import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
 public abstract class Packet<T> implements ComparableDataObject<T>
 {
+   public long uniqueId = 0; 
+   
    @IgnoreField
    public byte destination = (byte) PacketDestination.BROADCAST.ordinal();
    
    @IgnoreField
    @Optional(value = "scripting")
    public String notes;
+   
    
    public void setDestination(PacketDestination destination)
    {
@@ -23,7 +26,17 @@ public abstract class Packet<T> implements ComparableDataObject<T>
    {
       this.destination = (byte) destination;
    }
-   
+      
+   public long getUniqueId()
+   {
+      return uniqueId;
+   }
+
+   public void setUniqueId(long uniqueId)
+   {
+      this.uniqueId = uniqueId;
+   }
+
    public int getDestination()
    {
       return destination;

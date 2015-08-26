@@ -17,6 +17,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -29,6 +30,7 @@ import us.ihmc.utilities.ros.publisher.RosCachedRawIMUDataPublisher;
 import us.ihmc.utilities.ros.publisher.RosImuPublisher;
 import us.ihmc.utilities.ros.publisher.RosInt32Publisher;
 import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
+import us.ihmc.utilities.ros.publisher.RosLastReceivedMessagePublisher;
 import us.ihmc.utilities.ros.publisher.RosOdometryPublisher;
 import us.ihmc.utilities.ros.publisher.RosStringPublisher;
 import us.ihmc.utilities.ros.publisher.RosWrenchPublisher;
@@ -38,6 +40,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable
 {
    public static final String WORLD_FRAME = "world";
+   private final IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
 
    private final RosTfPublisher tfPublisher;
 
@@ -49,6 +52,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final RosOdometryPublisher pelvisOdometryPublisher;
    private final RosStringPublisher robotMotionStatusPublisher;
    private final RosInt32Publisher robotBehaviorPublisher;
+   private final RosLastReceivedMessagePublisher lastReceivedMessagePublisher;
    private final ForceSensorDefinition[] forceSensorDefinitions;
    private final IMUDefinition[] imuDefinitions;
    private final ArrayList<String> nameList = new ArrayList<String>();
@@ -85,6 +89,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       this.pelvisOdometryPublisher = new RosOdometryPublisher(latched);
       this.robotMotionStatusPublisher = new RosStringPublisher(latched);
       this.robotBehaviorPublisher = new RosInt32Publisher(latched);
+      this.lastReceivedMessagePublisher = new RosLastReceivedMessagePublisher(latched);
       
       this.batchImuPublishers = new RosCachedRawIMUDataPublisher[imuDefinitions.length];
       this.imuPublishers = new RosImuPublisher[imuDefinitions.length];
@@ -130,6 +135,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/right", footForceSensorPublishers.get(RobotSide.RIGHT));
       rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/left", wristForceSensorPublishers.get(RobotSide.LEFT));
       rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/right", wristForceSensorPublishers.get(RobotSide.RIGHT));
+      rosMainNode.attachPublisher(rosNameSpace + "/output/last_received_message", lastReceivedMessagePublisher);
       rosModulePacketCommunicator.attachListener(RobotConfigurationData.class, this);
 
       Thread t = new Thread(this, "RosRobotJointStatePublisher");
@@ -253,6 +259,18 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                   tfPublisher.publish(staticTransform, timeStamp, from, to);
                }
             }
+            
+            
+            if(robotConfigurationData.getLastReceivedPacketTypeID() != -1)
+            {
+               Class<?> packetClass = netClassList.getClass(robotConfigurationData.getLastReceivedPacketTypeID());
+               String messageType = IHMCRosApiMessageMap.MESSAGE_NAME_PACKET_MAP.get(packetClass);
+               if(messageType != null)
+               {
+                  lastReceivedMessagePublisher.publish(messageType, robotConfigurationData.getLastReceivedPacketUniqueId(), robotConfigurationData.getTimestamp(), robotConfigurationData.getLastReceivedPacketRobotTimestamp());
+               }
+            }
+            
          }
       }
    }

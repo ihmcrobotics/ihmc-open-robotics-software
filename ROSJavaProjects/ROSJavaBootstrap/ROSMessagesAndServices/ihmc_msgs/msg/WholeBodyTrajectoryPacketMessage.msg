@@ -55,4 +55,6 @@ int32 num_waypoints
 # Number of joints in a single arm
 int32 num_joints_per_arm
 
+int64 unique_id
+
 

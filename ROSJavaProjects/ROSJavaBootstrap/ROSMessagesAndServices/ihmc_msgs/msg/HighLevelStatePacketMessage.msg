@@ -9,4 +9,6 @@ uint8 JOINT_POSITION_CONTROL=1 # joint control. NOTE: controller will not attemp
 uint8 DO_NOTHING_BEHAVIOR=2 # do nothing behavior. the robot will start in this behavior, and report this behavior when falling and ramping down the controller. This behavior is intended for feedback only. Requesting this behavior is not supported and can cause the robot to shut down.
 uint8 high_level_state
 
+int64 unique_id
+
 
