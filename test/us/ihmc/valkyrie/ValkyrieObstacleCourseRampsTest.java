@@ -6,11 +6,11 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.VideoB})
+@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoB})
 public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
 {
-
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
+   
    @Override
    public DRCRobotModel getRobotModel()
    {
@@ -28,5 +28,4 @@ public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    {
       return 0.0;
    }
-
 }
