@@ -34,6 +34,7 @@ import ihmc_msgs.MultiJointAnglePacketMessage;
 import ihmc_msgs.PauseCommandMessage;
 import ihmc_msgs.Point2dMessage;
 import ihmc_msgs.SingleJointAnglePacketMessage;
+import ihmc_msgs.StopMotionPacketMessage;
 import ihmc_msgs.WholeBodyTrajectoryPacketMessage;
 import us.ihmc.communication.packets.HighLevelStateChangePacket;
 import us.ihmc.communication.packets.HighLevelStatePacket;
@@ -48,6 +49,7 @@ import us.ihmc.communication.packets.manipulation.AtlasWristSensorCalibrationReq
 import us.ihmc.communication.packets.manipulation.HandComplianceControlParametersPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.JointTrajectoryPoint;
+import us.ihmc.communication.packets.manipulation.StopMotionPacket;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootPosePacket;
@@ -112,6 +114,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((LegCompliancePacket) packet);
       else if (packet instanceof WholeBodyTrajectoryPacket)
          return convertToRosMessage((WholeBodyTrajectoryPacket) packet);
+      else if (packet instanceof StopMotionPacket)
+         return convertToRosMessage((StopMotionPacket) packet);
       else
          return null;
    }
@@ -158,10 +162,24 @@ public class DRCROSMessageConverter
          return convertToPacket((LegCompliancePacketMessage) message);
       else if (message instanceof WholeBodyTrajectoryPacketMessage)
          return convertToPacket((WholeBodyTrajectoryPacketMessage) message);
+      else if (message instanceof StopMotionPacketMessage)
+         return convertToPacket((StopMotionPacketMessage) message);
       else
          return null;
    }
+   
 
+   private static Packet<?> convertToPacket(StopMotionPacketMessage message)
+   {
+      return new StopMotionPacket();
+   }
+   
+   public static StopMotionPacketMessage convertToRosMessage(StopMotionPacket packet)
+   {
+      return messageFactory.newFromType("ihmc_msgs/StopMotionPacketMessage");
+   }
+   
+   
    private static Packet<?> convertToPacket(WholeBodyTrajectoryPacketMessage message)
    {
       WholeBodyTrajectoryPacket ret = new WholeBodyTrajectoryPacket(message.getNumWaypoints(), message.getNumJointsPerArm());
