@@ -56,10 +56,7 @@ public class ROSMessageConverterTest
 //   @EstimatedDuration(duration = 0.1)
 //   @Test(timeout=300000)
 //   public void SinglePacketTest()
-//   {
-//      if (System.getProperty("BAMBOO_JOB_NAME") != null)
-//         return;
-//      
+//   {      
 //      Random random = new Random();
 //      Class clazz = 
 //      for (int i = 0; i < NUMBER_OF_TIMES_TO_RUN_EACH_PACKET_TYPE; i++)

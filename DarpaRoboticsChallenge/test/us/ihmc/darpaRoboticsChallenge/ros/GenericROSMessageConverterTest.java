@@ -11,17 +11,12 @@ import org.ros.internal.message.Message;
 
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
-import us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMap;
 import us.ihmc.tools.agileTesting.BambooAnnotations;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter;
 
-/**
- * Created by agrabertilton on 4/23/15.
- */
 @BambooAnnotations.BambooPlan(planType = BambooPlanType.InDevelopment)
 public class GenericROSMessageConverterTest
 {
