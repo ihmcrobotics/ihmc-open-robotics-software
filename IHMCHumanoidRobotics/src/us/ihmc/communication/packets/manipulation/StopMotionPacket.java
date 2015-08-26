@@ -1,16 +1,25 @@
 package us.ihmc.communication.packets.manipulation;
 
-import us.ihmc.communication.packets.Packet;
+import java.util.Random;
 
-public class StopMotionPacket extends Packet<StopMotionPacket>
+import us.ihmc.communication.packetAnnotations.ClassDocumentation;
+import us.ihmc.communication.packets.IHMCRosApiPacket;
+
+@ClassDocumentation("Stop the execution of a Whole Body Trajectory")
+public class StopMotionPacket extends IHMCRosApiPacket<StopMotionPacket>
 {
 
    public StopMotionPacket()
    {
-   }  
+   }
    
+   public StopMotionPacket(Random random)
+   {
+      
+   }
+
    @Override
-   public boolean epsilonEquals(StopMotionPacket other, double epsilon) 
+   public boolean epsilonEquals(StopMotionPacket other, double epsilon)
    {
       return true;
    }

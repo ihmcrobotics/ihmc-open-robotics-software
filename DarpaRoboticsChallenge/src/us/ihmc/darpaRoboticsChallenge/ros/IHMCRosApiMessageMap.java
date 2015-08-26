@@ -45,7 +45,8 @@ public class IHMCRosApiMessageMap
       MultiJointAnglePacket.class,
       HandComplianceControlParametersPacket.class,
       LegCompliancePacket.class,
-      WholeBodyTrajectoryPacket.class
+      WholeBodyTrajectoryPacket.class,
+      StopMotionPacket.class
    };
 
    public static final Class[] INPUT_PACKET_LIST =
@@ -66,7 +67,8 @@ public class IHMCRosApiMessageMap
       MultiJointAnglePacket.class,
       HandComplianceControlParametersPacket.class,
       LegCompliancePacket.class,
-      WholeBodyTrajectoryPacket.class
+      WholeBodyTrajectoryPacket.class,
+      StopMotionPacket.class
    };
 
    public static final Class[] OUTPUT_PACKET_LIST =
@@ -104,6 +106,7 @@ public class IHMCRosApiMessageMap
       PACKET_TO_TOPIC_MAP.put(HandComplianceControlParametersPacket.class, "/control/hand_compliance_control_parameters");
       PACKET_TO_TOPIC_MAP.put(LegCompliancePacket.class, "/control/leg_compliance_control_parameters");
       PACKET_TO_TOPIC_MAP.put(WholeBodyTrajectoryPacket.class, "/control/whole_body_trajectory");
+      PACKET_TO_TOPIC_MAP.put(StopMotionPacket.class, "/control/stop_motion");
 
       //outputs
       PACKET_TO_TOPIC_MAP.put(FootstepStatus.class, "/output/footstep_status");
