@@ -107,7 +107,6 @@ public class IHMCRosApiMessageMap
 
       //outputs
       PACKET_TO_TOPIC_MAP.put(FootstepStatus.class, "/output/footstep_status");
-      PACKET_TO_TOPIC_MAP.put(RobotConfigurationData.class, "/output/joint_states");
    }
 
    private static Map<String, Class> setupMaps(Class[] packetList)
