@@ -12,7 +12,7 @@ import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 
-@BambooPlan(planType = BambooPlanType.InDevelopment)
+@BambooPlan(planType = BambooPlanType.Exclude)
 public class SimulationRewoundListenerTest
 {
    @QuarantinedTest("Hangs forever")
