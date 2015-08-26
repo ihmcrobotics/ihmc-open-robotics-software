@@ -78,7 +78,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testIsOnLeftSideOfLine()
    {
-	   BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.UI);
+	   BambooPlanType.assumeRunningLocally();
 	   
       double xMin = -1.0;
       double xMax = 1.0;
@@ -124,7 +124,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testIsInFrontOfLine()
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.UI);
+      BambooPlanType.assumeRunningLocally();
       
       // illegal method call:
       Line2d line = new Line2d(new Point2d(0.0, 0.0), new Vector2d(1.0, 0.0));
