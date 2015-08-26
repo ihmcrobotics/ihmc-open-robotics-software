@@ -4,15 +4,14 @@ import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.robotics.MathTools;
 
 
 @ClassDocumentation("Sub-Packet for a point in an arm joint trajectory. It works similar to the\n"
                                   + "trajectory_msgs/JointTrajectoryPoint message.")
-public class JointTrajectoryPoint extends IHMCRosApiPacket<JointTrajectoryPoint>
+public class JointTrajectoryPoint
 {
    @FieldDocumentation("Arm joint angles for this waypoint in order. For Atlas the controller assumes\n"
                                      + "joint angles will be given in the following order: shoulder pitch, shoulder\n"
@@ -53,7 +52,7 @@ public class JointTrajectoryPoint extends IHMCRosApiPacket<JointTrajectoryPoint>
       this.time = 0.0;
    }
    
-   @Override
+//   @Override
    public boolean epsilonEquals(JointTrajectoryPoint other, double epsilon)
    {
       if (this.positions.length != other.positions.length || this.velocities.length != other.velocities.length)
