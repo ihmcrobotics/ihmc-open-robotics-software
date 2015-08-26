@@ -7,6 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
+   us.ihmc.darpaRoboticsChallenge.ros.GenericROSMessageConverterTest.class,
    us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMapTest.class
 })
 

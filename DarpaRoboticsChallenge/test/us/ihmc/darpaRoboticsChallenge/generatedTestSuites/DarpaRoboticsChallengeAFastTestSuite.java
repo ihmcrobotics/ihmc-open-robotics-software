@@ -14,7 +14,6 @@ import org.junit.runners.Suite;
    us.ihmc.darpaRoboticsChallenge.frictionCompensation.JointFrictionModelsHolderTest.class,
    us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.WheelRotationEstimatorTest.class,
    us.ihmc.darpaRoboticsChallenge.odometry.IcpCloud3DTest.class,
-   us.ihmc.darpaRoboticsChallenge.ros.GenericROSMessageConverterTest.class,
    us.ihmc.darpaRoboticsChallenge.ros.ROSMessageConverterTest.class,
    us.ihmc.darpaRoboticsChallenge.ros.ROSMessageGenerationTest.class,
    us.ihmc.darpaRoboticsChallenge.stateEstimationEndToEndTests.PelvisPoseHistoryCorrectionUsingSimpleRobotTest.class
