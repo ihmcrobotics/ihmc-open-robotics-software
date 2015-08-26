@@ -81,7 +81,6 @@ public class IHMCRosApiMessageMap
    public static final Class[] OUTPUT_PACKET_LIST =
    {
       FootstepStatus.class,
-      RobotConfigurationData.class
    };
 
    public static final Map<String, Class> PACKET_MESSAGE_NAME_MAP;
@@ -90,6 +89,8 @@ public class IHMCRosApiMessageMap
    public static final Map<Class, String> PACKET_TO_TOPIC_MAP = new HashMap<>();
    
    public static final Map<Class, String> MESSAGE_NAME_PACKET_MAP;
+   
+   public static final String JOINT_STATE_TOPIC = "/output/joint_states";
 
    static
    {
@@ -120,7 +121,6 @@ public class IHMCRosApiMessageMap
 
       //outputs
       PACKET_TO_TOPIC_MAP.put(FootstepStatus.class, "/output/footstep_status");
-      PACKET_TO_TOPIC_MAP.put(RobotConfigurationData.class, "/output/joint_states");
    }
 
    private static Map<String, Class> setupMaps(Class[] packetList)

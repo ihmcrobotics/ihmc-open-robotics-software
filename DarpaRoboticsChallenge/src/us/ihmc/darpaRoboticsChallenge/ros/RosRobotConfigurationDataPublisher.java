@@ -127,7 +127,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
       jointNameHash = RobotConfigurationData.calculateJointNameHash(joints, forceSensorDefinitions, imuDefinitions);
 
-      rosMainNode.attachPublisher(rosNameSpace + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(RobotConfigurationData.class), jointStatePublisher);
+      rosMainNode.attachPublisher(rosNameSpace + IHMCRosApiMessageMap.JOINT_STATE_TOPIC, jointStatePublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/robot_pose", pelvisOdometryPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/robot_motion_status", robotMotionStatusPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/behavior", robotBehaviorPublisher);
