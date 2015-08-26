@@ -137,3 +137,38 @@ task deploy(dependsOn: assemble) {
 		}
 	}
 }
+
+
+
+task svnversion {
+  description 'Get SVN revision number.'
+  new ByteArrayOutputStream().withStream { os ->
+    def result = exec {
+      executable = 'svnversion'
+      standardOutput = os
+    }
+    def tmp=os.toString()
+    ext.revid = tmp.substring(0,tmp.lastIndexOf("M"))
+  }
+}
+
+task createRosJar(type: Jar) {
+	manifest {
+        attributes 'Implementation-Title': 'ROSAPI',  
+        	'Implementation-Version': svnversion.revid,
+        	'Main-Class': 'us.ihmc.valkyrie.ValkyrieIPABSimulator'
+    }
+    version = svnversion.revid
+    baseName = 'ValkyrieIPABSimulator'
+    from ( { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } } ) {
+      exclude "META-INF/*.SF"
+      exclude "META-INF/*.DSA"
+      exclude "META-INF/*.RSA"
+      with jar
+    }
+}
+
+task rosJar(type: Copy) {
+    from createRosJar
+    into "lib/"
+}
