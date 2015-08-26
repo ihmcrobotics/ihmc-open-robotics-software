@@ -177,6 +177,16 @@ public class FramePoint extends FrameTuple<Point3d>
    {
       pointToPack.setIncludingFrame(this.getReferenceFrame(), this.getX(), this.getY());
    }
+   
+   /**
+    * Makes the tupleToPack a FrameTuple2d version of this FramePoint
+    * 
+    * @param tupleToPack
+    */
+   public void getFrameTuple2d(FrameTuple2d<?> tupleToPack)
+   {
+      tupleToPack.setIncludingFrame(this.getReferenceFrame(), this.getX(), this.getY());
+   }
 
    /**
     * Returns the Point3d used in this FramePoint
