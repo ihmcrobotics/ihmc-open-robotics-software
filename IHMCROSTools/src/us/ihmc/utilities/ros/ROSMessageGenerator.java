@@ -27,19 +27,24 @@ public class ROSMessageGenerator
    private static String messageFolder = ("../ROSJavaBootstrap/ROSMessagesAndServices/ihmc_msgs/msg/").replace("/", File.separator);
    boolean overwriteSubMessages;
 
-   public ROSMessageGenerator(Boolean overwriteSubMessages)
+   public ROSMessageGenerator(boolean overwriteSubMessages)
    {
       this.overwriteSubMessages = overwriteSubMessages;
    }
    
-   public String createNewRosMessage(Class clazz, boolean overwrite) throws Exception
+   public void createNewRosMessage(Class clazz, boolean overwrite) throws Exception
+   {
+      createNewRosMessage(clazz, overwrite, true);
+   }
+   
+   private String createNewRosMessage(Class clazz, boolean overwrite, boolean topLevel) throws Exception
    {
       if (clazz == null)
       {
          return "";
       }
 
-      if (!IHMCRosApiPacket.class.isAssignableFrom(clazz))
+      if (topLevel && !IHMCRosApiPacket.class.isAssignableFrom(clazz))
          System.err.println(clazz.getSimpleName() + " does not extend IHMCRosApiPacket");
 
       File file = new File(messageFolder);
@@ -276,7 +281,7 @@ public class ROSMessageGenerator
       }
       else
       {
-         buffer += createNewRosMessage(clazz, overwriteSubMessages);
+         buffer += createNewRosMessage(clazz, overwriteSubMessages, false);
       }
 
       return buffer;

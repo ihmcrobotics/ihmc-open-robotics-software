@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 
 import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.LegCompliancePacket;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
 import us.ihmc.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
