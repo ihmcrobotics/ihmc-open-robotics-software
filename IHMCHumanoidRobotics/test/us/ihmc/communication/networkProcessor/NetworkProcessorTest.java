@@ -33,13 +33,15 @@ public class NetworkProcessorTest
    {
       BROADCAST, A, B, C, D, E, F,
    }
-  
-   private final NetworkPorts A = NetworkPorts.createRandomTestPort();
-   private final NetworkPorts B = NetworkPorts.createRandomTestPort();
-   private final NetworkPorts C = NetworkPorts.createRandomTestPort();
-   private final NetworkPorts D = NetworkPorts.createRandomTestPort();
-   private final NetworkPorts E = NetworkPorts.createRandomTestPort();
-   private final NetworkPorts F = NetworkPorts.createRandomTestPort();
+
+   private final Random random = new Random(2641569L);
+   
+   private final NetworkPorts A = NetworkPorts.createRandomTestPort(random);
+   private final NetworkPorts B = NetworkPorts.createRandomTestPort(random);
+   private final NetworkPorts C = NetworkPorts.createRandomTestPort(random);
+   private final NetworkPorts D = NetworkPorts.createRandomTestPort(random);
+   private final NetworkPorts E = NetworkPorts.createRandomTestPort(random);
+   private final NetworkPorts F = NetworkPorts.createRandomTestPort(random);
    
    private PacketCommunicator packetCommunicatorAClient = PacketCommunicator.createIntraprocessPacketCommunicator(A, CLASS_LIST);
    private PacketCommunicator packetCommunicatorBClient = PacketCommunicator.createIntraprocessPacketCommunicator(B, CLASS_LIST);
@@ -59,7 +61,6 @@ public class NetworkProcessorTest
    private PacketCommunicator packetCommunicatorFServer = PacketCommunicator.createTCPPacketCommunicatorServer(F, CLASS_LIST);
 
    private PacketRouter<TestPacketDestinations> networkProcessor = new PacketRouter<>(TestPacketDestinations.class);
-   private Random random = new Random();
 
    public void connectCommunicators() throws IOException
    {
