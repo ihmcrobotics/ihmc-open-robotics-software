@@ -27,6 +27,9 @@ geometry_msgs/Quaternion actual_foot_orientation_in_world
 # isDoneWalking is set to true, the rest of the fields in this packet should be ignored
 bool is_done_walking
 
+# A unique id for the current message. This can be a timestamp or sequence number.
+# Only the unique id in the top level message is used, the unique id in nested messages is ignored.
+# Use /output/last_received_message for feedback about when the last message was received.
 int64 unique_id
 
 

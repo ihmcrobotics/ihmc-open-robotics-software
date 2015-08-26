@@ -16,6 +16,9 @@ uint8 initial_state
 # DO_NOTHING_BEHAVIOR=2 # do nothing behavior. the robot will start in this behavior, and report this behavior when falling and ramping down the controller. This behavior is intended for feedback only. Requesting this behavior is not supported and can cause the robot to shut down.
 uint8 end_state
 
+# A unique id for the current message. This can be a timestamp or sequence number.
+# Only the unique id in the top level message is used, the unique id in nested messages is ignored.
+# Use /output/last_received_message for feedback about when the last message was received.
 int64 unique_id
 
 
