@@ -9,6 +9,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.agileTesting.BambooPlanType;
 
 public class ThreadToolsTest
 {
@@ -46,12 +47,7 @@ public class ThreadToolsTest
    @Test(timeout = 30000)
    public void testRunCommandLineEchoOutput()
    {
-      String bambooJobName = System.getenv("BAMBOO_JOB_NAME");
-      if (bambooJobName != null)
-      {
-         System.out.println("Not compatable with Bamboo. Job name: " + bambooJobName);
-         return;
-      }
+      BambooPlanType.assumeNotRunningOnBamboo();
 
       final StringBuilder commandLineOutput = new StringBuilder();
 
