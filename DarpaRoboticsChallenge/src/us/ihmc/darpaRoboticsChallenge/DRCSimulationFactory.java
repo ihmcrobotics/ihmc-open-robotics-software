@@ -78,6 +78,8 @@ public class DRCSimulationFactory
    private DRCEstimatorThread drcEstimatorThread;
    private DRCControllerThread drcControllerThread;
    private AbstractThreadedRobotController multiThreadedRobotController;
+   
+   private final DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup;
 
    private final SimulatedDRCRobotTimeProvider simulatedDRCRobotTimeProvider;
    
@@ -142,8 +144,20 @@ public class DRCSimulationFactory
       scsInitialSetup.initializeRobot(simulatedRobot, drcRobotModel, null);
       robotInitialSetup.initializeRobot(simulatedRobot, drcRobotModel.getJointMap());
       simulatedRobot.update();
+      
+      // We store these in case we need to update the environment later
+      this.robotInitialSetup = robotInitialSetup;
 
 //      setupJointDamping(simulatedRobot, drcRobotModel);
+   }
+   
+   public void updateEnvironment(CommonAvatarEnvironmentInterface environment)
+   {
+	   setupEnvironmentAndListSimulatedRobots(simulatedRobot, environment);
+	   if (environment != null && environment.getTerrainObject3D() != null)
+       {
+          scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
+       }
    }
 
    private Robot[] setupEnvironmentAndListSimulatedRobots(SDFRobot simulatedRobot, CommonAvatarEnvironmentInterface environment)

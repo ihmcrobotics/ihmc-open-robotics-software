@@ -97,10 +97,10 @@ public class SDFVisual implements AbstractSDFMesh
       private SDFScript script;
       
       private String lighting;
-      private String ambient;
-      private String diffuse;
-      private String specular;
-      private String emissive;
+      private String ambient = "1 1 1 1";
+      private String diffuse = "0.5 0.5 0.5 1";
+      private String specular = "1 1 1 1";
+      private String emissive = "0 0 0 1";
 
 
       public SDFScript getScript()
