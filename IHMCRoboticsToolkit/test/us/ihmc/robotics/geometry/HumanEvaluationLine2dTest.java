@@ -78,7 +78,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testIsOnLeftSideOfLine()
    {
-	   BambooPlanType.assumeRunningOnPlan(BambooPlanType.UI);
+	   BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.UI);
 	   
       double xMin = -1.0;
       double xMax = 1.0;
@@ -124,7 +124,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testIsInFrontOfLine()
    {
-      BambooPlanType.assumeRunningOnPlan(BambooPlanType.UI);
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.UI);
       
       // illegal method call:
       Line2d line = new Line2d(new Point2d(0.0, 0.0), new Vector2d(1.0, 0.0));
@@ -184,7 +184,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testApplyTransform()
    {
-      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
       
       RigidBodyTransform transform = new RigidBodyTransform();
 
@@ -214,7 +214,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testContainsEpsilon()
    {
-      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
 	   
       // Test will fail if you change epsilon too much.
 
@@ -246,7 +246,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testGetNormalizedVectorCopy()
    {
-      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
       
       Vector2d vector = new Vector2d();
       line2dPointPoint.getNormalizedVector(vector);
@@ -262,7 +262,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testGetSlope()
    {
-      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
       
       double slope = line2dPointPoint.getSlope();
       double scaleFactor = 10.0 * random.nextDouble() - 5.0;
@@ -277,7 +277,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testInteriorBisector()
    {
-      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
       
       Point2d somePoint = new Point2d(random.nextDouble(), random.nextDouble());
       Vector2d vector1 = new Vector2d(1.0, 0.0);
@@ -329,7 +329,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testNegateDirection()
    {
-      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
       
       Line2d someLine = new Line2d(line2dPointPoint);
 
@@ -348,7 +348,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testNegateDirectionCopy()
    {
-      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
       
       Line2d someLine = new Line2d(line2dPointPoint);
 
@@ -370,7 +370,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testPerpendicularVector()
    {
-      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
       
       Line2d line;
       Vector2d vector;
@@ -389,7 +389,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testZeroLength()
    {
-      BambooPlanType.assumeRunningOnPlan(BambooPlanType.Fast);
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
       
       Vector2d directionAndLength = new Vector2d(0.0, 0.0);
       Point2d start = new Point2d(1.0, 1.0);
