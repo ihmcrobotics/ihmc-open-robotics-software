@@ -43,4 +43,6 @@ float64[] joint_angles
 # Specifies whether or not the orientation of the hand should be controller during HAND_POSE commands.
 bool control_orientation
 
+int64 unique_id
+
 

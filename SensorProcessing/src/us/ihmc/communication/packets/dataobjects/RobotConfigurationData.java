@@ -10,7 +10,6 @@ import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.robotics.geometry.RotationFunctions;
@@ -35,44 +34,47 @@ public class RobotConfigurationData extends IHMCRosApiPacket<RobotConfigurationD
    public Vector3f pelvisLinearVelocity = new Vector3f();
    public Vector3f pelvisAngularVelocity = new Vector3f();
    public Quat4f rootOrientation = new Quat4f();
-   
+
    public Vector3f pelvisLinearAcceleration = new Vector3f();
-//   public DenseMatrix64F[] momentAndForceDataAllForceSensors;
-   @IgnoreField
+   //   public DenseMatrix64F[] momentAndForceDataAllForceSensors;
    public float[][] momentAndForceDataAllForceSensors;
    public IMUPacket[] imuSensorData;
    public RobotMotionStatus robotMotionStatus;
    public AuxiliaryRobotData auxiliaryRobotData;
-   
+
+   public int lastReceivedPacketTypeID;
+   public long lastReceivedPacketUniqueId;
+   public long lastReceivedPacketRobotTimestamp;
+
    public RobotConfigurationData(Random random)
    {
       timestamp = random.nextLong();
       sensorHeadPPSTimestamp = random.nextLong();
       jointNameHash = random.nextInt(10000);
-      
+
       int size = Math.abs(random.nextInt(1000));
-      
+
       jointAngles = new float[size];
-      for(int i = 0; i < jointAngles.length; i++)
+      for (int i = 0; i < jointAngles.length; i++)
       {
          jointAngles[i] = random.nextFloat();
       }
-      
+
       jointVelocities = new float[size];
-      for(int i = 0; i < jointVelocities.length; i++)
+      for (int i = 0; i < jointVelocities.length; i++)
       {
          jointVelocities[i] = random.nextFloat();
       }
-      
+
       jointTorques = new float[size];
-      for(int i = 0; i < jointTorques.length; i++)
+      for (int i = 0; i < jointTorques.length; i++)
       {
          jointTorques[i] = random.nextFloat();
       }
-      
+
       rootTranslation = RandomTools.generateRandomVector3f(random);
       rootOrientation = RandomTools.generateRandomQuaternion4f(random);
-      
+
       size = Math.abs(random.nextInt(1000));
       momentAndForceDataAllForceSensors = new float[size][Wrench.SIZE];
       for (int i = 0; i < momentAndForceDataAllForceSensors.length; i++)
@@ -83,13 +85,14 @@ public class RobotConfigurationData extends IHMCRosApiPacket<RobotConfigurationD
          }
       }
    }
-   
+
    public RobotConfigurationData()
    {
       // empty constructor for serialization
    }
 
-   public RobotConfigurationData(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, AuxiliaryRobotData auxiliaryRobotData, IMUDefinition[] imuDefinitions)
+   public RobotConfigurationData(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, AuxiliaryRobotData auxiliaryRobotData,
+         IMUDefinition[] imuDefinitions)
    {
       jointAngles = new float[joints.length];
       jointVelocities = new float[joints.length];
@@ -97,15 +100,14 @@ public class RobotConfigurationData extends IHMCRosApiPacket<RobotConfigurationD
       momentAndForceDataAllForceSensors = new float[forceSensorDefinitions.length][Wrench.SIZE];
 
       imuSensorData = new IMUPacket[imuDefinitions.length];
-      for(int sensorNumber = 0; sensorNumber < imuSensorData.length; sensorNumber++)
+      for (int sensorNumber = 0; sensorNumber < imuSensorData.length; sensorNumber++)
       {
          imuSensorData[sensorNumber] = new IMUPacket();
       }
-      
+
       jointNameHash = calculateJointNameHash(joints, forceSensorDefinitions, imuDefinitions);
       this.auxiliaryRobotData = auxiliaryRobotData;
    }
-
 
    public void setJointState(ArrayList<OneDoFJoint> newJointData)
    {
@@ -134,17 +136,16 @@ public class RobotConfigurationData extends IHMCRosApiPacket<RobotConfigurationD
    {
       return jointAngles;
    }
-   
+
    public float[] getJointVelocities()
    {
       return jointVelocities;
    }
-   
+
    public float[] getJointTorques()
    {
       return jointTorques;
    }
-
 
    public Vector3f getPelvisTranslation()
    {
@@ -190,35 +191,35 @@ public class RobotConfigurationData extends IHMCRosApiPacket<RobotConfigurationD
 
       return timestamp == other.timestamp;
    }
-   
+
    public float[] getMomentAndForceVectorForSensor(int sensorNumber)
    {
       return momentAndForceDataAllForceSensors[sensorNumber];
    }
-   
+
    public IMUPacket getImuPacketForSensor(int sensorNumber)
    {
       return imuSensorData[sensorNumber];
    }
-   
+
    public static int calculateJointNameHash(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
    {
       CRC32 crc = new CRC32();
-      for(OneDoFJoint joint : joints)
+      for (OneDoFJoint joint : joints)
       {
          crc.update(joint.getName().getBytes());
       }
-      
-      for(ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
+
+      for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
       {
          crc.update(forceSensorDefinition.getSensorName().getBytes());
       }
-      
-      for(IMUDefinition imuDefinition : imuDefinitions)
+
+      for (IMUDefinition imuDefinition : imuDefinitions)
       {
          crc.update(imuDefinition.getName().getBytes());
       }
-      
+
       return (int) crc.getValue();
    }
 
@@ -269,7 +270,7 @@ public class RobotConfigurationData extends IHMCRosApiPacket<RobotConfigurationD
 
    public void setAuxiliaryRobotData(AuxiliaryRobotData auxiliaryRobotData)
    {
-      if(this.auxiliaryRobotData != null && auxiliaryRobotData != null)
+      if (this.auxiliaryRobotData != null && auxiliaryRobotData != null)
       {
          this.auxiliaryRobotData.setAuxiliaryRobotData(auxiliaryRobotData);
       }
@@ -284,4 +285,35 @@ public class RobotConfigurationData extends IHMCRosApiPacket<RobotConfigurationD
    {
       this.pelvisLinearAcceleration.set(pelvisLinearAcceleration);
    }
+
+   public int getLastReceivedPacketTypeID()
+   {
+      return lastReceivedPacketTypeID;
+   }
+
+   public void setLastReceivedPacketTypeID(int lastReceivedPacketTypeID)
+   {
+      this.lastReceivedPacketTypeID = lastReceivedPacketTypeID;
+   }
+
+   public long getLastReceivedPacketUniqueId()
+   {
+      return lastReceivedPacketUniqueId;
+   }
+
+   public void setLastReceivedPacketUniqueId(long lastReceivedPacketUniqueId)
+   {
+      this.lastReceivedPacketUniqueId = lastReceivedPacketUniqueId;
+   }
+
+   public long getLastReceivedPacketRobotTimestamp()
+   {
+      return lastReceivedPacketRobotTimestamp;
+   }
+
+   public void setLastReceivedPacketRobotTimestamp(long lastReceivedPacketRobotTimestamp)
+   {
+      this.lastReceivedPacketRobotTimestamp = lastReceivedPacketRobotTimestamp;
+   }
+
 }

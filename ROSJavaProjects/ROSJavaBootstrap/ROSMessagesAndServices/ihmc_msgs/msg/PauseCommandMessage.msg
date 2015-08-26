@@ -5,4 +5,6 @@
 
 bool pause
 
+int64 unique_id
+
 

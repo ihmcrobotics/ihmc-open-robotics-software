@@ -74,6 +74,8 @@ public class ROSMessageConverterTest
       {
          Constructor constructor = clazz.getDeclaredConstructor(Random.class);
          untranslated = (T) constructor.newInstance(random);
+         
+         untranslated.uniqueId = random.nextLong();
 
          translatedMessage = DRCROSMessageConverter.convertToRosMessage(untranslated);
          translated = (T) DRCROSMessageConverter.convertToPacket(translatedMessage);

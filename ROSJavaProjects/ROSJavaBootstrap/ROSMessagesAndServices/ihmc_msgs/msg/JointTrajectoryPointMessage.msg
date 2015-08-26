@@ -14,4 +14,6 @@ float64[] velocities
 # A value of zero is not allowed.
 float64 time
 
+int64 unique_id
+
 

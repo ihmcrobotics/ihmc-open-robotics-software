@@ -12,4 +12,6 @@ uint8 motor_enable_enum
 
 bool enable
 
+int64 unique_id
+
 

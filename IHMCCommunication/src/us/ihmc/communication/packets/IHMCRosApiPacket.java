@@ -12,6 +12,6 @@ public abstract class IHMCRosApiPacket<T> extends Packet<T>
    
    public boolean rosConversionEpsilonEquals(T other, double epsilon)
    {
-      return epsilonEquals(other, epsilon);
+      return this.uniqueId == ((Packet<T>) other).uniqueId && epsilonEquals(other, epsilon);
    }
 }

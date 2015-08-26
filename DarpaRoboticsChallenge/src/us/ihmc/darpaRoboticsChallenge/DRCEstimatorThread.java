@@ -227,10 +227,18 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          sensorReader.read();
 
          estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
+         
+         if(globalDataProducer != null)
+         {
+            globalDataProducer.setRobotTime(estimatorTime.getLongValue());
+         }
       }
       catch (Throwable e)
       {
-         globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_READ, e.getMessage());
+         if(globalDataProducer != null)
+         {
+            globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_READ, e.getMessage());
+         }
          throw new RuntimeException(e);
       }
    }

@@ -33,4 +33,6 @@ uint8 trajectory_type
 # Contains information on how high the robot should step. This affects only basic and obstacle clearance trajectories.Recommended values are between 0.1 (default) and 0.25.
 float64 swing_height
 
+int64 unique_id
+
 

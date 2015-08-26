@@ -476,6 +476,7 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
             for (int j = 0; j < numJointsPerArm; j++)
             {
 
+               System.out.println(Arrays.toString(rightArmTrajectory.trajectoryPoints[w].positions));
                out.format(F + "\t", leftArmTrajectory.trajectoryPoints[w].positions[j]);
             }
          }
@@ -488,6 +489,7 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
          {
             for (int j = 0; j < numJointsPerArm; j++)
             {
+               System.out.println(Arrays.toString(rightArmTrajectory.trajectoryPoints[w].positions));
                out.format(F + "\t", rightArmTrajectory.trajectoryPoints[w].positions[j]);
             }
          }

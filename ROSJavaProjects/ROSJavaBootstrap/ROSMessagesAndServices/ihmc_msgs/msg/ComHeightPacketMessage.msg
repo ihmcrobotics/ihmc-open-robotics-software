@@ -9,4 +9,6 @@ float64 height_offset
 # trajectoryTime specifies how fast or how slow to move to the desired pose
 float64 trajectory_time
 
+int64 unique_id
+
 

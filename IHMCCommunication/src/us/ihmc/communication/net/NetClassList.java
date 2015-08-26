@@ -4,11 +4,20 @@ import java.util.ArrayList;
 
 import com.esotericsoftware.kryo.Kryo;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+
 public class NetClassList
 {
    private final ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
    private final ArrayList<Class<?>> typeList = new ArrayList<Class<?>>();
 
+   public int uniquePacketID = 0;
+   public final TObjectIntMap<Class<?>> registrationIDs = new TObjectIntHashMap<>();
+   public final TIntObjectMap<Class<?>> registrationClasses = new TIntObjectHashMap<>();
+   
    public NetClassList()
    {
    }
@@ -21,6 +30,10 @@ public class NetClassList
    public void registerPacketClass(Class<?> clazz)
    {
       classList.add(clazz);
+
+      int id = ++uniquePacketID;
+      registrationIDs.put(clazz, id);
+      registrationClasses.put(id, clazz);
    }
 
    public void registerPacketClasses(Class<?>... classes)
@@ -71,4 +84,16 @@ public class NetClassList
          kryo.register(type);
       }
    }
+   
+   public int getID(Class<?> clazz)
+   {
+      return registrationIDs.get(clazz);
+   }
+   
+   public Class<?> getClass(int id)
+   {
+      return registrationClasses.get(id);
+   }
+   
+   
 }

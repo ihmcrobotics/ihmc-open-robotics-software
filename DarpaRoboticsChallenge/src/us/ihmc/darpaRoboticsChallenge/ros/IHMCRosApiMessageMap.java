@@ -3,11 +3,17 @@ package us.ihmc.darpaRoboticsChallenge.ros;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.LegCompliancePacket;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.communication.packets.manipulation.*;
+import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
+import us.ihmc.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
+import us.ihmc.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
+import us.ihmc.communication.packets.manipulation.HandComplianceControlParametersPacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.StopMotionPacket;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootPosePacket;
@@ -81,12 +87,15 @@ public class IHMCRosApiMessageMap
    public static final Map<String, Class> INPUT_PACKET_MESSAGE_NAME_MAP;
    public static final Map<String, Class> OUTPUT_PACKET_MESSAGE_NAME_MAP;
    public static final Map<Class, String> PACKET_TO_TOPIC_MAP = new HashMap<>();
+   
+   public static final Map<Class, String> MESSAGE_NAME_PACKET_MAP;
 
    static
    {
       PACKET_MESSAGE_NAME_MAP = setupMaps(PACKET_LIST);
       INPUT_PACKET_MESSAGE_NAME_MAP = setupMaps(INPUT_PACKET_LIST);
       OUTPUT_PACKET_MESSAGE_NAME_MAP = setupMaps(OUTPUT_PACKET_LIST);
+      MESSAGE_NAME_PACKET_MAP = invertMap(PACKET_MESSAGE_NAME_MAP);
 
       //inputs
       PACKET_TO_TOPIC_MAP.put(HandPosePacket.class, "/control/hand_pose");
@@ -120,6 +129,15 @@ public class IHMCRosApiMessageMap
           initMap.put("ihmc_msgs/" + clazz.getSimpleName()+"Message", clazz);
       }
       return Collections.unmodifiableMap(initMap);
+   }
+   
+   private static Map<Class, String> invertMap(Map<String, Class> original)
+   {
+      Map<Class, String> map = new HashMap<>();
+      for(Entry<String, Class> entry : original.entrySet()){
+         map.put(entry.getValue(), entry.getKey());
+     }
+      return Collections.unmodifiableMap(map);
    }
 
 }
