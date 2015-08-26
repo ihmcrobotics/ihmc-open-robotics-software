@@ -6,10 +6,9 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 
-@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.VideoB})
+@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.InDevelopment, BambooPlanType.VideoB})
 public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrialsTerrainTest
 {
-
    @Override
    public DRCRobotModel getRobotModel()
    {
@@ -21,5 +20,4 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
-
 }
