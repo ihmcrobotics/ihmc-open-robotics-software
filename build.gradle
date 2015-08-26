@@ -139,7 +139,7 @@ task deploy(dependsOn: assemble) {
 }
 
 
-
+/*
 task svnversion {
   description 'Get SVN revision number.'
   new ByteArrayOutputStream().withStream { os ->
@@ -171,4 +171,4 @@ task createRosJar(type: Jar) {
 task rosJar(type: Copy) {
     from createRosJar
     into "lib/"
-}
+}*/
