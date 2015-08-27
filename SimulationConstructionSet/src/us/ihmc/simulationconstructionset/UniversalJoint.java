@@ -31,7 +31,16 @@ public class UniversalJoint extends PinJoint
       joint2.physics.r_in.y = 0.0;
       joint2.physics.r_in.z = 0.0;
    }
+   
+   public PinJoint getFirstJoint()
+   {
+      return this;
+   }
 
+   public PinJoint getSecondJoint()
+   {
+      return this.joint2;
+   }
 
    public void addJoint(Joint nextJoint)
    {
