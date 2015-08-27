@@ -4,13 +4,12 @@ evaluationDependsOn(':Graphics3DAdapter')
 evaluationDependsOn(':IHMCHumanoidOperatorInterface')
 evaluationDependsOn(':IHMCWholeBodyController')
 evaluationDependsOn(':PathGeneration')
+evaluationDependsOn(':SensorProcessing')
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
     compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: '1.5.2'
-    
-
 	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
 	['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
     compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.8-internal'
@@ -31,37 +30,38 @@ dependencies {
     compile group: 'net.java.jinput', name: 'jinput', version: '2.0.5'
     compile group: 'net.java.jinput', name: 'jinput-platform', version: '2.0.5'
    
-    compile project(':IHMCUtilities')
     compile project(':CommonWalkingControlModules')
     compile project(':DarpaRoboticsChallenge')
-    compile project(':IHMCHumanoidRobotics')
-    testCompile project(':IHMCHumanoidRobotics').sourceSets.test.output
-    testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
-    testCompile project(':CommonWalkingControlModules').sourceSets.test.output
-    testCompile project(':IHMCHumanoidOperatorInterface').sourceSets.test.output
-    compile project(':IHMCHumanoidOperatorInterface')
-    testCompile project(':IHMCWholeBodyController').sourceSets.test.output
-    compile project(':IHMCCommunication')
-    testCompile project(':IHMCCommunication').sourceSets.test.output
     compile project(':Graphics3DAdapter')
+    compile project(':IHMCHumanoidOperatorInterface')
+    compile project(':IHMCHumanoidRobotics')
+    compile project(':IHMCCommunication')
+    compile project(':IHMCControlFlow')
+    compile project(':IHMCJavaToolkit')
+    compile project(':IHMCPerception')
+    compile project(':IHMCRoboticsToolkit')
     compile project(':IHMCROSTools')
+    compile project(':IHMCUtilities')
     compile project(':IHMCWholeBodyController')
     compile project(':ImageProcessing')
     compile project(':iRobotHardwareDrivers')
     compile project(':RobotDataCommunication')
     compile project(':RobotiqHandDrivers')
-    compile project(':IHMCControlFlow')
     compile project(':ROSJava')
+	compile project(':PathGeneration')
+    compile project(':Planning')
     compile project(':SDFLoader')
     compile project(':SensorProcessing')
-    testCompile project(':SensorProcessing').sourceSets.test.output
     compile project(':SimulationConstructionSet')
     compile project(':UserInterface')
-    compile project(':Planning')
-    compile project(':IHMCPerception')
-	compile project(':PathGeneration')
-	testCompile project(':PathGeneration').sourceSets.test.output
-    compile project(':IHMCJavaToolkit')
-    compile project(':IHMCRoboticsToolkit')
+	
+    testCompile project(':CommonWalkingControlModules').sourceSets.test.output
+    testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
+    testCompile project(':IHMCCommunication').sourceSets.test.output
+    testCompile project(':IHMCHumanoidOperatorInterface').sourceSets.test.output
+    testCompile project(':IHMCHumanoidRobotics').sourceSets.test.output
 	testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
+    testCompile project(':IHMCWholeBodyController').sourceSets.test.output
+	testCompile project(':PathGeneration').sourceSets.test.output
+    testCompile project(':SensorProcessing').sourceSets.test.output
   }
