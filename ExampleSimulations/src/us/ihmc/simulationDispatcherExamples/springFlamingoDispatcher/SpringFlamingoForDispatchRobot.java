@@ -141,9 +141,9 @@ public class SpringFlamingoForDispatchRobot extends Robot    // implements java.
       AppearanceDefinition bodyAppearance = YoAppearance.Red();
 
       ret.setMass(12.0);
-      ret.physics.setMomentOfInertia(0.10, 0.10, 0.10);
+      ret.setMomentOfInertia(0.10, 0.10, 0.10);
 
-      ret.physics.setComOffset(0.0, 0.0, BODY_CG_Z);
+      ret.setComOffset(0.0, 0.0, BODY_CG_Z);
 
       // ret.setComOffset(0.0,0.0, 0.0);
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -239,8 +239,8 @@ public class SpringFlamingoForDispatchRobot extends Robot    // implements java.
       AppearanceDefinition pulleyAppearance = YoAppearance.Red();
 
       ret.setMass(UPPER_LEG_MASS);
-      ret.physics.setMomentOfInertia(UPPER_LEG_Ixx, UPPER_LEG_Iyy, UPPER_LEG_Izz);
-      ret.physics.setComOffset(0.0, 0.0, -0.3029);
+      ret.setMomentOfInertia(UPPER_LEG_Ixx, UPPER_LEG_Iyy, UPPER_LEG_Izz);
+      ret.setComOffset(0.0, 0.0, -0.3029);
       Graphics3DObject linkGraphics = new Graphics3DObject();
       ret.setLinkGraphics(linkGraphics);
       linkGraphics.translate(0.0, 0.0, -UPPER_LINK_LENGTH);
@@ -273,8 +273,8 @@ public class SpringFlamingoForDispatchRobot extends Robot    // implements java.
       Link ret = new Link(name);
 
       ret.setMass(LOWER_LEG_MASS);
-      ret.physics.setMomentOfInertia(LOWER_LEG_Ixx, LOWER_LEG_Iyy, LOWER_LEG_Izz);
-      ret.physics.setComOffset(0.0, 0.0, -0.1818);
+      ret.setMomentOfInertia(LOWER_LEG_Ixx, LOWER_LEG_Iyy, LOWER_LEG_Izz);
+      ret.setComOffset(0.0, 0.0, -0.1818);
       
       Graphics3DObject linkGraphics = new Graphics3DObject();
       ret.setLinkGraphics(linkGraphics);
@@ -296,8 +296,8 @@ public class SpringFlamingoForDispatchRobot extends Robot    // implements java.
       Link ret = new Link(name);
 
       ret.setMass(FOOT_MASS);
-      ret.physics.setMomentOfInertia(FOOT_Ixx, FOOT_Iyy, FOOT_Izz);
-      ret.physics.setComOffset(-0.0458, 0.0, -0.0309);
+      ret.setMomentOfInertia(FOOT_Ixx, FOOT_Iyy, FOOT_Izz);
+      ret.setComOffset(-0.0458, 0.0, -0.0309);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       ret.setLinkGraphics(linkGraphics);

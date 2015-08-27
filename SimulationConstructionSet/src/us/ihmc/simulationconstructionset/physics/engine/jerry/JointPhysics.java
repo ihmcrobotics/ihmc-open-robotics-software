@@ -161,7 +161,7 @@ public abstract class JointPhysics< J extends Joint>
             for (int y = 0; y < groundContactPoints.size(); y++)
             {
                GroundContactPoint point = groundContactPoints.get(y);
-               point.updatePointVelocity(R0_i, this.owner.link.physics.comOffset, v_i, w_i);
+               point.updatePointVelocity(R0_i, this.owner.link.comOffset, v_i, w_i);
             }
          }
       }
@@ -171,7 +171,7 @@ public abstract class JointPhysics< J extends Joint>
          for (int i = 0; i < this.kinematicPoints.size(); i++)
          {
             KinematicPoint point = this.kinematicPoints.get(i);
-            point.updatePointVelocity(R0_i, this.owner.link.physics.comOffset, v_i, w_i);
+            point.updatePointVelocity(R0_i, this.owner.link.comOffset, v_i, w_i);
          }
       }
 
@@ -213,9 +213,9 @@ public abstract class JointPhysics< J extends Joint>
       // Z_hat_i.setInitArticulatedZeroAccel(this.link.mass, this.w_i, this.link.Ixx, this.link.Iyy, this.link.Izz, Ri_0, Robot.gX, Robot.gY, Robot.gZ);
       // I_hat_i.setInitArticulatedInertia(this.link.mass, this.link.Ixx, this.link.Iyy, this.link.Izz);
 
-      Z_hat_i.setInitArticulatedZeroAccel(owner.link.getMass(), this.w_i, owner.link.physics.Inertia, Ri_0, owner.rob.gravityX.getDoubleValue(), owner.rob.gravityY.getDoubleValue(),
+      Z_hat_i.setInitArticulatedZeroAccel(owner.link.getMass(), this.w_i, owner.link.Inertia, Ri_0, owner.rob.gravityX.getDoubleValue(), owner.rob.gravityY.getDoubleValue(),
             owner.rob.gravityZ.getDoubleValue());
-      I_hat_i.setInitArticulatedInertia(owner.link.getMass(), owner.link.physics.Inertia);
+      I_hat_i.setInitArticulatedInertia(owner.link.getMass(), owner.link.Inertia);
 
       // Put ground contact point effects in Z_hat:
       // Do not iterate over the groundContactPointGroups hashmap here, has a very large overhead!
@@ -311,7 +311,7 @@ public abstract class JointPhysics< J extends Joint>
 //       externalForceR.sub(p.offset, this.link.comOffset);    // JEP+++ 12/19/01.  Something wrong here!
 
          point.getOffset(externalForceR);
-         externalForceR.sub(owner.link.physics.comOffset);
+         externalForceR.sub(owner.link.comOffset);
 
          // jointDependentComputeExternalForceR(p.offset, this.link.comOffset, externalForceR);
          externalMomentVector.cross(externalForceR, externalForceVector);
@@ -526,7 +526,7 @@ public abstract class JointPhysics< J extends Joint>
    public void getLinearVelocityInBody(Vector3d linearVelocityInBodyToPack, Vector3d pointInBody)
    {
       tempDeltaPVector.set(pointInBody);
-      tempDeltaPVector.sub(owner.link.physics.comOffset);
+      tempDeltaPVector.sub(owner.link.comOffset);
 
       linearVelocityInBodyToPack.cross(w_i, tempDeltaPVector);
       linearVelocityInBodyToPack.add(v_i);
@@ -552,7 +552,7 @@ public abstract class JointPhysics< J extends Joint>
    public void getLinearAccelerationInBody(Vector3d linearAccelerationInBodyToPack, Vector3d pointInBody)
    {
       tempDeltaPVector.set(pointInBody);
-      tempDeltaPVector.sub(owner.link.physics.comOffset);
+      tempDeltaPVector.sub(owner.link.comOffset);
 
       tempOmegaCrossDeltaPVector.cross(w_i, tempDeltaPVector);
       tempOmegaCrossOmegaCrossDeltaPVector.cross(w_i, tempOmegaCrossDeltaPVector);
@@ -1211,7 +1211,7 @@ public abstract class JointPhysics< J extends Joint>
       }
 
       // Get this joints com:
-      tempCOMPoint.set(owner.link.physics.comOffset);
+      tempCOMPoint.set(owner.link.comOffset);
 
       // Transform to World Coords
       owner.transformToNext.transform(tempCOMPoint);
@@ -1302,7 +1302,7 @@ public abstract class JointPhysics< J extends Joint>
       }
 
       // Get this joints com:
-      tempCOMPoint.set(owner.link.physics.comOffset);
+      tempCOMPoint.set(owner.link.comOffset);
 
       // Transform to World Coords
       owner.transformToNext.transform(tempCOMPoint);
@@ -1325,7 +1325,7 @@ public abstract class JointPhysics< J extends Joint>
 
       // Angular momentum of this joint about its center of mass in its coordinate system:
       tempAngularMomentum.set(this.w_i);
-      owner.link.physics.Inertia.transform(tempAngularMomentum);
+      owner.link.Inertia.transform(tempAngularMomentum);
 
       // Transform to World Coords
       owner.transformToNext.transform(tempAngularMomentum);
@@ -1345,7 +1345,7 @@ public abstract class JointPhysics< J extends Joint>
    public double recursiveComputeRotationalKineticEnergy()    // 1/2 w^T I w
    {
       tempRotationalEnergyVector.set(this.w_i);
-      owner.link.physics.Inertia.transform(tempRotationalEnergyVector);
+      owner.link.Inertia.transform(tempRotationalEnergyVector);
 
       double rotationalKineticEnergy = 0.5 * w_i.dot(tempRotationalEnergyVector);
 
@@ -1391,7 +1391,7 @@ public abstract class JointPhysics< J extends Joint>
     */
    public double recursiveComputeGravitationalPotentialEnergy()    // m g h
    {
-      tempPE_COMPoint.set(owner.link.physics.comOffset);    // Get this joints com
+      tempPE_COMPoint.set(owner.link.comOffset);    // Get this joints com
 
       // Transform to World Coords
       owner.transformToNext.transform(tempPE_COMPoint);
@@ -1454,7 +1454,7 @@ public abstract class JointPhysics< J extends Joint>
             for (int y = 0; y < groundContactPoints.size(); y++)
             {
                GroundContactPoint point = groundContactPoints.get(y);
-               point.updatePointVelocity(R0_i, owner.link.physics.comOffset, v_i, w_i);
+               point.updatePointVelocity(R0_i, owner.link.comOffset, v_i, w_i);
             }
          }
 

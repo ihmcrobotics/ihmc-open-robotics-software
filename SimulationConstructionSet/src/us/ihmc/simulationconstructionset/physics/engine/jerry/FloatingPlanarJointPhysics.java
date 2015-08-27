@@ -76,7 +76,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
             for (int i = 0; i < groundContactPoints.size(); i++)
             {
                GroundContactPoint point = groundContactPoints.get(i);
-               point.updatePointVelocity(R0_i, owner.link.physics.comOffset, v_i, w_i);
+               point.updatePointVelocity(R0_i, owner.link.comOffset, v_i, w_i);
             }
          }
       }
@@ -86,7 +86,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
          for (int i = 0; i < kinematicPoints.size(); i++)
          {
             KinematicPoint point = kinematicPoints.get(i);
-            point.updatePointVelocity(R0_i, owner.link.physics.comOffset, v_i, w_i);
+            point.updatePointVelocity(R0_i, owner.link.comOffset, v_i, w_i);
          }
       }
 
@@ -218,9 +218,9 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
       a_hat_world_bot.set(a_hat_i.bottom);
 
       // +++TK 02/09/12 Transform to joint location from com location.
-      wXr.cross(w_i, owner.link.physics.comOffset);
+      wXr.cross(w_i, owner.link.comOffset);
       wXwXr.cross(w_i, wXr);
-      wdXr.cross(a_hat_i.top, owner.link.physics.comOffset);
+      wdXr.cross(a_hat_i.top, owner.link.comOffset);
       a_hat_world_bot.sub(wdXr);
       a_hat_world_bot.sub(wXwXr);
 
