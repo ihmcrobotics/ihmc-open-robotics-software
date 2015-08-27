@@ -1,7 +1,6 @@
 package us.ihmc.utilities.ros.publisher;
 
 import ihmc_msgs.LastReceivedMessage;
-import us.ihmc.tools.time.TimeTools;
 
 public class RosLastReceivedMessagePublisher extends RosTopicPublisher<LastReceivedMessage>
 {
@@ -17,7 +16,7 @@ public class RosLastReceivedMessagePublisher extends RosTopicPublisher<LastRecei
       message.setType(messageType);
       message.setUniqueId(uid);
       message.setReceiveTimestamp(lastReceivedTimestamp);
-      message.setTimeSinceLastReceived(TimeTools.nanoSecondstoSeconds(robotTimestamp - lastReceivedTimestamp));
+      message.setTimeSinceLastReceived(robotTimestamp - lastReceivedTimestamp);
       publish(message);
    }
 
