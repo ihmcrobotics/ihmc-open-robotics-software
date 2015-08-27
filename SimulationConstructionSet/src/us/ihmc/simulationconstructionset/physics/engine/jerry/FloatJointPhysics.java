@@ -87,7 +87,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
             {
                GroundContactPoint point = groundContactPoints.get(i);
 
-               point.updatePointVelocity(R0_i, owner.link.physics.comOffset, v_i, w_i);
+               point.updatePointVelocity(R0_i, owner.link.comOffset, v_i, w_i);
             }
          }
       }
@@ -98,7 +98,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
          {
             KinematicPoint point = kinematicPoints.get(i);
 
-            point.updatePointVelocity(R0_i, owner.link.physics.comOffset, v_i, w_i);
+            point.updatePointVelocity(R0_i, owner.link.comOffset, v_i, w_i);
          }
       }
 
@@ -132,7 +132,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
 
       // ///////////////////////////////
       // +++JEP 10/17/01.  Transform v_i to be at com, not the joint location...
-      wXr1.cross(w_i, owner.link.physics.comOffset);
+      wXr1.cross(w_i, owner.link.comOffset);
       v_i.add(wXr1);
 
       // ///////////////////////////////
@@ -205,9 +205,9 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
       // //////////////////
       // +++JEP 10/17/01.  Transform to joint location from com location.
       // +++TK 02/06/12 See comment above.
-      wXr.cross(w_i, owner.link.physics.comOffset);
+      wXr.cross(w_i, owner.link.comOffset);
       wXwXr.cross(w_i, wXr);
-      wdXr.cross(a_hat_world_top, owner.link.physics.comOffset);
+      wdXr.cross(a_hat_world_top, owner.link.comOffset);
       a_hat_world_bot.sub(wdXr);
       a_hat_world_bot.sub(wXwXr);
 

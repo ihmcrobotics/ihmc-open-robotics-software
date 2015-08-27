@@ -44,7 +44,7 @@ public class LinkSolidCylinder extends Link
 		FrameVector cylinderZAxisExpressedInWorld = new FrameVector(world, cylinderZAxisInWorld);
 		this.cylinderReferenceFrame = ReferenceFrame.constructReferenceFrameFromPointAndZAxis(name, new FramePoint(world), cylinderZAxisExpressedInWorld);
 
-      physics.comOffset.set(parentJointOffsetFromCoM);
+      comOffset.set(parentJointOffsetFromCoM);
 
 
 			Matrix3d moiInLegFrame = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, length, Axis.Z);
@@ -75,7 +75,7 @@ public class LinkSolidCylinder extends Link
 
 				this.setMass(mass);
             setMomentOfInertia(moiInWorldFrame);
-            setComOffset(physics.comOffset);
+            setComOffset(comOffset);
 			}
 			else
 			{
@@ -84,7 +84,7 @@ public class LinkSolidCylinder extends Link
 
 				this.setMass(mass);
             setMomentOfInertia(inertia.getMassMomentOfInertiaPartCopy());
-            setComOffset(physics.comOffset);
+            setComOffset(comOffset);
 			}
 
 			this.addCoordinateSystemToCOM(length/10.0);

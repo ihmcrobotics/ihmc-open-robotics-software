@@ -9,10 +9,9 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.simulationconstructionset.physics.CollisionShape;
-import us.ihmc.simulationconstructionset.physics.engine.jerry.LinkPhysics;
-import us.ihmc.simulationconstructionset.robotdefinition.LinkDefinitionFixedFrame;
 import us.ihmc.robotics.geometry.InertiaTools;
+import us.ihmc.simulationconstructionset.physics.CollisionShape;
+import us.ihmc.simulationconstructionset.robotdefinition.LinkDefinitionFixedFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 /**
@@ -33,13 +32,17 @@ public class Link implements java.io.Serializable
    protected Joint parentJoint;    // Needed for collisions.
    private double mass;
 
+   public Matrix3d Inertia = new Matrix3d();
+   public Vector3d principalMomentsOfInertia = new Vector3d();
+   public Matrix3d principalAxesRotation = new Matrix3d();
+
+   public Vector3d comOffset = new Vector3d();
+   
    private Graphics3DObject linkGraphics;
    private CollisionShape collision;
 
    // external force applied to center of mass
    protected ExternalForcePoint ef_centerOfMass;
-
-   public LinkPhysics physics = new LinkPhysics(this);
 
    public Link(LinkDefinitionFixedFrame linkDefinition)
    {
@@ -112,10 +115,12 @@ public class Link implements java.io.Serializable
 
       retBuffer.append("      Link: " + name + "\n");
       retBuffer.append("         Mass: " + mass + "\n");
-
-      return retBuffer.toString()+physics;
+      retBuffer.append("         COM Offset: " + comOffset + "\n");
+      retBuffer.append("         Moment of Inertia: \n" + this.Inertia);
+      
+      return retBuffer.toString();
    }
-
+   
    /**
     * Sets the moment of inertia for this link.  This is stored as a matrix
     * with the values Ixx, Iyy and Izz representing the positions m00, m11 and
@@ -133,18 +138,29 @@ public class Link implements java.io.Serializable
     */
    public void setMomentOfInertia(double Ixx, double Iyy, double Izz)
    {
-      physics.setMomentOfInertia(Ixx,Iyy,Izz);
-   }
+      this.Inertia.m00 = Ixx;
+      this.Inertia.m01 = 0.0;
+      this.Inertia.m02 = 0.0;
+      this.Inertia.m10 = 0.0;
+      this.Inertia.m11 = Iyy;
+      this.Inertia.m12 = 0.0;
+      this.Inertia.m20 = 0.0;
+      this.Inertia.m21 = 0.0;
+      this.Inertia.m22 = Izz;
 
+      computePrincipalMomentsOfInertia();   
+   }
+   
    /**
     * Sets the moment of inertia for this link.  Inertias are represented in units of kg*m^2
     *
     * @param momentOfInertia Matrix3d representing the moment of inertia
     */
-   public void setMomentOfInertia(Matrix3d momentOfInertia) {
-      physics.setMomentOfInertia(momentOfInertia);
+   public void setMomentOfInertia(Matrix3d momentOfInertia) 
+   {
+      this.Inertia.set(momentOfInertia);
+      computePrincipalMomentsOfInertia();   
    }
-
 
    /**
     * Retrieves the offset from this link's inboard joint to its center of mass.
@@ -153,7 +169,7 @@ public class Link implements java.io.Serializable
     */
    public Vector3d getComOffset()
    {
-      return this.physics.comOffset;
+      return this.comOffset;
    }
 
    /**
@@ -167,9 +183,9 @@ public class Link implements java.io.Serializable
     */
    public void setComOffset(double xOffset, double yOffset, double zOffset)
    {
-      // this.comOffset = new Vector3d(xOffset, yOffset, zOffset);
-      this.physics.setComOffset(xOffset, yOffset, zOffset);
+      this.comOffset.set(xOffset, yOffset, zOffset);
    }
+
 
    /**
     * Sets the offset from the inbound joint ot this links center of mass.
@@ -178,7 +194,7 @@ public class Link implements java.io.Serializable
     */
    public void setComOffset(Vector3d comOffset)
    {
-      this.physics.setComOffset(comOffset);
+      this.comOffset.set(comOffset);
    }
 
    /**
@@ -214,10 +230,10 @@ public class Link implements java.io.Serializable
 
       // Center of mass is weighted averages of centers of mass:
       Vector3d newComOffset = new Vector3d();
-      newComOffset.scale(linkOne.mass, linkOne.physics.comOffset);
+      newComOffset.scale(linkOne.mass, linkOne.comOffset);
       
       Vector3d linkToAddTotalOffset = new Vector3d(linkOffset);
-      linkToAddTotalOffset.add(linkTwo.physics.comOffset);
+      linkToAddTotalOffset.add(linkTwo.comOffset);
       
       Vector3d temp = new Vector3d();
       temp.scale(linkTwo.mass, linkToAddTotalOffset);
@@ -229,14 +245,14 @@ public class Link implements java.io.Serializable
 
       // New inertia is sum of the old plus parallel axis theorem:
       Matrix3d newInertia = new Matrix3d();
-      newInertia.add(linkOne.physics.Inertia, linkTwo.physics.Inertia);
+      newInertia.add(linkOne.Inertia, linkTwo.Inertia);
 
       // Parallel Axis Theorem:
       double a, b, c;
 
-      a = linkOne.physics.comOffset.x - newComOffset.x;
-      b = linkOne.physics.comOffset.y - newComOffset.y;
-      c = linkOne.physics.comOffset.z - newComOffset.z;
+      a = linkOne.comOffset.x - newComOffset.x;
+      b = linkOne.comOffset.y - newComOffset.y;
+      c = linkOne.comOffset.z - newComOffset.z;
       Matrix3d inertiaOffset1 = new Matrix3d(b * b + c * c, -a * b, -a * c, -a * b, c * c + a * a, -b * c, -a * c, -b * c, a * a + b * b);
 
       a = linkToAddTotalOffset.getX() - newComOffset.x;
@@ -287,7 +303,7 @@ public class Link implements java.io.Serializable
    
    public void getMomentOfInertia(Matrix3d momentOfInertiaToPack)
    {
-      physics.getMomentOfInertia(momentOfInertiaToPack);
+      momentOfInertiaToPack.set(this.Inertia);
    }
 
    /**
@@ -385,15 +401,15 @@ public class Link implements java.io.Serializable
 
    public void addEllipsoidFromMassProperties2(AppearanceDefinition appearance)
    {
-	   physics.computePrincipalMomentsOfInertia();
+	   computePrincipalMomentsOfInertia();
 	   
-	   Vector3d inertiaEllipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(physics.principalMomentsOfInertia, mass);
+	   Vector3d inertiaEllipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
 	   
 	   ArrayList<Vector3d> inertiaEllipsoidAxes = new ArrayList<Vector3d>();
 
-	   Vector3d e1 = new Vector3d(); physics.principalAxesRotation.getColumn(0, e1); e1.normalize(); e1.scale(inertiaEllipsoidRadii.x); inertiaEllipsoidAxes.add(e1);
-	   Vector3d e2 = new Vector3d(); physics.principalAxesRotation.getColumn(1, e2); e2.normalize(); e2.scale(inertiaEllipsoidRadii.y); inertiaEllipsoidAxes.add(e2);
-	   Vector3d e3 = new Vector3d(); physics.principalAxesRotation.getColumn(2, e3); e3.normalize(); e3.scale(inertiaEllipsoidRadii.z); inertiaEllipsoidAxes.add(e3);
+	   Vector3d e1 = new Vector3d(); principalAxesRotation.getColumn(0, e1); e1.normalize(); e1.scale(inertiaEllipsoidRadii.x); inertiaEllipsoidAxes.add(e1);
+	   Vector3d e2 = new Vector3d(); principalAxesRotation.getColumn(1, e2); e2.normalize(); e2.scale(inertiaEllipsoidRadii.y); inertiaEllipsoidAxes.add(e2);
+	   Vector3d e3 = new Vector3d(); principalAxesRotation.getColumn(2, e3); e3.normalize(); e3.scale(inertiaEllipsoidRadii.z); inertiaEllipsoidAxes.add(e3);
 	   Vector3d e4 = new Vector3d(e1); e4.negate(); inertiaEllipsoidAxes.add(e4);
 	   Vector3d e5 = new Vector3d(e2); e5.negate(); inertiaEllipsoidAxes.add(e5);
 	   Vector3d e6 = new Vector3d(e3); e6.negate(); inertiaEllipsoidAxes.add(e6);
@@ -403,7 +419,7 @@ public class Link implements java.io.Serializable
 	   for (Vector3d vector : inertiaEllipsoidAxes)
 	   {
 		   linkGraphics.identity();
-		   linkGraphics.translate(physics.comOffset.x, physics.comOffset.y, physics.comOffset.z);
+		   linkGraphics.translate(comOffset.x, comOffset.y, comOffset.z);
 		   linkGraphics.translate(vector);
 		   linkGraphics.addCube(vertexSize, vertexSize, vertexSize, appearance); 
 	   }
@@ -429,7 +445,7 @@ public class Link implements java.io.Serializable
 
 	   
 	   linkGraphics.identity();
-	   linkGraphics.translate(physics.comOffset.x, physics.comOffset.y, physics.comOffset.z);
+	   linkGraphics.translate(comOffset.x, comOffset.y, comOffset.z);
 	   linkGraphics.addPolygon(face1, appearance);
 	   linkGraphics.addPolygon(face2, appearance);
 	   linkGraphics.addPolygon(face3, appearance);
@@ -456,16 +472,16 @@ public class Link implements java.io.Serializable
     */
    public void addEllipsoidFromMassProperties(AppearanceDefinition appearance)
    {
-      physics.computePrincipalMomentsOfInertia();
+      computePrincipalMomentsOfInertia();
 
-      Vector3d inertiaEllipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(physics.principalMomentsOfInertia, mass);
+      Vector3d inertiaEllipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
 
       if (appearance == null)
          appearance = YoAppearance.Black();
 
       linkGraphics.identity();
-      linkGraphics.translate(physics.comOffset.x, physics.comOffset.y, physics.comOffset.z);
-      linkGraphics.rotate(physics.principalAxesRotation);
+      linkGraphics.translate(comOffset.x, comOffset.y, comOffset.z);
+      linkGraphics.rotate(principalAxesRotation);
       linkGraphics.addEllipsoid(inertiaEllipsoidRadii.getX(), inertiaEllipsoidRadii.getY(), inertiaEllipsoidRadii.getZ(), appearance);
       linkGraphics.identity();
    }
@@ -483,8 +499,6 @@ public class Link implements java.io.Serializable
     */
    public void addBoxFromMassProperties(AppearanceDefinition appearance)
    {
-      Matrix3d Inertia  = physics.Inertia;
-
       if (mass <= 0 || Inertia.m00 <= 0 || Inertia.m11 <= 0 || Inertia.m22 <= 0 || Inertia.m00 + Inertia.m11 <= Inertia.m22
             || Inertia.m11 + Inertia.m22 <= Inertia.m00 || Inertia.m00 + Inertia.m22 <= Inertia.m11)
       {
@@ -493,7 +507,7 @@ public class Link implements java.io.Serializable
       else
       {
          linkGraphics.identity();
-         linkGraphics.translate(physics.comOffset.x, physics.comOffset.y, physics.comOffset.z);
+         linkGraphics.translate(comOffset.x, comOffset.y, comOffset.z);
          double lx = Math.sqrt(6 * (Inertia.m22 + Inertia.m11 - Inertia.m00) / mass);
          double ly = Math.sqrt(6 * (Inertia.m22 + Inertia.m00 - Inertia.m11) / mass);
          double lz = Math.sqrt(6 * (Inertia.m00 + Inertia.m11 - Inertia.m22) / mass);
@@ -509,8 +523,9 @@ public class Link implements java.io.Serializable
     *
     * @param comOffsetRet Vector3d in which the offset will be stored.
     */
-   public void getComOffset(Vector3d comOffsetRet) {
-      physics.getComOffset(comOffsetRet);
+   public void getComOffset(Vector3d comOffsetRet) 
+   {
+      comOffsetRet.set(this.comOffset);
    }
 
    public ExternalForcePoint getCenterOfMassForce()
@@ -534,6 +549,12 @@ public class Link implements java.io.Serializable
    public void _setParentJoint( Joint parent )
    {
       this.parentJoint = parent;
+   }
+
+
+   public void computePrincipalMomentsOfInertia()
+   {
+      InertiaTools.computePrincipalMomentsOfInertia(Inertia, principalAxesRotation, principalMomentsOfInertia);
    }
 
 
