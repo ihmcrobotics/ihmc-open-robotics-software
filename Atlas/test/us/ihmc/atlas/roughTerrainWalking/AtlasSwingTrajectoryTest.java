@@ -6,9 +6,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.roughTerrainWalking.DRCSwingTrajectoryTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 
-/**
- * Created by agrabertilton on 2/25/15.
- */
 public class AtlasSwingTrajectoryTest extends DRCSwingTrajectoryTest
 {
    @Override
