@@ -31,7 +31,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
 
       String host = NetworkParameters.getHost(NetworkParameterKeys.logger);
       System.out.println("Connecting to host " + host);
-      valkyrieRobotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.GAZEBO, false);
+      valkyrieRobotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.REAL_ROBOT, false);
 
       SCSVisualizer scsVisualizer = new SCSVisualizer(BUFFER_SIZE);
       scsVisualizer.addSCSVisualizerStateListener(this);
