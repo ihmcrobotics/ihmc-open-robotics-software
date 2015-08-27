@@ -725,6 +725,21 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
       scale(centroid.getPoint(), scaleFactor);
    }
 
+   /**
+    * Returns distance from the point to the boundary of this polygon.
+    * Positive number if inside. Negative number if outside.
+    * If inside, the distance is the exact distance to an edge.
+    * If outside, the negative distance is an underestimate.
+    * It is actually the furthest distance from a projected edge that
+    * it is outside of.
+    * @param point
+    * @return distance from point to this polygon.
+    */
+   public double getDistanceInside(FramePoint2d point)
+   {
+      return this.convexPolygon.getDistanceInside(point.tuple);
+   }
+   
    public BoundingBox2d getBoundingBoxCopy()
    {
       BoundingBox2d ret = this.convexPolygon.getBoundingBoxCopy();
