@@ -665,6 +665,71 @@ public class ConvexPolygon2d implements Geometry2d
 
       return ret;
    }
+   
+   /**
+    * Returns distance from the point to the boundary of this polygon.
+    * Positive number if inside. Negative number if outside.
+    * If inside, the distance is the exact distance to an edge.
+    * If outside, the negative distance is an underestimate.
+    * It is actually the furthest distance from a projected edge that
+    * it is outside of.
+    * @param point
+    * @return distance from point to this polygon.
+    */
+   public double getDistanceInside(Point2d point)
+   {
+      checkIfUpToDate();
+            
+      if (numberOfVertices == 1)
+      {
+         return -point.distance(getVertex(0));
+      }
+      
+      if (numberOfVertices == 2)
+      {
+         Point2d pointOne = getVertex(0);
+         Point2d pointTwo = getVertex(1);
+         
+         return -Math.abs(computeDistanceToSideOfSegment(point, pointOne, pointTwo));
+      }
+      
+      double closestDistance = Double.POSITIVE_INFINITY;
+      
+      for (int index = 0; index < numberOfVertices; index++)
+      {
+         Point2d pointOne = getVertex(index);
+         int nextIndex = index+1;
+         if (nextIndex == numberOfVertices)
+            nextIndex = 0;
+         
+         Point2d pointTwo = getVertex(nextIndex);
+         
+         double distance = computeDistanceToSideOfSegment(point, pointOne, pointTwo);
+         if (distance < closestDistance)
+         {
+            closestDistance = distance;
+         }
+      }
+      
+      return closestDistance;
+   }
+
+   private double computeDistanceToSideOfSegment(Point2d point, Point2d pointOne, Point2d pointTwo)
+   {
+      double x0 = point.getX();
+      double y0 = point.getY();
+      
+      double x1 = pointOne.getX();
+      double y1 = pointOne.getY();
+      
+      double x2 = pointTwo.getX();
+      double y2 = pointTwo.getY();
+      
+      double numerator = (y2 - y1) * x0 - (x2 - x1) * y0 + x2*y1 - y2*x1;
+      double denominator = Math.sqrt((y2-y1) * (y2-y1) + (x2-x1) * (x2-x1));
+      
+      return numerator/denominator;
+   }
 
    public Point2d getClosestVertexCopy(Point2d point)
    {

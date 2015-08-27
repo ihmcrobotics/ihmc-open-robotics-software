@@ -1981,12 +1981,77 @@ public class ConvexPolygon2dTest
 
    @EstimatedDuration(duration = 0.1)
    @Test(timeout = 30000)
+   public void testGetDistanceInside()
+   {
+      double[][] vertices = new double[][]{{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}};
+      
+      ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertices);
+      
+      Point2d point = new Point2d(0.0, 0.0);
+      assertEquals(0.0, convexPolygon.getDistanceInside(point), 1e-7);
+      
+      point = new Point2d(0.5, 0.8);
+      assertEquals(0.2, convexPolygon.getDistanceInside(point), 1e-7);
+      
+      point = new Point2d(0.5, 1.2);
+      assertEquals(-0.2, convexPolygon.getDistanceInside(point), 1e-7);
+      
+      point = new Point2d(0.5, 0.5);
+      assertEquals(0.5, convexPolygon.getDistanceInside(point), 1e-7);
+      
+      // Note: This 1.0 isn't the true distance outside. It's the distance to 
+      // a projected edge. The distance is only exact when the point is inside.
+      point = new Point2d(2.0, 2.0);
+      assertEquals(-1.0, convexPolygon.getDistanceInside(point), 1e-7);
+
+      vertices = new double[][]{{0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}};
+      
+      convexPolygon = new ConvexPolygon2d(vertices);
+      
+      point = new Point2d(0.0, 0.0);
+      assertEquals(-0.70710678118, convexPolygon.getDistanceInside(point), 1e-7);
+      
+      point = new Point2d(0.5, 0.5);
+      assertEquals(0.0, convexPolygon.getDistanceInside(point), 1e-7);
+      
+      point = new Point2d(0.6, 0.6);
+      assertEquals(0.141421356, convexPolygon.getDistanceInside(point), 1e-7);
+      
+      vertices = new double[][]{{0.0, 1.0}, {1.0, 0.0}};
+      
+      convexPolygon = new ConvexPolygon2d(vertices);
+      
+      point = new Point2d(0.0, 0.0);
+      assertEquals(-0.70710678118, convexPolygon.getDistanceInside(point), 1e-7);
+      
+      point = new Point2d(0.5, 0.5);
+      assertEquals(0.0, convexPolygon.getDistanceInside(point), 1e-7);
+      
+      point = new Point2d(0.6, 0.6);
+      assertEquals(-0.141421356, convexPolygon.getDistanceInside(point), 1e-7);
+      
+      vertices = new double[][]{{0.0, 1.0}};
+      
+      convexPolygon = new ConvexPolygon2d(vertices);
+      
+      point = new Point2d(0.0, 0.0);
+      assertEquals(-1.0, convexPolygon.getDistanceInside(point), 1e-7);
+      
+      point = new Point2d(0.5, 0.5);
+      assertEquals(-0.70710678118, convexPolygon.getDistanceInside(point), 1e-7);
+      
+      point = new Point2d(0.6, 0.6);
+      assertEquals(-0.721110255, convexPolygon.getDistanceInside(point), 1e-7);
+   }
+
+   
+   @EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000)
    public void testOrthogonalProjectionPointConvexPolygon2d()
    {
       ArrayList<Point2d> pointList = new ArrayList<Point2d>();
       ConvexPolygon2d convexPolygon;
       Point2d testPoint = new Point2d();
-      ;
 
       for (int i = 4; i < 10; i++) // polygon sizes
       {
