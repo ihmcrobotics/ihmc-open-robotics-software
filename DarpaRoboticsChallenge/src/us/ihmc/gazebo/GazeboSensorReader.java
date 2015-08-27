@@ -17,7 +17,6 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -77,7 +76,7 @@ public class GazeboSensorReader implements SensorReader
       this.imu = stateEstimatorSensorDefinitions.getIMUSensorDefinitions().get(0);
 
       additionalFixedRotation = new Quat4d();
-      imu.getIMUFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()).get(additionalFixedRotation);
+      imu.getIMUFrame().getTransformToDesiredFrame(imu.getRigidBody().getBodyFixedFrame()).get(additionalFixedRotation);
 
       jointDataLength = jointList.size() * 8 * 2;
       imuDataLength = 10 * 8;
