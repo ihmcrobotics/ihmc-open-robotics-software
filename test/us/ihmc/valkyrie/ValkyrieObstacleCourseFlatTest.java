@@ -63,7 +63,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees();
    }
    
-   
    @Override
 	@EstimatedDuration(duration = 111.7)
    @Test(timeout = 558712)
@@ -72,7 +71,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
       super.testSimpleFlatGroundScriptWithOscillatingFeet();
    }
-   
    
    @Override
 	@EstimatedDuration(duration = 34.7)
@@ -84,17 +82,16 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 18.6)
-   @Test(timeout = 93215)
+	@EstimatedDuration(duration = 30.0)
+   @Test(timeout = 300000)
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
       super.testSimpleFlatGroundScriptWithRandomFootSlip();
    }
    
-   
    @Override
-   @EstimatedDuration
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 300000)
    public void testWalkingUpToRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
@@ -102,9 +99,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testWalkingUpToRampWithShortSteps();
    }
    
-   
    @Override
-   @EstimatedDuration
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 300000)
    public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
    {
@@ -112,9 +108,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testSideStepsWithSlipping();
    }
    
-   
    @Override
-   @EstimatedDuration
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 300000)
    public void testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly() throws SimulationExceededMaximumTimeException
    {
@@ -122,9 +117,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly();
    }
    
-   
    @Override
-   @EstimatedDuration
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 300000)
    public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
@@ -132,9 +126,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testStandingWithOscillatingFeet();
    }
    
-   
    @Override
-   @EstimatedDuration
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 300000)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
@@ -142,9 +135,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testStandingForACoupleSeconds();
    }
    
-   
    @Override
-   @EstimatedDuration
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 300000)
    public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException
    {
@@ -152,19 +144,17 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testSideStepsWithRandomSlipping();
    }
    
-   
    @Override
-   @EstimatedDuration
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 300000)
    public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
       super.testLongStepsMaxHeightPauseAndResume();
    }
-
    
    @Override
-   @EstimatedDuration
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 300000)
    public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
    {
@@ -172,9 +162,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testTurningInPlaceAndPassingPI();
    }
    
-   
    @Override
-   @EstimatedDuration
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 300000)
    public void testChestControlWithPackets() throws SimulationExceededMaximumTimeException
    {
@@ -182,9 +171,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testChestControlWithPackets();
    }
    
-   
    @Override
-   @EstimatedDuration
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 300000)
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
@@ -192,9 +180,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testStandingOnUnevenTerrainForACoupleSeconds();
    }
    
-   
    @Override
-   @EstimatedDuration
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 300000)
    public void testForMemoryLeaks() throws Exception
    {
