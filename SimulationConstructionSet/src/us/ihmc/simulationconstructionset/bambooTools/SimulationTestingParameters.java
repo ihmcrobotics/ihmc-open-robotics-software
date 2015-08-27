@@ -1,7 +1,5 @@
 package us.ihmc.simulationconstructionset.bambooTools;
 
-import java.util.Properties;
-
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 public class SimulationTestingParameters extends SimulationConstructionSetParameters
@@ -63,8 +61,8 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
          setKeepSCSUp(keepSCSUp);
       }
       System.out.println(toString());
-      Properties properties = System.getProperties();
-      System.out.println(properties.toString());
+      //Properties properties = System.getProperties();
+      //System.out.println(properties.toString());
    }
    
    public boolean getUsePefectSensors()
