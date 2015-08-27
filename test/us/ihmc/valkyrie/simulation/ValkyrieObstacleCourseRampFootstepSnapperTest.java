@@ -13,7 +13,7 @@ public class ValkyrieObstacleCourseRampFootstepSnapperTest extends DRCObstacleCo
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(false, false);
+      return new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
    }
 
    @Override

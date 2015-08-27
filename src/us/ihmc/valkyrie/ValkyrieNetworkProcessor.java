@@ -12,7 +12,7 @@ import com.martiansoftware.jsap.JSAPException;
 
 public class ValkyrieNetworkProcessor
 {
-   private static final DRCRobotModel model = new ValkyrieRobotModel(true, true);
+   private static final DRCRobotModel model = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.REAL_ROBOT, true);
 
    
    public static void main(String[] args) throws URISyntaxException, JSAPException

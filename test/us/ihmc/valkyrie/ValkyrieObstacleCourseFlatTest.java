@@ -19,7 +19,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 @BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.InDevelopment, BambooPlanType.VideoB})
 public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
-   private final DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
    
    @Override
    public DRCRobotModel getRobotModel()

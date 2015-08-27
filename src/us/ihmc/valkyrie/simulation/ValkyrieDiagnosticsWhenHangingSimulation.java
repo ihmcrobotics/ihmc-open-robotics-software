@@ -34,7 +34,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
 
    public ValkyrieDiagnosticsWhenHangingSimulation()
    {
-      DRCRobotModel robotModel = new ValkyrieRobotModelWithHoist(false, false);
+      DRCRobotModel robotModel = new ValkyrieRobotModelWithHoist(DRCRobotModel.RobotTarget.SCS, false);
       double groundZ = 0.0;
       double initialYaw = 0.0;
       DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw);
@@ -304,9 +304,9 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
    private class ValkyrieRobotModelWithHoist extends ValkyrieRobotModel
    {
 
-      public ValkyrieRobotModelWithHoist(boolean runningOnRealRobot, boolean headless)
+      public ValkyrieRobotModelWithHoist(DRCRobotModel.RobotTarget target, boolean headless)
       {
-         super(runningOnRealRobot, headless);
+         super(target, headless);
       }
       
       @Override

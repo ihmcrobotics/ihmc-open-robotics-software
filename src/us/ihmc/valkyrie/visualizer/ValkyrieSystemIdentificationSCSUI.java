@@ -21,7 +21,7 @@ public class ValkyrieSystemIdentificationSCSUI
       final SimulationConstructionSet scs;
 
       // initialize SCS
-     DRCRobotModel robotModel = new ValkyrieRobotModel(true,false);
+     DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.REAL_ROBOT, false);
       final SDFRobot robot =robotModel.createSdfRobot(false);
       
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();

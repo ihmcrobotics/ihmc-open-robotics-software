@@ -9,7 +9,7 @@ import us.ihmc.tools.agileTesting.BambooPlanType;
 @BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoB})
 public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
 {
-   private final DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
    
    @Override
    public DRCRobotModel getRobotModel()

@@ -58,7 +58,7 @@ public class ValkyrieIPABSimulator
    public ValkyrieIPABSimulator(DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
          boolean runAutomaticDiagnosticRoutine, boolean disableViz) throws IOException
    {
-	      DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
+	      DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
 	      environment = new SDFEnvironment();
 	      
 	   	  DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);

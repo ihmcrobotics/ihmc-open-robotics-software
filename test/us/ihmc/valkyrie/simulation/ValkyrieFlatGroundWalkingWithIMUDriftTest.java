@@ -31,7 +31,7 @@ public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalk
       BambooTools.reportTestStartedMessage();
 
       String runName = "ValkyrieFlatGroundWalkingTest";
-      robotModel = new ValkyrieRobotModel(false, false);
+      robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
 
       DRCFlatGroundWalkingTrack track = setupFlatGroundSimulationTrack(robotModel);
       YoVariable[] allVariables = track.getSimulationConstructionSet().getAllVariablesArray();

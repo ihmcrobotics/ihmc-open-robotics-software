@@ -31,7 +31,7 @@ public class ValkyrieROSAPISimulator extends ROSAPISimulator
    {
       Options opt = parseArguments(args);
       
-      DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
+      DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
       
       DRCStartingLocation startingLocation;
       try

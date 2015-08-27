@@ -79,10 +79,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final DRCHandType drcHandType = DRCHandType.VALKYRIE;
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
-   private final boolean runningOnRealRobot;
    private final Map<String, Double> standPrepAngles = (Map<String, Double>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "setpoints.yaml");
-   
-   @Override
+   private final DRCRobotModel.RobotTarget target;
+
    public WholeBodyIkSolver createWholeBodyIkSolver()  
    {
       return null;
@@ -102,12 +101,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    private boolean enableJointDamping = true;
 
-   public ValkyrieRobotModel(boolean runningOnRealRobot, boolean headless)
+   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless)
    {
-      this.runningOnRealRobot = runningOnRealRobot;
+      this.target = target;
       jointMap = new ValkyrieJointMap();
       physicalProperties = new ValkyriePhysicalProperties();
-      sensorInformation = new ValkyrieSensorInformation(runningOnRealRobot);
+      sensorInformation = new ValkyrieSensorInformation(target);
 
       if (headless)
       {
@@ -121,11 +120,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
       for (String forceSensorNames : ValkyrieSensorInformation.forceSensorNames)
       {
          RigidBodyTransform transform = new RigidBodyTransform();
-         if (forceSensorNames.equals("LeftAnkleRoll"))
+         if (forceSensorNames.equals("LeftAnkleRoll") && target != RobotTarget.GAZEBO)
          {
             transform.set(ValkyrieSensorInformation.transformFromSixAxisMeasurementToAnkleZUpFrames.get(RobotSide.LEFT));
          }
-         else if (forceSensorNames.equals("RightAnkleRoll"))
+         else if (forceSensorNames.equals("RightAnkleRoll") && target != RobotTarget.GAZEBO)
          {
             transform.set(ValkyrieSensorInformation.transformFromSixAxisMeasurementToAnkleZUpFrames.get(RobotSide.RIGHT));
          }
@@ -144,6 +143,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
          }
       }
 
+      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
       capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(runningOnRealRobot);
       armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, runningOnRealRobot);
@@ -383,7 +383,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      return new ValkyrieSensorSuiteManager(this, getPPSTimestampOffsetProvider(), sensorInformation, jointMap, runningOnRealRobot);
+      return new ValkyrieSensorSuiteManager(this, getPPSTimestampOffsetProvider(), sensorInformation, jointMap, target);
    }
 
    @Override
@@ -426,7 +426,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public LogSettings getLogSettings()
    {
-      if(runningOnRealRobot)
+      if(target == RobotTarget.REAL_ROBOT)
       {
          return LogSettings.VALKYRIE_IHMC;
       }
@@ -445,7 +445,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public ImmutablePair<Class<?>, String[]> getOperatorInterfaceStarter()
    {
-      String[] args = runningOnRealRobot ? new String[]{"--realRobot"} : null;
+      String[] args = (target == RobotTarget.REAL_ROBOT) ? new String[]{"--realRobot"} : null;
       return new ImmutablePair<Class<?>, String[]>(ValkyrieOperatorUserInterface.class, args);
    }
 

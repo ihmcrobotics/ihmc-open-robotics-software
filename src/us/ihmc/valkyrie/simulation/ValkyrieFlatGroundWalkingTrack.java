@@ -26,7 +26,7 @@ public class ValkyrieFlatGroundWalkingTrack
    {
       boolean USE_JOYSTICK_CONTROLLER = JoystickUpdater.isJoyStickConnected();
       
-      DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
+      DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);      
 
       final double groundHeight = 0.0;

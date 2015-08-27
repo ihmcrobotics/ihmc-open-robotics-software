@@ -14,7 +14,7 @@ public class ValkyrieInverseDynamicsControllerDemo
 {
    public static void main(String[] args)
    {
-      DRCRobotModel model = new ValkyrieRobotModel(false, false);
+      DRCRobotModel model = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
       double groundHeight = 0.0;
       double initialYaw = 0.0;
       DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight + 0.3, initialYaw);

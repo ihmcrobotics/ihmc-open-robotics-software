@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 
 import javax.vecmath.Quat4d;
 
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
@@ -172,20 +173,20 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    public static final String[] imuSensorsToUse = {leftPelvisIMUSensor};
 //   public static final String[] imuSensorsToUse = {rightPelvisIMUSensor};
    
-   public ValkyrieSensorInformation(boolean runningOnRealRobot)
+   public ValkyrieSensorInformation(DRCRobotModel.RobotTarget target)
    {
       cameraParamaters[1] = new DRCRobotCameraParameters(RobotSide.LEFT, leftStereoCameraName,leftCameraTopic,headLinkName,leftHazardCameraId);
       cameraParamaters[2] = new DRCRobotCameraParameters(RobotSide.RIGHT, rightStereoCameraName,rightCameraTopic,headLinkName,rightHazardCameraId);
 
-      if(runningOnRealRobot)
+      if(target == DRCRobotModel.RobotTarget.REAL_ROBOT)
       {
-         lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(runningOnRealRobot, lidarSensorName, multisense_near_Scan, multisense_height_map,
+         lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(true, lidarSensorName, multisense_near_Scan, multisense_height_map,
                lidarJointName, lidarJointTopic, lidarPoseLink, multisenseHandoffFrame, lidarEndFrameInSdf, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
          cameraParamaters[0] = new DRCRobotCameraParameters(null, multisenseCameraName,left_camera_compressed_topic,headLinkName,left_info_camera_topic,transformFromHeadToCamera, multisenseCameraId);
       }
       else
       {
-         lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(runningOnRealRobot, lidarSensorName, multisense_laser_topic_string, multisense_laser_topic_string,
+         lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(false, lidarSensorName, multisense_laser_topic_string, multisense_laser_topic_string,
                lidarJointName, lidarJointTopic, lidarPoseLink, multisenseHandoffFrame, lidarEndFrameInSdf, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
          cameraParamaters[0] = new DRCRobotCameraParameters(null, multisenseCameraName,left_camera_topic,multisense_camera_frame_name,left_info_camera_topic,transformFromHeadToCamera, multisenseCameraId);
       }
