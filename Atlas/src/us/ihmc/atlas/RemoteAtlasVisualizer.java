@@ -1,6 +1,5 @@
 package us.ihmc.atlas;
 
-import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.GainControllerSliderBoard;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
@@ -79,7 +78,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       
       try
       {
-        AtlasTarget target = config.getBoolean(runningOnRealRobot.getID()) ? AtlasTarget.REAL_ROBOT : AtlasTarget.SIM;
+        DRCRobotModel.RobotTarget target = config.getBoolean(runningOnRealRobot.getID()) ? DRCRobotModel.RobotTarget.REAL_ROBOT : DRCRobotModel.RobotTarget.SCS;
         DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, false);
 
          new RemoteAtlasVisualizer(bufferSize, model);         

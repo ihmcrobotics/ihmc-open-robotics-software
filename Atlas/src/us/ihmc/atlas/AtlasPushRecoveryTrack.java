@@ -21,7 +21,7 @@ import com.martiansoftware.jsap.JSAPException;
 
 public class AtlasPushRecoveryTrack
 {
-   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
    private final static boolean VISUALIZE_FORCE = true;
 
    public static void main(String[] args) throws JSAPException

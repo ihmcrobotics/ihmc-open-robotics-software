@@ -15,7 +15,7 @@ public class AtlasRemoveMultipleDebrisBehaviorTest extends DRCRemoveMultipleDebr
 	
 	public AtlasRemoveMultipleDebrisBehaviorTest() 
 	{
-		robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
+		robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
 		robotModel.getContactPointParameters().createHandContactPoints(false);
 	}
 

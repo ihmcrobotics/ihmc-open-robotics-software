@@ -16,6 +16,7 @@ import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -28,7 +29,7 @@ public class AtlasDrivingInitialSetupTest
    @Test(timeout = 3000)
    public void testLoadFile()
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(version, AtlasRobotModel.AtlasTarget.SIM, false);
+      AtlasRobotModel robotModel = new AtlasRobotModel(version, DRCRobotModel.RobotTarget.SCS, false);
       SDFHumanoidRobot robot = robotModel.createSdfRobot(false);
       DRCRobotJointMap jointMap = new AtlasJointMap(version);
       

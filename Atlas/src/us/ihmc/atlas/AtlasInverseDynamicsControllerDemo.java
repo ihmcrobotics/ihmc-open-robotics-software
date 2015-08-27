@@ -14,7 +14,7 @@ import com.martiansoftware.jsap.JSAPException;
 public class AtlasInverseDynamicsControllerDemo
 {
    private static final double ROBOT_FLOATING_HEIGHT = 0.3;
-   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
    public static void main(String[] args) throws JSAPException
    {
       DRCRobotModel model = null;

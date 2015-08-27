@@ -57,7 +57,7 @@ public class MultisenseHeadOnAStickManualTestNetworkProcessor
 
       try
       {
-         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), AtlasRobotModel.AtlasTarget.HEAD_ON_A_STICK, false);
+         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), DRCRobotModel.RobotTarget.HEAD_ON_A_STICK, false);
       }
       catch (IllegalArgumentException e)
       {

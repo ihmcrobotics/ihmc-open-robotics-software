@@ -2,6 +2,7 @@ package us.ihmc.atlas;
 
 import us.ihmc.atlas.initialSetup.AtlasInitialSetupFromFile;
 import us.ihmc.darpaRoboticsChallenge.DRCSteeringWheelDemo;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -11,7 +12,7 @@ public class AtlasSteeringWorldDemo
    
    public static void main(final String[] args) throws JSAPException
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
       boolean useHighResolutionContactPointGrid = true;
       robotModel.createHandContactPoints(useHighResolutionContactPointGrid);
 

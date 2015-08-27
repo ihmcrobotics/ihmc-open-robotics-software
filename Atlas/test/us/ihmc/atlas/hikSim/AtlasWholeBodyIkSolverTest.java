@@ -17,6 +17,7 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.Robot;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -44,7 +45,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
    @Override
    public WholeBodyIkSolverTestHelper getWholeBodyIkSolverTestHelper()
    {
-      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
+      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
       SDFFullHumanoidRobotModel actualRobotModel = atlasRobotModel.createFullRobotModel();
       wholeBodySolver = new AtlasWholeBodyIK(atlasRobotModel);
 

@@ -3,9 +3,8 @@ package us.ihmc.atlas;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
-import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 
@@ -57,18 +56,18 @@ public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
         }
         try
         {
-           AtlasTarget target;
+           DRCRobotModel.RobotTarget target;
            if(config.getBoolean(runningOnRealRobot.getID()))
            {
-              target = AtlasTarget.REAL_ROBOT;
+              target = DRCRobotModel.RobotTarget.REAL_ROBOT;
            }
            else if(config.getBoolean(runningOnGazebo.getID()))
            {
-             target = AtlasTarget.GAZEBO;
+             target = DRCRobotModel.RobotTarget.GAZEBO;
            }
            else
            {
-              target = AtlasTarget.SIM;
+              target = DRCRobotModel.RobotTarget.SCS;
            }
            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
            if(model.getHandModel()!=null)

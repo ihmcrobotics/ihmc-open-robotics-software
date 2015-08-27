@@ -10,7 +10,7 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 @BambooPlan(planType = {BambooPlanType.Fast})
 public class AtlasWholeBodyTrajectoryPacketTest extends WholeBodyTrajectoryPacketEndToEndTest
 {
-   private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
+   private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
 
    @Override
    public DRCRobotModel getRobotModel() {
