@@ -69,7 +69,7 @@ public class ThePeoplesGloriousNetworkProcessor
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator gfe_communicator, ObjectCommunicator sensorCommunicator,
          DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix) throws IOException
    {
-      this(rosUri, gfe_communicator, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, null, null);
+      this(rosUri, gfe_communicator, sensorCommunicator, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, null, null);
    }
 
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator gfe_communicator, ObjectCommunicator sensorCommunicator,
