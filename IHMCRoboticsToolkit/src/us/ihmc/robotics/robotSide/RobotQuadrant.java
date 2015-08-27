@@ -6,8 +6,8 @@ import us.ihmc.tools.FormattingTools;
 
 public enum RobotQuadrant
 {
-   BACK_LEFT(RobotEnd.BACK, RobotSide.LEFT),
-   BACK_RIGHT(RobotEnd.BACK, RobotSide.RIGHT),
+   HIND_LEFT(RobotEnd.HIND, RobotSide.LEFT),
+   HIND_RIGHT(RobotEnd.HIND, RobotSide.RIGHT),
    FRONT_LEFT(RobotEnd.FRONT, RobotSide.LEFT),
    FRONT_RIGHT(RobotEnd.FRONT, RobotSide.RIGHT);
    
@@ -18,15 +18,15 @@ public enum RobotQuadrant
    
    public static final RobotQuadrant getQuadrant(RobotEnd robotEnd, RobotSide robotSide)
    {
-      if (robotEnd == RobotEnd.BACK)
+      if (robotEnd == RobotEnd.HIND)
       {
          if (robotSide == RobotSide.LEFT)
          {
-            return BACK_LEFT;
+            return HIND_LEFT;
          }
          else
          {
-            return BACK_RIGHT;
+            return HIND_RIGHT;
          }
       }
       else
@@ -44,7 +44,7 @@ public enum RobotQuadrant
    
    public static final RobotQuadrant getDiagonalOppositeQuadrant(RobotQuadrant robotQuadrant)
    {
-      if (robotQuadrant.getEnd() == RobotEnd.BACK)
+      if (robotQuadrant.getEnd() == RobotEnd.HIND)
       {
          if (robotQuadrant.getSide() == RobotSide.LEFT)
          {
@@ -59,26 +59,26 @@ public enum RobotQuadrant
       {
          if (robotQuadrant.getSide() == RobotSide.LEFT)
          {
-            return BACK_RIGHT;
+            return HIND_RIGHT;
          }
          else
          {
-            return BACK_LEFT;
+            return HIND_LEFT;
          }
       }
    }
    
    public static final RobotQuadrant getAcrossBodyQuadrant(RobotQuadrant robotQuadrant)
    {
-      if (robotQuadrant.getEnd() == RobotEnd.BACK)
+      if (robotQuadrant.getEnd() == RobotEnd.HIND)
       {
          if (robotQuadrant.getSide() == RobotSide.LEFT)
          {
-            return BACK_RIGHT;
+            return HIND_RIGHT;
          }
          else
          {
-            return BACK_LEFT;
+            return HIND_LEFT;
          }
       }
       else
@@ -96,7 +96,7 @@ public enum RobotQuadrant
    
    public static final RobotQuadrant getNextRegularGaitSwingQuadrant(RobotQuadrant robotQuadrant)
    {
-      if (robotQuadrant.getEnd() == RobotEnd.BACK)
+      if (robotQuadrant.getEnd() == RobotEnd.HIND)
       {
          if (robotQuadrant.getSide() == RobotSide.LEFT)
          {
@@ -111,11 +111,11 @@ public enum RobotQuadrant
       {
          if (robotQuadrant.getSide() == RobotSide.LEFT)
          {
-            return BACK_RIGHT;
+            return HIND_RIGHT;
          }
          else
          {
-            return BACK_LEFT;
+            return HIND_LEFT;
          }
       }
    }
@@ -138,7 +138,7 @@ public enum RobotQuadrant
    
    public Color getColor()
    {
-      if (end == RobotEnd.BACK)
+      if (end == RobotEnd.HIND)
       {
          if (side == RobotSide.LEFT)
          {
@@ -164,7 +164,7 @@ public enum RobotQuadrant
    
    public Color getColorForWhiteBackground()
    {
-      if (end == RobotEnd.BACK)
+      if (end == RobotEnd.HIND)
       {
          if (side == RobotSide.LEFT)
          {
@@ -190,7 +190,7 @@ public enum RobotQuadrant
    
    public int getBDIQuadrantIndex()
    {
-      if (end == RobotEnd.BACK)
+      if (end == RobotEnd.HIND)
       {
          if (side == RobotSide.LEFT)
          {
@@ -223,9 +223,9 @@ public enum RobotQuadrant
    {
       if (side == RobotSide.RIGHT)
       {
-         if (end == RobotEnd.BACK)
+         if (end == RobotEnd.HIND)
          {
-            return "backRight";
+            return "hindRight";
          }
          else
          {
@@ -234,9 +234,9 @@ public enum RobotQuadrant
       }
       else
       {
-         if (end == RobotEnd.BACK)
+         if (end == RobotEnd.HIND)
          {
-            return "backLeft";
+            return "hindLeft";
          }
          else
          {

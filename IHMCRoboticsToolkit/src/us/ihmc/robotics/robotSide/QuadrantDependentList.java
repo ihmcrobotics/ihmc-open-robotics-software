@@ -19,8 +19,8 @@ public class QuadrantDependentList<V> extends LinkedHashMap<RobotQuadrant, V> im
       super();
       this.put(RobotQuadrant.FRONT_LEFT, frontLeftObject);
       this.put(RobotQuadrant.FRONT_RIGHT, frontRightObject);
-      this.put(RobotQuadrant.BACK_LEFT, backLeftObject);
-      this.put(RobotQuadrant.BACK_RIGHT, backRightObject);
+      this.put(RobotQuadrant.HIND_LEFT, backLeftObject);
+      this.put(RobotQuadrant.HIND_RIGHT, backRightObject);
    }
    
    public V get(RobotQuadrant key)
@@ -60,12 +60,12 @@ public class QuadrantDependentList<V> extends LinkedHashMap<RobotQuadrant, V> im
          if (state == 0)
          {
             ++state;
-            return get(RobotQuadrant.getQuadrant(RobotEnd.BACK, RobotSide.LEFT));
+            return get(RobotQuadrant.getQuadrant(RobotEnd.HIND, RobotSide.LEFT));
          }
          else if (state == 1)
          {
             ++state;
-            return get(RobotQuadrant.getQuadrant(RobotEnd.BACK, RobotSide.RIGHT));
+            return get(RobotQuadrant.getQuadrant(RobotEnd.HIND, RobotSide.RIGHT));
          }
          else if (state == 2)
          {

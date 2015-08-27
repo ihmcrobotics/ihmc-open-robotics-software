@@ -7,7 +7,7 @@ import us.ihmc.tools.FormattingTools;
 
 public enum RobotEnd implements DocumentedEnum<RobotEnd>
 {
-   BACK, FRONT;
+   HIND, FRONT;
 
    public static final RobotEnd[] values = values();
 
@@ -19,16 +19,16 @@ public enum RobotEnd implements DocumentedEnum<RobotEnd>
       }
       else
       {
-         return BACK;
+         return HIND;
       }
    }
 
    public RobotEnd getOppositeEnd()
    {
-      if (this == BACK)
+      if (this == HIND)
          return FRONT;
       else
-         return BACK;
+         return HIND;
    }
 
    public String getShortLowerCaseName()
@@ -43,32 +43,32 @@ public enum RobotEnd implements DocumentedEnum<RobotEnd>
 
    public String getCamelCaseNameForMiddleOfExpression()
    {
-      if (this == BACK)
-         return "Back";
+      if (this == HIND)
+         return "Hind";
       else
          return "Front";
    }
 
    public String getLowerCaseName()
    {
-      if (this == BACK)
-         return "back";
+      if (this == HIND)
+         return "hind";
       else
          return "front";
    }
 
    public String getSideNameInAllCaps()
    {
-      if (this == BACK)
-         return "BACK";
+      if (this == HIND)
+         return "HIND";
       else
          return "FRONT";
    }
 
    public String getEndNameFirstLetter()
    {
-      if (this == BACK)
-         return "B";
+      if (this == HIND)
+         return "H";
       else
          return "F";
    }
@@ -81,9 +81,9 @@ public enum RobotEnd implements DocumentedEnum<RobotEnd>
       return value;
    }
 
-   public double negateIfBackEnd(double value)
+   public double negateIfHindEnd(double value)
    {
-      if (this == BACK)
+      if (this == HIND)
          return -value;
 
       return value;
@@ -97,9 +97,9 @@ public enum RobotEnd implements DocumentedEnum<RobotEnd>
       return value;
    }
 
-   public float negateIfBackEnd(float value)
+   public float negateIfHindEnd(float value)
    {
-      if (this == BACK)
+      if (this == HIND)
          return -value;
 
       return value;
@@ -141,8 +141,8 @@ public enum RobotEnd implements DocumentedEnum<RobotEnd>
    {
       switch (var)
       {
-      case BACK:
-         return "refers to the BACK end of a robot";
+      case HIND:
+         return "refers to the HIND end of a robot";
       case FRONT:
          return "refers to the FRONT end of a robot";
 
