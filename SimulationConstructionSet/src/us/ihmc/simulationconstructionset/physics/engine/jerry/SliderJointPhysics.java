@@ -55,11 +55,15 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
       {
          if (owner.q.getDoubleValue() < owner.q_min)
          {
-            owner.tauJointLimit.set(owner.k_limit * (owner.q_min - owner.q.getDoubleValue()) - owner.b_limit * owner.qd.getDoubleValue());
+            double limitTorque = owner.k_limit * (owner.q_min - owner.q.getDoubleValue()) - owner.b_limit * owner.qd.getDoubleValue();
+            if (limitTorque < 0.0) limitTorque = 0.0;
+            owner.tauJointLimit.set(limitTorque);
          }
          else if (owner.q.getDoubleValue() > owner.q_max)
          {
-            owner.tauJointLimit.set(owner.k_limit * (owner.q_max - owner.q.getDoubleValue()) - owner.b_limit * owner.qd.getDoubleValue());
+            double limitTorque = owner.k_limit * (owner.q_max - owner.q.getDoubleValue()) - owner.b_limit * owner.qd.getDoubleValue();
+            if (limitTorque > 0.0) limitTorque = 0.0;
+            owner.tauJointLimit.set(limitTorque);
          }
          else
          {
