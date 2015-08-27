@@ -36,6 +36,8 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 public interface DRCRobotModel extends WholeBodyControllerParameters
 {
+   enum RobotTarget {SCS, GAZEBO, REAL_ROBOT, HEAD_ON_A_STICK}
+
    // TODO: RobotBoundingBoxes.java
 
 // public abstract boolean isRunningOnRealRobot();

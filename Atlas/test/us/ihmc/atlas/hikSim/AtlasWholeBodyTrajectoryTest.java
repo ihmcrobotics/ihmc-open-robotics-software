@@ -5,6 +5,7 @@ import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooPlanType;
@@ -19,7 +20,7 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
    @Override 
    public WholeBodyTrajectoryTestHelper getWholeBodyTrajectoryTestHelper()
    {
-      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
+      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
 
       SDFFullHumanoidRobotModel actualRobotModel =  atlasRobotModel.createFullRobotModel();
 

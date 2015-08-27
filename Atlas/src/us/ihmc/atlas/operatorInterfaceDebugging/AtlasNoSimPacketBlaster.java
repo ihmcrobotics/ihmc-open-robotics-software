@@ -12,7 +12,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -50,7 +50,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
 
    public AtlasNoSimPacketBlaster() throws IOException
    {
-      atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
+      atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
       fullRobotModel = atlasRobotModel.createFullRobotModel();
       
       initRobotConfiguration();

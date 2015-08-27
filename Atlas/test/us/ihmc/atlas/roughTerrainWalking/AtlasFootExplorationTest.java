@@ -15,7 +15,7 @@ public class AtlasFootExplorationTest extends DRCFootExplorationTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
 
       AtlasContactPointParameters contactPointParameters = (AtlasContactPointParameters) robotModel.getContactPointParameters();
       contactPointParameters.addMoreFootContactPointsSimOnly();

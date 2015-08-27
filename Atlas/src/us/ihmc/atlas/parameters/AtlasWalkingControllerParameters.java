@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.atlas.AtlasJointMap;
-import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
@@ -31,7 +31,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class AtlasWalkingControllerParameters implements WalkingControllerParameters
 {
-   private final AtlasTarget target;
+   private final DRCRobotModel.RobotTarget target;
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
    // Limits
@@ -51,10 +51,10 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public AtlasWalkingControllerParameters(AtlasJointMap jointMap)
    {
-      this(AtlasTarget.SIM, jointMap);
+      this(DRCRobotModel.RobotTarget.SCS, jointMap);
    }
 
-   public AtlasWalkingControllerParameters(AtlasTarget target, AtlasJointMap jointMap)
+   public AtlasWalkingControllerParameters(DRCRobotModel.RobotTarget target, AtlasJointMap jointMap)
    {
       this.target = target;
       this.jointMap = jointMap;
@@ -83,7 +83,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getOmega0()
    {
       // TODO probably need to be tuned.
-//      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+//      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 //      return realRobot ? 3.4 : 3.0; // 3.0 seems more appropriate.
       return 3.0;
    }
@@ -91,7 +91,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getTimeToGetPreparedForLocomotion()
    {
-      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
       return realRobot ? 0.3 : 0.0; // 0.3 seems to be a good starting point
    }
 
@@ -104,7 +104,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public boolean checkTrailingLegJacobianDeterminantToTriggerToeOff()
    {
-      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
       return !realRobot;
    }
 
@@ -162,7 +162,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public boolean allowShrinkingSingleSupportFootPolygon()
    {
-//    return target == AtlasTarget.REAL_ROBOT;
+//    return target == DRCRobotModel.RobotTarget.REAL_ROBOT;
     return false; // Does more bad than good
    }
 
@@ -187,7 +187,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
-      if (target == AtlasTarget.REAL_ROBOT)
+      if (target == DRCRobotModel.RobotTarget.REAL_ROBOT)
          return 0.4;
       else
          return 0.3;
@@ -195,7 +195,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public boolean isNeckPositionControlled()
    {
-      if (target == AtlasTarget.REAL_ROBOT)
+      if (target == DRCRobotModel.RobotTarget.REAL_ROBOT)
          return true;
       else
          return false;
@@ -257,7 +257,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double defaultOffsetHeightAboveAnkle()
    {
-      double defaultOffset = target == AtlasTarget.REAL_ROBOT ? 0.035 : 0.0;
+      double defaultOffset = target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 0.035 : 0.0;
       return defaultOffset;
    }
 
@@ -414,7 +414,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public ICPControlGains getICPControlGains()
    {
       ICPControlGains gains = new ICPControlGains();
-      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kpParallel = realRobot ? 2.5 : 1.5;
       double kpOrthogonal = 1.5;
@@ -443,7 +443,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
    {
       YoPDGains gains = new YoPDGains("CoMHeight", registry);
-      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kp = 40.0;
       double zeta = realRobot ? 0.4 : 0.8;
@@ -469,7 +469,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
    {
       YoPDGains gains = new YoPDGains("PelvisXY", registry);
-      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       gains.setKp(4.0);
       gains.setKd(realRobot ? 0.5 : 1.2);
@@ -481,7 +481,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
-      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kp = 80.0;
       double zeta = realRobot ? 0.5 : 0.8;
@@ -505,7 +505,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public YoOrientationPIDGains createHeadOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
-      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kp = 40.0;
       double zeta = realRobot ? 0.4 : 0.8;
@@ -541,7 +541,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
    {
       YoPDGains gains = new YoPDGains("UnconstrainedJoints", registry);
-      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kp = 80.0;
       double zeta = realRobot ? 0.25 : 0.8;
@@ -561,7 +561,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry)
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
-      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kpXY = 40.0; //80.0;
       double kpZ = 40.0; //80.0;
@@ -583,7 +583,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
-      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kpXY = 150.0;
       double kpZ = 200.0;
@@ -612,7 +612,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public YoSE3PIDGains createHoldPositionFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("HoldFoot", registry);
-      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kpXY = 100.0;
       double kpZ = 0.0;
@@ -642,7 +642,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public YoSE3PIDGains createToeOffFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("ToeOffFoot", registry);
-      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kpXY = 100.0;
       double kpZ = 0.0;
@@ -672,7 +672,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public YoSE3PIDGains createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("EdgeTouchdownFoot", registry);
-      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kp = 0.0;
       double zetaXYZ = 0.0;
@@ -721,7 +721,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getSwingSingularityEscapeMultiplier()
    {
-      return (target == AtlasTarget.REAL_ROBOT) ? 50.0 : 200.0;
+      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 50.0 : 200.0;
    }
 
    @Override
@@ -733,13 +733,13 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getDefaultTransferTime()
    {
-      return (target == AtlasTarget.REAL_ROBOT) ? 0.8 : 0.25;
+      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 0.8 : 0.25;
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return (target == AtlasTarget.REAL_ROBOT) ? 1.2 : 0.60;
+      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 1.2 : 0.60;
    }
 
    /** @inheritDoc */
@@ -848,7 +848,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       switch (target)
       {
-         case SIM :
+         case SCS:
             return -2.0;
 
          default :
@@ -867,7 +867,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
          case GAZEBO :
             return 50.0;
 
-         case SIM :
+         case SCS:
             return 5.0;
 
          default :
@@ -907,7 +907,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public boolean doFancyOnToesControl()
    {
-      return target != AtlasTarget.REAL_ROBOT;
+      return target != DRCRobotModel.RobotTarget.REAL_ROBOT;
    }
 
    @Override

@@ -8,7 +8,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 import com.martiansoftware.jsap.FlaggedOption;
@@ -29,10 +28,10 @@ public class AtlasRobotModelFactory
    
    public static AtlasRobotModel createDefaultRobotModel()
    {
-      return createDRCRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ.toString(), AtlasRobotModel.AtlasTarget.SIM, false);
+      return createDRCRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ.toString(), DRCRobotModel.RobotTarget.SCS, false);
    }
 
-   public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, AtlasTarget runningOnRealRobot, boolean headless)
+   public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, DRCRobotModel.RobotTarget runningOnRealRobot, boolean headless)
    {
       robotModelAsString = robotModelAsString.toUpperCase().trim();
       try
@@ -75,7 +74,7 @@ public class AtlasRobotModelFactory
    
    public static AtlasRobotModel selectModelFromGraphicSelector()
    {
-      return selectModelFromGraphicSelector(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false));
+      return selectModelFromGraphicSelector(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false));
    }
 
    public static AtlasRobotModel selectModelFromGraphicSelector(DRCRobotModel defaultOption)
@@ -104,7 +103,7 @@ public class AtlasRobotModelFactory
       else if (selectedOption == JOptionPane.OK_OPTION)
       {
          String groundTypeString = robotTypeComboBox.getSelectedItem().toString();
-         AtlasRobotModel model = createDRCRobotModel(groundTypeString, AtlasRobotModel.AtlasTarget.SIM, false);
+         AtlasRobotModel model = createDRCRobotModel(groundTypeString, DRCRobotModel.RobotTarget.SCS, false);
          return model;
       }
       else
@@ -126,7 +125,7 @@ public class AtlasRobotModelFactory
          JSAPResult config = jsap.parse(args);
 
          if (config.success())
-            return createDRCRobotModel(config.getString("robotModel"), AtlasTarget.SIM, false);
+            return createDRCRobotModel(config.getString("robotModel"), DRCRobotModel.RobotTarget.SCS, false);
       }
       catch (JSAPException e)
       {

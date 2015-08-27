@@ -3,6 +3,7 @@ package us.ihmc.atlas.gazebo;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.gazebo.GazeboControllerFactory;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ public class AtlasGazeboControllerFactory
 {
    public static void main(String[] args) throws IOException, URISyntaxException
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.GAZEBO, false);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.GAZEBO, false);
 
       AtlasContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
 

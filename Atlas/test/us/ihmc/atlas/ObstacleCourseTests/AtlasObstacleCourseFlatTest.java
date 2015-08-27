@@ -15,7 +15,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 @BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.VideoA})
 public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
-   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
    
    @Override
    public DRCRobotModel getRobotModel()

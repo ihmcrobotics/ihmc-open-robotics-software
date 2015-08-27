@@ -3,9 +3,9 @@ package us.ihmc.atlas.hikSim;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-//import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+//import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 //import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIKSimController;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
@@ -84,7 +84,7 @@ public class AtlasWholeBodyIKSimulation
 
    public static void main(String[] args) throws Exception
    {
-      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
+      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
       new AtlasWholeBodyIKSimulation(atlasRobotModel);
    }
 }

@@ -12,9 +12,8 @@ import org.apache.tools.zip.ZipFile;
 
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
-import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -174,7 +173,7 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
    public static void main(String[] args)
    {
 	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
-	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasTarget.SIM, false);
+	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, DRCRobotModel.RobotTarget.SCS, false);
 	  
       AtlasWristLoopKinematicCalibrator calib = new AtlasWristLoopKinematicCalibrator(robotModel);
       calib.loadData("data/manip_motions/log4.zip");

@@ -9,12 +9,11 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LimbName;
-import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.WholeBodyIKIngressEgressControllerSimulation;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -61,7 +60,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
 
    public AtlasWholeBodyIKIngressEgressCtrlSim() throws Exception
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
+      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
       this.desiredFullRobotModel = robotModel.createFullRobotModel();
       this.hikIngEgCtrlSim = new WholeBodyIKIngressEgressControllerSimulation(robotModel);
       this.registry = hikIngEgCtrlSim.getSimulationConstructionSet().getRootRegistry();

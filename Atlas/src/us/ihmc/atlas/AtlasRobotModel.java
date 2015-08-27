@@ -74,11 +74,9 @@ import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 public class AtlasRobotModel implements DRCRobotModel
 {
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
-
-   public enum AtlasTarget {SIM, GAZEBO, REAL_ROBOT, HEAD_ON_A_STICK}
-
+   
    private final AtlasRobotVersion selectedVersion;
-   private final AtlasTarget target;
+   private final DRCRobotModel.RobotTarget target;
 
    private static final long ESTIMATOR_DT_IN_NS = 1000000;
    private static final double ESTIMATOR_DT = TimeTools.nanoSecondstoSeconds(ESTIMATOR_DT_IN_NS);
@@ -124,7 +122,7 @@ public class AtlasRobotModel implements DRCRobotModel
       return null;
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, AtlasTarget target, boolean headless)
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless)
    {
       selectedVersion = atlasVersion;
       jointMap = new AtlasJointMap(selectedVersion);
@@ -146,7 +144,7 @@ public class AtlasRobotModel implements DRCRobotModel
          loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, new RigidBodyTransform());
       }
 
-      boolean runningOnRealRobot = target == AtlasTarget.REAL_ROBOT;
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
       capturePointPlannerParameters = new AtlasCapturePointPlannerParameters(runningOnRealRobot);
       sensorInformation = new AtlasSensorInformation(target);
       armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot, selectedVersion.getDistanceAttachmentPlateHand());
@@ -358,12 +356,12 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
    {
-      if (target == AtlasTarget.REAL_ROBOT)
+      if (target == DRCRobotModel.RobotTarget.REAL_ROBOT)
       {
          return AtlasPPSTimestampOffsetProvider.getInstance(sensorInformation);
       }
 
-      if ((target == AtlasTarget.SIM) && DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
+      if ((target == DRCRobotModel.RobotTarget.SCS) && DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
       {
          return new SimulationRosClockPPSTimestampOffsetProvider();
       }
@@ -387,7 +385,7 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public SideDependentList<HandCommandManager> createHandCommandManager()
    {
-      if (target == AtlasTarget.REAL_ROBOT)
+      if (target == DRCRobotModel.RobotTarget.REAL_ROBOT)
       {
          SideDependentList<HandCommandManager> handCommandManagers = new SideDependentList<HandCommandManager>();
          switch (selectedVersion)
@@ -475,7 +473,7 @@ public class AtlasRobotModel implements DRCRobotModel
          }
 
       case GAZEBO :
-      case SIM :
+      case SCS:
       default :
          return LogSettings.SIMULATION;
       }

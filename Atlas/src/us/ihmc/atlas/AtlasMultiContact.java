@@ -8,7 +8,7 @@ import java.util.Map;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.atlas.initialSetup.MultiContactDRCRobotInitialSetup;
 import us.ihmc.atlas.initialSetup.PushUpDRCRobotInitialSetup;
 import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
@@ -188,7 +188,7 @@ public class AtlasMultiContact
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, true);
 
-      new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasTarget.SIM, false), guiInitialSetup, MultiContactTask.DEFAULT);
+      new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, DRCRobotModel.RobotTarget.SCS, false), guiInitialSetup, MultiContactTask.DEFAULT);
    }
 
 }

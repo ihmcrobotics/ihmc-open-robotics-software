@@ -9,7 +9,7 @@ import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 
@@ -18,7 +18,7 @@ public class AtlasModelBundleGenerator
 {
    public static void main(String[] args) throws IOException
    {
-      AtlasRobotModel model = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasTarget.REAL_ROBOT, false);
+      AtlasRobotModel model = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.REAL_ROBOT, false);
       LogModelProvider logModelProvider = model.getLogModelProvider();
       Properties properties = new Properties();
       properties.setProperty("modelName", logModelProvider.getModelName());

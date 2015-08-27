@@ -26,7 +26,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       BambooTools.reportTestStartedMessage();
 
       String runName = "AtlasFlatGroundWalkingTest";
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
 
       boolean doPelvisYawWarmup = true;
       setupAndTestFlatGroundSimulationTrack(robotModel, runName, doPelvisYawWarmup);
@@ -41,7 +41,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
          Assume.assumeTrue(BambooTools.isNightlyBuild());
          BambooTools.reportTestStartedMessage();
 
-         robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+         robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
 
          setupAndTestFlatGroundSimulationTrackTwice(robotModel);
       }

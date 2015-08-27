@@ -43,11 +43,11 @@ public class AtlasFinalsROSAPISimulator extends ROSAPISimulator
       {
          if (opt.robotModel.equals(DEFAULT_STRING))
          {
-            robotModel = AtlasRobotModelFactory.createDRCRobotModel(DEFAULT_ROBOT_MODEL, AtlasRobotModel.AtlasTarget.SIM, false);
+            robotModel = AtlasRobotModelFactory.createDRCRobotModel(DEFAULT_ROBOT_MODEL, DRCRobotModel.RobotTarget.SCS, false);
          }
          else
          {
-            robotModel = AtlasRobotModelFactory.createDRCRobotModel(opt.robotModel, AtlasRobotModel.AtlasTarget.SIM, false);
+            robotModel = AtlasRobotModelFactory.createDRCRobotModel(opt.robotModel, DRCRobotModel.RobotTarget.SCS, false);
          }
       }
       catch (IllegalArgumentException e)

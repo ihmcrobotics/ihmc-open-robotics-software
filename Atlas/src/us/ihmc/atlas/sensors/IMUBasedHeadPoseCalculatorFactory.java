@@ -7,7 +7,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import multisense_ros.RawImuData;
-import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -42,7 +42,7 @@ public class IMUBasedHeadPoseCalculatorFactory
 		boolean USE_REAL_ROBOT_TRANSFORM=true;
 		if(USE_REAL_ROBOT_TRANSFORM)
 		{
-			calculator.setHeadIMUFrameWhenLevel(AtlasSensorInformation.getHeadIMUFramesWhenLevel().get(AtlasTarget.REAL_ROBOT));
+			calculator.setHeadIMUFrameWhenLevel(AtlasSensorInformation.getHeadIMUFramesWhenLevel().get(DRCRobotModel.RobotTarget.REAL_ROBOT));
 		}
 		return calculator;
 	}

@@ -19,7 +19,7 @@ public class AtlasDemo03 extends DRCDemo03
 
    public static void main(String[] args) throws JSAPException
    {
-      DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+      DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS, DRCRobotModel.RobotTarget.SCS, false);
 
       DRCRobotModel model = null;
       model = AtlasRobotModelFactory.selectSimulationModelFromFlag(args);

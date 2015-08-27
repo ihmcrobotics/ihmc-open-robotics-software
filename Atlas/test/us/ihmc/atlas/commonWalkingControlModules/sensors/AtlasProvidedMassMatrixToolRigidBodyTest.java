@@ -9,6 +9,7 @@ import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
 import us.ihmc.atlas.parameters.AtlasDefaultArmConfigurations;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBodyTest;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
 
@@ -21,7 +22,7 @@ public class AtlasProvidedMassMatrixToolRigidBodyTest extends ProvidedMassMatrix
    @Override
    public FullHumanoidRobotModel getFullRobotModel()
    {
-      SDFFullHumanoidRobotModel fullRobotModel = new AtlasRobotModel(version, AtlasRobotModel.AtlasTarget.SIM, false).createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = new AtlasRobotModel(version, DRCRobotModel.RobotTarget.SCS, false).createFullRobotModel();
       
       fullRobotModel.setJointAngles(side, LimbName.ARM, config.getArmDefaultConfigurationJointAngles(ArmConfigurations.HOME, side));
       fullRobotModel.updateFrames();
