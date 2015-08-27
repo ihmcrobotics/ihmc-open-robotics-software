@@ -9,6 +9,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
@@ -38,7 +39,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private final SDFFullRobotModelFactory fullRobotModelFactory;
 
    public ValkyrieSensorSuiteManager(SDFFullRobotModelFactory fullRobotModelFactory, DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider,
-         DRCRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap, boolean runningOnRealRobot)
+         DRCRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap, DRCRobotModel.RobotTarget target)
    {
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.fullRobotModelFactory = fullRobotModelFactory;

@@ -26,7 +26,7 @@ public class ValkyriePushRecoveryTrack
    
    public static void main(String[] args) throws JSAPException
    {
-      DRCRobotModel model = new ValkyrieRobotModel(false, false);
+      DRCRobotModel model = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
       final double groundHeight = 0.0;
 
       GroundProfile3D groundProfile = new FlatGroundProfile(groundHeight);

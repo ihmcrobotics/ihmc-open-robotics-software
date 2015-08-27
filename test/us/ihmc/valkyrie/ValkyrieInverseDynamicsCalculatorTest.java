@@ -9,7 +9,7 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 @BambooPlan(planType = {BambooPlanType.Exclude})
 public class ValkyrieInverseDynamicsCalculatorTest extends DRCInverseDynamicsCalculatorTest
 {
-   private final DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
    
    @Override
    public DRCRobotModel getRobotModel()

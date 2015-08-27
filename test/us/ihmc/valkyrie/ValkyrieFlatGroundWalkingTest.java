@@ -25,7 +25,7 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       BambooTools.reportTestStartedMessage();
 
       String runName = "ValkyrieFlatGroundWalkingTest";
-      robotModel = new ValkyrieRobotModel(false, false);
+      robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
 
       boolean doPelvisYawWarmup = true;
       setupAndTestFlatGroundSimulationTrack(robotModel, runName, doPelvisYawWarmup);

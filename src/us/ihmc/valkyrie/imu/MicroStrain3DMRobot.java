@@ -6,6 +6,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -117,7 +118,7 @@ public class MicroStrain3DMRobot extends Robot
    
    public static void main(String[] args) throws IOException
    {
-      ValkyrieSensorInformation sensorInformation = new ValkyrieSensorInformation(true);
+      ValkyrieSensorInformation sensorInformation = new ValkyrieSensorInformation(DRCRobotModel.RobotTarget.REAL_ROBOT);
       final MicrostrainUDPPacketListener listener = MicrostrainUDPPacketListener.createNonRealtimeListener(sensorInformation.getImuUSBSerialIds().get("v1Pelvis_LeftIMU"));
       
       final MicroStrain3DMRobot robot = new MicroStrain3DMRobot();

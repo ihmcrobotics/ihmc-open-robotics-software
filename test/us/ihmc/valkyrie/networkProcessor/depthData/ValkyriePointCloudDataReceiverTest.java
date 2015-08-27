@@ -10,7 +10,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 @BambooPlan(planType = BambooPlanType.Exclude)
 public class ValkyriePointCloudDataReceiverTest extends PointCloudDataReceiverTest
 {
-   private final DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
 
    @Override
    public DRCRobotModel getRobotModel()

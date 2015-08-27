@@ -12,7 +12,7 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
 
 public class ValkyrieObstacleCourseEveryBuildTest extends DRCObstacleCourseEveryBuildTest
 {
-   private final DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
    @Override
    public DRCRobotModel getRobotModel()
    {

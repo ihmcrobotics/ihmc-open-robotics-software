@@ -15,7 +15,7 @@ public class ValkyriePosePlaybackSCSBridge
 
    public static void main(String[] args) throws IOException
    {
-      DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
+      DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
       
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);

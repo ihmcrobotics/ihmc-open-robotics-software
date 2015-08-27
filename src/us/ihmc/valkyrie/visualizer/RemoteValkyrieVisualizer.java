@@ -7,6 +7,7 @@ import javax.swing.JButton;
 
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizerStateListener;
@@ -30,7 +31,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
 
       String host = NetworkParameters.getHost(NetworkParameterKeys.logger);
       System.out.println("Connecting to host " + host);
-      valkyrieRobotModel = new ValkyrieRobotModel(true, false);
+      valkyrieRobotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.GAZEBO, false);
 
       SCSVisualizer scsVisualizer = new SCSVisualizer(BUFFER_SIZE);
       scsVisualizer.addSCSVisualizerStateListener(this);
@@ -78,7 +79,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       scs.addButton(showControlModePanel);
 
       // TODO The sliderboard throws an NPE when scrubbing, at least in Sim. If this is okay on the real robot then feel free to uncomment. -- Doug
-      new ValkyrieSliderBoard(scs, registry, valkyrieRobotModel, valkyrieSliderBoardType);
+//      new ValkyrieSliderBoard(scs, registry, valkyrieRobotModel, valkyrieSliderBoardType);
    }
    
    public static void main(String[] args)

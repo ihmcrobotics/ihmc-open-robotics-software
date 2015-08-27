@@ -10,6 +10,6 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
 {
    protected DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(false, false);
+      return new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
    }
 }
