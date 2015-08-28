@@ -146,7 +146,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
       capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(runningOnRealRobot);
       armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
-      walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, runningOnRealRobot);
+      walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, target);
       stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
    }
    
