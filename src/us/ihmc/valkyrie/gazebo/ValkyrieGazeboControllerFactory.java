@@ -16,7 +16,7 @@ public class ValkyrieGazeboControllerFactory
 {
    public static void main(String[] args) throws IOException, URISyntaxException
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.GAZEBO, false);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.GAZEBO, true);
 
       new GazeboControllerFactory(robotModel, "/ihmc_ros", "valkyrie", "NONE");
    }
