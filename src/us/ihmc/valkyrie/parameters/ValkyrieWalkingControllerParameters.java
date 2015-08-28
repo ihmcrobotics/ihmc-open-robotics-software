@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientation
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
@@ -26,7 +27,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ValkyrieWalkingControllerParameters implements WalkingControllerParameters
 {
-   private final boolean runningOnRealRobot;
+   private final DRCRobotModel.RobotTarget target;
 
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
@@ -42,13 +43,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public ValkyrieWalkingControllerParameters(DRCRobotJointMap jointMap)
    {
-      this(jointMap, false);
+      this(jointMap, DRCRobotModel.RobotTarget.SCS);
    }
 
-   public ValkyrieWalkingControllerParameters(DRCRobotJointMap jointMap, boolean runningOnRealRobot)
+   public ValkyrieWalkingControllerParameters(DRCRobotJointMap jointMap, DRCRobotModel.RobotTarget target)
    {
       this.jointMap = jointMap;
-      this.runningOnRealRobot = runningOnRealRobot;
+      this.target = target;
 
       // Genreated using ValkyrieFullRobotModelVisualizer
       RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
@@ -89,7 +90,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getOmega0()
    {
       // TODO probably need to be tuned.
-      return runningOnRealRobot ? 3.4 : 3.3; // 3.3 seems more appropriate.
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 3.4 : 3.3; // 3.3 seems more appropriate.
    }
 
    @Override
@@ -107,7 +108,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public boolean doToeOffIfPossible()
    {
-      return !runningOnRealRobot;
+      return !(target == DRCRobotModel.RobotTarget.REAL_ROBOT);
    }
 
    @Override
@@ -200,7 +201,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public boolean isNeckPositionControlled()
    {
-      return runningOnRealRobot;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -357,7 +358,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getMaxStepLength()
    {
-      if (!runningOnRealRobot)
+      if (target == DRCRobotModel.RobotTarget.SCS)
          return 0.6; // 0.5; //0.35;
 
       return 0.4;
@@ -372,7 +373,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getMinStepWidth()
    {
-      return runningOnRealRobot ? 0.165 : 0.15;
+      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 0.165 : 0.15;
    }
 
    @Override
@@ -434,6 +435,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       ICPControlGains gains = new ICPControlGains();
 
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
       double kpOrthogonal = runningOnRealRobot ? 1.9 : 1.5;
       double kpParallel = runningOnRealRobot ? 2.0 : 1.5;
       double ki = runningOnRealRobot ? 0.0 : 0.0;
@@ -460,6 +463,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoPDGains gains = new YoPDGains("CoMHeight", registry);
 
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
       double kp = runningOnRealRobot ? 40.0 : 50.0;
       double zeta = runningOnRealRobot ? 0.4 : 1.0;
       double maxAcceleration = 0.5 * 9.81;
@@ -485,6 +490,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoPDGains gains = new YoPDGains("PelvisXY", registry);
 
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
       gains.setKp(4.0);
       gains.setKd(runningOnRealRobot ? 0.5 : 1.2);
 
@@ -495,6 +502,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("PelvisOrientation", registry);
+
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kpXY = runningOnRealRobot ? 160.0 : 100.0; // 120.0
       double kpZ = runningOnRealRobot ? 120.0 : 100.0; // 120.0
@@ -516,6 +525,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public YoOrientationPIDGains createHeadOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
+
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kp = 6.5;//40.0;
       double zeta = runningOnRealRobot ? 0.4 : 0.8;
@@ -552,6 +563,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoPDGains gains = new YoPDGains("UnconstrainedJoints", registry);
 
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
       double kp = runningOnRealRobot ? 80.0 : 100.0;
       double zeta = runningOnRealRobot ? 0.6 : 0.8;
       double maxAcceleration = runningOnRealRobot ? 18.0 : 18.0;
@@ -570,6 +583,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry)
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
+
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kpXY = runningOnRealRobot ? 80.0 : 100.0; // 60.0
       double kpZ = runningOnRealRobot ? 40.0 : 100.0; // 60.0
@@ -591,6 +606,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
+
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kpXY = 100.0; // 150.0
       double kpZ = runningOnRealRobot ? 200.0 : 200.0;
@@ -620,6 +637,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("HoldFoot", registry);
 
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
       double kpXY = 40.0;
       double kpZ = 0.0;
       double zetaXYZ = runningOnRealRobot ? 0.7 : 1.0;
@@ -647,6 +666,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("ToeOffFoot", registry);
 
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
       double kpXY = 40.0;
       double kpZ = 0.0;
       double zetaXYZ = runningOnRealRobot ? 0.7 : 0.4;
@@ -673,6 +694,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public YoSE3PIDGains createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("EdgeTouchdownFoot", registry);
+
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kp = 0.0;
       double zetaXYZ = runningOnRealRobot ? 0.0 : 0.0;
@@ -710,7 +733,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getSwingSingularityEscapeMultiplier()
    {
-      return -(runningOnRealRobot ? 30.0 : 200.0); // negative as knee axis are -y direction
+      return -(target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 30.0 : 200.0); // negative as knee axis are -y direction
    }
 
    @Override
@@ -722,13 +745,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getDefaultTransferTime()
    {
-      return runningOnRealRobot ? 2.0 : 0.25;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 2.0 : 0.25;
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return runningOnRealRobot ? 1.5 : 0.60;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 1.5 : 0.60;
    }
 
    /** @inheritDoc */
@@ -833,13 +856,27 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getDesiredTouchdownAcceleration()
    {
-      return 0;
+      if(target == DRCRobotModel.RobotTarget.GAZEBO)
+      {
+         return -1.0;
+      }
+      else
+      {
+         return 0.0;
+      }
    }
 
    @Override
    public double getContactThresholdForce()
    {
-      return runningOnRealRobot ? 50.0 : 5.0;
+      switch(target)
+      {
+      case REAL_ROBOT:
+      case GAZEBO:
+         return 50.0;
+      default:
+         return 5.0;
+      }
    }
 
    @Override
@@ -906,7 +943,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public boolean doFancyOnToesControl()
    {
-      return !runningOnRealRobot;
+      return !(target == DRCRobotModel.RobotTarget.REAL_ROBOT);
    }
 
    @Override
