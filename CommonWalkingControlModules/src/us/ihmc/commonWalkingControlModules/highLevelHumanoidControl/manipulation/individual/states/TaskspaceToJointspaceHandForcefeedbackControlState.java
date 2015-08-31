@@ -91,7 +91,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	private Point3d circularTrajectoryOrigin;
 	private final IntegerYoVariable trajectoryNumber;
 
-	//MPC
+	//MBC
 	private final DoubleYoVariable scaledTimeVariable;
 	private final DoubleYoVariable timeParameterScaleFactor;
 	private final static double MAX_TIME_SCALE = 0.5;
@@ -161,7 +161,6 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		{
 			doIntegrateDesiredAccelerations[i] = oneDoFJoints[i].getIntegrateDesiredAccelerations();
 		}
-
 
 		/**
 		 * Position Control on real robot.
