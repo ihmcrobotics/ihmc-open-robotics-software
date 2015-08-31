@@ -7,10 +7,10 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasGraspPieceOfDebrisBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasTurnValveBehaviorTest.class
 })
 
-public class AtlasCInDevelopmentTestSuite
+public class AtlasJSlowTestSuite
 {
    public static void main(String[] args)
    {

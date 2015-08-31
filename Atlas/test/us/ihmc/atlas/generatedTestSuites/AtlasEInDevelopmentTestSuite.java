@@ -8,8 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.atlas.behaviorTests.AtlasHighLevelStateBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasPushButtonBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasRemoveMultipleDebrisBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasPushButtonBehaviorTest.class
 })
 
 public class AtlasEInDevelopmentTestSuite

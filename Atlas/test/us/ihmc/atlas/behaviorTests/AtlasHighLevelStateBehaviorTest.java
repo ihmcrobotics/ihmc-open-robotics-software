@@ -1,15 +1,19 @@
 package us.ihmc.atlas.behaviorTests;
 
+import org.junit.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCHighLevelStateBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment})
+@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
 public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -18,7 +22,6 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
    }
-   
    
    @Override
    public DRCRobotModel getRobotModel()
@@ -32,4 +35,21 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Override
+   @EstimatedDuration(duration = 21.5)
+   @Test(timeout = 64580)
+   public void testDoNothingBehavior() throws SimulationExceededMaximumTimeException
+   {
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
+      super.testDoNothingBehavior();
+   }
+   
+   @Override
+   @EstimatedDuration(duration = 21.5)
+   @Test(timeout = 64580)
+   public void testRandomState() throws SimulationExceededMaximumTimeException
+   {
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      super.testRandomState();
+   }
 }

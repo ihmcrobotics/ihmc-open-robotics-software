@@ -4,6 +4,8 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import org.junit.Test;
+
 import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
@@ -11,12 +13,14 @@ import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseWholeBodyTrajectoryTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment})
+@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
 public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCourseWholeBodyTrajectoryTest
 {
    private final DRCRobotModel robotModel = AtlasRobotModelFactory.createDefaultRobotModel();
@@ -32,6 +36,42 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
    public String getSimpleRobotName()
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+   }
+   
+   @Override
+   @EstimatedDuration(duration = 38.0)
+   @Test(timeout = 124050)
+   public void testArmMovementsWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
+   {
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      super.testArmMovementsWithTrajectoryPacket();
+   }
+   
+   @Override
+   @EstimatedDuration(duration = 38.0)
+   @Test(timeout = 124050)
+   public void testChestControlWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
+   {
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
+      super.testChestControlWithTrajectoryPacket();
+   }
+   
+   @Override
+   @EstimatedDuration(duration = 50.0)
+   @Test(timeout = 300000)
+   public void testForMemoryLeaks() throws Exception
+   {
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      super.testForMemoryLeaks();
+   }
+   
+   @Override
+   @EstimatedDuration(duration = 14.9)
+   @Test(timeout = 54656)
+   public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
+   {
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
+      super.testStandingForACoupleSeconds();
    }
 
    private double[] ensureJointAnglesSize(double[] desiredJointAngles)
