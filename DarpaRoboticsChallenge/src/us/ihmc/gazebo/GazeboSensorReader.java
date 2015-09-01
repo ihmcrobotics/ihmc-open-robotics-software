@@ -45,8 +45,12 @@ public class GazeboSensorReader implements SensorReader
    private final List<OneDoFJoint> jointList;
    private final ArrayList<ForceSensorDefinition> forceSensorDefinitions;
 
+   /*
+    * Gazebo reports IMU orientations as relative values to their starting value as defined
+    * in the model's tree, so we need to store this value to tack on to all reported rotations.
+    */
+   private final Quat4d imuToParentLinkRotationOffset;
    private final IMUDefinition imu;
-   private final Quat4d additionalFixedRotation;
 
    private SocketChannel channel;
 
@@ -75,8 +79,8 @@ public class GazeboSensorReader implements SensorReader
       });;
       this.imu = stateEstimatorSensorDefinitions.getIMUSensorDefinitions().get(0);
 
-      additionalFixedRotation = new Quat4d();
-      imu.getIMUFrame().getTransformToDesiredFrame(imu.getRigidBody().getBodyFixedFrame()).get(additionalFixedRotation);
+      imuToParentLinkRotationOffset = new Quat4d();
+      imu.getIMUFrame().getTransformToDesiredFrame(imu.getRigidBody().getBodyFixedFrame()).get(imuToParentLinkRotationOffset);
 
       jointDataLength = jointList.size() * 8 * 2;
       imuDataLength = 10 * 8;
@@ -159,7 +163,7 @@ public class GazeboSensorReader implements SensorReader
          orientation.setY(data.getDouble());
          orientation.setZ(data.getDouble());
 
-         orientation.mul(additionalFixedRotation, orientation);
+         orientation.mul(imuToParentLinkRotationOffset, orientation);
 
          angularVelocity.setX(data.getDouble());
          angularVelocity.setY(data.getDouble());
