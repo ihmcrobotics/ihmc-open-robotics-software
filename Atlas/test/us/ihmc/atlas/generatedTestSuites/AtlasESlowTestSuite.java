@@ -7,7 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasHandPoseBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasHandLoadBearingBehaviorTest.class
 })
 
 public class AtlasESlowTestSuite
