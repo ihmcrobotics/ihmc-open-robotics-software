@@ -25,8 +25,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 public class StepprState extends AcsellState<StepprActuator, StepprJoint>
 {
-   private static final int[] leftFootForceSensorsToUse = { 1, 1, 2, 3 }; //leftMost sensor0 is broken
-   private static final int[] rightFootForceSensorsToUse = { 0, 1, 2, 2 }; //rightMost sensor3 is broken
+   private static final int[] leftFootForceSensorsToUse = { 0, 1, 2, 3 }; //leftMost sensor0 is broken
+   private static final int[] rightFootForceSensorsToUse = { 0, 1, 2, 3 }; //rightMost sensor3 is broken
    private static final boolean USE_STRAIN_GAUGES_FOR_Z_FORCE = false;
    
    private final StepprUpperBodyOffsetCalculator stepprUpperBodyOffsetCalculator;

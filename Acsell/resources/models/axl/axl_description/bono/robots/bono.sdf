@@ -206,8 +206,21 @@
     </joint>
     <link name='utorso'>
       <pose>0.018243 0.0 0.188773 0.0 0.0 0.0</pose>
+<!-- Wanderer Style Torso -->
+      <inertial>
+        <pose> 0.004656 0.003641 0.392397 0 -0 0</pose>
+        <mass>26.260992</mass>
+        <inertia>
+          <ixx> 0.516466</ixx>
+          <ixy> 0.003142</ixy>
+          <ixz>-0.004028</ixz>
+          <iyy> 0.235936</iyy>
+          <iyz>-0.003012</iyz>
+          <izz> 0.405404</izz>
+        </inertia>
+      </inertial>
 <!-- Inertial pose with mass shifted by 0.02 in Y -->
-<!-- With dummy mass  original sdf said 18.9 added 2.2kg to accomodate full robot mass -->
+<!-- With dummy mass  original sdf said 18.9 added 2.2kg to accomodate full robot mass
        <inertial>
         <pose>-0.0195224 0.020144025 0.313439 0 -0 0</pose>
         <mass>21.14268</mass>
@@ -220,6 +233,7 @@
           <izz> 0.190387</izz>
         </inertia>
       </inertial>
+ -->
 <!-- without dummy mass original sdf said 7.00027 added 2.2kg to accomodate full robot mass
       <inertial>
         <pose>-0.02033 0.00039 0.35741 0 -0 0</pose>

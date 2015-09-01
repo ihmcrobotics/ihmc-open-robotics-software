@@ -316,14 +316,16 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
         yoAngleSpring.get(joint).set(q);
         leftAnkleSpringCalculator.update(q);
         return (USE_LEFT_ANKLE_SPRING && (currentWalkingState != WalkingState.RIGHT_SUPPORT)) ? 
-        		leftAnkleSpringCalculator.getSpringForce() : 0.0;
+              leftAnkleSpringCalculator.getSpringForce() : 
+              leftAnkleSpringCalculator.getSpringForce()*0.75;
       }
       case RIGHT_ANKLE_Y:
       {
         yoAngleSpring.get(joint).set(q);
         rightAnkleSpringCalculator.update(q);
         return (USE_RIGHT_ANKLE_SPRING && (currentWalkingState != WalkingState.LEFT_SUPPORT)) ?
-        		rightAnkleSpringCalculator.getSpringForce() : 0.0;
+              rightAnkleSpringCalculator.getSpringForce() :
+              rightAnkleSpringCalculator.getSpringForce()*0.75;
       }
       default:
          return 0.0;

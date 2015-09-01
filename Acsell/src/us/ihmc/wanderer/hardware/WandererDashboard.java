@@ -39,6 +39,7 @@ public class WandererDashboard extends JPanel implements PlaybackListener
    private final EnumMap<WandererActuator, YoVariable<?>> motorTemperatures = new EnumMap<>(WandererActuator.class);
    private final EnumMap<WandererActuator, YoVariable<?>> mcbTemperatures1 = new EnumMap<>(WandererActuator.class);
    private final EnumMap<WandererActuator, YoVariable<?>> mcbTemperatures2 = new EnumMap<>(WandererActuator.class);
+   private final EnumMap<WandererActuator, YoVariable<?>> consecutivePacketDropCount = new EnumMap<>(WandererActuator.class);
    private final EnumMap<WandererActuator, YoVariable<?>> motorEncoders = new EnumMap<>(WandererActuator.class);
    
 
@@ -243,12 +244,13 @@ public class WandererDashboard extends JPanel implements PlaybackListener
 
    private void createTable(YoVariableHolder yoVariableHolder)
    {
-      DefaultTableModel tableModel = new DefaultTableModel(new String[] { "Actuator", "Motor Temperature", "MCB Temperature 0", "MCB Temperture 1", "Motor angle" }, WandererActuator.values.length);
+      DefaultTableModel tableModel = new DefaultTableModel(new String[] { "Actuator", "Motor Temperature", "MCB Temperature 0", "MCB Temperture 1", "Packet Drops", "Motor angle" }, WandererActuator.values.length);
       table = new JTable(tableModel);
       table.setFillsViewportHeight(true);
       table.getColumn("Motor Temperature").setCellRenderer(new WarningRenderer());
       table.getColumn("MCB Temperature 0").setCellRenderer(new WarningRenderer(80.0));
       table.getColumn("MCB Temperture 1").setCellRenderer(new WarningRenderer(80.0));
+      table.getColumn("Packet Drops").setCellRenderer(new WarningRenderer(100.0));
 
       int row = 0, col = 0;
       for (WandererActuator actuator : WandererActuator.values)
@@ -257,6 +259,7 @@ public class WandererDashboard extends JPanel implements PlaybackListener
          motorTemperatures.put(actuator, yoVariableHolder.getVariable(actuator.getName() + ".SlowSensors", actuator.getName() + "MotorTemperature"));
          mcbTemperatures1.put(actuator, yoVariableHolder.getVariable(actuator.getName() + ".SlowSensors", actuator.getName() + "MCBTemperature1"));
          mcbTemperatures2.put(actuator, yoVariableHolder.getVariable(actuator.getName() + ".SlowSensors", actuator.getName() + "MCBTemperature2"));
+         consecutivePacketDropCount.put(actuator, yoVariableHolder.getVariable(actuator.getName(), actuator.getName() + "ConsecutivePacketDropCount"));
 
          table.setValueAt(actuator.getName(), row, col);
 
@@ -270,6 +273,10 @@ public class WandererDashboard extends JPanel implements PlaybackListener
 
          col++;
 
+         table.setValueAt(Double.NaN, row, col);
+
+         col++;
+         
          table.setValueAt(Double.NaN, row, col);
 
          col++;
@@ -293,7 +300,8 @@ public class WandererDashboard extends JPanel implements PlaybackListener
          table.setValueAt(String.format("%.1f", motorTemperatures.get(actuator).getValueAsDouble()), row, 1);
          table.setValueAt(String.format("%.1f", mcbTemperatures1.get(actuator).getValueAsDouble()), row, 2);
          table.setValueAt(String.format("%.1f", mcbTemperatures2.get(actuator).getValueAsDouble()), row, 3);
-         table.setValueAt(String.format("%.3f", motorEncoders.get(actuator).getValueAsDouble()), row, 4);
+         table.setValueAt(String.format("%.1f", consecutivePacketDropCount.get(actuator).getValueAsDouble()), row, 4);
+         table.setValueAt(String.format("%.3f", motorEncoders.get(actuator).getValueAsDouble()), row, 5);
          row++;
       }
 

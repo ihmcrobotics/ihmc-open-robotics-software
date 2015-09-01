@@ -84,7 +84,7 @@ public class WandererControllerFactory
        * Create cost of transport calculator
        */
       
-      double mass = 89.693;
+      double mass = 91.100;
       CostOfTransportCalculator costOfTransportCalculator = new CostOfTransportCalculator(mass, gravity, 10.0, robotModel.getEstimatorDT(), yoVariableServer);
       
       /*

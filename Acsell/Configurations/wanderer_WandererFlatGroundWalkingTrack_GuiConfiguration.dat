@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.wanderer.t,root.wanderer.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisICPBasedTranslationManager.manualModeICPOffset</Variables>
+		<Variables>root.wanderer.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.SmartCMPProjectorTwo.cmpProjectedAlongRay</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -12,14 +12,20 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.wanderer.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.walkingState</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
 <Entry Boxes Tab Pane>
-<EntryBoxTab>
-<Title>
-Tab0
-</Title>
-<Entry Boxes>walk,kpXYLinearSwingFoot,kpZLinearSwingFoot,kpPelvisOrientation</Entry Boxes>
-</EntryBoxTab>
 </Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
@@ -27,8 +33,39 @@ Tab0
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>0</Graph Array Window Size>
-
+<Graph Array Window Size>1</Graph Array Window Size>
+<Graph Array Window1>
+<ScreenID>2</ScreenID>
+<WindowLocation>1918.0, 1080.0</WindowLocation>
+<WindowSize>1440.0, 898.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.wanderer.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.isLeftFootTrusted,root.wanderer.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.isRightFootTrusted</Variables>
+		<GraphConfiguration>
+			<Name>config3</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.wanderer.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.CapturabilityBasedDesiredCoPVisualizer.desiredCoPX,root.wanderer.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.CapturabilityBasedDesiredCoPVisualizer.desiredCoPY,root.wanderer.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footIsDesiredCoPOnEdge,root.wanderer.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footIsDesiredCoPOnEdge,root.wanderer.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.footUnderCoPControl</Variables>
+		<GraphConfiguration>
+			<Name>config4</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window1>
 
 <Extra Panels>
 <Main Viewport>

@@ -30,8 +30,8 @@ public class WandererFootSensorManager
            7.450 * 0.0254 - WandererPhysicalProperties.footLength/2.0,
            0.000 * 0.0254 - WandererPhysicalProperties.footLength/2.0
          };
-   private static final double[][] leftSensorsToUse = {{1,1,1,1},{1,1,1,1},{0,0,0,0}};
-   private static final double[][] rightSensorsToUse = {{1,1,1,1},{1,1,1,1},{0,0,0,0}};
+   private static final double[][] leftSensorsToUse = {{1,1,1,1},{0,0,0,0},{0,0,0,0}};
+   private static final double[][] rightSensorsToUse = {{1,0,1,1},{0,0,0,0},{0,0,0,0}};
    
    private final EnumMap<WandererJoint, AcsellJointState> jointStates;
    private final EnumMap<WandererActuator, AcsellActuatorState> actuatorStates;

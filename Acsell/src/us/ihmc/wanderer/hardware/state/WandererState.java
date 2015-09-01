@@ -23,11 +23,13 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public class WandererState extends AcsellState<WandererActuator, WandererJoint>
 {
    private final WandererFootSensorManager footSensorManager;
+   private final WandererBatteryMonitor batteryMonitor;
    
    public WandererState(double dt, YoVariableRegistry parentRegistry)
    {
       super("Wanderer", dt, AcsellRobot.WANDERER, parentRegistry);
-      footSensorManager = new WandererFootSensorManager(footWrenches, jointStates, actuatorStates, parentRegistry);      
+      footSensorManager = new WandererFootSensorManager(footWrenches, jointStates, actuatorStates, parentRegistry);
+      batteryMonitor = new WandererBatteryMonitor(actuatorStates, parentRegistry);
    }
    
    @Override
@@ -39,6 +41,7 @@ public class WandererState extends AcsellState<WandererActuator, WandererJoint>
 //      updateFootForceSensor();//TODO: Fix this!
 
       footSensorManager.update();
+      batteryMonitor.update();
       
    }
    
