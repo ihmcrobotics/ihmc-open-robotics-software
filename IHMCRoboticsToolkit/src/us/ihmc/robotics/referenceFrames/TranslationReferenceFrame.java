@@ -1,9 +1,10 @@
 package us.ihmc.robotics.referenceFrames;
 
+import javax.vecmath.Tuple3d;
+
+import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-
-import javax.vecmath.Tuple3d;
 
 public class TranslationReferenceFrame extends ReferenceFrame
 {
@@ -23,7 +24,7 @@ public class TranslationReferenceFrame extends ReferenceFrame
       transformToParent.setTranslation(originVector.getVector());
    }
 
-   public void updateTranslation(FrameVector frameVector)
+   public void updateTranslation(FrameTuple frameVector)
    {      
       originVector.set(frameVector);
       this.update();
