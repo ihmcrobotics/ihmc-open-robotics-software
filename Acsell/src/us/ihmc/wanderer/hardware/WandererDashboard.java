@@ -117,7 +117,7 @@ public class WandererDashboard extends JPanel implements PlaybackListener
       initializationPanel.setLayout(new BoxLayout(initializationPanel, BoxLayout.X_AXIS));
       final BooleanYoVariable enabledOutput = (BooleanYoVariable)yoVariableHolder.getVariable("WandererOutputWriter","enableOutput");
       final BooleanYoVariable startStandPrep = (BooleanYoVariable)yoVariableHolder.getVariable("WandererStandPrep","startStandPrep");
-      final EnumYoVariable<HighLevelState>  requestedHighLevelState = (EnumYoVariable<HighLevelState>)yoVariableHolder.getVariable("HighLevelHumanoidControllerManager","requestedHighLevelState");
+      final EnumYoVariable requestedHighLevelState = (EnumYoVariable)yoVariableHolder.getVariable("HighLevelHumanoidControllerManager","requestedHighLevelState");
       final DoubleYoVariable controlRatio = (DoubleYoVariable) yoVariableHolder.getVariable("WandererOutputWriter","controlRatio");
       
       final DoubleYoVariable leftFootForce = (DoubleYoVariable)yoVariableHolder.getVariable("l_footStateEstimatorWrenchBasedFootSwitch","l_footStateEstimatorFootForceMag");
@@ -161,9 +161,9 @@ public class WandererDashboard extends JPanel implements PlaybackListener
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            requestedHighLevelState.set(HighLevelState.WALKING);
+            requestedHighLevelState.set(HighLevelState.WALKING.ordinal());
             ThreadTools.sleep(500);
-            requestedHighLevelState.set(HighLevelState.WALKING);
+            requestedHighLevelState.set(HighLevelState.WALKING.ordinal());
             ThreadTools.sleep(500);
             controlRatio.set(1.0);
          }
