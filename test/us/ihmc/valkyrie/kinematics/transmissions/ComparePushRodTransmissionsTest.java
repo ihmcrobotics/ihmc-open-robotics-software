@@ -23,7 +23,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-@BambooPlan(planType = BambooPlanType.InDevelopment)
+@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.Fast})
 public class ComparePushRodTransmissionsTest
 {
    private static final boolean DEBUG = false;
@@ -33,6 +33,8 @@ public class ComparePushRodTransmissionsTest
 	@Test(timeout = 30000)
    public void testCompareInefficientToEfficientAnkle()
    {
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      
       Random random = new Random(1255L);
       double epsilon = 1e-7;
 
@@ -51,11 +53,13 @@ public class ComparePushRodTransmissionsTest
       compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @Ignore
+	@Ignore
 	@EstimatedDuration
 	@Test(timeout=300000)
    public void testTiming()
    {
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      
       Random random = new Random(1255L);
       double epsilon = 1e-7;
 
@@ -78,6 +82,8 @@ public class ComparePushRodTransmissionsTest
 	@Test(timeout = 30000)
    public void testCompareInefficientToEfficientWaist()
    {
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      
       Random random = new Random(1255L);
       double epsilon = 1e-7;
 
@@ -98,12 +104,12 @@ public class ComparePushRodTransmissionsTest
    
    // Seems that the interpolated should be same as the pushrod when use futeks is false. Should try to get this to work
    // Or figure out if the interpolated is just plain wrong.
-   @Ignore
-
-	@EstimatedDuration
+	@EstimatedDuration(duration = 0.2)
 	@Test(timeout=300000)
    public void testCompareInefficientToInterpolatedAnkles()
    {
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      
       Random random = new Random(1255L);
 
       String ankleNamespace = "v1_ankle";
@@ -124,15 +130,14 @@ public class ComparePushRodTransmissionsTest
       double epsilon = 1e-7;
 
       compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, interpolatedPushRodTransmission, registry, yoGraphicsListRegistry);
-      
    }
    
-   @Ignore
-
-	@EstimatedDuration
+	@EstimatedDuration(duration = 0.5)
 	@Test(timeout=300000)
    public void testCompareInefficientToInterpolatedWaist()
    {
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      
       Random random = new Random(1255L);
 
       String ankleNamespace = "v1_waist";
@@ -195,7 +200,6 @@ public class ComparePushRodTransmissionsTest
       {
          scs = null;
       }
-      
       
       TurboDriver[] actuatorData = new DummyTurboDriver[2];
       actuatorData[0] = new DummyTurboDriver();
@@ -432,7 +436,5 @@ public class ComparePushRodTransmissionsTest
    {
       if (DEBUG)
          System.out.println(string);
-
    }
-   
 }
