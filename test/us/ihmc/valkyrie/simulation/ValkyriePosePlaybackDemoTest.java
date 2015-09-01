@@ -44,7 +44,7 @@ import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-@BambooPlan(planType = BambooPlanType.InDevelopment)
+@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
 public class ValkyriePosePlaybackDemoTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
@@ -102,6 +102,8 @@ public class ValkyriePosePlaybackDemoTest
 	@Test(timeout = 120970)
    public void testPosePlaybackControllerWithWarmupPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      
       int numberOfPoses = 5;
       double trajectoryTime = 1.0;
       ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
@@ -124,6 +126,8 @@ public class ValkyriePosePlaybackDemoTest
 	@Test(timeout = 128797)
    public void testPosePlaybackControllerWithRandomPoses() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      
       int numberOfPoses = 5;
       double delayTime = 0.25;
       double trajectoryTime = 1.0;
@@ -146,6 +150,8 @@ public class ValkyriePosePlaybackDemoTest
 	@Test(timeout = 118283)
    public void testPosePlaybackControllerWithRandomPosesWithSomeJointsUncontrolled() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      
       int numberOfPoses = 5;
       double delayTime = 0.25;
       double trajectoryTime = 1.0;
@@ -171,7 +177,6 @@ public class ValkyriePosePlaybackDemoTest
 
    private SimulationConstructionSet startPosePlaybackSim(PosePlaybackPacket posePlaybackPacket)
    {
-
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
       guiInitialSetup.setCreateGUI(simulationTestingParameters.getCreateGUI());
       double floatingHeight = 0.3;

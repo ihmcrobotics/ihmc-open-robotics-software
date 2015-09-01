@@ -9,8 +9,10 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.valkyrie.codeGenerators.APIBuilderTest.class,
    us.ihmc.valkyrie.kinematics.PushrodTransmissionTest.class,
+   us.ihmc.valkyrie.kinematics.transmissions.ComparePushRodTransmissionsTest.class,
    us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobianTest.class,
    us.ihmc.valkyrie.kinematics.transmissions.InefficientPushRodTransmissionTest.class,
+   us.ihmc.valkyrie.kinematics.util.ClosedFormJacobianTest.class,
    us.ihmc.valkyrie.kinematics.will.WillsPushrodTransmissionTest.class,
    us.ihmc.valkyrie.simulation.ValkyrieFlatGroundWalkingWithIMUDriftTest.class,
    us.ihmc.valkyrie.simulation.ValkyrieObstacleCourseRampFootstepSnapperTest.class,
