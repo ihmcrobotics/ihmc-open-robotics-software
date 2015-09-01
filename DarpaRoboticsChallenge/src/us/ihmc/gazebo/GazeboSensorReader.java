@@ -47,7 +47,7 @@ public class GazeboSensorReader implements SensorReader
 
    /*
     * Gazebo reports IMU orientations as relative values to their starting value as defined
-    * in the model's tree, so we need to store this value to tack on to all reported rotations.
+    * in the model's tree, so we need to store this initial rotation to tack on to all reported rotations.
     */
    private final Quat4d imuToParentLinkRotationOffset;
    private final IMUDefinition imu;
