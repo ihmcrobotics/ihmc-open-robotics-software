@@ -171,10 +171,10 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
       //final double desiredVelocityX_Bias = 0.0;
       final double desiredVelocityY_Bias = 0.0;
       final double desiredHeadingDot_Bias = 0.0;
-      final double maxVelocityX = 0.35;
+      final double maxVelocityX = 0.40;
       final double maxDesiredVelocityX_Setpoint = 0.275;
       final double maxDesiredVelocityX_Adjust = 0.275;
-      final double minVelocityX = -0.35;
+      final double minVelocityX = -0.40;
       
       
       final DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
@@ -216,7 +216,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
       DoubleYoVariable desiredVelocityY = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
       desiredVelocityY.set(desiredVelocityY_Bias);
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X),
-    		  -0.1+desiredVelocityY_Bias, 0.1+desiredVelocityY_Bias, deadZone, true));
+    		  -0.2+desiredVelocityY_Bias, 0.2+desiredVelocityY_Bias, deadZone, true));
 
       DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
       desiredHeadingDot.set(desiredHeadingDot_Bias);

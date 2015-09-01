@@ -12,10 +12,10 @@ public class WandererPhysicalProperties extends DRCRobotPhysicalProperties
 {
    
    public static final double ankleHeight   = 2.625 * 0.0254 + 0.016;
-   public static final double footForward   = 7.975 * 0.0254 - 0.2 * 0.0254;
+   public static final double footForward   = 7.975 * 0.0254 - 0.2 * 0.0254 - 0.01;
    public static final double heelExtension = 0.0   * 0.0254;
-   public static final double footBack      = 2.280 * 0.0254 - 0.2 * 0.0254;;
-   public static final double toeWidth      = 6.000 * 0.0254 - 2 * 0.375 * 0.0254;;
+   public static final double footBack      = 2.280 * 0.0254 - 0.2 * 0.0254 - 0.01;
+   public static final double toeWidth      = 6.000 * 0.0254 - 2 * 0.375 * 0.0254 - 0.01;
    public static final double thighLength   = 14.80 * 0.0254;
    public static final double shinLength    = 16.00 * 0.0254;
    public static final double footLength = footForward + footBack;

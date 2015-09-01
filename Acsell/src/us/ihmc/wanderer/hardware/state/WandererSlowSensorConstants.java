@@ -62,7 +62,7 @@ public class WandererSlowSensorConstants implements AcsellSlowSensorConstants
    @Override
    public double getPressureSensorOffset()
    {
-      return -63.5;
+      return -63.5;//-13.0;//Changes with altitude: -63.5 in Albuquerque -76.5 near sea level.
    }
 
    @Override

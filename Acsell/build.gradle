@@ -67,11 +67,12 @@ task deploy(dependsOn: assemble) << {
 	else {
 		throw new GradleException("Invalid robot \"$robot\" passed in. Valid options are \"steppr\" and \"wanderer\"");
 	}
-
+	
+	println "Trying ssh"
 	ssh.run {
 		session(rep) {
 			execute("mkdir -p " + directory + "/lib")
-
+			println "Adding Jars"
 			configurations.runtime.each
             {
             	put it, directory + '/lib'

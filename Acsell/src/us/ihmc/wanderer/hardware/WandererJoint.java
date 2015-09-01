@@ -22,7 +22,7 @@ public enum WandererJoint implements AcsellJoint
    RIGHT_ANKLE_X("r_leg_lax", RIGHT_ANKLE_Y.getRatio(), true, true, RIGHT_ANKLE_Y.getActuators()),
 
    TORSO_Z("back_ubz", 120, false, false, WandererActuator.TORSO_Z),
-   TORSO_Y("back_mby", 120, true, false, WandererActuator.TORSO_Y),
+   TORSO_Y("back_mby", 120, false, false, WandererActuator.TORSO_Y),
    TORSO_X("back_lbx", 120, true, false, WandererActuator.TORSO_X);
 
    public static final WandererJoint[] values = values();

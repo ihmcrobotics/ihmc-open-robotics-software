@@ -37,8 +37,8 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
 {
    boolean USE_LEFT_HIP_X_SPRING = true;
    boolean USE_RIGHT_HIP_X_SPRING = true;
-   boolean USE_LEFT_ANKLE_SPRING = false;
-   boolean USE_RIGHT_ANKLE_SPRING = false;
+   boolean USE_LEFT_ANKLE_SPRING = true;
+   boolean USE_RIGHT_ANKLE_SPRING = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("WandererOutputWriter");
 
@@ -321,7 +321,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
         if(USE_LEFT_ANKLE_SPRING)
            return (currentWalkingState != WalkingState.RIGHT_SUPPORT) ? 
               leftAnkleSpringCalculator.getSpringForce() : 
-              leftAnkleSpringCalculator.getSpringForce()*0.0;
+              leftAnkleSpringCalculator.getSpringForce()*0.75;//0.75 at DRC
         else
            return 0.0;
       }
@@ -332,7 +332,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
         if(USE_RIGHT_ANKLE_SPRING)
            return (currentWalkingState != WalkingState.LEFT_SUPPORT) ?
               rightAnkleSpringCalculator.getSpringForce() :
-              rightAnkleSpringCalculator.getSpringForce()*0.0;
+              rightAnkleSpringCalculator.getSpringForce()*0.75;//0.75 at DRC
         else
            return 0.0;
       }

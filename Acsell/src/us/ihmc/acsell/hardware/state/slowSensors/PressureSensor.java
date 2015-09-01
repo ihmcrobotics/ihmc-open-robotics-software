@@ -10,6 +10,7 @@ public class PressureSensor implements AcsellSlowSensor
    private final double scale;// = 0.0815;
    private final double conversionFactor;
    
+   private double rawValue;
    private final DoubleYoVariable pressureSensorRawVoltage;
    private final DoubleYoVariable force;
    
@@ -31,6 +32,7 @@ public class PressureSensor implements AcsellSlowSensor
    @Override
    public void update(int value)
    {
+      rawValue = value;
       pressureSensorRawVoltage.set(((double) value) * conversionFactor); // 5.0 / 4095.0);
       force.set(((double) value) * scale + offset);
 
@@ -39,6 +41,11 @@ public class PressureSensor implements AcsellSlowSensor
    public double getValue()
    {
       return force.getDoubleValue();
+   }
+   
+   public double getRawValue()
+   {
+      return rawValue;
    }
 
   public void tare()

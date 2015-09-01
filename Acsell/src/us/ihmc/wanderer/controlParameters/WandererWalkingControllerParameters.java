@@ -849,7 +849,7 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getMaxICPErrorBeforeSingleSupportX()
    {
-      return 0.025;
+      return 0.075;
    }
 
    @Override

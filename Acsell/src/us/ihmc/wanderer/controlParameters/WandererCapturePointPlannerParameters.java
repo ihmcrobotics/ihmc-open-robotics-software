@@ -212,7 +212,7 @@ public class WandererCapturePointPlannerParameters implements CapturePointPlanne
    @Override
    public double getCMPSafeDistanceAwayFromSupportEdges()
    {
-      return 0.03;
+      return 0.02;//0.03
    }
 
    /** {@inheritDoc} */

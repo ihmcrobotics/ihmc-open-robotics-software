@@ -50,6 +50,7 @@ root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.back_lbx*false*
 root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkle*false*false
 root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkle*false*false
 root.remotemain.DRCEstimatorThread.WandererSensorReader.WandererFootManager*false*false
+root.remotemain.DRCEstimatorThread.WandererSensorReader.WandererBatteryMonitor*false*false
 root.remotemain.DRCEstimatorThread.WandererSensorReader.SensorProcessing*false*false
 root.remotemain.DRCEstimatorThread.l_footStateEstimatorWrenchBasedFootSwitch*false*false
 root.remotemain.DRCEstimatorThread.r_footStateEstimatorWrenchBasedFootSwitch*false*false

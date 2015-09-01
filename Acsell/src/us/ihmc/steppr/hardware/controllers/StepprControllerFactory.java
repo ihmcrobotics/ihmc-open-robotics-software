@@ -39,6 +39,7 @@ import us.ihmc.steppr.hardware.output.StepprOutputWriter;
 import us.ihmc.steppr.hardware.sensorReader.StepprSensorReaderFactory;
 import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.logging.LogTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
@@ -150,7 +151,7 @@ public class StepprControllerFactory
 
       AcsellSetup stepprSetup = new AcsellSetup(yoVariableServer);
 
-      yoVariableServer.start();
+      //yoVariableServer.start();
 
       AcsellSetup.startStreamingData();
       stepprSetup.start();
@@ -158,6 +159,10 @@ public class StepprControllerFactory
       robotController.start();
       StepprRunner runner = new StepprRunner(estimatorPriority, sensorReaderFactory, robotController);
       runner.start();
+      
+      ThreadTools.sleep(2000);
+      yoVariableServer.start();
+      
       runner.join();
 
       System.exit(0);
