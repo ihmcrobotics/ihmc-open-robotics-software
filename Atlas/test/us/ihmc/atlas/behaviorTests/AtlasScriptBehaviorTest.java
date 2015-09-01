@@ -42,7 +42,7 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    @Test(timeout = 300000)
    public void testPauseAndResumeScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
       super.testPauseAndResumeScript();
    }
    
