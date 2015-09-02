@@ -447,7 +447,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          MathTools.roundToGivenPrecision(tempVector.getVector(), 1.0e-2);
          tempVector.normalize();
 
-         Vector3d expectedArmZeroConfiguration = new Vector3d(0.0, 0.0, -1.0);
+         Vector3d expectedArmZeroConfiguration = new Vector3d(0.0, robotSide.negateIfRightSide(1.0), 0.0);
          RigidBodyTransform armZeroJointAngleConfigurationOffset = new RigidBodyTransform();
          if (tempVector.dot(expectedArmZeroConfiguration) > 1.0 - 1e-5)
          {
@@ -460,10 +460,10 @@ public class DiagnosticBehavior extends BehaviorInterface
             armZeroJointAngleConfigurationOffset.setRotation(rotation);
          }
 
-         Vector3d expectedElbowAxis = new Vector3d(0.0, 1.0, 0.0);
+         Vector3d expectedElbowAxis = new Vector3d(0.0, 0.0, 1.0);
          RigidBodyTransform zRotationDueToAccountForElbowAxis = new RigidBodyTransform();
          FrameVector elbowJointAxis = elbowJoint.getJointAxis();
-         zRotationDueToAccountForElbowAxis.rotZ(robotSide.negateIfRightSide(elbowJointAxis.angle(expectedElbowAxis)));
+         zRotationDueToAccountForElbowAxis.rotY(-elbowJointAxis.angle(expectedElbowAxis));
          armZeroJointAngleConfigurationOffset.multiply(zRotationDueToAccountForElbowAxis);
 
          armZeroJointAngleConfigurationOffset.invert();
@@ -1363,11 +1363,11 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       // Go to running man pose:
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, -Math.PI / 2.0, 0.3);
-      submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationsForRightSide);
+      desiredUpperArmOrientation.setYawPitchRoll(-1.4, -Math.PI/2.0, 0.0);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI/2.0, null, mirrorOrientationsForRightSide);
 
       if (CAN_ARMS_REACH_FAR_BEHIND)
-         desiredUpperArmOrientation.setYawPitchRoll(0.0, Math.PI / 2.0, 0.3); // Normal Running man
+         desiredUpperArmOrientation.setYawPitchRoll(1.4, Math.PI / 2.0, 0.0); // Normal Running man
       else
          desiredUpperArmOrientation.setYawPitchRoll(0.78, 1.43, Math.PI / 2.0); // Running man for Atlas
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationsForRightSide);
