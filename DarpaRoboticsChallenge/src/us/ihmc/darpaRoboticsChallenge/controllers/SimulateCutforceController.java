@@ -37,6 +37,7 @@ public class SimulateCutforceController implements RobotController
    private final Vector3d tangentionalVelocity;
    
    private final DoubleYoVariable efpHandControlFrameVelocity;
+   private final DoubleYoVariable efpForce;
   
    private final SDFRobot sdfRobot;
    private final SDFFullRobotModel sdfFullRobotModel;
@@ -73,6 +74,7 @@ public class SimulateCutforceController implements RobotController
       xAxisVector = new Vector3d(1.0, 0.0, 0.0);
       
       efpHandControlFrameVelocity = new DoubleYoVariable("cutforceSimulatorVelocity", registry);
+      efpForce = new DoubleYoVariable("cutforceSimulatorForce", registry);
       
       switch (this.robotSide)
       {
@@ -194,7 +196,7 @@ public class SimulateCutforceController implements RobotController
 	        
 	        forceVector.set(tangentVector);
 //	        forceVector.add(climbingForceVector);
-	        
+	        efpForce.set(forceVector.length());
 	        return forceVector;
 	        
 	     }
