@@ -30,7 +30,7 @@ public abstract class HandCommandManager
       handManagerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(managerPort, new IHMCCommunicationKryoNetClassList());
 
       NetworkPorts port = robotSide.equals(RobotSide.LEFT) ? NetworkPorts.LEFT_HAND_PORT : NetworkPorts.RIGHT_HAND_PORT;
-      packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(SERVER_ADDRESS, port, new IHMCCommunicationKryoNetClassList());
+      packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(port, new IHMCCommunicationKryoNetClassList());
 
       try
       {
