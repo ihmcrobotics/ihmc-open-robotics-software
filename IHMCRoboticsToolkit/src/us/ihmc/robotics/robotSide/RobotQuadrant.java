@@ -276,37 +276,6 @@ public enum RobotQuadrant
       return ((this == HIND_LEFT) || (this == HIND_RIGHT));
    }
 
-   public final int getBDIQuadrantIndex()
-   {
-      switch (this)
-      {
-         case FRONT_LEFT:
-         {
-            return 0;
-         }
-   
-         case FRONT_RIGHT:
-         {
-            return 1;
-         }
-   
-         case HIND_RIGHT:
-         {
-            return 3;
-         }
-   
-         case HIND_LEFT:
-         {
-            return 2;
-         }
-   
-         default:
-         {
-            throw new RuntimeException();
-         }
-      }
-   }
-
    public final RobotQuadrant getNextRegularGaitSwingQuadrant()
    {
       return getNextRegularGaitSwingQuadrant(this);
