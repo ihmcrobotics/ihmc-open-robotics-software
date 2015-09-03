@@ -53,17 +53,6 @@ public class RobotQuadrantTest
 
    @EstimatedDuration(duration = 0.1)
    @Test(timeout = 30000)
-   public void testGetBDILegIndex()
-   {
-      assertEquals(0, frontLeft.getBDIQuadrantIndex());
-      assertEquals(1, frontRight.getBDIQuadrantIndex());
-      assertEquals(3, hindRight.getBDIQuadrantIndex());
-      assertEquals(2, hindLeft.getBDIQuadrantIndex());
-
-   }
-
-   @EstimatedDuration(duration = 0.1)
-   @Test(timeout = 30000)
    public void testGetBodyQuadrant()
    {
 //      ReferenceFrame frame = LittleDogFrames.getBodyFrame();
