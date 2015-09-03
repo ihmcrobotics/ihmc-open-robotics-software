@@ -39,7 +39,7 @@ import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 public class TaskspaceToJointspaceHandForcefeedbackControlState extends TrajectoryBasedTaskspaceHandControlState
 {
 	private final static boolean TRAJECTORY_FORCEFEEDBACK = true; //DO NOT SET TO TRUE! NOT ENTIRELY TESTED YET!! T.Meier If false: make sure trajectory time from behavior is set big enough
-	private final static boolean SIMULATION = true;
+	private final static boolean SENSOR_NOISE = true;
 	private boolean isDone = false;
 	private final BooleanYoVariable forcefeedback;
 	private final Boolean doPositionControlOnJoints;
@@ -198,7 +198,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		wristSensor = momentumBasedController.getWristForceSensor(robotSide);
 		sensorPrefix = robotSide.getShortLowerCaseName() + "_wristSensor";
 
-		alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, dtControl);
+		alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(5.0, dtControl);
 		fxRaw = new DoubleYoVariable(sensorPrefix + "_Fx_raw", registry);
 		fyRaw = new DoubleYoVariable(sensorPrefix + "_Fy_raw", registry);
 		fzRaw = new DoubleYoVariable(sensorPrefix + "_Fz_raw", registry);
@@ -239,7 +239,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		w1.set(w1_0);
 		w2.set(w2_0);
 
-		if (SIMULATION && TRAJECTORY_FORCEFEEDBACK)
+		if (SENSOR_NOISE && TRAJECTORY_FORCEFEEDBACK)
 		{
 			randomNumberGenerator = new Random(random);
 		}
@@ -290,7 +290,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 
 		wristSensor.packWrench(wristSensorWrench);
 		CutForceControlHelper.wristSensorUpdate(wristSensorWrench, worldFrame, fxRaw, fyRaw, fzRaw,
-				fxFiltered, fyFiltered, fzFiltered, massHandandDrill.getDoubleValue(), false, randomNumberGenerator);
+				fxFiltered, fyFiltered, fzFiltered, massHandandDrill.getDoubleValue(), SENSOR_NOISE, randomNumberGenerator, currentTimeInState.getDoubleValue());
 
 		CutForceControlHelper.getTangentForce(forceVectorInWorld, currentTangentialForce, tangentTrajectoryVectorInWorld,
 				lastTangentTrajectoryVectorInWorld, fxFiltered.getDoubleValue(), fyFiltered.getDoubleValue(),
@@ -377,7 +377,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 
 		wristSensor.packWrench(wristSensorWrench);
 		CutForceControlHelper.wristSensorUpdate(wristSensorWrench, worldFrame, fxRaw, fyRaw, fzRaw, fxFiltered, fyFiltered,
-				fzFiltered, massHandandDrill.getDoubleValue(), false, randomNumberGenerator);
+				fzFiltered, massHandandDrill.getDoubleValue(), false, randomNumberGenerator, 0.0);
 		CutForceControlHelper.getTangentForce(forceVectorInWorld, currentTangentialForce, tangentTrajectoryVectorInWorld,
 				lastTangentTrajectoryVectorInWorld, fxFiltered.getDoubleValue(), fyFiltered.getDoubleValue(),
 				fzFiltered.getDoubleValue(), false, currentTimeInState.getDoubleValue());

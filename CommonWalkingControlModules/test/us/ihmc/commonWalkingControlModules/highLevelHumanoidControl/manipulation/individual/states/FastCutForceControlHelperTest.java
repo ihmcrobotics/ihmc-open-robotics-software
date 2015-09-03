@@ -208,7 +208,7 @@ public class FastCutForceControlHelperTest {
 		double mass = RandomTools.generateRandomDouble(randomNumberGenerator, 0.1, 10.0);
 		double fzEmpty = RandomTools.generateRandomDouble(randomNumberGenerator, 5.0);
 		
-		CutForceControlHelper.wristSensorUpdate(testWrench, worldFrame, fxRaw, fyRaw, fzRaw, fxFiltered, fyFiltered, fzFiltered, mass, false, randomNumberGenerator);
+		CutForceControlHelper.wristSensorUpdate(testWrench, worldFrame, fxRaw, fyRaw, fzRaw, fxFiltered, fyFiltered, fzFiltered, mass, false, randomNumberGenerator, 0.0);
 		
 		// Check if reference frame is changed
 		assertTrue(testWrench.getExpressedInFrame() == worldFrame);
@@ -220,7 +220,7 @@ public class FastCutForceControlHelperTest {
 		testWrench.changeFrame(worldFrame);
 		testWrench.setLinearPartZ(fzEmpty);
 		testWrench.changeBodyFrameAttachedToSameBody(worldFrame);
-		CutForceControlHelper.wristSensorUpdate(testWrench, worldFrame, fxRaw, fyRaw, fzRaw, fxFiltered, fyFiltered, fzFiltered, mass, false, randomNumberGenerator);
+		CutForceControlHelper.wristSensorUpdate(testWrench, worldFrame, fxRaw, fyRaw, fzRaw, fxFiltered, fyFiltered, fzFiltered, mass, false, randomNumberGenerator, 0.0);
 		
 		assertEquals(testWrench.getLinearPartZ() + mass * CutForceControlHelper.GRAVITY, fzRaw.getDoubleValue(), EPSILON);
 
