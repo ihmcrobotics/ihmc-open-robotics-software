@@ -1004,7 +1004,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       sequencePelvisRotations(0.3);
       sequenceMovingChestAndPelvisOnly();
 
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, Math.PI / 2.0);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
       submitHandPose(RobotSide.LEFT, desiredUpperArmOrientation, 0.0, null, true);
       submitHumanoidArmPose(RobotSide.RIGHT, HumanoidArmPose.ARM_STRAIGHT_DOWN);
       sequenceChestRotations(0.55);
@@ -1012,7 +1012,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       sequenceMovingChestAndPelvisOnly();
 
       submitHumanoidArmPose(RobotSide.LEFT, HumanoidArmPose.ARM_STRAIGHT_DOWN);
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, -Math.PI / 2.0);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
       submitHandPose(RobotSide.RIGHT, desiredUpperArmOrientation, 0.0, null, true);
       sequenceChestRotations(0.55);
       sequencePelvisRotations(0.3);
@@ -1363,13 +1363,13 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       // Go to running man pose:
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
-      desiredUpperArmOrientation.setYawPitchRoll(-1.4, -Math.PI/2.0, 0.0);
-      submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI/2.0, null, mirrorOrientationsForRightSide);
+      desiredUpperArmOrientation.setYawPitchRoll(-1.2, -Math.PI / 2.0, 0.0);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationsForRightSide);
 
       if (CAN_ARMS_REACH_FAR_BEHIND)
-         desiredUpperArmOrientation.setYawPitchRoll(1.4, Math.PI / 2.0, 0.0); // Normal Running man
+         desiredUpperArmOrientation.setYawPitchRoll(1.2, Math.PI / 2.0, 0.0); // Normal Running man
       else
-         desiredUpperArmOrientation.setYawPitchRoll(0.78, 1.43, Math.PI / 2.0); // Running man for Atlas
+         desiredUpperArmOrientation.setYawPitchRoll(0.7800, 1.4300, -0.0000); // Running man for Atlas  //FIXME check values for atlas
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationsForRightSide);
 
       FramePose footPose = new FramePose(ankleZUpFrame);
@@ -1383,7 +1383,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       pipeLine.submitSingleTaskStage(new NullTask());
 
       // Do a "Y" stance with the foot outside
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, -0.0, 2.3561);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 1.1);
       submitSymmetricHandPose(desiredUpperArmOrientation, 0.0, null); // Couldn't find Solution for upper arm
 
       footPose.setToZero(ankleZUpFrame);
@@ -1420,8 +1420,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
       FrameOrientation desiredHandOrientation = new FrameOrientation(lowerArmsFrames.get(robotSide));
       
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, -shoulderExtensionAngle, 0.3);
-      desiredHandOrientation.setYawPitchRoll(0.0, shakeHandAngle, 0.0);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, -shoulderExtensionAngle, -1.2708);
+      desiredHandOrientation.setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
       submitHandPose(robotSide, desiredUpperArmOrientation, shoulderExtensionAngle-Math.PI/2.0, desiredHandOrientation, mirrorOrientationForRightSide);
       pipeLine.requestNewStage();
 
@@ -1435,17 +1435,17 @@ public class DiagnosticBehavior extends BehaviorInterface
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
       FrameOrientation desiredHandOrientation = new FrameOrientation(lowerArmsFrames.get(robotSide));
       
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, -shoulderExtensionAngle, 0.3);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, -shoulderExtensionAngle, -1.2708);
 
       int numberOfShakes = 3;
       for (int i = 0; i < numberOfShakes; i++)
       {
-         desiredHandOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
+         desiredHandOrientation.setYawPitchRoll(0.0, Math.PI/2.0, shakeHandAngle);
          submitHandPose(robotSide, desiredUpperArmOrientation, shakeHandAngle + shoulderExtensionAngle - Math.PI / 2.0, desiredHandOrientation,
                mirrorOrientationForRightSide);
          pipeLine.requestNewStage();
 
-         desiredHandOrientation.setYawPitchRoll(0.0, shakeHandAngle, 0.0);
+         desiredHandOrientation.setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
          submitHandPose(robotSide, desiredUpperArmOrientation, shoulderExtensionAngle - Math.PI / 2.0, desiredHandOrientation, mirrorOrientationForRightSide);
          pipeLine.requestNewStage();
       }
@@ -1545,28 +1545,31 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
-      FrameOrientation desiredHandOrientation = new FrameOrientation(lowerArmsFrames.get(robotSide));
+      FrameOrientation desiredHandOnHipOrientation = new FrameOrientation(lowerArmsFrames.get(robotSide.getOppositeSide()));
+      FrameOrientation desiredHandWavingOrientation = new FrameOrientation(lowerArmsFrames.get(robotSide));
       boolean mirrorOrientationForRightSide = true;
 
       submitDesiredPelvisOrientation(true, 0.0, 0.0, Math.toRadians((robotSide==RobotSide.RIGHT ? 20.0 : -20.0)));
 
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, Math.toRadians(45.0), Math.toRadians(15.0));
-      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationForRightSide);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, Math.toRadians(45.0), Math.toRadians(-75.0));
+      desiredHandOnHipOrientation.setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0, desiredHandOnHipOrientation, mirrorOrientationForRightSide);
       
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, -Math.PI / 2.0, Math.PI / 2.0);
-      submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationForRightSide);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, -Math.PI / 2.0, 0.0);
+      desiredHandWavingOrientation.setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, desiredHandWavingOrientation, mirrorOrientationForRightSide);
       pipeLine.requestNewStage();
       
       int numberOfWaves = 3;
       
       for(int i = 0; i<numberOfWaves; i++)
       {
-         desiredHandOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(-30.0), Math.toRadians(0.0));
-         submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI/2.0, desiredHandOrientation, mirrorOrientationForRightSide);
+         desiredHandWavingOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.PI / 2.0 , Math.toRadians(-30.0));
+         submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI/2.0, desiredHandWavingOrientation, mirrorOrientationForRightSide);
          pipeLine.requestNewStage();
          
-         desiredHandOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(25.0), Math.toRadians(0.0));
-         submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI/2.0, desiredHandOrientation, mirrorOrientationForRightSide);
+         desiredHandWavingOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.PI / 2.0, Math.toRadians(25.0));
+         submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI/2.0, desiredHandWavingOrientation, mirrorOrientationForRightSide);
          pipeLine.requestNewStage();
       }
       sequenceGoHome();
@@ -1592,30 +1595,30 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitFootstepPose(true, robotSide, desiredFootstepPosition);
 
       if (CAN_ARMS_REACH_FAR_BEHIND)
-         desiredUpperArmOrientation.setYawPitchRoll(0.2, -0.05, 0.20);
+         desiredUpperArmOrientation.setYawPitchRoll(0.2, -0.05, -1.3708);
       else
-         desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.523, 0.3);
+         desiredUpperArmOrientation.setYawPitchRoll(0.0000, 0.5230, -1.2708); //FIXME check values for atlas
       submitHandPose(robotSide, desiredUpperArmOrientation, 0.0, null, mirrorOrientationForRightSide);
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, -0.5235, 0.3);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0000, -0.5235, -1.2708);
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       pipeLine.requestNewStage();
 
       if (CAN_ARMS_REACH_FAR_BEHIND)
       {
-         desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
+         desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -2.1144);
          submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       }
-      desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
+      desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, -1.0272);
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       pipeLine.requestNewStage();
 
       //bend forward and arms
       if (CAN_ARMS_REACH_FAR_BEHIND)
       {
-         desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
+         desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -2.1144);
          submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationForRightSide);
       }
-      desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
+      desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, -1.0272);
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationForRightSide);
       submitDesiredChestOrientation(true, 0.0, 0.7 * maxPitchForward, 0.0);
       submitDesiredPelvisOrientation(true, 0.0, 0.5 * maxPitchForward, 0.0);
@@ -1623,7 +1626,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       if (CAN_ARMS_REACH_FAR_BEHIND)
       {
-         desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
+         desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -2.1144);
          submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       }
       pipeLine.requestNewStage();
@@ -1633,13 +1636,13 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitPelvisHomeCommand(true);
       pipeLine.requestNewStage();
 
-      desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
+      desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, -1.0272);
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       pipeLine.requestNewStage();
 
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, -0.523, 0.3);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0000, -0.5230, -1.2708);
       submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, -0.5235, 0.3);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0000, -0.5235, -1.2708);
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       pipeLine.requestNewStage();
 
@@ -1847,12 +1850,12 @@ public class DiagnosticBehavior extends BehaviorInterface
       double halfPi = Math.PI / 2.0;
       ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
 
-      FrameOrientation upperArmDown2 = new FrameOrientation(chestFrame, -0.7443, 0.2789, 0.2905);
-      FrameOrientation upperArmIntermediateOnWayUp = new FrameOrientation(chestFrame, 0.0, 0.7853, halfPi);
-      FrameOrientation upperArmUp1 = new FrameOrientation(chestFrame, 0.6154, 0.5235, 2.5261);
-      FrameOrientation upperArmUp2 = new FrameOrientation(chestFrame, -0.6154, -0.5235, 2.5261);
-      FrameOrientation upperArmIntermediateOnWayDown = new FrameOrientation(chestFrame, 0.0, -0.7853, halfPi);
-      FrameOrientation upperArmDown1 = new FrameOrientation(chestFrame, 0.7443, -0.2789, 0.2905);
+      FrameOrientation upperArmDown2 = new FrameOrientation(chestFrame, -0.7443, 0.2789, -1.2803);
+      FrameOrientation upperArmIntermediateOnWayUp = new FrameOrientation(chestFrame, -0.0000, 0.7853, -0.0000);
+      FrameOrientation upperArmUp1 = new FrameOrientation(chestFrame, 0.6154, 0.5235, 0.9553);
+      FrameOrientation upperArmUp2 = new FrameOrientation(chestFrame, -0.6154, -0.5235, 0.9553);
+      FrameOrientation upperArmIntermediateOnWayDown = new FrameOrientation(chestFrame, 0.0000, -0.7853, -0.0000);
+      FrameOrientation upperArmDown1 = new FrameOrientation(chestFrame, 0.7443, -0.2789, -1.2803);
 
       SideDependentList<double[]> armsDown2 = computeSymmetricArmJointAngles(upperArmDown2, 0.0, null, true);
       SideDependentList<double[]> armsIntermediateOnWayUp = computeSymmetricArmJointAngles(upperArmIntermediateOnWayUp, -halfPi / 2.0, null, true);
@@ -1910,11 +1913,11 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       // Put the arms in front
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(chestFrame);
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, -0.0, 0.6);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0000, -0.0000, -0.9708);
       submitSymmetricHandPose(desiredUpperArmOrientation, -halfPi, null);
       pipeLine.requestNewStage();
 
-      desiredUpperArmOrientation.setYawPitchRoll(-0.7800, 0.1585, 0.7473);
+      desiredUpperArmOrientation.setYawPitchRoll(-0.7800, 0.1585, -0.8235);
       submitSymmetricHandPose(desiredUpperArmOrientation, -1.40, null);
 
       // Supa powerful front kick!!!!!
@@ -1930,10 +1933,10 @@ public class DiagnosticBehavior extends BehaviorInterface
       pipeLine.requestNewStage();
 
       // Supa powerful back kick!!!!!
-      desiredUpperArmOrientation.setYawPitchRoll(-0.7566, -0.9980, 0.9947);
+      desiredUpperArmOrientation.setYawPitchRoll(-0.7566, -0.9980, -0.5761);
       submitHandPose(robotSide, desiredUpperArmOrientation, -0.3, null, true);
 
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, 1.2566, 0.3);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0000, 1.2566, -1.2708);
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.3, null, true);
 
       footPose.setToZero(ankleZUpFrame);
@@ -1947,10 +1950,10 @@ public class DiagnosticBehavior extends BehaviorInterface
       pipeLine.requestNewStage();
 
       // Supa powerful side kick!!!!!
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.4, halfPi);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0000, 0.4000, -0.0000);
       submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, true);
 
-      desiredUpperArmOrientation.setYawPitchRoll(-1.2707, 0.0, halfPi);
+      desiredUpperArmOrientation.setYawPitchRoll(-1.2707, 0.0, 0.0);
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -halfPi, null, true);
 
       footPose.setToZero(ankleZUpFrame);
@@ -2698,7 +2701,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          double yaw = (i % 2) == 0 ? 1.0 : -1.0;
          yaw += 0.75;
          yaw *= Math.toRadians(10.0);
-         desiredUpperArmOrientation.setYawPitchRoll(yaw, 0.0, 0.0);
+         desiredUpperArmOrientation.setYawPitchRoll(yaw, 0.0, -1.2);
          if (armSide == null)
             submitSymmetricHandPose(desiredUpperArmOrientation, -halfPi, null);
          else
