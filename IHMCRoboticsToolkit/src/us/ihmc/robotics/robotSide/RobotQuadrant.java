@@ -1,20 +1,46 @@
 package us.ihmc.robotics.robotSide;
 
 import java.awt.Color;
+import java.util.ArrayList;
 
 import us.ihmc.tools.FormattingTools;
 
 public enum RobotQuadrant
 {
-   HIND_LEFT(RobotEnd.HIND, RobotSide.LEFT),
-   HIND_RIGHT(RobotEnd.HIND, RobotSide.RIGHT),
    FRONT_LEFT(RobotEnd.FRONT, RobotSide.LEFT),
-   FRONT_RIGHT(RobotEnd.FRONT, RobotSide.RIGHT);
+   FRONT_RIGHT(RobotEnd.FRONT, RobotSide.RIGHT),
+   HIND_RIGHT(RobotEnd.HIND, RobotSide.RIGHT),
+   HIND_LEFT(RobotEnd.HIND, RobotSide.LEFT);
    
    public static final RobotQuadrant[] values = values();
    
    private final RobotEnd end;
    private final RobotSide side;
+
+   public static final int FRONT_LEFT_ORDINAL = FRONT_LEFT.ordinal();
+   public static final int FRONT_RIGHT_ORDINAL = FRONT_RIGHT.ordinal();
+   public static final int HIND_RIGHT_ORDINAL = HIND_RIGHT.ordinal();
+   public static final int HIND_LEFT_ORDINAL = HIND_LEFT.ordinal();
+
+   private static final Color[] colorArray = new Color[] { Color.YELLOW, Color.WHITE, Color.BLUE, Color.BLACK };
+
+   private static final Color[] colorArrayForWhiteBackground = new Color[] { Color.YELLOW, Color.PINK, Color.BLUE, Color.BLACK };
+   
+   private RobotQuadrant(RobotEnd end, RobotSide side)
+   {
+      this.end = end;
+      this.side = side;
+   }
+
+   public RobotEnd getEnd()
+   {
+      return end;
+   }
+  
+   public RobotSide getSide()
+   {
+      return side;
+   }
    
    public static final RobotQuadrant getQuadrant(RobotEnd robotEnd, RobotSide robotSide)
    {
@@ -42,205 +68,341 @@ public enum RobotQuadrant
       }
    }
    
-   public static final RobotQuadrant getDiagonalOppositeQuadrant(RobotQuadrant robotQuadrant)
+   // Methods:
+   public final RobotQuadrant getDiagonalOppositeQuadrant()
    {
-      if (robotQuadrant.getEnd() == RobotEnd.HIND)
+      switch (this)
       {
-         if (robotQuadrant.getSide() == RobotSide.LEFT)
+         case FRONT_LEFT:
          {
-            return FRONT_RIGHT;
+            return RobotQuadrant.HIND_RIGHT;
          }
-         else
-         {
-            return FRONT_LEFT;
-         }
-      }
-      else
-      {
-         if (robotQuadrant.getSide() == RobotSide.LEFT)
-         {
-            return HIND_RIGHT;
-         }
-         else
-         {
-            return HIND_LEFT;
-         }
-      }
-   }
    
-   public static final RobotQuadrant getAcrossBodyQuadrant(RobotQuadrant robotQuadrant)
-   {
-      if (robotQuadrant.getEnd() == RobotEnd.HIND)
-      {
-         if (robotQuadrant.getSide() == RobotSide.LEFT)
+         case FRONT_RIGHT:
          {
-            return HIND_RIGHT;
+            return RobotQuadrant.HIND_LEFT;
          }
-         else
-         {
-            return HIND_LEFT;
-         }
-      }
-      else
-      {
-         if (robotQuadrant.getSide() == RobotSide.LEFT)
-         {
-            return FRONT_RIGHT;
-         }
-         else
-         {
-            return FRONT_LEFT;
-         }
-      }
-   }
    
-   public static final RobotQuadrant getNextRegularGaitSwingQuadrant(RobotQuadrant robotQuadrant)
-   {
-      if (robotQuadrant.getEnd() == RobotEnd.HIND)
-      {
-         if (robotQuadrant.getSide() == RobotSide.LEFT)
+         case HIND_RIGHT:
          {
-            return FRONT_LEFT;
+            return RobotQuadrant.FRONT_LEFT;
          }
-         else
+   
+         case HIND_LEFT:
          {
-            return FRONT_RIGHT;
+            return RobotQuadrant.FRONT_RIGHT;
+         }
+   
+         default:
+         {
+            throw new RuntimeException();
          }
       }
-      else
-      {
-         if (robotQuadrant.getSide() == RobotSide.LEFT)
-         {
-            return HIND_RIGHT;
-         }
-         else
-         {
-            return HIND_LEFT;
-         }
-      }
-   }
-   
-   private RobotQuadrant(RobotEnd end, RobotSide side)
-   {
-      this.end = end;
-      this.side = side;
-   }
-   
-   public RobotEnd getEnd()
-   {
-      return end;
    }
 
-   public RobotSide getSide()
-   {
-      return side;
-   }
-   
    public Color getColor()
    {
-      if (end == RobotEnd.HIND)
-      {
-         if (side == RobotSide.LEFT)
-         {
-            return Color.BLUE;
-         }
-         else
-         {
-            return Color.BLACK;
-         }
-      }
-      else
-      {
-         if (side == RobotSide.LEFT)
-         {
-            return Color.WHITE;
-         }
-         else
-         {
-            return Color.YELLOW;
-         }
-      }
+      return colorArray[this.ordinal()];
    }
-   
+
    public Color getColorForWhiteBackground()
    {
-      if (end == RobotEnd.HIND)
+      return colorArrayForWhiteBackground[this.ordinal()];
+   }
+
+   public final RobotQuadrant getAcrossBodyQuadrant()
+   {
+      switch (this)
       {
-         if (side == RobotSide.LEFT)
+         case FRONT_LEFT:
          {
-            return Color.BLACK;
+            return RobotQuadrant.FRONT_RIGHT;
          }
-         else
+   
+         case FRONT_RIGHT:
          {
-            return Color.BLUE;
+            return RobotQuadrant.FRONT_LEFT;
          }
-      }
-      else
-      {
-         if (side == RobotSide.LEFT)
+   
+         case HIND_RIGHT:
          {
-            return Color.YELLOW;
+            return RobotQuadrant.HIND_LEFT;
          }
-         else
+   
+         case HIND_LEFT:
          {
-            return Color.PINK;
+            return RobotQuadrant.HIND_RIGHT;
+         }
+   
+         default:
+         {
+            throw new RuntimeException();
          }
       }
    }
-   
-   public int getBDIQuadrantIndex()
+
+   public final String getShortName()
    {
-      if (end == RobotEnd.HIND)
+      switch (this)
       {
-         if (side == RobotSide.LEFT)
+         case FRONT_LEFT:
          {
-            return 2;
+            return "FL";
          }
-         else
+   
+         case FRONT_RIGHT:
          {
-            return 3;
+            return "FR";
          }
+   
+         case HIND_RIGHT:
+         {
+            return "HR";
+         }
+   
+         case HIND_LEFT:
+         {
+            return "HL";
+         }
+   
+         default:
+         {
+            throw new RuntimeException();
+         }
+      }
+   }
+
+   public static ArrayList<RobotQuadrant> getAllQuadrants()
+   {
+      ArrayList<RobotQuadrant> quadrantNames = new ArrayList<RobotQuadrant>();
+      for (RobotQuadrant quadrantName : RobotQuadrant.values())
+      {
+         quadrantNames.add(quadrantName);
+      }
+
+      return quadrantNames;
+   }
+
+   public static ArrayList<RobotQuadrant> getFrontQuadrants()
+   {
+      ArrayList<RobotQuadrant> quadrantNames = new ArrayList<RobotQuadrant>();
+      for (RobotQuadrant quadrantName : RobotQuadrant.values())
+      {
+         if (quadrantName.isQuadrantInFront())
+            quadrantNames.add(quadrantName);
+      }
+
+      return quadrantNames;
+   }
+
+   public static ArrayList<RobotQuadrant> getHindQuadrants()
+   {
+      ArrayList<RobotQuadrant> quadrantNames = new ArrayList<RobotQuadrant>();
+      for (RobotQuadrant quadrantName : RobotQuadrant.values())
+      {
+         if (quadrantName.isQuadrantInHind())
+            quadrantNames.add(quadrantName);
+      }
+
+      return quadrantNames;
+   }
+
+   public static ArrayList<RobotQuadrant> getDiagonalOppositeQuadrants(boolean useFrontLeft)
+   {
+      ArrayList<RobotQuadrant> quadrantNames = new ArrayList<RobotQuadrant>();
+
+      if (useFrontLeft)
+      {
+         quadrantNames.add(RobotQuadrant.FRONT_LEFT);
+         quadrantNames.add(RobotQuadrant.HIND_RIGHT);
       }
       else
       {
-         if (side == RobotSide.LEFT)
+         quadrantNames.add(RobotQuadrant.FRONT_RIGHT);
+         quadrantNames.add(RobotQuadrant.HIND_LEFT);
+      }
+
+      return quadrantNames;
+   }
+
+   public final RobotQuadrant getSameSideQuadrant()
+   {
+      switch (this)
+      {
+         case FRONT_LEFT:
+         {
+            return RobotQuadrant.HIND_LEFT;
+         }
+   
+         case FRONT_RIGHT:
+         {
+            return RobotQuadrant.HIND_RIGHT;
+         }
+   
+         case HIND_RIGHT:
+         {
+            return RobotQuadrant.FRONT_RIGHT;
+         }
+   
+         case HIND_LEFT:
+         {
+            return RobotQuadrant.FRONT_LEFT;
+         }
+   
+         default:
+         {
+            throw new RuntimeException();
+         }
+      }
+   }
+
+   public final boolean isQuadrantOnLeftSide()
+   {
+      return ((this == FRONT_LEFT) || (this == HIND_LEFT));
+   }
+
+   public final boolean isQuadrantOnRightSide()
+   {
+      return ((this == FRONT_RIGHT) || (this == HIND_RIGHT));
+   }
+
+   public final boolean isQuadrantInFront()
+   {
+      return ((this == FRONT_LEFT) || (this == FRONT_RIGHT));
+   }
+
+   public final boolean isQuadrantInHind()
+   {
+      return ((this == HIND_LEFT) || (this == HIND_RIGHT));
+   }
+
+   public final int getBDIQuadrantIndex()
+   {
+      switch (this)
+      {
+         case FRONT_LEFT:
          {
             return 0;
          }
-         else
+   
+         case FRONT_RIGHT:
          {
             return 1;
          }
+   
+         case HIND_RIGHT:
+         {
+            return 3;
+         }
+   
+         case HIND_LEFT:
+         {
+            return 2;
+         }
+   
+         default:
+         {
+            throw new RuntimeException();
+         }
       }
+   }
+
+   public final RobotQuadrant getNextRegularGaitSwingQuadrant()
+   {
+      return getNextRegularGaitSwingQuadrant(this);
+   }
+
+   public static final RobotQuadrant getNextRegularGaitSwingQuadrant(RobotQuadrant currentSwingQuadrant)
+   {
+      switch (currentSwingQuadrant)
+      {
+         case FRONT_LEFT:
+         {
+            return RobotQuadrant.HIND_RIGHT;
+         }
+   
+         case FRONT_RIGHT:
+         {
+            return RobotQuadrant.HIND_LEFT;
+         }
+   
+         case HIND_RIGHT:
+         {
+            return RobotQuadrant.FRONT_RIGHT;
+         }
+   
+         case HIND_LEFT:
+         {
+            return RobotQuadrant.FRONT_LEFT;
+         }
+   
+         default:
+         {
+            throw new RuntimeException();
+         }
+      }
+   }
+
+   public static RobotQuadrant getQuadrantNameFromOrdinal(int quadrantIndex)
+   {
+      if (quadrantIndex == RobotQuadrant.FRONT_LEFT.ordinal())
+         return RobotQuadrant.FRONT_LEFT;
+      if (quadrantIndex == RobotQuadrant.FRONT_RIGHT.ordinal())
+         return RobotQuadrant.FRONT_RIGHT;
+      if (quadrantIndex == RobotQuadrant.HIND_LEFT.ordinal())
+         return RobotQuadrant.HIND_LEFT;
+      if (quadrantIndex == RobotQuadrant.HIND_RIGHT.ordinal())
+         return RobotQuadrant.HIND_RIGHT;
+
+      throw new RuntimeException("Invalid quadrant index: " + quadrantIndex);
+   }
+
+   public static RobotQuadrant getQuadrantName(String quadrantName)
+   {
+      if (quadrantName.equals(RobotQuadrant.FRONT_LEFT.toString()))
+         return RobotQuadrant.FRONT_LEFT;
+      if (quadrantName.equals(RobotQuadrant.FRONT_RIGHT.toString()))
+         return RobotQuadrant.FRONT_RIGHT;
+      if (quadrantName.equals(RobotQuadrant.HIND_LEFT.toString()))
+         return RobotQuadrant.HIND_LEFT;
+      if (quadrantName.equals(RobotQuadrant.HIND_RIGHT.toString()))
+         return RobotQuadrant.HIND_RIGHT;
+
+      throw new RuntimeException("Invalid quadrant name: " + quadrantName);
    }
    
    public String getCamelCaseNameForStartOfExpression()
    {
       return FormattingTools.lowerCaseFirstLetter(getCamelCaseNameForMiddleOfExpression());
    }
-
+   
    public String getCamelCaseNameForMiddleOfExpression()
    {
-      if (side == RobotSide.RIGHT)
+      switch (this)
       {
-         if (end == RobotEnd.HIND)
+         case FRONT_LEFT:
          {
-            return "hindRight";
+            return "frontLeft";
          }
-         else
+   
+         case FRONT_RIGHT:
          {
             return "frontRight";
          }
-      }
-      else
-      {
-         if (end == RobotEnd.HIND)
+   
+         case HIND_RIGHT:
+         {
+            return "hindRight";
+         }
+   
+         case HIND_LEFT:
          {
             return "hindLeft";
          }
-         else
+   
+         default:
          {
-            return "frontLeft";
+            throw new RuntimeException();
          }
       }
    }

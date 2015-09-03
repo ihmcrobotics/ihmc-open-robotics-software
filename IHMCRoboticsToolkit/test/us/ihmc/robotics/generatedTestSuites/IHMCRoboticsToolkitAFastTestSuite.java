@@ -112,6 +112,7 @@ import org.junit.runners.Suite;
    us.ihmc.robotics.referenceFrames.Pose2dReferenceFrameTest.class,
    us.ihmc.robotics.referenceFrames.PoseReferenceFrameTest.class,
    us.ihmc.robotics.referenceFrames.ReferenceFrameTest.class,
+   us.ihmc.robotics.robotSide.RobotQuadrantTest.class,
    us.ihmc.robotics.robotSide.RobotSideTest.class,
    us.ihmc.robotics.robotSide.SideDependentListTest.class,
    us.ihmc.robotics.screwTheory.CenterOfMassAccelerationCalculatorTest.class,
