@@ -35,7 +35,7 @@ public class CutForceControlHelper {
 	static void wristSensorUpdate(Wrench wristSensorWrench, ReferenceFrame worldFrame,
 			DoubleYoVariable fxRaw, DoubleYoVariable fyRaw, DoubleYoVariable fzRaw,
 			AlphaFilteredYoVariable fxFiltered, AlphaFilteredYoVariable fyFiltered, AlphaFilteredYoVariable fzFiltered,
-			double massHandAndDrill, boolean adNoise, Random randomNumberGenerator)
+			double massHandAndDrill, boolean adNoise, Random randomNumberGenerator, double driftTime)
 	{
 		if (wristSensorWrench.getExpressedInFrame() != worldFrame)
 		{
@@ -44,12 +44,13 @@ public class CutForceControlHelper {
 
 		if (adNoise)
 		{
-			addWhiteNoise(wristSensorWrench, 0.5, randomNumberGenerator);
+			addWhiteNoise(wristSensorWrench, 1.0, randomNumberGenerator);
 		}
 
-		fxRaw.set(wristSensorWrench.getLinearPartX());
-		fyRaw.set(wristSensorWrench.getLinearPartY());
-		fzRaw.set(wristSensorWrench.getLinearPartZ());
+		fxRaw.set(wristSensorWrench.getLinearPartX() + generateDriftDisturbance(0.1, driftTime));
+		fyRaw.set(wristSensorWrench.getLinearPartY() + generateDriftDisturbance(0.1, driftTime));
+		fzRaw.set(wristSensorWrench.getLinearPartZ() + generateDriftDisturbance(0.1, driftTime));
+		System.out.println(driftTime);
 		fzRaw.add(massHandAndDrill * GRAVITY);
 		
 		/**
