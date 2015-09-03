@@ -2,19 +2,20 @@ package us.ihmc.valkyrie.parameters;
 
 import java.util.LinkedHashMap;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.valkyrie.configuration.ValkyrieSliderBoardControlledNeckJoints;
 import us.ihmc.valkyrie.fingers.ValkyrieFingerJointLimits;
 import us.ihmc.valkyrie.fingers.ValkyrieRealRobotFingerJoint;
@@ -219,16 +220,21 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public String[] getDefaultHeadOrientationControlJointNames()
    {
-      if (!controlHeadAndHandsWithSliders())
+      if (controlHeadAndHandsWithSliders())
       {
-         String[] defaultHeadOrientationControlJointNames = new String[] { jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH),
-               jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW) };
-         return defaultHeadOrientationControlJointNames;
+         // For sliders, return none of them, to make sure that the QP whole body controller doesn't control the neck.
+         return new String[]{};
       }
-      else
+      
+      else if (target == DRCRobotModel.RobotTarget.REAL_ROBOT)
       {
-         return new String[] {};
+         // On the real robot, return all 3 so it knows to use them all. The real robot will use position control.
+         return new String[] {jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
       }
+      
+      // For sims using the QP and whole body controller, only allow one neck joint for now since the QP and inverse dynamics
+      // don't do well with redundant joints yet. We'll have to fix that later some how.
+      else return new String[] {jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
    }
 
    @Override
@@ -267,7 +273,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public boolean controlHeadAndHandsWithSliders()
    {
-//      return runningOnRealRobot;
       return false;
    }
 
