@@ -32,8 +32,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
-   private final double upperNeckExtensorUpperLimit = 0.785398;
-   private final double upperNeckExtensorLowerLimit = -0.0872665;
+   private final double upperNeckExtensorUpperLimit = 0.0872665;
+   private final double upperNeckExtensorLowerLimit = -0.785398;
    private final double LowerNeckPitchUpperLimit = 1.162;
    private final double LowerNeckPitchLowerLimit = 0;
 
