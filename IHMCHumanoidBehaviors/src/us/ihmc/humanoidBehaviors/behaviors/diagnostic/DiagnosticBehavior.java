@@ -52,13 +52,8 @@ import us.ihmc.humanoidBehaviors.taskExecutor.PelvisPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.RotateHandAboutAxisTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.TurnInPlaceTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
-import us.ihmc.robotics.Axis;
-import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
-import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -70,8 +65,10 @@ import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
+import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -81,9 +78,12 @@ import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJointReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
+import us.ihmc.tools.FormattingTools;
+import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.time.TimeTools;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.taskExecutor.NullTask;
 import us.ihmc.utilities.taskExecutor.PipeLine;
-import us.ihmc.tools.time.TimeTools;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -2123,7 +2123,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame(),
             armPose.getDesiredUpperArmYawPitchRoll());
-      double elbowAngle = armPose.getDesiredElbowAngle(robotSide);
+      double elbowAngle = robotSide.negateIfRightSide(armPose.getDesiredElbowAngle(robotSide));
       double[] handOrientation = new double[3];
       if (enableHandOrientation.getBooleanValue())
       {
