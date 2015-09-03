@@ -103,7 +103,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
 //      final double QuadTreePointUnderFeetScaling = 1.1;
       for (RobotSide side : RobotSide.values)
       {
-         ReferenceFrame soleFrame = fullRobotModel.getFoot(side).getBodyFixedFrame();
+         ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(side);
          for (Point2d point : contactPoints.get(side))
          {
             FramePoint footContactPoint = new FramePoint(soleFrame, point.getX(), point.getY(), 0.0);
