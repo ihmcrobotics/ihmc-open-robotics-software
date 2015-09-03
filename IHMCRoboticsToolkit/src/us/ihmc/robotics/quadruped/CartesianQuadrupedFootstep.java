@@ -23,7 +23,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
  *
  * @author Learning Locomotion Team
  */
-public class CartesianQuadrupedFootstep implements Footstep, Serializable
+public class CartesianQuadrupedFootstep implements QuadrupedFootstep, Serializable
 {
    private final FramePoint footPosition;
    private final RobotQuadrant legName;
@@ -90,7 +90,7 @@ public class CartesianQuadrupedFootstep implements Footstep, Serializable
       return (this == object);
    }
 
-   public boolean isEpsilonEqualTo(Footstep footstep, double epsilon)
+   public boolean isEpsilonEqualTo(QuadrupedFootstep footstep, double epsilon)
    {
       return (footPosition.epsilonEquals(footstep.getPositionFramePointCopy(), epsilon) && (legName == footstep.getLegName()));
    }
@@ -121,12 +121,12 @@ public class CartesianQuadrupedFootstep implements Footstep, Serializable
       return new CartesianQuadrupedFootstep(temp, legName);
    }
 
-   public double distanceToFootstep(Footstep footstepToCheck)
+   public double distanceToFootstep(QuadrupedFootstep footstepToCheck)
    {
       return this.footPosition.distance(footstepToCheck.getPositionFramePointCopy());
    }
 
-   public double distanceToFootstepInXY(Footstep footstepToCheck)
+   public double distanceToFootstepInXY(QuadrupedFootstep footstepToCheck)
    {
       Point2d position1 = new Point2d(this.footPosition.getX(), this.footPosition.getY());
       Point2d position2 = new Point2d(footstepToCheck.getX(), footstepToCheck.getY());
@@ -135,12 +135,12 @@ public class CartesianQuadrupedFootstep implements Footstep, Serializable
    }
 
 
-   public double distanceSquaredToFootstep(Footstep footstepToCheck)
+   public double distanceSquaredToFootstep(QuadrupedFootstep footstepToCheck)
    {
       return this.footPosition.distanceSquared(footstepToCheck.getPositionFramePointCopy());
    }
 
-   public Footstep morphCopy(Footstep footstep, double alpha)
+   public QuadrupedFootstep morphCopy(QuadrupedFootstep footstep, double alpha)
    {
       return morph(this, (CartesianQuadrupedFootstep) footstep, alpha);
    }

@@ -8,15 +8,15 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-public interface Footstep
+public interface QuadrupedFootstep
 {
-   public abstract Footstep changeFrameCopy(ReferenceFrame desiredFrame);
+   public abstract QuadrupedFootstep changeFrameCopy(ReferenceFrame desiredFrame);
 
-   public abstract double distanceToFootstep(Footstep footstepToCheck);
+   public abstract double distanceToFootstep(QuadrupedFootstep footstepToCheck);
 
-   public abstract double distanceToFootstepInXY(Footstep footstepToCheck);
+   public abstract double distanceToFootstepInXY(QuadrupedFootstep footstepToCheck);
 
-   public abstract double distanceSquaredToFootstep(Footstep footstepToCheck);
+   public abstract double distanceSquaredToFootstep(QuadrupedFootstep footstepToCheck);
 
    public abstract RobotQuadrant getLegName();
 
@@ -30,7 +30,7 @@ public interface Footstep
 
    public abstract double getZ();
 
-   public abstract boolean isEpsilonEqualTo(Footstep footstep, double epsilon);
+   public abstract boolean isEpsilonEqualTo(QuadrupedFootstep footstep, double epsilon);
 
    public abstract void save(PrintWriter printWriter);
 
@@ -45,9 +45,9 @@ public interface Footstep
     * @param yaw Amount to yaw.
     * @return FootstepInterface
     */
-   public abstract Footstep yawAboutPointCopy(FramePoint pointToYawAbout, double yaw);
+   public abstract QuadrupedFootstep yawAboutPointCopy(FramePoint pointToYawAbout, double yaw);
 
-   public abstract Footstep applyTransformCopy(RigidBodyTransform transform3D);
+   public abstract QuadrupedFootstep applyTransformCopy(RigidBodyTransform transform3D);
 
-   public abstract Footstep morphCopy(Footstep footstep, double alpha);
+   public abstract QuadrupedFootstep morphCopy(QuadrupedFootstep footstep, double alpha);
 }
