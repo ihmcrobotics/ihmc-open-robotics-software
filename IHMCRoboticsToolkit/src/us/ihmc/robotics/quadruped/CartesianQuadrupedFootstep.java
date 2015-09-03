@@ -23,18 +23,18 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
  *
  * @author Learning Locomotion Team
  */
-public class CartesianPositionFootstep implements Footstep, Serializable
+public class CartesianQuadrupedFootstep implements Footstep, Serializable
 {
    private final FramePoint footPosition;
    private final RobotQuadrant legName;
 
-   public CartesianPositionFootstep(CartesianPositionFootstep footstep)
+   public CartesianQuadrupedFootstep(CartesianQuadrupedFootstep footstep)
    {
       this.footPosition = new FramePoint(footstep.footPosition);
       this.legName = footstep.legName;
    }
 
-   public CartesianPositionFootstep(FramePoint position, RobotQuadrant legName)
+   public CartesianQuadrupedFootstep(FramePoint position, RobotQuadrant legName)
    {
       this.footPosition = new FramePoint(position);
       this.legName = legName;
@@ -101,24 +101,24 @@ public class CartesianPositionFootstep implements Footstep, Serializable
     * @param desiredFrame Frame
     * @return Footstep
     */
-   public CartesianPositionFootstep changeFrameCopy(ReferenceFrame desiredFrame)
+   public CartesianQuadrupedFootstep changeFrameCopy(ReferenceFrame desiredFrame)
    {
       FramePoint newPosition = new FramePoint(footPosition);
       newPosition.changeFrame(desiredFrame);
 
-      return new CartesianPositionFootstep(newPosition, legName);
+      return new CartesianQuadrupedFootstep(newPosition, legName);
    }
 
-   public CartesianPositionFootstep yawAboutPointCopy(FramePoint pointToYawAbout, double yaw)
+   public CartesianQuadrupedFootstep yawAboutPointCopy(FramePoint pointToYawAbout, double yaw)
    {
-      return new CartesianPositionFootstep(this.footPosition.yawAboutPoint(pointToYawAbout, yaw), this.legName);
+      return new CartesianQuadrupedFootstep(this.footPosition.yawAboutPoint(pointToYawAbout, yaw), this.legName);
    }
 
-   public CartesianPositionFootstep applyTransformCopy(RigidBodyTransform transform3D)
+   public CartesianQuadrupedFootstep applyTransformCopy(RigidBodyTransform transform3D)
    {
       FramePoint temp = new FramePoint(footPosition);
       temp.applyTransform(transform3D);
-      return new CartesianPositionFootstep(temp, legName);
+      return new CartesianQuadrupedFootstep(temp, legName);
    }
 
    public double distanceToFootstep(Footstep footstepToCheck)
@@ -142,11 +142,11 @@ public class CartesianPositionFootstep implements Footstep, Serializable
 
    public Footstep morphCopy(Footstep footstep, double alpha)
    {
-      return morph(this, (CartesianPositionFootstep) footstep, alpha);
+      return morph(this, (CartesianQuadrupedFootstep) footstep, alpha);
    }
 
 
-   public static CartesianPositionFootstep morph(CartesianPositionFootstep footstep1, CartesianPositionFootstep footstep2, double alpha)
+   public static CartesianQuadrupedFootstep morph(CartesianQuadrupedFootstep footstep1, CartesianQuadrupedFootstep footstep2, double alpha)
    {
       RobotQuadrant legName = footstep1.getLegName();
       if (legName != footstep2.getLegName())
@@ -163,7 +163,7 @@ public class CartesianPositionFootstep implements Footstep, Serializable
       framePoint2.scale(alpha);
       framePoint1.add(framePoint2);
 
-      return new CartesianPositionFootstep(framePoint1, legName);
+      return new CartesianQuadrupedFootstep(framePoint1, legName);
    }
 
    /**
@@ -174,7 +174,7 @@ public class CartesianPositionFootstep implements Footstep, Serializable
     * @param bufferedReader BufferedReader
     * @return Footstep
     */
-   public static CartesianPositionFootstep load(BufferedReader bufferedReader, ReferenceFrame referenceFrame)
+   public static CartesianQuadrupedFootstep load(BufferedReader bufferedReader, ReferenceFrame referenceFrame)
    {
       try
       {
@@ -193,7 +193,7 @@ public class CartesianPositionFootstep implements Footstep, Serializable
          else
             legName = RobotQuadrant.getQuadrantName(legNameString);
 
-         return new CartesianPositionFootstep(position, legName);
+         return new CartesianQuadrupedFootstep(position, legName);
       }
       catch (IOException ex)
       {
@@ -218,11 +218,11 @@ public class CartesianPositionFootstep implements Footstep, Serializable
    // Serializable support to handle the fact that wedoobject matching for reference frame matching
    public Object readResolve()
    {
-      CartesianPositionFootstep footstep = this;
+      CartesianQuadrupedFootstep footstep = this;
       if (this.getReferenceFrame().getName().equals(ReferenceFrame.getWorldFrame().getName()))
       {
          FramePoint position = new FramePoint(ReferenceFrame.getWorldFrame(), this.getX(), this.getY(), this.getZ());
-         footstep = new CartesianPositionFootstep(position, this.legName);
+         footstep = new CartesianQuadrupedFootstep(position, this.legName);
       }
       else
       {
