@@ -1,5 +1,6 @@
 import java.nio.file.Files
 import java.nio.file.Paths
+import com.monochromeroad.gradle.plugin.aws.s3.S3Sync
 
 buildscript {
     repositories {
@@ -27,6 +28,21 @@ apply plugin: 'application'
 applicationName = "IHMCAtlasAPI"
 mainClassName = "us.ihmc.atlas.AtlasROSAPINetworkProcessor"
 applicationDefaultJvmArgs = ["-Xmx4g"]
+
+jar {
+   manifest {
+      attributes(
+      "Created-By": "IHMC Gradle Build Script",
+      "Implementation-Title": project.name,
+      "Implementation-Version": project.version,
+      "Implementation-Vendor": "IHMC",
+      
+      "Bundle-Name": project.name,
+      "Bundle-Version": project.version,
+      "Bundle-License": "https://gnu.org/licenses/gpl-3.0.txt",
+      "Bundle-Vendor": "IHMC")
+   }
+}
 
 startScripts {
     outputs.upToDateWhen { false }
@@ -71,7 +87,6 @@ applicationDistribution.from(startScripts.outputDir) {
     into "bin"
 }
 
-import com.monochromeroad.gradle.plugin.aws.s3.S3Sync
 
 task awsDeploySim(type: S3Sync, dependsOn: distTar) {
     description = "Push current API release to AWS S3"

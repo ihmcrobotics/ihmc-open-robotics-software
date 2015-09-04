@@ -33,7 +33,11 @@ dependencies {
 	
 	compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'
 
-	compile group: 'org.easytesting', name: 'fest-swing', version: '1.2.1'
+	compile group: 'org.easytesting', name: 'fest', version: '1.0.3'
+	compile('org.easytesting:fest-swing:1.2.1' ) 
+	{
+		exclude group: 'org.easytesting', module: 'fest' 
+	}
 	
 	compile project(':IHMCUtilities')
 	compile project(':IHMCYoUtilities')

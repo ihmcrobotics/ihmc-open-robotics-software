@@ -9,3 +9,18 @@ setupDefaultDirectoryStructure()
 setupDefaultRepositories()
 
 setupProjectSpecificDependencies()
+
+jar {
+   manifest {
+      attributes(
+      "Created-By": "IHMC Gradle Build Script",
+      "Implementation-Title": project.name,
+      "Implementation-Version": project.version,
+      "Implementation-Vendor": "IHMC",
+      
+      "Bundle-Name": project.name,
+      "Bundle-Version": project.version,
+      "Bundle-License": "IHMC Proprietary",
+      "Bundle-Vendor": "IHMC")
+   }
+}
