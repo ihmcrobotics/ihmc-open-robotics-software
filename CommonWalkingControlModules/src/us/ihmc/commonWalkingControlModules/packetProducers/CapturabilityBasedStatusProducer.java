@@ -12,20 +12,24 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.CloseableAndDisposable;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.util.PeriodicThreadScheduler;
 
-public class CapturabilityBasedStatusProducer implements Runnable
+public class CapturabilityBasedStatusProducer implements Runnable, CloseableAndDisposable
 {
    private final GlobalDataProducer objectCommunicator;
    private final PeriodicThreadScheduler scheduler;
    private final ConcurrentRingBuffer<CapturabilityBasedStatus> capturabilityBuffer;
 
-   public CapturabilityBasedStatusProducer(PeriodicThreadScheduler scheduler, GlobalDataProducer objectCommunicator)
+   public CapturabilityBasedStatusProducer(CloseableAndDisposableRegistry closeAndDisposeRegistry, PeriodicThreadScheduler scheduler, GlobalDataProducer objectCommunicator)
    {
       this.scheduler = scheduler;
       this.objectCommunicator = objectCommunicator;
       this.capturabilityBuffer = new ConcurrentRingBuffer<>(new CapturabilityBasedStatusBuilder(), 16);
       scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
+      
+      closeAndDisposeRegistry.registerCloseable(this);
    }
 
    public void sendStatus(FramePoint2d capturePoint2d, FramePoint2d desiredCapturePoint2d, FramePoint centerOfMass, SideDependentList<FrameConvexPolygon2d> footSupportPolygons)
@@ -51,7 +55,7 @@ public class CapturabilityBasedStatusProducer implements Runnable
 
    }
    
-   public void stop()
+   public void closeAndDispose()
    {
       scheduler.shutdown();
    }
