@@ -36,6 +36,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -53,7 +54,7 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
            WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
            SideDependentList<ContactablePlaneBody> feet, ConstantTransferTimeCalculator transferTimeCalculator,
            ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables, YoVariableRegistry registry,
-           YoGraphicsListRegistry yoGraphicsListRegistry)
+           YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
    {
       HandstepProvider handstepProvider = null;
       DesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = null;
