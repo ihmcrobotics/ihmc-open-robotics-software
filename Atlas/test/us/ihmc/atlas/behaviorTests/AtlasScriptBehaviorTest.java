@@ -15,7 +15,7 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
+@BambooPlan(planType = {BambooPlanType.Flaky, BambooPlanType.Slow})
 public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -42,7 +42,7 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    @Test(timeout = 300000)
    public void testPauseAndResumeScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Flaky);
       super.testPauseAndResumeScript();
    }
    
@@ -51,7 +51,7 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    @Test(timeout = 300000)
    public void testScriptWithOneHandPosePacket() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Flaky);
       super.testScriptWithOneHandPosePacket();
    }
    
@@ -69,7 +69,7 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    @Test(timeout = 300000)
    public void testScriptWithTwoHandPosePackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Flaky);
       super.testScriptWithTwoHandPosePackets();
    }
    
