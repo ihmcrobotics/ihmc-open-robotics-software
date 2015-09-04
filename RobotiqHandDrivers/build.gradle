@@ -18,3 +18,18 @@ mainClassName = 'us.ihmc.robotiq.control.RobotiqControlThread'
 applicationDistribution.from(file("IHMCNetworkParameters.ini")) {
 	into "bin"
 }
+
+jar {
+   manifest {
+      attributes(
+      "Created-By": "IHMC Gradle Build Script",
+      "Implementation-Title": project.name,
+      "Implementation-Version": project.version,
+      "Implementation-Vendor": "IHMC",
+      
+      "Bundle-Name": project.name,
+      "Bundle-Version": project.version,
+      "Bundle-License": "https://gnu.org/licenses/gpl-3.0.txt",
+      "Bundle-Vendor": "IHMC")
+   }
+}
