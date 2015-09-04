@@ -711,64 +711,7 @@ public class QuadrupedalSupportPolygon extends QuadrupedalPolygon
    }
 
 
-   /**
-    *  getStanceWidthFrontLegs
-    * 
-    *  @return double
-    */
-   public double getStanceWidthFrontLegs()
-   {
-      if (this.getNumberOfLegs() != 4)
-      {
-         throw new RuntimeException("Need 4 legs for SupportPolygon.getStanceWidthFrontLegs()");
-      }
-
-      double heading = this.getNominalYaw();
-      Vector2d perpendicularHeadingVecetor = new Vector2d(-Math.sin(heading), Math.cos(heading));
-
-      QuadrupedFootstep frontLeft = footstepArray[RobotQuadrant.FRONT_LEFT.ordinal()];
-      QuadrupedFootstep frontRight = footstepArray[RobotQuadrant.FRONT_RIGHT.ordinal()];
-
-      frontLeft.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      frontRight.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-
-      double vectorX = frontLeft.getX() - frontRight.getX();
-      double vectorY = frontLeft.getY() - frontRight.getY();
-
-      Vector2d rightToLeft = new Vector2d(vectorX, vectorY);
-
-      return Math.abs(rightToLeft.dot(perpendicularHeadingVecetor));
-   }
-
-   /**
-    * getStanceWidthHindLegs
-    *
-    * @return double
-    */
-   public double getStanceWidthHindLegs()
-   {
-      if (this.getNumberOfLegs() != 4)
-      {
-         throw new RuntimeException("Need 4 legs for SupportPolygon.getStanceWidthHindLegs()");
-      }
-
-      double heading = this.getNominalYaw();
-      Vector2d perpendicularHeadingVecetor = new Vector2d(-Math.sin(heading), Math.cos(heading));
-
-      QuadrupedFootstep hindLeft = footstepArray[RobotQuadrant.HIND_LEFT.ordinal()];
-      QuadrupedFootstep hindRight = footstepArray[RobotQuadrant.HIND_RIGHT.ordinal()];
-
-      hindLeft.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      hindRight.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-
-      double vectorX = hindLeft.getX() - hindRight.getX();
-      double vectorY = hindLeft.getY() - hindRight.getY();
-
-      Vector2d rightToLeft = new Vector2d(vectorX, vectorY);
-
-      return Math.abs(rightToLeft.dot(perpendicularHeadingVecetor));
-   }
-
+  
    public void printOutSupportPolygon(String nameSuffix)
    {
       QuadrupedalSupportPolygon supportPolygon = this.changeFrameCopy(ReferenceFrame.getWorldFrame());
