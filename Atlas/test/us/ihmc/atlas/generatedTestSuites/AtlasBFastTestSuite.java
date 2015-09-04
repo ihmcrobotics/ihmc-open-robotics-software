@@ -9,6 +9,7 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.atlas.AtlasPushRecoveryMultiStepTest.class,
    us.ihmc.atlas.AtlasScriptingTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasFootstepListBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasObjectWeightBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasWalkToGoalBehaviorTest.class
 })

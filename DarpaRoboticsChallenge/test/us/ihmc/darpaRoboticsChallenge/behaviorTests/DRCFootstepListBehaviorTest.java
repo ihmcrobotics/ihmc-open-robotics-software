@@ -1,20 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
@@ -26,26 +16,34 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.utilities.StopThreadUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FramePose2d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.time.GlobalTimer;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInterface
 {
@@ -101,6 +99,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       robot = drcBehaviorTestHelper.getRobot();
+      robotDataReceiver = drcBehaviorTestHelper.getRobotDataReceiver();
    }
 
    @EstimatedDuration(duration = 31.9)

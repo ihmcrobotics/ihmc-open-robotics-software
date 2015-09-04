@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment})
+@BambooPlan(planType = {BambooPlanType.Fast})
 public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
 {
    private final AtlasRobotModel robotModel;
