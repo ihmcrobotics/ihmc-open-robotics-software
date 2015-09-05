@@ -5,8 +5,6 @@ import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import com.jme3.math.Transform;
-
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
@@ -45,6 +43,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wanderer.controlParameters.WandererArmControlParameters;
 import us.ihmc.wanderer.controlParameters.WandererCapturePointPlannerParameters;
 import us.ihmc.wanderer.controlParameters.WandererStateEstimatorParameters;
@@ -57,6 +56,8 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
+
+import com.jme3.math.Transform;
 
 public class WandererRobotModel implements DRCRobotModel
 {
@@ -305,7 +306,7 @@ public class WandererRobotModel implements DRCRobotModel
 
    @Override
    public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
-         GlobalDataProducer globalDataProducersw)
+         GlobalDataProducer globalDataProducersw, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       return null;
    }

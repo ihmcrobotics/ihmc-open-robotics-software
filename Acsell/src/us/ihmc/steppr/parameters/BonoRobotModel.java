@@ -52,6 +52,7 @@ import us.ihmc.steppr.controlParameters.BonoStateEstimatorParameters;
 import us.ihmc.steppr.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.steppr.hardware.controllers.StepprOutputProcessor;
 import us.ihmc.steppr.operatorInterface.StepprOperatorInterface;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
@@ -305,7 +306,7 @@ public class BonoRobotModel implements DRCRobotModel
 
    @Override
    public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
-         GlobalDataProducer globalDataProducersw)
+         GlobalDataProducer globalDataProducers, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       return null;
    }
