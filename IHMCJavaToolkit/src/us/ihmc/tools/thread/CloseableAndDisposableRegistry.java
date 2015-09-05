@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 public class CloseableAndDisposableRegistry
 {
-   private final ArrayList<CloseableAndDisposable> closeables = new ArrayList<CloseableAndDisposable>();
+   private ArrayList<CloseableAndDisposable> closeableAndDisposables = new ArrayList<CloseableAndDisposable>();
    
    public CloseableAndDisposableRegistry()
    {
@@ -21,14 +21,17 @@ public class CloseableAndDisposableRegistry
    
    public void registerCloseable(CloseableAndDisposable closeable)
    {
-      this.closeables.add(closeable);
+      this.closeableAndDisposables.add(closeable);
    }
    
    public void closeAndDispose()
    {
-      for (CloseableAndDisposable closeable : closeables)
+      for (CloseableAndDisposable closeable : closeableAndDisposables)
       {
          closeable.closeAndDispose();
       }
+      
+      closeableAndDisposables.clear();
+      closeableAndDisposables = null;
    }
 }

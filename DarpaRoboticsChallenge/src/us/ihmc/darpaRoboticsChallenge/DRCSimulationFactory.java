@@ -47,6 +47,7 @@ import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotCo
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -88,6 +89,8 @@ public class DRCSimulationFactory
    private ThreadDataSynchronizerInterface threadDataSynchronizer;
 
    private GlobalDataProducer globalDataProducer;
+   
+   private CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
    
    public DRCSimulationFactory(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, CommonAvatarEnvironmentInterface environment,
          DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
@@ -256,7 +259,7 @@ public class DRCSimulationFactory
 
       multiThreadedRobotController.addController(drcEstimatorThread, estimatorTicksPerSimulationTick, false);
       multiThreadedRobotController.addController(drcControllerThread, controllerTicksPerSimulationTick, true);
-      MultiThreadedRobotControlElement simulatedHandController = drcRobotModel.createSimulatedHandController(simulatedRobot, threadDataSynchronizer, globalDataProducer);
+      MultiThreadedRobotControlElement simulatedHandController = drcRobotModel.createSimulatedHandController(simulatedRobot, threadDataSynchronizer, globalDataProducer, closeableAndDisposableRegistry);
       if (simulatedHandController != null)
       {
          multiThreadedRobotController.addController(simulatedHandController, controllerTicksPerSimulationTick, false);
@@ -391,6 +394,9 @@ public class DRCSimulationFactory
       
       multiThreadedRobotController = null;
       globalDataProducer = null;
+      
+      closeableAndDisposableRegistry.closeAndDispose();
+      closeableAndDisposableRegistry = null;
    }
 
    public SDFHumanoidRobot getRobot()

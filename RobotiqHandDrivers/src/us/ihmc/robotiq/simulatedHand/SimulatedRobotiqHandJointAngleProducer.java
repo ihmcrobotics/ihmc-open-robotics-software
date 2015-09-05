@@ -7,10 +7,11 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
-import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
 public class SimulatedRobotiqHandJointAngleProducer
 {
@@ -22,7 +23,7 @@ public class SimulatedRobotiqHandJointAngleProducer
    
    private final SideDependentList<HandJointAngleCommunicator> jointAngleCommunicators = new SideDependentList<>();
 
-   public SimulatedRobotiqHandJointAngleProducer(GlobalDataProducer dataProducer, SDFRobot simulatedRobot)
+   public SimulatedRobotiqHandJointAngleProducer(GlobalDataProducer dataProducer, SDFRobot simulatedRobot, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -30,7 +31,7 @@ public class SimulatedRobotiqHandJointAngleProducer
          middleJoints.put(robotSide, new ArrayList<OneDegreeOfFreedomJoint>());
          thumbJoints.put(robotSide, new ArrayList<OneDegreeOfFreedomJoint>());
          
-         jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, dataProducer));
+         jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, dataProducer, closeableAndDisposableRegistry));
 
          for (RobotiqHandJointNameMinimal jointEnum : RobotiqHandJointNameMinimal.values)
          {

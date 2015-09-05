@@ -11,8 +11,10 @@ import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.thread.CloseableAndDisposable;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
-public class HandJointAngleCommunicator
+public class HandJointAngleCommunicator implements CloseableAndDisposable
 {
    private final int WORKER_SLEEP_TIME_MILLIS = 500;
 
@@ -25,26 +27,30 @@ public class HandJointAngleCommunicator
    private final AtomicBoolean calibrated = new AtomicBoolean();
    private final RobotSide side;
 
-   public HandJointAngleCommunicator(RobotSide side, PacketCommunicator packetCommunicator)
+   private final ScheduledExecutorService executor;
+   
+   public HandJointAngleCommunicator(RobotSide side, PacketCommunicator packetCommunicator, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
-      this(side, packetCommunicator, null);
+      this(side, packetCommunicator, null, closeableAndDisposableRegistry);
    }
 
-   public HandJointAngleCommunicator(RobotSide side, GlobalDataProducer dataProducer)
+   public HandJointAngleCommunicator(RobotSide side, GlobalDataProducer dataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
-      this(side, null, dataProducer);
+      this(side, null, dataProducer, closeableAndDisposableRegistry);
    }
 
-   private HandJointAngleCommunicator(RobotSide side, PacketCommunicator packetCommunicator, GlobalDataProducer dataProducer)
+   private HandJointAngleCommunicator(RobotSide side, PacketCommunicator packetCommunicator, GlobalDataProducer dataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       this.side = side;
       this.packetCommunicator = packetCommunicator;
       this.dataProducer = dataProducer;
       packetCopier = new ConcurrentCopier<HandJointAnglePacket>(HandJointAngleCommunicator.builder);
-      startWriterThread();
+      executor = startWriterThread();
+      
+      closeableAndDisposableRegistry.registerCloseable(this);
    }
 
-   private void startWriterThread()
+   private ScheduledExecutorService startWriterThread()
    {
       ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
       executor.scheduleAtFixedRate(new Runnable()
@@ -66,6 +72,8 @@ public class HandJointAngleCommunicator
             }
          }
       }, 0, WORKER_SLEEP_TIME_MILLIS, TimeUnit.MILLISECONDS);
+            
+      return executor;
    }
 
    public String getName()
@@ -108,5 +116,11 @@ public class HandJointAngleCommunicator
    public void setHandDisconnected()
    {
       connected.set(true);
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      executor.shutdown();
    }
 }

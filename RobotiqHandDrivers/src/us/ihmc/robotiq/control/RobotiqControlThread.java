@@ -11,10 +11,11 @@ import us.ihmc.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandControlThread;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.ManualHandControlProvider;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.RobotiqHandInterface;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -33,14 +34,14 @@ class RobotiqControlThread extends HandControlThread
    private int errorCount = 0;
    private RobotiqHandSensorData handStatus;
 
-   public RobotiqControlThread(RobotSide robotSide)
+   public RobotiqControlThread(RobotSide robotSide, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       super(robotSide);
       this.robotSide = robotSide;
       robotiqHand = new RobotiqHandInterface(robotSide.equals(RobotSide.LEFT) ? NetworkParameters.getHost(NetworkParameterKeys.leftHand) : NetworkParameters.getHost(NetworkParameterKeys.rightHand));
       fingerStateProvider = new FingerStateProvider(robotSide);
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
-      jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, packetCommunicator);
+      jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, packetCommunicator, closeableAndDisposableRegistry);
       
       packetCommunicator.attachListener(FingerStatePacket.class, fingerStateProvider);
       packetCommunicator.attachListener(ManualHandControlPacket.class, manualHandControlProvider);
@@ -223,6 +224,8 @@ class RobotiqControlThread extends HandControlThread
    
    public static void main(String[] args)
    {
+      CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
+      
       JSAP jsap = new JSAP();
       
       FlaggedOption robotSide = new FlaggedOption("robotSide").setRequired(true).setLongFlag("robotSide").setShortFlag('r').setStringParser(JSAP.STRING_PARSER);
@@ -234,7 +237,7 @@ class RobotiqControlThread extends HandControlThread
          
          if(config.success())
          {
-            RobotiqControlThread controlThread = new RobotiqControlThread(RobotSide.valueOf(config.getString("robotSide").toUpperCase()));
+            RobotiqControlThread controlThread = new RobotiqControlThread(RobotSide.valueOf(config.getString("robotSide").toUpperCase()), closeableAndDisposableRegistry);
             controlThread.connect();
             controlThread.run();
          }
