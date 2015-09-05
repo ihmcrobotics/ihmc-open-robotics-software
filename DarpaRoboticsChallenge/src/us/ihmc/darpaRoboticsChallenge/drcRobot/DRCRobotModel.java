@@ -4,10 +4,9 @@ import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import com.jme3.math.Transform;
-
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.HeightCalculatorParameters;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -16,7 +15,6 @@ import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
@@ -29,10 +27,13 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
+
+import com.jme3.math.Transform;
 
 public interface DRCRobotModel extends WholeBodyControllerParameters
 {
@@ -83,7 +84,7 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
    public abstract SideDependentList<HandCommandManager> createHandCommandManager();
 
    public abstract MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot,
-           ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer);
+           ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry);
 
    public abstract DRCHandType getDRCHandType();
    

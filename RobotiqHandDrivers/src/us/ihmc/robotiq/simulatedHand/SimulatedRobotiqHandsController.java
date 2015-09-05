@@ -12,14 +12,15 @@ import us.ihmc.communication.packets.dataobjects.HandJointName;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.tools.time.TimeTools;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -61,7 +62,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
    private final SideDependentList<Boolean> hasRobotiqHand = new SideDependentList<Boolean>(false, false);
 
    public SimulatedRobotiqHandsController(SDFRobot simulatedRobot, DRCRobotModel robotModel, ThreadDataSynchronizerInterface threadDataSynchronizer,
-         GlobalDataProducer globalDataProducer)
+         GlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.controlDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getControllerDT());
@@ -70,7 +71,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
 
       if(globalDataProducer != null)
       {
-         jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(globalDataProducer, simulatedRobot);
+         jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(globalDataProducer, simulatedRobot, closeableAndDisposableRegistry);
       }      
       else
       {
