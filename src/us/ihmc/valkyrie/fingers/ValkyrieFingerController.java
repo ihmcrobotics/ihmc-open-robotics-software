@@ -11,13 +11,14 @@ import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.tools.time.TimeTools;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -59,7 +60,8 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
     * @param globalDataProducer
     * @param yoVariableRegistry 
     */
-   public ValkyrieFingerController(DRCRobotModel robotModel, SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer, YoVariableRegistry controllerRegistry)
+   public ValkyrieFingerController(DRCRobotModel robotModel, SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, 
+         GlobalDataProducer globalDataProducer, YoVariableRegistry controllerRegistry, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       this.isRunningOnRealRobot = robotModel.getStateEstimatorParameters().isRunningOnRealRobot();
       PrintTools.debug(DEBUG, "Running on real robot: " + isRunningOnRealRobot);
@@ -126,7 +128,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
             globalDataProducer.attachListener(FingerStatePacket.class, fingerStateProviders.get(robotSide));
          fingerSetControllers.put(robotSide, new ValkyrieFingerSetController(robotSide, fingerControllerTime, fingerTrajectoryTime, fullRobotModel, isRunningOnRealRobot, registry, controllerRegistry));
          
-         jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, globalDataProducer));
+         jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, globalDataProducer, closeableAndDisposableRegistry));
       }
       
       for (RobotSide robotSide : RobotSide.values)
