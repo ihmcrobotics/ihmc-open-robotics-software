@@ -534,7 +534,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
       private void writeSpreadsheetFormattedData(File chosenFile, String timeVariable)
       {
-         PrintTools.info(this, "Writing Data File " + chosenFile.getName());
+         PrintTools.info(this, "Writing Data File " + chosenFile.getAbsolutePath());
 
          DataBuffer dataBuffer = exportData.scs.getDataBuffer();
 

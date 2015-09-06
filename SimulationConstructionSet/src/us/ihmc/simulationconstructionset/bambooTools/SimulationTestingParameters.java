@@ -119,6 +119,7 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
    {
       String st = super.toString();
       st += "createSCSMovies: " + createSCSMovies + "\n";    
+      st += "movieDir: " + System.getProperty("create.movies.dir") + "\n";
       st += "checkNothingChangedInSimulation: " + checkNothingChangedInSimulation + "\n";    
       st += "keepSCSUp: " + keepSCSUp + "\n";    
       return st;   
