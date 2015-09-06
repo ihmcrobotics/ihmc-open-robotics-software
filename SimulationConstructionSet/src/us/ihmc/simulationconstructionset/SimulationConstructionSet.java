@@ -545,6 +545,16 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    }
 
    /**
+    * Get the SimulationConstructionSetParameters that this simulation was created with
+    * 
+    * @return SimulationConstructionSetParameters
+    */
+   public SimulationConstructionSetParameters getSimulationConstructionSetParameters()
+   {
+      return parameters;
+   }
+   
+   /**
     * Get the simulation step size in seconds.
     *
     * @return Simulation step size.
