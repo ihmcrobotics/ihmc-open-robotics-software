@@ -20,7 +20,7 @@ jar {
       
       "Bundle-Name": project.name,
       "Bundle-Version": project.version,
-      "Bundle-License": "http://www.apache.org/licenses/LICENSE-2.0",
+      "Bundle-License": "http://www.apache.org/licenses/LICENSE-2.0.txt",
       "Bundle-Vendor": "rosjava")      
    }
 }
