@@ -20,20 +20,20 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl.SliderType;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class VirtualSliderBoardGui
 {
-   public static final int CHECK_TIME = 10;
    private final int MAX_CHANNELS_PER_ROW = 13;
 
    private final int sliderBoardMax = 127;
 
    private ArrayList<MidiControl> virtualMidiControls = new ArrayList<MidiControl>();
 
-   private final ArrayList<JPanel> sliderPanels = new ArrayList<JPanel>();
+   private ArrayList<JPanel> sliderPanels = new ArrayList<JPanel>();
 
    private JPanel mainPanel = new JPanel();
 
@@ -44,37 +44,37 @@ public class VirtualSliderBoardGui
    private int numCol = 0;
    private final int sliderWidth = 80;
    private final int sliderHeight = 300;
+   
    private MidiSliderBoard sliderBoard;
    private VariableChangedListener listener;
-   ReentrantLock slidersLock = new ReentrantLock();
-   ReentrantLock controlsLock = new ReentrantLock();
+   private ReentrantLock slidersLock = new ReentrantLock();
+   private ReentrantLock controlsLock = new ReentrantLock();
 
 
-   private class JSliderControl extends JSlider
+   private class JSliderControl extends JSlider implements CloseableAndDisposable
    {
       private static final long serialVersionUID = 8570638563928914747L;
       public boolean changeLock = false;
-      public Thread timer;
       public boolean updatedRemotly = false;
 
-      JTextField value;
-      MidiControl ctrl;
+      private JTextField value;
+      private MidiControl midiControl;
       public int sliderMax;
 
-      public JSliderControl(int orientation, int min, int max, int value, MidiControl ctrl)
+      public JSliderControl(int orientation, int min, int max, int value, MidiControl midiControl)
       {
          super(orientation, min, max, value);
-         this.ctrl = ctrl;
+         this.midiControl = midiControl;
          setSnapToTicks(true);
 
-         if (ctrl.sliderType == SliderType.BOOLEAN)
+         if (midiControl.sliderType == SliderType.BOOLEAN)
          {
             sliderMax = 1;
 
          }
-         else if (ctrl.sliderType == SliderType.ENUM)
+         else if (midiControl.sliderType == SliderType.ENUM)
          {
-            sliderMax = ((EnumYoVariable) ctrl.var).getEnumValues().length - 1;
+            sliderMax = ((EnumYoVariable<?>) midiControl.var).getEnumValues().length - 1;
          }
          else
             sliderMax = 127;
@@ -82,14 +82,14 @@ public class VirtualSliderBoardGui
 
       public MidiControl getControl()
       {
-         return ctrl;
+         return midiControl;
       }
 
       synchronized public void lock()
       {
          if (!changeLock)
          {
-            timer = new Thread(new Runnable()
+            Thread timer = new Thread(new Runnable()
             {
                public void run()
                {
@@ -108,6 +108,12 @@ public class VirtualSliderBoardGui
             });
             timer.start();
          }
+      }
+
+      @Override
+      public void closeAndDispose()
+      {
+         midiControl = null;
       }
    }
 
@@ -136,7 +142,7 @@ public class VirtualSliderBoardGui
 
       listener = new VariableChangedListener()
       {
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             slidersLock.lock();
 
@@ -160,12 +166,12 @@ public class VirtualSliderBoardGui
    public void closeAndDispose()
    {
       sliderPanels.clear();
+      sliderPanels = null;
 
       SwingUtilities.invokeLater(new Runnable() {
          public void run() {
             mainPanel.setVisible(false);
             mainPanel = null;
-
 
             frame.setVisible(false);
             frame.dispose();
@@ -173,11 +179,21 @@ public class VirtualSliderBoardGui
          }
       });
 
+      virtualMidiControls.clear();
+      virtualMidiControls = null;
+      
+      for (JSliderControl slider : sliders)
+      {
+         slider.closeAndDispose();
+      }
+      
       sliders.clear();
       sliders = null;
 
       sliderBoard = null;
       listener = null;
+      
+      mainPanel = null;
    }
 
    private synchronized void addSlider(MidiControl ctrl)
@@ -185,17 +201,16 @@ public class VirtualSliderBoardGui
       virtualMidiControls.add(ctrl);
       ctrl.var.addVariableChangedListener(listener);
       setUpGui();
-
    }
 
-   private void removeSlider(MidiControl ctrl)
+   private void removeSlider(MidiControl midiControl)
    {
 	   controlsLock.lock();
-      virtualMidiControls.remove(ctrl);
+      virtualMidiControls.remove(midiControl);
 
-      if (ctrl.var.getVariableChangedListeners().contains(listener))
+      if (midiControl.var.getVariableChangedListeners().contains(listener))
       {
-         ctrl.var.removeVariableChangedListener(listener);
+         midiControl.var.removeVariableChangedListener(listener);
       }
 
       setUpGui();
@@ -218,9 +233,9 @@ public class VirtualSliderBoardGui
 
          else if (current.sliderType == SliderType.ENUM)
          {
-            slider = new JSliderControl(SwingConstants.VERTICAL, 0, ((EnumYoVariable) current.var).getEnumValues().length - 1,
+            slider = new JSliderControl(SwingConstants.VERTICAL, 0, ((EnumYoVariable<?>) current.var).getEnumValues().length - 1,
                                         SliderBoardUtils.valueRatioConvertToIntWithExponents(current,
-                                           ((EnumYoVariable) current.var).getEnumValues().length - 1), current);
+                                           ((EnumYoVariable<?>) current.var).getEnumValues().length - 1), current);
          }
 
          else
@@ -231,9 +246,9 @@ public class VirtualSliderBoardGui
          slider.addChangeListener(new SliderChangeListener(slider, this));
 
          JPanel sliderPanel = new JPanel(new BorderLayout());
-         sliderPanel.setBorder(new TitledBorder(slider.ctrl.var.getName()));
+         sliderPanel.setBorder(new TitledBorder(slider.midiControl.var.getName()));
          sliderPanel.add(slider, BorderLayout.CENTER);
-         slider.value = new JTextField(slider.ctrl.var.getNumericValueAsAString());
+         slider.value = new JTextField(slider.midiControl.var.getNumericValueAsAString());
          sliders.add(slider);
          slider.value.addActionListener(new textFieldListener(slider));
          sliderPanel.add(slider.value, BorderLayout.SOUTH);
@@ -250,7 +265,6 @@ public class VirtualSliderBoardGui
          mainPanel.setLayout(new GridLayout(numRow, numCol));
 
          mainPanel.add(sliderPanel, sliderPanels.size() - 1);
-
       }
 
       resizePanel();
@@ -264,9 +278,9 @@ public class VirtualSliderBoardGui
          slider.updatedRemotly = true;
 
          // slider.ctrl.currentVal = sliderVal;
-         slider.setValue(SliderBoardUtils.valueRatioConvertToIntWithExponents(slider.ctrl, slider.sliderMax));
+         slider.setValue(SliderBoardUtils.valueRatioConvertToIntWithExponents(slider.midiControl, slider.sliderMax));
 
-         String formattedValue = new DecimalFormat("#.##").format(slider.ctrl.var.getValueAsDouble());
+         String formattedValue = new DecimalFormat("#.##").format(slider.midiControl.var.getValueAsDouble());
 
          slider.value.setText(formattedValue);
       }
@@ -277,22 +291,22 @@ public class VirtualSliderBoardGui
       if (!slider.updatedRemotly)
       {
          // channel is between 0 and 15. value is between 0 and 127.
-         if (slider.ctrl.currentVal == sliderVal)
+         if (slider.midiControl.currentVal == sliderVal)
             return;
-         slider.ctrl.currentVal = sliderVal;
+         slider.midiControl.currentVal = sliderVal;
          slider.lock();
-         slider.ctrl.var.setValueFromDouble(sliderVal);
+         slider.midiControl.var.setValueFromDouble(sliderVal);
 
          for (VariableChangedListener listener : sliderBoard.getVariableChangedListeners())
          {
-            listener.variableChanged(slider.ctrl.var);
+            listener.variableChanged(slider.midiControl.var);
          }
 
          // System.out.println(slider.ctrl.var.getValueAsDouble()+" " +SliderBoardUtils.valueRatioConvertToIntWithExponents(slider.ctrl, slider.sliderMax));
 
-         slider.setValue(SliderBoardUtils.valueRatioConvertToIntWithExponents(slider.ctrl, slider.sliderMax));
+         slider.setValue(SliderBoardUtils.valueRatioConvertToIntWithExponents(slider.midiControl, slider.sliderMax));
 
-         String formattedValue = new DecimalFormat("#.##").format(slider.ctrl.var.getValueAsDouble());
+         String formattedValue = new DecimalFormat("#.##").format(slider.midiControl.var.getValueAsDouble());
 
          slider.value.setText(formattedValue);
       }
@@ -314,7 +328,7 @@ public class VirtualSliderBoardGui
       public void stateChanged(ChangeEvent e)
       {
          // System.out.println();
-         board.sliderSlid(slider, SliderBoardUtils.valueRatioConvertToDoubleWithExponents(slider.ctrl, slider.getValue(), slider.sliderMax));
+         board.sliderSlid(slider, SliderBoardUtils.valueRatioConvertToDoubleWithExponents(slider.midiControl, slider.getValue(), slider.sliderMax));
       }
    }
 
@@ -338,7 +352,6 @@ public class VirtualSliderBoardGui
       public textFieldListener(JSliderControl slider)
       {
          this.slider = slider;
-
       }
 
       public void actionPerformed(ActionEvent e)
