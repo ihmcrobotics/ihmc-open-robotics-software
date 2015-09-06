@@ -47,7 +47,7 @@ public class HandJointAngleCommunicator implements CloseableAndDisposable
       packetCopier = new ConcurrentCopier<HandJointAnglePacket>(HandJointAngleCommunicator.builder);
       executor = startWriterThread();
       
-      closeableAndDisposableRegistry.registerCloseable(this);
+      closeableAndDisposableRegistry.registerCloseableAndDisposable(this);
    }
 
    private ScheduledExecutorService startWriterThread()

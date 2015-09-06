@@ -19,16 +19,16 @@ public class CloseableAndDisposableRegistry
    {
    }
    
-   public void registerCloseable(CloseableAndDisposable closeable)
+   public void registerCloseableAndDisposable(CloseableAndDisposable closeable)
    {
       this.closeableAndDisposables.add(closeable);
    }
    
    public void closeAndDispose()
    {
-      for (CloseableAndDisposable closeable : closeableAndDisposables)
+      for (CloseableAndDisposable closeableAndDisposable : closeableAndDisposables)
       {
-         closeable.closeAndDispose();
+         closeableAndDisposable.closeAndDispose();
       }
       
       closeableAndDisposables.clear();
