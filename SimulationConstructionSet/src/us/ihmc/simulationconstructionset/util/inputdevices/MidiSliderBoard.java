@@ -15,12 +15,13 @@ import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl.ControlType;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl.SliderType;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
-public class MidiSliderBoard implements ExitActionListener
+public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposable
 {
    // There are problems with using both virtual and physical sliderboards at the same time when connected to the biped.
    private boolean alwaysShowVirtualSliderBoard = false;
@@ -35,17 +36,17 @@ public class MidiSliderBoard implements ExitActionListener
    // public int sliderOffset = 0;
    public int sliderBoardMax = 127;
 
-   protected final Hashtable<Integer, MidiControl> controlsHashTable = new Hashtable<Integer, MidiControl>(40);
-   protected final ArrayList<SliderListener> internalListeners = new ArrayList<SliderListener>();
-   private final ArrayList<VariableChangedListener> variableChangedListeners = new ArrayList<VariableChangedListener>();
+   protected Hashtable<Integer, MidiControl> controlsHashTable = new Hashtable<Integer, MidiControl>(40);
+   protected ArrayList<SliderListener> internalListeners = new ArrayList<SliderListener>();
+   private ArrayList<VariableChangedListener> variableChangedListeners = new ArrayList<VariableChangedListener>();
 
-   private final ArrayList<SliderBoardControlAddedListener> controlAddedListeners = new ArrayList<SliderBoardControlAddedListener>();
+   private ArrayList<SliderBoardControlAddedListener> controlAddedListeners = new ArrayList<SliderBoardControlAddedListener>();
 
    private Devices preferedDevice = Devices.VIRTUAL;
    private int preferdDeviceNumber = -1;
 
    private static final boolean DEBUG = false;
-   private static final boolean DEBUG_CLOSE_AND_DISPOSE = false;
+   private static final boolean DEBUG_CLOSE_AND_DISPOSE = true;
 
    private MidiDevice inDevice = null;
    private Receiver midiOut = null;
@@ -111,7 +112,7 @@ public class MidiSliderBoard implements ExitActionListener
             final Object self = this;
             listener = new VariableChangedListener()
             {
-               public void variableChanged(YoVariable v)
+               public void variableChanged(YoVariable<?> v)
                {
                   synchronized (self)
                   {
@@ -177,9 +178,26 @@ public class MidiSliderBoard implements ExitActionListener
 
    public void closeAndDispose()
    {
+      holder = null;
+      
+      controlsHashTable.clear();
+      controlsHashTable = null;
+      
+      internalListeners.clear();
+      internalListeners = null;
+      
+      variableChangedListeners.clear();
+      variableChangedListeners = null;
+      
+      controlAddedListeners.clear();
+      controlAddedListeners = null;
+      
       if (DEBUG_CLOSE_AND_DISPOSE) System.out.println("Closing And Disposing virtualSliderBoard");
       if (virtualSliderBoard != null)
+      {
          virtualSliderBoard.closeAndDispose();
+         virtualSliderBoard = null;
+      }
       
       if (inDevice != null)
       {
@@ -430,7 +448,7 @@ public class MidiSliderBoard implements ExitActionListener
       setButton(channel, holder.getVariable(name));
    }
 
-   public void setButton(int channel, YoVariable var)
+   public void setButton(int channel, YoVariable<?> var)
    {
       int offset;
       if ((channel >= 17) && (channel <= 20))
@@ -445,7 +463,7 @@ public class MidiSliderBoard implements ExitActionListener
       setKnobButton(channel, holder.getVariable(name));
    }
 
-   public void setKnobButton(int channel, YoVariable var)
+   public void setKnobButton(int channel, YoVariable<?> var)
    {
       setControl(channel - 48, var, 0, 1, 1, SliderType.BOOLEAN, ControlType.BUTTON);
    }
@@ -480,7 +498,7 @@ public class MidiSliderBoard implements ExitActionListener
       setSlider(channel, holder.getVariable(name), min, max, exponent, hires);
    }
 
-   public void setSlider(int channel, YoVariable var, double min, double max)
+   public void setSlider(int channel, YoVariable<?> var, double min, double max)
    {
       setSlider(channel, var, min, max, 1.0);
    }
@@ -510,7 +528,7 @@ public class MidiSliderBoard implements ExitActionListener
       setKnob(channel, holder.getVariable(name), min, max, exponent, hires);
    }
 
-   public void setKnob(int channel, YoVariable var, double min, double max)
+   public void setKnob(int channel, YoVariable<?> var, double min, double max)
    {
       setKnob(channel, var, min, max, 1.0);
    }
@@ -530,37 +548,37 @@ public class MidiSliderBoard implements ExitActionListener
       setSliderBoolean(channel, holder.getVariable(name));
    }
 
-   public void setSliderBoolean(int channel, YoVariable var)
+   public void setSliderBoolean(int channel, YoVariable<?> var)
    {
       setControl(channel, var, 0.0, 1.0, 1.0, SliderType.BOOLEAN, ControlType.SLIDER);
    }
 
-   public void setSlider(int channel, YoVariable var, double min, double max, double exponent)
+   public void setSlider(int channel, YoVariable<?> var, double min, double max, double exponent)
    {
       setControl(channel, var, min, max, exponent, SliderType.NUMBER, ControlType.SLIDER);
    }
    
-   public void setSlider(int channel, YoVariable var, double min, double max, double exponent, double hires)
+   public void setSlider(int channel, YoVariable<?> var, double min, double max, double exponent, double hires)
    {
       setControl(channel, var, min, max, exponent, hires, SliderType.NUMBER, ControlType.SLIDER);
    }
 
-   public void setKnob(int channel, YoVariable var, double min, double max, double exponent)
+   public void setKnob(int channel, YoVariable<?> var, double min, double max, double exponent)
    {
       setControl(channel - 80, var, min, max, exponent, SliderType.NUMBER, ControlType.KNOB);
    }
    
-   public void setKnob(int channel, YoVariable var, double min, double max, double exponent, double hires)
+   public void setKnob(int channel, YoVariable<?> var, double min, double max, double exponent, double hires)
    {
       setControl(channel - 80, var, min, max, exponent, hires, SliderType.NUMBER, ControlType.KNOB);
    }
 
-   private void setControl(int channel, YoVariable var, double min, double max, double exponent, SliderType sliderType, ControlType controlType)
+   private void setControl(int channel, YoVariable<?> var, double min, double max, double exponent, SliderType sliderType, ControlType controlType)
    {
       setControl(channel, var, min, max, exponent, (min+max)/2.0, sliderType, controlType);
    }
    
-   private synchronized void setControl(int channel, YoVariable var, double min, double max, double exponent, double hires, SliderType sliderType, ControlType controlType)
+   private synchronized void setControl(int channel, YoVariable<?> var, double min, double max, double exponent, double hires, SliderType sliderType, ControlType controlType)
    {
       if (var != null)
       {

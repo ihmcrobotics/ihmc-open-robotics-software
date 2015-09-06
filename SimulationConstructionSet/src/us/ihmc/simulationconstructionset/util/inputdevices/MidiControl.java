@@ -11,7 +11,7 @@ public class MidiControl
    public double exponent = 1;
    public double hires = (min+max)/2.0;
    public double currentVal = -1;
-   YoVariable var = null;
+   public YoVariable<?> var = null;
 
    public enum SliderType
    {
@@ -28,17 +28,17 @@ public class MidiControl
    public ControlType controlType;
    public boolean notify = true;
 
-   public MidiControl(int mapping, YoVariable var, double max, double min, double exponent)
+   public MidiControl(int mapping, YoVariable<?> var, double max, double min, double exponent)
    {
       this(mapping, var, max, min, exponent, (min+max)/2.0, true);
    }
    
-   public MidiControl(int mapping, YoVariable var, double max, double min, double exponent, double hires)
+   public MidiControl(int mapping, YoVariable<?> var, double max, double min, double exponent, double hires)
    {
       this(mapping, var, max, min, exponent, hires, true);
    }
 
-   public MidiControl(int mapping, YoVariable var, double max, double min, double exponent, double hires, boolean notify)
+   public MidiControl(int mapping, YoVariable<?> var, double max, double min, double exponent, double hires, boolean notify)
    {
       this.mapping = mapping;
       this.currentVal = var.getValueAsDouble();
