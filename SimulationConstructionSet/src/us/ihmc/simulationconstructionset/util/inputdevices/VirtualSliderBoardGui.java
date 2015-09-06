@@ -10,7 +10,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -21,11 +20,12 @@ import javax.swing.event.ChangeListener;
 
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl.SliderType;
 import us.ihmc.tools.thread.CloseableAndDisposable;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
-public class VirtualSliderBoardGui
+public class VirtualSliderBoardGui implements CloseableAndDisposable
 {
    private final int MAX_CHANNELS_PER_ROW = 13;
 
@@ -44,82 +44,18 @@ public class VirtualSliderBoardGui
    private int numCol = 0;
    private final int sliderWidth = 80;
    private final int sliderHeight = 300;
-   
+
    private MidiSliderBoard sliderBoard;
    private VariableChangedListener listener;
    private ReentrantLock slidersLock = new ReentrantLock();
    private ReentrantLock controlsLock = new ReentrantLock();
 
+   private CloseableAndDisposableRegistry closeableAndDisposableRegistry;
 
-   private class JSliderControl extends JSlider implements CloseableAndDisposable
+   public VirtualSliderBoardGui(MidiSliderBoard sliderBoard, final CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
-      private static final long serialVersionUID = 8570638563928914747L;
-      public boolean changeLock = false;
-      public boolean updatedRemotly = false;
+      this.closeableAndDisposableRegistry = closeableAndDisposableRegistry;
 
-      private JTextField value;
-      private MidiControl midiControl;
-      public int sliderMax;
-
-      public JSliderControl(int orientation, int min, int max, int value, MidiControl midiControl)
-      {
-         super(orientation, min, max, value);
-         this.midiControl = midiControl;
-         setSnapToTicks(true);
-
-         if (midiControl.sliderType == SliderType.BOOLEAN)
-         {
-            sliderMax = 1;
-
-         }
-         else if (midiControl.sliderType == SliderType.ENUM)
-         {
-            sliderMax = ((EnumYoVariable<?>) midiControl.var).getEnumValues().length - 1;
-         }
-         else
-            sliderMax = 127;
-      }
-
-      public MidiControl getControl()
-      {
-         return midiControl;
-      }
-
-      synchronized public void lock()
-      {
-         if (!changeLock)
-         {
-            Thread timer = new Thread(new Runnable()
-            {
-               public void run()
-               {
-                  changeLock = true;
-
-                  try
-                  {
-                     Thread.sleep(1000);
-                  }
-                  catch (InterruptedException e)
-                  {
-                  }
-
-                  changeLock = false;
-               }
-            });
-            timer.start();
-         }
-      }
-
-      @Override
-      public void closeAndDispose()
-      {
-         midiControl = null;
-      }
-   }
-
-
-   public VirtualSliderBoardGui(MidiSliderBoard sliderBoard)
-   {
       this.sliderBoard = sliderBoard;
       frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
       frame.getContentPane().setLayout(new BorderLayout());
@@ -136,7 +72,7 @@ public class VirtualSliderBoardGui
 
          public void controlRemoved(MidiControl ctrl)
          {
-            removeSlider(ctrl);
+            removeSlider(ctrl, closeableAndDisposableRegistry);
          }
       });
 
@@ -161,6 +97,7 @@ public class VirtualSliderBoardGui
       // Thread valueCheckerThread = new Thread(new ValueChecker());
       // valueCheckerThread.start();
 
+      closeableAndDisposableRegistry.registerCloseableAndDisposable(this);
    }
 
    public void closeAndDispose()
@@ -168,8 +105,10 @@ public class VirtualSliderBoardGui
       sliderPanels.clear();
       sliderPanels = null;
 
-      SwingUtilities.invokeLater(new Runnable() {
-         public void run() {
+      SwingUtilities.invokeLater(new Runnable()
+      {
+         public void run()
+         {
             mainPanel.setVisible(false);
             mainPanel = null;
 
@@ -181,18 +120,13 @@ public class VirtualSliderBoardGui
 
       virtualMidiControls.clear();
       virtualMidiControls = null;
-      
-      for (JSliderControl slider : sliders)
-      {
-         slider.closeAndDispose();
-      }
-      
+
       sliders.clear();
       sliders = null;
 
       sliderBoard = null;
       listener = null;
-      
+
       mainPanel = null;
    }
 
@@ -200,12 +134,12 @@ public class VirtualSliderBoardGui
    {
       virtualMidiControls.add(ctrl);
       ctrl.var.addVariableChangedListener(listener);
-      setUpGui();
+      setUpGui(closeableAndDisposableRegistry);
    }
 
-   private void removeSlider(MidiControl midiControl)
+   private void removeSlider(MidiControl midiControl, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
-	   controlsLock.lock();
+      controlsLock.lock();
       virtualMidiControls.remove(midiControl);
 
       if (midiControl.var.getVariableChangedListeners().contains(listener))
@@ -213,10 +147,10 @@ public class VirtualSliderBoardGui
          midiControl.var.removeVariableChangedListener(listener);
       }
 
-      setUpGui();
+      setUpGui(closeableAndDisposableRegistry);
    }
 
-   public void setUpGui()
+   private void setUpGui(CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       slidersLock.lock();
       sliderPanels.clear();
@@ -228,19 +162,20 @@ public class VirtualSliderBoardGui
          JSliderControl slider;
          if (current.sliderType == SliderType.BOOLEAN)
          {
-            slider = new JSliderControl(SwingConstants.VERTICAL, 0, 1, SliderBoardUtils.valueRatioConvertToIntWithExponents(current, 0), current);
+            slider = new JSliderControl(SwingConstants.VERTICAL, 0, 1, SliderBoardUtils.valueRatioConvertToIntWithExponents(current, 0), current,
+                                        closeableAndDisposableRegistry);
          }
 
          else if (current.sliderType == SliderType.ENUM)
          {
             slider = new JSliderControl(SwingConstants.VERTICAL, 0, ((EnumYoVariable<?>) current.var).getEnumValues().length - 1,
                                         SliderBoardUtils.valueRatioConvertToIntWithExponents(current,
-                                           ((EnumYoVariable<?>) current.var).getEnumValues().length - 1), current);
+                                           ((EnumYoVariable<?>) current.var).getEnumValues().length - 1), current, closeableAndDisposableRegistry);
          }
 
          else
             slider = new JSliderControl(SwingConstants.VERTICAL, 0, sliderBoardMax,
-                                        SliderBoardUtils.valueRatioConvertToIntWithExponents(current, sliderBoardMax), current);
+                                        SliderBoardUtils.valueRatioConvertToIntWithExponents(current, sliderBoardMax), current, closeableAndDisposableRegistry);
 
          slider.setPaintLabels(false);
          slider.addChangeListener(new SliderChangeListener(slider, this));

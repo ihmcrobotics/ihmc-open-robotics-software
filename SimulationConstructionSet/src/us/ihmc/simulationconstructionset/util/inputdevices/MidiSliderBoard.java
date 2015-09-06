@@ -16,6 +16,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl.ControlType;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl.SliderType;
 import us.ihmc.tools.thread.CloseableAndDisposable;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
@@ -26,10 +27,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    // There are problems with using both virtual and physical sliderboards at the same time when connected to the biped.
    private boolean alwaysShowVirtualSliderBoard = false;
 
-   private enum Devices
-   {
-      VIRTUAL, MOTORIZED, GENERIC
-   }
+   private enum Devices {VIRTUAL, MOTORIZED, GENERIC}
 
    public static final int CHECK_TIME = 10;
 
@@ -54,7 +52,9 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    private VirtualSliderBoardGui virtualSliderBoard;
    private VariableChangedListener listener;
    private YoVariableHolder holder;
-   
+
+   private CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
+
    public MidiSliderBoard(SimulationConstructionSet scs)
    {
       this(scs, true);
@@ -78,13 +78,13 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          {
             this.holder = scs;
          }
-         
+
          if (showVirtualSliderBoard && (preferedDevice.equals(Devices.VIRTUAL) || alwaysShowVirtualSliderBoard))
          {
             if ((scs == null) || (scs.getStandardSimulationGUI() != null))
             {
                System.out.println("Setting Up Virtual Slider Board");
-               virtualSliderBoard = new VirtualSliderBoardGui(this);
+               virtualSliderBoard = new VirtualSliderBoardGui(this, closeableAndDisposableRegistry);
             }
 
          }
@@ -158,7 +158,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
             {
                if (DEBUG)
                   System.out.println("EVL::valueChanged [" + midiControl.mapping + "] value to : " + midiControl.var.getValueAsDouble() + " YoVal:"
-                        + midiControl.var.getValueAsDouble());
+                                     + midiControl.var.getValueAsDouble());
             }
          });
       }
@@ -178,46 +178,42 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    public void closeAndDispose()
    {
+      closeableAndDisposableRegistry.closeAndDispose();
+      virtualSliderBoard = null;
+
       holder = null;
-      
+
       controlsHashTable.clear();
       controlsHashTable = null;
-      
+
       internalListeners.clear();
       internalListeners = null;
-      
+
       variableChangedListeners.clear();
       variableChangedListeners = null;
-      
+
       controlAddedListeners.clear();
       controlAddedListeners = null;
-      
-      if (DEBUG_CLOSE_AND_DISPOSE) System.out.println("Closing And Disposing virtualSliderBoard");
-      if (virtualSliderBoard != null)
-      {
-         virtualSliderBoard.closeAndDispose();
-         virtualSliderBoard = null;
-      }
-      
+
       if (inDevice != null)
       {
          try
          {
             inDevice.close();
          }
-         catch(Exception e)
+         catch (Exception e)
          {
             System.err.println("Exception when trying to close inDevice in MidiSliderBoard.closeAndDispose()");
          }
       }
-      
+
       if (midiOut != null)
       {
          try
          {
             midiOut.close();
          }
-         catch(Exception e)
+         catch (Exception e)
          {
             System.err.println("Exception when trying to close midiOut in MidiSliderBoard.closeAndDispose()");
          }
@@ -482,14 +478,14 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
       setSlider(channel, holder.getVariable(name), min, max, exponent);
    }
-   
+
    public void setSlider(int channel, String name, double min, double max, double exponent, double hires)
-   { 
+   {
       setSlider(channel, name, holder, min, max, exponent, hires);
    }
-   
+
    public void setSlider(int channel, String name, YoVariableHolder holder, double min, double max, double exponent, double hires)
-   {  
+   {
       if (!holder.hasUniqueVariable(name))
       {
          System.err.println("trying to add yovariable to slider, but it does not exist, or more than 1 exists: " + name);
@@ -514,17 +510,17 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       {
          System.err.println("trying to add yovariable to knob, but it does not exist, or more than 1 exists: " + name);
       }
-      
+
       setKnob(channel, holder.getVariable(name), min, max, exponent);
    }
-   
+
    public void setKnob(int channel, String name, YoVariableHolder holder, double min, double max, double exponent, double hires)
    {
       if (!holder.hasUniqueVariable(name))
       {
          System.err.println("trying to add yovariable to knob, but it does not exist, or more than 1 exists: " + name);
       }
-      
+
       setKnob(channel, holder.getVariable(name), min, max, exponent, hires);
    }
 
@@ -557,7 +553,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    {
       setControl(channel, var, min, max, exponent, SliderType.NUMBER, ControlType.SLIDER);
    }
-   
+
    public void setSlider(int channel, YoVariable<?> var, double min, double max, double exponent, double hires)
    {
       setControl(channel, var, min, max, exponent, hires, SliderType.NUMBER, ControlType.SLIDER);
@@ -567,7 +563,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    {
       setControl(channel - 80, var, min, max, exponent, SliderType.NUMBER, ControlType.KNOB);
    }
-   
+
    public void setKnob(int channel, YoVariable<?> var, double min, double max, double exponent, double hires)
    {
       setControl(channel - 80, var, min, max, exponent, hires, SliderType.NUMBER, ControlType.KNOB);
@@ -575,10 +571,11 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    private void setControl(int channel, YoVariable<?> var, double min, double max, double exponent, SliderType sliderType, ControlType controlType)
    {
-      setControl(channel, var, min, max, exponent, (min+max)/2.0, sliderType, controlType);
+      setControl(channel, var, min, max, exponent, (min + max) / 2.0, sliderType, controlType);
    }
-   
-   private synchronized void setControl(int channel, YoVariable<?> var, double min, double max, double exponent, double hires, SliderType sliderType, ControlType controlType)
+
+   private synchronized void setControl(int channel, YoVariable<?> var, double min, double max, double exponent, double hires, SliderType sliderType,
+           ControlType controlType)
    {
       if (var != null)
       {
@@ -775,7 +772,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    public void exitActionPerformed()
    {
       printIfDebug("Exit Action was performed. Closing and disposing " + getClass().getSimpleName());
-      
+
       this.closeAndDispose();
    }
 
@@ -784,13 +781,15 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       public void valueChanged(MidiControl midiControl);
    }
 
+
    public void setVirtualSliderBoardFrameLocation(int x, int y)
    {
       virtualSliderBoard.setFrameLocation(x, y);
    }
-   
+
    private void printIfDebug(String string)
    {
-      if (DEBUG) System.out.println(string);
+      if (DEBUG)
+         System.out.println(string);
    }
 }

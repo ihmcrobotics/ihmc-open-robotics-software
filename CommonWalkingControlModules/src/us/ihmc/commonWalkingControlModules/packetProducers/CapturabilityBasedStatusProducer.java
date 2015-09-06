@@ -29,7 +29,7 @@ public class CapturabilityBasedStatusProducer implements Runnable, CloseableAndD
       this.capturabilityBuffer = new ConcurrentRingBuffer<>(new CapturabilityBasedStatusBuilder(), 16);
       scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
       
-      closeAndDisposeRegistry.registerCloseable(this);
+      closeAndDisposeRegistry.registerCloseableAndDisposable(this);
    }
 
    public void sendStatus(FramePoint2d capturePoint2d, FramePoint2d desiredCapturePoint2d, FramePoint centerOfMass, SideDependentList<FrameConvexPolygon2d> footSupportPolygons)
