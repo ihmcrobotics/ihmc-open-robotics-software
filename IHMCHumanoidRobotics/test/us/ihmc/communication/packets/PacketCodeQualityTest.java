@@ -17,7 +17,7 @@ import us.ihmc.tools.agileTesting.BambooPlanType;
 @BambooPlan(planType = BambooPlanType.CodeQuality)
 public class PacketCodeQualityTest
 {
-	@EstimatedDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.1)
    @Test(timeout = 30000)
    public void testAllPacketFieldsArePublic()
    {
