@@ -25,7 +25,7 @@ jar {
       
       "Bundle-Name": project.name,
       "Bundle-Version": project.version,
-      "Bundle-License": "https://gnu.org/licenses/gpl-3.0.txt",
+      "Bundle-License": "http://gnu.org/licenses/gpl-3.0.txt",
       "Bundle-Vendor": "IHMC")
    }
 }
