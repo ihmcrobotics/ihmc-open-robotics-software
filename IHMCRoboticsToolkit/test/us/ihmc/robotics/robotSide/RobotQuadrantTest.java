@@ -10,18 +10,6 @@ import org.junit.Test;
 
 import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2006</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class RobotQuadrantTest
 {
    private RobotQuadrant frontLeft = RobotQuadrant.FRONT_LEFT;
@@ -51,16 +39,16 @@ public class RobotQuadrantTest
       assertEquals(hindLeft, actualReturn.get(3));
    }
 
-   @EstimatedDuration(duration = 0.1)
-   @Test(timeout = 30000)
-   public void testGetBodyQuadrant()
-   {
+//   @EstimatedDuration(duration = 0.1)
+//   @Test(timeout = 30000)
+//   public void testGetBodyQuadrant()
+//   {
 //      ReferenceFrame frame = LittleDogFrames.getBodyFrame();
 //      assertEquals(frontLeft, getBodyQuadrant(new FramePoint(frame, 1.0, 1.0, 0)));
 //      assertEquals(frontRight, getBodyQuadrant(new FramePoint(frame, 1.0, -1.0, 0)));
 //      assertEquals(hindRight, getBodyQuadrant(new FramePoint(frame, -1.0, -1.0, 0)));
 //      assertEquals(hindLeft, getBodyQuadrant(new FramePoint(frame, -1.0, 1.0, 0)));
-   }
+//   }
    
 //   private static RobotQuadrant getBodyQuadrant(FramePoint point)
 //   {
