@@ -79,7 +79,8 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
             this.holder = scs;
          }
 
-         if (showVirtualSliderBoard && (preferedDevice.equals(Devices.VIRTUAL) || alwaysShowVirtualSliderBoard))
+         boolean showSCSWindows = scs.getSimulationConstructionSetParameters().getShowWindows();
+         if (showSCSWindows && showVirtualSliderBoard && (preferedDevice.equals(Devices.VIRTUAL) || alwaysShowVirtualSliderBoard))
          {
             if ((scs == null) || (scs.getStandardSimulationGUI() != null))
             {

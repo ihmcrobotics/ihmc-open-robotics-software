@@ -105,6 +105,15 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
       sliderPanels.clear();
       sliderPanels = null;
 
+      virtualMidiControls.clear();
+      virtualMidiControls = null;
+
+      sliders.clear();
+      sliders = null;
+
+      sliderBoard = null;
+      listener = null;
+      
       SwingUtilities.invokeLater(new Runnable()
       {
          public void run()
@@ -117,17 +126,6 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
             frame = null;
          }
       });
-
-      virtualMidiControls.clear();
-      virtualMidiControls = null;
-
-      sliders.clear();
-      sliders = null;
-
-      sliderBoard = null;
-      listener = null;
-
-      mainPanel = null;
    }
 
    private synchronized void addSlider(MidiControl ctrl)
