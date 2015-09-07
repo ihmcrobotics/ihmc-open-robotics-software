@@ -23,11 +23,9 @@ dependencies {
 	compile group: 'jgraph', name: 'jgraph', version: '5.13.0.0' //1.14.0.0
 	compile group: 'com.github.rwl', name: 'jtransforms', version: '2.4.0'
 	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.1.1'
-	compile group: 'us.ihmc.thirdparty', name: 'filedrop', version: 'x'
+//	compile group: 'us.ihmc.thirdparty', name: 'filedrop', version: 'x'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-	compile group: 'us.ihmc.thirdparty', name: 'gdx', version: '1.0.1'
-	compile group: 'us.ihmc.thirdparty', name: 'gdx-bullet', version: '1.0.1'
-	compile group: 'us.ihmc.thirdparty', name: 'gdx-bullet-platform', version: '1.0.1', classifier: 'natives-desktop'
+	compile group: 'com.badlogicgames.gdx', name: 'gdx-bullet-platform', version: '1.0.1', classifier: 'natives-desktop'
 	compile group: 'org.apache.pdfbox', name: 'pdfbox', version: '1.8.4'
 	
 	compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'

@@ -42,7 +42,6 @@ import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 import javax.vecmath.Color3f;
 
-import net.iharder.dnd.FileDrop;
 import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
@@ -202,8 +201,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    private BookmarkedVariablesHolder bookmarkedVariablesHolder;
 
    private ArrayList<TickUpdateListener> tickUpdateListeners = new ArrayList<TickUpdateListener>();
-
-   private FileDrop fileDrop;
    
    public StandardSimulationGUI(Graphics3DAdapter graphics3dAdapter, SimulationSynchronizer simulationSynchronizer, AllCommandsExecutor allCommandsExecutor,
          AllDialogConstructorsHolder allDialogConstructorsHolder, SimulationConstructionSet sim, YoVariableHolder yoVariableHolder, Robot[] robots,
@@ -251,8 +248,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       {
          parentContainer = jApplet;
       }
-
-      this.fileDrop = new FileDrop(parentContainer, /* dragBorder, */StdOutFileDropListener.INSTANCE);
 
       // frame.addPropertyChangeListener(this);
       // frame.addWindowStateListener(this);
@@ -3022,11 +3017,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       viewportSelectorCommandListener = null;
 
       jApplet = null;
-
-      if (DEBUG_CLOSE_AND_DISPOSE)
-         System.out.println("Removing FileDrop hooks.");
-      FileDrop.remove(parentContainer);
-      fileDrop = null;
       
       parentContainer.removeAll();
       parentContainer = null;
