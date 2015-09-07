@@ -57,7 +57,7 @@ public class SingularValueExplorationAndExamplesTest
       JUnitTools.assertMatrixEquals(matrixJ, matrixJReconstructed, 1e-7);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.1)
 	@Test(timeout = 30000)
    public void showIMinusNNTransposeJDoesntMakeSense()
    {

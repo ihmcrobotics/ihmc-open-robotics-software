@@ -15,8 +15,8 @@ import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
 public class KryoAnnotationTest
 {
-   @Test(timeout = 1000)
-   @EstimatedDuration(duration = 100)
+   @Test(timeout = 30000)
+	@EstimatedDuration(duration = 0.1)
    public void testOptionalAnnotation()
    {
       final int ITERATIONS = 1000;

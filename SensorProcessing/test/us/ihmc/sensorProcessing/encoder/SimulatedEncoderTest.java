@@ -21,15 +21,15 @@ public class SimulatedEncoderTest
    {
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testSimpleTest()
    {
       assertEquals(1, 1);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testConstructor()
    {
       double ticksPerPosition = 1.0;
@@ -37,8 +37,8 @@ public class SimulatedEncoderTest
       new SimulatedEncoder(ticksPerPosition, "simEncTest", parentRegistry);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testGetTicksOne()
    {
       double ticksPerPosition = 10.0;
@@ -53,8 +53,8 @@ public class SimulatedEncoderTest
       assertEquals(expecetedTicks, simulatedEncoder.getEncoderTicks());
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testGetTicksTwo()
    {
       double ticksPerPosition = 0.5;
@@ -76,8 +76,8 @@ public class SimulatedEncoderTest
       assertEquals(expecetedTicks, simulatedEncoder.getEncoderTicks());
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testGetTicksThree()
    {
       double ticksPerPosition = 0.5;
@@ -99,8 +99,8 @@ public class SimulatedEncoderTest
       assertEquals(expecetedTicks, simulatedEncoder.getEncoderTicks());
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testGetTicksFour()
    {
       double ticksPerPosition = 10.0;
@@ -140,8 +140,8 @@ public class SimulatedEncoderTest
       assertEquals(expectedPosition, simulatedEncoder.getPositionFromEncoder(), 0.01);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testGetPositionFromEncoderTwo()
    {
       double ticksPerPosition = 10;
@@ -158,8 +158,8 @@ public class SimulatedEncoderTest
       assertEquals(expectedPosition, simulatedEncoder.getPositionFromEncoder(), 0.01);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testGetPositionFromEncoderThree()
    {
       double ticksPerPosition = 100;
@@ -174,8 +174,8 @@ public class SimulatedEncoderTest
       assertEquals(expectedPosition, simulatedEncoder.getPositionFromEncoder(), 0.01);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testGetPositionFromEncoderFour()
    {
       double ticksPerPosition = 100;
@@ -190,8 +190,8 @@ public class SimulatedEncoderTest
       assertEquals(expectedPosition, simulatedEncoder.getPositionFromEncoder(), 0.01);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testConverTicksToDistance()
    {
       double ticksPerPosition = 100;

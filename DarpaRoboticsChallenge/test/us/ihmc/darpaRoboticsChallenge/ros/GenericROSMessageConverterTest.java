@@ -22,8 +22,8 @@ public class GenericROSMessageConverterTest
 {
    private int numberOfTimesToRunEachPacketType = 1000;
 
-   @EstimatedDuration(duration = 2.3)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 10.7)
+   @Test(timeout = 54000)
    public void AllPacketTest()
    {
       PrintTools.info(

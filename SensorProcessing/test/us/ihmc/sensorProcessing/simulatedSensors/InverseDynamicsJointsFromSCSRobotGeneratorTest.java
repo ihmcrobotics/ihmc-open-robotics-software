@@ -86,8 +86,8 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
    private static final boolean DO_ASSERTS = true;
    private static final boolean DO_TWIST_ASSERTS = true;
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 2.1)
+	@Test(timeout = 30000)
    public void testSinglePinJoint() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       Robot robot = new Robot("TestSinglePinJoint");
@@ -120,8 +120,8 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 1.6)
+	@Test(timeout = 30000)
    public void testTwoPinJoints() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       Robot robot = new Robot("TestTwoPinJoints");
@@ -173,8 +173,8 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 1.7)
+	@Test(timeout = 30000)
    public void testSingleFloatingJoint() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       Robot robot = new Robot("TestSingleFloatingJoint");
@@ -211,8 +211,8 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 4.1)
+	@Test(timeout = 30000)
    public void testRandomLinearChainRobot() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       Random random = new Random(1984L);

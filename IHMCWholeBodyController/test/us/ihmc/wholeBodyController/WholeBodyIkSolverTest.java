@@ -68,8 +68,8 @@ public abstract class WholeBodyIkSolverTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @EstimatedDuration(duration = 5.0)
-   @Test(timeout = 20000)
+	@EstimatedDuration(duration = 4.0)
+   @Test(timeout = 30000)
    public void testLeftHandIn3P3RModeManual()
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
@@ -101,8 +101,8 @@ public abstract class WholeBodyIkSolverTest
    }
 
 
-   @EstimatedDuration(duration = 5.0)
-   @Test(timeout = 20000)
+	@EstimatedDuration(duration = 1.5)
+   @Test(timeout = 30000)
    public void testRightHandIn3PModeManual()
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
@@ -131,8 +131,8 @@ public abstract class WholeBodyIkSolverTest
       scs.cropBuffer();
    }
 
-   @EstimatedDuration(duration = 6.0)
-   @Test(timeout = 20000)
+	@EstimatedDuration(duration = 2.2)
+   @Test(timeout = 30000)
    public void testRightHandIn3PMode()
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
@@ -162,8 +162,8 @@ public abstract class WholeBodyIkSolverTest
    }
 
 
-   @EstimatedDuration(duration = 5.0)
-   @Test(timeout = 20000)
+	@EstimatedDuration(duration = 2.1)
+   @Test(timeout = 30000)
    public void testLeftHandIn3PModeManual()
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
@@ -192,8 +192,8 @@ public abstract class WholeBodyIkSolverTest
       scs.cropBuffer();
    }
 
-   @EstimatedDuration(duration = 6.0)
-   @Test(timeout = 20000)
+	@EstimatedDuration(duration = 5.5)
+   @Test(timeout = 30000)
    public void testLeftHandIn3PMode()
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
@@ -226,8 +226,8 @@ public abstract class WholeBodyIkSolverTest
 
 
 
-   @EstimatedDuration(duration = 5.0)
-   @Test(timeout = 20000)
+	@EstimatedDuration(duration = 6.0)
+   @Test(timeout = 30000)
    public void testRightHandIn3P2RModeManual()
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
@@ -256,8 +256,8 @@ public abstract class WholeBodyIkSolverTest
    }
 
 // PASS
-   @EstimatedDuration(duration = 5.0)
-   @Test(timeout = 20000)
+	@EstimatedDuration(duration = 2.3)
+   @Test(timeout = 30000)
    public void testLeftHandIn3P2RModeManual()
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
@@ -286,8 +286,8 @@ public abstract class WholeBodyIkSolverTest
    }
 
 // PASS
-   @EstimatedDuration(duration = 5.0)
-   @Test(timeout = 20000)
+	@EstimatedDuration(duration = 3.1)
+   @Test(timeout = 30000)
    public void testRightHandIn3P3RModeManual()
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
@@ -350,8 +350,8 @@ public abstract class WholeBodyIkSolverTest
 
 
    // May FAIL
-   @EstimatedDuration(duration = 7.0)
-   @Test(timeout = 30000)
+	@EstimatedDuration(duration = 9.4)
+   @Test(timeout = 47000)
    public void testBothHandsIn3P2RModeManual()
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
@@ -382,8 +382,8 @@ public abstract class WholeBodyIkSolverTest
 
 
 
-   @EstimatedDuration(duration = 6.0)
-   @Test(timeout = 30000)
+	@EstimatedDuration(duration = 6.6)
+   @Test(timeout = 33000)
    public void testBothHandsIn3P3RModeManual()
    {
       WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();

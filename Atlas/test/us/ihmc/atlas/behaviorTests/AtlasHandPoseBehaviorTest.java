@@ -38,8 +38,8 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
 
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 26.2)
+   @Test(timeout = 130000)
    public void testAimPalmNormalXaxis() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -47,8 +47,8 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 28.1)
+   @Test(timeout = 140000)
    public void testAimPalmNormalXaxisZupGrasp() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -56,8 +56,8 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 26.1)
+   @Test(timeout = 130000)
    public void testAimPalmNormalYaxis() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -65,8 +65,8 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 26.6)
+   @Test(timeout = 130000)
    public void testAimPalmNormalYaxisZupGrasp() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -74,8 +74,8 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 33.2)
+   @Test(timeout = 170000)
    public void testJointSpaceHandPoseMove() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -83,8 +83,8 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 42.2)
+   @Test(timeout = 210000)
    public void testMoveHandToHome() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -92,8 +92,8 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 43.4)
+   @Test(timeout = 220000)
    public void testPauseAndResume() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -101,8 +101,8 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 34.1)
+   @Test(timeout = 170000)
    public void testStop() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -110,8 +110,8 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 57.8)
+   @Test(timeout = 290000)
    public void testTaskSpaceMoveToPoseAchievedInJointSpace() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -119,8 +119,8 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 35.2)
+   @Test(timeout = 180000)
    public void testTwoSequentialHandPoses() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -128,8 +128,8 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 35.9)
+   @Test(timeout = 180000)
    public void testTwoSimultaneousHandPoseBehaviors() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -137,8 +137,8 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 27.6)
+   @Test(timeout = 140000)
    public void testUnreachableHandPoseMove() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);

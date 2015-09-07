@@ -14,8 +14,8 @@ import us.ihmc.tools.agileTesting.BambooPlanType;
 @BambooPlan(planType = BambooPlanType.Fast)
 public class RobotiqReadResponseTest
 {
-   @Test(timeout = 3000)
-   @EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000)
+	@EstimatedDuration(duration = 0.0)
    public void testSetAll()
    {
       final int ITERATIONS = 1000;

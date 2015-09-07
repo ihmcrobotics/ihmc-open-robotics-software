@@ -10,8 +10,8 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class SDFRobotTest
 {
-   @EstimatedDuration(duration = 1.0)
-   @Test(timeout = 10000)
+	@EstimatedDuration(duration = 0.7)
+   @Test(timeout = 30000)
    public void testNullJointMap() throws FileNotFoundException, JAXBException
    {
       JaxbSDFLoader loader = new JaxbSDFLoader(getClass().getClassLoader().getResourceAsStream("sdfRobotTest.sdf"), null);

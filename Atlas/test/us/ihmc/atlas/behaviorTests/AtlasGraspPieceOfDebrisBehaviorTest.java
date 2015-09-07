@@ -37,8 +37,8 @@ public class AtlasGraspPieceOfDebrisBehaviorTest extends DRCGraspPieceOfDebrisBe
 	}
 	
 	@Override
-	@EstimatedDuration(duration = 70.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 542.6)
+   @Test(timeout = 2700000)
 	public void testGraspingHorizontalDebrisWithRightHand() throws SimulationExceededMaximumTimeException
 	{
 	   super.testGraspingHorizontalDebrisWithRightHand();
@@ -54,16 +54,16 @@ public class AtlasGraspPieceOfDebrisBehaviorTest extends DRCGraspPieceOfDebrisBe
 	}
 	
 	@Override
-	@EstimatedDuration(duration = 70.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 86.4)
+   @Test(timeout = 430000)
 	public void testGraspingStandingDebrisWithLeftHand() throws SimulationExceededMaximumTimeException
 	{
 	   super.testGraspingStandingDebrisWithLeftHand();
 	}
 	
 	@Override
-	@EstimatedDuration(duration = 70.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 114.1)
+   @Test(timeout = 570000)
 	public void testGraspingStandingDebrisWithRightHand() throws SimulationExceededMaximumTimeException
 	{
 	   super.testGraspingStandingDebrisWithRightHand();

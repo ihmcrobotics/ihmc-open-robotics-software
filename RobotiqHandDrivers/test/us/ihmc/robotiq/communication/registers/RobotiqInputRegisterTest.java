@@ -13,8 +13,8 @@ public abstract class RobotiqInputRegisterTest
    protected abstract RobotiqInputRegister getExpectedRegister();
    protected abstract byte getValueToSet();
    
-   @Test(timeout = 3000)
-   @EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000)
+	@EstimatedDuration(duration = 0.0)
    public void testSetRegister()
    {
       RobotiqInputRegister inputRegister = getInputRegister();
@@ -23,8 +23,8 @@ public abstract class RobotiqInputRegisterTest
       assertTrue(getExpectedRegister().equals(inputRegister));
    }
 
-   @Test(timeout = 3000)
-   @EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000)
+	@EstimatedDuration(duration = 0.0)
    public void testGetRegister()
    {
       assertEquals(getValueToSet(), getExpectedRegister().getRegisterValue());

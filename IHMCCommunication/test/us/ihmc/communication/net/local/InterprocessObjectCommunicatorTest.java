@@ -20,7 +20,7 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class InterprocessObjectCommunicatorTest
 {
-	@EstimatedDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.1)
    @Test(timeout = 30000)
    public void testOpeningAndClosingALotOfPorts() throws IOException
    {
@@ -44,7 +44,7 @@ public class InterprocessObjectCommunicatorTest
 
    }
 
-	@EstimatedDuration(duration = 1.6)
+	@EstimatedDuration(duration = 1.5)
    @Test(timeout = 30000)
    public void testSendingObjectsToClients() throws IOException
    {

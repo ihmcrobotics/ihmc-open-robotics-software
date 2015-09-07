@@ -326,8 +326,8 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    }
 
-	@EstimatedDuration(duration = 28.3)
-	@Test(timeout = 300000)
+	@EstimatedDuration(duration = 7.8)
+	@Test(timeout = 39000)
    public void testPelvisCorrectionControllerOutOfTheLoop() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -370,8 +370,8 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    }
 
-	@EstimatedDuration(duration = 42.4)
-	@Test(timeout = 127292)
+	@EstimatedDuration(duration = 12.1)
+	@Test(timeout = 61000)
    public void testPelvisCorrectionDuringSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -398,8 +398,8 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
    }
 
 	@QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 7.7)
+	@Test(timeout = 39000)
    public void testBigYawInDoubleSupport() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -425,8 +425,8 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
 //	@Ignore
 	@QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 9.4)
+	@Test(timeout = 47000)
    public void testBigYawInSingleSupport() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -454,8 +454,8 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 	
 //	@Ignore
 	@QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 8.1)
+	@Test(timeout = 41000)
    public void testLocalizationOffsetOutsideOfFootInSingleSupport() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -510,8 +510,8 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
 //   @Ignore
    @QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 5.0)
+	@Test(timeout = 30000)
    public void testWalkingDuringBigPelvisCorrection() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();

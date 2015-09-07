@@ -73,8 +73,8 @@ public class AtlasFinalsWorldStairsTest
    }
 
 
-   @EstimatedDuration(duration = 30.4)
-   @Test(timeout = 200000)
+	@EstimatedDuration(duration = 135.0)
+   @Test(timeout = 680000)
    public void testWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

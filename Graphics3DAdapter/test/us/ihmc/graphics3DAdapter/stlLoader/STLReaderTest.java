@@ -45,8 +45,8 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 public class STLReaderTest
 {
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testASCIILoad() throws IOException
    {
       InputStream stream = getClass().getClassLoader().getResourceAsStream("testASCIISTL.STL");
@@ -57,8 +57,8 @@ public class STLReaderTest
       checkData(reader);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testBinaryLoad() throws IOException
    {
       InputStream stream = getClass().getClassLoader().getResourceAsStream("testBinarySTL.STL");

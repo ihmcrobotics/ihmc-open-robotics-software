@@ -104,8 +104,8 @@ public class QuadTreeForGroundHeightMapTest
          ThreadTools.sleepForever();
    }
 
-	@EstimatedDuration
-	@Test(timeout = 300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testOnSomeSlopes()
    {
       boolean visualizeAndKeepUp = false;
@@ -128,8 +128,8 @@ public class QuadTreeForGroundHeightMapTest
       if (visualizeAndKeepUp) ThreadTools.sleepForever();
    }
 
-	@EstimatedDuration
-	@Test(timeout = 300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testOnSomeStairCases()
    {
       boolean visualizeAndKeepUp = false;
@@ -156,8 +156,8 @@ public class QuadTreeForGroundHeightMapTest
       if (visualizeAndKeepUp) ThreadTools.sleepForever();
    }
 
-	@EstimatedDuration
-	@Test(timeout = 300000)
+	@EstimatedDuration(duration = 0.1)
+	@Test(timeout = 30000)
    public void testUsingStairGroundProfile()
    {
       boolean visualizeAndKeepUp = false;

@@ -51,8 +51,8 @@ public abstract class WholeBodyTrajectoryPacketEndToEndTest implements MultiRobo
       simulationTestingParameters.setKeepSCSUp(false);
    }
    
-	@EstimatedDuration(duration = 45.7)
-   @Test(timeout = 228549)
+	@EstimatedDuration(duration = 42.2)
+   @Test(timeout = 210000)
    public void testArmPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       int waypoints = 2;
@@ -86,8 +86,8 @@ public abstract class WholeBodyTrajectoryPacketEndToEndTest implements MultiRobo
       executePacket(packet);
    }
    
-	@EstimatedDuration(duration = 27.1)
-   @Test(timeout = 135339)
+	@EstimatedDuration(duration = 19.4)
+   @Test(timeout = 97000)
    public void testPelvisHeightPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       // currently the pelvis does not support multiple waypoints:

@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class TimeStampedTransformBufferTest
 {
-	@EstimatedDuration(duration = 0.4)
+	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 30000)
    public void testEmptyBuffer()
    {
@@ -32,7 +32,7 @@ public class TimeStampedTransformBufferTest
          assertFalse(timeStampedPelvisPoseBuffer.isInRange(random.nextLong()));
    }
 
-	@EstimatedDuration(duration = 0.2)
+	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 30000)
    public void testThatPosesAreProperlyStored()
    {
@@ -73,7 +73,7 @@ public class TimeStampedTransformBufferTest
       }
    }
 
-	@EstimatedDuration(duration = 0.8)
+	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 30000)
    public void testThatPosesAreProperlyStoredEvenAfterFillingTheBuffer()
    {
@@ -115,7 +115,7 @@ public class TimeStampedTransformBufferTest
       }
    }
 
-	@EstimatedDuration(duration = 0.4)
+	@EstimatedDuration(duration = 0.1)
    @Test(timeout = 30000)
    public void testInterpolationBetweenPoses()
    {
@@ -163,7 +163,7 @@ public class TimeStampedTransformBufferTest
       }
    }
 
-	@EstimatedDuration(duration = 1.0)
+	@EstimatedDuration(duration = 0.9)
    @Test(timeout = 30000)
    public void testInterpolationBetweenPosesAfterFillingBuffer()
    {

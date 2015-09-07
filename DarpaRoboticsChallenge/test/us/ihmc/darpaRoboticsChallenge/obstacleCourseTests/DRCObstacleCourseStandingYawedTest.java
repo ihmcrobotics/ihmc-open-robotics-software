@@ -53,8 +53,8 @@ import us.ihmc.robotics.geometry.BoundingBox3d;
       }
 
 
-	@EstimatedDuration(duration = 19.7)
-	@Test(timeout = 98263)
+	@EstimatedDuration(duration = 19.1)
+	@Test(timeout = 95000)
       public void testStandingYawed() throws SimulationExceededMaximumTimeException
       {
          BambooTools.reportTestStartedMessage();

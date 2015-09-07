@@ -29,8 +29,8 @@ import com.jme3.math.Vector3f;
 public class JMEGeometryUtilsTest
 {
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testGetInverse()
    {
       Random random = new Random(100L);
@@ -48,8 +48,8 @@ public class JMEGeometryUtilsTest
       }
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testTransformFromJMECoordinatesToZup()
    {
       Transform transform3D = new Transform();
@@ -86,8 +86,8 @@ public class JMEGeometryUtilsTest
       assertTrue(expectedAnswer.epsilonEquals(originalVectorTransformedToZup, 1e-6));
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testTransformFromJMECoordinatesToZupWithItsInverse()
    {
       Random random = new Random(100L);
@@ -102,8 +102,8 @@ public class JMEGeometryUtilsTest
       }
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testTransformFromJMECoordinatesToZupWith90RotAboutX()
    {
       Transform transform;
@@ -160,8 +160,8 @@ public class JMEGeometryUtilsTest
       assertTrue(expectedAnswer.epsilonEquals(originalVectorTransformedToZup, 1e-6));
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testTransformFromZupToJMECoordinates()
    {
       Vector3f pointOriginal, pointTransformed, expectedAnswer;
@@ -194,8 +194,8 @@ public class JMEGeometryUtilsTest
       assertTrue(areVectorsEqual(expectedAnswer, pointTransformed));
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testTransformFromJMECoordinatesToZupPoint()
    {
       Vector3f pointOriginal, pointTransformed, expectedAnswer;
@@ -224,8 +224,8 @@ public class JMEGeometryUtilsTest
       assertTrue(areVectorsEqual(expectedAnswer, pointTransformed));
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testTransformFromZupToJMECoordinatesQuaternion()
    {
       Random random = new Random(100L);
@@ -241,8 +241,8 @@ public class JMEGeometryUtilsTest
 //      transformFromZupToJMECoordinates(Quaternion rotation)
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testRotationsFromAndToJMEToZupCoordinates()
    {
       //JME to World

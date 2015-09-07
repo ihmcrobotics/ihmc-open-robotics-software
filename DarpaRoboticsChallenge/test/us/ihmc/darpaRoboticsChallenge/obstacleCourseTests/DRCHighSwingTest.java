@@ -69,8 +69,8 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
    }
 
 
-   @EstimatedDuration(duration = 30.4)
-   @Test(timeout = 200000)
+	@EstimatedDuration(duration = 104.5)
+   @Test(timeout = 520000)
    public void testWalkingWithHighSteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

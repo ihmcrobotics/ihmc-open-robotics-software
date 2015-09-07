@@ -108,8 +108,8 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
       return new DRCGraspCylinderEnvironment(cylinderOrigins, cylinderYawAngles_degrees, cylinderPitchAngles_degrees, cylinderRollAngles_degrees);
    }
 
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 57.4)
+   @Test(timeout = 290000)
    public void testGraspXAxisCylinder() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -145,8 +145,8 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
       BambooTools.reportTestFinishedMessage();
    }
    
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 61.2)
+   @Test(timeout = 310000)
    public void testGraspYAxisCylinder() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -182,7 +182,7 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
       BambooTools.reportTestFinishedMessage();
    }
    
-   @EstimatedDuration(duration = 50.0)
+	@EstimatedDuration(duration = 59.8)
    @Test(timeout = 300000)
    public void testGraspZAxisCylinder() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {

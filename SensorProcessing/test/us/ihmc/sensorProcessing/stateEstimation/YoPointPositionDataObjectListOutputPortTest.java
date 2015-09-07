@@ -27,8 +27,8 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public class YoPointPositionDataObjectListOutputPortTest
 {
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.9)
+	@Test(timeout = 30000)
    public void testRandom()
    {
       Random random  = new Random(1235561L);

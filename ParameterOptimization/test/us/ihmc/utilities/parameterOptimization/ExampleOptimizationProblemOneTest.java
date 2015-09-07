@@ -11,8 +11,8 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 public class ExampleOptimizationProblemOneTest
 {
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testSimpleXSquaredOptimization()
    {
       SimpleXSquaredCostFunction sampleCostFunction = new SimpleXSquaredCostFunction();      
@@ -87,8 +87,8 @@ public class ExampleOptimizationProblemOneTest
       }
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testSimpleThreeParameterCostFunction()
    {      
       SimpleThreeParameterCostFunction sampleCostFunction = new SimpleThreeParameterCostFunction();

@@ -129,7 +129,7 @@ public class GroundReactionWrenchDistributorTest
       testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry, 1e-7);
    }
 
-	@EstimatedDuration(duration = 0.4)
+	@EstimatedDuration(duration = 0.3)
 	@Test(timeout = 30000)
    public void testRandomFlatGroundExamplesWithGeometricFlatGroundDistributor()
    {

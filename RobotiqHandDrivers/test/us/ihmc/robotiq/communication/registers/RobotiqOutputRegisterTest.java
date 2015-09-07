@@ -11,8 +11,8 @@ public abstract class RobotiqOutputRegisterTest
    protected abstract byte getExpectedByteValue();
    protected abstract RobotiqOutputRegister getOutputRegister();
    
-   @Test(timeout = 3000)
-   @EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000)
+	@EstimatedDuration(duration = 0.0)
    public void testGetRegisterValue()
    {
       byte expectedValue = getExpectedByteValue();

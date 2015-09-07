@@ -35,8 +35,8 @@ public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 35.5)
+   @Test(timeout = 180000)
    public void testPelvisPitchRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -44,8 +44,8 @@ public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 32.0)
+   @Test(timeout = 160000)
    public void testPelvisYawRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -53,8 +53,8 @@ public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
    }
 
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 36.0)
+   @Test(timeout = 180000)
    public void testPelvisRollRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -71,8 +71,8 @@ public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 25.1)
+   @Test(timeout = 130000)
    public void testPelvisYTranslation() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -80,8 +80,8 @@ public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 23.5)
+   @Test(timeout = 120000)
    public void testSingleRandomPelvisRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);

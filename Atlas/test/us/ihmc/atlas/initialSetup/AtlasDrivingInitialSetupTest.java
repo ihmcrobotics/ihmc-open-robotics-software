@@ -25,8 +25,8 @@ public class AtlasDrivingInitialSetupTest
 {
    private static final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
    
-   @EstimatedDuration(duration = 1.0)
-   @Test(timeout = 3000)
+	@EstimatedDuration(duration = 1.0)
+   @Test(timeout = 30000)
    public void testLoadFile()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(version, DRCRobotModel.RobotTarget.SCS, false);
@@ -37,8 +37,8 @@ public class AtlasDrivingInitialSetupTest
       initialSetup.initializeRobot(robot, jointMap);
    }
    
-   @EstimatedDuration(duration = 1.0)
-   @Test(timeout = 3000)
+	@EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testFileContainsAllJoints()
    {
       boolean containsAllJoints = true;

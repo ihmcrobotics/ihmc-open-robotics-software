@@ -12,8 +12,8 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 public class PointCloudWorldPacketGeneratorTest
 {
 
-   @EstimatedDuration
-   @Test(timeout = 10000)
+	@EstimatedDuration(duration = 0.7)
+   @Test(timeout = 30000)
    public void testGeneratePointCloudWorldPacket() throws InterruptedException
    {
       DepthDataFilter depthDataFilter = new DepthDataFilter();

@@ -39,8 +39,8 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
    }
    
    @Override
-   @EstimatedDuration(duration = 38.0)
-   @Test(timeout = 124050)
+	@EstimatedDuration(duration = 18.8)
+   @Test(timeout = 94000)
    public void testArmMovementsWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -48,8 +48,8 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
    }
    
    @Override
-   @EstimatedDuration(duration = 38.0)
-   @Test(timeout = 124050)
+	@EstimatedDuration(duration = 93.8)
+   @Test(timeout = 470000)
    public void testChestControlWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -66,8 +66,8 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
    }
    
    @Override
-   @EstimatedDuration(duration = 14.9)
-   @Test(timeout = 54656)
+	@EstimatedDuration(duration = 30.4)
+   @Test(timeout = 150000)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);

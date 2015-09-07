@@ -91,8 +91,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 105.5)
+   @Test(timeout = 530000)
    public void testTurn361DegreesInPlace() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -119,8 +119,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 39.8)
+   @Test(timeout = 200000)
    public void testWalkForwardsX() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -146,8 +146,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 32.8)
+   @Test(timeout = 160000)
    public void testWalkBackwardsASmallAmountWithoutTurningInPlace() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -188,8 +188,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 46.4)
+   @Test(timeout = 230000)
    public void testWalkAtAngleUsingStartOrientation() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -228,8 +228,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 72.5)
+   @Test(timeout = 360000)
    public void testWalkAtAngleUsingTargetOrientation() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -270,8 +270,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 55.4)
+   @Test(timeout = 280000)
    public void testWalkAtAngleUsingStartTargetMeanOrientation() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -323,8 +323,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 39.9)
+   @Test(timeout = 200000)
    public void testWalkAtAngleAndFinishAlignedWithWalkingPath() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -352,7 +352,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
+	@EstimatedDuration(duration = 60.7)
    @Test(timeout = 300000)
    public void testWalkAtAngleAndFinishAlignedWithInitialOrientation() throws SimulationExceededMaximumTimeException
    {
@@ -381,8 +381,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 40.3)
+   @Test(timeout = 200000)
    public void testWalkAndStopBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -424,8 +424,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 55.7)
+   @Test(timeout = 280000)
    public void testWalkPauseAndResumeBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -471,8 +471,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 55.1)
+   @Test(timeout = 280000)
    public void testWalkPauseAndResumeOnLastStepBehavior() throws SimulationExceededMaximumTimeException
    {
       //This test makes sure that walking behavior doesn't declare isDone() when *starting/resuming* walking
@@ -517,8 +517,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 66.2)
+   @Test(timeout = 330000)
    public void testWalkStopAndWalkToDifferentLocation() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

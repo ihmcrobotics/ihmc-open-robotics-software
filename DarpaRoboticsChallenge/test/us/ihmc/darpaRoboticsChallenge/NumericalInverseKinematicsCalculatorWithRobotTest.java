@@ -195,7 +195,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    }
 
 
-	@EstimatedDuration(duration = 0.2)
+	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCase()
    {
@@ -215,8 +215,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
 
 
-	@EstimatedDuration(duration = 10.9)
-   @Test(timeout = 54335)
+	@EstimatedDuration(duration = 10.5)
+   @Test(timeout = 52000)
    public void testRandomFeasibleRobotPoses()
    {
       Random random = new Random(1776L);

@@ -558,8 +558,8 @@ public class SmartCMPProjectorTest
       checkOne(null, smartCMPProjector, supportPolygon, capturePoint, desiredCMP, expectedCMPProjection);
    }
 
-	@EstimatedDuration(duration = 7.8)
-	@Test(timeout = 38839)
+	@EstimatedDuration(duration = 6.7)
+	@Test(timeout = 34000)
    public void testRandomPoints()
    {
       Random random = new Random(1775L);

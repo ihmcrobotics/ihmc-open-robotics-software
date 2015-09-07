@@ -31,8 +31,8 @@ public class JMEGPULidarParallelSceneGraphTest
     * The blue sphere should not show up in the lidar data.
     */
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 10.2)
+	@Test(timeout = 51000)
    public void testGPULidarParallelSceneGraph()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld(getClass().getSimpleName(), new JMEGraphics3DAdapter(true));

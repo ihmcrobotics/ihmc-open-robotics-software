@@ -44,8 +44,8 @@ public class CentroidalMomentumBenchmarkTest
 
 //   @Ignore
 
-	@EstimatedDuration(duration = 25.6)
-	@Test(timeout = 128213)
+	@EstimatedDuration(duration = 24.7)
+	@Test(timeout = 120000)
    public void floatingChainTest() throws UnreasonableAccelerationException
    {
       Random random = new Random(12651L);

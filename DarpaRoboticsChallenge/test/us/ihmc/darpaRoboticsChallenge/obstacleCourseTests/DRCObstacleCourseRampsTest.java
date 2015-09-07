@@ -60,8 +60,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    private final ComHeightPacket comHeightPacket = new ComHeightPacket(0.05, 1.0);
 
 
-	@EstimatedDuration(duration = 61.1)
-	@Test(timeout = 305716)
+	@EstimatedDuration(duration = 46.7)
+	@Test(timeout = 230000)
    public void testWalkingUpRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -75,8 +75,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 66.9)
-	@Test(timeout = 334341)
+	@EstimatedDuration(duration = 57.0)
+	@Test(timeout = 280000)
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -111,8 +111,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 64.3)
-	@Test(timeout = 321421)
+	@EstimatedDuration(duration = 49.3)
+	@Test(timeout = 250000)
    public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -126,8 +126,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 71.1)
-	@Test(timeout = 355275)
+	@EstimatedDuration(duration = 46.4)
+	@Test(timeout = 230000)
    public void testWalkingUpRampWithShortStepsALittleTooHigh() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -147,8 +147,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 64.6)
-	@Test(timeout = 323084)
+	@EstimatedDuration(duration = 43.9)
+	@Test(timeout = 220000)
    public void testWalkingUpRampWithShortStepsALittleTooLow() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

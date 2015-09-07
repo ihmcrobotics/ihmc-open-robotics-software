@@ -35,8 +35,8 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    }
 
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 50.0)
+   @Test(timeout = 250000)
    public void testDispatchPelvisPoseBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -44,8 +44,8 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 315.0)
+   @Test(timeout = 1600000)
    public void testDispatchWalkToLocationBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -53,8 +53,8 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 33.4)
+   @Test(timeout = 170000)
    public void testDispatchWalkToLocationBehaviorAndStop() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -62,8 +62,8 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 314.6)
+   @Test(timeout = 1600000)
    public void testDispatchWalkToLocationBehaviorPauseAndResume() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);

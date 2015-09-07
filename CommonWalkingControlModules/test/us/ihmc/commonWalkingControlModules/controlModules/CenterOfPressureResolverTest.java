@@ -63,7 +63,7 @@ public class CenterOfPressureResolverTest
             expectedCenterOfPressure, expectedNormalTorque);
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@EstimatedDuration(duration = 0.4)
 	@Test(timeout = 30000)
    public void testCenterOfPressureResolverSimpleCaseWithVerticalForce()
    {      

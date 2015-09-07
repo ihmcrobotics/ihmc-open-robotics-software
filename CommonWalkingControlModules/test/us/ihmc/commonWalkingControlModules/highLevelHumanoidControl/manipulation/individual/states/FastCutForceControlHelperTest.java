@@ -68,8 +68,8 @@ public class FastCutForceControlHelperTest {
 	/**
 	 * Test the exponential character of the force model.
 	 */
-	@EstimatedDuration(duration = 0.5)
-	@Test(timeout = 50000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
 	public void testExponentialForceModel()
 	{
 		double C1 = RandomTools.generateRandomDouble(randomNumberGenerator, 80.0, 120.0);
@@ -88,8 +88,8 @@ public class FastCutForceControlHelperTest {
 	 * Note that the adapted parameters do not necessarily correspond to the real values.
 	 * The selection range for c2 and v has to be chosen small since they are in the exponent of the function.
 	 */
-	@EstimatedDuration(duration = 0.5)
-	@Test(timeout = 50000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
 	public void testModelParameterAdaption()
 	{
 		double C1 = RandomTools.generateRandomDouble(randomNumberGenerator, 80.0, 120.0);
@@ -111,8 +111,8 @@ public class FastCutForceControlHelperTest {
 	/**
 	 * Test the ramp function that scales the weigthing matrix.
 	 */
-	@EstimatedDuration(duration = 0.5)
-	@Test(timeout = 50000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
 	public void testAdaptW()
 	{
 		final double w10 = RandomTools.generateRandomDouble(randomNumberGenerator, 0.1, 50.0);
@@ -147,8 +147,8 @@ public class FastCutForceControlHelperTest {
 	/**
 	 * Test the getTangentForce method using geometric considerations.
 	 */
-	@EstimatedDuration(duration = 0.5)
-	@Test(timeout = 50000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
 	public void testGetTangentForce()
 	{
 		final Vector3d lastTangentVector = RandomTools.generateRandomVector(randomNumberGenerator);
@@ -198,8 +198,8 @@ public class FastCutForceControlHelperTest {
 		CutForceControlHelper.getTangentForce(forceVector, currentTangentialForce, tangentVector, lastTangentVector, fxFiltered, fyFiltered, fzFiltered, false, 0.0);
 		assertEquals(currentTangentialForce.getDoubleValue(), 0.0, EPSILON);
 	}
-	@EstimatedDuration(duration = 0.5)
-	@Test(timeout = 50000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
 	public void testWristSensorUpdate()
 	{
 		ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

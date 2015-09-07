@@ -205,8 +205,8 @@ public abstract class WholeBodyTrajectoryTest
    }
 
    //@Ignore
-   @EstimatedDuration(duration = 4.1)
-   @Test(timeout = 22445)
+	@EstimatedDuration(duration = 1.3)
+   @Test(timeout = 30000)
    public void testPointToPointRight() throws Exception
    {
       WholeBodyTrajectoryTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyTrajectoryTestHelper();
@@ -322,8 +322,8 @@ public abstract class WholeBodyTrajectoryTest
    }
 
    //@Ignore
-   @EstimatedDuration(duration = 4.1)
-   @Test(timeout = 22445)
+	@EstimatedDuration(duration = 2.8)
+   @Test(timeout = 30000)
    public void testPointToPointLeft() throws Exception
    {
       WholeBodyTrajectoryTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyTrajectoryTestHelper();

@@ -54,32 +54,32 @@ public class JMEGPULidarTest implements LidarTestListener
       lidarTest.getWorld().stop();
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 5.3)
+	@Test(timeout = 30000)
    public void test60DegreeFieldOfView()
    {
       parameters = new JMELidar60FovTest();
       doATest(parameters);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 4.4)
+	@Test(timeout = 30000)
    public void test120DegreeFieldOfView()
    {
       parameters = new JMELidar120FovTest();
       doATest(parameters);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 4.0)
+	@Test(timeout = 30000)
    public void test360DegreeFieldOfView()
    {
       parameters = new JMELidar360FovTest();
       doATest(parameters);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 4.7)
+	@Test(timeout = 30000)
    public void test270DegreeFieldOfView()
    {
       parameters = new JMELidarSphere270FovTest();

@@ -60,14 +60,14 @@ public class RangeOfStep3dTest
       assertEquals(range.getEllipsoid3d().getZRadius(), 0.5 * verticalLength, 1e-7);
    }
 
-	@EstimatedDuration(duration = 0.4)
+	@EstimatedDuration(duration = 0.3)
 	@Test(timeout = 30000)
    public void testAtCenter()
    {
       testAtTranslation(2013L, ReferenceFrame.getWorldFrame(), new Vector3d(0.0, 0.0, 0.0));
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@EstimatedDuration(duration = 0.2)
 	@Test(timeout = 30000)
    public void testAtRandomTranslation()
    {
@@ -85,7 +85,7 @@ public class RangeOfStep3dTest
       testAtTranslation(5318008L, frame, new Vector3d(xTranslation, yTranslation, zTranslation));
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@EstimatedDuration(duration = 0.2)
 	@Test(timeout = 30000)
    public void test90DegreeRotation()
    {

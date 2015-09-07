@@ -94,8 +94,8 @@ public class TestbedAutomaticAlignmentTest {
       assertTrue(MatrixFeatures.isIdentical(first.getR(), second.getR(), 0.01));
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void findLineLocation() {
 
       LineParametric3D_F64 line = new LineParametric3D_F64();
@@ -120,8 +120,8 @@ public class TestbedAutomaticAlignmentTest {
       assertEquals(found[1],end,1e-8);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void adjustSign() {
 
       Vector3D_F64 v = new Vector3D_F64(1,0,0);

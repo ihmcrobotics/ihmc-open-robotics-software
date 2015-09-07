@@ -77,7 +77,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    
   
 	@EstimatedDuration(duration = 30.6)
-	@Test(timeout = 153027)
+	@Test(timeout = 150000)
    public void TestPushForwardInDoubleSupport() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
@@ -106,8 +106,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 40.2)
-	@Test(timeout = 201110)
+	@EstimatedDuration(duration = 46.6)
+	@Test(timeout = 230000)
    public void TestPushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
@@ -140,8 +140,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 45.6)
-	@Test(timeout = 227903)
+	@EstimatedDuration(duration = 49.1)
+	@Test(timeout = 250000)
    public void TestDoublePushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
@@ -181,8 +181,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 39.9)
-	@Test(timeout = 199744)
+	@EstimatedDuration(duration = 44.8)
+	@Test(timeout = 220000)
    public void TestPushBackwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
@@ -215,8 +215,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 52.4)
-	@Test(timeout = 262099)
+	@EstimatedDuration(duration = 52.2)
+	@Test(timeout = 260000)
    public void TestPushBackwardForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();

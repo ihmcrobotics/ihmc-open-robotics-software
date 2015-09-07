@@ -15,8 +15,8 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class CollisionCylinderTest
 {
-   @EstimatedDuration(duration = 0.1)
-   @Test(timeout = 3000)
+	@EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000)
    public void testInsideCylinderPoints()
    {
       Random random = new Random(98124L);
@@ -36,8 +36,8 @@ public class CollisionCylinderTest
          assertTrue(cylinder.contains(point));
       }
    }
-   @EstimatedDuration(duration = 0.1)
-   @Test(timeout = 3000)
+	@EstimatedDuration(duration = 0.2)
+   @Test(timeout = 30000)
    public void testOutideCylinderPoints()
    {
       Random random = new Random(98716L);
