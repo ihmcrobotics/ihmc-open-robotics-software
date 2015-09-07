@@ -18,15 +18,15 @@ dependencies {
     compile group: 'us.ihmc.thirdparty', name: 'boofcv-calibration', version: '0.19-internal'
 	compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: '0.7-internal'
     compile group: 'org.apache.poi', name: 'poi', version: '3.9' 
-    compile group: 'us.ihmc.thirdparty', name: 'concavehull', version: 'x'   
+    compile group: 'org.opensphere', name: 'concavehull', version: '1.0'   
     compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4.+'
     compile group: 'com.vividsolutions', name: 'jts', version: '1.13' 
     compile group: 'jfree', name: 'jfreechart', version: '1.0.7' 
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.2' 
     compile group: 'org.jgrapht', name: 'jgrapht-jdk1.5', version: '0.7.3' 
     compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
+    compile group: 'pl.edu.icm', name: 'JLargeArrays', version: '1.2'
     
-    compile group: 'us.ihmc.thirdparty', name: 'JLargeArrays', version: '1.2'
     compile group: 'us.ihmc.thirdparty', name: 'JTransforms', version: '3.0'
       
     compile project(':IHMCControlFlow')
