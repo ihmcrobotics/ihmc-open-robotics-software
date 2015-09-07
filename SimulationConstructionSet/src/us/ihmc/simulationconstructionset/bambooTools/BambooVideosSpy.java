@@ -6,22 +6,52 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.apache.commons.lang3.SystemUtils;
+
+import us.ihmc.utilities.io.printing.PrintTools;
+
 public class BambooVideosSpy
 {
-
-
    public static void spyOnEraseableBambooDataAndVideosDirectory()
    {
-      int numberOfRowsOfVideo = 4;
-      int numberOfColumnsOfVideo = 11;
+      spyOnLatestBambooDataAndVideos(new LatestDirectoryProvider()
+      {
+         @Override
+         public File findLatestDirectory()
+         {
+            return BambooTools.getEraseableDirectoryWithMostRecentBambooDataAndVideos();
+         }
+      });
+   }
+
+   public static void spyOnLatestBambooDataAndVideosOnSamson()
+   {
+      spyOnLatestBambooDataAndVideos(new LatestDirectoryProvider()
+      {
+         @Override
+         public File findLatestDirectory()
+         {
+            if (SystemUtils.IS_OS_WINDOWS)
+               return BambooTools.getDirectoryWithMostRecentBambooDataAndVideos("//samson/BambooVideos");
+            else if (SystemUtils.IS_OS_MAC)
+               return BambooTools.getDirectoryWithMostRecentBambooDataAndVideos("/Users/unknownid/BambooVideos");
+            else
+               return null;
+         }
+      });
+   }
+   
+   private static void spyOnLatestBambooDataAndVideos(LatestDirectoryProvider latestDirectoryProvider)
+   {
+      int numberOfRowsOfVideo = 2;
+      int numberOfColumnsOfVideo = 3;
       MultipleVideoDecoderAndPlaybacker multipleVideoDecoderAndPlaybacker = new MultipleVideoDecoderAndPlaybacker(numberOfRowsOfVideo, numberOfColumnsOfVideo);
 
       while (true)
       {
-         File mostRecentDirectory = BambooTools.getEraseableDirectoryWithMostRecentBambooDataAndVideos();
-//         File mostRecentDirectory = new File("V:/20150204");
-
-         System.out.println("Most recent directory = " + mostRecentDirectory);
+         File mostRecentDirectory = latestDirectoryProvider.findLatestDirectory();
+         
+         PrintTools.info("Most recent directory = " + mostRecentDirectory);
 
          showMostRecentMovies(mostRecentDirectory, multipleVideoDecoderAndPlaybacker);
 
@@ -34,8 +64,13 @@ public class BambooVideosSpy
          }
       }
    }
+   
+   private interface LatestDirectoryProvider
+   {
+      File findLatestDirectory();
+   }
 
-   public static void showMostRecentMovies(File movieDirectory, MultipleVideoDecoderAndPlaybacker multipleVideoDecoderAndPlaybacker)
+   private static void showMostRecentMovies(File movieDirectory, MultipleVideoDecoderAndPlaybacker multipleVideoDecoderAndPlaybacker)
    {
       BambooTools.reportOutMessage("Showing Most Recent Movie in " + movieDirectory);
 
@@ -120,10 +155,9 @@ public class BambooVideosSpy
       }
    }
 
-
    public static void main(String[] args)
    {
-//    spyOnBambooDataAndVideosDirectoryOnSubversion();
-      spyOnEraseableBambooDataAndVideosDirectory();
+      // spyOnEraseableBambooDataAndVideosDirectory();
+      spyOnLatestBambooDataAndVideosOnSamson();
    }
 }
