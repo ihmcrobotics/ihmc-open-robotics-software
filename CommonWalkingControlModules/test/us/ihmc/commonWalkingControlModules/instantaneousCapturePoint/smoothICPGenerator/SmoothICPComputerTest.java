@@ -105,8 +105,8 @@ public class SmoothICPComputerTest
       icpVelocityLineSegment = null;
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.8)
+	@Test(timeout = 30000)
    public void testTypicalFourStepExample()
    {
       
@@ -264,8 +264,8 @@ public class SmoothICPComputerTest
       }
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.7)
+	@Test(timeout = 30000)
    public void testTypicalFourStepExampleWithSuddenStop()
    {
       double deltaT = 0.001;
@@ -671,8 +671,8 @@ public class SmoothICPComputerTest
       }
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testTrivialTwoStepExample()
    {
       int maxNumberOfConsideredFootsteps = 4;

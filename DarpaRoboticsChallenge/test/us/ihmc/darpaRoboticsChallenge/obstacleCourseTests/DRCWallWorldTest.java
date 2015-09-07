@@ -63,8 +63,8 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-	@EstimatedDuration(duration = 105.6)
-	@Test(timeout = 316687)
+	@EstimatedDuration(duration = 207.8)
+	@Test(timeout = 1000000)
    public void testVariousHandstepsOnWalls() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

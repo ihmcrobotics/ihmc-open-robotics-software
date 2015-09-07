@@ -35,8 +35,8 @@ public class AtlasRemoveMultipleDebrisBehaviorTest extends DRCRemoveMultipleDebr
 	}
 	
 	@Override
-	@EstimatedDuration(duration = 90.0)
-   @Test(timeout = 900000)
+	@EstimatedDuration(duration = 501.1)
+   @Test(timeout = 2500000)
 	public void testRemovingthreeDebris() throws SimulationExceededMaximumTimeException
 	{
 	   super.testRemovingthreeDebris();

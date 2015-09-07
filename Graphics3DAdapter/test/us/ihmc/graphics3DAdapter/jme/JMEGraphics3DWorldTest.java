@@ -21,8 +21,8 @@ import com.jme3.scene.shape.Sphere;
 public class JMEGraphics3DWorldTest
 {
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 1.2)
+	@Test(timeout = 30000)
    public void testShowGui()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -33,8 +33,8 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 1.1)
+	@Test(timeout = 30000)
    public void testWithoutGui()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -45,8 +45,8 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 1.2)
+	@Test(timeout = 30000)
    public void addASphere()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -58,8 +58,8 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 1.1)
+	@Test(timeout = 30000)
    public void addASphereAfterGuiStarted()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -71,8 +71,8 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 1.1)
+	@Test(timeout = 30000)
    public void addAJMESphere()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -94,8 +94,8 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 1.1)
+	@Test(timeout = 30000)
    public void testSetCameraPosition()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -108,8 +108,8 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 1.1)
+	@Test(timeout = 30000)
    public void fixCameraOnSphere()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());

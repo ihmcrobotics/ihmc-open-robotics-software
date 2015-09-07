@@ -18,8 +18,8 @@ public class ExpectationMaximizationFitterTest
 {
    static Random rand = new Random(152L);
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.1)
+	@Test(timeout = 30000)
    public void testFitToCube()
    {
       Point3D_F64 center = new Point3D_F64(rand.nextDouble(), rand.nextDouble(), rand.nextDouble());

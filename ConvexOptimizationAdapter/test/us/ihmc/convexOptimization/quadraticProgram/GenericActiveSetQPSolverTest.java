@@ -39,8 +39,8 @@ public class GenericActiveSetQPSolverTest
     * So we put these test cases here to check 
     */
 
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 60000) 
+	@EstimatedDuration(duration = 0.1)
+	@Test(timeout = 30000) 
    public void choleskyDecompositionAccuracy()
    {
       /**
@@ -99,7 +99,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void zeroMatrixSVD(){
       DenseMatrix64F []testMatrices = new DenseMatrix64F[]{
             RandomMatrices.createRandom(2, 2, new Random()),
@@ -120,7 +120,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void errorSVD()
    {
       SingularValueDecomposition<DenseMatrix64F> dec = DecompositionFactory.svd(16, 16, true, true, true);
@@ -132,7 +132,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void errorZeroSizeMatrix()
    {
       DenseMatrix64F 
@@ -144,7 +144,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void matrixRankFromQRDecomositionPivot()
    {
       double[][] AMatrix = new double[][]
@@ -164,7 +164,7 @@ public class GenericActiveSetQPSolverTest
     */
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void consistentColinearEqualityConstraints()
    {
       double[][] AMatrix = new double[][]
@@ -187,7 +187,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void inconsistentColinearEqualityConstraints()
    {
       double[][] AMatrix = new double[][]
@@ -211,7 +211,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void findBestIndependentEqualityConstraints()
    {
       double[][] AMatrix = new double[][]
@@ -234,7 +234,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void initializeActivesetTest() throws Exception
    {
       GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -255,7 +255,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testLinearProblemWithInitialSeedNonConstraints() throws Exception
    {
       GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -271,7 +271,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testLinearProblemWithInitialSeedEqualityConstraint() throws Exception
    {
       GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -298,7 +298,7 @@ public class GenericActiveSetQPSolverTest
    } 
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testLinearProblemWithInitialSeedInequalityConstraint() throws Exception
    {
       GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -332,7 +332,7 @@ public class GenericActiveSetQPSolverTest
    } 
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testFindFeasiblePointTest() throws Exception
    {
       GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -383,8 +383,8 @@ public class GenericActiveSetQPSolverTest
     * Randomized Test
     */
 
-	@EstimatedDuration(duration = 0.1)
-   @Test(timeout = 60000) 
+	@EstimatedDuration(duration = 0.3)
+   @Test(timeout = 30000) 
    public void testRandomQuadraticCostFunction()
    {
 
@@ -446,8 +446,8 @@ public class GenericActiveSetQPSolverTest
       
    }
 
-	@EstimatedDuration(duration = 0.1)
-   @Test(timeout = 60000) 
+	@EstimatedDuration(duration = 0.3)
+   @Test(timeout = 30000) 
    public void testSingularQuadraticCostFunction()
    {
 
@@ -595,7 +595,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testQPS_TAME() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -603,7 +603,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testQPS_SimpleOneD() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -612,7 +612,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testQPS_HS35() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -620,7 +620,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testQPS_HS21() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -628,8 +628,8 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("HS21.yaml",solver); 
    }
 
-	@EstimatedDuration(duration = 0.1)
-   @Test(timeout = 60000) 
+	@EstimatedDuration(duration = 0.2)
+   @Test(timeout = 30000) 
    public void testQPS_ZECEVVIC2() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -638,7 +638,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testQPS_HS35MOD() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -647,7 +647,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testQPS_HS76() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -656,7 +656,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testQPS_HS51() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -665,7 +665,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testQPS_HS52() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -674,7 +674,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testQPS_HS53() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -683,7 +683,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testQPS_HS268() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -692,7 +692,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testQPS_LOTSCHD() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -701,7 +701,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testQPS_HS118() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -709,8 +709,8 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("HS118.yaml",solver); 
    }
 
-	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+	@EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000) 
    public void testQPS_DUALC2() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -719,7 +719,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testQPS_DUALC5() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -727,8 +727,8 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("DUALC5.yaml",solver); 
    }
 
-	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+	@EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000) 
    public void testQPS_DUAL4() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -736,8 +736,8 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("DUAL4.yaml",solver); 
    }
 
-	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+	@EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000) 
    public void testQPS_DUAL1() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -746,7 +746,7 @@ public class GenericActiveSetQPSolverTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+   @Test(timeout = 30000) 
    public void testQPS_DUAL2() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -754,8 +754,8 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("DUALC5.yaml",solver); 
    }
 
-	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+	@EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000) 
    public void testQPS_QPCBLEND() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -763,8 +763,8 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("QPCBLEND.yaml",solver); 
    }
 
-	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+	@EstimatedDuration(duration = 0.2)
+   @Test(timeout = 30000) 
    public void testQPS_DUAL3() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -772,8 +772,8 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("DUAL3.yaml",solver); 
    }
 
-	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+	@EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000) 
    public void testQPS_DUALC1() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -781,8 +781,8 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("DUALC1.yaml",solver); 
    }
 
-	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 60000) 
+	@EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000) 
    public void testQPS_DUALC8() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
@@ -790,32 +790,32 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("DUALC8.yaml",solver); 
    }
 
-	@EstimatedDuration(duration = 0.9)
-   @Test(timeout = 60000) 
+	@EstimatedDuration(duration = 1.9)
+   @Test(timeout = 30000) 
    public void testQPS_PRIMAL1() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
      testCaseFromQPS("PRIMAL1.yaml",solver); 
    }
 
-	@EstimatedDuration(duration = 6.0)
-   @Test(timeout = 60000) 
+	@EstimatedDuration(duration = 11.2)
+   @Test(timeout = 56000) 
    public void testQPS_PRIMALC2() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
      testCaseFromQPS("PRIMALC2.yaml",solver); 
    }
 
-	@EstimatedDuration(duration = 6.7)
-   @Test(timeout = 60000) 
+	@EstimatedDuration(duration = 11.8)
+   @Test(timeout = 59000) 
    public void testQPS_PRIMALC1() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
      testCaseFromQPS("PRIMALC1.yaml",solver); 
    }
 
-	@EstimatedDuration(duration = 14.5)
-   @Test(timeout = 60000) 
+	@EstimatedDuration(duration = 25.1)
+   @Test(timeout = 130000) 
    public void testQPS_PRIMALC5() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();

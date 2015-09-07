@@ -78,8 +78,8 @@ public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterf
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration(duration = 46.5)
-   @Test(timeout = 232742)
+	@EstimatedDuration(duration = 52.2)
+   @Test(timeout = 260000)
    public void testIsReceivingScansAnd95PercentOfPointsAreCorrect() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

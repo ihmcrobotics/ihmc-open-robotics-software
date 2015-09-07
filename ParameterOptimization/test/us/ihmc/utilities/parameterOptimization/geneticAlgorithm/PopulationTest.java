@@ -14,8 +14,8 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 public class PopulationTest
 {
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.8)
+	@Test(timeout = 30000)
    public void testPopulation()
    {
       Random random = new Random(1776L);

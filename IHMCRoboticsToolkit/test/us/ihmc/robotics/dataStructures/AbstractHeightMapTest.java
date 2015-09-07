@@ -184,7 +184,7 @@ public abstract class AbstractHeightMapTest
    }
    public abstract HeightMapWithPoints getHeightMap(double minX, double minY, double maxX, double maxY, double resolution);
 
-	@EstimatedDuration(duration = 3.0)
+	@EstimatedDuration(duration = 2.0)
 	@Test(timeout = 30000)
    public void rowModificationSynchronizationTest()
    {

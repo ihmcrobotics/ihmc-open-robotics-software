@@ -26,8 +26,8 @@ public class ROSMessageConverterTest
 {
    private static final int NUMBER_OF_TIMES_TO_RUN_EACH_PACKET_TYPE = 10000;
 
-   @EstimatedDuration(duration = 20.0)
-   @Test(timeout=300000)
+	@EstimatedDuration(duration = 23.6)
+   @Test(timeout = 120000)
    public void AllPacketTest()
    {
       PrintTools.info(this, "If this test fails, run ROSMessageGenerator then MessageAndServiceInterfaceGenerator.\n\tSee Confluence for more details (https://confluence.ihmc.us/display/HOWTO/How+to+Generate+Code+after+Packet+Change)");

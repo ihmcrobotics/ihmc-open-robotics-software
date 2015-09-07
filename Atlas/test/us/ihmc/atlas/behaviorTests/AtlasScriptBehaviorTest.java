@@ -56,8 +56,8 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 46.5)
+   @Test(timeout = 230000)
    public void testScriptWithTwoComHeightScriptPackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -74,8 +74,8 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 26.8)
+   @Test(timeout = 130000)
    public void testSimpleScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -83,8 +83,8 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 41.1)
+   @Test(timeout = 210000)
    public void testStopScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);

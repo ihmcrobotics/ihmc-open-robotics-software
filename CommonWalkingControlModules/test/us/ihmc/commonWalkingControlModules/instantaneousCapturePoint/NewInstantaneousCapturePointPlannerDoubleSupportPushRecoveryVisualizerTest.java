@@ -340,8 +340,8 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       icpVelocityLineSegment = null;
    }
 
-   @EstimatedDuration
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 4.1)
+   @Test(timeout = 30000)
    public void visualizePlanner()
    {
       boolean testPushInDoubleSupport = true;

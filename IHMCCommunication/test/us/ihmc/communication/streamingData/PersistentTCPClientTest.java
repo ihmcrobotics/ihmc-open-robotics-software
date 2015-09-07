@@ -18,7 +18,7 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 public class PersistentTCPClientTest
 {
 
-	@EstimatedDuration(duration = 1.7)
+	@EstimatedDuration(duration = 0.4)
 	@Test(timeout = 30000)
    public void test() throws IOException
    {

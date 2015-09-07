@@ -14,8 +14,8 @@ public class GeneticAlgorithmTest
 {
    private static final boolean SHOW_GUI = false;
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.8)
+	@Test(timeout = 30000)
    public void testOptimizeExampleIndividualOne()
    {
       int populationSize = 500;

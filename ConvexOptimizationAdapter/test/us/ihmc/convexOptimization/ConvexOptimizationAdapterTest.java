@@ -63,7 +63,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testASimpleRedundantEqualityCase()
    {
       // Minimize x subject to x = 2 and x = 2;
@@ -79,7 +79,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testASimpleRedundantEqualityCase2d()
    {
 	   // Minimize x + y subject to x + 2y = 2, 2x + 4y = 4, 3x + 7y = 7; Solution is (0, 1)
@@ -95,8 +95,8 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.0, solution[1], getTestErrorEpsilon());
    }
 
-	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000)
   public void JOptimizerWebpageLPExample() throws Exception
   {
       //from http://www.joptimizer.com/linearProgramming.html
@@ -145,7 +145,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testASimpleInequalityCase() throws Exception
    {
       // Minimize x subject to -x <= -2; (x >= 2)
@@ -160,7 +160,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testASimpleMaximizationInequalityCase()
    {
       // Minimize -x subject to x <= 5
@@ -201,7 +201,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testLinearCostFullyLinearConstrainedEqualityOptimizationProblem()
    {
       // Minimize x subject to x+y=4 and x-y=2. Should return (3,1).
@@ -223,7 +223,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testZeroCostLinearEqualityOptimizationProblem() throws Exception
    {
       // Minimize 0 subject to x+y=4. Should return any feasible solution.

@@ -59,8 +59,8 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
    private boolean makeAssertions = true;
 
-   @EstimatedDuration(duration = 3.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000)
    public void testLookAheadCoMHeightTrajectoryGenerator()
    {
       //TODO: Make more assertions. Right now we just assert continuity, so this is more a human visualizer and manual tester than an automatic unit test...

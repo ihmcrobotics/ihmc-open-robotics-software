@@ -39,8 +39,8 @@ public class AtlasTurnValveBehaviorTest extends DRCTurnValveBehaviorTest
    }
 
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 312.1)
+   @Test(timeout = 1600000)
    public void testCloseValveByGrabbingCenter() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -48,8 +48,8 @@ public class AtlasTurnValveBehaviorTest extends DRCTurnValveBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 97.6)
+   @Test(timeout = 490000)
    public void testCloseValveByGrabbingRim() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -57,8 +57,8 @@ public class AtlasTurnValveBehaviorTest extends DRCTurnValveBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 46.6)
+   @Test(timeout = 230000)
    public void testGraspValveBehavior() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -66,8 +66,8 @@ public class AtlasTurnValveBehaviorTest extends DRCTurnValveBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 41.6)
+   @Test(timeout = 210000)
    public void testGraspValveUsingWholeBodyIKBehavior() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -75,8 +75,8 @@ public class AtlasTurnValveBehaviorTest extends DRCTurnValveBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 53.2)
+   @Test(timeout = 270000)
    public void testOpenValveByGrabbingRim() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -84,8 +84,8 @@ public class AtlasTurnValveBehaviorTest extends DRCTurnValveBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 138.6)
+   @Test(timeout = 690000)
    public void testWalkToAndCloseValve() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);

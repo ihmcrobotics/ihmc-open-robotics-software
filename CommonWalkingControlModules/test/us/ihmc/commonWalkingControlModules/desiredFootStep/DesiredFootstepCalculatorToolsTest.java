@@ -31,7 +31,7 @@ public class DesiredFootstepCalculatorToolsTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@EstimatedDuration(duration = 0.4)
 	@Test(timeout = 30000)
    public void testComputeMaximumPoints()
    {

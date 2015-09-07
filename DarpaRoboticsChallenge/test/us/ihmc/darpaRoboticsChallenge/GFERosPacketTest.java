@@ -103,8 +103,8 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
       }
    }
    
-   @EstimatedDuration(duration = 5.0)
-   @Test(timeout = 30000)
+	@EstimatedDuration(duration = 8.7)
+   @Test(timeout = 43000)
    public void testFuzzyPacketsUsingRos()
    {
       RosCore rosCore = RosCore.newPrivate();
@@ -216,7 +216,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 
    private DRCSimulationFactory drcSimulation;
    
-   @EstimatedDuration(duration = 1.0)
+	@EstimatedDuration(duration = 2.7)
    @Test(timeout = 30000)
    public void testFuzzyPacketsWithoutRos()
    {

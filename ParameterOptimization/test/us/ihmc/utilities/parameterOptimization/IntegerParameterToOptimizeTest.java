@@ -9,8 +9,8 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 public class IntegerParameterToOptimizeTest
 {
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testGetBitsOfResolution()
    {
       testNBit(0, 0, 1);
@@ -38,8 +38,8 @@ public class IntegerParameterToOptimizeTest
       assertEquals(expectedNumberOfBits, integerParameterToOptimize.getBitsOfResolution());
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testZeroToOneConversions()
    {
       testZeroToOneConversion(0, 100);

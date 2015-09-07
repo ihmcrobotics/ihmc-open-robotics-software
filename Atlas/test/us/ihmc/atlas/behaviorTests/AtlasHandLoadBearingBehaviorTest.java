@@ -39,8 +39,8 @@ public class AtlasHandLoadBearingBehaviorTest extends DRCHandLoadBearingBehavior
    }
 
    @Override
-   @EstimatedDuration(duration = 40.0)
-   @Test(timeout = 120000)
+	@EstimatedDuration(duration = 61.3)
+   @Test(timeout = 310000)
    public void testHandLoadBearingBehavior() throws SimulationExceededMaximumTimeException
    {
       super.testHandLoadBearingBehavior();

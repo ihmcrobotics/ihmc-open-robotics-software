@@ -19,8 +19,8 @@ import us.ihmc.tools.agileTesting.BambooPlanType;
 public class GraphicsDemoToolsTest
 {
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.2)
+	@Test(timeout = 30000)
    public void testCreatePointCloud()
    {
       List<Point3d> worldPoints = new ArrayList<Point3d>();

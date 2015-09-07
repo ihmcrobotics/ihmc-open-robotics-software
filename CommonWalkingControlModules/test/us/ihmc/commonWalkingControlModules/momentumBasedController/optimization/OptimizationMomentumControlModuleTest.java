@@ -289,7 +289,7 @@ public class OptimizationMomentumControlModuleTest
       FrameVectorTest.assertFrameVectorEquals(desiredPointAccelerationBack, desiredPointAcceleration, 1e-3);
    }
 
-	@EstimatedDuration(duration = 0.1)
+	@EstimatedDuration(duration = 0.2)
 	@Test(timeout = 30000)
    public void testSingleRigidBody() throws NoConvergenceException
    {

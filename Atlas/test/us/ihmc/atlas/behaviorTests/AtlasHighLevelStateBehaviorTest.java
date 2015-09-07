@@ -36,8 +36,8 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    }
 
    @Override
-   @EstimatedDuration(duration = 21.5)
-   @Test(timeout = 64580)
+	@EstimatedDuration(duration = 34.3)
+   @Test(timeout = 170000)
    public void testDoNothingBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -45,8 +45,8 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    }
    
    @Override
-   @EstimatedDuration(duration = 21.5)
-   @Test(timeout = 64580)
+	@EstimatedDuration(duration = 44.4)
+   @Test(timeout = 220000)
    public void testRandomState() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);

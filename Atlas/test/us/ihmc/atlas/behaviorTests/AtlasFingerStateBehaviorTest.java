@@ -35,8 +35,8 @@ public class AtlasFingerStateBehaviorTest extends DRCFingerStateBehaviorTest
    }
 
    @Override
-   @EstimatedDuration(duration = 27.7)
-   @Test(timeout = 83115)
+	@EstimatedDuration(duration = 97.9)
+   @Test(timeout = 490000)
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -44,8 +44,8 @@ public class AtlasFingerStateBehaviorTest extends DRCFingerStateBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 27.7)
-   @Test(timeout = 83115)
+	@EstimatedDuration(duration = 36.1)
+   @Test(timeout = 180000)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -53,8 +53,8 @@ public class AtlasFingerStateBehaviorTest extends DRCFingerStateBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 27.7)
-   @Test(timeout = 83115)
+	@EstimatedDuration(duration = 24.2)
+   @Test(timeout = 120000)
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);

@@ -18,8 +18,8 @@ import com.jme3.scene.shape.Box;
 
 public class CollisionBoxTest
 {
-   @EstimatedDuration(duration = 0.3)
-   @Test(timeout = 3000)
+	@EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000)
    public void testInsideBoxPoints()
    {
       Random random = new Random(0101010101L);
@@ -36,8 +36,8 @@ public class CollisionBoxTest
       }
    }
 
-   @EstimatedDuration(duration = 0.3)
-   @Test(timeout = 3000)
+	@EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000)
    public void testOutsideBoxPoints()
    {
       Random random = new Random(1098551L);
@@ -54,8 +54,8 @@ public class CollisionBoxTest
       }
    }
 
-   @EstimatedDuration(duration = 0.3)
-   @Test(timeout = 3000)
+	@EstimatedDuration(duration = 0.2)
+   @Test(timeout = 30000)
    public void compareWithJMEBox()
    {
       Random random = new Random(1098551L);

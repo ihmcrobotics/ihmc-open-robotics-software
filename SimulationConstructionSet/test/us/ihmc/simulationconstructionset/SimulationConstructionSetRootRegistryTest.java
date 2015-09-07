@@ -18,8 +18,8 @@ public class SimulationConstructionSetRootRegistryTest
 {
    private static final boolean SHOW_GUI = false;
 
-	@EstimatedDuration
-	@Test(timeout=20000)
+	@EstimatedDuration(duration = 1.1)
+	@Test(timeout = 30000)
    public void testRootRegistryNothingFancy()
    {
       Robot robot = new Robot("RobotsRootRegistry");
@@ -58,8 +58,8 @@ public class SimulationConstructionSetRootRegistryTest
       scs.closeAndDispose();
    }
 
-	@EstimatedDuration
-	@Test(timeout=20000) 
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000) 
    public void testVarGroups()
    {
       Robot robot = new Robot("testVarGroups");
@@ -105,8 +105,8 @@ public class SimulationConstructionSetRootRegistryTest
       scs.closeAndDispose();
    }
 
-	@EstimatedDuration
-	@Test(timeout=20000)
+	@EstimatedDuration(duration = 0.1)
+	@Test(timeout = 30000)
    public void testRootRegistryAddYoVariablesAfterConstruction()
    {
       Robot robot = new Robot("TestAfterConstruction");

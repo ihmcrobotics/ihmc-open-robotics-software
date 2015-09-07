@@ -18,8 +18,8 @@ public class Graphics3DTextTest implements Graphics3DFrameListener
    int counter = 0;
    Graphics3DAddExtrusionInstruction instruction;
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 4.1)
+	@Test(timeout = 30000)
    public void testTextDisplay()
    {
       Graphics3DWorld world = new Graphics3DWorld(new JMEGraphics3DAdapter());

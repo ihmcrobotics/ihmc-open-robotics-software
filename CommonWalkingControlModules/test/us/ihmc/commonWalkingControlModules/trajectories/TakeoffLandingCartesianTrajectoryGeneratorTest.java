@@ -35,7 +35,7 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration(duration = 0.5)
+	@EstimatedDuration(duration = 0.4)
 	@Test(timeout = 30000)
    public void testOne()
    {

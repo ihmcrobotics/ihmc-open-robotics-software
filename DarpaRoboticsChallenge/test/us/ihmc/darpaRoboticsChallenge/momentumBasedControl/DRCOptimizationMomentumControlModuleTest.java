@@ -72,7 +72,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public abstract class DRCOptimizationMomentumControlModuleTest implements MultiRobotTestInterface
 {
 
-	@EstimatedDuration(duration = 0.6)
+	@EstimatedDuration(duration = 1.1)
 	@Test(timeout = 30000)
    public void testAllJointAccelerationsZero() throws IOException, JAXBException
    {
@@ -167,8 +167,8 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       }
    }
 
-	@EstimatedDuration(duration = 0.6)
-	@Test(timeout = 11724)
+	@EstimatedDuration(duration = 1.1)
+	@Test(timeout = 30000)
    public void testStandingInDoubleSupport() throws NoConvergenceException
    {
       Random random = new Random(1252515L);

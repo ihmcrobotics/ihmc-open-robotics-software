@@ -67,7 +67,7 @@ public class DesiredFootstepTest
     * @throws IOException 
     */
 
-   @EstimatedDuration(duration = 2.0)
+	@EstimatedDuration(duration = 1.6)
    @Test(timeout = 30000)
    public void testPassingFootstepData() throws IOException
    {
@@ -102,7 +102,7 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-   @EstimatedDuration(duration = 1.9)
+	@EstimatedDuration(duration = 1.4)
    @Test(timeout = 30000)
    public void testPassingFootstepPath() throws IOException
    {
@@ -132,7 +132,7 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-   @EstimatedDuration(duration = 1.9)
+	@EstimatedDuration(duration = 1.5)
    @Test(timeout = 30000)
    public void testPassingPauseCommand() throws IOException
    {
@@ -173,7 +173,7 @@ public class DesiredFootstepTest
       }
    }
 
-   @EstimatedDuration(duration = 3.4)
+	@EstimatedDuration(duration = 2.4)
    @Test(timeout = 30000)
    public void testPassingFootstepPathAndPauseCommands() throws IOException
    {
@@ -244,7 +244,7 @@ public class DesiredFootstepTest
       }
    }
 
-   @EstimatedDuration(duration = 1.9)
+	@EstimatedDuration(duration = 1.4)
    @Test(timeout = 30000)
    public void testPassingFootstepStatus() throws IOException
    {

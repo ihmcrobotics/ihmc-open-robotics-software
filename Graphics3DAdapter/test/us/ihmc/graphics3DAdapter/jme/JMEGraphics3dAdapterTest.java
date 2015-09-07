@@ -13,8 +13,8 @@ import us.ihmc.tools.agileTesting.BambooPlanType;
 public class JMEGraphics3dAdapterTest
 {
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 6.2)
+	@Test(timeout = 31000)
    public void testSimpleObject()
    {
       JMEGraphics3DAdapter renderer = new JMEGraphics3DAdapter();

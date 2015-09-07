@@ -67,8 +67,8 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
    
 // @Ignore
 // @QuarantinedTest("150313: This test currently fails, seemingly due to some sort of problem in the MomentumBasedController or InverseDynamicsCalculator. Trying to fix it...")
-   @EstimatedDuration(duration = 20.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 39.1)
+   @Test(timeout = 200000)
    public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException
    {
       // March 2015: Low pelvis orientation gains cause the pelvis to flip out. Trying to track down why this happens.

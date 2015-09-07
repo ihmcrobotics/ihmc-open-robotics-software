@@ -15,8 +15,8 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class CollisionSphereTest
 {
-   @EstimatedDuration(duration = 0.1)
-   @Test(timeout = 3000)
+	@EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000)
    public void testInsideSpherePoints()
    {
       Random random = new Random(98124L);
@@ -34,8 +34,8 @@ public class CollisionSphereTest
       }
    }
    
-   @EstimatedDuration(duration = 0.1)
-   @Test(timeout = 3000)
+	@EstimatedDuration(duration = 0.1)
+   @Test(timeout = 30000)
    public void testOutsideSpherePoints()
    {
       Random random = new Random(1098551L);

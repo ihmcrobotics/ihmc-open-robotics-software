@@ -14,7 +14,7 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 public class KryoStreamSerializerTest
 {
 
-	@EstimatedDuration(duration = 0.1)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 30000)
    public void test() throws IOException
    {

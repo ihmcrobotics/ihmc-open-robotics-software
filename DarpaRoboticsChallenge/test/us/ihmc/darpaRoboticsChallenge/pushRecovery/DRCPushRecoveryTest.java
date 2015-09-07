@@ -84,8 +84,8 @@ public abstract class DRCPushRecoveryTest
 
    protected abstract DRCRobotModel getRobotModel();
 
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 172343)
+	@EstimatedDuration(duration = 19.4)
+   @Test(timeout = 97000)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(script, true, false);
@@ -105,8 +105,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 172343)
+	@EstimatedDuration(duration = 23.1)
+   @Test(timeout = 120000)
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(script, false, false);
@@ -126,8 +126,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 164603)
+	@EstimatedDuration(duration = 18.0)
+   @Test(timeout = 90000)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
       setupTest(script, true, false);
@@ -147,8 +147,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 22.8)
+   @Test(timeout = 110000)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, true, false);
@@ -168,8 +168,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @EstimatedDuration(duration = 25.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 30.2)
+   @Test(timeout = 150000)
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, true);
@@ -189,8 +189,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @EstimatedDuration(duration = 35.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 20.2)
+   @Test(timeout = 100000)
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, true, false);
@@ -211,8 +211,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @EstimatedDuration(duration = 25.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 11.5)
+   @Test(timeout = 58000)
    public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, false);
@@ -239,8 +239,8 @@ public abstract class DRCPushRecoveryTest
       }
    }
 
-   @EstimatedDuration(duration = 45.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 23.7)
+   @Test(timeout = 120000)
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, true, false);
@@ -260,8 +260,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @EstimatedDuration(duration = 25.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 15.7)
+   @Test(timeout = 78000)
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, true);
@@ -282,8 +282,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @EstimatedDuration(duration = 35.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 16.1)
+   @Test(timeout = 80000)
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, true);
@@ -303,8 +303,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 18.9)
+   @Test(timeout = 94000)
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, false);

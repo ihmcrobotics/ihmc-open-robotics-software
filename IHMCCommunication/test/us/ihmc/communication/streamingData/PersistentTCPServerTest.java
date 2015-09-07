@@ -19,7 +19,7 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 public class PersistentTCPServerTest
 {
 
-	@EstimatedDuration(duration = 0.6)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPersistentTCPServer() throws UnknownHostException, IOException
    {

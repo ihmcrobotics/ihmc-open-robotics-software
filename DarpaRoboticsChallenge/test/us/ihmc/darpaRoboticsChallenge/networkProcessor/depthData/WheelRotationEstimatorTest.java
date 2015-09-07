@@ -14,8 +14,8 @@ public class WheelRotationEstimatorTest
 {
    private static final double eps = 1e-7;
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testAngleDefinitions()
    {
       int sectors = 370;
@@ -34,8 +34,8 @@ public class WheelRotationEstimatorTest
       
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.1)
+	@Test(timeout = 30000)
    public void testIndexBounds()
    {
       int sectors = 370;
@@ -56,8 +56,8 @@ public class WheelRotationEstimatorTest
       
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testAngleTautology()
    {
       int sectors = 11100;

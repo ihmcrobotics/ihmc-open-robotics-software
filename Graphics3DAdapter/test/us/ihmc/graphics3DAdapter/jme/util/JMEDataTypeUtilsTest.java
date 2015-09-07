@@ -10,8 +10,8 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 public class JMEDataTypeUtilsTest
 {
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testTransforms()
    {
       for (int i = 0; i < 1000; i++)

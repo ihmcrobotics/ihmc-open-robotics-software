@@ -12,7 +12,7 @@ import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class RobotiqWriteRequestFactoryTest
 {
-   @EstimatedDuration(duration = 0.05)
+	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 30000)
    public void testOpenMessage()
    {

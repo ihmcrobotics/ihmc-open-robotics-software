@@ -33,8 +33,8 @@ public class IHMCRosApiMessageMapTest
       assertFalse(outputPacketClasses.isEmpty());
    }
    
-   @EstimatedDuration(duration = 0.01)
-   @Test(timeout = 1000)
+	@EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testPacketsAreClassified()
    {
       assertEquals(IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.keySet().size(), inputPacketClasses.size() + outputPacketClasses.size());
