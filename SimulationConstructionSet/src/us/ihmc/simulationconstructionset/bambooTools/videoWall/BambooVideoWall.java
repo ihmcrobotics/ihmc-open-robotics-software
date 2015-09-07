@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.bambooTools;
+package us.ihmc.simulationconstructionset.bambooTools.videoWall;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -8,40 +8,48 @@ import java.util.Comparator;
 
 import org.apache.commons.lang3.SystemUtils;
 
+import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 
-public class BambooVideosSpy
+public class BambooVideoWall
 {
-   public static void spyOnEraseableBambooDataAndVideosDirectory()
+   public static void startVideoWallSourcedFromErasableDirectory()
    {
-      spyOnLatestBambooDataAndVideos(new LatestDirectoryProvider()
+      startVideoWall(new LatestDirectoryProvider()
       {
          @Override
-         public File findLatestDirectory()
+         public File checkForLatestDirectory()
          {
             return BambooTools.getEraseableDirectoryWithMostRecentBambooDataAndVideos();
          }
       });
    }
 
-   public static void spyOnLatestBambooDataAndVideosOnSamson()
+   public static void startVideoWallSourcedFromSamson()
    {
-      spyOnLatestBambooDataAndVideos(new LatestDirectoryProvider()
+      startVideoWall(new LatestDirectoryProvider()
       {
          @Override
-         public File findLatestDirectory()
+         public File checkForLatestDirectory()
          {
             if (SystemUtils.IS_OS_WINDOWS)
+            {
                return BambooTools.getDirectoryWithMostRecentBambooDataAndVideos("//samson/BambooVideos");
+            }
             else if (SystemUtils.IS_OS_MAC)
+            {
                return BambooTools.getDirectoryWithMostRecentBambooDataAndVideos("/Users/unknownid/BambooVideos");
+            }
             else
+            {
                return null;
+            }
          }
       });
    }
    
-   private static void spyOnLatestBambooDataAndVideos(LatestDirectoryProvider latestDirectoryProvider)
+   private static void startVideoWall(LatestDirectoryProvider latestDirectoryProvider)
    {
       int numberOfRowsOfVideo = 2;
       int numberOfColumnsOfVideo = 3;
@@ -49,28 +57,20 @@ public class BambooVideosSpy
 
       while (true)
       {
-         File mostRecentDirectory = latestDirectoryProvider.findLatestDirectory();
-         
-         PrintTools.info("Most recent directory = " + mostRecentDirectory);
+         File latestDirectory = latestDirectoryProvider.checkForLatestDirectory();
+         PrintTools.info("Latest directory = " + latestDirectory);
+         showLatestMovies(latestDirectory, multipleVideoDecoderAndPlaybacker);
 
-         showMostRecentMovies(mostRecentDirectory, multipleVideoDecoderAndPlaybacker);
-
-         try
-         {
-            Thread.sleep(1000);
-         }
-         catch (InterruptedException e)
-         {
-         }
+         ThreadTools.sleepSeconds(1.0);
       }
    }
    
    private interface LatestDirectoryProvider
    {
-      File findLatestDirectory();
+      File checkForLatestDirectory();
    }
 
-   private static void showMostRecentMovies(File movieDirectory, MultipleVideoDecoderAndPlaybacker multipleVideoDecoderAndPlaybacker)
+   private static void showLatestMovies(File movieDirectory, MultipleVideoDecoderAndPlaybacker multipleVideoDecoderAndPlaybacker)
    {
       BambooTools.reportOutMessage("Showing Most Recent Movie in " + movieDirectory);
 
@@ -112,7 +112,7 @@ public class BambooVideosSpy
             String videoName = potentialMovies[i].getName();
 
             String shortName = videoName.substring(14, videoName.length());
-            System.out.println("BambooVideoSpy:" + shortName);
+            PrintTools.info(shortName);
 
             if (!videoNames.contains(shortName))
             {
@@ -144,20 +144,13 @@ public class BambooVideosSpy
 
       while (!multipleVideoDecoderAndPlaybacker.areAllVideosDonePlaying())
       {
-         try
-         {
-            Thread.sleep(1000);
-         }
-         catch (InterruptedException e)
-         {
-         }
-
+         ThreadTools.sleepSeconds(1.0);
       }
    }
 
    public static void main(String[] args)
    {
-      // spyOnEraseableBambooDataAndVideosDirectory();
-      spyOnLatestBambooDataAndVideosOnSamson();
+      // startVideoWallSourcedFromErasableDirectory();
+      startVideoWallSourcedFromSamson();
    }
 }
