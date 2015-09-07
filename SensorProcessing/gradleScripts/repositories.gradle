@@ -9,6 +9,13 @@ repositories {
     maven{
         url "https://bengal.ihmc.us/nexus/content/repositories/central/"
     }
+    
+    /**
+     * JCenter, local proxy
+     */
+    maven{
+       url "https://bengal.ihmc.us/nexus/content/repositories/jcenter/"
+    }
 
     /**
      * Vendored third-party jars
