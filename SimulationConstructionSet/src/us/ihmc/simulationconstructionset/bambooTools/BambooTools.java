@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -19,8 +18,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.gui.GUIMessageFrame;
 import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.net.youtube.YouTubeCredentials;
-import us.ihmc.utilities.net.youtube.YouTubeUploader;
 import us.ihmc.utilities.time.DateTools;
 
 public class BambooTools
@@ -279,7 +276,7 @@ public class BambooTools
 
       if (doMovieUpload())
       {
-         uploadMovieToYouTube(movieFile, "video/mp4", movieFilename);
+         throw new RuntimeException("Youtube API v2 got deleted. Re-implement using v3 API");
       }
 
       scs.gotoOutPointNow();
@@ -287,23 +284,6 @@ public class BambooTools
       return new File[]{directory, movieFile, dataFile};
    }
 
-   private static void uploadMovieToYouTube(File movieFile, String mimeType, String movieFilename)
-   {
-      try
-      {
-         YouTubeCredentials credentials = new YouTubeCredentials();
-         YouTubeUploader youTubeUploader = new YouTubeUploader(credentials.getUsername(), credentials.getPassword(), credentials.getDeveloperKey());
-         String videoUrl = youTubeUploader.uploadVideo(movieFile, mimeType, movieFilename);
-         writeVideoUrlToVideoLog(movieFilename, videoUrl);
-      } catch (UnknownHostException e)
-      {
-         System.err.println("Failed to resolve host for YouTube, is the internet down?");
-         throw new RuntimeException(e);
-      } catch (Exception e)
-      {
-         throw new RuntimeException("Failed to upload video to YouTube!", e);
-      }
-   }
 
    private static void writeVideoUrlToVideoLog(String fileName, String videoUrl)
    {
