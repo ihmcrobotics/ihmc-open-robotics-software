@@ -7,7 +7,6 @@ dependencies {
     ['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
     ['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
     compile group: 'gov.nist.math', name: 'jama', version: '1.0.3' 
-    compile group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.5'  
       
     compile project(':Graphics3DAdapter')
     compile project(':SimulationConstructionSet')

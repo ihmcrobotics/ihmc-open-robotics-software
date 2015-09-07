@@ -4,8 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-import org.tmatesoft.svn.core.SVNException;
-
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
@@ -59,14 +57,6 @@ public class DataExporter implements ActionListener
 
       // figure out svn revsision number for project
       long revisionNumber = -1;
-      try
-      {
-         revisionNumber = DataExporterSVNHandler.getRevisionNumber(simulationRootDirectory);
-      }
-      catch (SVNException e1)
-      {
-         e1.printStackTrace();
-      }
 
       optionsPanel = new DataExporterOptionsDialog(tagName);
 
@@ -121,19 +111,6 @@ public class DataExporter implements ActionListener
                System.out.println("done creating movie");
             }
 
-            if (optionsPanel.commitToSVN())
-            {
-               try
-               {
-                  System.out.println("committing to svn");
-                  DataExporterSVNHandler.importIntoSVN(dataAndVideosTagDirectory, robot.getClass().getSimpleName(), tagName);
-                  System.out.println("done committing to svn");
-               }
-               catch (SVNException svnException)
-               {
-                  svnException.printStackTrace();
-               }
-            }
          }
       }
       else

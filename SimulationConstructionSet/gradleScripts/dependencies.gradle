@@ -20,7 +20,6 @@ dependencies {
 	compile group: 'org.apache.xmlgraphics', name: 'batik-dom', version: '1.7'
 	compile group: 'org.apache.xmlgraphics', name: 'batik-awt-util', version: '1.7'
 	compile group: 'net.sourceforge.jexcelapi', name: 'jxl', version: '2.6.12'
-	compile group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.5' //1.7.5
 	compile group: 'jgraph', name: 'jgraph', version: '5.13.0.0' //1.14.0.0
 	compile group: 'com.github.rwl', name: 'jtransforms', version: '2.4.0'
 	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.1.1'
