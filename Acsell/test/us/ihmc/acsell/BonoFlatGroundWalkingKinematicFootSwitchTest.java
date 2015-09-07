@@ -22,8 +22,8 @@ public class BonoFlatGroundWalkingKinematicFootSwitchTest extends DRCFlatGroundW
 {
    private BonoRobotModel robotModel;
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 15.4)
+	@Test(timeout = 77000)
    public void testBONOFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
