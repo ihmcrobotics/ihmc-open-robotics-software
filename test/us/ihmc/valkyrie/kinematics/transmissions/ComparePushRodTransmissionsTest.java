@@ -104,8 +104,8 @@ public class ComparePushRodTransmissionsTest
    
    // Seems that the interpolated should be same as the pushrod when use futeks is false. Should try to get this to work
    // Or figure out if the interpolated is just plain wrong.
-	@EstimatedDuration(duration = 0.2)
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.7)
+	@Test(timeout = 30000)
    public void testCompareInefficientToInterpolatedAnkles()
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -132,8 +132,8 @@ public class ComparePushRodTransmissionsTest
       compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, interpolatedPushRodTransmission, registry, yoGraphicsListRegistry);
    }
    
-	@EstimatedDuration(duration = 0.5)
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 1.6)
+	@Test(timeout = 30000)
    public void testCompareInefficientToInterpolatedWaist()
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);

@@ -98,8 +98,8 @@ public class ValkyriePosePlaybackDemoTest
       }
    }
 
-	@EstimatedDuration(duration = 24.2)
-	@Test(timeout = 120970)
+	@EstimatedDuration(duration = 6.2)
+	@Test(timeout = 31000)
    public void testPosePlaybackControllerWithWarmupPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);

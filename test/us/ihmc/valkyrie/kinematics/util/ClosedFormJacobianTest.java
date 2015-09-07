@@ -56,7 +56,7 @@ public class ClosedFormJacobianTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 30000)
    public void testJacobianMatchesMATLABWaist()
    {
@@ -128,7 +128,7 @@ public class ClosedFormJacobianTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 30000)
    public void testEfficientMatchesInefficientJacobianWaist()
    {
@@ -175,7 +175,7 @@ public class ClosedFormJacobianTest
       }
    }
 
-   @EstimatedDuration(duration = 0.8)
+	@EstimatedDuration(duration = 0.2)
    @Test(timeout = 30000)
    public void testEfficentMatchesInterpolatedJacobianWaist()
    {

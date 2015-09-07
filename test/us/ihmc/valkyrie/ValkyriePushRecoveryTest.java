@@ -27,8 +27,8 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-   @EstimatedDuration(duration = 45.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 26.0)
+   @Test(timeout = 130000)
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -36,8 +36,8 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-   @EstimatedDuration(duration = 35.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 16.4)
+   @Test(timeout = 82000)
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -45,8 +45,8 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-   @EstimatedDuration(duration = 35.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 15.7)
+   @Test(timeout = 78000)
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -54,8 +54,8 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-   @EstimatedDuration(duration = 25.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 17.2)
+   @Test(timeout = 86000)
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -63,8 +63,8 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 172343)
+	@EstimatedDuration(duration = 35.7)
+   @Test(timeout = 180000)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
@@ -72,8 +72,8 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 164603)
+	@EstimatedDuration(duration = 22.2)
+   @Test(timeout = 110000)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -81,8 +81,8 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 14.7)
+   @Test(timeout = 73000)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -90,8 +90,8 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-   @EstimatedDuration(duration = 25.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 14.4)
+   @Test(timeout = 72000)
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -99,8 +99,8 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 14.3)
+   @Test(timeout = 71000)
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -108,8 +108,8 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 163619)
+	@EstimatedDuration(duration = 25.2)
+   @Test(timeout = 130000)
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
