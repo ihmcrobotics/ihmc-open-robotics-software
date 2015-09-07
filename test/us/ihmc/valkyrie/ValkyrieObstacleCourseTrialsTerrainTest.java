@@ -28,8 +28,8 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-   @EstimatedDuration(duration = 90.6)
-   @Test(timeout = 1800000)
+	@EstimatedDuration(duration = 46.0)
+   @Test(timeout = 230000)
    public void testTrialsTerrainCinderblockEntireFieldScript() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment, BambooPlanType.VideoB);
@@ -37,8 +37,8 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-   @EstimatedDuration(duration = 23.3)
-   @Test(timeout = 1200000)
+	@EstimatedDuration(duration = 79.4)
+   @Test(timeout = 400000)
    public void testTrialsTerrainZigzagHurdlesScript() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -57,8 +57,8 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-   @EstimatedDuration(duration = 43.4)
-   @Test(timeout = 1200000)
+	@EstimatedDuration(duration = 147.5)
+   @Test(timeout = 740000)
    public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -66,8 +66,8 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-   @EstimatedDuration(duration = 45.8)
-   @Test(timeout = 1200000)
+	@EstimatedDuration(duration = 137.4)
+   @Test(timeout = 690000)
    public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -75,8 +75,8 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-   @EstimatedDuration(duration = 83.9)
-   @Test(timeout = 1200000)
+	@EstimatedDuration(duration = 32.3)
+   @Test(timeout = 160000)
    public void testTrialsTerrainCinderblockFieldPartTwoScript() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment, BambooPlanType.VideoB);
@@ -95,8 +95,8 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-   @EstimatedDuration(duration = 44.2)
-   @Test(timeout = 1200000)
+	@EstimatedDuration(duration = 131.3)
+   @Test(timeout = 660000)
    public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -104,8 +104,8 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-   @EstimatedDuration(duration = 64.7)
-   @Test(timeout = 1200000)
+	@EstimatedDuration(duration = 54.0)
+   @Test(timeout = 270000)
    public void testTrialsTerrainCinderblockFieldPartOneScript() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment, BambooPlanType.VideoB);
@@ -113,8 +113,8 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 1200000)
+	@EstimatedDuration(duration = 67.7)
+   @Test(timeout = 340000)
    public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);

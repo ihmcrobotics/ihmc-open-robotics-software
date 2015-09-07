@@ -64,8 +64,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 111.7)
-   @Test(timeout = 558712)
+	@EstimatedDuration(duration = 80.0)
+   @Test(timeout = 400000)
    public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -73,8 +73,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 34.7)
-   @Test(timeout = 173495)
+	@EstimatedDuration(duration = 41.4)
+   @Test(timeout = 210000)
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment, BambooPlanType.VideoB);
@@ -82,8 +82,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 30.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 81.9)
+   @Test(timeout = 410000)
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -91,8 +91,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 51.5)
+   @Test(timeout = 260000)
    public void testWalkingUpToRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -100,8 +100,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 44.4)
+   @Test(timeout = 220000)
    public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -109,8 +109,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 18.8)
+   @Test(timeout = 94000)
    public void testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -118,8 +118,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 23.4)
+   @Test(timeout = 120000)
    public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -127,8 +127,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 14.8)
+   @Test(timeout = 74000)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -136,8 +136,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 43.6)
+   @Test(timeout = 220000)
    public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -145,8 +145,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 55.3)
+   @Test(timeout = 280000)
    public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -154,8 +154,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 26.5)
+   @Test(timeout = 130000)
    public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
@@ -163,8 +163,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 38.9)
+   @Test(timeout = 190000)
    public void testChestControlWithPackets() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -172,8 +172,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 31.9)
+   @Test(timeout = 160000)
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
@@ -181,8 +181,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 159.1)
+   @Test(timeout = 800000)
    public void testForMemoryLeaks() throws Exception
    {
       BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow, BambooPlanType.VideoB);
