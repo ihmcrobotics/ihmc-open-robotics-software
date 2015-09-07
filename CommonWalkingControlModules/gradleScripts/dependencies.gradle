@@ -15,7 +15,6 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.gdata', name: 'gdata-core', version: 'x'
     compile group: 'com.google.guava', name: 'guava', version: '17.0' //earlier version used 13.0.1
     compile group: 'us.ihmc.thirdparty', name: 'NonlinearOptimization', version: 'x'
-    compile group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.5'
 	compile group: 'com.github.vincentfk', name:'joptimizer', version:'3.3.0'
     compile group: 'colt', name: 'colt', version: '1.2.0'
     

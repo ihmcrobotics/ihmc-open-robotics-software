@@ -24,10 +24,5 @@ repositories {
         url "https://bengal.ihmc.us/nexus/content/repositories/xuggle/"
     }
 
-    /**
-     * SVNKit Official repository
-     */
-    maven{
-        url "https://bengal.ihmc.us/nexus/content/repositories/SVNKit/"
-    }
+
 }

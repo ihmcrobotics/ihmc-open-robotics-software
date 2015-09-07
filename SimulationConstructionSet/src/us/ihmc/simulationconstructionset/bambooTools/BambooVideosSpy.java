@@ -8,41 +8,7 @@ import java.util.Comparator;
 
 public class BambooVideosSpy
 {
-   public static void spyOnBambooDataAndVideosDirectoryOnSubversion()
-   {
-      long previousVersion = -1;
 
-      int numberOfRowsOfVideo = 4;
-      int numberOfColumnsOfVideo = 2;
-      MultipleVideoDecoderAndPlaybacker multipleVideoDecoderAndPlaybacker = new MultipleVideoDecoderAndPlaybacker(numberOfRowsOfVideo, numberOfColumnsOfVideo);
-
-      while (true)
-      {
-         long currentVersion = BambooTools.updateLocalBambooDataAndVideos();
-
-         System.out.println("currentVersion = " + currentVersion);
-
-         if (previousVersion != currentVersion)
-         {
-            System.out.println("New Version!");
-            previousVersion = currentVersion;
-         }
-
-         File mostRecentDirectory = BambooTools.getSVNDirectoryWithMostRecentBambooDataAndVideos();
-         
-         System.out.println("Most recent directory = " + mostRecentDirectory);
-
-         showMostRecentMovies(mostRecentDirectory, multipleVideoDecoderAndPlaybacker);
-
-         try
-         {
-            Thread.sleep(1000);
-         }
-         catch (InterruptedException e)
-         {
-         }
-      }
-   }
 
    public static void spyOnEraseableBambooDataAndVideosDirectory()
    {

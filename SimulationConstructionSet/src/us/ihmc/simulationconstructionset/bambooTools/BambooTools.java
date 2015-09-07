@@ -14,16 +14,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.tmatesoft.svn.core.SVNCommitInfo;
-import org.tmatesoft.svn.core.SVNDepth;
-import org.tmatesoft.svn.core.SVNException;
-import org.tmatesoft.svn.core.SVNProperties;
-import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
-import org.tmatesoft.svn.core.wc.SVNClientManager;
-import org.tmatesoft.svn.core.wc.SVNCommitClient;
-import org.tmatesoft.svn.core.wc.SVNRevision;
-import org.tmatesoft.svn.core.wc.SVNUpdateClient;
-import org.tmatesoft.svn.core.wc.SVNWCClient;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.gui.GUIMessageFrame;
@@ -122,33 +112,6 @@ public class BambooTools
       }
    }
 
-   public static void createMovieAndDataWithDateTimeClassMethodAndCheckIntoSVN(String simplifiedRobotModelName, SimulationConstructionSet scs)
-   {
-      String rootDirectoryToUse = determineBambooDataAndVideosRootDirectoryToUse();
-
-      if (rootDirectoryToUse == null)
-      {
-         reportErrorMessage("Couldn't find a BambooDataAndVideos directory (for SVN)!");
-
-         return;
-      }
-
-      reportOutMessage("Automatically creating video and data and saving to " + rootDirectoryToUse);
-
-      File[] files = createMovieAndDataWithDateTimeClassMethod(rootDirectoryToUse, simplifiedRobotModelName, scs, 2);
-
-      File rootDirectoryFile = new File(rootDirectoryToUse);
-      updateSVN(rootDirectoryFile);
-
-      for (File file : files)
-      {
-         addToSVN(file);
-      }
-
-      updateSVN(rootDirectoryFile);
-
-      commitToSVN(files);
-   }
 
    private static String determineBambooDataAndVideosRootDirectoryToUse()
    {
@@ -274,23 +237,6 @@ public class BambooTools
       return fileAlphabeticalComparator;
    }
 
-   public static long updateLocalBambooDataAndVideos()
-   {
-      String rootDirectoryToUse = determineBambooDataAndVideosRootDirectoryToUse();
-
-      if (rootDirectoryToUse == null)
-      {
-         System.err.println("Couldn't find a BambooDataAndVideos directory (for updating)!");
-
-         return -1;
-      }
-
-      File rootDirectoryFile = new File(rootDirectoryToUse);
-
-      long updateReturnValue = updateSVN(rootDirectoryFile);
-
-      return updateReturnValue;
-   }
 
    private static File[] createMovieAndDataWithDateTimeClassMethod(String rootDirectory, String simplifiedRobotModelName, SimulationConstructionSet scs, int stackDepthForRelevantCallingMethod)
    {
@@ -403,86 +349,9 @@ public class BambooTools
       return classAndMethodName;
    }
 
-   private static long updateSVN(File directoryToUpdate)
-   {
-      reportOutMessage("Updating SVN for " + directoryToUpdate);
-      DAVRepositoryFactory.setup();
-      SVNClientManager clientManager = SVNClientManager.newInstance();
-      SVNUpdateClient updateClient = clientManager.getUpdateClient();
 
-      try
-      {
-         long updateReturnValue = updateClient.doUpdate(directoryToUpdate, SVNRevision.HEAD, SVNDepth.INFINITY, true, false);
 
-         return updateReturnValue;
-      } catch (SVNException e)
-      {
-         return -1;
-      }
-   }
 
-   private static void addToSVN(File fileToAdd)
-   {
-      try
-      {
-         boolean force = false;
-         boolean mkdir = false;    // this must be false to work
-         boolean climbUnversionedParents = false;
-         boolean includeIgnored = false;
-         boolean makeParents = true;
-
-         DAVRepositoryFactory.setup();
-         SVNClientManager clientManager = SVNClientManager.newInstance();
-         SVNWCClient wcClient = clientManager.getWCClient();
-
-         wcClient.doAdd(fileToAdd, force, mkdir, climbUnversionedParents, SVNDepth.EMPTY, includeIgnored, makeParents);
-
-         String logMessage = "Successfully Added (I think) " + fileToAdd.getPath() + " to SVN";
-         reportOutMessage(logMessage);
-
-         String logFilename = fileToAdd.getPath() + ".successAddingToSVNLog";
-         writeSuccessLogFile(logMessage, logFilename);
-      } catch (SVNException exception)
-      {
-         // Will get exceptions on the doAdd above if it already exists, but not sure how to check first, so I'm just adding it every time.
-
-         reportErrorMessage("Exception adding " + fileToAdd.getPath() + " to SVN! \n" + exception);
-         String logFilename = fileToAdd.getPath() + ".errorAddingToSVNLog";
-         writeErrorLogFile(exception, logFilename);
-      }
-   }
-
-   private static void commitToSVN(File[] filesToCommit)
-   {
-      try
-      {
-         boolean keepLocks = false;
-         String commitMessage = "Auto generated from Bamboo run.";
-         SVNProperties revisionProperties = null;
-         String[] changeLists = null;
-         boolean keepChangeList = false;
-         boolean force = false;
-
-         DAVRepositoryFactory.setup();
-         SVNClientManager clientManager = SVNClientManager.newInstance();
-
-         SVNCommitClient commitClient = clientManager.getCommitClient();
-         SVNCommitInfo commitInfo = commitClient.doCommit(filesToCommit, keepLocks, commitMessage, revisionProperties, changeLists, keepChangeList, force,
-               SVNDepth.EMPTY);
-
-         reportOutMessage(commitInfo.toString() + ": Successfully commited to SVN!");
-
-         String logFilename = filesToCommit[0].getPath() + ".successCommittingToSVNLog";
-         writeSuccessLogFile(commitInfo.toString(), logFilename);
-      } catch (SVNException exception)
-      {
-         reportErrorMessage(filesToCommit[0].getPath() + " Couldn't commit to SVN! \n " + exception);
-
-         // Will get exceptions on the doCommit above things aren't set up correctly. Log a file if so.
-         String logFilename = filesToCommit[0].getPath() + ".errorCommittingToSVNLog";
-         writeErrorLogFile(exception, logFilename);
-      }
-   }
 
    private static void writeSuccessLogFile(String successString, String logFilename)
    {
@@ -571,18 +440,6 @@ public class BambooTools
          return;
 
       guiMessageFrame.save(file);
-   }
-
-   public static void logMessagesAndCheckInToBambooDataAndVideos(String filename)
-   {
-      String rootDirectoryToUse = determineBambooDataAndVideosRootDirectoryToUse();
-
-      String logFilename = rootDirectoryToUse + DateTools.getDateString() + "_" + DateTools.getTimeString() + "_" + filename;
-      File file = new File(logFilename);
-      logMessagesToFile(file);
-
-      addToSVN(file);
-      commitToSVN(new File[]{file});
    }
 
    public static void logMessagesAndShareOnSharedDriveIfAvailable(String filename)

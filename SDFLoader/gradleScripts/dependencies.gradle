@@ -3,7 +3,6 @@ dependencies {
     
     compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: '1.5.2' 
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-    compile group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.5'
        
     compile project(':SimulationConstructionSet')
     compile project(':Graphics3DAdapter')
