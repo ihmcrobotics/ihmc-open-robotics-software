@@ -1,6 +1,6 @@
 dependencies {
 	compile group: 'junit', name: 'junit', version: '4.11'
-	compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: '1.5.2'
+	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 	
 	
 	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  

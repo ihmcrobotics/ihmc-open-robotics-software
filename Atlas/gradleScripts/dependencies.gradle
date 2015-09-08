@@ -9,7 +9,7 @@ evaluationDependsOn(':SensorProcessing')
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
-    compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: '1.5.2'
+    compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
 	['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
     compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.8-internal'

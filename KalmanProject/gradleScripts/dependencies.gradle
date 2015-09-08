@@ -3,7 +3,7 @@ dependencies {
      
     
     
-    compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: '1.5.2' 
+    compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2' 
     ['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
     ['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
     compile group: 'gov.nist.math', name: 'jama', version: '1.0.3' 
