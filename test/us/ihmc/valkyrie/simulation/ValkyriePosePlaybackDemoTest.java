@@ -116,7 +116,7 @@ public class ValkyriePosePlaybackDemoTest
       scs.getVariable("PosePlayback_startPosePlayback").setValueFromDouble(1.0);
       blockingSimulationRunner.simulateAndBlock(numberOfPoses * trajectoryTime + 0.5);
 
-      createMovie(scs);
+      createVideo(scs);
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -142,7 +142,7 @@ public class ValkyriePosePlaybackDemoTest
       scs.getVariable("PosePlayback_startPosePlayback").setValueFromDouble(1.0);
       blockingSimulationRunner.simulateAndBlock(numberOfPoses * trajectoryTime + 0.5);
 
-      createMovie(scs);
+      createVideo(scs);
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -171,7 +171,7 @@ public class ValkyriePosePlaybackDemoTest
       scs.getVariable("PosePlayback_startPosePlayback").setValueFromDouble(1.0);
       blockingSimulationRunner.simulateAndBlock(numberOfPoses * trajectoryTime + 0.5);
 
-      createMovie(scs);
+      createVideo(scs);
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -197,11 +197,11 @@ public class ValkyriePosePlaybackDemoTest
       return drcPosePlaybackDemo.getSimulationConstructionSet();
    }
 
-   private void createMovie(SimulationConstructionSet scs)
+   private void createVideo(SimulationConstructionSet scs)
    {
-      if (simulationTestingParameters.getCreateSCSMovies())
+      if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(
                BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE), scs, 1);
       }
    }
