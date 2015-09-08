@@ -160,7 +160,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       if (simulationTestingParameters.getCheckNothingChangedInSimulation())
          checkNothingChanged(nothingChangedVerifier);
 
-      createMovie(scs);
+      createVideo(scs);
    }
 
 	@Ignore
@@ -233,7 +233,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
             done = true;
       }
 
-      createMovie(scs);
+      createVideo(scs);
       assertTrue(success);
    }
    
@@ -343,7 +343,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
          }
       }
 
-      createMovie(scs);
+      createVideo(scs);
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -355,11 +355,11 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       walk.set(true);
    }
 
-   private void createMovie(SimulationConstructionSet scs)
+   private void createVideo(SimulationConstructionSet scs)
    {
-      if (simulationTestingParameters.getCreateSCSMovies())
+      if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
       }
    }
 

@@ -123,7 +123,7 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

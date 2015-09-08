@@ -376,7 +376,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       // Help Menu Items: None
    }
 
-   public void createMovieExportActions(StandardGUIActions actions, ActiveCameraHolder activeCameraHolder)
+   public void createVideoExportActions(StandardGUIActions actions, ActiveCameraHolder activeCameraHolder)
    {
 
       // Run Menu Items:
@@ -702,7 +702,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       return menuBar;
    }
 
-   public JPanel createMovieExportPanelButtons()
+   public JPanel createVideoExportPanelButtons()
    {
       Action[] fileActions = new Action[] {};
       Action[] runActions = new Action[] { playAction, stopAction };
@@ -805,7 +805,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
 
    protected JPanel createGraphWindowButtons()
    {
-      Action[] fileActions = new Action[] { exportAction, importDataAction }; // , exportMovieAction, exportSnapshotAction};
+      Action[] fileActions = new Action[] { exportAction, importDataAction }; // , exportVideoAction, exportSnapshotAction};
       Action[] runActions = new Action[] { simulateAction, playAction, stopAction };
       Action[] stepActions = new Action[] { setInPointAction, goInPointAction, stepBackwardAction, stepForwardAction, goOutPointAction, setOutPointAction };
       Action[] keyActions = new Action[] { setKeyAction, toggleKeyPointModeAction };
@@ -1231,9 +1231,9 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       importDataAction.setCurrentDirectory(directory);
    }
 
-   public void createMovie(File file)
+   public void createVideo(File file)
    {
-      mediaCapture.createMovieFromFile(file);
+      mediaCapture.createVideoFromFile(file);
    }
 
    public ArrayList<AbstractAction> getGuiActions()

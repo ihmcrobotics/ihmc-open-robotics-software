@@ -1,9 +1,9 @@
-package us.ihmc.simulationconstructionset.movies;
+package us.ihmc.simulationconstructionset.videos;
 
 import java.io.File;
 import java.io.FilenameFilter;
 
-public class MovieFileFilter extends javax.swing.filechooser.FileFilter implements FilenameFilter
+public class VideoFileFilter extends javax.swing.filechooser.FileFilter implements FilenameFilter
 {
    private final String[] extensions = { "mov", "mp4", "mpeg", "avi", "flv" };
    
@@ -28,7 +28,7 @@ public class MovieFileFilter extends javax.swing.filechooser.FileFilter implemen
 
    public String getDescription()
    {
-      return "Movie: .mov, .mp4, mpeg, .avi, .flv";
+      return "Video: .mov, .mp4, mpeg, .avi, .flv";
    }
 
    public boolean accept(File dir, String name)

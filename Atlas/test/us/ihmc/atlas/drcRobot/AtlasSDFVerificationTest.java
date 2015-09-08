@@ -104,9 +104,9 @@ public class AtlasSDFVerificationTest
          checkNothingChanged(nothingChangedVerifier);
       }
 
-      if (simulationTestingParameters.getCreateSCSMovies())
+      if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS), scs, 1);
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS), scs, 1);
       }
 
       BambooTools.reportTestFinishedMessage();

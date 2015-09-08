@@ -34,7 +34,7 @@ import us.ihmc.simulationconstructionset.TimeHolder;
 import us.ihmc.simulationconstructionset.ViewportConfiguration;
 import us.ihmc.simulationconstructionset.commands.AllCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.DataBufferCommandsExecutor;
-import us.ihmc.simulationconstructionset.commands.ExportMovieCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.ExportVideoCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ExportSnapshotCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.RunCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.StopCommandExecutor;
@@ -53,8 +53,8 @@ import us.ihmc.simulationconstructionset.gui.dialogConstructors.MediaCaptureDial
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.MediaCaptureDialogGenerator;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ResizeViewportDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ResizeViewportDialogGenerator;
-import us.ihmc.simulationconstructionset.movies.ExportMovie;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
+import us.ihmc.simulationconstructionset.videos.ExportVideo;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
 
@@ -141,11 +141,11 @@ public class ViewportWindow implements ViewportSelectorCommandExecutor, ActiveCa
       ExportSnapshotDialogConstructor exportSnapshotDialogConstructor = new ExportSnapshotDialogGenerator(exportSnapshotCommandExecutor, guiEnablerAndDisabler,
                                                                            robots, activeCanvas3DHolder, frame);
 
-      ExportMovieCommandExecutor exportMovieCommandExecutor = new ExportMovie(timeHolder, myGUI, dataBufferCommandsExecutor, runCommandsExecutor,
+      ExportVideoCommandExecutor exportVideoCommandExecutor = new ExportVideo(timeHolder, myGUI, dataBufferCommandsExecutor, runCommandsExecutor,
                                                                  guiEnablerAndDisabler, activeCanvas3DHolder, simulationSynchronizer);
       StopCommandExecutor stopCommandExecutor = allCommandsExecutor;
 
-      MediaCaptureDialogConstructor mediaCaptureDialogConstructor = new MediaCaptureDialogGenerator(exportMovieCommandExecutor, guiEnablerAndDisabler,
+      MediaCaptureDialogConstructor mediaCaptureDialogConstructor = new MediaCaptureDialogGenerator(exportVideoCommandExecutor, guiEnablerAndDisabler,
                                                                        stopCommandExecutor, viewportSelector, myGUI, mainGUIActions, activeCanvas3DHolder);
 
       CameraPropertiesDialogGenerator cameraPropertiesDialogGenerator = new CameraPropertiesDialogGenerator(viewportPanel, frame, frame);
@@ -288,11 +288,11 @@ public class ViewportWindow implements ViewportSelectorCommandExecutor, ActiveCa
       ExportSnapshotDialogConstructor exportSnapshotDialogConstructor = new ExportSnapshotDialogGenerator(exportSnapshotCommandExecutor, guiEnablerAndDisabler,
                                                                            robots, activeCanvas3DHolder, frame);
 
-      ExportMovieCommandExecutor exportMovieCommandExecutor = new ExportMovie(timeHolder, myGUI, dataBufferCommandsExecutor, runCommandsExecutor,
+      ExportVideoCommandExecutor exportVideoCommandExecutor = new ExportVideo(timeHolder, myGUI, dataBufferCommandsExecutor, runCommandsExecutor,
                                                                  guiEnablerAndDisabler, activeCanvas3DHolder, simulationSynchronizer);
       StopCommandExecutor stopCommandExecutor = sim;
 
-      MediaCaptureDialogConstructor mediaCaptureDialogConstructor = new MediaCaptureDialogGenerator(exportMovieCommandExecutor, guiEnablerAndDisabler,
+      MediaCaptureDialogConstructor mediaCaptureDialogConstructor = new MediaCaptureDialogGenerator(exportVideoCommandExecutor, guiEnablerAndDisabler,
                                                                        stopCommandExecutor, viewportSelector, myGUI, mainGUIActions, activeCanvas3DHolder);
       CameraPropertiesDialogGenerator cameraPropertiesDialogGenerator = new CameraPropertiesDialogGenerator(viewportPanel, frame, frame);
       ResizeViewportDialogConstructor resizeViewportDialogConstructor = new ResizeViewportDialogGenerator(frame, myGUI);

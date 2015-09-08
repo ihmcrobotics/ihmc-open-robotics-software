@@ -88,7 +88,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule
 
       icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, registry, yoGraphicsListRegistry);
       groundReactionMomentControlModule = new GroundReactionMomentControlModule(pelvisFrame, registry);
-      groundReactionMomentControlModule.setGains(10.0, 100.0); // kPelvisYaw was 0.0 for M3 movie TODO: move to setGains method
+      groundReactionMomentControlModule.setGains(10.0, 100.0); // kPelvisYaw was 0.0 for M3 video TODO: move to setGains method
 
       momentumCalculator = new MomentumCalculator(twistCalculator);
       visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, yoGraphicsListRegistry);

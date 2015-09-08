@@ -92,7 +92,7 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(23.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

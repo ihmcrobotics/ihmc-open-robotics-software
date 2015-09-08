@@ -18,7 +18,7 @@ public class MediaCaptureAction extends AbstractAction
       super("Media Capture...");
       this.constructor = constructor;
 
-      String iconFilename = "icons/Movie24.gif";
+      String iconFilename = "icons/Video24.gif";
       int shortKey = KeyEvent.VK_M;
       String longDescription = "Capture media to a file.";
       String shortDescription = "Capture Media";
@@ -26,9 +26,9 @@ public class MediaCaptureAction extends AbstractAction
       AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
    }
 
-   public void createMovieFromFile(File file)
+   public void createVideoFromFile(File file)
    {
-      constructor.createMovie(file);
+      constructor.createVideo(file);
    }
 
    public void actionPerformed(ActionEvent event)

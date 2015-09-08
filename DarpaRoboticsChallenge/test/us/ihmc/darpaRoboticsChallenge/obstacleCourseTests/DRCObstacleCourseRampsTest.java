@@ -98,7 +98,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(18.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -200,7 +200,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(16.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 2);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
 
       drcSimulationTestHelper.checkNothingChanged();
       assertTrue(success);

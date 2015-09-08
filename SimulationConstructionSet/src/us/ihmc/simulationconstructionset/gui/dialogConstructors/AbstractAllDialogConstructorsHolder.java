@@ -138,7 +138,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
    {
       return new MediaCaptureDialogConstructor()
       {
-         public void createMovie(File file)
+         public void createVideo(File file)
          {
          }
 

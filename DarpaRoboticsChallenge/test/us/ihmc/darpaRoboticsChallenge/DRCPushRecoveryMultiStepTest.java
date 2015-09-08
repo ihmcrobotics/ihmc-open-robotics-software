@@ -114,7 +114,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
 
-      createMovie(scs);
+      createVideo(scs);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -150,7 +150,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
 
-      createMovie(scs);
+      createVideo(scs);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -229,11 +229,11 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       }
    }
 
-   private void createMovie(SimulationConstructionSet scs)
+   private void createVideo(SimulationConstructionSet scs)
    {
-      if (simulationTestingParameters.getCreateSCSMovies())
+      if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
       }
    }
 

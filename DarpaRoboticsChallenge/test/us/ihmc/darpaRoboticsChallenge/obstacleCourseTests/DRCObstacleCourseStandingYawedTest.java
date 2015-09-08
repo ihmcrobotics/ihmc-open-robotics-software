@@ -71,7 +71,7 @@ import us.ihmc.robotics.geometry.BoundingBox3d;
          ThreadTools.sleep(1000);
          boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
          
-         drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+         drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
          drcSimulationTestHelper.checkNothingChanged();
 
          assertTrue(success);

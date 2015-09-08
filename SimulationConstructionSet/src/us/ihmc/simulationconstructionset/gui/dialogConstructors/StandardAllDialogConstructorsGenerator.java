@@ -17,8 +17,8 @@ import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
 import us.ihmc.simulationconstructionset.gui.StandardGUIActions;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
-import us.ihmc.simulationconstructionset.movies.ExportMovie;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
+import us.ihmc.simulationconstructionset.videos.ExportVideo;
 
 public class StandardAllDialogConstructorsGenerator implements AllDialogConstructorsHolder
 {
@@ -63,10 +63,10 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
       ActiveCanvas3DHolder activeCanvas3DHolder = myGUI;
       StopCommandExecutor stopCommandExecutor = sim;
 
-      ExportMovie exportMovie = new ExportMovie(timeHolder, standardSimulationGUI, dataBufferCommandsExecutor, runCommandsExecutor, 
+      ExportVideo exportVideo = new ExportVideo(timeHolder, standardSimulationGUI, dataBufferCommandsExecutor, runCommandsExecutor, 
             guiEnablerAndDisabler, activeCanvas3DHolder, simulationSynchronizer);
       
-      this.mediaCaptureDialogConstructor = new MediaCaptureDialogGenerator(exportMovie, guiEnablerAndDisabler, stopCommandExecutor, viewportSelector, standardSimulationGUI, standardGUIActions, activeCanvas3DHolder);
+      this.mediaCaptureDialogConstructor = new MediaCaptureDialogGenerator(exportVideo, guiEnablerAndDisabler, stopCommandExecutor, viewportSelector, standardSimulationGUI, standardGUIActions, activeCanvas3DHolder);
       this.exportSnapshotDialogConstructor = new ExportSnapshotDialogGenerator(sim, sim, robots, myGUI, frame);
       
       this.playbackPropertiesDialogConstructor = new PlaybackPropertiesDialogGenerator(sim, parentContainer, frame);

@@ -5,5 +5,5 @@ import java.io.File;
 public interface MediaCaptureDialogConstructor
 {
    public abstract void constructMediaCaptureDialog();
-   public abstract void createMovie(File file);
+   public abstract void createVideo(File file);
 }

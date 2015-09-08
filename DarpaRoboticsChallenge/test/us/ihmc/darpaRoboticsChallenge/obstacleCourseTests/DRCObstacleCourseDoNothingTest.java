@@ -83,7 +83,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
 
       
 //      new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI, showGUI,
-//      createMovie, false, robotModel
+//      createVideo, false, robotModel
       
       CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new DRCDemo01NavigationEnvironment();
       String name = "DRCDoNothingTest";
@@ -93,7 +93,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       DRCRobotModel robotModel = getRobotModel();
       
       drcSimulationTestHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel);
-//      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCDoNothingTest", "", selectedLocation, checkNothingChanged, showGUI, createMovie,
+//      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCDoNothingTest", "", selectedLocation, checkNothingChanged, showGUI, createVideo,
 //            getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -102,7 +102,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       ThreadTools.sleep(100);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 2);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

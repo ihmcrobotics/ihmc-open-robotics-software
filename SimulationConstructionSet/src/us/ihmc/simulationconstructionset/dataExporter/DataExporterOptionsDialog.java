@@ -22,7 +22,7 @@ class DataExporterOptionsDialog
    private final JCheckBox createSpreadSheetCheckBox = new JCheckBox("Create Torque & Speed Spreadsheet");
    private final JCheckBox createGraphsCheckBoxJPG = new JCheckBox("Create Torque & Speed Graph JPG");
    private final JCheckBox createGraphsCheckBoxPDF = new JCheckBox("Create Torque & Speed Graph PDF");
-   private final JCheckBox createMovieCheckBox = new JCheckBox("Create Movie");
+   private final JCheckBox createVideoCheckBox = new JCheckBox("Create Video");
    private final JCheckBox tagCodeCheckBox = new JCheckBox("Auto Tag Code");
    private final JTextField tagTextField = new JTextField();
    private boolean isCancelled = false;
@@ -83,8 +83,8 @@ class DataExporterOptionsDialog
 
       gridBagConstraints.gridy++;
       gridBagConstraints.gridwidth = 2;
-      panel.add(createMovieCheckBox, gridBagConstraints);
-      createMovieCheckBox.setSelected(true);
+      panel.add(createVideoCheckBox, gridBagConstraints);
+      createVideoCheckBox.setSelected(true);
 
 
       gridBagConstraints.gridy++;
@@ -152,9 +152,9 @@ class DataExporterOptionsDialog
       return createGraphsCheckBoxPDF.isSelected();
    }
 
-   public boolean createMovie()
+   public boolean createVideo()
    {
-      return createMovieCheckBox.isSelected();
+      return createVideoCheckBox.isSelected();
    }
 
    public boolean tagCode()

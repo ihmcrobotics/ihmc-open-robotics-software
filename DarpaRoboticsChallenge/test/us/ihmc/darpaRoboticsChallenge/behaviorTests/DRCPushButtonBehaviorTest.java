@@ -152,7 +152,7 @@ public abstract class DRCPushButtonBehaviorTest implements MultiRobotTestInterfa
       }
 
 
-      drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcBehaviorTestHelper.createVideo(getSimpleRobotName(), 1);
 
       success = success & pushButtonBehavior.isDone();
       assertTrue(success);

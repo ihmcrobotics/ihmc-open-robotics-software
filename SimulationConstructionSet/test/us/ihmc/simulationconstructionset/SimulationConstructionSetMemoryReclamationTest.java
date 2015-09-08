@@ -27,9 +27,9 @@ public class SimulationConstructionSetMemoryReclamationTest
    {
       boolean useRobot = false;
       int numberOfTests = 3;
-      boolean createMovie = false;
+      boolean createVideo = false;
       int usedMemoryMBAtStart = MemoryTools.getCurrentMemoryUsageInMB();
-      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(useRobot, numberOfTests, createMovie);
+      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(useRobot, numberOfTests, createVideo);
       int usedMemoryMB = usedMemoryMBAtEnd - usedMemoryMBAtStart;
 
       checkForLingeringFrames();
@@ -42,9 +42,9 @@ public class SimulationConstructionSetMemoryReclamationTest
    {
       boolean useRobot = true;
       int numberOfTests = 1;
-      boolean createMovie = false;
+      boolean createVideo = false;
       int usedMemoryMBAtStart = MemoryTools.getCurrentMemoryUsageInMB();
-      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(useRobot, numberOfTests, createMovie);
+      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(useRobot, numberOfTests, createVideo);
       int usedMemoryMB = usedMemoryMBAtEnd - usedMemoryMBAtStart;
 
       checkForLingeringFrames();
@@ -55,20 +55,20 @@ public class SimulationConstructionSetMemoryReclamationTest
 
 	@EstimatedDuration
 	@Test(timeout=300000)
-   public void testMemoryReclamationForSCSWithARobotAndMovie()
+   public void testMemoryReclamationForSCSWithARobotAndVideo()
    {
       boolean useRobot = true;
       int numberOfTests = 10;
-      boolean createMovie = true;
+      boolean createVideo = true;
       int usedMemoryMBAtStart = MemoryTools.getCurrentMemoryUsageInMB();
-      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(useRobot, numberOfTests, createMovie);
+      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(useRobot, numberOfTests, createVideo);
       int usedMemoryMB = usedMemoryMBAtEnd - usedMemoryMBAtStart;
 
       checkForLingeringFrames();
       assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
    }
 
-   private int testOneAndReturnUsedMemoryMB(boolean useARobot, int numberOfTests, boolean createMovie)
+   private int testOneAndReturnUsedMemoryMB(boolean useARobot, int numberOfTests, boolean createVideo)
    {
       boolean garbageCollect = true;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("testOneAndReturnUsedMemoryMB start:", DEBUG, garbageCollect );
@@ -79,19 +79,19 @@ public class SimulationConstructionSetMemoryReclamationTest
          scs.simulate(2.0);
          
          sleep(2000);
-         if (createMovie)
+         if (createVideo)
          {
             scs.gotoInPointNow();
 
-            String movieFilename = "testOneAndReturnUsedMemoryMB.mp4";
-            File file = new File(movieFilename);
+            String videoFilename = "testOneAndReturnUsedMemoryMB.mp4";
+            File file = new File(videoFilename);
             if (file.exists())
                file.delete();
             
-            File movieFile = scs.createMovie(movieFilename);
-            movieFile.delete();
+            File videoFile = scs.createVideo(videoFilename);
+            videoFile.delete();
             
-            printIfDebug("Got past movie creation...maybe");
+            printIfDebug("Got past video creation...maybe");
          }
          scs.closeAndDispose();
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("testOneAndReturnUsedMemoryMB final: ", DEBUG, garbageCollect);

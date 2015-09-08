@@ -178,7 +178,7 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
          fail("Robot didn't traverse the terrain. CoM_x = " + q_x.getDoubleValue());
       }
 
-      createMovie(scs);
+      createVideo(scs);
    }
 
    private ImmutablePair<CombinedTerrainObject3D, Double> createRandomBlocks()
@@ -233,11 +233,11 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
       walk.set(true);
    }
 
-   private void createMovie(SimulationConstructionSet scs)
+   private void createVideo(SimulationConstructionSet scs)
    {
-      if (simulationTestingParameters.getCreateSCSMovies())
+      if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
       }
    }
 
