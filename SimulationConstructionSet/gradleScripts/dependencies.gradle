@@ -6,7 +6,7 @@ dependencies {
 	
 	//compile group: 'cz.advel.jbullet', name: 'jbullet', version: '20101010-1'	//Disabled jbullet because it depends on vecmath 1.3.1. Jesper
 	compile group: 'us.ihmc.thirdparty', name: 'joystick', version: 'x'
-	compile group: 'us.ihmc.thirdparty', name: 'vrpn', version: 'x'
+//	compile group: 'us.ihmc.thirdparty', name: 'vrpn', version: 'x'
 	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
 	['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
 	compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
