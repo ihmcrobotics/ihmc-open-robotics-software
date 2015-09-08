@@ -18,7 +18,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty', name: 'boofcv-calibration', version: '0.19-internal'
 	compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: '0.7-internal'
     compile group: 'org.apache.poi', name: 'poi', version: '3.9' 
-    compile group: 'org.opensphere', name: 'concavehull', version: '1.0'   
+    compile group: 'us.ihmc.thirdparty.org.opensphere', name: 'concavehull', version: '1.0'   
     compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4.+'
     compile group: 'com.vividsolutions', name: 'jts', version: '1.13' 
     compile group: 'jfree', name: 'jfreechart', version: '1.0.7' 
