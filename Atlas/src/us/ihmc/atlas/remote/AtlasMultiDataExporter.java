@@ -467,7 +467,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
          exportData.scs.cropBuffer();
 
          if (exportData.exportSCSVideo)
-            exportData.scs.createMovie(savePath + File.separator + fileName + "SCS");
+            exportData.scs.createVideo(savePath + File.separator + fileName + "SCS");
 
          switchVideoUpdate(exportData, cameraName);
          exportVideo(exportData, savePath, fileName + cameraName);

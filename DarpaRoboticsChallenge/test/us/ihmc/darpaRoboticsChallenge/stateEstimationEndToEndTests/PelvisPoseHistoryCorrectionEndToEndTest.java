@@ -345,7 +345,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(testInterpolationToRandomTargetsWithFastAlphaValue(robot, registry, 10));
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
       sendPelvisCorrectionPackets = false;
       
@@ -388,7 +388,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       sendPelvisCorrectionPackets = false;
@@ -414,7 +414,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(yawBigInDoubleSupport(externalPelvisPosePublisher));
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       sendPelvisCorrectionPackets = false;
@@ -441,7 +441,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(yawBigInSingleSupport(externalPelvisPosePublisher));
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(100.0);
       drcSimulationTestHelper.checkNothingChanged();
 
@@ -470,7 +470,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(localizeOutsideOfFootInSingleSupport(externalPelvisPosePublisher));
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(100.0);
       drcSimulationTestHelper.checkNothingChanged();
 

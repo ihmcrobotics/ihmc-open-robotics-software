@@ -78,7 +78,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
       ThreadTools.sleep(2000);
 
 
-      // drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      // drcSimulationTestHelper.createVideo(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -115,7 +115,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
       drcSimulationTestHelper.send(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(18.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -169,7 +169,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

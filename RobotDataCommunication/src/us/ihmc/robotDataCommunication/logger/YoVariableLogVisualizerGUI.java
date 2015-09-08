@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.FileDialog;
 import java.awt.Frame;
 import java.awt.GridLayout;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -21,12 +20,11 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.movies.MovieFileFilter;
+import us.ihmc.simulationconstructionset.videos.VideoFileFilter;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -128,7 +126,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
 
          FileDialog saveDialog = new FileDialog((Frame) null, "Export video", FileDialog.SAVE);
 
-         MovieFileFilter filter = new MovieFileFilter();
+         VideoFileFilter filter = new VideoFileFilter();
          saveDialog.setFilenameFilter(filter);
          saveDialog.setVisible(true);
 

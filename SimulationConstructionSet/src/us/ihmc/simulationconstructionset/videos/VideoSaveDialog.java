@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.movies;
+package us.ihmc.simulationconstructionset.videos;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -19,7 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import us.ihmc.simulationconstructionset.commands.ExportMovieCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.ExportVideoCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.ActiveCanvas3DHolder;
 import us.ihmc.simulationconstructionset.gui.StandardGUIActions;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
@@ -27,7 +27,7 @@ import us.ihmc.simulationconstructionset.gui.TickUpdateListener;
 import us.ihmc.simulationconstructionset.gui.ViewportPanel;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 
-public class MovieSaveDialog implements TickUpdateListener
+public class VideoSaveDialog implements TickUpdateListener
 {
    private final Dimension[] dimensions = {new Dimension(640, 360), new Dimension(1280, 720), new Dimension(1920, 1080), new Dimension(640, 480),
            new Dimension(800, 600)};
@@ -46,15 +46,15 @@ public class MovieSaveDialog implements TickUpdateListener
    private JTextField playbackRateTextField;
    
    private final Dimension dimension = new Dimension(1900, 1080);
-   private final ExportMovieCommandExecutor exportMovieCommandExecutor;
+   private final ExportVideoCommandExecutor exportVideoCommandExecutor;
       
-   public MovieSaveDialog(Window owner, StandardSimulationGUI myGUI, StandardGUIActions standardGUIActions, ActiveCanvas3DHolder activeCanvas3DHolder,
-                          ExportMovieCommandExecutor exportMovieCommandExecutor, GUIEnablerAndDisabler guiEnablerAndDisabler)
+   public VideoSaveDialog(Window owner, StandardSimulationGUI myGUI, StandardGUIActions standardGUIActions, ActiveCanvas3DHolder activeCanvas3DHolder,
+                          ExportVideoCommandExecutor exportVideoCommandExecutor, GUIEnablerAndDisabler guiEnablerAndDisabler)
    {      
-      this.exportMovieCommandExecutor = exportMovieCommandExecutor;
+      this.exportVideoCommandExecutor = exportVideoCommandExecutor;
 
-      exportDialog = new JDialog(owner, "Export Movie");
-      exportDialog.setName("Export Movie");
+      exportDialog = new JDialog(owner, "Export Video");
+      exportDialog.setName("Export Video");
       
       this.guiEnablerAndDisabler = guiEnablerAndDisabler;
       this.myGUI = myGUI;
@@ -88,9 +88,9 @@ public class MovieSaveDialog implements TickUpdateListener
       panel.setBounds(0, previewHeight, frameWidth, frameHeight - previewHeight);
       container.add(panel);
 
-      StandardGUIActions movieActions = new StandardGUIActions();
-      movieActions.createMovieExportActions(standardGUIActions, viewportPanel);
-      JPanel toolbar = movieActions.createMovieExportPanelButtons();
+      StandardGUIActions videoActions = new StandardGUIActions();
+      videoActions.createVideoExportActions(standardGUIActions, viewportPanel);
+      JPanel toolbar = videoActions.createVideoExportPanelButtons();
       panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
       panel.add(toolbar);
 
@@ -122,7 +122,7 @@ public class MovieSaveDialog implements TickUpdateListener
       {
          public void actionPerformed(ActionEvent e)
          {
-            selectMovieLoction();
+            selectVideoLoction();
          }
       });
 
@@ -149,10 +149,10 @@ public class MovieSaveDialog implements TickUpdateListener
       exportDialog.setVisible(true);
    }
 
-   private void selectMovieLoction()
+   private void selectVideoLoction()
    {
       JFileChooser saveDialog = new JFileChooser(System.getProperty("user.home"));
-      saveDialog.setFileFilter(new MovieFileFilter());
+      saveDialog.setFileFilter(new VideoFileFilter());
       File selectedFile = null;
       if (JFileChooser.APPROVE_OPTION == saveDialog.showSaveDialog(exportDialog))
       {
@@ -165,7 +165,7 @@ public class MovieSaveDialog implements TickUpdateListener
          float playBackRate = new Float(playbackRateTextField.getText());
 
          Boolean isSequanceSelected = false;
-         exportMovieCommandExecutor.createMovie(viewportPanel.getCamera(), selectedFile, dimension, isSequanceSelected , playBackRate, frameRate);
+         exportVideoCommandExecutor.createVideo(viewportPanel.getCamera(), selectedFile, dimension, isSequanceSelected , playBackRate, frameRate);
       }
    }
 

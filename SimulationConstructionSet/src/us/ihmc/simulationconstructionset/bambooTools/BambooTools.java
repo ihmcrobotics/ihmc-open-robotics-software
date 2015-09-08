@@ -49,12 +49,12 @@ public class BambooTools
    }
 
    /**
-    * If you set {@code upload.movies} to {@code true} you must also set the system properties
+    * If you set {@code upload.videos} to {@code true} you must also set the system properties
     * defined in {@link YouTubeCredentials}.
     */
-   public static boolean doMovieUpload()
+   public static boolean doVideoUpload()
    {
-      return Boolean.parseBoolean(System.getProperty("upload.movies"));
+      return Boolean.parseBoolean(System.getProperty("upload.videos"));
    }
 
    public static boolean isEveryCommitBuild()
@@ -71,15 +71,15 @@ public class BambooTools
       return ((buildType != null) && (buildType.equals("isolated")));
    }
 
-   public static void createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(String simplifiedRobotModelName, SimulationConstructionSet scs)
+   public static void createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(String simplifiedRobotModelName, SimulationConstructionSet scs)
    {
-      createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, 1);
+      createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, 1);
    }
 
-   public static void createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(String simplifiedRobotModelName, SimulationConstructionSet scs,
+   public static void createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(String simplifiedRobotModelName, SimulationConstructionSet scs,
                                                                                                 int additionalStackDepthForRelevantCallingMethod)
    {
-      System.out.println("Trying to create movies!");
+      System.out.println("Trying to create videos!");
       try
       {
          String rootDirectoryToUse = determineEraseableBambooDataAndVideosRootDirectoryToUse();
@@ -93,10 +93,10 @@ public class BambooTools
 
          reportOutMessage("Automatically creating video and data and saving to " + rootDirectoryToUse);
 
-         createMovieAndDataWithDateTimeClassMethod(rootDirectoryToUse, simplifiedRobotModelName, scs, additionalStackDepthForRelevantCallingMethod + 2);
+         createVideoAndDataWithDateTimeClassMethod(rootDirectoryToUse, simplifiedRobotModelName, scs, additionalStackDepthForRelevantCallingMethod + 2);
       } catch (Throwable t)
       {
-         reportErrorMessage("createMovieAndData failed with " + t.toString());
+         reportErrorMessage("createVideoAndData failed with " + t.toString());
          t.printStackTrace();
          System.err.flush();
          if (t instanceof Error)
@@ -130,7 +130,7 @@ public class BambooTools
 
    private static String determineEraseableBambooDataAndVideosRootDirectoryToUse()
    {
-      String rootDirectoryToTry = System.getProperty("create.movies.dir");
+      String rootDirectoryToTry = System.getProperty("create.videos.dir");
       if (rootDirectoryToTry == null)
       {
          if (SystemUtils.IS_OS_WINDOWS)
@@ -146,20 +146,20 @@ public class BambooTools
       {
          return rootDirectoryToTry;
       } 
-      else if (doMovieUpload())
+      else if (doVideoUpload())
       {
-         // if we're going to upload the movies, we can just use the tmp dir if
+         // if we're going to upload the videos, we can just use the tmp dir if
          // the other specified directories don't exist
-         System.out.println("Saving movies to tmp dir before uploading..");
+         System.out.println("Saving videos to tmp dir before uploading..");
 
          Path temporaryDirectoryPath = FileTools.getTemporaryDirectoryPath();
-         File movieDir = temporaryDirectoryPath.resolve("atlas-movies").toFile();
-         if (movieDir.exists() || movieDir.mkdirs())
+         File videoDir = temporaryDirectoryPath.resolve("atlas-videos").toFile();
+         if (videoDir.exists() || videoDir.mkdirs())
          {
-            System.out.println("Using " + movieDir.getAbsolutePath());
-            return movieDir.getAbsolutePath();
+            System.out.println("Using " + videoDir.getAbsolutePath());
+            return videoDir.getAbsolutePath();
          }
-         System.err.println("Couldn't create directory: " + movieDir.getAbsolutePath());
+         System.err.println("Couldn't create directory: " + videoDir.getAbsolutePath());
       }
       
       return determineBambooDataAndVideosRootDirectoryToUse();
@@ -235,7 +235,7 @@ public class BambooTools
    }
 
 
-   private static File[] createMovieAndDataWithDateTimeClassMethod(String rootDirectory, String simplifiedRobotModelName, SimulationConstructionSet scs, int stackDepthForRelevantCallingMethod)
+   private static File[] createVideoAndDataWithDateTimeClassMethod(String rootDirectory, String simplifiedRobotModelName, SimulationConstructionSet scs, int stackDepthForRelevantCallingMethod)
    {
       String dateString = DateTools.getDateString();
       String directoryName = rootDirectory + dateString + "/";
@@ -255,10 +255,10 @@ public class BambooTools
          filenameStart += "_" + simplifiedRobotModelName;
       }
       filenameStart += "_" + classAndMethodName;
-      String movieFilename = filenameStart + ".mp4";
+      String videoFilename = filenameStart + ".mp4";
 
-//    String movieFilename = filenameStart + ".mov";
-      File movieFile = scs.createMovie(directoryName + movieFilename);
+//    String videoFilename = filenameStart + ".mov";
+      File videoFile = scs.createVideo(directoryName + videoFilename);
 
       String dataFilename = directoryName + filenameStart + ".data.gz";
 
@@ -270,18 +270,18 @@ public class BambooTools
       } 
       catch (Exception e)
       {
-         System.err.println("Error in writing data file in BambooTools.createMovieAndDataWithDateTimeClassMethod()");
+         System.err.println("Error in writing data file in BambooTools.createVideoAndDataWithDateTimeClassMethod()");
          e.printStackTrace();
       }
 
-      if (doMovieUpload())
+      if (doVideoUpload())
       {
          throw new RuntimeException("Youtube API v2 got deleted. Re-implement using v3 API");
       }
 
       scs.gotoOutPointNow();
 
-      return new File[]{directory, movieFile, dataFile};
+      return new File[]{directory, videoFile, dataFile};
    }
 
 

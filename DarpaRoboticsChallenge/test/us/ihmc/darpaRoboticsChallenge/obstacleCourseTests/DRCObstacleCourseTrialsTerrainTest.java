@@ -76,7 +76,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -120,7 +120,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.6);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -153,7 +153,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -197,7 +197,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(1.0);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -229,7 +229,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(40.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -261,7 +261,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(40.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -295,7 +295,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       // ThreadTools.sleepForever();
@@ -331,7 +331,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -364,7 +364,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(50.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -390,7 +390,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
     *
     * drcSimulationTestHelper = new
     * DRCSimulationTestHelper("DRCWalkingOntoSlopesTest", "", selectedLocation,
-    * checkNothingChanged, createMovie);
+    * checkNothingChanged, createVideo);
     *
     * SimulationConstructionSet simulationConstructionSet =
     * drcSimulationTestHelper.getSimulationConstructionSet();
@@ -416,7 +416,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
     * success = success &&
     * drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0); }
     *
-    * drcSimulationTestHelper.createMovie(getSimpleRobotName(),
+    * drcSimulationTestHelper.createVideo(getSimpleRobotName(),
     * simulationConstructionSet, 1);
     * drcSimulationTestHelper.checkNothingChanged();
     *
@@ -463,7 +463,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
       }
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

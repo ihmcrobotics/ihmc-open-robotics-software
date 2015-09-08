@@ -7,7 +7,7 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
    private boolean runMultiThreaded = true;
    private boolean usePefectSensors = false;
 
-   private boolean createSCSMovies = false;
+   private boolean createSCSVideos = false;
    private boolean checkNothingChangedInSimulation = false;
    private boolean keepSCSUp = false;
    
@@ -40,11 +40,11 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
          setUsePefectSensors(usePerfectSensors);
       }
       
-      property = System.getProperty("create.scs.movies");
+      property = System.getProperty("create.scs.videos");
       if (property != null)
       {
-         Boolean createSCSMovies = Boolean.parseBoolean(property);
-         setCreateSCSMovies(createSCSMovies);
+         Boolean createSCSVideos = Boolean.parseBoolean(property);
+         setCreateSCSVideos(createSCSVideos);
       }
 
       property = System.getProperty("check.nothing.changed.in.simulation");
@@ -85,14 +85,14 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
       return runMultiThreaded;
    }
    
-   public boolean getCreateSCSMovies()
+   public boolean getCreateSCSVideos()
    {
-      return createSCSMovies;
+      return createSCSVideos;
    }
 
-   public void setCreateSCSMovies(boolean createSCSMovies)
+   public void setCreateSCSVideos(boolean createSCSVideos)
    {
-      this.createSCSMovies = createSCSMovies;
+      this.createSCSVideos = createSCSVideos;
    }
 
    public boolean getCheckNothingChangedInSimulation()
@@ -118,8 +118,8 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
    public String toString()
    {
       String st = super.toString();
-      st += "createSCSMovies: " + createSCSMovies + "\n";    
-      st += "movieDir: " + System.getProperty("create.movies.dir") + "\n";
+      st += "createSCSVideos: " + createSCSVideos + "\n";    
+      st += "videoDir: " + System.getProperty("create.videos.dir") + "\n";
       st += "checkNothingChangedInSimulation: " + checkNothingChangedInSimulation + "\n";    
       st += "keepSCSUp: " + keepSCSUp + "\n";    
       return st;   

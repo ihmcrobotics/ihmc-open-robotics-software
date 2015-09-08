@@ -63,7 +63,7 @@ public class DataExporter implements ActionListener
       if (!optionsPanel.isCancelled())
       {
          if (optionsPanel.saveData() || optionsPanel.createSpreadSheet() || optionsPanel.createGraphsJPG() || optionsPanel.createGraphsPDF()
-                 || optionsPanel.createMovie() || optionsPanel.tagCode())
+                 || optionsPanel.createVideo() || optionsPanel.tagCode())
          {
             tagName = optionsPanel.tagName();
             System.out.println("Saving data using tag: " + tagName);
@@ -104,11 +104,11 @@ public class DataExporter implements ActionListener
                System.out.println("done creating torque and speed graphs");
             }
 
-            if (optionsPanel.createMovie())
+            if (optionsPanel.createVideo())
             {
-               System.out.println("creating movie");
-               createMovie(dataAndVideosTagDirectory, tagName);
-               System.out.println("done creating movie");
+               System.out.println("creating video");
+               createVideo(dataAndVideosTagDirectory, tagName);
+               System.out.println("done creating video");
             }
 
          }
@@ -128,13 +128,13 @@ public class DataExporter implements ActionListener
    }
 
    /**
-    * Create movie from current viewport using the file path and file header
+    * Create video from current viewport using the file path and file header
     * @param dataAndVideosTagDirectory
     * @param fileHeader
     */
-   private void createMovie(File dataAndVideosTagDirectory, String fileHeader)
+   private void createVideo(File dataAndVideosTagDirectory, String fileHeader)
    {
-      File movie = new File(dataAndVideosTagDirectory, fileHeader + "_Movie.mov");
-      scs.getStandardSimulationGUI().getViewportPanel().getStandardGUIActions().createMovie(movie);
+      File video = new File(dataAndVideosTagDirectory, fileHeader + "_Video.mov");
+      scs.getStandardSimulationGUI().getViewportPanel().getStandardGUIActions().createVideo(video);
    }
 }

@@ -111,7 +111,7 @@ public class AtlasMultiContactTest
          }
       }
 
-      createMovie(scs);
+      createVideo(scs);
       BambooTools.reportTestFinishedMessage();
 
    }
@@ -130,11 +130,11 @@ public class AtlasMultiContactTest
       return drcMultiContact;
    }
 
-   private void createMovie(SimulationConstructionSet scs)
+   private void createVideo(SimulationConstructionSet scs)
    {
-      if (simulationTestingParameters.getCreateSCSMovies())
+      if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS), scs, 1);
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS), scs, 1);
       }
    }
 

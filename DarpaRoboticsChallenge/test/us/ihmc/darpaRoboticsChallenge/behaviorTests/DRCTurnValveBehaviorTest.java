@@ -144,7 +144,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       double finalValveClosePercentage = valveRobot.getClosePercentage();
       PrintTools.debug(this, "Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage);
 
-      drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcBehaviorTestHelper.createVideo(getSimpleRobotName(), 1);
 
       success = success & turnValveBehavior.isDone();
 
@@ -193,7 +193,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       double finalValveClosePercentage = valveRobot.getClosePercentage();
       PrintTools.debug(this, "Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage);
 
-      drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcBehaviorTestHelper.createVideo(getSimpleRobotName(), 1);
 
       success = success & turnValveBehavior.isDone();
 
@@ -240,7 +240,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       double finalValveClosePercentage = valveRobot.getClosePercentage();
       PrintTools.debug(this, "Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage);
 
-      drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcBehaviorTestHelper.createVideo(getSimpleRobotName(), 1);
 
       success = success & turnValveBehavior.isDone();
 
@@ -288,7 +288,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       double finalValveClosePercentage = valveRobot.getClosePercentage();
       PrintTools.debug(this, "Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage);
 
-      drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcBehaviorTestHelper.createVideo(getSimpleRobotName(), 1);
 
       success = success & turnValveBehavior.isDone();
 

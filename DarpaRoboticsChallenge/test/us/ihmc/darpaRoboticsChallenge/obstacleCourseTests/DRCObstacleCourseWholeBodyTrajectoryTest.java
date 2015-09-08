@@ -117,7 +117,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       ThreadTools.sleep(2000);
-      // drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      // drcSimulationTestHelper.createVideo(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

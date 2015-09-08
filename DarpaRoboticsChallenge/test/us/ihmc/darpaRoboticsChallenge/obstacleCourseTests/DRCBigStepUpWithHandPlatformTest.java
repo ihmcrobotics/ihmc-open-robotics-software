@@ -123,7 +123,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       assertTrue(leftArmZForce.getDoubleValue() > 50.0);
       assertTrue(rightArmZForce.getDoubleValue() > 50.0);
       
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

@@ -106,7 +106,7 @@ public class AtlasFinalsWorldStairsTest
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(24.0);
 
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -154,7 +154,7 @@ public class AtlasFinalsWorldStairsTest
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(22.0);
 
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

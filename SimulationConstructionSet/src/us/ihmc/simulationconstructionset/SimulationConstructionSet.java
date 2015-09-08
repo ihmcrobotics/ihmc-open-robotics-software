@@ -3264,18 +3264,18 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       dataWriter.writeMatlabBinaryData( mySimulation.getDT() * mySimulation.getRecordFreq(), myDataBuffer, vars);      
    }
 
-   public File createMovie(String movieFilename)
+   public File createVideo(String videoFilename)
    {
-      File movieFile = new File(movieFilename);
-      createMovie(movieFile);
+      File videoFile = new File(videoFilename);
+      createVideo(videoFile);
 
-      return movieFile;
+      return videoFile;
 
    }
 
-   public void createMovie(File movieFile)
+   public void createVideo(File videoFile)
    {
-      if (myGUI != null) myGUI.getViewportPanel().getStandardGUIActions().createMovie(movieFile);
+      if (myGUI != null) myGUI.getViewportPanel().getStandardGUIActions().createVideo(videoFile);
    }
 
    /**

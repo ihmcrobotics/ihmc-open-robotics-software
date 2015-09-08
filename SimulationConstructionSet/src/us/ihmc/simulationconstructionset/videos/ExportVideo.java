@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.movies;
+package us.ihmc.simulationconstructionset.videos;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -14,7 +14,7 @@ import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.simulationconstructionset.TimeHolder;
 import us.ihmc.simulationconstructionset.commands.DataBufferCommandsExecutor;
-import us.ihmc.simulationconstructionset.commands.ExportMovieCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.ExportVideoCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.RunCommandsExecutor;
 import us.ihmc.simulationconstructionset.gui.ActiveCanvas3DHolder;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
@@ -23,7 +23,7 @@ import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDis
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.tools.MemoryTools;
 
-public class ExportMovie implements ExportMovieCommandExecutor
+public class ExportVideo implements ExportVideoCommandExecutor
 {
    private final static boolean DEBUG = false;
 
@@ -37,7 +37,7 @@ public class ExportMovie implements ExportMovieCommandExecutor
    private final RunCommandsExecutor runCommandsExecutor;
 
 
-   public ExportMovie(TimeHolder timeHolder, StandardSimulationGUI standardSimulationGUI, DataBufferCommandsExecutor dataBufferCommandsExecutor,
+   public ExportVideo(TimeHolder timeHolder, StandardSimulationGUI standardSimulationGUI, DataBufferCommandsExecutor dataBufferCommandsExecutor,
          RunCommandsExecutor runCommandsExecutor, GUIEnablerAndDisabler guiEnablerAndDisabler, ActiveCanvas3DHolder activeCanvas3DHolder,
          SimulationSynchronizer simulationSynchronizer)
    {
@@ -50,7 +50,7 @@ public class ExportMovie implements ExportMovieCommandExecutor
       this.guiEnablerAndDisabler = guiEnablerAndDisabler;
    }
 
-   public void createMovie(File selectedFile)
+   public void createVideo(File selectedFile)
    {
       Dimension dimension = new Dimension(1280, 720); // Default to 720p
 //      Dimension dimension = new Dimension(1920, 1080); // Default to 1080p
@@ -61,10 +61,10 @@ public class ExportMovie implements ExportMovieCommandExecutor
       
       CameraController cameraController = standardSimulationGUI.getActiveView().getCameraController();
 
-      this.createMovie(cameraController, selectedFile, dimension, isSequanceSelected, playBackRate, frameRate);
+      this.createVideo(cameraController, selectedFile, dimension, isSequanceSelected, playBackRate, frameRate);
    }
    
-   public void createMovie(CameraController cameraController, File selectedFile, Dimension dimension, Boolean isSequanceSelected, double playBackRate, double frameRate)
+   public void createVideo(CameraController cameraController, File selectedFile, Dimension dimension, Boolean isSequanceSelected, double playBackRate, double frameRate)
    { 
       Graphics3DAdapter graphics3dAdapter = standardSimulationGUI.getGraphics3dAdapter();
       
@@ -75,14 +75,14 @@ public class ExportMovie implements ExportMovieCommandExecutor
       adapter.setCameraController(cameraController);
 
       CaptureDevice captureDevice = adapter.getCaptureDevice();
-      this.createMovie(captureDevice, selectedFile, false, playBackRate, frameRate);
+      this.createVideo(captureDevice, selectedFile, false, playBackRate, frameRate);
 
       graphics3dAdapter.closeViewport(adapter);
    }
 
-   public void createMovie(CaptureDevice captureDevice, File selected, Boolean isSequenceSelected, double playBackRate, double frameRate)
+   public void createVideo(CaptureDevice captureDevice, File selected, Boolean isSequenceSelected, double playBackRate, double frameRate)
    {
-      printIfDebug("Creating Movie. File = " + selected);
+      printIfDebug("Creating Video. File = " + selected);
 
       Vector<BufferedImage> imageVector = new Vector<BufferedImage>();
       int currentTick = 1;
@@ -153,7 +153,7 @@ public class ExportMovie implements ExportMovieCommandExecutor
       }
       else
       {
-         moviePlaybackAsBufferedImage(selectedFile.getAbsolutePath(), captureDevice, playBackRate, frameRate);
+         videoPlaybackAsBufferedImage(selectedFile.getAbsolutePath(), captureDevice, playBackRate, frameRate);
 
          //         buffer = canvas3D.getBufferedImage();
       }
@@ -169,7 +169,7 @@ public class ExportMovie implements ExportMovieCommandExecutor
          System.out.println(message);
    }
 
-   public void moviePlaybackAsBufferedImage(String file, CaptureDevice captureDevice, double playBackRate, double frameRate)
+   public void videoPlaybackAsBufferedImage(String file, CaptureDevice captureDevice, double playBackRate, double frameRate)
    {
 
       // *****************************
@@ -202,7 +202,7 @@ public class ExportMovie implements ExportMovieCommandExecutor
    
          while (!reachedEndPoint)
          {
-            printIfDebug("ExportMovie: Capturing Frame");
+            printIfDebug("ExportVideo: Capturing Frame");
             if (DEBUG)
                MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " capturing frame: ");
    

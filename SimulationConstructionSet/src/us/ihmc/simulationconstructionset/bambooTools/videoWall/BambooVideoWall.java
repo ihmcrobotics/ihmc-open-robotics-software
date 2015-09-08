@@ -59,7 +59,7 @@ public class BambooVideoWall
       {
          File latestDirectory = latestDirectoryProvider.checkForLatestDirectory();
          PrintTools.info("Latest directory = " + latestDirectory);
-         showLatestMovies(latestDirectory, multipleVideoDecoderAndPlaybacker);
+         showLatestVideos(latestDirectory, multipleVideoDecoderAndPlaybacker);
 
          ThreadTools.sleepSeconds(1.0);
       }
@@ -70,9 +70,9 @@ public class BambooVideoWall
       File checkForLatestDirectory();
    }
 
-   private static void showLatestMovies(File movieDirectory, MultipleVideoDecoderAndPlaybacker multipleVideoDecoderAndPlaybacker)
+   private static void showLatestVideos(File videoDirectory, MultipleVideoDecoderAndPlaybacker multipleVideoDecoderAndPlaybacker)
    {
-      BambooTools.reportOutMessage("Showing Most Recent Movie in " + movieDirectory);
+      BambooTools.reportOutMessage("Showing Most Recent Video in " + videoDirectory);
 
       FileFilter filter = new FileFilter()
       {
@@ -91,32 +91,32 @@ public class BambooVideoWall
          }
       };
 
-      File[] potentialMovies = movieDirectory.listFiles(filter);
+      File[] potentialVideos = videoDirectory.listFiles(filter);
 
-      if ((potentialMovies == null) || (potentialMovies.length == 0))
+      if ((potentialVideos == null) || (potentialVideos.length == 0))
          return;
 
-      ArrayList<File> moviesToPlay = new ArrayList<File>();
+      ArrayList<File> videosToPlay = new ArrayList<File>();
 
       Comparator<File> fileAlphabeticalComparator = BambooTools.createFileAlphabeticalComparator();
-      Arrays.sort(potentialMovies, fileAlphabeticalComparator);
+      Arrays.sort(potentialVideos, fileAlphabeticalComparator);
 
-      int maxNumberOfMoviesToShow = multipleVideoDecoderAndPlaybacker.getTotalNumberOfScreens();
+      int maxNumberOfVideosToShow = multipleVideoDecoderAndPlaybacker.getTotalNumberOfScreens();
 
       ArrayList<String> videoNames = new ArrayList<String>();
 
-      for (int i = 0; i < potentialMovies.length; i++)
+      for (int i = 0; i < potentialVideos.length; i++)
       {
-         if (moviesToPlay.size() < maxNumberOfMoviesToShow)
+         if (videosToPlay.size() < maxNumberOfVideosToShow)
          {
-            String videoName = potentialMovies[i].getName();
+            String videoName = potentialVideos[i].getName();
 
             String shortName = videoName.substring(14, videoName.length());
             PrintTools.info(shortName);
 
             if (!videoNames.contains(shortName))
             {
-               moviesToPlay.add(potentialMovies[i]);
+               videosToPlay.add(potentialVideos[i]);
 
                videoNames.add(shortName);
             }
@@ -124,21 +124,21 @@ public class BambooVideoWall
          }
       }
 
-      for (int i = 0; i < moviesToPlay.size(); i++)
+      for (int i = 0; i < videosToPlay.size(); i++)
       {
-         File movieToPlay = moviesToPlay.get(i);
-         BambooTools.reportOutMessage("Playing " + movieToPlay);
+         File videoToPlay = videosToPlay.get(i);
+         BambooTools.reportOutMessage("Playing " + videoToPlay);
 
          try
          {
-            multipleVideoDecoderAndPlaybacker.playVideo(i, movieToPlay.getAbsolutePath());
+            multipleVideoDecoderAndPlaybacker.playVideo(i, videoToPlay.getAbsolutePath());
          }
          catch (Exception e)
          {
-            System.err.println("Could not play movie " + movieToPlay.getAbsolutePath());
+            System.err.println("Could not play video " + videoToPlay.getAbsolutePath());
          }
 
-         BambooTools.reportOutMessage("Done Playing Movie " + movieToPlay);
+         BambooTools.reportOutMessage("Done playing video " + videoToPlay);
 
       }
 

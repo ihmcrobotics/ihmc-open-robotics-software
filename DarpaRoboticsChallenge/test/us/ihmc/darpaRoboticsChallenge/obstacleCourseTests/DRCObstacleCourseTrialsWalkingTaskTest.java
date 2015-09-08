@@ -78,7 +78,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.5);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -118,7 +118,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.5);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.5);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -178,7 +178,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

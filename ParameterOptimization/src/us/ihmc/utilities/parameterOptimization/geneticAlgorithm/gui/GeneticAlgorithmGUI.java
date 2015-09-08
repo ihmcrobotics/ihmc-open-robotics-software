@@ -66,7 +66,7 @@ public class GeneticAlgorithmGUI implements GeneticAlgorithmChangedListener, Sel
    // private ExportDataAction exportAction;
    // private ImportDataAction importDataAction;
    // private ExportSnapshotAction exportSnapshotAction;
-   // private ExportMovieAction exportMovieAction;
+   // private ExportVideoAction exportVideoAction;
 // private JMenuItem exitMenuItem;
 
    // private SimulateAction simulateAction;

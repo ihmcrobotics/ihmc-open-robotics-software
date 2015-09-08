@@ -135,7 +135,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
       if (simulationTestingParameters.getCheckNothingChangedInSimulation())
          checkNothingChanged(nothingChangedVerifier);
 
-      createMovie(scs);
+      createVideo(scs);
       BambooTools.reportTestFinishedMessage();
    }
  
@@ -148,11 +148,11 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
 //      walk.set(true);
    }
 
-   private void createMovie(SimulationConstructionSet scs)
+   private void createVideo(SimulationConstructionSet scs)
    {
-      if (simulationTestingParameters.getCreateSCSMovies())
+      if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
       }
    }
 

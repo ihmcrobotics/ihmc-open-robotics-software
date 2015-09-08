@@ -120,7 +120,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       ThreadTools.sleep(2000);
 
 
-      // drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      // drcSimulationTestHelper.createVideo(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -375,7 +375,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -422,7 +422,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -465,7 +465,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -495,7 +495,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -538,7 +538,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       slipOnEachStepPerturber.setSlipNextStep(true);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -582,7 +582,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.5);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -619,7 +619,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
 
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -665,7 +665,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -694,7 +694,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       drcSimulationTestHelper.send(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -733,7 +733,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -783,7 +783,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

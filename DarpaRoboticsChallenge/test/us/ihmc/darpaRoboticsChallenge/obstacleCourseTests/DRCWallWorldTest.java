@@ -135,7 +135,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       }
       
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

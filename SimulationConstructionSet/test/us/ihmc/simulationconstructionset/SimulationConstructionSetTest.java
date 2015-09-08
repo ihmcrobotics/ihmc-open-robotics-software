@@ -63,7 +63,7 @@ public class SimulationConstructionSetTest
 
 	@EstimatedDuration
 	@Test(timeout=300000)
-   public void testSimulationConstructionSetMovieGenerationUsingGUITestFixture() throws AWTException
+   public void testSimulationConstructionSetVideoGenerationUsingGUITestFixture() throws AWTException
    {
       Assume.assumeTrue(!isGradleBuild());
       FallingBrickRobot robot = new FallingBrickRobot();
@@ -80,7 +80,7 @@ public class SimulationConstructionSetTest
       
       testFixture.clickMediaCaptureButton();
 
-      testFixture.focusDialog("Export Movie");
+      testFixture.focusDialog("Export Video");
       testFixture.clickPlayButton();
       
       ThreadTools.sleepForever();
