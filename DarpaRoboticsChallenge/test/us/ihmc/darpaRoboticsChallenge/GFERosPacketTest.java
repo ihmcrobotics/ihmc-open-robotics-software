@@ -103,7 +103,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
       }
    }
    
-	@DeployableTestMethod(duration = 8.7)
+	@DeployableTestMethod(estimatedDuration = 8.7)
    @Test(timeout = 43000)
    public void testFuzzyPacketsUsingRos()
    {
@@ -216,7 +216,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 
    private DRCSimulationFactory drcSimulation;
    
-	@DeployableTestMethod(duration = 2.7)
+	@DeployableTestMethod(estimatedDuration = 2.7)
    @Test(timeout = 30000)
    public void testFuzzyPacketsWithoutRos()
    {

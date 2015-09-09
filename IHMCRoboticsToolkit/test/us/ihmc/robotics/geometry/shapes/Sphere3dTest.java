@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class Sphere3dTest
 {
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testCommonShape3dFunctionality()
    {
@@ -36,7 +36,7 @@ public class Sphere3dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleConstructor()
    {
@@ -49,7 +49,7 @@ public class Sphere3dTest
       JUnitTools.assertTuple3dEquals(new Point3d(), centerCheck, epsilon);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsInside()
    {
@@ -70,7 +70,7 @@ public class Sphere3dTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOrthogonalProjection()
    {

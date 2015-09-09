@@ -23,7 +23,7 @@ public class WaypointMotionGeneratorTest
    {
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testStraightLineMotion()
    {
@@ -81,7 +81,7 @@ public class WaypointMotionGeneratorTest
       assertEquals(0.0, acceleration.length(), 1e-2);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testThreePointMotion()
    {

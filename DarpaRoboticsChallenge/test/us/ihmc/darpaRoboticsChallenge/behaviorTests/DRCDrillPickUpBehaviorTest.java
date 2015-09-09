@@ -85,7 +85,7 @@ public abstract class DRCDrillPickUpBehaviorTest implements MultiRobotTestInterf
    /**
     * @throws SimulationExceededMaximumTimeException
     */
-	@DeployableTestMethod(duration = 117.5)
+	@DeployableTestMethod(estimatedDuration = 117.5)
    @Test(timeout = 590000)
    public void testDrillPickUp() throws SimulationExceededMaximumTimeException
    {

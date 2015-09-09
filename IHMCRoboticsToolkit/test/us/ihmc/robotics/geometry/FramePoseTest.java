@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 public class FramePoseTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testFrameMismatch()
    {
@@ -38,7 +38,7 @@ public class FramePoseTest
       distance = framePose1.getEffectiveDistanceToFramePose(framePose2, 10.0);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetOrientationDistanceTrivial()
    {
@@ -54,7 +54,7 @@ public class FramePoseTest
       assertEquals(0.0, distance, 1e-9);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetDistance()
    {
@@ -142,7 +142,7 @@ public class FramePoseTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetTransform()
    {
@@ -156,7 +156,7 @@ public class FramePoseTest
       RigidBodyTransformTest.assertTransformEquals(transform, transformCheck, 1e-10);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRotatePoseAboutOffsetAxisAndCheckTranslation()
    {
@@ -187,7 +187,7 @@ public class FramePoseTest
             + actualPosePositionAfterRotation, 0.0, positionError.length(), 1e-3);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRotatePoseAboutCollinearAxisAndCheckTranslation()
    {
@@ -216,7 +216,7 @@ public class FramePoseTest
             + actualPosePositionAfterRotation, 0.0, positionError.length(), 1e-3);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRotatePoseAboutZAxisAndCheckOrientation()
    {
@@ -251,7 +251,7 @@ public class FramePoseTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRotatePoseAboutCollinearAxisIncrementally()
    {
@@ -278,7 +278,7 @@ public class FramePoseTest
       assertEquals("Change in FramePose Orientation after rotation is wrong.", desiredOrientationDistance, orientationDistance, Math.toRadians(0.1));
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRotateAndUnrotatePoseAboutCollinearAxis()
    {
@@ -301,7 +301,7 @@ public class FramePoseTest
       assertEquals("Change in FramePose Orientation after rotation is wrong.", 0.0, orientationDistance, Math.toRadians(0.1));
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRotatePoseLockOrientation()
    {
@@ -344,7 +344,7 @@ public class FramePoseTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRotatePoseLockPosition()
    {
@@ -386,7 +386,7 @@ public class FramePoseTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetTranslationBetweenPoses()
    {
@@ -422,7 +422,7 @@ public class FramePoseTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetOrientationTransformBetweenPoses()
    {
@@ -442,7 +442,7 @@ public class FramePoseTest
       JUnitTools.assertQuaternionsEqual(actualRotationFromThisToThat, rotationFromThisToThat, 1e-15);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetRotationAngleBetweenRotatedPoses()
    {
@@ -485,7 +485,7 @@ public class FramePoseTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetRotationAxisBetweenRotatedPoses()
    {
@@ -524,7 +524,7 @@ public class FramePoseTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetRotationAxisOriginBetweenPoses()
    {
@@ -565,7 +565,7 @@ public class FramePoseTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRotatePoseGetAxisOfRotationAndUnrotatePose()
    {

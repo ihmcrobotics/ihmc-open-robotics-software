@@ -22,7 +22,7 @@ import us.ihmc.tools.thread.RunnableThatThrows;
 public class LidarScanTest
 {
 	
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFlipNew()
    {
@@ -47,7 +47,7 @@ public class LidarScanTest
       assertLidarScanEquals(lidarScan, lidarScan.flipNew().flipNew(), 1e-7, 1e-7f);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertLidarScanRangesEqual()
    {
@@ -78,7 +78,7 @@ public class LidarScanTest
       assertLidarScanRangesEqual(lidarScan1, lidarScan4, 1e-7);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertLidarScanTransformsEqual()
    {
@@ -108,7 +108,7 @@ public class LidarScanTest
       });
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertLidarScanEquals()
    {
@@ -152,7 +152,7 @@ public class LidarScanTest
       assertLidarScanRangesEqual(lidarScan1, lidarScan2, rangeTolerance);
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructor()
    {
@@ -172,7 +172,7 @@ public class LidarScanTest
       assertEquals(lidarScan1.size(), 720, 1e-7f);
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructor2()
    {
@@ -189,7 +189,7 @@ public class LidarScanTest
       }
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetRanges()
    {
@@ -210,7 +210,7 @@ public class LidarScanTest
       }
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetCopy()
    {
@@ -231,7 +231,7 @@ public class LidarScanTest
       }
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testScanParameters()
    {
@@ -270,7 +270,7 @@ public class LidarScanTest
       }
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAllPoints()
    {

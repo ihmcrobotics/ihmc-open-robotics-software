@@ -86,7 +86,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
    private final ComHeightPacket comHeightPacket = new ComHeightPacket(0.05, 1.0);
    private final Random random = new Random(165163L);
 
-	@DeployableTestMethod(duration = 71.2)
+	@DeployableTestMethod(estimatedDuration = 71.2)
    @Test(timeout = 360000)
    public void testWalkingUpRampUsingSnapFootsteps() throws SimulationExceededMaximumTimeException
    {

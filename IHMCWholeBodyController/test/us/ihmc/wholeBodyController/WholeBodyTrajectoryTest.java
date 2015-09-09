@@ -83,7 +83,7 @@ public abstract class WholeBodyTrajectoryTest
 
 
    @Ignore
-   @DeployableTestMethod(duration = 4.1)
+   @DeployableTestMethod(estimatedDuration = 4.1)
    @Test(timeout = 22445)
    public void testTrajectory() throws Exception
    {
@@ -206,7 +206,7 @@ public abstract class WholeBodyTrajectoryTest
    }
 
    //@Ignore
-	@DeployableTestMethod(duration = 1.3)
+	@DeployableTestMethod(estimatedDuration = 1.3)
    @Test(timeout = 30000)
    public void testPointToPointRight() throws Exception
    {
@@ -323,7 +323,7 @@ public abstract class WholeBodyTrajectoryTest
    }
 
    //@Ignore
-	@DeployableTestMethod(duration = 2.8)
+	@DeployableTestMethod(estimatedDuration = 2.8)
    @Test(timeout = 30000)
    public void testPointToPointLeft() throws Exception
    {

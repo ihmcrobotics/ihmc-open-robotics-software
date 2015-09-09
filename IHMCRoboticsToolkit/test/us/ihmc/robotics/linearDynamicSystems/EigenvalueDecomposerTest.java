@@ -19,7 +19,7 @@ public class EigenvalueDecomposerTest
    P1 = zeta * wn, P2 = Math.sqrt(1.0 - zeta * zeta) * wn, P3 = wn * wn;
    private double epsilon = 1e-7;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetEigenvalues()
    {
@@ -52,7 +52,7 @@ public class EigenvalueDecomposerTest
       verifyTwoComplexConjugateEigenvalue(decomposerMassSpringDamper.getEigenvalues(), -P1, P2);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDecompositions()
    {
@@ -141,7 +141,7 @@ public class EigenvalueDecomposerTest
       assertTrue(foundComplexPair);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCircleGenerator()
    {
@@ -155,7 +155,7 @@ public class EigenvalueDecomposerTest
       verifyDecomposition(matrixA, circleDecomposer);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testZeroMatrix()
    {
@@ -167,7 +167,7 @@ public class EigenvalueDecomposerTest
       verifyDecomposition(matrixA, eigenvalueDecomposer);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIdentityMatrix()
    {
@@ -180,7 +180,7 @@ public class EigenvalueDecomposerTest
       verifyDecomposition(matrixA, eigenvalueDecomposer);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testThreeByThreeIdentityMatrix()
    {
@@ -194,7 +194,7 @@ public class EigenvalueDecomposerTest
       verifyDecomposition(matrixA, eigenvalueDecomposer);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRepeatedPoles()
    {
@@ -224,7 +224,7 @@ public class EigenvalueDecomposerTest
       verifyDecomposition(matrixA, eigenvalueDecomposer);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRandomExample()
    {

@@ -15,7 +15,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class CollisionSphereTest
 {
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testInsideSpherePoints()
    {
@@ -34,7 +34,7 @@ public class CollisionSphereTest
       }
    }
    
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testOutsideSpherePoints()
    {

@@ -14,7 +14,7 @@ public class GeneticAlgorithmTest
 {
    private static final boolean SHOW_GUI = false;
 
-	@DeployableTestMethod(duration = 0.8)
+	@DeployableTestMethod(estimatedDuration = 0.8)
 	@Test(timeout = 30000)
    public void testOptimizeExampleIndividualOne()
    {

@@ -25,7 +25,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
@@ -36,7 +36,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-@DeployableTestClass(planType = {BambooPlanType.UI})
+@DeployableTestClass(targets = {TestPlanTarget.UI})
 public class SmoothICPComputerTest
 {
    private static final boolean USE_ASSERTS = true; //false;
@@ -105,7 +105,7 @@ public class SmoothICPComputerTest
       icpVelocityLineSegment = null;
    }
 
-	@DeployableTestMethod(duration = 0.8)
+	@DeployableTestMethod(estimatedDuration = 0.8)
 	@Test(timeout = 30000)
    public void testTypicalFourStepExample()
    {
@@ -264,7 +264,7 @@ public class SmoothICPComputerTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.7)
+	@DeployableTestMethod(estimatedDuration = 0.7)
 	@Test(timeout = 30000)
    public void testTypicalFourStepExampleWithSuddenStop()
    {
@@ -671,7 +671,7 @@ public class SmoothICPComputerTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTrivialTwoStepExample()
    {

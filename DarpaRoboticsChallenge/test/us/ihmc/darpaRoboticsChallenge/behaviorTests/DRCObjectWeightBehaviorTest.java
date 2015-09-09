@@ -59,7 +59,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(duration = 15.0)
+   @DeployableTestMethod(estimatedDuration = 15.0)
    @Test(timeout = 45000)
    public void testConstructorAndSetInput()
    {
@@ -68,7 +68,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       assertTrue(behavior.hasInputBeenSet());
    }
    
-   @DeployableTestMethod(duration = 20.0)
+   @DeployableTestMethod(estimatedDuration = 20.0)
    @Test(timeout = 60000)
    public void testSettingWeight() throws SimulationExceededMaximumTimeException
    {

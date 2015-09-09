@@ -41,7 +41,7 @@ public class LinearMappingTest
       linearMappingTwoD = null;
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMapFromInputSpaceToOutputSpace()
    {
@@ -65,7 +65,7 @@ public class LinearMappingTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMapFromOutputSpaceToInputSpace()
    {

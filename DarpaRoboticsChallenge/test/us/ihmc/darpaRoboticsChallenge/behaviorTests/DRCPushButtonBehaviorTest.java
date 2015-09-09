@@ -111,7 +111,7 @@ public abstract class DRCPushButtonBehaviorTest implements MultiRobotTestInterfa
       return new DRCButtonEnvironment(buttonLocations, buttonPushDirections);
    }
 
-   @DeployableTestMethod(duration = 100.0)
+   @DeployableTestMethod(estimatedDuration = 100.0)
    @Test(timeout = 500000)
 
    public void testPushButton() throws FileNotFoundException, SimulationExceededMaximumTimeException

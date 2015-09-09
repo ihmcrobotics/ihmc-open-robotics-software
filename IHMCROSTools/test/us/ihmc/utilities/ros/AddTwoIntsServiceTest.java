@@ -15,13 +15,13 @@ import org.ros.node.service.ServiceResponseListener;
 import test_ros.AddTwoInts;
 import test_ros.AddTwoIntsRequest;
 import test_ros.AddTwoIntsResponse;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.utilities.ros.service.AddTwoIntsClient;
 import us.ihmc.utilities.ros.service.AddTwoIntsServer;
 
-@DeployableTestClass(planType = {BambooPlanType.Flaky})
+@DeployableTestClass(targets = {TestPlanTarget.Flaky})
 public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
 {
    

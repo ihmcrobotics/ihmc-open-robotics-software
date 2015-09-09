@@ -14,7 +14,7 @@ public class ConstantDoubleProviderTest
 
    private static final double EPS = 1e-12;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void test()
    {

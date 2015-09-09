@@ -69,7 +69,7 @@ public class SpatialMotionVectorTest
     * Test inverting a twist
     */
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInvert()
    {
@@ -105,7 +105,7 @@ public class SpatialMotionVectorTest
     * Constructing using a matrix
     */
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructUsingMatrix()
    {
@@ -116,7 +116,7 @@ public class SpatialMotionVectorTest
       JUnitTools.assertMatrixEquals(matrix, matrixBack, 0.0);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testConstructUsingMatrixTooSmall()
    {
@@ -124,7 +124,7 @@ public class SpatialMotionVectorTest
       createSpatialMotionVector(frameC, frameD, frameA, matrix);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testConstructUsingMatrixTooBig()
    {
@@ -132,7 +132,7 @@ public class SpatialMotionVectorTest
       createSpatialMotionVector(frameC, frameD, frameA, matrix);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testConstructUsingMatrixTooBig2()
    {
@@ -140,7 +140,7 @@ public class SpatialMotionVectorTest
       createSpatialMotionVector(frameC, frameD, frameA, matrix);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testLimitLinearAndAngularParts()
    {

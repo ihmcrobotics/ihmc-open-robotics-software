@@ -97,7 +97,7 @@ public class TestbedAutomaticAlignmentTest {
       assertTrue(MatrixFeatures.isIdentical(first.getR(), second.getR(), 0.01));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void findLineLocation() {
 
@@ -123,7 +123,7 @@ public class TestbedAutomaticAlignmentTest {
       assertEquals(found[1],end,1e-8);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void adjustSign() {
 

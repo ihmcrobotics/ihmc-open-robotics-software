@@ -4,10 +4,10 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.packetEndToEndTests.ArmJointTrajectoryPacketEndToEndTest;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 
-@DeployableTestClass(planType = {BambooPlanType.Fast})
+@DeployableTestClass(targets = {TestPlanTarget.Fast})
 public class AtlasArmJointTrajectoryPacketTest extends ArmJointTrajectoryPacketEndToEndTest
 {
    private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);

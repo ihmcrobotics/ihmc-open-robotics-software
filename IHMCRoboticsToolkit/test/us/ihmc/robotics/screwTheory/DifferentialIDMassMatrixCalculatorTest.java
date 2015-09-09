@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 public class DifferentialIDMassMatrixCalculatorTest extends MassMatrixCalculatorTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testKineticEnergy()
    {

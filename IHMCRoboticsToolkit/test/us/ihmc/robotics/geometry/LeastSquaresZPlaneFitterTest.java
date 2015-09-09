@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 
 public class LeastSquaresZPlaneFitterTest
 {
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleFlatCase()
    {
@@ -37,7 +37,7 @@ public class LeastSquaresZPlaneFitterTest
       JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 1.0), plane3d.getNormalCopy(), 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRandomlyGeneratedPointsOnRandomPlanes()
    {
@@ -106,7 +106,7 @@ public class LeastSquaresZPlaneFitterTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCornerCaseWithOnlyTwoPoints()
    {
@@ -124,7 +124,7 @@ public class LeastSquaresZPlaneFitterTest
       assertTrue(isNaN(plane3d.getNormalCopy()));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCornerCaseWithColinearPoints()
    {

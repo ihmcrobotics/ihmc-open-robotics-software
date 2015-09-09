@@ -21,7 +21,7 @@ import static org.junit.Assert.fail;
 public class CapsuleCollisionCheckTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void test() throws ParserConfigurationException, SAXException
    {

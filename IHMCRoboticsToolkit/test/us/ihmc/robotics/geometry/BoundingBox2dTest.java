@@ -16,7 +16,7 @@ public class BoundingBox2dTest
 {
    double epsilon = 0.00001;
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetMinPoint()
    {
@@ -32,7 +32,7 @@ public class BoundingBox2dTest
       assertEquals(minPoint, lowerLeftPoint);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetMinPoint_2()
    {
@@ -48,7 +48,7 @@ public class BoundingBox2dTest
       assertEquals(minPoint, lowerLeftPoint);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetMinPoint_3()
    {
@@ -65,7 +65,7 @@ public class BoundingBox2dTest
       assertEquals(minPoint, lowerLeftPoint);
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected=RuntimeException.class)
    public void testGetMinPoint_4()
    {
@@ -75,7 +75,7 @@ public class BoundingBox2dTest
       boundingBox2d.set(4.0, lowerLeftPoint.y, upperRightPoint.x, upperRightPoint.y);
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected=RuntimeException.class)
    public void testGetMinPoint_5()
    {
@@ -85,7 +85,7 @@ public class BoundingBox2dTest
       boundingBox2d.set(lowerLeftPoint.x, 4.0, upperRightPoint.x, upperRightPoint.y);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetMaxPoint()
    {
@@ -101,7 +101,7 @@ public class BoundingBox2dTest
       assertEquals(maxPoint, upperRightPoint);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetCenterPointCopy()
    {
@@ -128,7 +128,7 @@ public class BoundingBox2dTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsFullyAbove()
    {
@@ -141,7 +141,7 @@ public class BoundingBox2dTest
       assertTrue(boundingBox2d.isBoxAtOrAbove(0.0));
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsFullyBelow()
    {
@@ -154,7 +154,7 @@ public class BoundingBox2dTest
       assertFalse(boundingBox2d.isBoxAtOrBelow(1.0));
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsFullyLeft()
    {
@@ -167,7 +167,7 @@ public class BoundingBox2dTest
       assertFalse(boundingBox2d.isBoxAtOrLeftOf(1.0));
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsFullyRight() throws Exception
    {
@@ -180,7 +180,7 @@ public class BoundingBox2dTest
       assertFalse(boundingBox2d.isBoxAtOrRightOf(1.0));
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsInside()
    {
@@ -232,7 +232,7 @@ public class BoundingBox2dTest
 
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIntersects()
    {
@@ -277,7 +277,7 @@ public class BoundingBox2dTest
       assertFalse(boundingBox2dA.intersects(boundingBox2dG));
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructors()
    {
@@ -318,7 +318,7 @@ public class BoundingBox2dTest
 //    BoundingBox2d boundingBox2dA = new BoundingBox2d(lowerLeftPoint, upperRightPoint);
 // }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetPointGivenParameters()
    {

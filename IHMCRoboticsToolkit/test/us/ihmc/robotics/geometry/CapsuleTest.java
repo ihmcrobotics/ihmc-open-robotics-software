@@ -22,7 +22,7 @@ public class CapsuleTest
       assertTrue(result.epsilonEquals(exp, epsilon));
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void test()
    {
@@ -97,7 +97,7 @@ public class CapsuleTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOther()
    {
@@ -116,7 +116,7 @@ public class CapsuleTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOther_2()
    {

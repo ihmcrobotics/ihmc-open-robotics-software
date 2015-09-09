@@ -3,10 +3,10 @@ package us.ihmc.atlas;
 import us.ihmc.darpaRoboticsChallenge.DRCBumpyAndShallowRampsWalkingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 
-@DeployableTestClass(planType = {BambooPlanType.Fast, BambooPlanType.VideoA})
+@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.VideoA})
 public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRampsWalkingTest
 {
 

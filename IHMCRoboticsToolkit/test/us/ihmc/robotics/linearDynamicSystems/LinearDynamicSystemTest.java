@@ -47,7 +47,7 @@ public class LinearDynamicSystemTest {
         massSpringDamperSystem  = null;
     }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
     public void testException() {
         boolean thrown = false;
@@ -146,7 +146,7 @@ public class LinearDynamicSystemTest {
         }
     }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
     public void testMCSExampleOne() {
 
@@ -260,7 +260,7 @@ public class LinearDynamicSystemTest {
         // assertTrue(passed);
     }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
     public void testMCSExampleTwo() {
 
@@ -365,7 +365,7 @@ public class LinearDynamicSystemTest {
 //      }
     }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
     public void testSimulateInitialConditions() {
 
@@ -403,7 +403,7 @@ public class LinearDynamicSystemTest {
         }
     }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
     public void testGetTransferFunctionMatrix() {
         TransferFunctionMatrix transferFunctions = simpleDecaySystem.getTransferFunctionMatrix();
@@ -418,19 +418,19 @@ public class LinearDynamicSystemTest {
         assertTrue(transferFunction.epsilonEquals(expectedTransferFunction, 1e-7));
     }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
     public void testSimpleDecaySystem() {
         verifyLinearDynamicSystem(simpleDecaySystem, simpleDecayMatrixA);
     }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
     public void testMassSpringDamperSystem() {
         verifyLinearDynamicSystem(massSpringDamperSystem, massSpringDamperMatrixA);
     }
 
-	@DeployableTestMethod(duration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
     public void testRandomLinearDynamicSystems() {
 
@@ -482,7 +482,7 @@ public class LinearDynamicSystemTest {
         }
     }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
     public void testStateFeedbackMethods() {
         double[][] elementsA  = new double[][] {

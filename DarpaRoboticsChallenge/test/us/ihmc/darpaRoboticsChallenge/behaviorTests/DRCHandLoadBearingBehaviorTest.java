@@ -88,7 +88,7 @@ public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestIn
    }
 
    @SuppressWarnings("unchecked")
-   @DeployableTestMethod(duration = 30.0)
+   @DeployableTestMethod(estimatedDuration = 30.0)
    @Test(timeout = 90137)
    public void testHandLoadBearingBehavior() throws SimulationExceededMaximumTimeException
    {

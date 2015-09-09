@@ -8,11 +8,11 @@ import javax.vecmath.Point3f;
 import org.junit.Test;
 
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@DeployableTestClass(planType={BambooPlanType.UI})
+@DeployableTestClass(targets={TestPlanTarget.UI})
 public class JMEPointCloudVisualizerTest
 {
    public static void main(String[] args)
@@ -20,7 +20,7 @@ public class JMEPointCloudVisualizerTest
       new JMEPointCloudVisualizerTest().testJMEPointCloudVisualizer();
    }
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testJMEPointCloudVisualizer()
    {

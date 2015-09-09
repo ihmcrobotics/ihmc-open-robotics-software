@@ -8,7 +8,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class TypicalMotionConstraintsTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDoubleSupportKneesBentTypicalMotionConstraints()
    {
@@ -120,7 +120,7 @@ public class TypicalMotionConstraintsTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDoubleSupportKneesStraightNoSingularity()
    {
@@ -239,7 +239,7 @@ public class TypicalMotionConstraintsTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDoubleSupportKneesStraightNoSingularityTwo()
    {
@@ -373,7 +373,7 @@ public class TypicalMotionConstraintsTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDoubleSupportKneesStraightThree()
    {

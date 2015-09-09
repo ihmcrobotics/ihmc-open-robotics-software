@@ -14,13 +14,13 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseWholeBodyTrajectoryTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 
-@DeployableTestClass(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Slow})
 public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCourseWholeBodyTrajectoryTest
 {
    private final DRCRobotModel robotModel = AtlasRobotModelFactory.createDefaultRobotModel();
@@ -39,38 +39,38 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
    }
    
    @Override
-	@DeployableTestMethod(duration = 18.8)
+	@DeployableTestMethod(estimatedDuration = 18.8)
    @Test(timeout = 94000)
    public void testArmMovementsWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testArmMovementsWithTrajectoryPacket();
    }
    
    @Override
-	@DeployableTestMethod(duration = 93.8)
+	@DeployableTestMethod(estimatedDuration = 93.8)
    @Test(timeout = 470000)
    public void testChestControlWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testChestControlWithTrajectoryPacket();
    }
    
    @Override
-   @DeployableTestMethod(duration = 50.0)
+   @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testForMemoryLeaks() throws Exception
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testForMemoryLeaks();
    }
    
    @Override
-	@DeployableTestMethod(duration = 30.4)
+	@DeployableTestMethod(estimatedDuration = 30.4)
    @Test(timeout = 150000)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testStandingForACoupleSeconds();
    }
 

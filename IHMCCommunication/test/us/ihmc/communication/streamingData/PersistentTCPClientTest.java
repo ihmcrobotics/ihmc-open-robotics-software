@@ -18,7 +18,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public class PersistentTCPClientTest
 {
 
-	@DeployableTestMethod(duration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void test() throws IOException
    {

@@ -260,7 +260,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       return debrisTransformBeforeRemove;
    }
    
-	@DeployableTestMethod(duration = 30.0)
+	@DeployableTestMethod(estimatedDuration = 30.0)
    @Test(timeout = 150000)
    public void testRemovingStandingDebris() throws SimulationExceededMaximumTimeException
    {
@@ -304,7 +304,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       BambooTools.reportTestFinishedMessage();
    }
    
-	@DeployableTestMethod(duration = 167.2)
+	@DeployableTestMethod(estimatedDuration = 167.2)
    @Test(timeout = 840000)
    public void testRemovingHorizontalDebris() throws SimulationExceededMaximumTimeException
    {
@@ -347,7 +347,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       BambooTools.reportTestFinishedMessage();
    }
    
-	@DeployableTestMethod(duration = 164.2)
+	@DeployableTestMethod(estimatedDuration = 164.2)
    @Test(timeout = 820000)
    public void testRemovingLeaningOnAWallDebris() throws SimulationExceededMaximumTimeException
    {

@@ -17,7 +17,7 @@ public class ParametricSplineTrajectorySolverTest
     * @Agraber
     */
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void test3rdOrder2DTrajectoryWithMidpoint(){
       double tolerance = 1e-13;
@@ -61,7 +61,7 @@ public class ParametricSplineTrajectorySolverTest
       assertArrayEquals(midPointPosition, trajectory.getPositions(midPointTime), tolerance);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void test3rdOrder1DTrajectoryWithMidpoint(){
       double tolerance = 1e-13;
@@ -106,7 +106,7 @@ public class ParametricSplineTrajectorySolverTest
       assertArrayEquals(midPointPosition, trajectory.getPositions(midPointTime), tolerance);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void test3rdOrderBasic1DMovementTrajectory(){
       double tolerance = 1e-13;
@@ -146,7 +146,7 @@ public class ParametricSplineTrajectorySolverTest
       assertArrayEquals(endVelocity, trajectory.getVelocities(endTime), tolerance);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void test3rdOrderNoMovementTrajectory(){
       double tolerance = 1e-13;
@@ -186,7 +186,7 @@ public class ParametricSplineTrajectorySolverTest
       assertArrayEquals(endVelocity, trajectory.getVelocities(endTime), tolerance);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInvalidNumberOfConstraints(){
       int order = 3;

@@ -19,7 +19,7 @@ public class InertiaToolsTest
    private static final int ITERATIONS = 1000;
    private static final double DELTA = 1e-3;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetInertiaEllipsoidRadii()
    {
@@ -43,7 +43,7 @@ public class InertiaToolsTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRotations()
    {

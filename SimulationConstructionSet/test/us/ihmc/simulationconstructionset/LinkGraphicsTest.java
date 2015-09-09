@@ -11,12 +11,12 @@ import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
 import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(planType = {BambooPlanType.UI})
+@DeployableTestClass(targets = {TestPlanTarget.UI})
 public class LinkGraphicsTest
 {
    private SimulationConstructionSet sim;
@@ -46,7 +46,7 @@ public class LinkGraphicsTest
    private static final double
       WEDGE_X = 0.4, WEDGE_Y = 0.3, WEDGE_Z = 0.2;
 
-	@DeployableTestMethod(duration = 3.4)
+	@DeployableTestMethod(estimatedDuration = 3.4)
 	@Test(timeout = 30000)
    public void testLinkGraphicsWithALargeNumberOfExampleShapes()
    {
@@ -54,7 +54,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@DeployableTestMethod(duration = 3.2)
+	@DeployableTestMethod(estimatedDuration = 3.2)
 	@Test(timeout = 30000)
    public void testLinkGraphicsWithASmallNumberOfExampleShapes()
    {
@@ -62,7 +62,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@DeployableTestMethod(duration = 3.3)
+	@DeployableTestMethod(estimatedDuration = 3.3)
 	@Test(timeout = 30000)
    public void testLinkGraphicsWithArcTorus()
    {
@@ -70,7 +70,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@DeployableTestMethod(duration = 3.2)
+	@DeployableTestMethod(estimatedDuration = 3.2)
 	@Test(timeout = 30000)
    public void testLinkGrapicsWithMeshData()
    {
@@ -78,7 +78,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@DeployableTestMethod(duration = 3.2)
+	@DeployableTestMethod(estimatedDuration = 3.2)
 	@Test(timeout = 30000)
    public void testLinkGrapicsWithCone()
    {
@@ -86,7 +86,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@DeployableTestMethod(duration = 3.2)
+	@DeployableTestMethod(estimatedDuration = 3.2)
 	@Test(timeout = 30000)
    public void testLinkGrapicsWithExtrudedPolygon()
    {

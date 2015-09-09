@@ -17,21 +17,21 @@ import us.ihmc.graphics3DAdapter.utils.FlatHeightMap;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.robotics.geometry.TransformTools;
 
-@DeployableTestClass(planType={BambooPlanType.UI})
+@DeployableTestClass(targets={TestPlanTarget.UI})
 public class JMEGPULidarParallelSceneGraphTest
 {
    /**
     * The blue sphere should not show up in the lidar data.
     */
 
-	@DeployableTestMethod(duration = 10.2)
+	@DeployableTestMethod(estimatedDuration = 10.2)
 	@Test(timeout = 51000)
    public void testGPULidarParallelSceneGraph()
    {

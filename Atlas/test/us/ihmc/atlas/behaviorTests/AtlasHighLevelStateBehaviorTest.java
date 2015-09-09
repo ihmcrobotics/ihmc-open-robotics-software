@@ -8,12 +8,12 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCHighLevelStateBehaviorTes
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 
-@DeployableTestClass(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Slow})
 public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -36,20 +36,20 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    }
 
    @Override
-	@DeployableTestMethod(duration = 34.3)
+	@DeployableTestMethod(estimatedDuration = 34.3)
    @Test(timeout = 170000)
    public void testDoNothingBehavior() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testDoNothingBehavior();
    }
    
    @Override
-	@DeployableTestMethod(duration = 44.4)
+	@DeployableTestMethod(estimatedDuration = 44.4)
    @Test(timeout = 220000)
    public void testRandomState() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testRandomState();
    }
 }

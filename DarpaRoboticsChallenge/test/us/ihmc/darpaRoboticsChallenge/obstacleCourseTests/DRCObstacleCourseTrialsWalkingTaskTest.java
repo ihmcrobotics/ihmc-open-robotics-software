@@ -57,7 +57,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    }
 
 
-	@DeployableTestMethod(duration = 39.7)
+	@DeployableTestMethod(estimatedDuration = 39.7)
 	@Test(timeout = 200000)
    public void testStepOnCinderBlocks() throws SimulationExceededMaximumTimeException
    {
@@ -92,7 +92,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    }
 	
    
-	@DeployableTestMethod(duration = 50.0)
+	@DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 250000)
    public void testStepOnCinderBlocksSlowlyWithDisturbance() throws SimulationExceededMaximumTimeException
    {

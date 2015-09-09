@@ -39,7 +39,7 @@ public abstract class AbstractHeightMapTest
       super();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSinglePoint()
    {
@@ -70,7 +70,7 @@ public abstract class AbstractHeightMapTest
       assertSinglePointGridHandlesPoint(x, y, xIndex, yIndex, z);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGettingAreas()
    {
@@ -184,7 +184,7 @@ public abstract class AbstractHeightMapTest
    }
    public abstract HeightMapWithPoints getHeightMap(double minX, double minY, double maxX, double maxY, double resolution);
 
-	@DeployableTestMethod(duration = 2.0)
+	@DeployableTestMethod(estimatedDuration = 2.0)
 	@Test(timeout = 30000)
    public void rowModificationSynchronizationTest()
    {
@@ -276,7 +276,7 @@ public abstract class AbstractHeightMapTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testKernelMasking() throws InsufficientDataException
    {

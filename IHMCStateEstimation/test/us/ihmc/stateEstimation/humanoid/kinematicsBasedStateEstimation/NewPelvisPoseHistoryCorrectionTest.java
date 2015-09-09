@@ -29,15 +29,15 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.testing.BambooPlanType;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
-@DeployableTestClass(planType={BambooPlanType.Fast})
+@DeployableTestClass(targets={TestPlanTarget.Fast})
 public class NewPelvisPoseHistoryCorrectionTest
 {
    private YoVariableRegistry registry;
@@ -245,7 +245,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    
    private BooleanYoVariable isRotationCorrectionEnabled;
    
-   @DeployableTestMethod(duration = 1.0)
+   @DeployableTestMethod(estimatedDuration = 1.0)
    @Test(timeout = 60000)
    public void testTranslationCorrectionOnlyWithPelvisFollowingAKnownPathAndRandomLocalizationOffsets()
    {
@@ -317,7 +317,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       }
    }
    
-   @DeployableTestMethod(duration = 1.0)
+   @DeployableTestMethod(estimatedDuration = 1.0)
    @Test(timeout = 60000)
    public void testTooBigAngleErrorAreDetectedAndPacketIsSent()
    {

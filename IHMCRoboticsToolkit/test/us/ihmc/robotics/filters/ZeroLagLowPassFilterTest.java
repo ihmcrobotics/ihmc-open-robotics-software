@@ -9,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 public class ZeroLagLowPassFilterTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testZeroFiltering()
    {
@@ -29,7 +29,7 @@ public class ZeroLagLowPassFilterTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testZeroNonZeroAlpha()
    {
@@ -53,7 +53,7 @@ public class ZeroLagLowPassFilterTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testZeroNonZeroAlpha2()
    {

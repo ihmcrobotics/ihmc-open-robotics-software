@@ -30,7 +30,7 @@ public class ThreePointDoubleSplines2DTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testSimpleFlatExample()
    {
@@ -49,7 +49,7 @@ public class ThreePointDoubleSplines2DTest
       assertFlatAndAtHeight(zHeight, zSlopeAndSecondDerivative);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testInitialInALineExample()
    {
@@ -72,7 +72,7 @@ public class ThreePointDoubleSplines2DTest
       assertEquals(0.0, zSlopeAndSecondDerivative[2], 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testInitialInALineExampleTwo()
    {
@@ -112,7 +112,7 @@ public class ThreePointDoubleSplines2DTest
       assertEquals(0.0, zSlopeAndSecondDerivative[2], 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.5)
+	@DeployableTestMethod(estimatedDuration = 0.5)
 	@Test(timeout = 30000)
    public void testInitialInALineExampleThree()
    {
@@ -160,7 +160,7 @@ public class ThreePointDoubleSplines2DTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testAFewQueriesOnFlatExampleOne()
    {

@@ -13,7 +13,7 @@ public class IterativeBestFitPlaneCalculatorTest
 {
    private static final double eps = 1e-7;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testEasyCase()
    {
@@ -22,7 +22,7 @@ public class IterativeBestFitPlaneCalculatorTest
       runTest(data, expectedPlane, eps);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGenericCase()
    {
@@ -42,7 +42,7 @@ public class IterativeBestFitPlaneCalculatorTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testEasyDegenerate0Case()
    {
@@ -51,7 +51,7 @@ public class IterativeBestFitPlaneCalculatorTest
       runTest(data, expectedPlane, eps);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testEasyDegenerate1XCase()
    {
@@ -60,7 +60,7 @@ public class IterativeBestFitPlaneCalculatorTest
       runTest(data, expectedPlane, eps);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testEasyDegenerate1YCase()
    {
@@ -69,7 +69,7 @@ public class IterativeBestFitPlaneCalculatorTest
       runTest(data, expectedPlane, eps);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testModerateDegenerate1XYCase()
    {
@@ -78,7 +78,7 @@ public class IterativeBestFitPlaneCalculatorTest
       runTest(data, expectedPlane, eps);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSuperEasyDegenerate1XYCase()
    {
@@ -87,7 +87,7 @@ public class IterativeBestFitPlaneCalculatorTest
       runTest(data, expectedPlane, eps);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDegenerate1Case()
    {
@@ -112,7 +112,7 @@ public class IterativeBestFitPlaneCalculatorTest
 	 * Not sure if this ever worked. The nearly degenerate cases are tough. Someone needs to look into it deeper.
 	 */
 	@Ignore
-	@DeployableTestMethod(duration = 0.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
 	@Test(timeout = 503)
    public void testNearlyDegenerate1Case()
    {
@@ -133,7 +133,7 @@ public class IterativeBestFitPlaneCalculatorTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testUnderDefinedCase()
    {

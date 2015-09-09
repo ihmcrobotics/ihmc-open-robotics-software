@@ -15,14 +15,14 @@ import javax.vecmath.Vector3d;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
 import com.esotericsoftware.minlog.Log;
 
-@DeployableTestClass(planType = {BambooPlanType.Flaky})
+@DeployableTestClass(targets = {TestPlanTarget.Flaky})
 public class KryoObjectCommunicatorTest
 {
 

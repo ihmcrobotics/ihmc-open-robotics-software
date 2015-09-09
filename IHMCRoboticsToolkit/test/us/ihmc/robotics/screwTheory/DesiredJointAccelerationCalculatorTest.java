@@ -20,7 +20,7 @@ public class DesiredJointAccelerationCalculatorTest
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testVersusSpatialAccelerationCalculator()
    {

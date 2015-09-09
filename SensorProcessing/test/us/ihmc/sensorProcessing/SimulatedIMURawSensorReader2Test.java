@@ -31,7 +31,7 @@ public class SimulatedIMURawSensorReader2Test
       random = new Random(1776L);
    }
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void test() throws SimulationExceededMaximumTimeException, UnreasonableAccelerationException
    {

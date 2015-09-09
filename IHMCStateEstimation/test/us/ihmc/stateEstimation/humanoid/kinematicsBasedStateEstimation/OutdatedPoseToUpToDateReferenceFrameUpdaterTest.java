@@ -16,16 +16,16 @@ import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.testing.BambooPlanType;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(planType={BambooPlanType.Fast})
+@DeployableTestClass(targets={TestPlanTarget.Fast})
 public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @DeployableTestMethod(duration = 0.2)
+   @DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 3000)
    public void testGetUpToDateTimeStampedBufferNewestTimeStamp()
    {
@@ -48,7 +48,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.2)
+   @DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 3000)
    public void testGetUpToDateTimeStampedBufferOldestTimeStamp()
    {
@@ -75,7 +75,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.2)
+   @DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 3000)
    public void testUpdateOutdatedTransformWithKnownOffsets()
    {

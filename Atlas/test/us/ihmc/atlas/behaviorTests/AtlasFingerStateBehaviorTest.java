@@ -8,11 +8,11 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCFingerStateBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@DeployableTestClass(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Slow})
 public class AtlasFingerStateBehaviorTest extends DRCFingerStateBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -35,29 +35,29 @@ public class AtlasFingerStateBehaviorTest extends DRCFingerStateBehaviorTest
    }
 
    @Override
-	@DeployableTestMethod(duration = 97.9)
+	@DeployableTestMethod(estimatedDuration = 97.9)
    @Test(timeout = 490000)
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testCloseHand();
    }
    
    @Override
-	@DeployableTestMethod(duration = 36.1)
+	@DeployableTestMethod(estimatedDuration = 36.1)
    @Test(timeout = 180000)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testPauseAndResumeCloseHand();
    }
    
    @Override
-	@DeployableTestMethod(duration = 24.2)
+	@DeployableTestMethod(estimatedDuration = 24.2)
    @Test(timeout = 120000)
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testStopCloseHand();
    }
 }

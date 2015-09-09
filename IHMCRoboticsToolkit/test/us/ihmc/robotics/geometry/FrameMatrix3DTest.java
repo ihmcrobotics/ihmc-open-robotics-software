@@ -25,7 +25,7 @@ public class FrameMatrix3DTest
    private static final ReferenceFrame bFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("bFrame", worldFrame, RigidBodyTransform
          .generateRandomTransform(random));
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructors()
    {
@@ -55,7 +55,7 @@ public class FrameMatrix3DTest
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetters()
    {
@@ -151,7 +151,7 @@ public class FrameMatrix3DTest
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetters()
    {
@@ -196,7 +196,7 @@ public class FrameMatrix3DTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToNaN()
    {
@@ -225,7 +225,7 @@ public class FrameMatrix3DTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToZero()
    {
@@ -254,7 +254,7 @@ public class FrameMatrix3DTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToIdentity()
    {
@@ -292,7 +292,7 @@ public class FrameMatrix3DTest
    /**
     * Check that changing frame applies the expected transformation to the matrix3d held in FrameMatrix3D
     */
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testChangeFrame()
    {
@@ -322,7 +322,7 @@ public class FrameMatrix3DTest
    /**
     * Test the changeFrame method by check that transforming a random vector in two different frames using the FrameMatrix3D ends up being the same.
     */
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testChangeFrameByTransformingAVectorInTwoDifferentFrames()
    {

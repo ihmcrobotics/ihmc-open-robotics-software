@@ -10,7 +10,7 @@ import static org.junit.Assert.assertTrue;
 public class BodeUnitsConverterTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testMagnitudeToDecibels()
    {
@@ -28,7 +28,7 @@ public class BodeUnitsConverterTest
       
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNaN()
    {
@@ -37,7 +37,7 @@ public class BodeUnitsConverterTest
       assertTrue(Double.isNaN(decibels)); 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNegativeInfinity()
    {
@@ -46,7 +46,7 @@ public class BodeUnitsConverterTest
       assertTrue(Double.isInfinite(decibels));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRadiansToDegrees()
    {      
@@ -70,7 +70,7 @@ public class BodeUnitsConverterTest
       assertEquals(-720.0, phaseInDegrees[4], epsilon);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
   public void testRadiansPerSecondToHz()
   {

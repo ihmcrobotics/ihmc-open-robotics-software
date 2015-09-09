@@ -5,10 +5,10 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCGraspCylinderBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 
-@DeployableTestClass(planType = {BambooPlanType.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.Slow})
 public class AtlasGraspCylinderBehaviorTest extends DRCGraspCylinderBehaviorTest
 {
    private final AtlasRobotModel robotModel;

@@ -37,7 +37,7 @@ public class CenterOfMassJacobianTest
       random = new Random(1986L);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeJacobianSingleJoint()
    {
@@ -45,7 +45,7 @@ public class CenterOfMassJacobianTest
       testComputeJacobianRevoluteJoints(joints, ScrewTools.computeSupportAndSubtreeSuccessors(elevator), elevator.getBodyFixedFrame());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeJacobianTwoJointsSimple()
    {
@@ -53,7 +53,7 @@ public class CenterOfMassJacobianTest
       testComputeJacobianRevoluteJoints(joints, ScrewTools.computeSupportAndSubtreeSuccessors(elevator), elevator.getBodyFixedFrame());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeJacobianRandomChain()
    {
@@ -61,7 +61,7 @@ public class CenterOfMassJacobianTest
       testComputeJacobianRevoluteJoints(joints, ScrewTools.computeSupportAndSubtreeSuccessors(elevator), elevator.getBodyFixedFrame());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTree()
    {
@@ -69,7 +69,7 @@ public class CenterOfMassJacobianTest
       testComputeJacobianRevoluteJoints(joints, ScrewTools.computeSupportAndSubtreeSuccessors(elevator), elevator.getBodyFixedFrame());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRigidBodyListSortInvariant()
    {
@@ -97,7 +97,7 @@ public class CenterOfMassJacobianTest
       JUnitTools.assertTuple3dEquals(velocityFromJacobianInOrder.getVectorCopy(), velocityFromJacobianOutOrder.getVectorCopy(), 1e-5);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeJacobianSixDoFPlusRandomChain()
    {
@@ -132,7 +132,7 @@ public class CenterOfMassJacobianTest
       JUnitTools.assertTuple3dEquals(velocityNumerical.getVectorCopy(), velocityFromJacobian.getVectorCopy(), 4e-5);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeJacobianSkipLeafBody()
    {
@@ -141,7 +141,7 @@ public class CenterOfMassJacobianTest
       testComputeJacobianRevoluteJoints(joints, rigidBodies, elevator.getBodyFixedFrame());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeJacobianSkipIntermediateBody()
    {
@@ -150,7 +150,7 @@ public class CenterOfMassJacobianTest
       testComputeJacobianRevoluteJoints(joints, rigidBodies, elevator.getBodyFixedFrame());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeRootJointLinearVelocity()
    {

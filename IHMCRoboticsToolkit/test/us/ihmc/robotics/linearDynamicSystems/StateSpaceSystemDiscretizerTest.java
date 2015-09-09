@@ -33,7 +33,7 @@ public class StateSpaceSystemDiscretizerTest
    private static final boolean DEBUG = false;
    private static final boolean DISPLAY_GRAPHS_AND_SLEEP_FOREVER = false;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testWithSimpleSpringDamperSystem()
    {
@@ -182,7 +182,7 @@ public class StateSpaceSystemDiscretizerTest
          ThreadTools.sleepForever();
    }
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testCompareDifferentImplementations()
    {

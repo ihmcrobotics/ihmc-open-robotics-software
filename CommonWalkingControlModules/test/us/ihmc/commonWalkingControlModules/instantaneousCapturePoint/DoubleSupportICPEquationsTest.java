@@ -13,7 +13,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
  */
 public class DoubleSupportICPEquationsTest
 {
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test (timeout = 30000)
    public void testSingleSupportICPDerivatives()
    {
@@ -35,7 +35,7 @@ public class DoubleSupportICPEquationsTest
       assertEquals(icpDot - w * icp, -w * zmp, 1e-14);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test (timeout = 30000)
    public void testCoefficientCalculations()
    {
@@ -63,7 +63,7 @@ public class DoubleSupportICPEquationsTest
    }
 
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test (timeout = 30000)
    public void testZMPICPDerivatives()
    {
@@ -94,7 +94,7 @@ public class DoubleSupportICPEquationsTest
       assertEquals(icpDot - w * icp, -w * zmp, 1e-10);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test (timeout = 30000)
    public void testSingleCoefficientDetermination(){
       Random random = new Random(4575L);
@@ -119,7 +119,7 @@ public class DoubleSupportICPEquationsTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test (timeout = 30000)
    public void testICPSumFormula(){
       Random random = new Random(4575L);
@@ -146,7 +146,7 @@ public class DoubleSupportICPEquationsTest
       assertEquals(icpSum, matrixCalculation, 1e-10);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test (timeout = 30000)
    public void testICPICalculation()
    {

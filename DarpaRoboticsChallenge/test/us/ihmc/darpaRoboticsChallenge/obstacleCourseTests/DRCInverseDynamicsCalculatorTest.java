@@ -20,7 +20,7 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 
 public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTestInterface
 {
-	@DeployableTestMethod(duration = 0.5)
+	@DeployableTestMethod(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testInverseDynamicsStartingWithRandomTorquesInSCS() throws UnreasonableAccelerationException
    {
@@ -92,7 +92,7 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
    }
 
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testInverseDynamicsStartingWithRandomAccelerationsInInverseDynamics() throws UnreasonableAccelerationException
    {

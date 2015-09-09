@@ -116,7 +116,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       }
    }
 
-	@DeployableTestMethod(duration = 93.3)
+	@DeployableTestMethod(estimatedDuration = 93.3)
    @Test(timeout = 470000)
    public void testRandomJointSpaceMoveAndTaskSpaceMoveBackToHome() throws SimulationExceededMaximumTimeException
    {
@@ -215,7 +215,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
    
-	@DeployableTestMethod(duration = 52.5)
+	@DeployableTestMethod(estimatedDuration = 52.5)
    @Test(timeout = 260000)
    public void testMoveOneRandomJoint20Deg() throws SimulationExceededMaximumTimeException
    {
@@ -257,7 +257,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
    }
 
    
-	@DeployableTestMethod(duration = 53.1)
+	@DeployableTestMethod(estimatedDuration = 53.1)
    @Test(timeout = 270000)
    public void testWristRoll() throws SimulationExceededMaximumTimeException
    {
@@ -297,7 +297,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
       
-	@DeployableTestMethod(duration = 82.1)
+	@DeployableTestMethod(estimatedDuration = 82.1)
    @Test(timeout = 410000)
    public void testMultipleArmPosesOnBothArms() throws SimulationExceededMaximumTimeException
    {

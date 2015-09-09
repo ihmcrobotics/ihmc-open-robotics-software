@@ -252,7 +252,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       assertTrue(debrisPositionAfterGrasping.getZ() > zThreshold);
    }
    
-   @DeployableTestMethod(duration = 90.0)
+   @DeployableTestMethod(estimatedDuration = 90.0)
    @Test(timeout = 300000)
    public void testGraspingStandingDebrisWithRightHand() throws SimulationExceededMaximumTimeException
    {
@@ -288,7 +288,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
    }
    
    @Ignore
-   @DeployableTestMethod(duration = 70.0)
+   @DeployableTestMethod(estimatedDuration = 70.0)
    @Test(timeout = 300000)
    public void testGraspingStandingDebrisWithLeftHand() throws SimulationExceededMaximumTimeException
    {
@@ -323,7 +323,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(duration = 70.0)
+   @DeployableTestMethod(estimatedDuration = 70.0)
    @Test(timeout = 300000)
    public void testGraspingHorizontalDebrisWithRightHand() throws SimulationExceededMaximumTimeException
    {
@@ -354,7 +354,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       assertChestAndPelvisAreCloseToHomePosition();
    }
 
-   @DeployableTestMethod(duration = 70.0)
+   @DeployableTestMethod(estimatedDuration = 70.0)
    @Test(timeout = 300000)
    public void testGraspingLeaningAgainstAWallDebrisWithRightHand() throws SimulationExceededMaximumTimeException
    {

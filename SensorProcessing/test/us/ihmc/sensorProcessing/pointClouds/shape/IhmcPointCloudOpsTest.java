@@ -23,7 +23,7 @@ public class IhmcPointCloudOpsTest
 {
    Random rand = new Random(234);
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void convert()
    {
@@ -41,7 +41,7 @@ public class IhmcPointCloudOpsTest
       assertTrue(UtilPlane3D_F64.equals(orig,found,1e-8));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void adjustBoxNormals()
    {

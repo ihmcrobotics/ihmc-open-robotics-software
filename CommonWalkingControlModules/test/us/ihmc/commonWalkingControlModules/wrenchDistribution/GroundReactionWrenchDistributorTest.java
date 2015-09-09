@@ -75,7 +75,7 @@ public class GroundReactionWrenchDistributorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testSimpleWrenchDistributionWithGeometricFlatGroundDistributor()
    {
@@ -129,7 +129,7 @@ public class GroundReactionWrenchDistributorTest
       testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry, 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testRandomFlatGroundExamplesWithGeometricFlatGroundDistributor()
    {
@@ -143,7 +143,7 @@ public class GroundReactionWrenchDistributorTest
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, false, centerOfMassFrame, distributor, 1.0, parentRegistry);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithGeometricFlatGroundDistributor()
    {
@@ -337,7 +337,7 @@ public class GroundReactionWrenchDistributorTest
       testTroublesomeExampleTwo(centerOfMassFrame, distributor, parentRegistry);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testTroublesomeExamplesWithGeometricFlatGroundDistributor()
    {

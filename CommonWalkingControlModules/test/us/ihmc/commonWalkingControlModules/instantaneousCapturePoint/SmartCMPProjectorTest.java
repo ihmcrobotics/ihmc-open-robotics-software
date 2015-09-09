@@ -34,7 +34,7 @@ public class SmartCMPProjectorTest
    private static final boolean SHOW_SCS = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleProjections()
    {
@@ -171,7 +171,7 @@ public class SmartCMPProjectorTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTroublesomeOne()
    {
@@ -195,7 +195,7 @@ public class SmartCMPProjectorTest
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTroublesomeTwo()
    {
@@ -220,7 +220,7 @@ public class SmartCMPProjectorTest
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTroublesomeThree()
    {
@@ -244,7 +244,7 @@ public class SmartCMPProjectorTest
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTroublesomeFour()
    {
@@ -268,7 +268,7 @@ public class SmartCMPProjectorTest
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTroublesomeFive()
    {
@@ -294,7 +294,7 @@ public class SmartCMPProjectorTest
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTroublesomeSix()
    {
@@ -320,7 +320,7 @@ public class SmartCMPProjectorTest
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTroublesomeSeven()
    {
@@ -347,7 +347,7 @@ public class SmartCMPProjectorTest
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTroublesomeEight()
    {
@@ -373,7 +373,7 @@ public class SmartCMPProjectorTest
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTroublesomeNine()
    {
@@ -399,7 +399,7 @@ public class SmartCMPProjectorTest
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTroublesomeTen()
    {
@@ -459,7 +459,7 @@ public class SmartCMPProjectorTest
       ThreadTools.sleepForever();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleProjectionAwayFromEdgeButNotTooFar()
    {
@@ -474,7 +474,7 @@ public class SmartCMPProjectorTest
       checkOne(null, smartCMPProjector, supportPolygon, capturePoint, desiredCMP, expectedCMPProjection);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleProjectionICPOutside()
    {
@@ -488,7 +488,7 @@ public class SmartCMPProjectorTest
       checkOne(null, smartCMPProjector, supportPolygon, capturePoint, desiredCMP, expectedCMPProjection);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleProjectionICPOutsideTwo()
    {
@@ -502,7 +502,7 @@ public class SmartCMPProjectorTest
       checkOne(null, smartCMPProjector, supportPolygon, capturePoint, desiredCMP, expectedCMPProjection);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleProjectionICPOutsideThree()
    {
@@ -516,7 +516,7 @@ public class SmartCMPProjectorTest
       checkOne(null, smartCMPProjector, supportPolygon, capturePoint, desiredCMP, expectedCMPProjection);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleProjectionBackOntoTheEdge()
    {
@@ -530,7 +530,7 @@ public class SmartCMPProjectorTest
       checkOne(null, smartCMPProjector, supportPolygon, capturePoint, desiredCMP, expectedCMPProjection);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testICPInsideCMPOutside()
    {
@@ -544,7 +544,7 @@ public class SmartCMPProjectorTest
       checkOne(null, smartCMPProjector, supportPolygon, capturePoint, desiredCMP, expectedCMPProjection);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testICPInsideCloseCMPOutside()
    {
@@ -558,7 +558,7 @@ public class SmartCMPProjectorTest
       checkOne(null, smartCMPProjector, supportPolygon, capturePoint, desiredCMP, expectedCMPProjection);
    }
 
-	@DeployableTestMethod(duration = 6.7)
+	@DeployableTestMethod(estimatedDuration = 6.7)
 	@Test(timeout = 34000)
    public void testRandomPoints()
    {

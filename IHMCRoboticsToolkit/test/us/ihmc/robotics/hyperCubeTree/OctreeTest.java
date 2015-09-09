@@ -16,7 +16,7 @@ public class OctreeTest
 {
    private static final String[] axes = { "x", "y", "z" };
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimplePutGetOctree()
    {
@@ -47,7 +47,7 @@ public class OctreeTest
       assertEquals(2, tree.listAllLeaves().size());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void test3DPutGetRemoveTwoLevel()
    {
@@ -88,7 +88,7 @@ public class OctreeTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOctreeInternalBoarders()
    {
@@ -100,7 +100,7 @@ public class OctreeTest
       assertEquals(2, tree.listAllLeaves().size());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOctreeLineSearch()
    {
@@ -124,7 +124,7 @@ public class OctreeTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPrint()
    {
@@ -132,7 +132,7 @@ public class OctreeTest
       System.out.println(tree.toString());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPutLidarInOctree()
    {
@@ -149,7 +149,7 @@ public class OctreeTest
       assertEquals(true, tree.get(new double[] { 0.375, 0.0, 0.0 }).getValue());
    }
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testShootOctreeIntoSphereWithLidarBullets()
    {

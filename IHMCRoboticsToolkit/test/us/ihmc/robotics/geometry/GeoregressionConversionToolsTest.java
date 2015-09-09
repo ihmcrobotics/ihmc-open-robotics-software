@@ -17,7 +17,7 @@ public class GeoregressionConversionToolsTest
 {
    private final static double eps = 1e-7;
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testTransformConversionFromGeoregressionToVecmath()
    {
@@ -55,7 +55,7 @@ public class GeoregressionConversionToolsTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testTransformConversionFromVecmathToGeoregression()
    {

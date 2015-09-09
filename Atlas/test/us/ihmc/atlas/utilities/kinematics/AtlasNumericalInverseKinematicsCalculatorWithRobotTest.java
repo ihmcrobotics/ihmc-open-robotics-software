@@ -33,7 +33,7 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
 
    
    @Ignore
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 120000)
    public void testTroublesomeCaseOne()
    {

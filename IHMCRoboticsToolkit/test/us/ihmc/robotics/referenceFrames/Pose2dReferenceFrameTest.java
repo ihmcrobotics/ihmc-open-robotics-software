@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class Pose2dReferenceFrameTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAsynchronousUpdatesOne()
    {
@@ -53,7 +53,7 @@ public class Pose2dReferenceFrameTest
       assertTrue(framePointInWorldThree.epsilonEquals(framePointInWorldTwo, 1e-7));
    }
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testLongChainEfficiency()
    {
@@ -89,7 +89,7 @@ public class Pose2dReferenceFrameTest
       finalPosition3.changeFrame(worldFrame);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAsynchronousUpdatesTwo()
    {

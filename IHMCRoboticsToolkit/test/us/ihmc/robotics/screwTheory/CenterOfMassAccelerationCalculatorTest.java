@@ -21,7 +21,7 @@ public class CenterOfMassAccelerationCalculatorTest
    {
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOneRigidBody()
    {
@@ -60,7 +60,7 @@ public class CenterOfMassAccelerationCalculatorTest
       JUnitTools.assertTuple3dEquals(expected, comAcceleration.getVectorCopy(), 1e-5);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTwoSliderJointsZeroAcceleration()
    {
@@ -102,7 +102,7 @@ public class CenterOfMassAccelerationCalculatorTest
       JUnitTools.assertTuple3dEquals(new Vector3d(), comAcceleration.getVectorCopy(), 1e-5);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPendulumCentripetalAcceleration()
    {
@@ -141,7 +141,7 @@ public class CenterOfMassAccelerationCalculatorTest
 
    // Just tests whether it will crash or not for now
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTree()
    {

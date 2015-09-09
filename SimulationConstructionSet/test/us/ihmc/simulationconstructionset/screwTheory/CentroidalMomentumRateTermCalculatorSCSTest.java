@@ -45,7 +45,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
    private final DenseMatrix64F aDotVNumerical = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void chainTest() throws UnreasonableAccelerationException
    {
@@ -65,7 +65,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       assertAAndADotV(random, joints, elevator, robot,numberOfJoints);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void treeTest() throws UnreasonableAccelerationException
    {
@@ -85,7 +85,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       assertAAndADotV(random, joints, elevator, robot, numberOfJoints);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void floatingChainTest() throws UnreasonableAccelerationException
    {

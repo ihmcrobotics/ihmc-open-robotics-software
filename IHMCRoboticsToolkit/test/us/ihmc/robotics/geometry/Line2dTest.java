@@ -38,7 +38,7 @@ public class Line2dTest
       return new Point2d(randomDouble(random, 1.0e5), randomDouble(random, 1.0e5));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructors()
    {
@@ -67,7 +67,7 @@ public class Line2dTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testPointVectorConstructorForException()
    {
@@ -77,7 +77,7 @@ public class Line2dTest
       new Line2d(firstPointOnLine, vector);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testPointPointConstructorForException()
    {
@@ -86,7 +86,7 @@ public class Line2dTest
       new Line2d(firstPointOnLine, firstPointOnLine);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetPoint()
    {
@@ -97,7 +97,7 @@ public class Line2dTest
       assertEquals(firstPointOnLine, line2d.getPoint());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetNormalizedVector()
    {
@@ -117,7 +117,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetNormalizedVectorCopy()
    {
@@ -135,7 +135,7 @@ public class Line2dTest
       assertFalse(line2d.getNormalizedVector() == normalizedVector2);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetSlope()
    {
@@ -161,7 +161,7 @@ public class Line2dTest
       assertEquals(Double.NEGATIVE_INFINITY, horizontalLine.getSlope(), delta);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetXIntercept()
    {
@@ -192,7 +192,7 @@ public class Line2dTest
       assertEquals(Double.POSITIVE_INFINITY, line2d.getXIntercept(), delta);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetYIntercept()
    {
@@ -224,7 +224,7 @@ public class Line2dTest
       assertEquals(Double.POSITIVE_INFINITY, line2d.getYIntercept(), delta);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNegateDirection()
    {
@@ -244,7 +244,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNegateDirectionCopy()
    {
@@ -261,7 +261,7 @@ public class Line2dTest
       assertFalse(line2d.getNormalizedVector() == line2dNegated.getNormalizedVector());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetPointPoint()
    {
@@ -288,7 +288,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSetPointPointException()
    {
@@ -298,7 +298,7 @@ public class Line2dTest
       line2d.set(firstPointOnLine, firstPointOnLine);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetPointArray()
    {
@@ -326,7 +326,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetPointArrayExceptions()
    {
@@ -371,7 +371,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetLine()
    {
@@ -398,7 +398,7 @@ public class Line2dTest
       assertFalse(secondLine2d.getNormalizedVector() == line2d.getNormalizedVector());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSetDoubleException()
    {
@@ -410,7 +410,7 @@ public class Line2dTest
       line2d.set(5.0, 6.0, 0.0, 0.0);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetPoint2d()
    {
@@ -424,7 +424,7 @@ public class Line2dTest
       assertFalse(newPoint == line2d.getPoint());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRotate()
    {
@@ -445,7 +445,7 @@ public class Line2dTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testShiftToLeftAndRight()
    {
@@ -533,7 +533,7 @@ public class Line2dTest
       assertEquals(lineVector.getY(), shiftedLineVector.getY(), epsilon);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInteriorBisector()
    {
@@ -583,7 +583,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPerpendicularVector()
    {
@@ -645,7 +645,7 @@ public class Line2dTest
       assertFalse(line2d.containsEpsilon(pointNearLine, epsilon));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPerpendicularLineThroughPoint()
    {
@@ -667,7 +667,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOrthogonalProjection()
    {
@@ -697,7 +697,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOrthogonalProjectionCopy()
    {
@@ -729,7 +729,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionWithLineSegment2d()
    {
@@ -775,7 +775,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInterSectionWithLine2d()
    {
@@ -817,7 +817,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDistancePoint2d()
    {
@@ -870,7 +870,7 @@ public class Line2dTest
       fail("Has not been implemented yet.");
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void isPointOnLineTest()
    {
@@ -886,7 +886,7 @@ public class Line2dTest
       assertTrue(line.isPointOnLine(point4));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void areLinesPerpendicularTest()
    {
@@ -910,7 +910,7 @@ public class Line2dTest
       assertTrue(line1.areLinesPerpendicular(line3));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsPointOnLeftSideOfLine()
    {
@@ -941,7 +941,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsPointOnRightSideOfLine()
    {
@@ -973,7 +973,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSideConsistency()
    {
@@ -997,7 +997,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsPointInFrontOfLine()
    {
@@ -1018,7 +1018,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsPointInFrontOfLineException()
    {
@@ -1040,7 +1040,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsPointBehindLine()
    {
@@ -1061,7 +1061,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsPointBehindLineException()
    {
@@ -1083,7 +1083,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFrontBehindConsistency()
    {
@@ -1100,7 +1100,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetParameterGivenPointEpsilon()
    {
@@ -1125,7 +1125,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetParameterGivenPointEpsilonException()
    {
@@ -1156,7 +1156,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionWithConvexPolygon()
    {
@@ -1213,7 +1213,7 @@ public class Line2dTest
       // assertEquals(2, intersections.length);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testcontainsNaN()
    {
@@ -1282,7 +1282,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetParallelThroughPoint()
    {
@@ -1306,7 +1306,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransformTranslation()
    {
@@ -1363,7 +1363,7 @@ public class Line2dTest
       line.applyTransform(transform);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransformRotation()
    {
@@ -1399,7 +1399,7 @@ public class Line2dTest
       assertEquals("pure rotation failed", vector.x * sina + vector.y * cosa, line.normalizedVector.y, delta);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testApplyTransformRotationXaxisException()
    {
@@ -1420,7 +1420,7 @@ public class Line2dTest
       line.applyTransform(transform);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testApplyTransformRotationYaxisException()
    {
@@ -1441,7 +1441,7 @@ public class Line2dTest
       line.applyTransform(transform);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransformCombination()
    {
@@ -1477,7 +1477,7 @@ public class Line2dTest
       assertEquals("pure rotation failed", vector.x * sina + vector.y * cosa, line.normalizedVector.y, delta);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransformCopy()
    {
@@ -1512,7 +1512,7 @@ public class Line2dTest
       assertEquals(line.normalizedVector.y, transformedCopy.normalizedVector.y, delta);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOrthogonalProjectionCopyPoint2dLine2d()
    {
@@ -1555,7 +1555,7 @@ public class Line2dTest
       assertEquals(new Point2d(5.0, 0.0), projectedPoint);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionLine2dLine2d()
    {
@@ -1588,7 +1588,7 @@ public class Line2dTest
       assertEquals(null, line1.intersectionWith(line9));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDistancePointLineTwo()
    {

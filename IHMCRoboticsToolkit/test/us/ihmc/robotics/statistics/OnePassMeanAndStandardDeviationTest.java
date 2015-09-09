@@ -23,7 +23,7 @@ public class OnePassMeanAndStandardDeviationTest
    {
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCalculateMeanAndStandardDeviationExample()
    {
@@ -44,7 +44,7 @@ public class OnePassMeanAndStandardDeviationTest
       assertEquals(9.730769230769189, meanAndStandardDeviation.getSampleVariance(), delta);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCalculateMeanAndStandardDeviationSingleValue()
    {
@@ -56,7 +56,7 @@ public class OnePassMeanAndStandardDeviationTest
       assertEquals(0.0, meanAndStandardDeviation.getStandardDeviation(), delta);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = InsufficientMeasurementsException.class)
    public void testCalculateSampleVarianceSingleValue()
    {
@@ -65,7 +65,7 @@ public class OnePassMeanAndStandardDeviationTest
       assertEquals(0.0, meanAndStandardDeviation.getSampleVariance(), delta);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = InsufficientMeasurementsException.class)
    public void testCalculateAverageNoValue()
    {
@@ -73,7 +73,7 @@ public class OnePassMeanAndStandardDeviationTest
       assertEquals(0.0, meanAndStandardDeviation.getAverage(), delta);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = InsufficientMeasurementsException.class)
    public void testCalculateVarianceNoValue()
    {

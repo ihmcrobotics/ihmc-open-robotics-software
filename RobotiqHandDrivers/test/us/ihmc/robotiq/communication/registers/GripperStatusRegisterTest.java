@@ -5,10 +5,10 @@ import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gGTO;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gIMC;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gMOD;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gSTA;
-import us.ihmc.tools.testing.BambooPlanType;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(planType = BambooPlanType.Fast)
+@DeployableTestClass(targets = TestPlanTarget.Fast)
 public class GripperStatusRegisterTest extends RobotiqInputRegisterTest
 {
    @Override

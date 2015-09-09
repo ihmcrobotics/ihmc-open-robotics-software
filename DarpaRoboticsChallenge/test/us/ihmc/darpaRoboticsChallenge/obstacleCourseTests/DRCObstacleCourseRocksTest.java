@@ -55,7 +55,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
    }
 
 
-	@DeployableTestMethod(duration = 65.8)
+	@DeployableTestMethod(estimatedDuration = 65.8)
 	@Test(timeout = 330000)
    public void testWalkingOntoRocks() throws SimulationExceededMaximumTimeException
    {

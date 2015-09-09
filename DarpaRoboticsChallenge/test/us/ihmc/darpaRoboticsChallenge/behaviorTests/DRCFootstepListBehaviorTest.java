@@ -102,7 +102,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       robotDataReceiver = drcBehaviorTestHelper.getRobotDataReceiver();
    }
 
-   @DeployableTestMethod(duration = 31.9)
+   @DeployableTestMethod(estimatedDuration = 31.9)
    @Test(timeout = 95822)
    public void testTwoStepsForwards() throws SimulationExceededMaximumTimeException
    {
@@ -158,7 +158,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(duration = 31.9)
+   @DeployableTestMethod(estimatedDuration = 31.9)
    @Test(timeout = 95822)
    public void testSideStepping() throws SimulationExceededMaximumTimeException
    {
@@ -215,7 +215,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(duration = 31.9)
+   @DeployableTestMethod(estimatedDuration = 31.9)
    @Test(timeout = 95822)
    public void testStepLongerThanMaxStepLength() throws SimulationExceededMaximumTimeException
    {
@@ -287,7 +287,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       return footStepsAreTooFarApart;
    }
 
-   @DeployableTestMethod(duration = 31.9)
+   @DeployableTestMethod(estimatedDuration = 31.9)
    @Test(timeout = 95822)
    public void testStop() throws SimulationExceededMaximumTimeException
    {

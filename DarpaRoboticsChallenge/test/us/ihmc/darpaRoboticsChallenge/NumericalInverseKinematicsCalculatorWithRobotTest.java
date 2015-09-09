@@ -195,7 +195,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    }
 
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCase()
    {
@@ -215,7 +215,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
 
 
-	@DeployableTestMethod(duration = 10.5)
+	@DeployableTestMethod(estimatedDuration = 10.5)
    @Test(timeout = 52000)
    public void testRandomFeasibleRobotPoses()
    {

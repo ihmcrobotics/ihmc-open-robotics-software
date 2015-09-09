@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalculatorTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testKineticEnergy()
    {
@@ -30,7 +30,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
       assertEquals(expectedKineticEnergy, kineticEnergyFromMassMatrix, 1e-12);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSixDoFJoint()
    {

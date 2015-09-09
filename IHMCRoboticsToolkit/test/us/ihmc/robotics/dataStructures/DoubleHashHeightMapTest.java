@@ -32,7 +32,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
    private static final double eps = 1e-7;
    private static final double NaN = Double.NaN;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSinglePointOld()
    {
@@ -63,7 +63,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       assertSinglePointGridHandlesPoint(x, y, xIndex, yIndex, z);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGettingAreasOld()
    {
@@ -111,7 +111,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testUnhandledPointsOld()
    {
@@ -145,7 +145,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGrabCellsOld()
    {
@@ -179,7 +179,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       assertEquals(z, simpleMap.getHeightAtPoint(xIndex * RESOLUTION, yIndex * RESOLUTION), eps);
    }
 
-	@DeployableTestMethod(duration = 3.0)
+	@DeployableTestMethod(estimatedDuration = 3.0)
 	@Test(timeout = 30000)
    public void rowModificationSynchronizationTestOld()
    {
@@ -201,7 +201,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testUnhandledPoints()
    {
@@ -278,7 +278,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testKernelMaskingOld() throws InsufficientDataException
    {

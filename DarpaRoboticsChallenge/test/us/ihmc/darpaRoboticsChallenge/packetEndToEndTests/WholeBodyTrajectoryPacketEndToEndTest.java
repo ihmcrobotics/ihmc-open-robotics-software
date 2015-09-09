@@ -51,7 +51,7 @@ public abstract class WholeBodyTrajectoryPacketEndToEndTest implements MultiRobo
       simulationTestingParameters.setKeepSCSUp(false);
    }
    
-	@DeployableTestMethod(duration = 42.2)
+	@DeployableTestMethod(estimatedDuration = 42.2)
    @Test(timeout = 210000)
    public void testArmPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -86,7 +86,7 @@ public abstract class WholeBodyTrajectoryPacketEndToEndTest implements MultiRobo
       executePacket(packet);
    }
    
-	@DeployableTestMethod(duration = 19.4)
+	@DeployableTestMethod(estimatedDuration = 19.4)
    @Test(timeout = 97000)
    public void testPelvisHeightPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

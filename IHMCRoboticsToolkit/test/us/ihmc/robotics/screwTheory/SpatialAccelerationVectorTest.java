@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 {
 
-	@DeployableTestMethod(duration = 1.7)
+	@DeployableTestMethod(estimatedDuration = 1.7)
 	@Test(timeout = 30000)
    public void testChangeFrameUsingNumericalDifferentiationVersusAnalytical()
    {
@@ -73,7 +73,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
     * Tests centripetal acceleration
     */
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAccelerationOfPointFixedInBodyFrame()
    {
@@ -132,7 +132,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
     * You shouldn't be able to add two spatial acceleration vectors expressed in different frames
     */
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testAddExpressedInDifferentFrames()
    {
@@ -146,7 +146,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
     * You shouldn't be able to add two spatial acceleration vectors if the second is not relative to the first
     */
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testAddNotRelative()
    {
@@ -161,7 +161,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
     * (which is allowed)
     */
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAdd()
    {
@@ -217,7 +217,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSub()
    {
@@ -240,7 +240,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       SpatialMotionVectorTest.assertSpatialMotionVectorEquals(vector1, vector1Back, epsilon);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSubWrongExpressedInFrame()
    {
@@ -249,7 +249,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       vector1.sub(vector2);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSubFramesDontMatchUp()
    {
@@ -262,7 +262,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
     * Compares setScrew method in SpatialAccelerationVector to numerical derivative based method
     */
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetScrew()
    {
@@ -306,7 +306,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       JUnitTools.assertMatrixEquals(numericalDerivative, acceleration.toMatrix(), 1e-4);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetBasedOnOriginAcceleration()
    {
@@ -334,7 +334,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       JUnitTools.assertTuple3dEquals(originAccelerationBack.getVector(), originAcceleration.getVector(), 1e-12);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrameNoRelativeMotion()
    {

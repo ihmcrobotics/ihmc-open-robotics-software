@@ -15,7 +15,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class CollisionCylinderTest
 {
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testInsideCylinderPoints()
    {
@@ -36,7 +36,7 @@ public class CollisionCylinderTest
          assertTrue(cylinder.contains(point));
       }
    }
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testOutideCylinderPoints()
    {

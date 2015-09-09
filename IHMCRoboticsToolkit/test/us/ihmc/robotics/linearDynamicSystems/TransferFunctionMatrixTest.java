@@ -43,7 +43,7 @@ public class TransferFunctionMatrixTest
       transferFunctionMatrix = null;
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGet()
    {
@@ -69,7 +69,7 @@ public class TransferFunctionMatrixTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPremultiply()
    {
@@ -95,7 +95,7 @@ public class TransferFunctionMatrixTest
       assertTrue(newTransferFunctionMatrix.epsilonEquals(transferFunctionMatrix, 1e-7));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testPreMultiplyException()
    {
@@ -106,7 +106,7 @@ public class TransferFunctionMatrixTest
       transferFunctionMatrix.preMultiply(testMatrix);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTimes()
    {
@@ -132,7 +132,7 @@ public class TransferFunctionMatrixTest
       assertTrue(newTransferFunctionMatrix.epsilonEquals(transferFunctionMatrix, 1e-7));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testTimesException()
    {
@@ -143,7 +143,7 @@ public class TransferFunctionMatrixTest
       transferFunctionMatrix.times(testMatrix);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPlusDouble()
    {
@@ -185,7 +185,7 @@ public class TransferFunctionMatrixTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testPlusDoubleException()
    {
@@ -196,7 +196,7 @@ public class TransferFunctionMatrixTest
       transferFunctionMatrix.plus(testMatrix);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPlusTransferFunctionDouble()
    {
@@ -245,7 +245,7 @@ public class TransferFunctionMatrixTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testPlusTransferFunctionException()
    {

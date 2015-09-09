@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 
 public class PermutationTest
 {
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNumberOfPossiblePermutations()
    {
@@ -49,7 +49,7 @@ public class PermutationTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCreateResultContainer()
    {
@@ -81,7 +81,7 @@ public class PermutationTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPermutate()
    {
@@ -186,7 +186,7 @@ public class PermutationTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDifferentElementTypes()
    {

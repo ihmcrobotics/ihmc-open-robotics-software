@@ -13,7 +13,7 @@ public class HyperCubeNodeTest
 {
    public static final double eps = 1.0e-6;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAssumptions()
    {
@@ -28,7 +28,7 @@ public class HyperCubeNodeTest
       assertTrue(index == 7);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testToIndex()
    {
@@ -45,7 +45,7 @@ public class HyperCubeNodeTest
       assertEquals(2, index);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testToBooleanArray()
    {
@@ -86,7 +86,7 @@ public class HyperCubeNodeTest
       return node;
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testLocatePoint()
    {
@@ -111,7 +111,7 @@ public class HyperCubeNodeTest
       assertEquals(expectation, index);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIndexing()
    {
@@ -125,7 +125,7 @@ public class HyperCubeNodeTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testWithinBounds()
    {
@@ -138,7 +138,7 @@ public class HyperCubeNodeTest
       assertFalse(HyperCubeNode.withinBounds(bounds, test3));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSubdivideBounds()
    {
@@ -153,7 +153,7 @@ public class HyperCubeNodeTest
       assertEquals(0.5, subBounds[2].max(), eps);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSplit()
    {
@@ -168,7 +168,7 @@ public class HyperCubeNodeTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testReplaceLeaf()
    {

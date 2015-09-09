@@ -34,7 +34,7 @@ public class VirtualChainConstructorFromARobotTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testOneAtZero()
    {
@@ -109,7 +109,7 @@ public class VirtualChainConstructorFromARobotTest
       assertTupleEquals(centerOfMass, comEstimateAtZero);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testOnePartTwo()
    {
@@ -117,7 +117,7 @@ public class VirtualChainConstructorFromARobotTest
       testRobotInRandomPositions(testRobotOne);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testTwo()
    {
@@ -125,7 +125,7 @@ public class VirtualChainConstructorFromARobotTest
       testRobotInRandomPositions(testRobotTwo);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testThree()
    {
@@ -133,7 +133,7 @@ public class VirtualChainConstructorFromARobotTest
       testRobotInRandomPositions(testRobotThree);
    }
 
-	@DeployableTestMethod(duration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testFour()
    {

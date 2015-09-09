@@ -24,7 +24,7 @@ public class PressureBasedFrictionModelTest
    private double posPressure = 123;
    private double negPressure = 105;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructorAndFormula()
    {

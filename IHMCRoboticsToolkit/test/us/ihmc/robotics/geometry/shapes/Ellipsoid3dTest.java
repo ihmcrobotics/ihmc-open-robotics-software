@@ -19,7 +19,7 @@ public class Ellipsoid3dTest
    private static final double epsilon = 1e-4;    // This epsilon is meant small changes in coordinates. Use Ellipsoid3d's DEFAULT_EPSILON for error handling.
    private static final int iterations = 100;
 
-	@DeployableTestMethod(duration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testCommonShape3dFunctionality()
    {
@@ -40,7 +40,7 @@ public class Ellipsoid3dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleWithNoTransform()
    {
@@ -81,7 +81,7 @@ public class Ellipsoid3dTest
       assertEquals(1.0, sumSquared, 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleWithTranslationalTransform()
    {
@@ -114,7 +114,7 @@ public class Ellipsoid3dTest
       assertFalse(ellipsoid.isInsideOrOnSurface(new Point3d(xTranslation, yTranslation, zTranslation-zRadius - epsilon)));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testExampleUsage()
    {
@@ -134,7 +134,7 @@ public class Ellipsoid3dTest
       assertFalse(ellipsoid.isInsideOrOnSurface(new Point3d(0.2, 8.2, 0.2), 0.001));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSet()
    {
@@ -168,7 +168,7 @@ public class Ellipsoid3dTest
       assertEquals(!invertResult, ellipsoid.isInsideOrOnSurface(new Point3d(translations[0], translations[1], translations[2] - (radii[2] + offsets[2]))));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTranslation()
    {
@@ -204,7 +204,7 @@ public class Ellipsoid3dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleRotations()
    {
@@ -309,7 +309,7 @@ public class Ellipsoid3dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testMethodsForRandomEllipsoids()
    {

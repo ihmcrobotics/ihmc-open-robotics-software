@@ -116,7 +116,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       }
    }
 
-   @DeployableTestMethod(duration = 90.0)
+   @DeployableTestMethod(estimatedDuration = 90.0)
    @Test(timeout = 300000)
    public void testWholeBodyInverseKinematicsMoveToPoseAcheivedInJointSpace() throws SimulationExceededMaximumTimeException
    {
@@ -194,7 +194,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(duration = 90.0)
+   @DeployableTestMethod(estimatedDuration = 90.0)
    @Test(timeout = 300000)
    public void testRandomRightHandPose() throws SimulationExceededMaximumTimeException
    {

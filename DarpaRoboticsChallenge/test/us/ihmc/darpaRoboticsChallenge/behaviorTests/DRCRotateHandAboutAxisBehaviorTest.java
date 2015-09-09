@@ -107,7 +107,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       }
    }
 
-	@DeployableTestMethod(duration = 316.0)
+	@DeployableTestMethod(estimatedDuration = 316.0)
    @Test(timeout = 1600000)
    public void testRotateSingleArmJointAndUnrotateInTaskSpace() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -152,7 +152,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(duration = 47.4)
+	@DeployableTestMethod(estimatedDuration = 47.4)
    @Test(timeout = 240000)
    public void testTwoRotationsAroundSameAxis() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {

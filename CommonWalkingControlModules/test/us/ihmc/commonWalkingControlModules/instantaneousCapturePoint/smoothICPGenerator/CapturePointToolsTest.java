@@ -26,7 +26,7 @@ public class CapturePointToolsTest
 	Random random = new Random();
 	YoVariableRegistry registry = new YoVariableRegistry("");
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeConstantCMPPointsWithBeginningAndEndBetweenFeetWith2Steps()
    {
@@ -72,7 +72,7 @@ public class CapturePointToolsTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeConstantCMPPointsOnFeetAndEndBetweenFeetWith2Steps()
    {
@@ -120,7 +120,7 @@ public class CapturePointToolsTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testComputeConstantCentersOfPressuresOnFeet()
 	{
@@ -162,7 +162,7 @@ public class CapturePointToolsTest
 		}
 	}
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeConstantCentersOfPressureWithStartBetweenFeetAndRestOnFeet()
    {
@@ -212,7 +212,7 @@ public class CapturePointToolsTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeConstantCentersOfPressureWithEndBetweenFeetAndRestOnFeet()
    {
@@ -263,7 +263,7 @@ public class CapturePointToolsTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeConstantCentersOfPressureWithEndAndBeginningBetweenFeet()
    {
@@ -319,7 +319,7 @@ public class CapturePointToolsTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testComputeDesiredEndOfStepCapturePointLocations()
 	{
@@ -385,7 +385,7 @@ public class CapturePointToolsTest
 		}
 	}
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testComputeDesiredCapturePointLocations()
 	{
@@ -450,7 +450,7 @@ public class CapturePointToolsTest
 		}
 	}
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testComputeDesiredCapturePointVelocity()
 	{
@@ -487,7 +487,7 @@ public class CapturePointToolsTest
 		}
 	}
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testComputeDesiredCapturePointAcceleration()
 	{
@@ -522,7 +522,7 @@ public class CapturePointToolsTest
 		}
 	}
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testComputeConstantCenterOfPressureFromInitialAndFinalCapturePointLocations()
 	{

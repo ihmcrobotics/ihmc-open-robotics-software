@@ -19,7 +19,7 @@ import java.util.Random;
 
 public class FrameBox3dTest
 {
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistance()
    {
@@ -57,7 +57,7 @@ public class FrameBox3dTest
       assertEquals(expectedDistance, box.distance(pointOnTheVertexBetweenXandYandZ), 1e-14);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOrthogonalProjection()
    {
@@ -105,7 +105,7 @@ public class FrameBox3dTest
 
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testgetClosestPointAndNormalAt()
    {
@@ -134,7 +134,7 @@ public class FrameBox3dTest
       assertTrue(expectedNormal.epsilonEquals(returnedNormal, 1e-14));
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsInsideOrOnSurface()
    {
@@ -159,7 +159,7 @@ public class FrameBox3dTest
       assertFalse(box.isInsideOrOnSurface(pointOutsideBox, 1e-7));
    }
 
-   @DeployableTestMethod(duration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testApplyTransform()
    {
@@ -196,7 +196,7 @@ public class FrameBox3dTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetTransform3DAndGetters()
    {

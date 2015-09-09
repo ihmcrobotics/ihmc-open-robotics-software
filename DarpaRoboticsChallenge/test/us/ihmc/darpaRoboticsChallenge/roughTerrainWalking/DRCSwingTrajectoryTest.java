@@ -132,7 +132,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    }
 
 
-	@DeployableTestMethod(duration = 65.4)
+	@DeployableTestMethod(estimatedDuration = 65.4)
    @Test(timeout = 330000)
    public void testMultipleHeightFootsteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
@@ -184,7 +184,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(duration = 29.1)
+	@DeployableTestMethod(estimatedDuration = 29.1)
    @Test(timeout = 150000)
    public void testReallyHighFootstep() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
@@ -214,7 +214,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(duration = 26.7)
+	@DeployableTestMethod(estimatedDuration = 26.7)
    @Test(timeout = 130000)
    public void testNegativeSwingHeight() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {

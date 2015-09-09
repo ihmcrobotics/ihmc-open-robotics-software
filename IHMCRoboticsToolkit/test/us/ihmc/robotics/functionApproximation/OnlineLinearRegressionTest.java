@@ -10,7 +10,7 @@ import static org.junit.Assert.assertArrayEquals;
 
 public class OnlineLinearRegressionTest {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	   public void toyExample()
 	   {

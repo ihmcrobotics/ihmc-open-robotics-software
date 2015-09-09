@@ -5,20 +5,20 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 
-@DeployableTestClass(planType = BambooPlanType.Exclude)
+@DeployableTestClass(targets = TestPlanTarget.Exclude)
 public class SimulationRewoundListenerTest
 {
    /**
     * Hang forever
     */
    @Ignore
-	@DeployableTestMethod(duration = 30.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 30.0, quarantined = true)
 	@Test(timeout=300000)
    public void testSimulationRewoundListener()
    {

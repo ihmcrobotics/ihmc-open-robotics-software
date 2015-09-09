@@ -23,7 +23,7 @@ public class ChessboardPoseEstimatorTest
 {
    static final boolean DEBUG = false;
 
-	@DeployableTestMethod(duration = 2.6)
+	@DeployableTestMethod(estimatedDuration = 2.6)
    @Test(timeout = 30000)
    public void testOpenCVRegression4x7() throws IOException
    {
@@ -42,7 +42,7 @@ public class ChessboardPoseEstimatorTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.6)
+	@DeployableTestMethod(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testOpenCVRegression4x5() throws IOException
    {
@@ -61,7 +61,7 @@ public class ChessboardPoseEstimatorTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.6)
+	@DeployableTestMethod(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testSimpleAlmostFrontChessboard() throws IOException
    {
@@ -73,7 +73,7 @@ public class ChessboardPoseEstimatorTest
       testSingleImage(image, squareNumRow, squareNumCol, gridWidth, 1e-2);
    }
 
-	@DeployableTestMethod(duration = 1.2)
+	@DeployableTestMethod(estimatedDuration = 1.2)
    @Test(timeout = 30000)
    public void testDrivingSimCheckerBoard() throws IOException
    {
@@ -87,7 +87,7 @@ public class ChessboardPoseEstimatorTest
 
    //boofCV can't find checker board
    @Ignore
-   @DeployableTestMethod(duration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 5000)
    public void testImage3() throws IOException
    {
@@ -100,7 +100,7 @@ public class ChessboardPoseEstimatorTest
    }
 
    //boofcv found checkerboard but pose estimated poorly
-	@DeployableTestMethod(duration = 1.6)
+	@DeployableTestMethod(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testImage1() throws IOException
    {

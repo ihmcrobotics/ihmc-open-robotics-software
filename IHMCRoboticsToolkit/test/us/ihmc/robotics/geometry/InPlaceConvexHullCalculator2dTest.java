@@ -27,7 +27,7 @@ public class InPlaceConvexHullCalculator2dTest
    private static final boolean DEBUG = true;
    Random rand = new Random(100l);
 
-	@DeployableTestMethod(duration = 1.6)
+	@DeployableTestMethod(estimatedDuration = 1.6)
 	@Test(timeout = 30000)
    public void testRandomV1()
    {
@@ -73,7 +73,7 @@ public class InPlaceConvexHullCalculator2dTest
       System.out.println(optClock / 1000000 + " " + inPlaceClock / 1000000);
    }
 
-	@DeployableTestMethod(duration = 1.6)
+	@DeployableTestMethod(estimatedDuration = 1.6)
 	@Test(timeout = 30000)
    public void testRandomV2()
    {
@@ -173,7 +173,7 @@ public class InPlaceConvexHullCalculator2dTest
       return xySeriesCollection;
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConvexCounterclockwise()
    {
@@ -191,7 +191,7 @@ public class InPlaceConvexHullCalculator2dTest
       assertTrue(ConvexHullCalculator2d.isConvexAndClockwise(points, newSize));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFirstPointSelection()
    {

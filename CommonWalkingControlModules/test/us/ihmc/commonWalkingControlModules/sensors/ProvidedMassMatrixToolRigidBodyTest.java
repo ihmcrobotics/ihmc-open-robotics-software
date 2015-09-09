@@ -22,7 +22,7 @@ public abstract class ProvidedMassMatrixToolRigidBodyTest
    private final double gravity = 9.81;
    private final double mass = 2.0;
    
-   @DeployableTestMethod(duration = 30.0)
+   @DeployableTestMethod(estimatedDuration = 30.0)
    @Test(timeout = 120000)
    public void testprovidedMassMatrixToolRigidBody()
    {

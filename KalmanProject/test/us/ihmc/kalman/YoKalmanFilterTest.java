@@ -50,7 +50,7 @@ public class YoKalmanFilterTest
       createRandomParameters(nStates, nInputs, nMeasurements);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCompareToSimple()
    {
@@ -69,7 +69,7 @@ public class YoKalmanFilterTest
       EjmlUnitTests.assertEquals(kalmanFilters[0].getCovariance(), kalmanFilters[1].getCovariance(), 1e-8);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testNotProcessCovarianceSymmetricPositiveDefinite1()
    {
@@ -91,7 +91,7 @@ public class YoKalmanFilterTest
       yoKalmanFilter.setProcessNoiseCovariance(Q);
    }
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testMeasurementCovarianceNotSymmetricPositiveDefinite1()
    {
@@ -113,7 +113,7 @@ public class YoKalmanFilterTest
       yoKalmanFilter.setMeasurementNoiseCovariance(R);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testWrongSize()
    {
@@ -122,7 +122,7 @@ public class YoKalmanFilterTest
       yoKalmanFilter.setProcessNoiseCovariance(new DenseMatrix64F(nStates + 1, nStates + 1));
    }
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testRewindability() throws RepeatDataBufferEntryException
    {
@@ -199,7 +199,7 @@ public class YoKalmanFilterTest
       EjmlUnitTests.assertEquals(kalmanFilter.getCovariance(), kalmanFilters[1].getCovariance(), 1e-8);
    }
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testInfiniteMeasurementNoise()
    {
@@ -233,7 +233,7 @@ public class YoKalmanFilterTest
       kalmanFilter.setState(x, P);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTwoUpdatesVersusOne()
    {
@@ -277,7 +277,7 @@ public class YoKalmanFilterTest
       EjmlUnitTests.assertEquals(kalmanFilters[0].getCovariance(), kalmanFilters[1].getCovariance(), 1e-8);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testViaSimulatingATrueSystemAndCheckingErrorDynamics()
    {
@@ -374,7 +374,7 @@ public class YoKalmanFilterTest
 
    }
 
-	@DeployableTestMethod(duration = 0.8)
+	@DeployableTestMethod(estimatedDuration = 0.8)
 	@Test(timeout = 30000)
    public void testViaKeepingCovariancesConstantAndCheckingKMatrixConvergence()
    {

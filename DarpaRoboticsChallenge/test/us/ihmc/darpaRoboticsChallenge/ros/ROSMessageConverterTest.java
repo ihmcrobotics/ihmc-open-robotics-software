@@ -16,17 +16,17 @@ import org.junit.Test;
 import org.ros.internal.message.Message;
 
 import us.ihmc.communication.packets.IHMCRosApiPacket;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.utilities.io.printing.PrintTools;
 
-@DeployableTestClass(planType = BambooPlanType.Fast)
+@DeployableTestClass(targets = TestPlanTarget.Fast)
 public class ROSMessageConverterTest
 {
    private static final int NUMBER_OF_TIMES_TO_RUN_EACH_PACKET_TYPE = 10000;
 
-	@DeployableTestMethod(duration = 23.6)
+	@DeployableTestMethod(estimatedDuration = 23.6)
    @Test(timeout = 120000)
    public void AllPacketTest()
    {

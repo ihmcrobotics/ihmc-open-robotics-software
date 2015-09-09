@@ -86,7 +86,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
    private static final boolean DO_ASSERTS = true;
    private static final boolean DO_TWIST_ASSERTS = true;
 
-	@DeployableTestMethod(duration = 2.1)
+	@DeployableTestMethod(estimatedDuration = 2.1)
 	@Test(timeout = 30000)
    public void testSinglePinJoint() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -120,7 +120,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-	@DeployableTestMethod(duration = 1.6)
+	@DeployableTestMethod(estimatedDuration = 1.6)
 	@Test(timeout = 30000)
    public void testTwoPinJoints() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -173,7 +173,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-	@DeployableTestMethod(duration = 1.7)
+	@DeployableTestMethod(estimatedDuration = 1.7)
 	@Test(timeout = 30000)
    public void testSingleFloatingJoint() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -211,7 +211,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-	@DeployableTestMethod(duration = 4.1)
+	@DeployableTestMethod(estimatedDuration = 4.1)
 	@Test(timeout = 30000)
    public void testRandomLinearChainRobot() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

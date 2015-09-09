@@ -38,7 +38,7 @@ public class RigidBodyTransformTest
    private final int nTests = 200;
 
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestSetRotationAndZeroTranslationWithAxisAngle4d()
    {
@@ -91,7 +91,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateTransformWithAxisAngle4dAndRandomVector3d()
    {
@@ -151,7 +151,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateTransformWithAxisAngle4dAndZeroVector3d()
    {
@@ -206,7 +206,7 @@ public class RigidBodyTransformTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateTransformWithAxisAngle4fEpsilonToPiMinusEpsilon() 
    {
@@ -273,7 +273,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateTransformWithAxisAngle4fAndRandomVector3fEpsilonToPiMinusEpsilon()  
    {
@@ -347,7 +347,7 @@ public class RigidBodyTransformTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateTransformWithAxisAngle4fAndZeroVector3fEpsilonToPiMinusEpsilon()
    {
@@ -416,7 +416,7 @@ public class RigidBodyTransformTest
 
    }
 	
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void TestNormalize()
    {
@@ -434,7 +434,7 @@ public class RigidBodyTransformTest
       assertTrue(checkOrthogonality(transform));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestGetTransformAsQuat4dAndVector3d()
    {
@@ -463,7 +463,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateTransformWithQuat4dAndVector3d()
    {
@@ -496,7 +496,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateTransformWithQuat4fAndVector3f()
    {
@@ -529,7 +529,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateTransformWithQuat4d()
    {
@@ -562,7 +562,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestSetTransformWithQuat4d()
    {
@@ -595,7 +595,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestSetTransformWithQuat4dAndVector3d()
    {
@@ -631,7 +631,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestSetTransformWithQuat4f()
    {
@@ -664,7 +664,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestSetTransformWithQuat4fAndVector3f()
    {
@@ -700,7 +700,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestDeterminant()
    {
@@ -717,7 +717,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateTransformWithQuat4f()
    {
@@ -749,7 +749,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateTransformWithQuat4f2()
    {
@@ -777,7 +777,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateTransformWithQuatWithZeroVectorElement()
    {
@@ -806,7 +806,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateTransformWithQuatWithZeroScalarElement()
    {
@@ -832,7 +832,7 @@ public class RigidBodyTransformTest
       assertEquals(quat1.w, quatCheck.w, 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestGetTransformAsQuat4fAndVector3f()
    {
@@ -864,7 +864,7 @@ public class RigidBodyTransformTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void TestGetRotationAxisAngle4d()
    {
@@ -927,7 +927,7 @@ public class RigidBodyTransformTest
       
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateTransformFromMatrix3dAndGetTransformAsMatrix3d()
    {
@@ -953,7 +953,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestSetMatrixScaleWithMatrix3d()
    {
@@ -982,7 +982,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestSetMatrixScaleWithMatrix3f()
    {
@@ -1012,7 +1012,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromMatrix3d()
    {
@@ -1043,7 +1043,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestSetAsMatrix3d()
    {
@@ -1081,7 +1081,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestSetAsVector3d()
    {
@@ -1110,7 +1110,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestSetAsVector3f()
    {
@@ -1139,7 +1139,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestSetAsMatrix3f()
    {
@@ -1177,7 +1177,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromMatrix3d2()
    {
@@ -1210,7 +1210,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromMatrix3f()
    {
@@ -1241,7 +1241,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromMatrix3f2()
    {
@@ -1271,7 +1271,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromTransform()
    {
@@ -1289,7 +1289,7 @@ public class RigidBodyTransformTest
       JUnitTools.assertMatrixEquals("", matrixCheck, matrix, 1e-12);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromMatrix3fAndVector3f()
    {
@@ -1315,7 +1315,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateIdentityTransform()
    {
@@ -1343,7 +1343,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromMatrix4d()
    {
@@ -1364,7 +1364,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromColumnMajorMatrix4d()
    {
@@ -1387,7 +1387,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromColumnMajorMatrix4()
    {
@@ -1413,7 +1413,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromColumnMajorMatrix4f()
    {
@@ -1436,7 +1436,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromMatrix4f()
    {
@@ -1457,7 +1457,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromDenseMatrix()
    {
@@ -1478,7 +1478,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromDenseMatrixAndVector3d()
    {
@@ -1503,7 +1503,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromDenseMatrixThatIsTheWrongSize()
    {
@@ -1520,7 +1520,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromDoubleArray()
    {
@@ -1540,7 +1540,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestCreateFromfloatArray()
    {
@@ -1563,7 +1563,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformMultiplication()
    {
@@ -1590,7 +1590,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformMultiplication2()
    {
@@ -1618,7 +1618,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformMultiplication3()
    {
@@ -1646,7 +1646,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformMultiplication4()
    {
@@ -1674,7 +1674,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 1.1)
+	@DeployableTestMethod(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void TestOrthogonalityOfChainOfTransformations()
    {
@@ -1701,7 +1701,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestMatrixInverse()
    {
@@ -1724,7 +1724,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestMatrixInverse7()
    {
@@ -1749,7 +1749,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestMatrixManyMatrixInverses()
    {
@@ -1777,7 +1777,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestInvertTransform2()
    {
@@ -1807,7 +1807,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestInvertTransform3()
    {
@@ -1835,7 +1835,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestMatrixInverse2()
    {
@@ -1863,7 +1863,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestEpsilonEquals()
    {
@@ -1894,7 +1894,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestRotX()
    {
@@ -1918,7 +1918,7 @@ public class RigidBodyTransformTest
             1e-12);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestRotY()
    {
@@ -1942,7 +1942,7 @@ public class RigidBodyTransformTest
             1e-12);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestRotZ()
    {
@@ -1966,7 +1966,7 @@ public class RigidBodyTransformTest
             1e-12);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestEquals()
    {
@@ -1986,7 +1986,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestEqualsWithScale()
    {
@@ -2006,7 +2006,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestEulerAngles()
    {
@@ -2033,7 +2033,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformVector4d()
    {
@@ -2058,7 +2058,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformVector4d2()
    {
@@ -2082,7 +2082,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformVector4f()
    {
@@ -2107,7 +2107,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformVector4f2()
    {
@@ -2131,7 +2131,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformVector3d()
    {
@@ -2158,7 +2158,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformVector3f()
    {
@@ -2185,7 +2185,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformVector3f2()
    {
@@ -2211,7 +2211,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformVector3d2()
    {
@@ -2237,7 +2237,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformPoint3d()
    {
@@ -2267,7 +2267,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformPoint3d2()
    {
@@ -2296,7 +2296,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformPoint3f()
    {
@@ -2326,7 +2326,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestTransformPoint3f2()
    {
@@ -2743,7 +2743,7 @@ public class RigidBodyTransformTest
       return AngleTools.generateArrayOfTestAngles(nTests, 0.0, true, false);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetErrorImpl()
    {

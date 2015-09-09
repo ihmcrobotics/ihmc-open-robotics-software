@@ -11,7 +11,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public class ConstrainedQPSolverTest
 {
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testSolveContrainedQP() throws NoConvergenceException
    {

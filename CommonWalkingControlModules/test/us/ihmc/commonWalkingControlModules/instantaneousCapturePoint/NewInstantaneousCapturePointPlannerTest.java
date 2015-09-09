@@ -322,7 +322,7 @@ public class NewInstantaneousCapturePointPlannerTest
 		icpVelocityLineSegment = null;
 	}
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
 	public void visualizePlanner()
 	{

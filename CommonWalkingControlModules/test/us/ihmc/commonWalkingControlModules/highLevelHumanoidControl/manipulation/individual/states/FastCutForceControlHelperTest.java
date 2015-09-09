@@ -15,14 +15,14 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
-@DeployableTestClass(planType = {BambooPlanType.Fast})
+@DeployableTestClass(targets = {TestPlanTarget.Fast})
 public class FastCutForceControlHelperTest {
 	/**
 	 * Unit test to test the functions of the TaskspaceToJointspaceHandForcefeedbackControlState extracted in CutForceControlHelper.
@@ -68,7 +68,7 @@ public class FastCutForceControlHelperTest {
 	/**
 	 * Test the exponential character of the force model.
 	 */
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
 	public void testExponentialForceModel()
 	{
@@ -88,7 +88,7 @@ public class FastCutForceControlHelperTest {
 	 * Note that the adapted parameters do not necessarily correspond to the real values.
 	 * The selection range for c2 and v has to be chosen small since they are in the exponent of the function.
 	 */
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
 	public void testModelParameterAdaption()
 	{
@@ -111,7 +111,7 @@ public class FastCutForceControlHelperTest {
 	/**
 	 * Test the ramp function that scales the weigthing matrix.
 	 */
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
 	public void testAdaptW()
 	{
@@ -147,7 +147,7 @@ public class FastCutForceControlHelperTest {
 	/**
 	 * Test the getTangentForce method using geometric considerations.
 	 */
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
 	public void testGetTangentForce()
 	{
@@ -198,7 +198,7 @@ public class FastCutForceControlHelperTest {
 		CutForceControlHelper.getTangentForce(forceVector, currentTangentialForce, tangentVector, lastTangentVector, fxFiltered, fyFiltered, fzFiltered, false, 0.0);
 		assertEquals(currentTangentialForce.getDoubleValue(), 0.0, EPSILON);
 	}
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
 	public void testWristSensorUpdate()
 	{

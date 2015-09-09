@@ -13,12 +13,12 @@ import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar360FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar60FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidarSphere270FovTest;
 import us.ihmc.robotics.lidar.LidarScanTest;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.lidar.LidarScan;
 
-@DeployableTestClass(planType={BambooPlanType.UI})
+@DeployableTestClass(targets={TestPlanTarget.UI})
 public class JMEGPULidarTest implements LidarTestListener
 {
    private static final boolean TEST_MANUALLY = false;
@@ -54,7 +54,7 @@ public class JMEGPULidarTest implements LidarTestListener
       lidarTest.getWorld().stop();
    }
 
-	@DeployableTestMethod(duration = 5.3)
+	@DeployableTestMethod(estimatedDuration = 5.3)
 	@Test(timeout = 30000)
    public void test60DegreeFieldOfView()
    {
@@ -62,7 +62,7 @@ public class JMEGPULidarTest implements LidarTestListener
       doATest(parameters);
    }
 
-	@DeployableTestMethod(duration = 4.4)
+	@DeployableTestMethod(estimatedDuration = 4.4)
 	@Test(timeout = 30000)
    public void test120DegreeFieldOfView()
    {
@@ -70,7 +70,7 @@ public class JMEGPULidarTest implements LidarTestListener
       doATest(parameters);
    }
 
-	@DeployableTestMethod(duration = 4.0)
+	@DeployableTestMethod(estimatedDuration = 4.0)
 	@Test(timeout = 30000)
    public void test360DegreeFieldOfView()
    {
@@ -78,7 +78,7 @@ public class JMEGPULidarTest implements LidarTestListener
       doATest(parameters);
    }
 
-	@DeployableTestMethod(duration = 4.7)
+	@DeployableTestMethod(estimatedDuration = 4.7)
 	@Test(timeout = 30000)
    public void test270DegreeFieldOfView()
    {

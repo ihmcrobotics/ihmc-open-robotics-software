@@ -26,7 +26,7 @@ public class ThreePointDoubleSplines1DTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testSimpleFlatExample()
    {
@@ -56,7 +56,7 @@ public class ThreePointDoubleSplines1DTest
       assertEquals(0.0, secondDerivativeAtQuery, 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testPerfectLineExample()
    {
@@ -87,7 +87,7 @@ public class ThreePointDoubleSplines1DTest
       assertEquals(0.0, secondDerivativeAtQuery, 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testFooExample()
    {
@@ -98,7 +98,7 @@ public class ThreePointDoubleSplines1DTest
       fooExample(xAtOne, xAtTwo, xAtThree);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testFooExamplePointsOutOfOrder()
    {
@@ -167,7 +167,7 @@ public class ThreePointDoubleSplines1DTest
       assertEquals(secondDerivativeAtThree, secondDerivativeAtQuery, 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testCompareOutOfOrderSplineWithNormalOne()
    {

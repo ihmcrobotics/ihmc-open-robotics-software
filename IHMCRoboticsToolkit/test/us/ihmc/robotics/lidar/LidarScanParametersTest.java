@@ -10,7 +10,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class LidarScanParametersTest
 {
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void LidarScanParameters_1()
    {
@@ -27,7 +27,7 @@ public class LidarScanParametersTest
       assertEquals(lidarScanParameters.timestamp, 0, 1e-7);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void LidarScanParameters_2()
    {
@@ -45,7 +45,7 @@ public class LidarScanParametersTest
       assertEquals(lidarScanParameters.timestamp, timeStamp, 1e-7);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void LidarScanParameters_3()
    {
@@ -74,7 +74,7 @@ public class LidarScanParametersTest
 
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void LidarScanParameters_4()
    {
@@ -103,7 +103,7 @@ public class LidarScanParametersTest
 
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void LidarScanParameters_5()
    {
@@ -132,7 +132,7 @@ public class LidarScanParametersTest
 
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void LidarScanParameters_6()
    {
@@ -166,7 +166,7 @@ public class LidarScanParametersTest
 
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void LidarScanParameters_7()
    {
@@ -201,7 +201,7 @@ public class LidarScanParametersTest
 
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void LidarScanParameters_8()
    {
@@ -237,7 +237,7 @@ public class LidarScanParametersTest
    }
    
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void LidarScanParameters_9()
    {
@@ -272,7 +272,7 @@ public class LidarScanParametersTest
 
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void LidarScanParameters_10()
    {
@@ -307,7 +307,7 @@ public class LidarScanParametersTest
 
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void LidarScanParameters_11()
    {
@@ -342,7 +342,7 @@ public class LidarScanParametersTest
    }
    
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testEquals()
    {
@@ -365,7 +365,7 @@ public class LidarScanParametersTest
       }
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testEquals_1()
    {

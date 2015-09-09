@@ -7,12 +7,12 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(planType = {BambooPlanType.Flaky})
+@DeployableTestClass(targets = {TestPlanTarget.Flaky})
 public class StreamingDataTCPServerTest
 {
 

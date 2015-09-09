@@ -110,7 +110,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       return new DRCValveEnvironment(valveLocations, valveYawAngles_degrees);
    }
 
-   @DeployableTestMethod(duration = 50.0)
+   @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testCloseValveByGrabbingRim() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -158,7 +158,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage();
    }
    
-   @DeployableTestMethod(duration = 50.0)
+   @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testOpenValveByGrabbingRim() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -207,7 +207,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(duration = 50.0)
+   @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testCloseValveByGrabbingCenter() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -254,7 +254,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(duration = 50.0)
+   @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testWalkToAndCloseValve() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -303,7 +303,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(duration = 50.0)
+   @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testGraspValveBehavior() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -346,7 +346,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(duration = 50.0)
+   @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testGraspValveUsingWholeBodyIKBehavior() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {

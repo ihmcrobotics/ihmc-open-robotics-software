@@ -8,7 +8,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ThreadToolsTest
@@ -18,7 +18,7 @@ public class ThreadToolsTest
     * does not produce an error, which is the most likely
     * failure mode.
     */
-   @DeployableTestMethod(duration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRunCommandLineStringedCommmands()
    {
@@ -43,11 +43,11 @@ public class ThreadToolsTest
    /**
     * Tests capturing the output of an echo.
     */
-   @DeployableTestMethod(duration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRunCommandLineEchoOutput()
    {
-      BambooPlanType.assumeRunningLocally();
+      TestPlanTarget.assumeRunningLocally();
 
       final StringBuilder commandLineOutput = new StringBuilder();
 

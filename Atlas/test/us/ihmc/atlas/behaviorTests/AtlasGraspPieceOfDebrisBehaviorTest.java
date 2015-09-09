@@ -8,12 +8,12 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCGraspPieceOfDebrisBehavio
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 
-@DeployableTestClass(planType = {BambooPlanType.InDevelopment})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment})
 public class AtlasGraspPieceOfDebrisBehaviorTest extends DRCGraspPieceOfDebrisBehaviorTest 
 {
 	private final AtlasRobotModel robotModel;
@@ -37,7 +37,7 @@ public class AtlasGraspPieceOfDebrisBehaviorTest extends DRCGraspPieceOfDebrisBe
 	}
 	
 	@Override
-	@DeployableTestMethod(duration = 542.6)
+	@DeployableTestMethod(estimatedDuration = 542.6)
    @Test(timeout = 2700000)
 	public void testGraspingHorizontalDebrisWithRightHand() throws SimulationExceededMaximumTimeException
 	{
@@ -45,16 +45,16 @@ public class AtlasGraspPieceOfDebrisBehaviorTest extends DRCGraspPieceOfDebrisBe
 	}
 	
 	@Override
-	@DeployableTestMethod(duration = 70.0)
+	@DeployableTestMethod(estimatedDuration = 70.0)
    @Test(timeout = 300000)
 	public void testGraspingLeaningAgainstAWallDebrisWithRightHand() throws SimulationExceededMaximumTimeException
 	{
-	   BambooPlanType.assumeRunningLocally();
+	   TestPlanTarget.assumeRunningLocally();
 	   super.testGraspingLeaningAgainstAWallDebrisWithRightHand();
 	}
 	
 	@Override
-	@DeployableTestMethod(duration = 86.4)
+	@DeployableTestMethod(estimatedDuration = 86.4)
    @Test(timeout = 430000)
 	public void testGraspingStandingDebrisWithLeftHand() throws SimulationExceededMaximumTimeException
 	{
@@ -62,7 +62,7 @@ public class AtlasGraspPieceOfDebrisBehaviorTest extends DRCGraspPieceOfDebrisBe
 	}
 	
 	@Override
-	@DeployableTestMethod(duration = 114.1)
+	@DeployableTestMethod(estimatedDuration = 114.1)
    @Test(timeout = 570000)
 	public void testGraspingStandingDebrisWithRightHand() throws SimulationExceededMaximumTimeException
 	{
