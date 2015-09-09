@@ -27,7 +27,7 @@ public class Ramp3dTest
 	 * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
 	 */
    @Ignore
-	@DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 502)
    public void testCommonShape3dFunctionality()
    {
@@ -209,7 +209,7 @@ public class Ramp3dTest
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
    @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 502)
    public void testIsInsideOrOnSurfaceRandomOrientations()
    {
@@ -291,7 +291,7 @@ public class Ramp3dTest
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
    @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 502)
 	public void testTrickyOneThatProjectsOntoTheEdge()
 	{
@@ -337,7 +337,7 @@ public class Ramp3dTest
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
    @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 502)
    public void testDistance()
    {
@@ -381,7 +381,7 @@ public class Ramp3dTest
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
    @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 502)
    public void testGetClosestPointAndNormalAt()
    {

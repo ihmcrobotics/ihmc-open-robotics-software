@@ -164,7 +164,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
 	@Ignore
 	// This has never worked. Would be nice if we can get it to work.")
-	@DeployableTestMethod(quarantined = true)
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

@@ -115,7 +115,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
    
    @Ignore
    // "Bamboo link: https://bamboo.ihmc.us/browse/RC-FASTLOOP-ATLASAFAST/test/case/115277833")
-	@DeployableTestMethod(quarantined = true)
+	@DeployableTestMethod
 	@Test(timeout=2400000)
    public void testRewindabilityWithSimpleFastMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {

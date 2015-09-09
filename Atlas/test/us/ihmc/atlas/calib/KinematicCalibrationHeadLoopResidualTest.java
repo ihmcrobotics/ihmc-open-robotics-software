@@ -91,7 +91,7 @@ public class KinematicCalibrationHeadLoopResidualTest
     * @throws IOException
     */
    @Ignore
-	@DeployableTestMethod(estimatedDuration = 50.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 50.0)
 	@Test(timeout=300000)
    public void perfect() throws IOException
    {
@@ -142,7 +142,7 @@ public class KinematicCalibrationHeadLoopResidualTest
     * @throws IOException
     */
    @Ignore
-	@DeployableTestMethod(estimatedDuration = 50.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 50.0)
 	@Test(timeout=300000)
    public void smallError() throws IOException
    {
@@ -197,7 +197,7 @@ public class KinematicCalibrationHeadLoopResidualTest
     * @throws IOException
     */
    @Ignore
-	@DeployableTestMethod(estimatedDuration = 50.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 50.0)
 	@Test(timeout=300000)
    public void optimize() throws IOException
    {

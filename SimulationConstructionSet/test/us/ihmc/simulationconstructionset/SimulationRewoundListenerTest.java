@@ -18,7 +18,7 @@ public class SimulationRewoundListenerTest
     * Hang forever
     */
    @Ignore
-	@DeployableTestMethod(estimatedDuration = 30.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 30.0)
 	@Test(timeout=300000)
    public void testSimulationRewoundListener()
    {

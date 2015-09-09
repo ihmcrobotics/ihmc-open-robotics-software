@@ -57,7 +57,7 @@ public class QuaternionToolsTest
     * Pretty old and uses Roll Pitch Yaw which is always flaky.
     */
    @Ignore
-   @DeployableTestMethod(quarantined = true)
+   @DeployableTestMethod
    @Test(timeout = 300000)
    public void testBackAndForthOne()
    {
