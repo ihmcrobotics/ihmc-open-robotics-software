@@ -401,7 +401,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 	 * 
 	 * @throws SimulationExceededMaximumTimeException
 	 */
-	@DeployableTestMethod(estimatedDuration = 7.7, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 7.7)
 	@Test(timeout = 39000)
    public void testBigYawInDoubleSupport() throws SimulationExceededMaximumTimeException
    {
@@ -431,7 +431,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 	 * 
 	 * @throws SimulationExceededMaximumTimeException
 	 */
-	@DeployableTestMethod(estimatedDuration = 9.4, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 9.4)
 	@Test(timeout = 47000)
    public void testBigYawInSingleSupport() throws SimulationExceededMaximumTimeException
    {
@@ -463,7 +463,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 	 * 
 	 * @throws SimulationExceededMaximumTimeException
 	 */
-	@DeployableTestMethod(estimatedDuration = 8.1, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 8.1)
 	@Test(timeout = 41000)
    public void testLocalizationOffsetOutsideOfFootInSingleSupport() throws SimulationExceededMaximumTimeException
    {
@@ -523,7 +523,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
     * @throws SimulationExceededMaximumTimeException
     * @throws ControllerFailureException
     */
-	@DeployableTestMethod(estimatedDuration = 5.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 5.0)
 	@Test(timeout = 30000)
    public void testWalkingDuringBigPelvisCorrection() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

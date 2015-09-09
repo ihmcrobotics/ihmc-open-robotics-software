@@ -318,7 +318,7 @@ public abstract class WholeBodyIkSolverTest
 	 * Failing but don't want to remove the rest from Bamboo
 	 */
    @Ignore
-   @DeployableTestMethod(estimatedDuration = 5.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 5.0)
    @Test(timeout = 20000)
    public void testBothHandsIn3PModeManual()
    {

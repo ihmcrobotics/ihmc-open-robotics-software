@@ -40,7 +40,7 @@ public class AtlasWholeBodyInverseKinematicBehaviorTest extends DRCWholeBodyInve
 	 */
 	@Override
 	@Ignore
-	@DeployableTestMethod(estimatedDuration = 90.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 90.0)
    @Test(timeout = 300000)
 	public void testRandomRightHandPose() throws SimulationExceededMaximumTimeException
 	{
@@ -52,7 +52,7 @@ public class AtlasWholeBodyInverseKinematicBehaviorTest extends DRCWholeBodyInve
     */
    @Override
    @Ignore
-   @DeployableTestMethod(estimatedDuration = 90.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 90.0)
    @Test(timeout = 300000)
 	public void testWholeBodyInverseKinematicsMoveToPoseAcheivedInJointSpace() throws SimulationExceededMaximumTimeException
 	{

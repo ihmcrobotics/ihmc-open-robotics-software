@@ -396,7 +396,7 @@ public class TrapezoidalVelocityTrajectoryTest
 	 * Never really worked yet. Some day maybe.
 	 */
    @Ignore
-   @DeployableTestMethod(quarantined = true)
+   @DeployableTestMethod
    @Test(timeout = 300000)
    public void DONTtestRandomSamples()
    {

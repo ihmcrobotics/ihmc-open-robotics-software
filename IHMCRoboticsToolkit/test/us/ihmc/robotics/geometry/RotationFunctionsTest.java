@@ -484,7 +484,7 @@ public class RotationFunctionsTest
     * Test that has for only purpose to highlight a bug in Java3d.
     */
    @Ignore
-	@DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testJava3dAxisAngleSetMatrixBug()
    {
@@ -506,7 +506,7 @@ public class RotationFunctionsTest
     * Test that has for only purpose to highlight a bug in Java3d
     */
    @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testJava3dQuat4dSetMatrixBug()
    {
@@ -528,7 +528,7 @@ public class RotationFunctionsTest
     * Test that has for only purpose to highlight a bug in Java3d
     */
    @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testJava3dQuat4dSetMatrixBug2()
    {
@@ -550,7 +550,7 @@ public class RotationFunctionsTest
     * Test that has for only purpose to highlight a bug in Java3d
     */
    @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testJava3dAxisAngleSetMatrixBug2()
    {

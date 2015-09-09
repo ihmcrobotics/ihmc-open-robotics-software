@@ -84,7 +84,7 @@ public class ActiveSearchQuadraticProgramOptimizerTest
 	 * Not working, but probably not critical right now. Get this to work some day TODO
 	 */
 	@Ignore
-	@DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 525)
    public void testFullyConstrained()
    {	   

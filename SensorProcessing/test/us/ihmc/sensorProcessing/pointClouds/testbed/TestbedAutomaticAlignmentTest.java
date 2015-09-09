@@ -33,7 +33,7 @@ public class TestbedAutomaticAlignmentTest {
     * Need the file savedTestbedCloud00_scans.csv to run this, which is huge. So manual test really.
     */
    @Ignore
-	@DeployableTestMethod(quarantined = true)
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void expectedSolution() {
 
@@ -64,7 +64,7 @@ public class TestbedAutomaticAlignmentTest {
     * Need the file savedTestbedCloud00_scans.csv to run this, which is huge. So manual test really.
     */
 	@Ignore
-	@DeployableTestMethod(quarantined = true)
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void multipleRuns() {
 

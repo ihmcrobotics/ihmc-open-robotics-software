@@ -276,7 +276,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 
 	@Ignore
 	// "Need to rerecord")
-	@DeployableTestMethod(quarantined = true)
+	@DeployableTestMethod
    @Test(timeout=1200000)
    public void testTrialsTerrainUpFlatCinderblocksScript() throws SimulationExceededMaximumTimeException
    {
@@ -315,7 +315,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 	 * @throws SimulationExceededMaximumTimeException
 	 */
    @Ignore
-   @DeployableTestMethod(quarantined = true)
+   @DeployableTestMethod
    @Test(timeout = 1200000)
    public void testTrialsTerrainUpSlantedCinderblocksScript() throws SimulationExceededMaximumTimeException
    {

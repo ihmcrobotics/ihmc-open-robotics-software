@@ -112,7 +112,7 @@ public class IterativeBestFitPlaneCalculatorTest
 	 * Not sure if this ever worked. The nearly degenerate cases are tough. Someone needs to look into it deeper.
 	 */
 	@Ignore
-	@DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 503)
    public void testNearlyDegenerate1Case()
    {
