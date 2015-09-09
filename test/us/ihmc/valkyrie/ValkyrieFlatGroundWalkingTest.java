@@ -6,19 +6,19 @@ import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
 
 //This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
-@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoB})
+@DeployableTestClass(planType = {BambooPlanType.Fast, BambooPlanType.VideoB})
 public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
 
    private DRCRobotModel robotModel;
 
-	@EstimatedDuration(duration = 700.0)
+	@DeployableTestMethod(duration = 700.0)
 	@Test(timeout = 1000000)
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

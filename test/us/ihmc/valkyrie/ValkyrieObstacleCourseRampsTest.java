@@ -3,10 +3,10 @@ package us.ihmc.valkyrie;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseRampsTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 
-@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoB})
+@DeployableTestClass(planType = {BambooPlanType.Fast, BambooPlanType.VideoB})
 public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
 {
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);

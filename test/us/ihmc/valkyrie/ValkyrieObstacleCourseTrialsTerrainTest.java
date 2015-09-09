@@ -7,12 +7,11 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseTrialsTerrainTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.InDevelopment, BambooPlanType.VideoB})
+@DeployableTestClass(planType = {BambooPlanType.Slow, BambooPlanType.InDevelopment, BambooPlanType.VideoB})
 public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrialsTerrainTest
 {
    @Override
@@ -28,7 +27,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-	@EstimatedDuration(duration = 46.0)
+	@DeployableTestMethod(duration = 46.0)
    @Test(timeout = 230000)
    public void testTrialsTerrainCinderblockEntireFieldScript() throws SimulationExceededMaximumTimeException
    {
@@ -37,7 +36,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-	@EstimatedDuration(duration = 79.4)
+	@DeployableTestMethod(duration = 79.4)
    @Test(timeout = 400000)
    public void testTrialsTerrainZigzagHurdlesScript() throws SimulationExceededMaximumTimeException
    {
@@ -45,10 +44,12 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
       super.testTrialsTerrainZigzagHurdlesScript();
    }
    
+   /**
+    * Need to rerecord
+    */
    @Override
    @Ignore
-   @QuarantinedTest("Need to rerecord")
-   @EstimatedDuration(duration = 20.0)
+   @DeployableTestMethod(duration = 20.0, quarantined = true)
    @Test(timeout = 1200000)
    public void testTrialsTerrainUpSlantedCinderblocksScript() throws SimulationExceededMaximumTimeException
    {
@@ -57,7 +58,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-	@EstimatedDuration(duration = 147.5)
+	@DeployableTestMethod(duration = 147.5)
    @Test(timeout = 740000)
    public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
    {
@@ -66,7 +67,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-	@EstimatedDuration(duration = 137.4)
+	@DeployableTestMethod(duration = 137.4)
    @Test(timeout = 690000)
    public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
@@ -75,7 +76,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-	@EstimatedDuration(duration = 32.3)
+	@DeployableTestMethod(duration = 32.3)
    @Test(timeout = 160000)
    public void testTrialsTerrainCinderblockFieldPartTwoScript() throws SimulationExceededMaximumTimeException
    {
@@ -83,10 +84,12 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
       super.testTrialsTerrainCinderblockFieldPartTwoScript();
    }
    
+   /**
+    * Need to rerecord
+    */
    @Override
    @Ignore
-   @QuarantinedTest("Need to rerecord")
-   @EstimatedDuration(duration = 20.0)
+   @DeployableTestMethod(duration = 20.0, quarantined = true)
    @Test(timeout=1200000)
    public void testTrialsTerrainUpFlatCinderblocksScript() throws SimulationExceededMaximumTimeException
    {
@@ -95,7 +98,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-	@EstimatedDuration(duration = 131.3)
+	@DeployableTestMethod(duration = 131.3)
    @Test(timeout = 660000)
    public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
    {
@@ -104,7 +107,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-	@EstimatedDuration(duration = 54.0)
+	@DeployableTestMethod(duration = 54.0)
    @Test(timeout = 270000)
    public void testTrialsTerrainCinderblockFieldPartOneScript() throws SimulationExceededMaximumTimeException
    {
@@ -113,7 +116,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-	@EstimatedDuration(duration = 67.7)
+	@DeployableTestMethod(duration = 67.7)
    @Test(timeout = 340000)
    public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {

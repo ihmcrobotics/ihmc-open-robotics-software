@@ -10,10 +10,10 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.kinematics.YoValkyrieJointWriter;
@@ -23,13 +23,13 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.Fast})
+@DeployableTestClass(planType = {BambooPlanType.InDevelopment, BambooPlanType.Fast})
 public class ComparePushRodTransmissionsTest
 {
    private static final boolean DEBUG = false;
    private static final boolean VISUALIZE = false;
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
 	@Test(timeout = 30000)
    public void testCompareInefficientToEfficientAnkle()
    {
@@ -54,7 +54,7 @@ public class ComparePushRodTransmissionsTest
    }
 
 	@Ignore
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testTiming()
    {
@@ -78,7 +78,7 @@ public class ComparePushRodTransmissionsTest
       testTimingTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCompareInefficientToEfficientWaist()
    {
@@ -104,7 +104,7 @@ public class ComparePushRodTransmissionsTest
    
    // Seems that the interpolated should be same as the pushrod when use futeks is false. Should try to get this to work
    // Or figure out if the interpolated is just plain wrong.
-	@EstimatedDuration(duration = 0.7)
+	@DeployableTestMethod(duration = 0.7)
 	@Test(timeout = 30000)
    public void testCompareInefficientToInterpolatedAnkles()
    {
@@ -132,7 +132,7 @@ public class ComparePushRodTransmissionsTest
       compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, interpolatedPushRodTransmission, registry, yoGraphicsListRegistry);
    }
    
-	@EstimatedDuration(duration = 1.6)
+	@DeployableTestMethod(duration = 1.6)
 	@Test(timeout = 30000)
    public void testCompareInefficientToInterpolatedWaist()
    {
