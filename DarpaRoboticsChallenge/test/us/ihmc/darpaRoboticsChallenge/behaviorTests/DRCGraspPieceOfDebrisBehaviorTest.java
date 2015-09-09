@@ -24,8 +24,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -252,7 +252,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       assertTrue(debrisPositionAfterGrasping.getZ() > zThreshold);
    }
    
-   @EstimatedDuration(duration = 90.0)
+   @DeployableTestMethod(duration = 90.0)
    @Test(timeout = 300000)
    public void testGraspingStandingDebrisWithRightHand() throws SimulationExceededMaximumTimeException
    {
@@ -288,7 +288,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
    }
    
    @Ignore
-   @EstimatedDuration(duration = 70.0)
+   @DeployableTestMethod(duration = 70.0)
    @Test(timeout = 300000)
    public void testGraspingStandingDebrisWithLeftHand() throws SimulationExceededMaximumTimeException
    {
@@ -323,7 +323,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 70.0)
+   @DeployableTestMethod(duration = 70.0)
    @Test(timeout = 300000)
    public void testGraspingHorizontalDebrisWithRightHand() throws SimulationExceededMaximumTimeException
    {
@@ -354,7 +354,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       assertChestAndPelvisAreCloseToHomePosition();
    }
 
-   @EstimatedDuration(duration = 70.0)
+   @DeployableTestMethod(duration = 70.0)
    @Test(timeout = 300000)
    public void testGraspingLeaningAgainstAWallDebrisWithRightHand() throws SimulationExceededMaximumTimeException
    {

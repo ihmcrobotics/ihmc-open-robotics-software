@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Matrix3d;
 import java.util.Random;
@@ -30,7 +30,7 @@ public class RotationalInertiaCalculatorTest
       return random.nextDouble() * maxRandomValue;
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testBasicCylinder()
    {
@@ -90,7 +90,7 @@ public class RotationalInertiaCalculatorTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testBasicCylinderNegativeMass()
    {
@@ -101,7 +101,7 @@ public class RotationalInertiaCalculatorTest
       RotationalInertiaCalculator.getIxxIyyIzzOfSolidCylinder(mass, radius, height, axis);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testBasicCylinderNegativeRadius()
    {
@@ -112,7 +112,7 @@ public class RotationalInertiaCalculatorTest
       RotationalInertiaCalculator.getIxxIyyIzzOfSolidCylinder(mass, radius, height, axis);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testBasicCylinderNegativeHeight()
    {
@@ -123,7 +123,7 @@ public class RotationalInertiaCalculatorTest
       RotationalInertiaCalculator.getIxxIyyIzzOfSolidCylinder(mass, radius, height, axis);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSolidEllipsoid()
    {
@@ -146,7 +146,7 @@ public class RotationalInertiaCalculatorTest
 	   }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSolidEllipsoidNegativeMass()
    {
@@ -158,7 +158,7 @@ public class RotationalInertiaCalculatorTest
 	   RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSolidEllipsoidNegativeXRadius()
    {
@@ -170,7 +170,7 @@ public class RotationalInertiaCalculatorTest
 	   RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSolidEllipsoidNegativeYRadius()
    {
@@ -182,7 +182,7 @@ public class RotationalInertiaCalculatorTest
 	   RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSolidEllipsoidNegativeZRadius()
    {
@@ -194,7 +194,7 @@ public class RotationalInertiaCalculatorTest
 	   RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testRadiiOfGyration()
    {
@@ -219,7 +219,7 @@ public class RotationalInertiaCalculatorTest
 	   }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testRadiiOfGyrationNegativeMass()
    {
@@ -231,7 +231,7 @@ public class RotationalInertiaCalculatorTest
 	   RotationalInertiaCalculator.getRotationalInertiaFromRadiiOfGyration(mass, xRadius, yRadius, zRadius);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testRadiiOfGyrationNegativeXRadius()
    {
@@ -243,7 +243,7 @@ public class RotationalInertiaCalculatorTest
 	   RotationalInertiaCalculator.getRotationalInertiaFromRadiiOfGyration(mass, xRadius, yRadius, zRadius);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testRadiiOfGyrationNegativeYRadius()
    {
@@ -255,7 +255,7 @@ public class RotationalInertiaCalculatorTest
 	   RotationalInertiaCalculator.getRotationalInertiaFromRadiiOfGyration(mass, xRadius, yRadius, zRadius);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testRadiiOfGyrationNegativeZRadius()
    {

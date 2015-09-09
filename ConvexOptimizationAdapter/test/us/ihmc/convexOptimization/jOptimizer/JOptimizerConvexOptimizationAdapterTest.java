@@ -2,12 +2,12 @@ package us.ihmc.convexOptimization.jOptimizer;
 
 import us.ihmc.convexOptimization.ConvexOptimizationAdapter;
 import us.ihmc.convexOptimization.ConvexOptimizationAdapterTest;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 
 
 //TODO: Get this working some day!!
-@BambooPlan(planType = {BambooPlanType.Exclude})
+@DeployableTestClass(planType = {BambooPlanType.Exclude})
 public class JOptimizerConvexOptimizationAdapterTest extends ConvexOptimizationAdapterTest
 {
    public ConvexOptimizationAdapter createConvexOptimizationAdapter()

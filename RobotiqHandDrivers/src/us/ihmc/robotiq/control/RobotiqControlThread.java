@@ -2,6 +2,11 @@ package us.ihmc.robotiq.control;
 
 import java.io.IOException;
 
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+
 import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -16,11 +21,6 @@ import us.ihmc.robotiq.RobotiqHandInterface;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.tools.thread.ThreadTools;
-
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
 
 class RobotiqControlThread extends HandControlThread
 {

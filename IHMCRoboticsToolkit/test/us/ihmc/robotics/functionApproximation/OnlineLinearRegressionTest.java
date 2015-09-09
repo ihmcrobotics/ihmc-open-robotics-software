@@ -1,7 +1,8 @@
 package us.ihmc.robotics.functionApproximation;
 
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.Random;
 
@@ -9,7 +10,7 @@ import static org.junit.Assert.assertArrayEquals;
 
 public class OnlineLinearRegressionTest {
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	   public void toyExample()
 	   {

@@ -12,7 +12,7 @@ import org.junit.Test;
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -22,7 +22,7 @@ public class YoFramePointControlFlowOutputPortTest
 
    private static final double EPS = 1e-17;
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
 	@Test(timeout = 30000)
    public void simpleWritingReadingTest()
    {

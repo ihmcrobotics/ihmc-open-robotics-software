@@ -17,15 +17,15 @@ import us.ihmc.simulationconstructionset.GroundContactPointsHolder;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.SlopedPlaneGroundProfile;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class LinearStickSlipGroundContactModelTest
 {
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testOnFlatGroundNoSlipCompareWithAndWithoutNormals()
    {
@@ -122,7 +122,7 @@ public class LinearStickSlipGroundContactModelTest
       JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 0.0), force, 1e-7);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testOnSlantedGroundCompareWithAndWithoutNormals()
    {

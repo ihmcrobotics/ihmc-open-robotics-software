@@ -11,7 +11,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -25,7 +25,7 @@ public class YoWhiteBoardTest
 {
    private static final boolean VERBOSE = false;
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testWriteNotConnected() throws IOException
    {
@@ -33,7 +33,7 @@ public class YoWhiteBoardTest
       whiteBoard.writeData();
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testReadNotConnected() throws IOException
    {

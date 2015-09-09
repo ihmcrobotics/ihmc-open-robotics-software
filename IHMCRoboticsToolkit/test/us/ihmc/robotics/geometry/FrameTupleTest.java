@@ -6,8 +6,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
@@ -80,7 +80,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       childFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", theFrame, theFrameToChildFrame, false, true, true);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testName()
    {
@@ -94,7 +94,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertSame("Strings should be the same", test, frameTuple.getName());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSetXYZ()
    {
@@ -119,7 +119,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       testGetters(frameTuple, x, y, z);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class) //Brett was here
    public final void testSetTuple()
    {
@@ -144,7 +144,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       ft1.set(ft2);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSetFrameTuple()
    {
@@ -248,7 +248,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
 
    // Tests copied from FramePointTest and FrameVectorTest
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testChangeFrameCopy()
    {
@@ -309,7 +309,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSets() //Brett was here
    {
@@ -344,7 +344,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals("This should be equal", 50.0, alpha.getX(), 1e-10);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000,expected = ReferenceFrameMismatchException.class) //Brett was here
    public final void testSetXY()
    {
@@ -364,7 +364,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
 
    // NaN was found in beta, commented out for further testing
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testCheckForNaN()
    {
@@ -375,7 +375,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       beta.checkForNaN();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testGets()
    {
@@ -386,7 +386,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       beta.getZ();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testAddTuple3d()
    {
@@ -397,7 +397,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(alpha.epsilonEquals(expected, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testAddTuple3dTuple3d()
    {
@@ -410,7 +410,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(alpha.epsilonEquals(expected, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public final void testAddFrameTuple() //Brett
    {
@@ -427,7 +427,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       frameTuple1.add(frameTuple2); 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testAddFrameTupleFrameTuple() //Brett
    {
@@ -462,7 +462,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testReferenceFramesAreCheckedOnSet()
    {
@@ -472,7 +472,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePointOne.set(framePointTwo);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testEpsilonEqualsTuple()
    {
@@ -485,7 +485,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(tupleResult == framePointResult);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public final void testEpsilonEqualsFrameTuple()
    {
@@ -519,7 +519,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals("return value", expectedReturn, actualReturn);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testGetPointCopy()
    {
@@ -536,7 +536,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals(3.0, actualReturn.z, epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testGetVectorCopy()
    {
@@ -547,7 +547,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(tuple3d.epsilonEquals(vector3dCopy, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testGetTuple3d()
    {
@@ -558,7 +558,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(frameTuple.epsilonEquals(tuple3d, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSetToZero()
    {
@@ -568,7 +568,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(frameTuple.epsilonEquals(frameTupleZero, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSetToZeroReferenceFrame()
    {
@@ -578,7 +578,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(frameTuple.epsilonEquals(frameTupleZero, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSetToNaN()
    {
@@ -589,7 +589,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(Double.isNaN(frameTuple.getZ()));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSetToNaNReferenceFrame()
    {
@@ -601,7 +601,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(Double.isNaN(frameTuple.getZ()));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testGetReferenceFrame()
    {
@@ -612,7 +612,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals("return value", expectedReturn, actualReturn);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testGetX()
    {
@@ -623,7 +623,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals("return value", expectedReturn, actualReturn, Double.MIN_VALUE);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testGetY()
    {
@@ -634,7 +634,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals("return value", expectedReturn, actualReturn, Double.MIN_VALUE);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testGetZ()
    {
@@ -645,7 +645,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals("return value", expectedReturn, actualReturn, Double.MIN_VALUE);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = NullPointerException.class)
    public final void testSet()
    {
@@ -655,7 +655,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePoint1.set(framePoint);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = NullPointerException.class)
    public final void testSet1()
    {
@@ -665,7 +665,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePoint.set(frameVector);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSet2()
    {
@@ -681,7 +681,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals(z, framePoint.getZ(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSetX()
    {
@@ -693,7 +693,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals(x, framePoint.getX(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSetY()
    {
@@ -705,7 +705,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals(y, framePoint.getY(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSetZ()
    {
@@ -717,7 +717,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals(z, framePoint.getZ(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSubTuple3d()
    {
@@ -730,7 +730,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(frameTuple1.epsilonEquals(tuple1, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSubTuple3dTuple3d()
    {
@@ -747,7 +747,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(expectedFrameTuple.epsilonEquals(expectedTuple, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSubFrameTuple()
    {
@@ -775,7 +775,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSubFrameTupleFrameTuple()
    {
@@ -821,7 +821,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public final void testCheckReferenceFrameMatch() throws ReferenceFrameMismatchException
    {
@@ -831,7 +831,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePoint.checkReferenceFrameMatch(frame);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = NullPointerException.class)
    public final void testCheckReferenceFrameMatch1() throws ReferenceFrameMismatchException
    {
@@ -841,7 +841,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePoint1.checkReferenceFrameMatch(framePoint);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = NullPointerException.class)
    public final void testCheckReferenceFrameMatch2() throws ReferenceFrameMismatchException
    {
@@ -851,7 +851,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePoint.checkReferenceFrameMatch(frameVector);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = NullPointerException.class)
    public final void testWeightedAverageNullPointerException()
    {
@@ -865,7 +865,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
 
    @Ignore("Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain")
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000,expected = RuntimeException.class)
    public final void testFramePoint()
    {
@@ -877,7 +877,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
 
    @Ignore("Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain")
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000,expected = RuntimeException.class)
    public final void testFramePoint1()
    {
@@ -890,7 +890,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
 
    @Ignore("Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain")
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000,expected = RuntimeException.class)
    public final void testFramePoint2()
    {
@@ -903,7 +903,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       createFrameTuple(referenceFrame, x, y, z);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testFramePoint3()
    {
@@ -913,7 +913,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       createFrameTuple(framePoint);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testFramePoint4()
    {
@@ -923,7 +923,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       createFrameTuple(frameVector);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testGetDirection()
    {
@@ -934,7 +934,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals(5.0, framePoint.get(Direction.Z), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class) //Brett was here
    public final void testScale()
    {
@@ -958,7 +958,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePoint.scale(scaleFactor, tuple1);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testScaleVector()
    {
@@ -973,7 +973,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals(-4.6, framePoint.getZ(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testScaleVectorException()
    {
@@ -984,7 +984,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePoint.scale(scale, frameVector);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testScalePoint()
    {
@@ -999,7 +999,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals(-4.6, framePoint.getZ(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testScalePointException()
    {
@@ -1010,7 +1010,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePoint.scale(scale, framePoint2);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testScaleAddVectorVector() //Brett was here
    {
@@ -1046,7 +1046,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testScaleAddVectorScaleVector() //Brett was here
    {
@@ -1064,7 +1064,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testScaleAddVectorVectorException1()
    {
@@ -1076,7 +1076,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePoint.scaleAdd(scale, frameVector1, frameVector2);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testScaleAddVectorVectorException2()
    {
@@ -1088,7 +1088,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePoint.scaleAdd(scale, frameVector1, frameVector2);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testScaleAddVectorPoint()
    {
@@ -1113,7 +1113,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(framePointResult1.epsilonEquals(framePointResult2, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testScaleAddVectorPointException1()
    {
@@ -1129,7 +1129,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePointResult1.scaleAdd(scale, frameVector1, framePoint1);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testScaleAddVectorPointException2()
    {
@@ -1145,7 +1145,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePointResult1.scaleAdd(scale, frameVector1, framePoint1);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testScaleAddPointVectorException1()
    {
@@ -1161,7 +1161,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePointResult1.scaleAdd(scale, framePoint1, frameVector1);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testScaleAddPointVectorException2()
    {
@@ -1177,7 +1177,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePointResult1.scaleAdd(scale, framePoint1, frameVector1);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testScaleAddPointPoint()
    {
@@ -1193,7 +1193,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals(2.3 * -2.0 + 3.6, framePointResult.getZ(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testScaleAddPointPointException1()
    {
@@ -1205,7 +1205,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePointResult.scaleAdd(scale, framePoint1, framePoint2);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testScaleAddPointPointException2()
    {
@@ -1217,7 +1217,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePointResult.scaleAdd(scale, framePoint1, framePoint2);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class) //Brett was here
    public final void testScaleAddScaleTuple()
    {
@@ -1236,7 +1236,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       ft1.scaleAdd(scale, frameVector);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testScaleAddVectorException()
    {
@@ -1247,7 +1247,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePointResult.scaleAdd(scale, frameVector);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testScaleAddPoint()
    {
@@ -1262,7 +1262,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals(2.3 * -2.0 + 3.6, framePointResult.getZ(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public final void testScaleAddPointException()
    {
@@ -1273,7 +1273,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePointResult.scaleAdd(scale, framePoint);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testChangeFrameUsingTransform()
    {
@@ -1287,7 +1287,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals(1000, framePoint.getZ(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testChangeFrameUsingTransformCopy()
    {
@@ -1301,7 +1301,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(framePointCopy.epsilonEquals(framePointTransformedCopy, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSubFramePoint()
    {
@@ -1313,7 +1313,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(expectedResult.epsilonEquals(framePoint1, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSubFrameVector()
    {
@@ -1325,7 +1325,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(expectedResult.epsilonEquals(framePoint, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSubPointPoint()
    {
@@ -1338,7 +1338,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(expectedResult.epsilonEquals(actualResult, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSubPointVector()
    {
@@ -1351,7 +1351,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(expectedResult.epsilonEquals(actualResult, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSubVectorPoint()
    {
@@ -1364,7 +1364,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(expectedResult.epsilonEquals(actualResult, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testSetNaN()
    {
@@ -1382,7 +1382,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(Double.isNaN(frameVector2.getZ()));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testCheckForNaNAndContainsNaN()
    {
@@ -1437,7 +1437,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertFalse(framePoint.containsNaN());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testInterpolate()
    {
@@ -1460,7 +1460,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals((1.0 - alpha) * frameTuple4.getZ() + alpha * frameTuple5.getZ(), resultTuple.getZ(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testNameField()
    {
@@ -1513,7 +1513,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertTrue(name.equals(point1.getName()));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testPackMatrix() //Brett was here
    {
@@ -1549,7 +1549,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testClipToMinMax() //Brett was here
    {
@@ -1560,7 +1560,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals("Should be equal", 10, frameTuple.getZ(), epsilon);
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public final void testNegate() //Brett was here
    {
@@ -1572,7 +1572,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals("Should be equal", frameTuple.getZ(), frameTupleToNegate.getZ(), epsilon);
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public final void testAbsolute()
    {
@@ -1591,7 +1591,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       assertEquals("Should be equal", expectedFrameTuple.getZ(), actualFrameTuple.getZ(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testToArray() //Brett was here
    {

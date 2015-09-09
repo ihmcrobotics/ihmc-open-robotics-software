@@ -22,8 +22,8 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.environments.ContactableCylinderRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -85,7 +85,7 @@ public abstract class DRCDrillPickUpBehaviorTest implements MultiRobotTestInterf
    /**
     * @throws SimulationExceededMaximumTimeException
     */
-	@EstimatedDuration(duration = 117.5)
+	@DeployableTestMethod(duration = 117.5)
    @Test(timeout = 590000)
    public void testDrillPickUp() throws SimulationExceededMaximumTimeException
    {

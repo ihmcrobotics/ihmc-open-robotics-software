@@ -25,8 +25,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -87,7 +87,7 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
 
    //TODO: Fix HeadOrienationManager() so that head actually tracks desired yaw and roll orientations.  Currently, only pitch orientation tracks properly.
 
-	@EstimatedDuration(duration = 31.9)
+	@DeployableTestMethod(duration = 31.9)
    @Test(timeout = 160000)
    public void testLookAtPitch() throws SimulationExceededMaximumTimeException
    {

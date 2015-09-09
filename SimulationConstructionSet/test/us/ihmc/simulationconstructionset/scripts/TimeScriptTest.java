@@ -10,7 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -60,7 +60,7 @@ public class TimeScriptTest
       enumVariable = null;
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testEmptyTimeScript()
    {
@@ -72,7 +72,7 @@ public class TimeScriptTest
       timeScript.doScript(time);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testAddEntryAndDoScript()
    {
@@ -132,7 +132,7 @@ public class TimeScriptTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testTimeScriptCommand()
    {
@@ -218,7 +218,7 @@ public class TimeScriptTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSaveAndLoad()
    {

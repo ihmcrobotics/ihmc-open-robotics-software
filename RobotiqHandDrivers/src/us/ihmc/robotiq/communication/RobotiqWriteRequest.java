@@ -5,11 +5,11 @@ import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rACT;
 import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rATR;
 import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rGTO;
 import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rMOD;
-import us.ihmc.robotiq.communication.registers.GripperOptionRegister.rICF;
 import us.ihmc.robotiq.communication.registers.FingerForceRegister;
 import us.ihmc.robotiq.communication.registers.FingerPositionRequestRegister;
 import us.ihmc.robotiq.communication.registers.FingerSpeedRegister;
 import us.ihmc.robotiq.communication.registers.GripperOptionRegister;
+import us.ihmc.robotiq.communication.registers.GripperOptionRegister.rICF;
 import us.ihmc.robotiq.communication.registers.GripperOptionRegister.rICS;
 
 public class RobotiqWriteRequest

@@ -9,8 +9,8 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Vector3d;
 import java.util.Random;
@@ -27,7 +27,7 @@ public class PointJacobianTest
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testVersusNumericalDifferentiation()
    {
@@ -72,7 +72,7 @@ public class PointJacobianTest
       FrameVectorTest.assertFrameVectorEquals(pointVelocityFromNumericalDifferentiation, pointVelocityFromJacobian, 1e-6);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSingularValuesOfTwoPointJacobians()
    {

@@ -2,13 +2,13 @@ package us.ihmc.communication.streamingData;
 
 import org.junit.Test;
 
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class StreamingDataProducerConsumerTest
 {
 
-	@EstimatedDuration(duration = 1.1)
+	@DeployableTestMethod(duration = 1.1)
 	@Test(timeout = 30000)
    public void testTypicalUsage()
    {
@@ -24,7 +24,7 @@ public class StreamingDataProducerConsumerTest
       }
    }
 
-	@EstimatedDuration(duration = 1.1)
+	@DeployableTestMethod(duration = 1.1)
 	@Test(timeout = 30000)
    public void testMultipleProducersAndConsumers()
    {

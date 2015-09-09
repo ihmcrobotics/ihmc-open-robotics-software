@@ -10,12 +10,12 @@ import java.io.InputStreamReader;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class BambooToolsTest
 {
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testGetClassAndMethodName()
    {
@@ -26,7 +26,7 @@ public class BambooToolsTest
       assertEquals("BambooToolsTest.testGetClassAndMethodName", classAndMethodName);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testLogMessagesToFile() throws IOException
    {

@@ -13,24 +13,23 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.RevoluteJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTestTools;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisRotationalStateUpdater;
-import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class PelvisRotationalStateUpdaterTest
@@ -45,7 +44,7 @@ public class PelvisRotationalStateUpdaterTest
 
    private final List<IMUSensorReadOnly> imuSensors = new ArrayList<>();
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testConstructorWithOneIMU()
    {
@@ -73,7 +72,7 @@ public class PelvisRotationalStateUpdaterTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testConstructorWithZeroIMUSensor()
    {
@@ -102,7 +101,7 @@ public class PelvisRotationalStateUpdaterTest
          fail("RuntimeException expected, no orientation sensor attached to the sensor map.");
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testInitializeAndReadWithOneIMU()
    {

@@ -18,12 +18,12 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
-@BambooPlan(planType = {BambooPlanType.Flaky})
+@DeployableTestClass(planType = {BambooPlanType.Flaky})
 public class NetworkProcessorTest
 {
    private static final boolean DEBUG = false;
@@ -124,7 +124,7 @@ public class NetworkProcessorTest
       
    }
 
-   @EstimatedDuration(duration = 1.3)
+   @DeployableTestMethod(duration = 1.3)
    @Test (timeout = 30000)
    public void testSendPackets() throws IOException
    {
@@ -171,7 +171,7 @@ public class NetworkProcessorTest
       disconnectCommunicators();
    }
 
-   @EstimatedDuration(duration = 0.7)
+   @DeployableTestMethod(duration = 0.7)
    @Test(timeout = 30000)
    public void testDetatchObjectCommunicator() throws IOException
    {
@@ -210,7 +210,7 @@ public class NetworkProcessorTest
       disconnectCommunicators();
    }
 
-   @EstimatedDuration(duration = 0.6)
+   @DeployableTestMethod(duration = 0.6)
    @Test(timeout = 30000)
    public void testForwarder() throws IOException
    {
@@ -236,7 +236,7 @@ public class NetworkProcessorTest
       disconnectCommunicators();
    }
 
-   @EstimatedDuration(duration = 0.5)
+   @DeployableTestMethod(duration = 0.5)
    @Test(timeout = 30000)
    public void testDoubleForwarder() throws IOException
    {
@@ -255,7 +255,7 @@ public class NetworkProcessorTest
       assertTrue(threwException);
    }
 
-   @EstimatedDuration(duration = 1.0)
+   @DeployableTestMethod(duration = 1.0)
    @Test(timeout = 30000)
    public void testDisconnectDoesNotFail() throws IOException
    {

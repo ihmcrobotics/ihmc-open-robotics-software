@@ -4,12 +4,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import georegression.struct.se.Se3_F64;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.awt.image.BufferedImage;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
 
@@ -19,7 +19,7 @@ import boofcv.struct.calib.IntrinsicParameters;
 public class DRCArmKinematicsCalibrationTest
 {
 
-	@EstimatedDuration(duration = 0.7)
+	@DeployableTestMethod(duration = 0.7)
 	@Test(timeout = 30000)
    public void estimateCameraPose()
    {

@@ -6,11 +6,11 @@ import java.rmi.registry.Registry;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@BambooPlan(planType = BambooPlanType.Manual)
+@DeployableTestClass(planType = BambooPlanType.Manual)
 public class SimulationDispatcherClientTest
 {
    private static final String pwd = "***REMOVED***";
@@ -24,7 +24,7 @@ public class SimulationDispatcherClientTest
    
 // private static final String serverURL = "//10.100.0.74/RemoteSimulationRunner0";
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void test()
    {

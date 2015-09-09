@@ -63,7 +63,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -225,7 +225,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       return ret;
    }
 
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testDispatchPelvisPoseBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -268,7 +268,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration
+   @DeployableTestMethod
    @Test(timeout = 300000)
    public void testDispatchWalkToLocationBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -323,7 +323,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration
+   @DeployableTestMethod
    @Test(timeout = 300000)
    public void testDispatchWalkToLocationBehaviorAndStop() throws SimulationExceededMaximumTimeException
    {
@@ -372,7 +372,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration
+   @DeployableTestMethod
    @Test(timeout = 300000)
    public void testDispatchWalkToLocationBehaviorPauseAndResume() throws SimulationExceededMaximumTimeException
    {

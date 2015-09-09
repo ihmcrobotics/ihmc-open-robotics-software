@@ -13,7 +13,7 @@ import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -27,7 +27,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public class YoPointPositionDataObjectListOutputPortTest
 {
 
-	@EstimatedDuration(duration = 0.9)
+	@DeployableTestMethod(duration = 0.9)
 	@Test(timeout = 30000)
    public void testRandom()
    {

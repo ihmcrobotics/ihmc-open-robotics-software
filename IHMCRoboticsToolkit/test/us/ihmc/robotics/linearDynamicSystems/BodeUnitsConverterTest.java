@@ -1,7 +1,8 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -9,7 +10,7 @@ import static org.junit.Assert.assertTrue;
 public class BodeUnitsConverterTest
 {
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testMagnitudeToDecibels()
    {
@@ -27,7 +28,7 @@ public class BodeUnitsConverterTest
       
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testNaN()
    {
@@ -36,7 +37,7 @@ public class BodeUnitsConverterTest
       assertTrue(Double.isNaN(decibels)); 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testNegativeInfinity()
    {
@@ -45,7 +46,7 @@ public class BodeUnitsConverterTest
       assertTrue(Double.isInfinite(decibels));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testRadiansToDegrees()
    {      
@@ -69,7 +70,7 @@ public class BodeUnitsConverterTest
       assertEquals(-720.0, phaseInDegrees[4], epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
   public void testRadiansPerSecondToHz()
   {

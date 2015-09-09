@@ -6,7 +6,7 @@ import org.ejml.simple.SimpleMatrix;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
@@ -80,7 +80,7 @@ public abstract class MassMatrixCalculatorTest
       return kineticEnergy.get(0, 0);
    }
 
-	@EstimatedDuration(duration = 0.6)
+	@DeployableTestMethod(duration = 0.6)
 	@Test(timeout = 30000)
    public void compareMassMatrixCalculators()
    {

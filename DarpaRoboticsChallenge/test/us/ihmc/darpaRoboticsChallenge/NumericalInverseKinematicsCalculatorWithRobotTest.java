@@ -31,8 +31,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
@@ -195,7 +195,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    }
 
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCase()
    {
@@ -215,7 +215,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
 
 
-	@EstimatedDuration(duration = 10.5)
+	@DeployableTestMethod(duration = 10.5)
    @Test(timeout = 52000)
    public void testRandomFeasibleRobotPoses()
    {

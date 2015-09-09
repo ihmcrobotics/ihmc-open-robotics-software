@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -31,11 +32,9 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.tools.MemoryTools;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -80,7 +79,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    }
    
 
-	@EstimatedDuration(duration = 84.2)
+	@DeployableTestMethod(duration = 84.2)
 	@Test(timeout = 420000)
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -164,8 +163,8 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    }
 
 	@Ignore
-	@QuarantinedTest("This has never worked. Would be nice if we can get it to work.")
-	@EstimatedDuration
+	// This has never worked. Would be nice if we can get it to work.")
+	@DeployableTestMethod(quarantined = true)
 	@Test(timeout=300000)
    public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -295,7 +294,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       return new ImmutablePair<CombinedTerrainObject3D, Double>(combinedTerrainObject, xMax);
    }
 
-	@EstimatedDuration(duration = 104.6)
+	@DeployableTestMethod(duration = 104.6)
 	@Test(timeout = 520000)
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

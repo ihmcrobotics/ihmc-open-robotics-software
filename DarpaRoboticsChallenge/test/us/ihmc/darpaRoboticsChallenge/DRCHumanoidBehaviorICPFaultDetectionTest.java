@@ -21,8 +21,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -93,7 +93,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    // cropped to 1.5 - 6.3 seconds
    @Ignore
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void TestForVideo() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -115,7 +115,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
    @Ignore
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void TestPushLeftEarlySwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -137,7 +137,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
    @Ignore
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void TestPushRightLateSwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -160,7 +160,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
    @Ignore
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void TestPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -191,7 +191,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
    @Ignore
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void TestPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -237,7 +237,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
    @Ignore
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void TestPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {

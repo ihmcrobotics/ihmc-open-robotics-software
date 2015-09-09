@@ -17,13 +17,13 @@ import us.ihmc.communication.net.KryoStreamDeSerializer;
 import us.ihmc.communication.net.KryoStreamSerializer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.utilities.io.files.FileTools;
 
-@BambooPlan(planType = BambooPlanType.Fast)
+@DeployableTestClass(planType = BambooPlanType.Fast)
 public class CapturabilityBasedStatusTest
 {
    private static final Path TEST_ROOT_PATH = JUnitTools.deriveTestResourcesPath(CapturabilityBasedStatusTest.class);
@@ -34,7 +34,7 @@ public class CapturabilityBasedStatusTest
       FileTools.ensureDirectoryExists(TEST_ROOT_PATH);
    }
 
-	@EstimatedDuration(duration = 0.6)
+	@DeployableTestMethod(duration = 0.6)
    @Test(timeout = 30000)
    public void testSerializeAndDeserialize() throws IOException
    {
@@ -55,7 +55,7 @@ public class CapturabilityBasedStatusTest
       assertPacketsEqual(cbs, cbsOut);
    }
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testSerializeToFileAndDeserialize() throws IOException
    {

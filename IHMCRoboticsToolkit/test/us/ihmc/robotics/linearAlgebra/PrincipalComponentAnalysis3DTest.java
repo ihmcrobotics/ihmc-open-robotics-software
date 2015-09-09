@@ -3,8 +3,8 @@ package us.ihmc.robotics.linearAlgebra;
 import org.junit.Test;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationFunctions;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
@@ -24,7 +24,7 @@ public class PrincipalComponentAnalysis3DTest
    private static final double EPSILON_HIGH_PRECISION = 1.0e-12;
    private static final double EPSILON_LOW_PRECISION = 2.0e-3;
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testWith1DData()
    {
@@ -162,7 +162,7 @@ public class PrincipalComponentAnalysis3DTest
       }
    }
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testWith2DData()
    {
@@ -346,7 +346,7 @@ public class PrincipalComponentAnalysis3DTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testWith3DData()
    {

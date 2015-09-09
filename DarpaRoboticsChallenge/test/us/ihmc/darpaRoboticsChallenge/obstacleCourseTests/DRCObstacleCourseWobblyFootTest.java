@@ -21,8 +21,8 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -59,7 +59,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
    }
 
 
-   @EstimatedDuration(duration = 14.9)
+   @DeployableTestMethod(duration = 14.9)
    @Test(timeout = 54656)
    public void testStandingForACoupleSecondsWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
@@ -92,7 +92,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
    }
 
 
-   @EstimatedDuration(duration = 44.4)
+   @DeployableTestMethod(duration = 44.4)
    @Test(timeout = 143110)
    public void testWalkingUpToRampWithShortStepsWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
@@ -130,7 +130,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
 
 
 
-   @EstimatedDuration(duration = 37.4)
+   @DeployableTestMethod(duration = 37.4)
    @Test(timeout = 122232)
    public void testTurningInPlaceAndPassingPIWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {

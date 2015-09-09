@@ -10,16 +10,16 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class CylinderTerrainObjectTest
 {
    private static final double errEpsilon = 1e-14;
    private static final double testDelta = .0001;
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSimpleCylinder()
    {
@@ -55,7 +55,7 @@ public class CylinderTerrainObjectTest
 
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testHeightAtTranslatedRot90TallHorizontalCylinderJustInsideAndOutside()
    {
@@ -95,7 +95,7 @@ public class CylinderTerrainObjectTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testHeightAtRot90TallHorizontalCylinderJustInsideAndOutside()
    {
@@ -133,7 +133,7 @@ public class CylinderTerrainObjectTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testHeightAtTranslatedVerticalCylinderJustInside()
    {
@@ -162,7 +162,7 @@ public class CylinderTerrainObjectTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testHeightAtTranslatedHorizontalCylinderJustInside()
    {
@@ -192,7 +192,7 @@ public class CylinderTerrainObjectTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testHeightAtTranslatedVerticalCylinderJustOutside()
    {
@@ -219,7 +219,7 @@ public class CylinderTerrainObjectTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testHeightAtTranslatedHorizontalCylinderJustOutside()
    {
@@ -248,7 +248,7 @@ public class CylinderTerrainObjectTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testHeightAtVerticalCylinderOutside()
    {
@@ -287,7 +287,7 @@ public class CylinderTerrainObjectTest
       assertEquals(expectedHeightOnCircle, horizontalCylinder.heightAt(height / 4, radius / 2, radius), errEpsilon);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedTwoSidesTop()
    {
@@ -317,7 +317,7 @@ public class CylinderTerrainObjectTest
       assertEquals(z, slopedRotatedCylinder.heightAt(x, y, z + 1), errEpsilon);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedTwoSidesBottom()
    {
@@ -349,7 +349,7 @@ public class CylinderTerrainObjectTest
       assertEquals(expectedHeight, slopedRotatedCylinder.heightAt(x, y, -1), errEpsilon);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedEndAndSideTop()
    {
@@ -378,7 +378,7 @@ public class CylinderTerrainObjectTest
       assertEquals(expectedHeight, slopedRotatedCylinder.heightAt(x, y, 2), errEpsilon);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedEndAndSideBottom()
    {

@@ -16,28 +16,28 @@ import us.ihmc.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
-@BambooPlan(planType={BambooPlanType.Fast})
+@DeployableTestClass(planType={BambooPlanType.Fast})
 public class NewPelvisPoseHistoryCorrectionTest
 {
    private YoVariableRegistry registry;
@@ -245,7 +245,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    
    private BooleanYoVariable isRotationCorrectionEnabled;
    
-   @EstimatedDuration(duration = 1.0)
+   @DeployableTestMethod(duration = 1.0)
    @Test(timeout = 60000)
    public void testTranslationCorrectionOnlyWithPelvisFollowingAKnownPathAndRandomLocalizationOffsets()
    {
@@ -317,7 +317,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       }
    }
    
-   @EstimatedDuration(duration = 1.0)
+   @DeployableTestMethod(duration = 1.0)
    @Test(timeout = 60000)
    public void testTooBigAngleErrorAreDetectedAndPacketIsSent()
    {

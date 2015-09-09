@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ThreePointDoubleSplines2DTest
 {
@@ -30,7 +30,7 @@ public class ThreePointDoubleSplines2DTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testSimpleFlatExample()
    {
@@ -49,7 +49,7 @@ public class ThreePointDoubleSplines2DTest
       assertFlatAndAtHeight(zHeight, zSlopeAndSecondDerivative);
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testInitialInALineExample()
    {
@@ -72,7 +72,7 @@ public class ThreePointDoubleSplines2DTest
       assertEquals(0.0, zSlopeAndSecondDerivative[2], 1e-7);
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testInitialInALineExampleTwo()
    {
@@ -112,7 +112,7 @@ public class ThreePointDoubleSplines2DTest
       assertEquals(0.0, zSlopeAndSecondDerivative[2], 1e-7);
    }
 
-	@EstimatedDuration(duration = 0.5)
+	@DeployableTestMethod(duration = 0.5)
 	@Test(timeout = 30000)
    public void testInitialInALineExampleThree()
    {
@@ -160,7 +160,7 @@ public class ThreePointDoubleSplines2DTest
       }
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testAFewQueriesOnFlatExampleOne()
    {
@@ -194,7 +194,7 @@ public class ThreePointDoubleSplines2DTest
    
    @Ignore // Not passing!
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testAFewQueries()
    {

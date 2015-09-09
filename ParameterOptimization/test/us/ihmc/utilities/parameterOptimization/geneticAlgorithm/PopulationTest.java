@@ -9,12 +9,12 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class PopulationTest
 {
 
-	@EstimatedDuration(duration = 0.8)
+	@DeployableTestMethod(duration = 0.8)
 	@Test(timeout = 30000)
    public void testPopulation()
    {

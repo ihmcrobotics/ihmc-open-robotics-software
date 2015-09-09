@@ -3,8 +3,8 @@ package us.ihmc.robotics.trajectories.providers;
 import org.junit.Test;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.Random;
 
@@ -15,7 +15,7 @@ public class ConstantPositionProviderTest
 
    private static final double EPS = 1e-12;
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void test()
    {

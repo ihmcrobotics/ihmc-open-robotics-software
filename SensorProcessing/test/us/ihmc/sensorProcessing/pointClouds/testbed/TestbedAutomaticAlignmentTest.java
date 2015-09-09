@@ -3,10 +3,6 @@ package us.ihmc.sensorProcessing.pointClouds.testbed;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
-import georegression.struct.line.LineParametric3D_F64;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.point.Vector3D_F64;
-import georegression.struct.se.Se3_F64;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,10 +12,13 @@ import org.ejml.ops.MatrixFeatures;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
-
 import com.thoughtworks.xstream.XStream;
+
+import georegression.struct.line.LineParametric3D_F64;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.point.Vector3D_F64;
+import georegression.struct.se.Se3_F64;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 /**
  * @author Peter Abeles
@@ -30,9 +29,11 @@ public class TestbedAutomaticAlignmentTest {
    Se3_F64 estimatedToModel = (Se3_F64) new XStream().fromXML(this.getClass().
            getResourceAsStream("/testbed/estimatedToModel.xml"));
 
+   /**
+    * Need the file savedTestbedCloud00_scans.csv to run this, which is huge. So manual test really.
+    */
    @Ignore
-   @QuarantinedTest("Need the file savedTestbedCloud00_scans.csv to run this, which is huge. So manual test really.")
-	@EstimatedDuration
+	@DeployableTestMethod(quarantined = true)
 	@Test(timeout=300000)
    public void expectedSolution() {
 
@@ -59,9 +60,11 @@ public class TestbedAutomaticAlignmentTest {
     * Should produce the approximately the solution when run multiple times
     */
 
+   /**
+    * Need the file savedTestbedCloud00_scans.csv to run this, which is huge. So manual test really.
+    */
 	@Ignore
-	@QuarantinedTest("Need the file savedTestbedCloud00_scans.csv to run this, which is huge. So manual test really.")
-	@EstimatedDuration
+	@DeployableTestMethod(quarantined = true)
 	@Test(timeout=300000)
    public void multipleRuns() {
 
@@ -94,7 +97,7 @@ public class TestbedAutomaticAlignmentTest {
       assertTrue(MatrixFeatures.isIdentical(first.getR(), second.getR(), 0.01));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void findLineLocation() {
 
@@ -120,7 +123,7 @@ public class TestbedAutomaticAlignmentTest {
       assertEquals(found[1],end,1e-8);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void adjustSign() {
 

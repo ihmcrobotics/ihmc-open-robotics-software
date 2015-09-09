@@ -9,7 +9,7 @@ import net.java.games.input.Event;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -17,7 +17,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class DoubleYoVariableJoystickEventListenerTest
 {
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testMinMaxAverage()
    {

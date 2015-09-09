@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -13,7 +13,7 @@ public class SimulationConstructionSetProcessDataCallTest
    private static final boolean DEBUG = false;
    private YoVariableRegistry registry;
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=1000)
    public void testForwardCount()
    {
@@ -71,7 +71,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=1000)
    public void testBackwardCount()
    {
@@ -130,7 +130,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=1000)
    public void testForwardCopy()
    {
@@ -188,7 +188,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=1000)
    public void testBackwardCopy()
    {

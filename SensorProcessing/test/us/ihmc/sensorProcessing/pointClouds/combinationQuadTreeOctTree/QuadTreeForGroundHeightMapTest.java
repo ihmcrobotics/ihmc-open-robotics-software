@@ -22,8 +22,8 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.robotics.geometry.BoundingBox2d;
@@ -44,7 +44,7 @@ public class QuadTreeForGroundHeightMapTest
    
    @Ignore
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout = 300000)
    public void testPointsFromAFile() throws NumberFormatException, IOException
    {
@@ -104,7 +104,7 @@ public class QuadTreeForGroundHeightMapTest
          ThreadTools.sleepForever();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testOnSomeSlopes()
    {
@@ -128,7 +128,7 @@ public class QuadTreeForGroundHeightMapTest
       if (visualizeAndKeepUp) ThreadTools.sleepForever();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testOnSomeStairCases()
    {
@@ -156,7 +156,7 @@ public class QuadTreeForGroundHeightMapTest
       if (visualizeAndKeepUp) ThreadTools.sleepForever();
    }
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
 	@Test(timeout = 30000)
    public void testUsingStairGroundProfile()
    {

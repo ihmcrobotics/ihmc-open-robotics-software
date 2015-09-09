@@ -6,7 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class DoubleGlobalParameterTest
 {
@@ -26,7 +26,7 @@ public class DoubleGlobalParameterTest
       GlobalParameter.clearGlobalRegistry();
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testGetValue()
    {
@@ -38,7 +38,7 @@ public class DoubleGlobalParameterTest
       assertEquals(DEFAULT_VALUE, doubleGlobalParameter.getValue(), eps);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSetValue()
    {
@@ -66,7 +66,7 @@ public class DoubleGlobalParameterTest
       assertEquals(newValue, doubleGlobalParameter.getValue(), eps);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
@@ -76,7 +76,7 @@ public class DoubleGlobalParameterTest
       parent.set(1.0);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantSetChild()
    {

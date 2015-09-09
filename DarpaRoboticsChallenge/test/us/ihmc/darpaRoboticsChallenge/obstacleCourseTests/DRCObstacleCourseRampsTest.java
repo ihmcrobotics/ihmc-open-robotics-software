@@ -21,8 +21,8 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -60,7 +60,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    private final ComHeightPacket comHeightPacket = new ComHeightPacket(0.05, 1.0);
 
 
-	@EstimatedDuration(duration = 46.7)
+	@DeployableTestMethod(duration = 46.7)
 	@Test(timeout = 230000)
    public void testWalkingUpRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
@@ -75,7 +75,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 57.0)
+	@DeployableTestMethod(duration = 57.0)
 	@Test(timeout = 280000)
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
@@ -111,7 +111,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 49.3)
+	@DeployableTestMethod(duration = 49.3)
 	@Test(timeout = 250000)
    public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
@@ -126,7 +126,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 46.4)
+	@DeployableTestMethod(duration = 46.4)
 	@Test(timeout = 230000)
    public void testWalkingUpRampWithShortStepsALittleTooHigh() throws SimulationExceededMaximumTimeException
    {
@@ -147,7 +147,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 43.9)
+	@DeployableTestMethod(duration = 43.9)
 	@Test(timeout = 220000)
    public void testWalkingUpRampWithShortStepsALittleTooLow() throws SimulationExceededMaximumTimeException
    {

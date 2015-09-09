@@ -5,8 +5,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.robotics.dataStructures.Vector64F;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -97,7 +97,7 @@ public class HierarchicalKinematicSolverTest {
 
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Ignore //This test hangs bamboo, we need to figure out why? see http://bamboo.ihmc.us/browse/RC-ALL2-IHMCUTILITIES-51/log
 	@Test(timeout=300000)
    public void test() {

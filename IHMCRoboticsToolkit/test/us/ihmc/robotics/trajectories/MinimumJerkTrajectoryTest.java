@@ -1,7 +1,8 @@
 package us.ihmc.robotics.trajectories;
 
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -17,7 +18,7 @@ public class MinimumJerkTrajectoryTest
       return min + Math.random() * (max - min);
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testRandomInitialFinalConditions()
    {
@@ -54,7 +55,7 @@ public class MinimumJerkTrajectoryTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCheckVelocityAndAcceleration()
    {

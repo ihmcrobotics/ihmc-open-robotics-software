@@ -14,15 +14,15 @@ import org.junit.Test;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
-@BambooPlan(planType = {BambooPlanType.Flaky})
+@DeployableTestClass(planType = {BambooPlanType.Flaky})
 public class CutForceControlHelperTest {
 	/**
 	 * Unit test to test the functions of the TaskspaceToJointspaceHandForcefeedbackControlState extracted in CutForceControlHelper.
@@ -67,7 +67,7 @@ public class CutForceControlHelperTest {
 	/**
 	 * Test the exponential character of the force model.
 	 */
-	@EstimatedDuration(duration = 0.5)
+	@DeployableTestMethod(duration = 0.5)
 	@Test(timeout = 50000)
 	public void testExponentialForceModel()
 	{
@@ -87,7 +87,7 @@ public class CutForceControlHelperTest {
 	 * Note that the adapted parameters do not necessarily correspond to the real values.
 	 * The selection range for c2 and v has to be chosen small since they are in the exponent of the function.
 	 */
-	@EstimatedDuration(duration = 0.5)
+	@DeployableTestMethod(duration = 0.5)
 	@Test(timeout = 50000)
 	public void testModelParameterAdaption()
 	{
@@ -110,7 +110,7 @@ public class CutForceControlHelperTest {
 	/**
 	 * Test the ramp function that scales the weigthing matrix.
 	 */
-	@EstimatedDuration(duration = 0.5)
+	@DeployableTestMethod(duration = 0.5)
 	@Test(timeout = 50000)
 	public void testAdaptW()
 	{
@@ -146,7 +146,7 @@ public class CutForceControlHelperTest {
 	/**
 	 * Test the getTangentForce method using geometric considerations.
 	 */
-	@EstimatedDuration(duration = 0.5)
+	@DeployableTestMethod(duration = 0.5)
 	@Test(timeout = 50000)
 	public void testGetTangentForce()
 	{
@@ -197,7 +197,7 @@ public class CutForceControlHelperTest {
 		CutForceControlHelper.getTangentForce(forceVector, currentTangentialForce, tangentVector, lastTangentVector, fxFiltered, fyFiltered, fzFiltered, false, 0.0);
 		assertEquals(currentTangentialForce.getDoubleValue(), 0.0, EPSILON);
 	}
-	@EstimatedDuration(duration = 0.5)
+	@DeployableTestMethod(duration = 0.5)
 	@Test(timeout = 50000)
 	public void testWristSensorUpdate()
 	{

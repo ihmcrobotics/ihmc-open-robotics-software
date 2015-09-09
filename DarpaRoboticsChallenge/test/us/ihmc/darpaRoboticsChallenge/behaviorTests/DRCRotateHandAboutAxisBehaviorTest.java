@@ -42,8 +42,8 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -107,7 +107,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       }
    }
 
-	@EstimatedDuration(duration = 316.0)
+	@DeployableTestMethod(duration = 316.0)
    @Test(timeout = 1600000)
    public void testRotateSingleArmJointAndUnrotateInTaskSpace() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -152,7 +152,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 47.4)
+	@DeployableTestMethod(duration = 47.4)
    @Test(timeout = 240000)
    public void testTwoRotationsAroundSameAxis() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {

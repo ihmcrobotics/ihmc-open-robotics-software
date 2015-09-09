@@ -1,8 +1,8 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.tools.test.JUnitTools;
-
 import static org.junit.Assert.assertEquals;
+
+import us.ihmc.tools.testing.JUnitTools;
 
 /**
  * Created by nathan on 8/7/15.

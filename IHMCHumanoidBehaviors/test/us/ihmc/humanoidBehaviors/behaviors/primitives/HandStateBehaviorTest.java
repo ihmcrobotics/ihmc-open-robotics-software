@@ -7,13 +7,13 @@ import org.junit.Test;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandStatePacket;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class HandStateBehaviorTest
 {
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 300000)
    public void testSetInput()
    {

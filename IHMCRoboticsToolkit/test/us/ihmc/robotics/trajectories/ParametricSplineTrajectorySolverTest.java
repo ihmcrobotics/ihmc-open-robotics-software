@@ -1,7 +1,8 @@
 package us.ihmc.robotics.trajectories;
 
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
@@ -16,7 +17,7 @@ public class ParametricSplineTrajectorySolverTest
     * @Agraber
     */
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void test3rdOrder2DTrajectoryWithMidpoint(){
       double tolerance = 1e-13;
@@ -60,7 +61,7 @@ public class ParametricSplineTrajectorySolverTest
       assertArrayEquals(midPointPosition, trajectory.getPositions(midPointTime), tolerance);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void test3rdOrder1DTrajectoryWithMidpoint(){
       double tolerance = 1e-13;
@@ -105,7 +106,7 @@ public class ParametricSplineTrajectorySolverTest
       assertArrayEquals(midPointPosition, trajectory.getPositions(midPointTime), tolerance);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void test3rdOrderBasic1DMovementTrajectory(){
       double tolerance = 1e-13;
@@ -145,7 +146,7 @@ public class ParametricSplineTrajectorySolverTest
       assertArrayEquals(endVelocity, trajectory.getVelocities(endTime), tolerance);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void test3rdOrderNoMovementTrajectory(){
       double tolerance = 1e-13;
@@ -185,7 +186,7 @@ public class ParametricSplineTrajectorySolverTest
       assertArrayEquals(endVelocity, trajectory.getVelocities(endTime), tolerance);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testInvalidNumberOfConstraints(){
       int order = 3;

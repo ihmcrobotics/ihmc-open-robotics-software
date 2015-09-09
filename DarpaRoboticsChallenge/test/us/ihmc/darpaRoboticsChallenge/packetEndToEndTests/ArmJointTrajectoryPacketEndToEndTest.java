@@ -21,8 +21,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
@@ -45,7 +45,7 @@ public abstract class ArmJointTrajectoryPacketEndToEndTest implements MultiRobot
       simulationTestingParameters.setKeepSCSUp(false);
    }
    
-	@EstimatedDuration(duration = 44.9)
+	@DeployableTestMethod(duration = 44.9)
    @Test(timeout = 220000)
    public void testPacketRight() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -76,7 +76,7 @@ public abstract class ArmJointTrajectoryPacketEndToEndTest implements MultiRobot
       executePacket(packet);
    }
    
-	@EstimatedDuration(duration = 62.3)
+	@DeployableTestMethod(duration = 62.3)
    @Test(timeout = 310000)
    public void testRandomPackets() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

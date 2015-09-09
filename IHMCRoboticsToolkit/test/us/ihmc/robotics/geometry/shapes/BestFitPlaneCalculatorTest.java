@@ -9,7 +9,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.HeightMapBestFitPlaneCalculator;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.GMatrix;
 import javax.vecmath.Point2d;
@@ -23,7 +23,7 @@ public class BestFitPlaneCalculatorTest
 {
    private static final double eps = 1e-7;
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void basicBestFitPlaneCalculatorTest() throws InsufficientDataException
    {
@@ -53,7 +53,7 @@ public class BestFitPlaneCalculatorTest
 
    }  
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void basicBestFitPlaneCalculatorNaNTest() throws InsufficientDataException
    {

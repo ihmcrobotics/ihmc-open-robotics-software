@@ -6,11 +6,11 @@ import javax.xml.bind.JAXBException;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class SDFRobotTest
 {
-	@EstimatedDuration(duration = 0.7)
+	@DeployableTestMethod(duration = 0.7)
    @Test(timeout = 30000)
    public void testNullJointMap() throws FileNotFoundException, JAXBException
    {

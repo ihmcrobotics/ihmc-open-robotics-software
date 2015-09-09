@@ -7,8 +7,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import Jama.Matrix;
 
 public class MatrixTest
@@ -21,7 +21,7 @@ public class MatrixTest
    Matrix matrix;
    Matrix matrixInverted;
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testInvert()
    {
@@ -63,7 +63,7 @@ public class MatrixTest
       assertTrue("Matrix Inversion works well", true);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testPseudoInvert()
    {

@@ -4,7 +4,7 @@ import Jama.Matrix;
 import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -19,7 +19,7 @@ public class EigenvalueDecomposerTest
    P1 = zeta * wn, P2 = Math.sqrt(1.0 - zeta * zeta) * wn, P3 = wn * wn;
    private double epsilon = 1e-7;
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetEigenvalues()
    {
@@ -52,7 +52,7 @@ public class EigenvalueDecomposerTest
       verifyTwoComplexConjugateEigenvalue(decomposerMassSpringDamper.getEigenvalues(), -P1, P2);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testDecompositions()
    {
@@ -141,7 +141,7 @@ public class EigenvalueDecomposerTest
       assertTrue(foundComplexPair);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCircleGenerator()
    {
@@ -155,7 +155,7 @@ public class EigenvalueDecomposerTest
       verifyDecomposition(matrixA, circleDecomposer);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testZeroMatrix()
    {
@@ -167,7 +167,7 @@ public class EigenvalueDecomposerTest
       verifyDecomposition(matrixA, eigenvalueDecomposer);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIdentityMatrix()
    {
@@ -180,7 +180,7 @@ public class EigenvalueDecomposerTest
       verifyDecomposition(matrixA, eigenvalueDecomposer);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testThreeByThreeIdentityMatrix()
    {
@@ -194,7 +194,7 @@ public class EigenvalueDecomposerTest
       verifyDecomposition(matrixA, eigenvalueDecomposer);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testRepeatedPoles()
    {
@@ -209,7 +209,7 @@ public class EigenvalueDecomposerTest
    
    @Ignore
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testMCSExample()
    {
@@ -224,7 +224,7 @@ public class EigenvalueDecomposerTest
       verifyDecomposition(matrixA, eigenvalueDecomposer);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testRandomExample()
    {

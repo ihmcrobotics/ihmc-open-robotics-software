@@ -28,8 +28,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -86,7 +86,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 
-   @EstimatedDuration(duration = 27.7)
+   @DeployableTestMethod(duration = 27.7)
    @Test(timeout = 83115)
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
@@ -113,7 +113,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 27.7)
+   @DeployableTestMethod(duration = 27.7)
    @Test(timeout = 83115)
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {
@@ -153,7 +153,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
    
-   @EstimatedDuration(duration = 27.7)
+   @DeployableTestMethod(duration = 27.7)
    @Test(timeout = 83115)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {

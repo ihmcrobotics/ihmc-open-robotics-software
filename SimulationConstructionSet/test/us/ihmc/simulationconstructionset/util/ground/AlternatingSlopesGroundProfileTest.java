@@ -6,7 +6,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
 {
@@ -34,7 +34,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       return 0.0;
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testAllFlat()
    {
@@ -51,7 +51,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(0.0, height, epsilon);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testOne()
    {
@@ -87,7 +87,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(0.0, height, epsilon);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testTwo()
    {
@@ -111,7 +111,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(1.0, height, epsilon);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testThree()
    {
@@ -140,7 +140,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(1.0, height, epsilon);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testFour()
    {
@@ -171,7 +171,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(1.0, height, epsilon);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(expected = RuntimeException.class,timeout=300000)
    public void testBadOrderingOne()
    {
@@ -179,7 +179,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       new AlternatingSlopesGroundProfile(xSlopePairs);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(expected = RuntimeException.class, timeout=300000)
    public void testBadOrderingTwo()
    {

@@ -17,15 +17,15 @@ import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasDrivingInitialSetupTest
 {
    private static final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
    
-	@EstimatedDuration(duration = 1.0)
+	@DeployableTestMethod(duration = 1.0)
    @Test(timeout = 30000)
    public void testLoadFile()
    {
@@ -37,7 +37,7 @@ public class AtlasDrivingInitialSetupTest
       initialSetup.initializeRobot(robot, jointMap);
    }
    
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testFileContainsAllJoints()
    {

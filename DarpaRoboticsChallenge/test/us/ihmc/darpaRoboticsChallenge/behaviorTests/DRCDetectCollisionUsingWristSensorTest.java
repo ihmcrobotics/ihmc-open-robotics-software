@@ -28,8 +28,8 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -160,7 +160,7 @@ public abstract class DRCDetectCollisionUsingWristSensorTest implements MultiRob
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 15.9)
+   @DeployableTestMethod(duration = 15.9)
    @Test(timeout = 47679)
    public void testImpactDetectionUsingHandPoseBehavior() throws SimulationExceededMaximumTimeException
    {

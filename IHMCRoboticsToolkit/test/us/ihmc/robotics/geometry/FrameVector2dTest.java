@@ -3,8 +3,8 @@ package us.ihmc.robotics.geometry;
 import org.junit.After;
 import org.junit.Test;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
@@ -40,7 +40,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
    {
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testFrameVector2d_ReferenceFrame_double_double_String()
    {
@@ -53,7 +53,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", frame.getReferenceFrame(), theFrame);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testFrameVector2d_ReferenceFrame_double_double()
    {
@@ -65,7 +65,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", frame.getReferenceFrame(), theFrame);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testFrameVector2d()
    {
@@ -76,7 +76,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", frame.getReferenceFrame(), ReferenceFrame.getWorldFrame());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testFrameVector2d_ReferenceFrame_Tuple2d()
    {
@@ -89,7 +89,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", frame.getReferenceFrame(), theFrame);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testFrameVector2d_ReferenceFrame_double()
    {
@@ -102,7 +102,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", frame.getReferenceFrame(), theFrame);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testFrameVector2d_ReferenceFrame()
    {
@@ -114,7 +114,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", frame.getReferenceFrame(), theFrame);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testFrameVector2d_FrameTuple2d()
    {
@@ -127,7 +127,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", frame.getReferenceFrame(), frameTuple.getReferenceFrame());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testFrameVector2d_FramePoint2d_FramePoint2d()
    {
@@ -151,7 +151,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetVector()
    {
@@ -163,7 +163,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", frame.getY(), vector2d.getY(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testRotate90()
    {
@@ -176,7 +176,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", frame.getY(), x, epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testDot_FrameVector2d()
    {
@@ -200,7 +200,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCross_FrameVector2d()
    {
@@ -224,7 +224,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testAngle_FrameVector2d()
    {
@@ -252,7 +252,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testNormalize()
    {
@@ -264,7 +264,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", 1.0, result, epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testLength()
    {
@@ -274,7 +274,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", result, frame1.length(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testLengthSquared()
    {
@@ -284,7 +284,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", result, frame1.lengthSquared(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testClipMaxLength_double()
    {
@@ -301,7 +301,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be 0.0", frame1.getY(), 0.0, epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrame_ReferenceFrame()
    {
@@ -313,7 +313,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       frameVector.checkReferenceFrameMatch(childFrame);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransform_Transform3D()
    {  
@@ -346,7 +346,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", vectorToTransform2.getY(), vectorToTest2.getY(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransformCopy_Transform3D()
    {
@@ -379,7 +379,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", vectorToTransform2.getY(), vectorToTest2.getY(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrameUsingTransform_ReferenceFrame_Transform3D()
    { 
@@ -397,7 +397,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       vectorToTest.checkReferenceFrameMatch(theFrame);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
       public void testChangeFrameUsingTransformCopy_ReferenceFrame_Transform3D()
       {
@@ -416,7 +416,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
          copy.checkReferenceFrameMatch(theFrame);
       }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSets()
    {
@@ -431,7 +431,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       alpha.set(beta);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testadd()
    {
@@ -443,7 +443,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
 
    // NaN was found in beta, commented out for further testing
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCheckForNaN()
    {
@@ -464,7 +464,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
     * frames.add(worldFrame); frames.clear(); }
     */
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testInterpolate()
    {
@@ -476,7 +476,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       gamma.interpolate(beta, alpha, 1);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetReferenceFrame()
    {
@@ -486,7 +486,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       beta.getReferenceFrame();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGets()
    {

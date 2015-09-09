@@ -26,8 +26,8 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.dataStructures.AbstractHeightMapTest;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.BoundingBox2d;
@@ -50,7 +50,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    private static final boolean DO_ASSERTS = true;
 
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
    @Test (timeout = 30000)
    public void testGetStoredPoints()
    {
@@ -102,7 +102,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleThings()
    {
@@ -121,14 +121,14 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(true, quadTree.getLeafNodeAtLocation(0.5f, 0.5f).getMetaData().getIsStuffAboveMe());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGettingAreas()
    {
       super.testGettingAreas();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSomethingAbove() throws Exception
    {
@@ -251,7 +251,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       return new GroundOnlyQuadTree(xMin, yMin, xMax, yMax, quadTreeResolution, heightThreshold, 100000);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testPuttingDifferentHeightPointsAtDifferentLocations() throws Exception
    {
@@ -278,7 +278,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testPuttingSimilarHeightPoints() throws Exception
    {
@@ -306,7 +306,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testAll() throws Exception
    {
@@ -606,7 +606,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
        */
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testMerging() throws Exception
    {
@@ -742,7 +742,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testClear() throws Exception
    {
@@ -804,7 +804,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
    }*/
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetMinX() throws Exception
    {
@@ -815,7 +815,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetMaxX() throws Exception
    {
@@ -826,7 +826,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetMinY() throws Exception
    {
@@ -837,7 +837,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetMaxY() throws Exception
    {
@@ -851,7 +851,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
 
    @Ignore
-   @EstimatedDuration
+   @DeployableTestMethod
    @Test(timeout = 150000)
    public void testOnALineOfPoints()
    {
@@ -871,7 +871,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    }
 
    @Ignore
-   @EstimatedDuration
+   @DeployableTestMethod
    @Test(timeout = 150000)
    public void testOnSomeSlopes()
    {
@@ -894,7 +894,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    }
 
    @Ignore
-   @EstimatedDuration
+   @DeployableTestMethod
    @Test(timeout = 150000)
    public void testOnSomeStairCases()
    {
@@ -921,7 +921,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    }
 
    @Ignore
-   @EstimatedDuration
+   @DeployableTestMethod
    @Test(timeout = 150000)
    public void testUsingStairGroundProfile()
    {

@@ -14,16 +14,16 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.utils.CoordinateFrameNode;
 import us.ihmc.graphics3DAdapter.utils.FlatHeightMap;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.robotics.geometry.shapes.Sphere3d;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@BambooPlan(planType={BambooPlanType.UI})
+@DeployableTestClass(planType={BambooPlanType.UI})
 public class JMERendererTest
 {
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
 	@Test(timeout = 30000)
    public void testInitialization()
    {
@@ -40,7 +40,7 @@ public class JMERendererTest
     * Ground should flash on and off a few times.
     */
 
-	@EstimatedDuration(duration = 2.2)
+	@DeployableTestMethod(duration = 2.2)
 	@Test(timeout = 30000)
    public void testSetGroundVisible()
    {
@@ -66,7 +66,7 @@ public class JMERendererTest
     * Should see a sphere orbit in a circle and leave 5 copies of itself along the way.
     */
 
-	@EstimatedDuration(duration = 3.1)
+	@DeployableTestMethod(duration = 3.1)
 	@Test(timeout = 30000)
    public void testFreezeFrame()
    {

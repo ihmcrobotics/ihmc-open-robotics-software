@@ -15,13 +15,13 @@ import org.ros.node.service.ServiceResponseListener;
 import test_ros.AddTwoInts;
 import test_ros.AddTwoIntsRequest;
 import test_ros.AddTwoIntsResponse;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.utilities.ros.service.AddTwoIntsClient;
 import us.ihmc.utilities.ros.service.AddTwoIntsServer;
 
-@BambooPlan(planType = {BambooPlanType.Flaky})
+@DeployableTestClass(planType = {BambooPlanType.Flaky})
 public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
 {
    
@@ -32,7 +32,7 @@ public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
       super.setUp(USE_JAVA_ROSCORE);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=5000)
    public void lowlevelRosServiceClientTest  () throws URISyntaxException, InterruptedException
    {
@@ -80,7 +80,7 @@ public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
    }
 	
 	
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test (timeout=5000)
    public void highLevelRosServiceClientTest() throws InterruptedException
    {

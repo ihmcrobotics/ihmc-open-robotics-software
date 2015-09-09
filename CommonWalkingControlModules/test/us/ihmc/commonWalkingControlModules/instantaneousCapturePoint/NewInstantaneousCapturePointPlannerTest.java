@@ -16,8 +16,8 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -322,7 +322,7 @@ public class NewInstantaneousCapturePointPlannerTest
 		icpVelocityLineSegment = null;
 	}
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
 	@Test(timeout = 30000)
 	public void visualizePlanner()
 	{

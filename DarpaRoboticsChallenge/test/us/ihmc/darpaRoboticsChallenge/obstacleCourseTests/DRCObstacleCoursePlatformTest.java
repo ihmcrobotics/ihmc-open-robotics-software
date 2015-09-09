@@ -22,6 +22,12 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
+import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -31,15 +37,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewinda
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifierWithStackTracing;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RotationFunctions;
-import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInterface
 {   
@@ -72,8 +71,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
    @Ignore
-   @QuarantinedTest("This test is flaky. Sometimes it works, sometimes it doesn't due to threading of the various globalDataProducer and communicators. We need to be able to shut those off or make them not screw up the robot run.")
-   @EstimatedDuration
+   // "This test is flaky. Sometimes it works, sometimes it doesn't due to threading of the various globalDataProducer and communicators. We need to be able to shut those off or make them not screw up the robot run.")
+   @DeployableTestMethod(quarantined = true)
    @Test(timeout=300000)
    public void testRunsTheSameWayTwiceJustStanding() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
@@ -152,7 +151,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
    
-	@EstimatedDuration(duration = 30.4)
+	@DeployableTestMethod(duration = 30.4)
 	@Test(timeout = 151825)
    public void testWalkingOverSmallPlatformQuickly() throws SimulationExceededMaximumTimeException
    {
@@ -189,7 +188,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 48.8)
+	@DeployableTestMethod(duration = 48.8)
    @Test(timeout = 243954)
    public void testSidestepOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
@@ -224,7 +223,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 49.2)
+	@DeployableTestMethod(duration = 49.2)
    @Test(timeout = 246010)
    public void testSidestepOverSmallWall() throws SimulationExceededMaximumTimeException
    {
@@ -259,7 +258,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 43.5)
+	@DeployableTestMethod(duration = 43.5)
    @Test(timeout = 217348)
    public void testWalkingOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
@@ -306,7 +305,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
 
 
-	@EstimatedDuration(duration = 29.9)
+	@DeployableTestMethod(duration = 29.9)
 	@Test(timeout = 149558)
    public void testWalkingOntoMediumPlatformToesTouching() throws SimulationExceededMaximumTimeException
    {
@@ -343,7 +342,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
 
-	@EstimatedDuration(duration = 30.0)
+	@DeployableTestMethod(duration = 30.0)
 	@Test(timeout = 149768)
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
    {
@@ -380,7 +379,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
 
-	@EstimatedDuration(duration = 30.0)
+	@DeployableTestMethod(duration = 30.0)
 	@Test(timeout = 149768)
 	public void testWalkingOffOfMediumPlatformSlowSteps() throws SimulationExceededMaximumTimeException
 	{

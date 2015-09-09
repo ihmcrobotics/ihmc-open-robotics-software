@@ -3,13 +3,13 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
-import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 /**
  * @author Nicolas EYSSETTE

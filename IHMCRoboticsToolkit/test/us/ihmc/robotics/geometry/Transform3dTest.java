@@ -4,8 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.AxisAngle4f;
@@ -32,7 +32,7 @@ public class Transform3dTest
 {
 	private final int nTests = 200;
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestAxisAngleAllZerosAndScale()
 	{
@@ -63,7 +63,7 @@ public class Transform3dTest
 	   }
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void TestAxisAngleAllZerosWithTranslationAndScale()
    {
@@ -98,7 +98,7 @@ public class Transform3dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void TestAxisAngleAllZerosWithTranslationAndScaleWithFloats()
    {
@@ -133,7 +133,7 @@ public class Transform3dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void TestAxisAngleAllZerosAndVectorScale()
    {
@@ -164,7 +164,7 @@ public class Transform3dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMultipleDoubleScales1()
 	{
@@ -196,7 +196,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMultipleDoubleScales2()
 	{
@@ -228,7 +228,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMultipleDoubleScales3()
 	{
@@ -267,7 +267,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMultipleDoubleScales4()
 	{
@@ -306,7 +306,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMultipleDoubleScales5()
 	{
@@ -345,7 +345,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMultipleDoubleScales6()
 	{
@@ -384,7 +384,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMultipleDoubleScales7()
 	{
@@ -416,7 +416,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestUseAxisAngleRepresentation()
 	{
@@ -477,7 +477,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestUseAxisAngleRepresentation2()
 	{
@@ -544,7 +544,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestUseAxisAngleRepresentation2WithScale()
 	{
@@ -616,7 +616,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestUseAxisAngleRepresentation2WithVectorScale()
 	{
@@ -689,7 +689,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestUseAxisAngleRepresentation3()
 	{
@@ -755,7 +755,7 @@ public class Transform3dTest
 
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestUseAxisAngleRepresentationWithFloats()
 	{
@@ -819,7 +819,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestUseAxisAngleRepresentationWithFloats2()
 	{
@@ -890,7 +890,7 @@ public class Transform3dTest
 
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestUseAxisAngleRepresentationWithFloats2AndScale()
 	{
@@ -961,7 +961,7 @@ public class Transform3dTest
 
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestUseAxisAngleRepresentationWithFloats2AndVectorScale()
 	{
@@ -1035,7 +1035,7 @@ public class Transform3dTest
 
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestNormalize()
 	{
@@ -1054,7 +1054,7 @@ public class Transform3dTest
 
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestUseAxisAngleRepresentationWithFloats3()
 	{
@@ -1120,7 +1120,7 @@ public class Transform3dTest
 
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestGetTransformAsQuat4dAndVector3d()
 	{
@@ -1149,7 +1149,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestGetTransformAsQuat4dAndVector3dWithScale()
 	{
@@ -1185,7 +1185,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestGetTransformAsQuat4dAndVector3dWithZeroScale()
 	{
@@ -1221,7 +1221,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateTransformWithQuat4dAndVector3d()
 	{
@@ -1254,7 +1254,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateTransformWithQuat4dAndVector3dAndScale()
 	{
@@ -1293,7 +1293,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateTransformWithQuat4dAndVector3dAndVectorScale()
 	{
@@ -1333,7 +1333,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateTransformWithQuat4fAndVector3f()
 	{
@@ -1366,7 +1366,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateTransformWithQuat4fAndVector3fAndVectorScales()
 	{
@@ -1404,7 +1404,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateTransformWithQuat4d()
 	{
@@ -1437,7 +1437,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestSetTransformWithQuat4d()
 	{
@@ -1470,7 +1470,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestSetTransformWithQuat4dAndVector3d()
 	{
@@ -1506,7 +1506,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestSetTransformWithQuat4dAndVector3dAndScale()
 	{
@@ -1548,7 +1548,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestSetTransformWithQuat4f()
 	{
@@ -1581,7 +1581,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestSetTransformWithQuat4fAndVector3f()
 	{
@@ -1617,7 +1617,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestSetTransformWithQuat4fAndVector3fAndScale()
 	{
@@ -1660,7 +1660,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestDeterminant()
 	{
@@ -1677,7 +1677,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestDeterminantWithScaledTransform()
 	{
@@ -1699,7 +1699,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateTransformWithQuat4f()
 	{
@@ -1731,7 +1731,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateTransformWithQuat4f2()
 	{
@@ -1759,7 +1759,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateTransformWithQuatWithZeroVectorElement()
 	{
@@ -1788,7 +1788,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateTransformWithQuatWithZeroScalarElement()
 	{
@@ -1814,7 +1814,7 @@ public class Transform3dTest
 		assertEquals(quat1.w, quatCheck.w, 1e-7);
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestGetTransformAsQuat4fAndVector3f()
 	{
@@ -1846,7 +1846,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateTransformFromMatrix3dAndGetTransformAsMatrix3d()
 	{
@@ -1877,7 +1877,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestSetMatrixScaleWithMatrix3d()
 	{
@@ -1911,7 +1911,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestSetMatrixScaleWithMatrix3f()
 	{
@@ -1946,7 +1946,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateTransformFromMatrix3dAndGetTransformAsMatrix3dWithScale()
 	{
@@ -1977,7 +1977,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromMatrix3d()
 	{
@@ -2008,7 +2008,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestSetAsMatrix3d()
 	{
@@ -2046,7 +2046,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestSetAsVector3d()
 	{
@@ -2075,7 +2075,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestSetAsVector3f()
 	{
@@ -2104,7 +2104,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestSetAsMatrix3f()
 	{
@@ -2142,7 +2142,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromMatrix3d2()
 	{
@@ -2175,7 +2175,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromMatrix3f()
 	{
@@ -2206,7 +2206,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromMatrix3f2()
 	{
@@ -2236,7 +2236,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromTransform()
 	{
@@ -2254,7 +2254,7 @@ public class Transform3dTest
 		JUnitTools.assertMatrixEquals("", matrixCheck, matrix, 1e-12);
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromMatrix3fAndVector3f()
 	{
@@ -2280,7 +2280,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateIdentityTransform()
 	{
@@ -2308,7 +2308,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromMatrix4d()
 	{
@@ -2329,7 +2329,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromColumnMajorMatrix4d()
 	{
@@ -2352,7 +2352,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromColumnMajorMatrix4()
 	{
@@ -2379,7 +2379,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromColumnMajorMatrix4f()
 	{
@@ -2402,7 +2402,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromMatrix4f()
 	{
@@ -2423,7 +2423,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromDenseMatrix()
 	{
@@ -2444,7 +2444,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromDenseMatrixAndVector3d()
 	{
@@ -2469,7 +2469,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromDenseMatrixAndVector3dWithVectorScale()
 	{
@@ -2502,7 +2502,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromDenseMatrixThatIsTheWrongSize()
 	{
@@ -2519,7 +2519,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromDoubleArray()
 	{
@@ -2539,7 +2539,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMax()
 	{
@@ -2562,7 +2562,7 @@ public class Transform3dTest
 		assertEquals(Transform3d.max3(a, b, c), a, 1e-12);
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestCreateFromfloatArray()
 	{
@@ -2585,7 +2585,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformMultiplication()
 	{
@@ -2612,7 +2612,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformMultiplication2()
 	{
@@ -2640,7 +2640,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformMultiplication3()
 	{
@@ -2668,7 +2668,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 1.3)
+	@DeployableTestMethod(duration = 1.3)
 	@Test(timeout = 30000)
 	public void TestOrthogonalityOfChainOfTransformations()
 	{
@@ -2695,7 +2695,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMatrixInverse()
 	{
@@ -2718,7 +2718,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMatrixInverse7()
 	{
@@ -2743,7 +2743,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMatrixManyMatrixInverses()
 	{
@@ -2771,7 +2771,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestNearSingularMatrixInverse()
 	{
@@ -2802,7 +2802,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestInvertTransform2()
 	{
@@ -2834,7 +2834,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestInvertTransform3()
 	{
@@ -2864,7 +2864,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMatrixInverseWithScale()
 	{
@@ -2899,7 +2899,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMatrixInverseWithScale3()
 	{
@@ -2938,7 +2938,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMatrixInverseWithScale4()
 	{
@@ -2976,7 +2976,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMatrixInverseWithScale2()
 	{
@@ -3027,7 +3027,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestMatrixInverse2()
 	{
@@ -3055,7 +3055,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestEpsilonEquals()
 	{
@@ -3086,7 +3086,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestEpsilonEqualsWithScale()
 	{
@@ -3120,7 +3120,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestRotX()
 	{
@@ -3144,7 +3144,7 @@ public class Transform3dTest
 				1e-12);
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestRotY()
 	{
@@ -3168,7 +3168,7 @@ public class Transform3dTest
 				1e-12);
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestRotZ()
 	{
@@ -3192,7 +3192,7 @@ public class Transform3dTest
 				1e-12);
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestEquals()
 	{
@@ -3212,7 +3212,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestEqualsWithScale()
 	{
@@ -3232,7 +3232,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestEulerAngles()
 	{
@@ -3259,7 +3259,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestEulerAnglesWithScale()
 	{
@@ -3294,7 +3294,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformVector4d()
 	{
@@ -3319,7 +3319,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformVector4d2()
 	{
@@ -3343,7 +3343,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformVector4f()
 	{
@@ -3368,7 +3368,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformVector4f2()
 	{
@@ -3392,7 +3392,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformVector3d()
 	{
@@ -3419,7 +3419,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformVector3f()
 	{
@@ -3446,7 +3446,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformVector3f2()
 	{
@@ -3472,7 +3472,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformVector3d2()
 	{
@@ -3498,7 +3498,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformPoint3d()
 	{
@@ -3528,7 +3528,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformPoint3d2()
 	{
@@ -3557,7 +3557,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformPoint3f()
 	{
@@ -3587,7 +3587,7 @@ public class Transform3dTest
 		}
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void TestTransformPoint3f2()
 	{

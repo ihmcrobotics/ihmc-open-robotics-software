@@ -9,13 +9,13 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class DataBufferEntryTest
 {
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testGetVal()
    {
@@ -30,7 +30,7 @@ public class DataBufferEntryTest
       assertEquals(tempDouble, dataBufferEntry.getVariableValueAsADouble(), 0);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testTickAndUpdate()
    {
@@ -57,7 +57,7 @@ public class DataBufferEntryTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000) public void testComputeAverage()
    {
       int nPoints = 100;
@@ -82,7 +82,7 @@ public class DataBufferEntryTest
       assertEquals(average, computedAverage, 1e-7);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testUpdateValue()
    {
@@ -108,7 +108,7 @@ public class DataBufferEntryTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testCheckIfDataIsEqual()
    {
@@ -158,7 +158,7 @@ public class DataBufferEntryTest
       assertFalse(dataBufferEntry.checkIfDataIsEqual(entry2, nPoints, nPoints - 1, epsilon)); //inPoint out of bounds
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testGetMinAndMaxScaling()
    {
@@ -176,7 +176,7 @@ public class DataBufferEntryTest
       assertEquals(maxScaling, dataBufferEntry.getManualMaxScaling(), 0);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testGetVariable()
    {
@@ -189,7 +189,7 @@ public class DataBufferEntryTest
       assertEquals(doubleYoVariable, dataBufferEntry.getVariable());
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testCopyValueThrough()
    {
@@ -210,7 +210,7 @@ public class DataBufferEntryTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testEnlargeBufferSize()
    {
@@ -239,7 +239,7 @@ public class DataBufferEntryTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testCropData()
    {
@@ -301,7 +301,7 @@ public class DataBufferEntryTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testCutData()
    {
@@ -390,7 +390,7 @@ public class DataBufferEntryTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testPackData()
    {
@@ -431,7 +431,7 @@ public class DataBufferEntryTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testGetMax()
    {
@@ -451,7 +451,7 @@ public class DataBufferEntryTest
       assertEquals(tempInteger + 10, dataBufferEntry.getMax(), 0);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testGetMin()
    {
@@ -471,7 +471,7 @@ public class DataBufferEntryTest
       assertEquals(0, dataBufferEntry.getMin(), 0);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testMinMaxWithNaN()
    {
@@ -489,7 +489,7 @@ public class DataBufferEntryTest
       assertEquals(0.0, dataBufferEntry.getMax(), 0.0);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testMinMaxWithNaN2()
    {
@@ -512,7 +512,7 @@ public class DataBufferEntryTest
       assertTrue(dataBufferEntry.getMin() <= dataBufferEntry.getMax());
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testResetMinMaxChanged()
    {
@@ -530,7 +530,7 @@ public class DataBufferEntryTest
       assertFalse(dataBufferEntry.minMaxChanged());
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSetData()
    {
@@ -547,7 +547,7 @@ public class DataBufferEntryTest
       assertEquals(tempDouble, dataBufferEntry.getData()[randomIndex], 0);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testGetWindowedData()
    {
@@ -580,7 +580,7 @@ public class DataBufferEntryTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testEnableAutoScale()
    {
@@ -595,7 +595,7 @@ public class DataBufferEntryTest
       assertFalse(dataBufferEntry.isAutoScaleEnabled());
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testGetMaxWithParameters()
    {
@@ -626,7 +626,7 @@ public class DataBufferEntryTest
       assertEquals(oldMax, dataBufferEntry.getMax(500,450,350,450), 0);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testGetMinWithParameters()
    {

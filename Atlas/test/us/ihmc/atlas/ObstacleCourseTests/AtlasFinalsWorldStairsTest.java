@@ -33,15 +33,15 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
  * Created by agrabertilton on 4/15/15.
  */
-@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoA})
+@DeployableTestClass(planType = {BambooPlanType.Fast, BambooPlanType.VideoA})
 public class AtlasFinalsWorldStairsTest
 {
    protected SimulationTestingParameters simulationTestingParameters;
@@ -73,7 +73,7 @@ public class AtlasFinalsWorldStairsTest
    }
 
 
-	@EstimatedDuration(duration = 135.0)
+	@DeployableTestMethod(duration = 135.0)
    @Test(timeout = 680000)
    public void testWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
@@ -121,7 +121,7 @@ public class AtlasFinalsWorldStairsTest
    }
 
    @Ignore
-   @EstimatedDuration(duration = 30.4)
+   @DeployableTestMethod(duration = 30.4)
    @Test(timeout = 151825)
    public void testFastWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {

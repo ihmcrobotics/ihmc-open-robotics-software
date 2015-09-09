@@ -14,13 +14,13 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 
 public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTestInterface
 {
-	@EstimatedDuration(duration = 0.5)
+	@DeployableTestMethod(duration = 0.5)
    @Test(timeout = 30000)
    public void testInverseDynamicsStartingWithRandomTorquesInSCS() throws UnreasonableAccelerationException
    {
@@ -92,7 +92,7 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
    }
 
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
    @Test(timeout = 30000)
    public void testInverseDynamicsStartingWithRandomAccelerationsInInverseDynamics() throws UnreasonableAccelerationException
    {

@@ -7,7 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class TypicalTorqueSpeedCurveTest
 {
@@ -21,7 +21,7 @@ public class TypicalTorqueSpeedCurveTest
    {
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000) 
    public void testOne()
    {

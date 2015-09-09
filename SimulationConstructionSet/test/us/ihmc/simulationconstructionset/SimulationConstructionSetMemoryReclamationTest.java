@@ -10,18 +10,18 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-@BambooPlan(planType = {BambooPlanType.UI})
+@DeployableTestClass(planType = {BambooPlanType.UI})
 public class SimulationConstructionSetMemoryReclamationTest
 {
    private static final boolean DEBUG = true;
 
-	@EstimatedDuration(duration = 10.1)
+	@DeployableTestMethod(duration = 10.1)
 	@Test(timeout = 51000)
    public void testMemoryReclamationForSCSWithoutARobot()
    {
@@ -36,7 +36,7 @@ public class SimulationConstructionSetMemoryReclamationTest
       assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
    }
 
-	@EstimatedDuration(duration = 7.2)
+	@DeployableTestMethod(duration = 7.2)
 	@Test(timeout = 36000)
    public void testMemoryReclamationForSCSWithARobot()
    {
@@ -53,7 +53,7 @@ public class SimulationConstructionSetMemoryReclamationTest
 
    @Ignore // TODO https://jira.ihmc.us/browse/DRC-2208
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testMemoryReclamationForSCSWithARobotAndVideo()
    {

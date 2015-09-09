@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -31,7 +31,7 @@ public class DesiredFootstepCalculatorToolsTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration(duration = 0.4)
+	@DeployableTestMethod(duration = 0.4)
 	@Test(timeout = 30000)
    public void testComputeMaximumPoints()
    {

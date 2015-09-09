@@ -7,14 +7,14 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 /**
  * @author Peter Abeles
  */
 public class Gaussian2D_F64Test {
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void chisq() {
       Gaussian2D_F64 g = new Gaussian2D_F64();
@@ -31,7 +31,7 @@ public class Gaussian2D_F64Test {
       assertEquals(g.chisq(4,6),g.chisq(6,6),1e-8);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void invertCovariance() {
       Gaussian2D_F64 g = new Gaussian2D_F64();
@@ -49,7 +49,7 @@ public class Gaussian2D_F64Test {
       assertEquals(A.get(1,1),g.syy,1e-8);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void zero() {
       Gaussian2D_F64 g = new Gaussian2D_F64();
@@ -72,7 +72,7 @@ public class Gaussian2D_F64Test {
       assertEquals(0,g.syy,1e-8);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void set() {
       Gaussian2D_F64 g = new Gaussian2D_F64();
@@ -96,7 +96,7 @@ public class Gaussian2D_F64Test {
       assertEquals(h.syy,g.syy,1e-8);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void copy() {
       Gaussian2D_F64 g = new Gaussian2D_F64();

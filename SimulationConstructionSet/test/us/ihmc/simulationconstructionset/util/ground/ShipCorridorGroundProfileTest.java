@@ -6,9 +6,9 @@ import javax.vecmath.Vector3d;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ShipCorridorGroundProfileTest 
 {
@@ -27,7 +27,7 @@ public class ShipCorridorGroundProfileTest
       groundProfile = new ShipCorridorGroundProfile(100.0, -10.0, 5.0, -5.0, 0.8, -0.8, 0.0, 3.0, Math.toRadians( 2.0 ));
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSurfaceNormalAlongYAxis()
    {

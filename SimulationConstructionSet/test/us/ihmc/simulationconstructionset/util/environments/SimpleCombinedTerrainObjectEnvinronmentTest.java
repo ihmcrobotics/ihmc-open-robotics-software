@@ -14,14 +14,14 @@ import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
 
 public class SimpleCombinedTerrainObjectEnvinronmentTest
 {
    private static boolean SHOW_GUI = false;
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSimpleCombinedTerrainObjectEnvironment()
    {

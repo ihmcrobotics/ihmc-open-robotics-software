@@ -15,6 +15,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -22,7 +23,6 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.PrintTools;
 
 import javax.vecmath.Point3d;
@@ -104,7 +104,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       return handPosePacket;
    }
 
-	@EstimatedDuration(duration = 11.8)
+	@DeployableTestMethod(duration = 11.8)
 	@Test(timeout = 35449)
    public void testStartedAndCompletedStatusAreSentAndReceivedForOneHandPose() throws SimulationExceededMaximumTimeException
    {
@@ -146,7 +146,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       
    }
 
-	@EstimatedDuration(duration = 21.5)
+	@DeployableTestMethod(duration = 21.5)
 	@Test(timeout = 64372)
    public void testPauseDuringSingleSendAndReceivedForOneHandPose() throws SimulationExceededMaximumTimeException
    {
@@ -222,7 +222,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       
    }
 
-	@EstimatedDuration(duration = 11.4)
+	@DeployableTestMethod(duration = 11.4)
 	@Test(timeout = 34250)
    public void testWhenTwoHandPosesAreSentInARow() throws SimulationExceededMaximumTimeException
    {
@@ -276,7 +276,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       
    }
 
-	@EstimatedDuration(duration = 11.7)
+	@DeployableTestMethod(duration = 11.7)
 	@Test(timeout = 35190)
    public void testEachArmReceiveOneHandPoseAtTheSameTime() throws SimulationExceededMaximumTimeException
    {

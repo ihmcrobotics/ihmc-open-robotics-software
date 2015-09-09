@@ -5,16 +5,16 @@ import javax.swing.JWindow;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.gui.SplashPanel;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@BambooPlan(planType = {BambooPlanType.UI})
+@DeployableTestClass(planType = {BambooPlanType.UI})
 public class SimulationConstructionSetSetupTest
 {
    private static final int pauseTimeForGUIs = 5000;
 
-	@EstimatedDuration(duration = 5.0)
+	@DeployableTestMethod(duration = 5.0)
 	@Test(timeout = 30000)
    public void testSplashScreen()
    {
@@ -25,7 +25,7 @@ public class SimulationConstructionSetSetupTest
       window.dispose();
    }
 
-	@EstimatedDuration(duration = 5.2)
+	@DeployableTestMethod(duration = 5.2)
 	@Test(timeout = 30000)
    public void testSimulationConstructionSetWithoutARobot()
    {
@@ -37,7 +37,7 @@ public class SimulationConstructionSetSetupTest
       scs.closeAndDispose();
    }
 
-	@EstimatedDuration(duration = 5.6)
+	@DeployableTestMethod(duration = 5.6)
 	@Test(timeout = 30000)
    public void testSimulationConstructionSetWithARobot()
    {

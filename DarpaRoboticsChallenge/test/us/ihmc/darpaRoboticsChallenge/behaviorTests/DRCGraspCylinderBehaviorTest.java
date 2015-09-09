@@ -24,8 +24,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.environments.ContactableStaticCylinderRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -108,7 +108,7 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
       return new DRCGraspCylinderEnvironment(cylinderOrigins, cylinderYawAngles_degrees, cylinderPitchAngles_degrees, cylinderRollAngles_degrees);
    }
 
-	@EstimatedDuration(duration = 57.4)
+	@DeployableTestMethod(duration = 57.4)
    @Test(timeout = 290000)
    public void testGraspXAxisCylinder() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -145,7 +145,7 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
       BambooTools.reportTestFinishedMessage();
    }
    
-	@EstimatedDuration(duration = 61.2)
+	@DeployableTestMethod(duration = 61.2)
    @Test(timeout = 310000)
    public void testGraspYAxisCylinder() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -182,7 +182,7 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
       BambooTools.reportTestFinishedMessage();
    }
    
-	@EstimatedDuration(duration = 59.8)
+	@DeployableTestMethod(duration = 59.8)
    @Test(timeout = 300000)
    public void testGraspZAxisCylinder() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {

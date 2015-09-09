@@ -1,30 +1,33 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.test.JUnitTools;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
 
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class Ramp3dTest
 {
 	private static final boolean DEBUG = false;
 
+	/**
+	 * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
+	 */
    @Ignore
-   @QuarantinedTest("Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.l")
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0, quarantined = true)
 	@Test(timeout = 502)
    public void testCommonShape3dFunctionality()
    {
@@ -45,7 +48,7 @@ public class Ramp3dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testExampleUsage()
    {
@@ -60,7 +63,7 @@ public class Ramp3dTest
       assertEquals(Math.toRadians(45.0), ramp3d.getRampIncline(), 1e-7);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetAndSet()
    {
@@ -79,7 +82,7 @@ public class Ramp3dTest
       assertEquals(ramp1.getTransform(), ramp2.getTransform());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSurfaceNormal()
    {
@@ -89,7 +92,7 @@ public class Ramp3dTest
       assertEquals(ramp.getSurfaceNormal().z, 1.0 / Math.sqrt(2.0), 1e-14);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleOrthogonalProjection()
    {
@@ -110,7 +113,7 @@ public class Ramp3dTest
       assertEquals(pointToProject.z, 0.5, 1e-14);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSimplePointOutside()
    {
@@ -119,7 +122,7 @@ public class Ramp3dTest
       assertTrue(ramp3d.isInsideOrOnSurface(new Point3d(new double[] {0.5, 0.0, 0.1})));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleMethodCalls()
    {
@@ -140,7 +143,7 @@ public class Ramp3dTest
       assertFalse(ramp3d.isInsideOrOnSurface(p2));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIsInsideOrOnSurface()
    {
@@ -162,7 +165,7 @@ public class Ramp3dTest
       transform.setTranslation(new Vector3d(1.0, -1.0, 2.0));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testProjectionPerpNormal()
    {
@@ -202,10 +205,12 @@ public class Ramp3dTest
       }
    }
 
-	@Ignore
-   @QuarantinedTest("Quarantined. Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.")
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 501)
+	/**
+    * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
+    */
+   @Ignore
+   @DeployableTestMethod(duration = 0.0, quarantined = true)
+   @Test(timeout = 502)
    public void testIsInsideOrOnSurfaceRandomOrientations()
    {
       int iterations = 1000;
@@ -282,11 +287,12 @@ public class Ramp3dTest
       }
    }
 
-	
-	@Ignore
-   @QuarantinedTest("Quarantined. Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.")
-	@EstimatedDuration(duration = 0.0)
-   @Test(timeout = 501)
+   /**
+    * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
+    */
+   @Ignore
+   @DeployableTestMethod(duration = 0.0, quarantined = true)
+   @Test(timeout = 502)
 	public void testTrickyOneThatProjectsOntoTheEdge()
 	{
 	  double width = 2.1722197228830327;
@@ -327,10 +333,12 @@ public class Ramp3dTest
 	}
 	
 	
-	@Ignore
-   @QuarantinedTest("Quarantined. Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.")
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 501)
+   /**
+    * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
+    */
+   @Ignore
+   @DeployableTestMethod(duration = 0.0, quarantined = true)
+   @Test(timeout = 502)
    public void testDistance()
    {
       int iterations = 1000;
@@ -369,10 +377,12 @@ public class Ramp3dTest
       }
    }
 
-	@Ignore
-   @QuarantinedTest("Quarantined. Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.")
-	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 501)
+   /**
+    * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
+    */
+   @Ignore
+   @DeployableTestMethod(duration = 0.0, quarantined = true)
+   @Test(timeout = 502)
    public void testGetClosestPointAndNormalAt()
    {
       int iterations = 1000;
@@ -430,7 +440,7 @@ public class Ramp3dTest
 
 
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIndependenceOfCopiedTransforms()
    {
@@ -452,7 +462,7 @@ public class Ramp3dTest
       assertFalse(rampCopyBySet.getTransform().equals(ramp.getTransform()));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSetMethodSetsUpAllFieldsOfNewRampAccurately()
    {

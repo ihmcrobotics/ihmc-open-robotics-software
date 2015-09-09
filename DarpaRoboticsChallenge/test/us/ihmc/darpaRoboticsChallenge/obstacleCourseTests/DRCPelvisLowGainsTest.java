@@ -22,8 +22,8 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -67,7 +67,7 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
    
 // @Ignore
 // @QuarantinedTest("150313: This test currently fails, seemingly due to some sort of problem in the MomentumBasedController or InverseDynamicsCalculator. Trying to fix it...")
-	@EstimatedDuration(duration = 39.1)
+	@DeployableTestMethod(duration = 39.1)
    @Test(timeout = 200000)
    public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException
    {

@@ -12,11 +12,11 @@ import us.ihmc.simulationconstructionset.simulatedSensors.PerfectSimulatedIMURaw
 import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedIMURawSensorReader;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 
@@ -31,7 +31,7 @@ public class SimulatedIMURawSensorReader2Test
       random = new Random(1776L);
    }
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
 	@Test(timeout = 30000)
    public void test() throws SimulationExceededMaximumTimeException, UnreasonableAccelerationException
    {

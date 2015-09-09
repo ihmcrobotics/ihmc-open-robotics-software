@@ -25,6 +25,7 @@ import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.utilities.exceptions.NoConvergenceException;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -45,7 +46,6 @@ import us.ihmc.robotics.screwTheory.TotalWrenchCalculator;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import javax.vecmath.Vector3d;
@@ -76,7 +76,7 @@ public class OptimizationMomentumControlModuleTest
    private final double controlDT = 1e-5;    // 5e-3;
    private final double gravityZ = 9.81;
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testMomentumAndJointSpaceConstraints() throws NoConvergenceException
    {
@@ -131,7 +131,7 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-3);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testMomentumAndTaskSpaceConstraints()
    {
@@ -207,7 +207,7 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testMomentumAndPointAccelerationConstraints() throws NoConvergenceException
    {
@@ -289,7 +289,7 @@ public class OptimizationMomentumControlModuleTest
       FrameVectorTest.assertFrameVectorEquals(desiredPointAccelerationBack, desiredPointAcceleration, 1e-3);
    }
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
 	@Test(timeout = 30000)
    public void testSingleRigidBody() throws NoConvergenceException
    {
@@ -352,7 +352,7 @@ public class OptimizationMomentumControlModuleTest
       }
    }
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
 	@Test(timeout = 30000)
    public void testPrimaryAndSecondaryConstraints() throws NoConvergenceException
    {
@@ -447,7 +447,7 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testNullspaceMultipliers() throws NoConvergenceException
    {

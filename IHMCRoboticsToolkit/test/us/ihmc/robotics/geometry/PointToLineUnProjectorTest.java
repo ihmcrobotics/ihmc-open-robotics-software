@@ -1,8 +1,9 @@
 package us.ihmc.robotics.geometry;
 
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -14,7 +15,7 @@ public class PointToLineUnProjectorTest
 {
    private static final double eps = 1e-7;
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testsimpleCase()
    {
@@ -30,7 +31,7 @@ public class PointToLineUnProjectorTest
       runTest(x0, y0, z0, x1, y1, z1, x2, y2, z2);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGeneralCase()
    {
@@ -50,7 +51,7 @@ public class PointToLineUnProjectorTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testDegenerateCase()
    {
@@ -70,7 +71,7 @@ public class PointToLineUnProjectorTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testYCase()
    {

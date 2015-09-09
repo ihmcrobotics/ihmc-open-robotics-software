@@ -15,10 +15,10 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGe
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -33,7 +33,7 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 // FIXME I've changed the way push recovery is handled with the planner but didn't take the time to fix the visualizer. (Sylvain)
 
-@BambooPlan(planType = { BambooPlanType.UI })
+@DeployableTestClass(planType = { BambooPlanType.UI })
 public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisualizerTest
 {
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -340,7 +340,7 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       icpVelocityLineSegment = null;
    }
 
-	@EstimatedDuration(duration = 4.1)
+	@DeployableTestMethod(duration = 4.1)
    @Test(timeout = 30000)
    public void visualizePlanner()
    {

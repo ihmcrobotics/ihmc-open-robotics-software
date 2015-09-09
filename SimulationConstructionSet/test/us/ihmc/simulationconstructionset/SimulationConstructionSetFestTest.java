@@ -13,16 +13,16 @@ import org.junit.Test;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.robotics.Axis;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
-@BambooPlan(planType = {BambooPlanType.UI})
+@DeployableTestClass(planType = {BambooPlanType.UI})
 public class SimulationConstructionSetFestTest
 {
    private boolean isGradleBuild()
@@ -36,7 +36,7 @@ public class SimulationConstructionSetFestTest
       return false;
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSimulationConstructionSetUsingGUITestFixture() throws AWTException
    {
@@ -245,7 +245,7 @@ public class SimulationConstructionSetFestTest
       testFixture = null;
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=45000)
    public void testSimulationConstructionSetNewGraphWindowUsingGUITestFixture() throws AWTException
    {

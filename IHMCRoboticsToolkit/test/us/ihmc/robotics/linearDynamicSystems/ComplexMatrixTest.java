@@ -5,7 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -88,7 +88,7 @@ public class ComplexMatrixTest
       allExamples = null;
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIdentity()
    {
@@ -98,7 +98,7 @@ public class ComplexMatrixTest
       }), 1e-7));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetRowAndColumnDimensions()
    {
@@ -121,7 +121,7 @@ public class ComplexMatrixTest
       assertEquals(4, threeByFour.getColumnDimension());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testEpsilonEquals()
    {
@@ -137,7 +137,7 @@ public class ComplexMatrixTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructDiagonalMatrix()
    {
@@ -161,7 +161,7 @@ public class ComplexMatrixTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testTranspose()
    {
@@ -182,7 +182,7 @@ public class ComplexMatrixTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testTimes()
    {
@@ -208,7 +208,7 @@ public class ComplexMatrixTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testMatrixTimes()
    {
@@ -231,7 +231,7 @@ public class ComplexMatrixTest
       assertTrue(result12.epsilonEquals(result.get(1, 2), 1e-7));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testInverse()
    {

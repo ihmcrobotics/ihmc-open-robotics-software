@@ -15,15 +15,15 @@ import org.junit.Test;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
-@BambooPlan(planType = BambooPlanType.Flaky)
+@DeployableTestClass(planType = BambooPlanType.Flaky)
 public class JointConfigurationDataSenderTest
 {
    private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
@@ -34,7 +34,7 @@ public class JointConfigurationDataSenderTest
    private static final NetworkPorts TCP_PORT = NetworkPorts.createRandomTestPort(random);
    private static final String HOST = "localhost";
 
-	@EstimatedDuration(duration = 30.0)
+	@DeployableTestMethod(duration = 30.0)
 	@Test(timeout = 30000)
    public void test() throws InterruptedException, IOException
    {

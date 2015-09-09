@@ -5,8 +5,9 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.Random;
 
@@ -19,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 public class NullspaceCalculatorTest
 {
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testRemoveNullspaceComponent()
    {
@@ -41,7 +42,7 @@ public class NullspaceCalculatorTest
       assertTrue(isNullspaceComponentZero(matrixCopy, nullspace));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testRemoveNullspaceComponent2()
    {
@@ -62,7 +63,7 @@ public class NullspaceCalculatorTest
       assertTrue(isNullspaceComponentZero(matrix2, nullspace));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testRemoveNullspaceComponentProblematicCase()
    {
@@ -90,7 +91,7 @@ public class NullspaceCalculatorTest
       assertTrue(isNullspaceComponentZero(otherMatrix, nullspace));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testNullspace()
    {

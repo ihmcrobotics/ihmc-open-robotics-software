@@ -25,9 +25,10 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataChecker;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -82,7 +83,7 @@ public abstract class WholeBodyTrajectoryTest
 
 
    @Ignore
-   @EstimatedDuration(duration = 4.1)
+   @DeployableTestMethod(duration = 4.1)
    @Test(timeout = 22445)
    public void testTrajectory() throws Exception
    {
@@ -205,7 +206,7 @@ public abstract class WholeBodyTrajectoryTest
    }
 
    //@Ignore
-	@EstimatedDuration(duration = 1.3)
+	@DeployableTestMethod(duration = 1.3)
    @Test(timeout = 30000)
    public void testPointToPointRight() throws Exception
    {
@@ -322,7 +323,7 @@ public abstract class WholeBodyTrajectoryTest
    }
 
    //@Ignore
-	@EstimatedDuration(duration = 2.8)
+	@DeployableTestMethod(duration = 2.8)
    @Test(timeout = 30000)
    public void testPointToPointLeft() throws Exception
    {

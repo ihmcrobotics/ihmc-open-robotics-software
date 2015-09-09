@@ -23,8 +23,8 @@ import us.ihmc.pathGeneration.footstepGenerator.TurningThenStraightFootstepGener
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -66,7 +66,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration(duration = 0.7)
+	@DeployableTestMethod(duration = 0.7)
 	@Test(timeout = 30000)
    public void testStraightLinePath()
    {
@@ -74,7 +74,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       testPathToDestination(destination);
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testAngledPaths()
    {

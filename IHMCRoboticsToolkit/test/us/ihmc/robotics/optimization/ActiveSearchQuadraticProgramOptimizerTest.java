@@ -1,17 +1,17 @@
 package us.ihmc.robotics.optimization;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Ignore;
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
 
-import java.util.Random;
-
-import static org.junit.Assert.assertTrue;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 /**
  * @author twan
@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 public class ActiveSearchQuadraticProgramOptimizerTest
 {
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testUnconstrained()
    {
@@ -43,7 +43,7 @@ public class ActiveSearchQuadraticProgramOptimizerTest
       assertTrue(MatrixFeatures.isConstantVal(axMinusB, 0.0, 1e-12));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testConstrainedSimple()
    {
@@ -80,13 +80,14 @@ public class ActiveSearchQuadraticProgramOptimizerTest
       assertTrue(MatrixFeatures.isEquals(expectedResult, solutionInfo.getSolution(), 1e-12));
    }
 
+	/**
+	 * Not working, but probably not critical right now. Get this to work some day TODO
+	 */
 	@Ignore
-	@QuarantinedTest("Not working, but probably not critical right now. Get this to work some day")
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0, quarantined = true)
 	@Test(timeout = 525)
-   // TODO: get this to pass!
    public void testFullyConstrained()
-   {
+   {	   
       int objectiveSize = 3;
       int solutionSize = 5;
       int constraintSize = 5;

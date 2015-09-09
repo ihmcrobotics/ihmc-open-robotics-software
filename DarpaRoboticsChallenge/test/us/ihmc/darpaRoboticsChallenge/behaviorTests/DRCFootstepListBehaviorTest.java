@@ -31,7 +31,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.time.GlobalTimer;
@@ -102,7 +102,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       robotDataReceiver = drcBehaviorTestHelper.getRobotDataReceiver();
    }
 
-   @EstimatedDuration(duration = 31.9)
+   @DeployableTestMethod(duration = 31.9)
    @Test(timeout = 95822)
    public void testTwoStepsForwards() throws SimulationExceededMaximumTimeException
    {
@@ -158,7 +158,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 31.9)
+   @DeployableTestMethod(duration = 31.9)
    @Test(timeout = 95822)
    public void testSideStepping() throws SimulationExceededMaximumTimeException
    {
@@ -215,7 +215,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 31.9)
+   @DeployableTestMethod(duration = 31.9)
    @Test(timeout = 95822)
    public void testStepLongerThanMaxStepLength() throws SimulationExceededMaximumTimeException
    {
@@ -287,7 +287,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       return footStepsAreTooFarApart;
    }
 
-   @EstimatedDuration(duration = 31.9)
+   @DeployableTestMethod(duration = 31.9)
    @Test(timeout = 95822)
    public void testStop() throws SimulationExceededMaximumTimeException
    {

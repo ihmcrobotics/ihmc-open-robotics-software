@@ -29,7 +29,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseHistoryCorrection;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -297,7 +297,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 0.015 , 0.015);
    }
 
-	@EstimatedDuration(duration = 25.0)
+	@DeployableTestMethod(duration = 25.0)
 	@Test(timeout = 130000)
    public void testRandomInterpolationFinals() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

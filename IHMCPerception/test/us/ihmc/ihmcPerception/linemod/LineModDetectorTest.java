@@ -14,21 +14,21 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import com.jme3.math.FastMath;
 
-@BambooPlan(planType = BambooPlanType.Exclude) // Doesn't work right on all machines
+@DeployableTestClass(planType = BambooPlanType.Exclude) // Doesn't work right on all machines
 public class LineModDetectorTest
 {
 
    static final String modelFile="drill_DCS551/drillUI.obj";
 //   static final String modelFile=""/examples/drill/drill.obj";
          
-   @EstimatedDuration(duration = 1.0)
+   @DeployableTestMethod(duration = 1.0)
    @Test(timeout=3000)
    public void testGenerateVertexes()
    {
@@ -39,7 +39,7 @@ public class LineModDetectorTest
       org.junit.Assert.assertEquals(257,vertexes.size());
    }
 
-   @EstimatedDuration(duration = 3.0)
+   @DeployableTestMethod(duration = 3.0)
    @Test(timeout=3000)
    public void trainOneTestOne() throws IOException
    {
@@ -74,7 +74,7 @@ public class LineModDetectorTest
       }
    }
    
-   @EstimatedDuration(duration = 1.0)
+   @DeployableTestMethod(duration = 1.0)
    @Test(timeout = 3000)
    public void trainOneTestOneScaled() throws IOException
    {
@@ -102,7 +102,7 @@ public class LineModDetectorTest
       assertTrue(bestDetection.score> 0.94);
    }
    
-   @EstimatedDuration(duration = 1.0)
+   @DeployableTestMethod(duration = 1.0)
    @Test(timeout = 5000)
    public void testFeatureSaveLoad()
    {
@@ -128,7 +128,7 @@ public class LineModDetectorTest
       System.out.println("score:"+bestDetection.score);
    }
 
-   @EstimatedDuration(duration = 3.0)
+   @DeployableTestMethod(duration = 3.0)
    @Test(timeout=120000)
    public void testYawAngles() 
    {

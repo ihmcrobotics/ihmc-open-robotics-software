@@ -18,8 +18,8 @@ import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.Axis;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class GroundContactPointBasedWrenchCalculatorTest
@@ -27,7 +27,7 @@ public class GroundContactPointBasedWrenchCalculatorTest
    WrenchCalculatorInterface calculator;
    OneDegreeOfFreedomJoint joint;
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
 	@Test(timeout = 30000)
    public void testWrenchCalculation()
    {

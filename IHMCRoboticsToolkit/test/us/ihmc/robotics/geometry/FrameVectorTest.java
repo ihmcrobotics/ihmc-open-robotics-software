@@ -3,9 +3,9 @@ package us.ihmc.robotics.geometry;
 import org.junit.After;
 import org.junit.Test;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
@@ -54,7 +54,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
       return new FrameVector(referenceFrame, x, y, z, name);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void allConstructorsWork() //Brett
    {
@@ -111,7 +111,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
       //      FrameVector frameXYZString = new FrameVector(referenceFrame, x, y, z name);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testFrameChanges()
    {
@@ -133,7 +133,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
       frameVector.checkReferenceFrameMatch(theFrame);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetVector()
    {
@@ -143,7 +143,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
       assertEquals("These should be equal", 20.0, expected.getY(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testToFrameVector2d() //Brett was here
    {
@@ -153,7 +153,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
       assertEquals("These should be equal", 22.0, expected.getY(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testDot() //Brett
    {
@@ -168,7 +168,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
       frameVector1.dot(frameVector3);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testAngle() //Brett
    {
@@ -189,7 +189,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
       frameVector1.angle(frameVector3);
    }
 	
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testIsParallel()
    {
@@ -203,7 +203,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
       assertTrue(errorMsg, randomFrameVector.isEpsilonParallel(parallelVector, 1e-7));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testLength() //Brett was here
    {
@@ -218,7 +218,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testLengthSquared() //Brett was here
    {
@@ -226,7 +226,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
       assertEquals("These should be equal", 25.0, frameVector.lengthSquared(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransform() //Brett was here
    {
@@ -243,7 +243,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
       }      
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testCrosses() //Brett
    {
@@ -298,7 +298,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testCrossWithVector3d()
    {
@@ -320,7 +320,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testNormalize() //Brett
    {

@@ -8,11 +8,11 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCRemoveMultipleDebrisBehav
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@BambooPlan(planType = {BambooPlanType.Slow})
+@DeployableTestClass(planType = {BambooPlanType.Slow})
 public class AtlasRemoveMultipleDebrisBehaviorTest extends DRCRemoveMultipleDebrisBehaviorTest 
 {
 	private final AtlasRobotModel robotModel;
@@ -35,7 +35,7 @@ public class AtlasRemoveMultipleDebrisBehaviorTest extends DRCRemoveMultipleDebr
 	}
 	
 	@Override
-	@EstimatedDuration(duration = 501.1)
+	@DeployableTestMethod(duration = 501.1)
    @Test(timeout = 2500000)
 	public void testRemovingthreeDebris() throws SimulationExceededMaximumTimeException
 	{

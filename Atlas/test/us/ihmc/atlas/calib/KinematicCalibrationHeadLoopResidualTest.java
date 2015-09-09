@@ -2,7 +2,6 @@ package us.ihmc.atlas.calib;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import georegression.struct.point.Point2D_F64;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,22 +22,22 @@ import org.ddogleg.optimization.UtilOptimize;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import boofcv.alg.geo.PerspectiveOps;
+import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
+import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
+import boofcv.struct.calib.IntrinsicParameters;
+import georegression.struct.point.Point2D_F64;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.imageProcessing.configuration.ConfigurationLoader;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import boofcv.alg.geo.PerspectiveOps;
-import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
-import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
-import boofcv.struct.calib.IntrinsicParameters;
 
 /**
  * @author Peter Abeles
@@ -86,9 +85,13 @@ public class KinematicCalibrationHeadLoopResidualTest
       targetToEE.setRotation(rotFull);
    }
 
+   /**
+    * Should get this working again.
+    * 
+    * @throws IOException
+    */
    @Ignore
-   @QuarantinedTest("Should get this working again.")
-	@EstimatedDuration(duration = 50.0)
+	@DeployableTestMethod(duration = 50.0, quarantined = true)
 	@Test(timeout=300000)
    public void perfect() throws IOException
    {
@@ -133,9 +136,13 @@ public class KinematicCalibrationHeadLoopResidualTest
     * Pass it into an optimization function and see if it works
     */
 
+   /**
+    * Should get this working again.
+    * 
+    * @throws IOException
+    */
    @Ignore
-   @QuarantinedTest("Should get this working again.")
-	@EstimatedDuration(duration = 50.0)
+	@DeployableTestMethod(duration = 50.0, quarantined = true)
 	@Test(timeout=300000)
    public void smallError() throws IOException
    {
@@ -184,9 +191,13 @@ public class KinematicCalibrationHeadLoopResidualTest
     * Pass it into an optimization function and see if it works
     */
 
+   /**
+    * Should get this working again.
+    * 
+    * @throws IOException
+    */
    @Ignore
-   @QuarantinedTest("Should get this working again.")
-	@EstimatedDuration(duration = 50.0)
+	@DeployableTestMethod(duration = 50.0, quarantined = true)
 	@Test(timeout=300000)
    public void optimize() throws IOException
    {

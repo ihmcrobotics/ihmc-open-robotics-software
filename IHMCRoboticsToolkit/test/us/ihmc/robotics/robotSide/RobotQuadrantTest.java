@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class RobotQuadrantTest
 {
@@ -17,7 +17,7 @@ public class RobotQuadrantTest
    private RobotQuadrant hindRight = RobotQuadrant.HIND_RIGHT;
    private RobotQuadrant hindLeft = RobotQuadrant.HIND_LEFT;
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetAcrossBodyLeg()
    {
@@ -27,7 +27,7 @@ public class RobotQuadrantTest
       assertEquals(hindRight, hindLeft.getAcrossBodyQuadrant());
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetAllLegs()
    {
@@ -39,7 +39,7 @@ public class RobotQuadrantTest
       assertEquals(hindLeft, actualReturn.get(3));
    }
 
-//   @EstimatedDuration(duration = 0.1)
+//   @DeployableTestMethod(duration = 0.1)
 //   @Test(timeout = 30000)
 //   public void testGetBodyQuadrant()
 //   {
@@ -71,7 +71,7 @@ public class RobotQuadrantTest
 //      }
 //   }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetDiagonalOppositeLeg()
    {
@@ -81,7 +81,7 @@ public class RobotQuadrantTest
       assertEquals(frontRight, hindLeft.getDiagonalOppositeQuadrant());
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetLegName()
    {
@@ -91,7 +91,7 @@ public class RobotQuadrantTest
       assertEquals(hindRight, RobotQuadrant.getQuadrantName("HIND_RIGHT"));
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetLegName1()
    {
@@ -101,7 +101,7 @@ public class RobotQuadrantTest
       assertEquals(hindLeft, RobotQuadrant.getQuadrantNameFromOrdinal(3));
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetSameSideLeg()
    {
@@ -111,7 +111,7 @@ public class RobotQuadrantTest
       assertEquals(frontLeft, hindLeft.getSameSideQuadrant());
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetShortName()
    {
@@ -121,7 +121,7 @@ public class RobotQuadrantTest
       assertEquals("HL", hindLeft.getShortName());
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testIsLegAFrontLeg()
    {
@@ -131,7 +131,7 @@ public class RobotQuadrantTest
       assertFalse(hindLeft.isQuadrantInFront());
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testIsLegAHindLeg()
    {
@@ -141,7 +141,7 @@ public class RobotQuadrantTest
       assertTrue(hindLeft.isQuadrantInHind());
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testIsLegALeftSideLeg()
    {
@@ -151,7 +151,7 @@ public class RobotQuadrantTest
       assertTrue(hindLeft.isQuadrantOnLeftSide());
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testIsLegARightSideLeg()
    {

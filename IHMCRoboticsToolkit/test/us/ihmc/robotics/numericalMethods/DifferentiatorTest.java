@@ -4,7 +4,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.Random;
 
@@ -29,7 +30,7 @@ public class DifferentiatorTest
    {
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSinusDifferentiatedIsCloseToCosinus()
    {
@@ -55,7 +56,7 @@ public class DifferentiatorTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testNOrderPolynomDifferentiatedIsNMinusOneOrderPolynom()
    {
@@ -84,7 +85,7 @@ public class DifferentiatorTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testFirstUpdatedToZero()
    {
@@ -121,7 +122,7 @@ public class DifferentiatorTest
       return t >= 2.0 * dt;
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testResetReturnsZero()
    {

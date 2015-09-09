@@ -1,7 +1,8 @@
 package us.ihmc.robotics.dataStructures;
 
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.Random;
 
@@ -12,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 public class ComplexNumberTest
 {
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCommonUsage()
    {
@@ -29,7 +30,7 @@ public class ComplexNumberTest
       assertEquals(Math.sqrt(real*real + imag*imag), complexNumber.magnitude(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testZero()
    {
@@ -39,7 +40,7 @@ public class ComplexNumberTest
       assertTrue(0.0 == complexNumber.magnitudeSquared());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testALotOfRandomComplexNumbers()
    {
@@ -59,7 +60,7 @@ public class ComplexNumberTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testEpsilonEquals()
    {
@@ -92,7 +93,7 @@ public class ComplexNumberTest
       assertFalse(complexNumber.epsilonEquals(complexNumber.real() + 2.0 * epsilon, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void regressionTest()
    {
@@ -132,7 +133,7 @@ public class ComplexNumberTest
       assertTrue(tan.epsilonEquals(new ComplexNumber(-2.5888999008384745E-7, 0.9999999988541863), epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void regessionTestTwo()
    {
@@ -150,7 +151,7 @@ public class ComplexNumberTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void regessionTestThree()
    {
@@ -166,7 +167,7 @@ public class ComplexNumberTest
       assertTrue(minus.epsilonEquals(new ComplexNumber(3.7819999999999965, 92.345), epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testToString()
    {

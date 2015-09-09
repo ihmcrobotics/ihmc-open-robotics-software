@@ -31,13 +31,13 @@ import org.junit.Test;
 
 import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ArrayToolsTest
 {
    private static final double EPSILON = 1e-10;
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintArrayOfLongs()
    {
@@ -61,7 +61,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), writer.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintArrayNumbersAsStrings()
    {
@@ -88,7 +88,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), writer.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintArrayOfInts()
    {
@@ -112,7 +112,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), writer.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintArrayOfDoubles()
    {
@@ -139,7 +139,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), writer.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintArrayFromStringsToPrintWriter()
    {
@@ -169,7 +169,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), stringWriter.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintArrayFromStringsToPrintStream()
    {
@@ -199,7 +199,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), outputStream.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintArrayToStandardOutFromArrayList()
    {
@@ -235,7 +235,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), outputStream.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintArrayOfDoublesForMATLABWithPrintWriter()
    {
@@ -267,7 +267,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), stringWriter.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintArrayOfDoublesFOrMATLABWithPrintStream()
    {
@@ -299,7 +299,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), outputStream.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintNamedArrayForMATLABWithPrintWriter()
    {
@@ -333,7 +333,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), stringWriter.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintNamedArrayForMATLABWithPrintStream()
    {
@@ -367,7 +367,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), outputStream.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintArrayOfDoublesToDataOutputStream()
    {
@@ -405,7 +405,7 @@ public class ArrayToolsTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintArrayOfDoublesWithPrintWriter()
    {
@@ -437,7 +437,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), stringWriter.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testArrayToString()
    {
@@ -458,7 +458,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), ArrayTools.arrayToString(arrayElements));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintDoubleArrayWithPrintStream()
    {
@@ -490,7 +490,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), outputStream.toString());
    }
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
 	@Test(timeout = 30000)
    public void testPrintTwoDimensionalArrayOfDoublesWithPrintStream()
    {
@@ -528,7 +528,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), outputStream.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintArrayOfIntsToPrintWriter()
    {
@@ -559,7 +559,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), stringWriter.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintArrayOfIntsToPrintStream()
    {
@@ -590,7 +590,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), outputStream.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintArrayOfIntsToDataOutputStream()
    {
@@ -628,7 +628,7 @@ public class ArrayToolsTest
       }
    }
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
 	@Test(timeout = 30000)
    public void testPrintTwoDimensionalArrayOfIntsToPrintStream()
    {
@@ -665,7 +665,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), outputStream.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testParseDoubleArrayFromMATLABString()
    {
@@ -689,7 +689,7 @@ public class ArrayToolsTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testParseDoubleArrayFromMATLABBufferedReader()
    {
@@ -714,7 +714,7 @@ public class ArrayToolsTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testParseDoubleArrayFromDataInputStream()
    {
@@ -738,7 +738,7 @@ public class ArrayToolsTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testParseIntegerArrayFromString()
    {
@@ -762,7 +762,7 @@ public class ArrayToolsTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testParseIntegerArrayFromBufferedReader()
    {
@@ -786,7 +786,7 @@ public class ArrayToolsTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testParseIntegerArrayFromDataInputStream()
    {
@@ -810,7 +810,7 @@ public class ArrayToolsTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetReverseOrderedArrayCopy()
    {
@@ -821,7 +821,7 @@ public class ArrayToolsTest
          assertEquals(array[array.length - i - 1], reversedCopyOfArray[i], 0);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrintGenericArray()
    {
@@ -857,7 +857,7 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), outputStream.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testDeltaEquals()
    {
@@ -875,7 +875,7 @@ public class ArrayToolsTest
       assertFalse(ArrayTools.deltaEquals(array1, array2, largestDifference - 1));
    }
 	
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void testDeltaEqualsWithNull()
 	{
@@ -888,7 +888,7 @@ public class ArrayToolsTest
 	   assertFalse(ArrayTools.deltaEquals(array1, array3, dummyDelta));
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testConcatentateArrays()
    {
@@ -909,7 +909,7 @@ public class ArrayToolsTest
             && (actualReturn[3] == expectedReturn[3]));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testConcatentateArrays1()
    {
@@ -930,7 +930,7 @@ public class ArrayToolsTest
             && (actualReturn[3] == expectedReturn[3]));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testConcatentateArrays2()
    {
@@ -951,7 +951,7 @@ public class ArrayToolsTest
             && (actualReturn[3] == expectedReturn[3]));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCopyArray()
    {
@@ -963,7 +963,7 @@ public class ArrayToolsTest
       assertTrue("Test Failed", (actualReturn[0] == expectedReturn[0]) && (actualReturn[1] == expectedReturn[1]));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCopyArray1()
    {
@@ -975,7 +975,7 @@ public class ArrayToolsTest
       assertTrue("Test Failed", (actualReturn[0] == expectedReturn[0]) && (actualReturn[1] == expectedReturn[1]) && (actualReturn[2] == expectedReturn[2]));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCopyArray2()
    {
@@ -987,7 +987,7 @@ public class ArrayToolsTest
       assertTrue("Test Failed", (actualReturn[0] == expectedReturn[0]) && (actualReturn[1] == expectedReturn[1]) && (actualReturn[2] == expectedReturn[2]));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCopyArray3()
    {
@@ -999,7 +999,7 @@ public class ArrayToolsTest
       assertTrue("Test Failed", (actualReturn[0] == expectedReturn[0]) && (actualReturn[1] == expectedReturn[1]) && (actualReturn[2] == expectedReturn[2]));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCopyGenericArray()
    {
@@ -1029,7 +1029,7 @@ public class ArrayToolsTest
    private class Orange extends Fruit
    {}
 
-	@EstimatedDuration(duration = 1.2)
+	@DeployableTestMethod(duration = 1.2)
 	@Test(timeout = 30000)
    public void testParseDoubleArrayFromString() throws IOException
    {
@@ -1055,7 +1055,7 @@ public class ArrayToolsTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testParseDoubleArrayFromBufferedReader()
    {
@@ -1092,7 +1092,7 @@ public class ArrayToolsTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000 , expected = IOException.class)
    public void testParseDoubleArrayFromBufferedReaderWithIOException() throws IOException
    {
@@ -1112,7 +1112,7 @@ public class ArrayToolsTest
       ArrayTools.parseDoubleArray(mockBufferedReader);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetArrayFromArrayList()
    {
@@ -1223,7 +1223,7 @@ public class ArrayToolsTest
       return array;
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetReversedArrayList()
    {
@@ -1244,7 +1244,7 @@ public class ArrayToolsTest
       /** @todo fill in the test code */
    }
 	
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetRearrangedArrayList()
    {
@@ -1268,7 +1268,7 @@ public class ArrayToolsTest
       assertEquals(arrayList, ArrayTools.getRearrangedArrayListCopy(arrayList, 0));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetArrayListFromArray()
    {
@@ -1282,7 +1282,7 @@ public class ArrayToolsTest
          assertEquals(array[i], arrayList.get(i), EPSILON);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetMaximumAbsoluteChangeBetweenTicks()
    {
@@ -1307,7 +1307,7 @@ public class ArrayToolsTest
       assertEquals(0.02, maxChange, 1e-7);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIsContinuous()
    {

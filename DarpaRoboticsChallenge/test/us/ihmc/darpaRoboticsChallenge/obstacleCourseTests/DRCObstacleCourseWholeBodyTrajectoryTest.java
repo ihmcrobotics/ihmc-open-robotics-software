@@ -29,8 +29,8 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footsepGenerator.PathTypeStepParameters;
@@ -89,7 +89,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
    }
 
    @Ignore("Invoked manually to test memory & thread leaks")
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout=300000)
    public void testForMemoryLeaks() throws Exception
    {
@@ -101,7 +101,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
       }
    }
    
-   @EstimatedDuration(duration = 14.9)
+   @DeployableTestMethod(duration = 14.9)
    @Test(timeout = 54656)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
@@ -148,7 +148,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
    
    public abstract WholeBodyTrajectoryPacket getRobotSpecificWholeBodyTrajectoryPacket(double trajectoryTime);
    
-   @EstimatedDuration(duration = 38.0)
+   @DeployableTestMethod(duration = 38.0)
    @Test(timeout = 124050)
    public void testChestControlWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {
@@ -325,7 +325,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
       BambooTools.reportTestFinishedMessage();
    }
    
-   @EstimatedDuration(duration = 38.0)
+   @DeployableTestMethod(duration = 38.0)
    @Test(timeout = 124050)
    public void testArmMovementsWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {

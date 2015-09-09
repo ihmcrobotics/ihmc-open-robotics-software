@@ -6,27 +6,24 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
+import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 
 public abstract class WholeBodyIkSolverTest
@@ -68,7 +65,7 @@ public abstract class WholeBodyIkSolverTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration(duration = 4.0)
+	@DeployableTestMethod(duration = 4.0)
    @Test(timeout = 30000)
    public void testLeftHandIn3P3RModeManual()
    {
@@ -101,7 +98,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
 
-	@EstimatedDuration(duration = 1.5)
+	@DeployableTestMethod(duration = 1.5)
    @Test(timeout = 30000)
    public void testRightHandIn3PModeManual()
    {
@@ -131,7 +128,7 @@ public abstract class WholeBodyIkSolverTest
       scs.cropBuffer();
    }
 
-	@EstimatedDuration(duration = 2.2)
+	@DeployableTestMethod(duration = 2.2)
    @Test(timeout = 30000)
    public void testRightHandIn3PMode()
    {
@@ -162,7 +159,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
 
-	@EstimatedDuration(duration = 2.1)
+	@DeployableTestMethod(duration = 2.1)
    @Test(timeout = 30000)
    public void testLeftHandIn3PModeManual()
    {
@@ -192,7 +189,7 @@ public abstract class WholeBodyIkSolverTest
       scs.cropBuffer();
    }
 
-	@EstimatedDuration(duration = 5.5)
+	@DeployableTestMethod(duration = 5.5)
    @Test(timeout = 30000)
    public void testLeftHandIn3PMode()
    {
@@ -226,7 +223,7 @@ public abstract class WholeBodyIkSolverTest
 
 
 
-	@EstimatedDuration(duration = 6.0)
+	@DeployableTestMethod(duration = 6.0)
    @Test(timeout = 30000)
    public void testRightHandIn3P2RModeManual()
    {
@@ -256,7 +253,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
 // PASS
-	@EstimatedDuration(duration = 2.3)
+	@DeployableTestMethod(duration = 2.3)
    @Test(timeout = 30000)
    public void testLeftHandIn3P2RModeManual()
    {
@@ -286,7 +283,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
 // PASS
-	@EstimatedDuration(duration = 3.1)
+	@DeployableTestMethod(duration = 3.1)
    @Test(timeout = 30000)
    public void testRightHandIn3P3RModeManual()
    {
@@ -317,9 +314,11 @@ public abstract class WholeBodyIkSolverTest
 
 
 // PASS 
-   @QuarantinedTest("Failing but don't want to remove the rest from Bamboo")
+	/**
+	 * Failing but don't want to remove the rest from Bamboo
+	 */
    @Ignore
-   @EstimatedDuration(duration = 5.0)
+   @DeployableTestMethod(duration = 5.0, quarantined = true)
    @Test(timeout = 20000)
    public void testBothHandsIn3PModeManual()
    {
@@ -350,7 +349,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    // May FAIL
-	@EstimatedDuration(duration = 9.4)
+	@DeployableTestMethod(duration = 9.4)
    @Test(timeout = 47000)
    public void testBothHandsIn3P2RModeManual()
    {
@@ -382,7 +381,7 @@ public abstract class WholeBodyIkSolverTest
 
 
 
-	@EstimatedDuration(duration = 6.6)
+	@DeployableTestMethod(duration = 6.6)
    @Test(timeout = 33000)
    public void testBothHandsIn3P3RModeManual()
    {
@@ -413,7 +412,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    @Ignore
-   @EstimatedDuration(duration = 45.0)
+   @DeployableTestMethod(duration = 45.0)
    @Test(timeout = 200000)
    public void testLeftHandIn3PModeRegression()
    {
@@ -452,7 +451,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    @Ignore
-   @EstimatedDuration(duration = 45.0)
+   @DeployableTestMethod(duration = 45.0)
    @Test(timeout = 200000)
    public void testRightHandIn3PModeRegression()
    {
@@ -490,7 +489,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    @Ignore
-   @EstimatedDuration(duration = 45.0)
+   @DeployableTestMethod(duration = 45.0)
    @Test(timeout = 200000)
    public void testBothHandsIn3PModeRegression()
    {
@@ -526,7 +525,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    @Ignore
-   @EstimatedDuration(duration = 45.0)
+   @DeployableTestMethod(duration = 45.0)
    @Test(timeout = 200000)
    public void testBothtHandsIn3P2RModeRegression()
    {
@@ -561,7 +560,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
    @Ignore
-   @EstimatedDuration(duration = 45.0)
+   @DeployableTestMethod(duration = 45.0)
    @Test(timeout = 200000)
    public void testBothHandsIn3P3RModeRegression()
    {
@@ -590,7 +589,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
    @Ignore
-   @EstimatedDuration(duration = 45.0)
+   @DeployableTestMethod(duration = 45.0)
    @Test(timeout = 200000)
    public void testWorkingSpaceFor5DoF()
    {

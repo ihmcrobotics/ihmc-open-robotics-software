@@ -37,8 +37,8 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.time.GlobalTimer;
@@ -114,7 +114,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       }
    }
 
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testJointSpaceHandPoseMove() throws SimulationExceededMaximumTimeException
    {
@@ -141,7 +141,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testTaskSpaceMoveToPoseAchievedInJointSpace() throws SimulationExceededMaximumTimeException
    {
@@ -194,7 +194,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
    
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testMoveHandToHome() throws SimulationExceededMaximumTimeException
    {
@@ -231,7 +231,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
    
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testTwoSequentialHandPoses() throws SimulationExceededMaximumTimeException
    {
@@ -270,7 +270,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testUnreachableHandPoseMove() throws SimulationExceededMaximumTimeException
    {
@@ -303,7 +303,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testTwoSimultaneousHandPoseBehaviors() throws SimulationExceededMaximumTimeException
    {
@@ -344,7 +344,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testPauseAndResume() throws SimulationExceededMaximumTimeException
    {
@@ -379,7 +379,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testStop() throws SimulationExceededMaximumTimeException
    {
@@ -409,7 +409,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
    
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testAimPalmNormalXaxis() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -447,7 +447,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
       
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testAimPalmNormalYaxis() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -486,7 +486,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    }
    
    
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testAimPalmNormalXaxisZupGrasp() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -532,7 +532,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
    
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testAimPalmNormalYaxisZupGrasp() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {

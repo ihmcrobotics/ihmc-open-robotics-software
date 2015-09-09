@@ -24,13 +24,13 @@ import java.io.InputStream;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.graphics3DAdapter.stlLoader.NormalCalculator;
 import us.ihmc.graphics3DAdapter.stlLoader.STLReader;
 import us.ihmc.graphics3DAdapter.stlLoader.STLReaderFactory;
 import us.ihmc.graphics3DAdapter.stlLoader.Triangle;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 /**
  * Test the normal calculation routine based on the normals in the the teapotBinary.STL model.
@@ -38,11 +38,11 @@ import us.ihmc.tools.agileTesting.BambooPlanType;
  * @author Jesper Smith
  *
  */
-@BambooPlan(planType={BambooPlanType.UI})
+@DeployableTestClass(planType={BambooPlanType.UI})
 public class NormalCalculatorTest
 {
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testNormalsBasedOnTeapot() throws IOException
    {

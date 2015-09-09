@@ -11,7 +11,7 @@ import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionState;
 import us.ihmc.systemIdentification.frictionId.frictionModels.JointFrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.NoCompensationFrictionModel;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class JointFrictionModelsHolderTest
@@ -59,7 +59,7 @@ public class JointFrictionModelsHolderTest
    private String name = "simpleHolder";
    private YoVariableRegistry registry = new YoVariableRegistry("simpleRegistry");
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructorAndFrictionStateSelection()
    {

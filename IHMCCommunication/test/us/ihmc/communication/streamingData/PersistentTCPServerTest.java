@@ -13,13 +13,13 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class PersistentTCPServerTest
 {
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPersistentTCPServer() throws UnknownHostException, IOException
    {

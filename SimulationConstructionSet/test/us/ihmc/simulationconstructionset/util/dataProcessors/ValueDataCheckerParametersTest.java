@@ -5,16 +5,16 @@ import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@BambooPlan(planType = {BambooPlanType.Fast})
+@DeployableTestClass(planType = {BambooPlanType.Fast})
 public class ValueDataCheckerParametersTest
 {
    private double EPSILON = 1e-10;
    
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 300000)
       public void testGetDefensiveCopy()
    {
@@ -34,7 +34,7 @@ public class ValueDataCheckerParametersTest
       assertEquals(valueDataCheckerParametersOriginal.getMinimumValue(), valueDataCheckerParametersCopy.getMinimumValue(), EPSILON);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 300000)
       public void testErrorThresholdOnDerivativeComparison()
    {
@@ -49,7 +49,7 @@ public class ValueDataCheckerParametersTest
    }
 
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 300000)
       public void testMaximumDerivative()
    {
@@ -64,7 +64,7 @@ public class ValueDataCheckerParametersTest
    }
 
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 300000)
    public void testMaximumSecondDerivative()
    {
@@ -78,7 +78,7 @@ public class ValueDataCheckerParametersTest
       assertEquals(valueDataCheckerParametersOriginal.getMaximumSecondDerivative(), value, EPSILON);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 300000)
       public void testMaximumValue()
    {
@@ -93,7 +93,7 @@ public class ValueDataCheckerParametersTest
    }
 
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 300000)
    
    public void testMinimumValue()
@@ -108,7 +108,7 @@ public class ValueDataCheckerParametersTest
       assertFalse(valueDataCheckerParametersOriginal.getMinimumValue() == value);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 300000, expected=RuntimeException.class)
    public void testSetMinGreaterThanMax()
    {
@@ -119,7 +119,7 @@ public class ValueDataCheckerParametersTest
       valueDataCheckerParametersOriginal.setMinimumValue(value + 1.0);
    }
    
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 300000, expected=RuntimeException.class)
    public void testSetMaxLessThanMin()
    {

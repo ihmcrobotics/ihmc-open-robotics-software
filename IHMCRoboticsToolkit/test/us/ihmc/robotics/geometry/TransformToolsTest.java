@@ -5,8 +5,8 @@ import org.ejml.ops.CommonOps;
 import org.junit.Test;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 public class TransformToolsTest
 {
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testRotate()
    {
@@ -54,7 +54,7 @@ public class TransformToolsTest
       RigidBodyTransformTest.assertTransformEquals(transform, transform2, 1e-7);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testDifferentiate()
    {
@@ -79,7 +79,7 @@ public class TransformToolsTest
       JUnitTools.assertMatrixEquals("", testMatrix, matrix2, 1e-8);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetTransformFromA1toA2Simple()
    {
@@ -112,7 +112,7 @@ public class TransformToolsTest
       a2Origin.epsilonEquals(a2OriginFramePoint.getPoint(), 1e-9);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetTransformFromA1toA2Random()
    {
@@ -145,7 +145,7 @@ public class TransformToolsTest
       a2Origin.epsilonEquals(a2OriginFramePoint.getPoint(), 1e-9);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testgetTransformDifference()
    {
@@ -179,7 +179,7 @@ public class TransformToolsTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testgetTransformDifferenceBetweenTwoTransforms()
    {

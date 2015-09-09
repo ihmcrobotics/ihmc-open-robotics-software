@@ -7,16 +7,16 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
 
-@BambooPlan(planType = {BambooPlanType.Flaky})
+@DeployableTestClass(planType = {BambooPlanType.Flaky})
 public class StreamingDataTCPServerTest
 {
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=90000)
    public void testTypicalUsage()
    {
@@ -50,7 +50,7 @@ public class StreamingDataTCPServerTest
       streamingDataTCPServer.closeAndBlockTillFullyClosed();
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=90000)
    public void testMultipleProducersAndConsumersRobustly()
    {
@@ -103,7 +103,7 @@ public class StreamingDataTCPServerTest
       
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=90000)
    public void testPersistentConsumerToServerRestart()
    {

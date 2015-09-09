@@ -2,9 +2,10 @@ package us.ihmc.robotics.quadTree;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import static org.junit.Assert.fail;
 public class QuadTreeForGroundTest
 {
    @Ignore
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetAllPoints()
    {
@@ -46,7 +47,7 @@ public class QuadTreeForGroundTest
 
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testCommonCaseWithNoFilteringOrPointAveraging()
    {
@@ -97,7 +98,7 @@ public class QuadTreeForGroundTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testPointLimiter()
    {
@@ -172,7 +173,7 @@ public class QuadTreeForGroundTest
       assertFalse(NE.hasChildren());
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCasesOne()
    {
@@ -240,7 +241,7 @@ public class QuadTreeForGroundTest
       assertEquals(1, quadTree.getNumberOfQuads());
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testWithFilteringAndPointAveraging()
    {
@@ -325,7 +326,7 @@ public class QuadTreeForGroundTest
       assertEquals(16, quadTree.getNumberOfQuads()); // Still 16 here.
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetClosestPoint()
    {
@@ -372,7 +373,7 @@ public class QuadTreeForGroundTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetAllPointsWithinBounds()
    {
@@ -414,7 +415,7 @@ public class QuadTreeForGroundTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetAllPointsWithinDistance()
    {

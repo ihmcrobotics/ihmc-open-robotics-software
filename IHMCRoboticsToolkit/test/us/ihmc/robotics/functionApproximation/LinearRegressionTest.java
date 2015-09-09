@@ -1,7 +1,8 @@
 package us.ihmc.robotics.functionApproximation;
 
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -13,7 +14,7 @@ public class LinearRegressionTest
 {
    private static final boolean VERBOSE = false;
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testTypicalExampleOne()
    {
@@ -50,7 +51,7 @@ public class LinearRegressionTest
                                  expectedCoefficients);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testTypicalExampleTwo()
    {
@@ -100,7 +101,7 @@ public class LinearRegressionTest
                                  expectedCoefficients);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPerfectMatch()
    {
@@ -148,7 +149,7 @@ public class LinearRegressionTest
                                  expectedCoefficients);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testRandomness()
    {
@@ -176,7 +177,7 @@ public class LinearRegressionTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testNotEnoughPoints()
    {
@@ -191,7 +192,7 @@ public class LinearRegressionTest
       boolean foundSolution = linearRegression.solve();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testAskingForAnswerBeforeDone()
    {
@@ -206,7 +207,7 @@ public class LinearRegressionTest
       linearRegression.packCoefficientVector(coefficientVector);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testAskingForSquaredErrorBeforeDone()
    {
@@ -220,7 +221,7 @@ public class LinearRegressionTest
       linearRegression.getSquaredError();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testAskingForCoefficientVectorAsMatrixBeforeDone()
    {

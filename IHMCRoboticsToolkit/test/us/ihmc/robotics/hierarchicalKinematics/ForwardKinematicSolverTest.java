@@ -3,8 +3,8 @@ package us.ihmc.robotics.hierarchicalKinematics;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 import us.ihmc.robotics.dataStructures.Vector64F;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -22,7 +22,7 @@ public class ForwardKinematicSolverTest
    final private boolean doprint = true;
    
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void test() 
    {

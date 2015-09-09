@@ -1,7 +1,8 @@
 package us.ihmc.robotics.geometry;
 
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -21,7 +22,7 @@ public class CapsuleTest
       assertTrue(result.epsilonEquals(exp, epsilon));
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void test()
    {
@@ -96,7 +97,7 @@ public class CapsuleTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testOther()
    {
@@ -115,7 +116,7 @@ public class CapsuleTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testOther_2()
    {

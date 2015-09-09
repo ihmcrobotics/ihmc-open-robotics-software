@@ -16,11 +16,11 @@ import org.junit.Test;
 
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.ObjectConsumer;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class InterprocessObjectCommunicatorTest
 {
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testOpeningAndClosingALotOfPorts() throws IOException
    {
@@ -44,7 +44,7 @@ public class InterprocessObjectCommunicatorTest
 
    }
 
-	@EstimatedDuration(duration = 1.5)
+	@DeployableTestMethod(duration = 1.5)
    @Test(timeout = 30000)
    public void testSendingObjectsToClients() throws IOException
    {

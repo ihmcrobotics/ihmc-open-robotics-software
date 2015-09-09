@@ -3,9 +3,9 @@ package us.ihmc.robotics.geometry;
 import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
@@ -57,7 +57,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       return new FramePoint(referenceFrame, x, y, z, name);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testRunTestMain()
    {
@@ -212,7 +212,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testOtherConstructors() //Brett was here
    {
@@ -255,7 +255,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       assertEquals("These should be equal", theFrame, frameName.getReferenceFrame());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testMidPoint()
    {
@@ -272,7 +272,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       assertTrue(expectedMidPoint.epsilonEquals(actualMidPoint, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testMidPointException()
    {
@@ -282,7 +282,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       FramePoint.getMidPoint(framePoint1, framePoint2);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testAverage()
    {
@@ -296,7 +296,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       assertEquals(10.0, average.getZ(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testGetXYplaneDistance()
    {
@@ -310,7 +310,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       firstPoint.getXYPlaneDistance(thirdPoint);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testDistance() //Brett
    {
@@ -326,7 +326,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       framePoint1.distance(framePoint2);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testDistanceSquared() //Brett
    {
@@ -343,7 +343,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       framePoint1.distanceSquared(framePoint2);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testToFramePoint2d() //Brett
    {
@@ -355,7 +355,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       assertEquals(2.0, framePoint2d.getY(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetFramePoint2d() //Brett
    {
@@ -369,7 +369,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       assertEquals(2.0, framePoint2d.getY(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetPoint()
    {
@@ -381,7 +381,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       assertTrue(tuple3d.epsilonEquals(tuple3dCopy, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testFrameChanges()
    {
@@ -404,7 +404,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       framePoint.checkReferenceFrameMatch(theFrame);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testApplyTransform()
    {
@@ -423,7 +423,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       assertEquals(16.0, frameTuple.getZ(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testApplyTransformScale()
    {
@@ -439,7 +439,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       assertTrue(expectedResultPoint.epsilonEquals(resultPoint, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testApplyTransformTranslate()
    {
@@ -456,7 +456,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       assertTrue(expectedResultPoint.epsilonEquals(resultPoint, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public final void testApplyTransformRotateZ()
    {
@@ -475,7 +475,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
 
    @Ignore("Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain")
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testConstructors()
    {
@@ -533,7 +533,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       assertTrue(pointToBeTested.getPoint().epsilonEquals(point3dExpected, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testYawAboutPoint() //Brett
    {
@@ -552,7 +552,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       point2.yawAboutPoint(pointToYawAbout, yaw);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testPitchAboutPoint() //Brett
    {

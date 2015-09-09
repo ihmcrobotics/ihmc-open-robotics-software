@@ -1,16 +1,16 @@
 package us.ihmc.robotics.trajectories;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class TrapezoidalVelocityTrajectoryTest
 {
@@ -26,7 +26,7 @@ public class TrapezoidalVelocityTrajectoryTest
    {
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetState()
    {
@@ -91,7 +91,7 @@ public class TrapezoidalVelocityTrajectoryTest
 
 
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void DONTtestOne()
    {
@@ -119,7 +119,7 @@ public class TrapezoidalVelocityTrajectoryTest
 //    sleepForever();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testTwo()
    {
@@ -149,7 +149,7 @@ public class TrapezoidalVelocityTrajectoryTest
 //    sleepForever();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testWithoutEnforcingFinalVelocity()
    {
@@ -178,7 +178,7 @@ public class TrapezoidalVelocityTrajectoryTest
 //    sleepForever();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testNotEnforcingFinalVelocityBadCase()
    {
@@ -214,7 +214,7 @@ public class TrapezoidalVelocityTrajectoryTest
       assertTrue("endSpeed=" + endSpeed + ", : " + errorMessage, endSpeed <= maxVelocity);
    }
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
    @Test(timeout = 30000)
    public void testRandomStuff()
    {
@@ -262,7 +262,7 @@ public class TrapezoidalVelocityTrajectoryTest
          throw new RuntimeException("testRandomStuff Failed. Check output.");
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testProblemOnDog()
    {
@@ -279,7 +279,7 @@ public class TrapezoidalVelocityTrajectoryTest
       performTests(trap, t0, x0, v0, xF, vF, vMax, aMax);
    }
 
-	@EstimatedDuration(duration = 0.8)
+	@DeployableTestMethod(duration = 0.8)
    @Test(timeout = 30000)
    public void testNotEnforcingFinalVelocity()
    {
@@ -352,7 +352,7 @@ public class TrapezoidalVelocityTrajectoryTest
    }
 
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testProblemOne()
    {
@@ -371,7 +371,7 @@ public class TrapezoidalVelocityTrajectoryTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testProblemTwo()
    {
@@ -392,10 +392,11 @@ public class TrapezoidalVelocityTrajectoryTest
 
    }
 
-
+	/**
+	 * Never really worked yet. Some day maybe.
+	 */
    @Ignore
-   @QuarantinedTest("Never really worked yet. Some day maybe.")
-   @EstimatedDuration
+   @DeployableTestMethod(quarantined = true)
    @Test(timeout = 300000)
    public void DONTtestRandomSamples()
    {

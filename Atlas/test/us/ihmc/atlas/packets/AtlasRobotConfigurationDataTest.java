@@ -23,11 +23,11 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@BambooPlan(planType = BambooPlanType.Fast)
+@DeployableTestClass(planType = BambooPlanType.Fast)
 public class AtlasRobotConfigurationDataTest
 {
 
@@ -37,7 +37,7 @@ public class AtlasRobotConfigurationDataTest
     * 
     * This allows sending data without fragmentation, reducing jitter and making UDP communication simpler.
     */
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSerializedSize()
    {

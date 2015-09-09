@@ -7,12 +7,12 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.PacketsForwardedToTheUi;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class DRCConfigParametersTest
 {
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void test()
    {

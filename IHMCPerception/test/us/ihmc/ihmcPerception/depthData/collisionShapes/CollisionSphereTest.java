@@ -10,12 +10,12 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class CollisionSphereTest
 {
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testInsideSpherePoints()
    {
@@ -34,7 +34,7 @@ public class CollisionSphereTest
       }
    }
    
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testOutsideSpherePoints()
    {

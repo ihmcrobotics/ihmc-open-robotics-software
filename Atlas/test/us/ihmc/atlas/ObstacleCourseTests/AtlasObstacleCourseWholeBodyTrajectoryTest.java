@@ -14,13 +14,13 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseWholeBodyTrajectoryTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
+@DeployableTestClass(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
 public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCourseWholeBodyTrajectoryTest
 {
    private final DRCRobotModel robotModel = AtlasRobotModelFactory.createDefaultRobotModel();
@@ -39,7 +39,7 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
    }
    
    @Override
-	@EstimatedDuration(duration = 18.8)
+	@DeployableTestMethod(duration = 18.8)
    @Test(timeout = 94000)
    public void testArmMovementsWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {
@@ -48,7 +48,7 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
    }
    
    @Override
-	@EstimatedDuration(duration = 93.8)
+	@DeployableTestMethod(duration = 93.8)
    @Test(timeout = 470000)
    public void testChestControlWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {
@@ -57,7 +57,7 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testForMemoryLeaks() throws Exception
    {
@@ -66,7 +66,7 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
    }
    
    @Override
-	@EstimatedDuration(duration = 30.4)
+	@DeployableTestMethod(duration = 30.4)
    @Test(timeout = 150000)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {

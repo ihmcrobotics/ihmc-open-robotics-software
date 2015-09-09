@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 
@@ -39,7 +39,7 @@ public abstract class SCSCollisionDetectorTest
       margin = 0.02;
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void createBox_checkBounds_noHit()
    {
@@ -74,7 +74,7 @@ public abstract class SCSCollisionDetectorTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void createBox_checkBounds_hit()
    {
@@ -112,7 +112,7 @@ public abstract class SCSCollisionDetectorTest
     * Make a small object and see if it detects the collision correctly.  Small objects aren't already handled correctly
     */
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void createBox_Collision_Small()
    {
@@ -142,7 +142,7 @@ public abstract class SCSCollisionDetectorTest
       collisionDetector.performCollisionDetection();
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void collisionMask_hit()
    {
@@ -169,7 +169,7 @@ public abstract class SCSCollisionDetectorTest
     * Makes sure the offset from the link is handled correctly
     */
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void checkCollisionShape_offset()
    {
