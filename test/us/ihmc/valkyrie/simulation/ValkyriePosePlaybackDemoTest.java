@@ -34,7 +34,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
@@ -44,7 +44,7 @@ import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-@DeployableTestClass(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Slow})
 public class ValkyriePosePlaybackDemoTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
@@ -98,11 +98,11 @@ public class ValkyriePosePlaybackDemoTest
       }
    }
 
-	@DeployableTestMethod(duration = 6.2)
+	@DeployableTestMethod(estimatedDuration = 6.2)
 	@Test(timeout = 31000)
    public void testPosePlaybackControllerWithWarmupPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       
       int numberOfPoses = 5;
       double trajectoryTime = 1.0;
@@ -122,11 +122,11 @@ public class ValkyriePosePlaybackDemoTest
 
    // FlakyUnitTest: Hung on https://bamboo.ihmc.us/browse/RC-ALLGRADLE-VAL-952
 
-	@DeployableTestMethod(duration = 25.8)
+	@DeployableTestMethod(estimatedDuration = 25.8)
 	@Test(timeout = 128797)
    public void testPosePlaybackControllerWithRandomPoses() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
       
       int numberOfPoses = 5;
       double delayTime = 0.25;
@@ -146,11 +146,11 @@ public class ValkyriePosePlaybackDemoTest
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(duration = 23.7)
+	@DeployableTestMethod(estimatedDuration = 23.7)
 	@Test(timeout = 118283)
    public void testPosePlaybackControllerWithRandomPosesWithSomeJointsUncontrolled() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
       
       int numberOfPoses = 5;
       double delayTime = 0.25;

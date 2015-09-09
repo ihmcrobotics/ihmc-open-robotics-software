@@ -17,7 +17,7 @@ public class InefficientPushRodTransmissionTest
 {
    private static final boolean DEBUG = false;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testForwardBackward()
    {
@@ -82,7 +82,7 @@ public class InefficientPushRodTransmissionTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRegression()
    {

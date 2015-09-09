@@ -3,10 +3,10 @@ package us.ihmc.valkyrie;
 import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryMultiStepTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 
-@DeployableTestClass(planType = BambooPlanType.Slow)
+@DeployableTestClass(targets = TestPlanTarget.Slow)
 public class ValkyriePushRecoveryMultiStepTest extends DRCPushRecoveryMultiStepTest
 {
    @Override
