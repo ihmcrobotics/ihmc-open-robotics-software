@@ -44,7 +44,7 @@ public class CentroidalMomentumBenchmarkTest
 
 //   @Ignore
 
-	@DeployableTestMethod(duration = 24.7)
+	@DeployableTestMethod(estimatedDuration = 24.7)
 	@Test(timeout = 120000)
    public void floatingChainTest() throws UnreasonableAccelerationException
    {

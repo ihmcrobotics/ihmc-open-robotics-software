@@ -158,7 +158,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
    }
 
    @Ignore
-   @DeployableTestMethod(duration = 50.0)
+   @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testWalkForwardsX() throws SimulationExceededMaximumTimeException
    {

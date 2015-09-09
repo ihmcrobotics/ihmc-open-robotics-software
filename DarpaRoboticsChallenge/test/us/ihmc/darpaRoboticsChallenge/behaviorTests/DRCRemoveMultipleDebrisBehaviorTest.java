@@ -118,7 +118,7 @@ public abstract class DRCRemoveMultipleDebrisBehaviorTest implements MultiRobotT
       debrisRobots = new ArrayList<>();
    }
 
-   @DeployableTestMethod(duration = 90.0)
+   @DeployableTestMethod(estimatedDuration = 90.0)
    @Test(timeout = 3000000)
    public void testRemovingthreeDebris() throws SimulationExceededMaximumTimeException
    {

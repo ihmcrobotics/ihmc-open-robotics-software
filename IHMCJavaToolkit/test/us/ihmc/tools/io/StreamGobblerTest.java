@@ -18,7 +18,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public class StreamGobblerTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testStreamGobblerWithASingleLine() throws IOException
    {
@@ -46,7 +46,7 @@ public class StreamGobblerTest
       assertEquals(0, inputStream.available());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testStreamGobblerToGobbleMultipleLines() throws IOException
    {

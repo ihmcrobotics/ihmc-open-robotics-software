@@ -35,7 +35,7 @@ public class ContainerToolsTest
       ONE, TWO, THREE;
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCreateEnumMap()
    {
@@ -54,7 +54,7 @@ public class ContainerToolsTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFindLargestElements()
    {
@@ -90,7 +90,7 @@ public class ContainerToolsTest
       assertEquals(3, setOfThreeLargestInts.size());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFlatten()
    {
@@ -137,7 +137,7 @@ public class ContainerToolsTest
       assertEquals(3, numberOfThrees);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testToArrayOfArrays()
    {
@@ -190,7 +190,7 @@ public class ContainerToolsTest
       assertEquals(3, numberOfThrees);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAsSortedList()
    {
@@ -209,7 +209,7 @@ public class ContainerToolsTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRemoveByReference()
    {

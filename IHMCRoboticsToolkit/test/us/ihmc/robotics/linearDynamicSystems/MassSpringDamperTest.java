@@ -54,7 +54,7 @@ public class MassSpringDamperTest
       eigenvalueDecomposerA = null;
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testVDotWEqualsOne()
    {
@@ -68,7 +68,7 @@ public class MassSpringDamperTest
       assertEquals(0.0, dotProduct.imag(), 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testVDotWCongEqualsZero()
    {
@@ -82,7 +82,7 @@ public class MassSpringDamperTest
       assertEquals(0.0, dotProduct.imag(), 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDecomposerGotEigenvaluesRight()
    {

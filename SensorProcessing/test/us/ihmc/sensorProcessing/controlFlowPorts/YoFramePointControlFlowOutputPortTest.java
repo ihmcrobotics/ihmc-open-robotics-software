@@ -22,7 +22,7 @@ public class YoFramePointControlFlowOutputPortTest
 
    private static final double EPS = 1e-17;
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void simpleWritingReadingTest()
    {

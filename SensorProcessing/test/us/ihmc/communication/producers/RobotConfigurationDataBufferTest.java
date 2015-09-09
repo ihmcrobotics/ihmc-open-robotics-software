@@ -20,7 +20,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class RobotConfigurationDataBufferTest
 {
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testAddingStuff()
    {
@@ -56,7 +56,7 @@ public abstract class RobotConfigurationDataBufferTest
       }
    }
 
-	@DeployableTestMethod(duration = 100.0)
+	@DeployableTestMethod(estimatedDuration = 100.0)
    @Test(timeout = 300000)
    public void waitForTimestampTest()
    {

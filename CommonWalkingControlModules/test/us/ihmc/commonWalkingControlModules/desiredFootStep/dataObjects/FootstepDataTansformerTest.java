@@ -34,7 +34,7 @@ public class FootstepDataTansformerTest
 {
    private static Random random = new Random(100L);
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void test()
    {
@@ -93,7 +93,7 @@ public class FootstepDataTansformerTest
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDistance()
    {

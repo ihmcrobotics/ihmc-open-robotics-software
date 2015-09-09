@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 public class NullspaceCalculatorTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRemoveNullspaceComponent()
    {
@@ -42,7 +42,7 @@ public class NullspaceCalculatorTest
       assertTrue(isNullspaceComponentZero(matrixCopy, nullspace));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRemoveNullspaceComponent2()
    {
@@ -63,7 +63,7 @@ public class NullspaceCalculatorTest
       assertTrue(isNullspaceComponentZero(matrix2, nullspace));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRemoveNullspaceComponentProblematicCase()
    {
@@ -91,7 +91,7 @@ public class NullspaceCalculatorTest
       assertTrue(isNullspaceComponentZero(otherMatrix, nullspace));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNullspace()
    {

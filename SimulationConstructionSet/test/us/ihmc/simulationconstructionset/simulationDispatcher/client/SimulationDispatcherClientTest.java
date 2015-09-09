@@ -6,11 +6,11 @@ import java.rmi.registry.Registry;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@DeployableTestClass(planType = BambooPlanType.Manual)
+@DeployableTestClass(targets = TestPlanTarget.Manual)
 public class SimulationDispatcherClientTest
 {
    private static final String pwd = "***REMOVED***";

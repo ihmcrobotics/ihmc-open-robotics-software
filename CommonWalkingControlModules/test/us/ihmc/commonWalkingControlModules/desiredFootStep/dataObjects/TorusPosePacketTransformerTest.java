@@ -29,7 +29,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 public class TorusPosePacketTransformerTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTransformTorusPosePacket()
    {

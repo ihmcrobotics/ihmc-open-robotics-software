@@ -26,7 +26,7 @@ public class CurrentPositionProviderTest
       referenceFrame = null;
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructor()
    {
@@ -34,7 +34,7 @@ public class CurrentPositionProviderTest
       provider = new CurrentPositionProvider(referenceFrame);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGet()
    {

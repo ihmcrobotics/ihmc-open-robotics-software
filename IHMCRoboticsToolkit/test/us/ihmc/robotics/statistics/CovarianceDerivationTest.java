@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 public class CovarianceDerivationTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testLawOfLargeNumbers()
    {
@@ -31,7 +31,7 @@ public class CovarianceDerivationTest
       assertEquals(variance, statistics.getVariance(), epsilon);
    }
 
-	@DeployableTestMethod(duration = 7.6)
+	@DeployableTestMethod(estimatedDuration = 7.6)
 	@Test(timeout = 38016)
    public void testRandomWalkDiscretization()
    {

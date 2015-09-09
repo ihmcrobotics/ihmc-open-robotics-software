@@ -21,7 +21,7 @@ public class SingleRealModeTest
    {
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDifferentLengths()
    {
@@ -39,7 +39,7 @@ public class SingleRealModeTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDotEqualsOne()
    {
@@ -58,7 +58,7 @@ public class SingleRealModeTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructTransferFunctionMatrixSISO()
    {
@@ -86,7 +86,7 @@ public class SingleRealModeTest
       DynamicSystemsTestHelpers.assertEpsilonEquals(new double[] {1.0, -eigenvalue}, denominatorCoefficients, 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructTransferFunctionMatrixMIMO()
    {

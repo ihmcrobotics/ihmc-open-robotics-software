@@ -10,7 +10,7 @@ public class OneDimensionalBoundsTest
 {
    private static final double eps = 1e-14;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersection()
    {

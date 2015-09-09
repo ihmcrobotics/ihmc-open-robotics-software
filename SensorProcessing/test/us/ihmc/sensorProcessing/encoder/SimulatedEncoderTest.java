@@ -21,14 +21,14 @@ public class SimulatedEncoderTest
    {
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleTest()
    {
       assertEquals(1, 1);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructor()
    {
@@ -37,7 +37,7 @@ public class SimulatedEncoderTest
       new SimulatedEncoder(ticksPerPosition, "simEncTest", parentRegistry);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetTicksOne()
    {
@@ -53,7 +53,7 @@ public class SimulatedEncoderTest
       assertEquals(expecetedTicks, simulatedEncoder.getEncoderTicks());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetTicksTwo()
    {
@@ -76,7 +76,7 @@ public class SimulatedEncoderTest
       assertEquals(expecetedTicks, simulatedEncoder.getEncoderTicks());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetTicksThree()
    {
@@ -99,7 +99,7 @@ public class SimulatedEncoderTest
       assertEquals(expecetedTicks, simulatedEncoder.getEncoderTicks());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetTicksFour()
    {
@@ -140,7 +140,7 @@ public class SimulatedEncoderTest
       assertEquals(expectedPosition, simulatedEncoder.getPositionFromEncoder(), 0.01);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetPositionFromEncoderTwo()
    {
@@ -158,7 +158,7 @@ public class SimulatedEncoderTest
       assertEquals(expectedPosition, simulatedEncoder.getPositionFromEncoder(), 0.01);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetPositionFromEncoderThree()
    {
@@ -174,7 +174,7 @@ public class SimulatedEncoderTest
       assertEquals(expectedPosition, simulatedEncoder.getPositionFromEncoder(), 0.01);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetPositionFromEncoderFour()
    {
@@ -190,7 +190,7 @@ public class SimulatedEncoderTest
       assertEquals(expectedPosition, simulatedEncoder.getPositionFromEncoder(), 0.01);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConverTicksToDistance()
    {

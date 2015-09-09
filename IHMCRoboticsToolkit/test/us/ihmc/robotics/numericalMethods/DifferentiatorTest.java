@@ -30,7 +30,7 @@ public class DifferentiatorTest
    {
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSinusDifferentiatedIsCloseToCosinus()
    {
@@ -56,7 +56,7 @@ public class DifferentiatorTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNOrderPolynomDifferentiatedIsNMinusOneOrderPolynom()
    {
@@ -85,7 +85,7 @@ public class DifferentiatorTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFirstUpdatedToZero()
    {
@@ -122,7 +122,7 @@ public class DifferentiatorTest
       return t >= 2.0 * dt;
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testResetReturnsZero()
    {

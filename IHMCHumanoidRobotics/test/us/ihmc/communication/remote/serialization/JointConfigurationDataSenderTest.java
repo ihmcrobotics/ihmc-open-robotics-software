@@ -18,12 +18,12 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
-@DeployableTestClass(planType = BambooPlanType.Flaky)
+@DeployableTestClass(targets = TestPlanTarget.Flaky)
 public class JointConfigurationDataSenderTest
 {
    private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
@@ -34,7 +34,7 @@ public class JointConfigurationDataSenderTest
    private static final NetworkPorts TCP_PORT = NetworkPorts.createRandomTestPort(random);
    private static final String HOST = "localhost";
 
-	@DeployableTestMethod(duration = 30.0)
+	@DeployableTestMethod(estimatedDuration = 30.0)
 	@Test(timeout = 30000)
    public void test() throws InterruptedException, IOException
    {

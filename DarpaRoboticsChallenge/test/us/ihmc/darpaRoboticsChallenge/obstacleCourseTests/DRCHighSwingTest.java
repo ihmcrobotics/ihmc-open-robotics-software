@@ -69,7 +69,7 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
    }
 
 
-	@DeployableTestMethod(duration = 104.5)
+	@DeployableTestMethod(estimatedDuration = 104.5)
    @Test(timeout = 520000)
    public void testWalkingWithHighSteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {

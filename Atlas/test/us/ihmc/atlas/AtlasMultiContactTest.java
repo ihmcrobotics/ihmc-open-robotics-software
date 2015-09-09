@@ -17,13 +17,13 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-@DeployableTestClass(planType = {BambooPlanType.Fast, BambooPlanType.VideoA})
+@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.VideoA})
 public class AtlasMultiContactTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
@@ -75,7 +75,7 @@ public class AtlasMultiContactTest
       }
    }
 
-	@DeployableTestMethod(duration = 30.8)
+	@DeployableTestMethod(estimatedDuration = 30.8)
 	@Test(timeout = 150000)
    public void testMultiContactLocomotion() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

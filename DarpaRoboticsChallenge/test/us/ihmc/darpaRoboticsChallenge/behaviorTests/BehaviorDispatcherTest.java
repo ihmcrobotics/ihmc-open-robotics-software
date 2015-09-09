@@ -225,7 +225,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       return ret;
    }
 
-   @DeployableTestMethod(duration = 50.0)
+   @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testDispatchPelvisPoseBehavior() throws SimulationExceededMaximumTimeException
    {

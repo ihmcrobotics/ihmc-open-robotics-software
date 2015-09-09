@@ -41,7 +41,7 @@ public class FrameOrientationTest
       testFrame = null;
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOrientationOrientation()
    {
@@ -64,7 +64,7 @@ public class FrameOrientationTest
       assertEquals(original.getReferenceFrame(), test.getReferenceFrame());
    }
 	
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testSetOrientationFromOneToTwo()
 	{
@@ -256,7 +256,7 @@ public class FrameOrientationTest
 //      fail("Not yet implemented");    // TODO
 //   }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrameCopy()
    {

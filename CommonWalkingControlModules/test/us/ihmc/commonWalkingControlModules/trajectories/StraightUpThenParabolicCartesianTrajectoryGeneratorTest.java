@@ -30,7 +30,7 @@ public class StraightUpThenParabolicCartesianTrajectoryGeneratorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(duration = 0.7)
+	@DeployableTestMethod(estimatedDuration = 0.7)
 	@Test(timeout = 30000)
    public void testMaxHeight()
    {

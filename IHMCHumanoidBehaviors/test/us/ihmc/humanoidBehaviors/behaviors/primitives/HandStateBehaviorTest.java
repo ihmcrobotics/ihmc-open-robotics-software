@@ -13,7 +13,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class HandStateBehaviorTest
 {
-   @DeployableTestMethod(duration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testSetInput()
    {

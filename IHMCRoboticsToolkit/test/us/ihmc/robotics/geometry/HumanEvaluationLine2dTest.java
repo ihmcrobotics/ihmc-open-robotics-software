@@ -18,11 +18,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@DeployableTestClass(planType = {BambooPlanType.Fast, BambooPlanType.UI})
+@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.UI})
 public class HumanEvaluationLine2dTest
 {
    private final boolean WAIT_FOR_BUTTON_PUSH = false;
@@ -74,11 +74,11 @@ public class HumanEvaluationLine2dTest
    {
    }
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testIsOnLeftSideOfLine()
    {
-	   BambooPlanType.assumeRunningLocally();
+	   TestPlanTarget.assumeRunningLocally();
 	   
       double xMin = -1.0;
       double xMax = 1.0;
@@ -120,11 +120,11 @@ public class HumanEvaluationLine2dTest
       testFrame.dispose();
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testIsInFrontOfLine()
    {
-      BambooPlanType.assumeRunningLocally();
+      TestPlanTarget.assumeRunningLocally();
       
       // illegal method call:
       Line2d line = new Line2d(new Point2d(0.0, 0.0), new Vector2d(1.0, 0.0));
@@ -180,11 +180,11 @@ public class HumanEvaluationLine2dTest
       testFrame.dispose();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransform()
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
       
       RigidBodyTransform transform = new RigidBodyTransform();
 
@@ -210,11 +210,11 @@ public class HumanEvaluationLine2dTest
       // TODO: test rotation
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testContainsEpsilon()
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
 	   
       // Test will fail if you change epsilon too much.
 
@@ -242,11 +242,11 @@ public class HumanEvaluationLine2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetNormalizedVectorCopy()
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
       
       Vector2d vector = new Vector2d();
       line2dPointPoint.getNormalizedVector(vector);
@@ -258,11 +258,11 @@ public class HumanEvaluationLine2dTest
             vector.y, EPSILON_FOR_EQUALS);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetSlope()
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
       
       double slope = line2dPointPoint.getSlope();
       double scaleFactor = 10.0 * random.nextDouble() - 5.0;
@@ -273,11 +273,11 @@ public class HumanEvaluationLine2dTest
       assertTrue("Point should have been on the line", line2dPointPoint.containsEpsilon(shouldBeOnLineToo, epsilon));
    }
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testInteriorBisector()
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
       
       Point2d somePoint = new Point2d(random.nextDouble(), random.nextDouble());
       Vector2d vector1 = new Vector2d(1.0, 0.0);
@@ -325,11 +325,11 @@ public class HumanEvaluationLine2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNegateDirection()
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
       
       Line2d someLine = new Line2d(line2dPointPoint);
 
@@ -344,11 +344,11 @@ public class HumanEvaluationLine2dTest
       assertEquals(directionVectorBefore, someLine.normalizedVector);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNegateDirectionCopy()
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
       
       Line2d someLine = new Line2d(line2dPointPoint);
 
@@ -366,11 +366,11 @@ public class HumanEvaluationLine2dTest
       assertNotSame(someLine, copy);
    }
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testPerpendicularVector()
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
       
       Line2d line;
       Vector2d vector;
@@ -385,11 +385,11 @@ public class HumanEvaluationLine2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testZeroLength()
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
       
       Vector2d directionAndLength = new Vector2d(0.0, 0.0);
       Point2d start = new Point2d(1.0, 1.0);

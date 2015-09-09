@@ -6,10 +6,10 @@ import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.roughTerrainWalking.DRCFootExplorationTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 
-@DeployableTestClass(planType = {BambooPlanType.InDevelopment})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment})
 public class AtlasFootExplorationTest extends DRCFootExplorationTest
 {
    @Override

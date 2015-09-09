@@ -30,7 +30,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class FootPosePacketTransformerTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTransformHandPosePacket() throws Exception
    {

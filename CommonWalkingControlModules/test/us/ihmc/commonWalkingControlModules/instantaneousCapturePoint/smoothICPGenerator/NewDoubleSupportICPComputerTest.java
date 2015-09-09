@@ -28,7 +28,7 @@ public class NewDoubleSupportICPComputerTest
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeICPCornerPoints()
    {
@@ -93,7 +93,7 @@ public class NewDoubleSupportICPComputerTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeSingleSupportICP()
    {

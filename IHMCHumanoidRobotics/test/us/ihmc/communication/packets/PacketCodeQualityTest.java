@@ -10,14 +10,14 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@DeployableTestClass(planType = BambooPlanType.CodeQuality)
+@DeployableTestClass(targets = TestPlanTarget.CodeQuality)
 public class PacketCodeQualityTest
 {
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAllPacketFieldsArePublic()
    {

@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 public class GlitchFilterForDataSetTest
 {
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testBasic0()
    {
@@ -43,7 +43,7 @@ public class GlitchFilterForDataSetTest
       assertTrue(ArrayTools.deltaEquals(filteredFata, answerFromMatlab, 1e-8));
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testBasic1()
    {
@@ -72,7 +72,7 @@ public class GlitchFilterForDataSetTest
 
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testBasic2()
    {
@@ -201,7 +201,7 @@ public class GlitchFilterForDataSetTest
       return ret;
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testNull()
    {
@@ -211,7 +211,7 @@ public class GlitchFilterForDataSetTest
       assertEquals(null, ret);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWindowSize()
    {
@@ -227,7 +227,7 @@ public class GlitchFilterForDataSetTest
       assertFalse(ArrayTools.deltaEquals(dataSet, ret, 1e-8));
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testData()
    {

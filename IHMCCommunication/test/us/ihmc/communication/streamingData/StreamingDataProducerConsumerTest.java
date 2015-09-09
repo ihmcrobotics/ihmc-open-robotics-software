@@ -8,7 +8,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public class StreamingDataProducerConsumerTest
 {
 
-	@DeployableTestMethod(duration = 1.1)
+	@DeployableTestMethod(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void testTypicalUsage()
    {
@@ -24,7 +24,7 @@ public class StreamingDataProducerConsumerTest
       }
    }
 
-	@DeployableTestMethod(duration = 1.1)
+	@DeployableTestMethod(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void testMultipleProducersAndConsumers()
    {

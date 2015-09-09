@@ -15,7 +15,7 @@ public class TimeStampedTransform3DTest
 
    private static final double EPSILON = 1.0e-15;
 
-   @DeployableTestMethod(duration = 0.01)
+   @DeployableTestMethod(estimatedDuration = 0.01)
    @Test(timeout = 300000)
    public void testEmptyConstructor()
    {
@@ -28,7 +28,7 @@ public class TimeStampedTransform3DTest
       assertTrue("Transform is different from what was expected", expectedTransform.epsilonEquals(toBeTested.getTransform3D(), EPSILON));
    }
 
-   @DeployableTestMethod(duration = 0.01)
+   @DeployableTestMethod(estimatedDuration = 0.01)
    @Test(timeout = 300000)
    public void testConstructor()
    {
@@ -45,7 +45,7 @@ public class TimeStampedTransform3DTest
       assertTrue("TimestampedTransform should only copy the given transform into an internal variable", expectedTransform != toBeTested.getTransform3D());
    }
 
-   @DeployableTestMethod(duration = 0.01)
+   @DeployableTestMethod(estimatedDuration = 0.01)
    @Test(timeout = 300000)
    public void testSetters()
    {
@@ -80,7 +80,7 @@ public class TimeStampedTransform3DTest
       assertTrue("Transform is different from what was expected", expectedTimeStampedTransform.getTransform3D().epsilonEquals(toBeTested.getTransform3D(), EPSILON));
    }
 
-   @DeployableTestMethod(duration = 0.01)
+   @DeployableTestMethod(estimatedDuration = 0.01)
    @Test(timeout = 300000)
    public void testGetTransform()
    {

@@ -151,7 +151,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
    
-	@DeployableTestMethod(duration = 30.4)
+	@DeployableTestMethod(estimatedDuration = 30.4)
 	@Test(timeout = 151825)
    public void testWalkingOverSmallPlatformQuickly() throws SimulationExceededMaximumTimeException
    {
@@ -188,7 +188,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(duration = 48.8)
+	@DeployableTestMethod(estimatedDuration = 48.8)
    @Test(timeout = 243954)
    public void testSidestepOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
@@ -223,7 +223,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(duration = 49.2)
+	@DeployableTestMethod(estimatedDuration = 49.2)
    @Test(timeout = 246010)
    public void testSidestepOverSmallWall() throws SimulationExceededMaximumTimeException
    {
@@ -258,7 +258,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(duration = 43.5)
+	@DeployableTestMethod(estimatedDuration = 43.5)
    @Test(timeout = 217348)
    public void testWalkingOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
@@ -305,7 +305,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
 
 
-	@DeployableTestMethod(duration = 29.9)
+	@DeployableTestMethod(estimatedDuration = 29.9)
 	@Test(timeout = 149558)
    public void testWalkingOntoMediumPlatformToesTouching() throws SimulationExceededMaximumTimeException
    {
@@ -342,7 +342,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
 
-	@DeployableTestMethod(duration = 30.0)
+	@DeployableTestMethod(estimatedDuration = 30.0)
 	@Test(timeout = 149768)
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
    {
@@ -379,7 +379,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
 
-	@DeployableTestMethod(duration = 30.0)
+	@DeployableTestMethod(estimatedDuration = 30.0)
 	@Test(timeout = 149768)
 	public void testWalkingOffOfMediumPlatformSlowSteps() throws SimulationExceededMaximumTimeException
 	{

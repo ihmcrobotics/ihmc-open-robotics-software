@@ -5,11 +5,11 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCHeadOrientationBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 
 
-@DeployableTestClass(planType = {BambooPlanType.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.Slow})
 public class AtlasHeadOrientationBehaviorTest extends DRCHeadOrientationBehaviorTest
 {
    private final AtlasRobotModel robotModel;

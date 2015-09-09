@@ -20,7 +20,7 @@ import static org.junit.Assert.fail;
 public class QuadTreeForGroundTest
 {
    @Ignore
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAllPoints()
    {
@@ -47,7 +47,7 @@ public class QuadTreeForGroundTest
 
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCommonCaseWithNoFilteringOrPointAveraging()
    {
@@ -98,7 +98,7 @@ public class QuadTreeForGroundTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPointLimiter()
    {
@@ -173,7 +173,7 @@ public class QuadTreeForGroundTest
       assertFalse(NE.hasChildren());
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCasesOne()
    {
@@ -241,7 +241,7 @@ public class QuadTreeForGroundTest
       assertEquals(1, quadTree.getNumberOfQuads());
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithFilteringAndPointAveraging()
    {
@@ -326,7 +326,7 @@ public class QuadTreeForGroundTest
       assertEquals(16, quadTree.getNumberOfQuads()); // Still 16 here.
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetClosestPoint()
    {
@@ -373,7 +373,7 @@ public class QuadTreeForGroundTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAllPointsWithinBounds()
    {
@@ -415,7 +415,7 @@ public class QuadTreeForGroundTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAllPointsWithinDistance()
    {

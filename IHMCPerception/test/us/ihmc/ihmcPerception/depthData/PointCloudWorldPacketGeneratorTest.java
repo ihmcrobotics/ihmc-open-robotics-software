@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class PointCloudWorldPacketGeneratorTest
 {
 
-	@DeployableTestMethod(duration = 0.7)
+	@DeployableTestMethod(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testGeneratePointCloudWorldPacket() throws InterruptedException
    {

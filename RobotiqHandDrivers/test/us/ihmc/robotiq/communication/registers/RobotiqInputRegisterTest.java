@@ -14,7 +14,7 @@ public abstract class RobotiqInputRegisterTest
    protected abstract byte getValueToSet();
    
    @Test(timeout = 30000)
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    public void testSetRegister()
    {
       RobotiqInputRegister inputRegister = getInputRegister();
@@ -24,7 +24,7 @@ public abstract class RobotiqInputRegisterTest
    }
 
    @Test(timeout = 30000)
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    public void testGetRegister()
    {
       assertEquals(getValueToSet(), getExpectedRegister().getRegisterValue());

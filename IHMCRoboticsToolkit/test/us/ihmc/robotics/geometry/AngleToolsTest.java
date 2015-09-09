@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 public class AngleToolsTest
 {
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructor()
            throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
@@ -33,7 +33,7 @@ public class AngleToolsTest
       constructor.newInstance();
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testComputeAngleDifferenceMinusTwoPiToZero()
    {
@@ -57,7 +57,7 @@ public class AngleToolsTest
 
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testComputeAngleDifferenceMinusPiToPi()
    {
@@ -81,7 +81,7 @@ public class AngleToolsTest
 
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testComputeAngleDifferenceMinusPiToPiUsingTrim()
    {
@@ -105,7 +105,7 @@ public class AngleToolsTest
 
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFindClosestNinetyDegreeYaw()
    {
@@ -140,7 +140,7 @@ public class AngleToolsTest
       assertEquals(expectedReturn, actualReturn);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomAngle()
    {
@@ -154,7 +154,7 @@ public class AngleToolsTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateArrayOfTestAngles()
    {
@@ -263,7 +263,7 @@ public class AngleToolsTest
       assertEquals("Should have found one angle equal to -2PI!", 1, numberOfAnglesEqualToMinus2PI);
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testShiftAngleToStartOfRange()
    {
@@ -288,7 +288,7 @@ public class AngleToolsTest
 
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTrimAngleMinusPiToPi()
    {
@@ -303,7 +303,7 @@ public class AngleToolsTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testComputeAngleAverage()
    {
@@ -345,7 +345,7 @@ public class AngleToolsTest
 
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAngleMinusPiToPi()
    {
@@ -380,7 +380,7 @@ public class AngleToolsTest
       assertTrue(Double.isNaN(expected));
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCalculateHeading()
    {

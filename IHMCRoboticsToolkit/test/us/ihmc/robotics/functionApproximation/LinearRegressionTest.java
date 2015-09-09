@@ -14,7 +14,7 @@ public class LinearRegressionTest
 {
    private static final boolean VERBOSE = false;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTypicalExampleOne()
    {
@@ -51,7 +51,7 @@ public class LinearRegressionTest
                                  expectedCoefficients);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTypicalExampleTwo()
    {
@@ -101,7 +101,7 @@ public class LinearRegressionTest
                                  expectedCoefficients);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPerfectMatch()
    {
@@ -149,7 +149,7 @@ public class LinearRegressionTest
                                  expectedCoefficients);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRandomness()
    {
@@ -177,7 +177,7 @@ public class LinearRegressionTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testNotEnoughPoints()
    {
@@ -192,7 +192,7 @@ public class LinearRegressionTest
       boolean foundSolution = linearRegression.solve();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testAskingForAnswerBeforeDone()
    {
@@ -207,7 +207,7 @@ public class LinearRegressionTest
       linearRegression.packCoefficientVector(coefficientVector);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testAskingForSquaredErrorBeforeDone()
    {
@@ -221,7 +221,7 @@ public class LinearRegressionTest
       linearRegression.getSquaredError();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testAskingForCoefficientVectorAsMatrixBeforeDone()
    {

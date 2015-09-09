@@ -14,14 +14,14 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
-@DeployableTestClass(planType = {BambooPlanType.UI})
+@DeployableTestClass(targets = {TestPlanTarget.UI})
 public class YoEntryBoxTest
 {
    public enum BadGreekEnum {ALPHA, BETA, GAMMA}
@@ -141,7 +141,7 @@ public class YoEntryBoxTest
       scs.closeAndDispose();
    }
 
-	@DeployableTestMethod(duration = 8.5)
+	@DeployableTestMethod(estimatedDuration = 8.5)
 	@Test(timeout = 43000)
    public void testSwitchToEnumEntry() throws SimulationExceededMaximumTimeException, InterruptedException
    {

@@ -8,17 +8,17 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtrusionIns
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.robotics.Axis;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@DeployableTestClass(planType={BambooPlanType.UI})
+@DeployableTestClass(targets={TestPlanTarget.UI})
 public class Graphics3DTextTest implements Graphics3DFrameListener
 {
    int counter = 0;
    Graphics3DAddExtrusionInstruction instruction;
 
-	@DeployableTestMethod(duration = 4.1)
+	@DeployableTestMethod(estimatedDuration = 4.1)
 	@Test(timeout = 30000)
    public void testTextDisplay()
    {

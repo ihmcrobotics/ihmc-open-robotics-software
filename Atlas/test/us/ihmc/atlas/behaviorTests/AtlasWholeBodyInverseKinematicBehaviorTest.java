@@ -9,12 +9,12 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCWholeBodyInverseKinematic
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 
-@DeployableTestClass(planType = {BambooPlanType.InDevelopment})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment})
 public class AtlasWholeBodyInverseKinematicBehaviorTest extends DRCWholeBodyInverseKinematicBehaviorTest
 {
 	private final AtlasRobotModel robotModel;
@@ -40,7 +40,7 @@ public class AtlasWholeBodyInverseKinematicBehaviorTest extends DRCWholeBodyInve
 	 */
 	@Override
 	@Ignore
-	@DeployableTestMethod(duration = 90.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 90.0, quarantined = true)
    @Test(timeout = 300000)
 	public void testRandomRightHandPose() throws SimulationExceededMaximumTimeException
 	{
@@ -52,7 +52,7 @@ public class AtlasWholeBodyInverseKinematicBehaviorTest extends DRCWholeBodyInve
     */
    @Override
    @Ignore
-   @DeployableTestMethod(duration = 90.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 90.0, quarantined = true)
    @Test(timeout = 300000)
 	public void testWholeBodyInverseKinematicsMoveToPoseAcheivedInJointSpace() throws SimulationExceededMaximumTimeException
 	{

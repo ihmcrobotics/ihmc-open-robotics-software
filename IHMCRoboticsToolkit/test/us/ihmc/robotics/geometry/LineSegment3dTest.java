@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 public class LineSegment3dTest {
 	private static Random ran = new Random(100L);
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testLenght() {
 		Point3d point0 = new Point3d(1.0,1.0,0.0);
@@ -33,7 +33,7 @@ public class LineSegment3dTest {
 	    assertEquals(3.0, segment.length(),1e-14);
 	}
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testDistanceToPoint() {
 		Point3d point0 = new Point3d(0.0,0.0,0.0);
@@ -70,7 +70,7 @@ public class LineSegment3dTest {
 	    assertEquals(segment.length(), segment.distanceToAPoint(point),1e-14);		    
 	}
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testProjection(){
 		Point3d pointA = new Point3d(1.0,2.0,3.0);
@@ -96,7 +96,7 @@ public class LineSegment3dTest {
 	        
 	}
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testRandom(){
 		Point3d pointA = new Point3d(1.0,2.0,3.0);
@@ -160,7 +160,7 @@ public class LineSegment3dTest {
 		return returnPoint;
 	}
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void directionTest()
    {

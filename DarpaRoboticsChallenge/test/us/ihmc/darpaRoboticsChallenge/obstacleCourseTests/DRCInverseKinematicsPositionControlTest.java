@@ -124,7 +124,7 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
    }
    
    
-	@DeployableTestMethod(duration = 46.6)
+	@DeployableTestMethod(estimatedDuration = 46.6)
 	@Test(timeout = 230000)
    public void testJointSpaceHandPose() throws SimulationExceededMaximumTimeException
    {
@@ -149,7 +149,7 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
       BambooTools.reportTestFinishedMessage();
    }
 	
-	@DeployableTestMethod(duration = 31.5)
+	@DeployableTestMethod(estimatedDuration = 31.5)
    @Test(timeout = 160000)
    public void testTaskSpaceHandPose() throws SimulationExceededMaximumTimeException
    {
@@ -188,7 +188,7 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
       BambooTools.reportTestFinishedMessage();
    }
    
-	@DeployableTestMethod(duration = 41.8)
+	@DeployableTestMethod(estimatedDuration = 41.8)
    @Test(timeout = 210000)
    public void testHandRotateAboutAxis() throws SimulationExceededMaximumTimeException
    {

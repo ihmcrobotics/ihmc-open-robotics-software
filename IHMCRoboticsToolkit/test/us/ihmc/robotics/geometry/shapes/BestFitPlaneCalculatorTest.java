@@ -23,7 +23,7 @@ public class BestFitPlaneCalculatorTest
 {
    private static final double eps = 1e-7;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void basicBestFitPlaneCalculatorTest() throws InsufficientDataException
    {
@@ -53,7 +53,7 @@ public class BestFitPlaneCalculatorTest
 
    }  
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void basicBestFitPlaneCalculatorNaNTest() throws InsufficientDataException
    {

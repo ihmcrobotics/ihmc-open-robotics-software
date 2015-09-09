@@ -46,7 +46,7 @@ public class EstimateMotionFromBoxTest
    Point3D_F64 foundP = new Point3D_F64();
    Point3D_F64 expectedP = new Point3D_F64();
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void translation() {
       Se3_F64 canonicalToA =  new Se3_F64();
@@ -58,7 +58,7 @@ public class EstimateMotionFromBoxTest
       checkCase(new EstimateMotionFromBox(), canonicalToA, canonicalToB);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void rotation() {
       Se3_F64 canonicalToA =  new Se3_F64();
@@ -70,7 +70,7 @@ public class EstimateMotionFromBoxTest
       checkCase(new EstimateMotionFromBox(), canonicalToA, canonicalToB);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void both() {
       Se3_F64 canonicalToA =  new Se3_F64();
@@ -84,7 +84,7 @@ public class EstimateMotionFromBoxTest
       checkCase(new EstimateMotionFromBox(), canonicalToA, canonicalToB);
    }
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void randomTransforms()
    {
@@ -148,7 +148,7 @@ public class EstimateMotionFromBoxTest
       return a;
    }
 
-	@DeployableTestMethod(duration = 1.7)
+	@DeployableTestMethod(estimatedDuration = 1.7)
 	@Test(timeout = 30000)
    public void testMovingBox()
    {

@@ -325,7 +325,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    }
 
-	@DeployableTestMethod(duration = 7.8)
+	@DeployableTestMethod(estimatedDuration = 7.8)
 	@Test(timeout = 39000)
    public void testPelvisCorrectionControllerOutOfTheLoop() throws SimulationExceededMaximumTimeException
    {
@@ -369,7 +369,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    }
 
-	@DeployableTestMethod(duration = 12.1)
+	@DeployableTestMethod(estimatedDuration = 12.1)
 	@Test(timeout = 61000)
    public void testPelvisCorrectionDuringSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
@@ -401,7 +401,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 	 * 
 	 * @throws SimulationExceededMaximumTimeException
 	 */
-	@DeployableTestMethod(duration = 7.7, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 7.7, quarantined = true)
 	@Test(timeout = 39000)
    public void testBigYawInDoubleSupport() throws SimulationExceededMaximumTimeException
    {
@@ -431,7 +431,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 	 * 
 	 * @throws SimulationExceededMaximumTimeException
 	 */
-	@DeployableTestMethod(duration = 9.4, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 9.4, quarantined = true)
 	@Test(timeout = 47000)
    public void testBigYawInSingleSupport() throws SimulationExceededMaximumTimeException
    {
@@ -463,7 +463,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 	 * 
 	 * @throws SimulationExceededMaximumTimeException
 	 */
-	@DeployableTestMethod(duration = 8.1, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 8.1, quarantined = true)
 	@Test(timeout = 41000)
    public void testLocalizationOffsetOutsideOfFootInSingleSupport() throws SimulationExceededMaximumTimeException
    {
@@ -523,7 +523,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
     * @throws SimulationExceededMaximumTimeException
     * @throws ControllerFailureException
     */
-	@DeployableTestMethod(duration = 5.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 5.0, quarantined = true)
 	@Test(timeout = 30000)
    public void testWalkingDuringBigPelvisCorrection() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

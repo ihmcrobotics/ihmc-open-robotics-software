@@ -13,13 +13,13 @@ import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCPelvisLowGainsTest;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-@DeployableTestClass(planType = {BambooPlanType.Slow, BambooPlanType.VideoA})
+@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.VideoA})
 public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);

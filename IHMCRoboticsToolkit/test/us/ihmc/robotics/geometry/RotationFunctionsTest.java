@@ -27,7 +27,7 @@ public class RotationFunctionsTest
    Matrix3d rotationMatrixToPack = new Matrix3d();
    Quat4d quatToPack = new Quat4d();
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAxisAngleEpsilonEquivalentIgnoreCompleteRotations()
    {
@@ -59,7 +59,7 @@ public class RotationFunctionsTest
       }
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAxisAngleEpsilonEqualsIgnoreFlippedAxes()
    {
@@ -91,7 +91,7 @@ public class RotationFunctionsTest
       }
    }
 
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAxisAngleEpsilonEquivalentAnglesAreZero()
    {
@@ -110,7 +110,7 @@ public class RotationFunctionsTest
       }
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAxisAngleEpsilonEquivalentAnglesDivisibleByTwoPi()
    {
@@ -150,7 +150,7 @@ public class RotationFunctionsTest
       }
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAxisAngleEpsilonEquivalentMinusPI()
    {
@@ -180,7 +180,7 @@ public class RotationFunctionsTest
       }
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAxisAngleEpsilonEquivalentPlusPI()
    {
@@ -210,7 +210,7 @@ public class RotationFunctionsTest
       }
    }
    
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetYawPitchRoll()
    {
@@ -238,7 +238,7 @@ public class RotationFunctionsTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetPitch()
    {
@@ -274,7 +274,7 @@ public class RotationFunctionsTest
       assertEquals("Yaw is not correct", 1.0, yaw, delta);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetYawFromQuaternion()
    {
@@ -299,7 +299,7 @@ public class RotationFunctionsTest
       assertEquals("Yaw is not correct", yaw, yawSolution, delta);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetQuaternionFromYawAndZNormal()
    {
@@ -332,7 +332,7 @@ public class RotationFunctionsTest
       assertTrue(RotationFunctions.quaternionEpsilonEquals(quatToPack, quatSolution, delta));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRandomGetQuaternionFromYawAndZNormal()
    {
@@ -355,7 +355,7 @@ public class RotationFunctionsTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testQuaternionStuff()
    {
@@ -421,7 +421,7 @@ public class RotationFunctionsTest
    
    //standard identity matrix
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetQuaternionBasedOnMatrix_Case0()
    {
@@ -443,7 +443,7 @@ public class RotationFunctionsTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testSetQuaternionBasedOnMatrix3d()
    {
@@ -484,7 +484,7 @@ public class RotationFunctionsTest
     * Test that has for only purpose to highlight a bug in Java3d.
     */
    @Ignore
-	@DeployableTestMethod(duration = 0.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
    @Test(timeout = 10000)
    public void testJava3dAxisAngleSetMatrixBug()
    {
@@ -506,7 +506,7 @@ public class RotationFunctionsTest
     * Test that has for only purpose to highlight a bug in Java3d
     */
    @Ignore
-   @DeployableTestMethod(duration = 0.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
    @Test(timeout = 10000)
    public void testJava3dQuat4dSetMatrixBug()
    {
@@ -528,7 +528,7 @@ public class RotationFunctionsTest
     * Test that has for only purpose to highlight a bug in Java3d
     */
    @Ignore
-   @DeployableTestMethod(duration = 0.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
    @Test(timeout = 10000)
    public void testJava3dQuat4dSetMatrixBug2()
    {
@@ -550,7 +550,7 @@ public class RotationFunctionsTest
     * Test that has for only purpose to highlight a bug in Java3d
     */
    @Ignore
-   @DeployableTestMethod(duration = 0.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
    @Test(timeout = 10000)
    public void testJava3dAxisAngleSetMatrixBug2()
    {
@@ -570,7 +570,7 @@ public class RotationFunctionsTest
       
    }
    
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testJava3dAxisAngle4dSetMatrixBugWorkAround()
    {
@@ -585,7 +585,7 @@ public class RotationFunctionsTest
       assertTrue(m3.epsilonEquals(m, 1e-5));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testJava3dAxisAngle4fSetMatrixBugWorkAround()
    {

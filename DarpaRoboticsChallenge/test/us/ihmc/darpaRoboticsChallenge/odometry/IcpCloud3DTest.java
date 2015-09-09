@@ -25,7 +25,7 @@ public class IcpCloud3DTest {
 
    Random rand = new Random(234);
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void perfect_nomotion() {
 
@@ -56,7 +56,7 @@ public class IcpCloud3DTest {
       assertTrue(found.getT().normSq()<=1e-8);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void perfect_translation() {
 
@@ -92,7 +92,7 @@ public class IcpCloud3DTest {
       assertEquals(expected.getT().z,found.getT().z,1e-8);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void perfect_tran_rot() {
 

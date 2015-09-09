@@ -10,7 +10,7 @@ import static org.junit.Assert.fail;
 public class RobotSideTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRobotSide()
    {
@@ -59,7 +59,7 @@ public class RobotSideTest
       assertEquals(numberToTest, leftRobotSide.negateIfRightSide(numberToTest), 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCheckRobotSideMatch()
    {

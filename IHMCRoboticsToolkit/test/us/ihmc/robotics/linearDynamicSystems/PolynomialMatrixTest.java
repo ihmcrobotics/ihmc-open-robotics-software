@@ -21,7 +21,7 @@ public class PolynomialMatrixTest
    {
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeDeterminantOne()
    {
@@ -53,7 +53,7 @@ public class PolynomialMatrixTest
       assertTrue(determinant.epsilonEquals(two.times(-1.0), 1e-7));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeDeterminantTwo()
    {
@@ -76,7 +76,7 @@ public class PolynomialMatrixTest
       assertTrue(determinant.epsilonEquals(expectedDeterminant, 1e-7));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeDeterminantAndConstructSIMinusA()
    {
@@ -105,7 +105,7 @@ public class PolynomialMatrixTest
       assertTrue(expectedPolynomial.epsilonEquals(determinant, 1e-7));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeDeterminantAndCofactors()
    {

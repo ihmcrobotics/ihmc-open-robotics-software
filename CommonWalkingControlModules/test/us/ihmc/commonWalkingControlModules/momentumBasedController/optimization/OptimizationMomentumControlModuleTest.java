@@ -76,7 +76,7 @@ public class OptimizationMomentumControlModuleTest
    private final double controlDT = 1e-5;    // 5e-3;
    private final double gravityZ = 9.81;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testMomentumAndJointSpaceConstraints() throws NoConvergenceException
    {
@@ -131,7 +131,7 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-3);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testMomentumAndTaskSpaceConstraints()
    {
@@ -207,7 +207,7 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testMomentumAndPointAccelerationConstraints() throws NoConvergenceException
    {
@@ -289,7 +289,7 @@ public class OptimizationMomentumControlModuleTest
       FrameVectorTest.assertFrameVectorEquals(desiredPointAccelerationBack, desiredPointAcceleration, 1e-3);
    }
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testSingleRigidBody() throws NoConvergenceException
    {
@@ -352,7 +352,7 @@ public class OptimizationMomentumControlModuleTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testPrimaryAndSecondaryConstraints() throws NoConvergenceException
    {
@@ -447,7 +447,7 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNullspaceMultipliers() throws NoConvergenceException
    {

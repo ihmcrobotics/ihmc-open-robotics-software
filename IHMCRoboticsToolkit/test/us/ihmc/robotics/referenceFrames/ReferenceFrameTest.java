@@ -212,7 +212,7 @@ public class ReferenceFrameTest
       matrix.m22 = 1;
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTypicalExample()
    {
@@ -229,7 +229,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetTransformToParents()
    {
@@ -253,7 +253,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetTransformToRoots()
    {
@@ -274,7 +274,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void getTransformToSelf()
    {
@@ -289,7 +289,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testGetTransformBetweenFrames()
    {
@@ -329,7 +329,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testUpdateInMiddleFrame()
    {
@@ -372,7 +372,7 @@ public class ReferenceFrameTest
       JUnitTools.assertTuple3dEquals(expectedTranslation, totalTranslation, 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testUpdateInMiddleWithCorruptors()
    {
@@ -425,7 +425,7 @@ public class ReferenceFrameTest
       RigidBodyTransformTest.assertTransformEquals(expectedTransform, transformToDesiredFrame, 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testGetTransformBetweenFramesTwo()
    {
@@ -463,7 +463,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 	
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructFrameFromPointAndAxis()
    {
@@ -492,7 +492,7 @@ public class ReferenceFrameTest
       tearDown();
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCopyAndAlignAxisWithVector()
    {
@@ -530,7 +530,7 @@ public class ReferenceFrameTest
       tearDown();
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCopyAndAlignTwoAxesWithTwoVectors()
    {
@@ -576,7 +576,7 @@ public class ReferenceFrameTest
       tearDown();
    }
    
-   @DeployableTestMethod(duration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCopyAndAimAxisAtPoint()
    {
@@ -617,7 +617,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testWorldFrameSerializable()
    {
@@ -629,7 +629,7 @@ public class ReferenceFrameTest
       //NOTE:No other reference frame is serializable because of transform3D
    }
 
-	@DeployableTestMethod(duration = 0.8)
+	@DeployableTestMethod(estimatedDuration = 0.8)
 	@Test(timeout = 30000)
    public void testGarbageCollectionInBroadTrees()
    {

@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 public class FrameLineTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrameCopy()
    {
@@ -76,7 +76,7 @@ public class FrameLineTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetFrameVector()
    {
@@ -104,7 +104,7 @@ public class FrameLineTest
       assertTrue(line.getDirectionInFrame(target2).epsilonEquals(vector, 1e-12));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetFramePoint()
    {
@@ -132,7 +132,7 @@ public class FrameLineTest
       assertTrue(line.getDirectionInFrame(target2).epsilonEquals(vector, 1e-12));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected=RuntimeException.class)
    public void testConstructorA()
    {
@@ -142,7 +142,7 @@ public class FrameLineTest
       new FrameLine(ReferenceFrame.getWorldFrame(), origin, direction);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected=RuntimeException.class)
    public void testConstructorB()
    {
@@ -152,7 +152,7 @@ public class FrameLineTest
       new FrameLine(origin, direction);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected=RuntimeException.class)
    public void testConstructorC()
    {

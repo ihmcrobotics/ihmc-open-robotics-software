@@ -26,7 +26,7 @@ public class TrapezoidalVelocityTrajectoryTest
    {
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetState()
    {
@@ -91,7 +91,7 @@ public class TrapezoidalVelocityTrajectoryTest
 
 
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void DONTtestOne()
    {
@@ -119,7 +119,7 @@ public class TrapezoidalVelocityTrajectoryTest
 //    sleepForever();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTwo()
    {
@@ -149,7 +149,7 @@ public class TrapezoidalVelocityTrajectoryTest
 //    sleepForever();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithoutEnforcingFinalVelocity()
    {
@@ -178,7 +178,7 @@ public class TrapezoidalVelocityTrajectoryTest
 //    sleepForever();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testNotEnforcingFinalVelocityBadCase()
    {
@@ -214,7 +214,7 @@ public class TrapezoidalVelocityTrajectoryTest
       assertTrue("endSpeed=" + endSpeed + ", : " + errorMessage, endSpeed <= maxVelocity);
    }
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testRandomStuff()
    {
@@ -262,7 +262,7 @@ public class TrapezoidalVelocityTrajectoryTest
          throw new RuntimeException("testRandomStuff Failed. Check output.");
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testProblemOnDog()
    {
@@ -279,7 +279,7 @@ public class TrapezoidalVelocityTrajectoryTest
       performTests(trap, t0, x0, v0, xF, vF, vMax, aMax);
    }
 
-	@DeployableTestMethod(duration = 0.8)
+	@DeployableTestMethod(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testNotEnforcingFinalVelocity()
    {
@@ -352,7 +352,7 @@ public class TrapezoidalVelocityTrajectoryTest
    }
 
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testProblemOne()
    {
@@ -371,7 +371,7 @@ public class TrapezoidalVelocityTrajectoryTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testProblemTwo()
    {

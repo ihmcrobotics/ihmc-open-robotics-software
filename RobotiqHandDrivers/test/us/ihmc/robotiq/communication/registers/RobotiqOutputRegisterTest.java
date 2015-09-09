@@ -12,7 +12,7 @@ public abstract class RobotiqOutputRegisterTest
    protected abstract RobotiqOutputRegister getOutputRegister();
    
    @Test(timeout = 30000)
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    public void testGetRegisterValue()
    {
       byte expectedValue = getExpectedByteValue();

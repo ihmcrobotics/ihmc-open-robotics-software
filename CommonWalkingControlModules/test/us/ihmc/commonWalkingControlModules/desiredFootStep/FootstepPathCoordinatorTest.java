@@ -54,7 +54,7 @@ public class FootstepPathCoordinatorTest
     * This test only verifies that polling returns the first footstep in the list *
     */
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testPoll() throws Exception
    {
@@ -83,7 +83,7 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@DeployableTestMethod(duration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testIsEmpty() throws Exception
    {
@@ -117,7 +117,7 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testUpdatePath() throws Exception
    {
@@ -160,7 +160,7 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testSetPaused() throws Exception
    {

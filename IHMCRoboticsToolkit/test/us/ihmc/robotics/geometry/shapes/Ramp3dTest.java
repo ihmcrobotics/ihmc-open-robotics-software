@@ -27,7 +27,7 @@ public class Ramp3dTest
 	 * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
 	 */
    @Ignore
-	@DeployableTestMethod(duration = 0.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
 	@Test(timeout = 502)
    public void testCommonShape3dFunctionality()
    {
@@ -48,7 +48,7 @@ public class Ramp3dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testExampleUsage()
    {
@@ -63,7 +63,7 @@ public class Ramp3dTest
       assertEquals(Math.toRadians(45.0), ramp3d.getRampIncline(), 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetAndSet()
    {
@@ -82,7 +82,7 @@ public class Ramp3dTest
       assertEquals(ramp1.getTransform(), ramp2.getTransform());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSurfaceNormal()
    {
@@ -92,7 +92,7 @@ public class Ramp3dTest
       assertEquals(ramp.getSurfaceNormal().z, 1.0 / Math.sqrt(2.0), 1e-14);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleOrthogonalProjection()
    {
@@ -113,7 +113,7 @@ public class Ramp3dTest
       assertEquals(pointToProject.z, 0.5, 1e-14);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimplePointOutside()
    {
@@ -122,7 +122,7 @@ public class Ramp3dTest
       assertTrue(ramp3d.isInsideOrOnSurface(new Point3d(new double[] {0.5, 0.0, 0.1})));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleMethodCalls()
    {
@@ -143,7 +143,7 @@ public class Ramp3dTest
       assertFalse(ramp3d.isInsideOrOnSurface(p2));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsInsideOrOnSurface()
    {
@@ -165,7 +165,7 @@ public class Ramp3dTest
       transform.setTranslation(new Vector3d(1.0, -1.0, 2.0));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testProjectionPerpNormal()
    {
@@ -209,7 +209,7 @@ public class Ramp3dTest
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
    @Ignore
-   @DeployableTestMethod(duration = 0.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
    @Test(timeout = 502)
    public void testIsInsideOrOnSurfaceRandomOrientations()
    {
@@ -291,7 +291,7 @@ public class Ramp3dTest
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
    @Ignore
-   @DeployableTestMethod(duration = 0.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
    @Test(timeout = 502)
 	public void testTrickyOneThatProjectsOntoTheEdge()
 	{
@@ -337,7 +337,7 @@ public class Ramp3dTest
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
    @Ignore
-   @DeployableTestMethod(duration = 0.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
    @Test(timeout = 502)
    public void testDistance()
    {
@@ -381,7 +381,7 @@ public class Ramp3dTest
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
    @Ignore
-   @DeployableTestMethod(duration = 0.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
    @Test(timeout = 502)
    public void testGetClosestPointAndNormalAt()
    {
@@ -440,7 +440,7 @@ public class Ramp3dTest
 
 
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIndependenceOfCopiedTransforms()
    {
@@ -462,7 +462,7 @@ public class Ramp3dTest
       assertFalse(rampCopyBySet.getTransform().equals(ramp.getTransform()));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetMethodSetsUpAllFieldsOfNewRampAccurately()
    {

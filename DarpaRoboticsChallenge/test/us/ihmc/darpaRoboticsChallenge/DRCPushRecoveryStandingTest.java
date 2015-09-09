@@ -76,7 +76,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    }
    
   
-	@DeployableTestMethod(duration = 30.6)
+	@DeployableTestMethod(estimatedDuration = 30.6)
 	@Test(timeout = 150000)
    public void TestPushForwardInDoubleSupport() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -106,7 +106,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(duration = 46.6)
+	@DeployableTestMethod(estimatedDuration = 46.6)
 	@Test(timeout = 230000)
    public void TestPushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -140,7 +140,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(duration = 49.1)
+	@DeployableTestMethod(estimatedDuration = 49.1)
 	@Test(timeout = 250000)
    public void TestDoublePushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -181,7 +181,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(duration = 44.8)
+	@DeployableTestMethod(estimatedDuration = 44.8)
 	@Test(timeout = 220000)
    public void TestPushBackwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -215,7 +215,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(duration = 52.2)
+	@DeployableTestMethod(estimatedDuration = 52.2)
 	@Test(timeout = 260000)
    public void TestPushBackwardForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {

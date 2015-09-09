@@ -10,7 +10,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public class Constrained5thOrderPolyForSwingTrajectoryTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestConstrainedCubicForSwingTrajectory()
    {

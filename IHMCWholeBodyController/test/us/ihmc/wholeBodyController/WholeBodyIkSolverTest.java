@@ -65,7 +65,7 @@ public abstract class WholeBodyIkSolverTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(duration = 4.0)
+	@DeployableTestMethod(estimatedDuration = 4.0)
    @Test(timeout = 30000)
    public void testLeftHandIn3P3RModeManual()
    {
@@ -98,7 +98,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
 
-	@DeployableTestMethod(duration = 1.5)
+	@DeployableTestMethod(estimatedDuration = 1.5)
    @Test(timeout = 30000)
    public void testRightHandIn3PModeManual()
    {
@@ -128,7 +128,7 @@ public abstract class WholeBodyIkSolverTest
       scs.cropBuffer();
    }
 
-	@DeployableTestMethod(duration = 2.2)
+	@DeployableTestMethod(estimatedDuration = 2.2)
    @Test(timeout = 30000)
    public void testRightHandIn3PMode()
    {
@@ -159,7 +159,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
 
-	@DeployableTestMethod(duration = 2.1)
+	@DeployableTestMethod(estimatedDuration = 2.1)
    @Test(timeout = 30000)
    public void testLeftHandIn3PModeManual()
    {
@@ -189,7 +189,7 @@ public abstract class WholeBodyIkSolverTest
       scs.cropBuffer();
    }
 
-	@DeployableTestMethod(duration = 5.5)
+	@DeployableTestMethod(estimatedDuration = 5.5)
    @Test(timeout = 30000)
    public void testLeftHandIn3PMode()
    {
@@ -223,7 +223,7 @@ public abstract class WholeBodyIkSolverTest
 
 
 
-	@DeployableTestMethod(duration = 6.0)
+	@DeployableTestMethod(estimatedDuration = 6.0)
    @Test(timeout = 30000)
    public void testRightHandIn3P2RModeManual()
    {
@@ -253,7 +253,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
 // PASS
-	@DeployableTestMethod(duration = 2.3)
+	@DeployableTestMethod(estimatedDuration = 2.3)
    @Test(timeout = 30000)
    public void testLeftHandIn3P2RModeManual()
    {
@@ -283,7 +283,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
 // PASS
-	@DeployableTestMethod(duration = 3.1)
+	@DeployableTestMethod(estimatedDuration = 3.1)
    @Test(timeout = 30000)
    public void testRightHandIn3P3RModeManual()
    {
@@ -318,7 +318,7 @@ public abstract class WholeBodyIkSolverTest
 	 * Failing but don't want to remove the rest from Bamboo
 	 */
    @Ignore
-   @DeployableTestMethod(duration = 5.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 5.0, quarantined = true)
    @Test(timeout = 20000)
    public void testBothHandsIn3PModeManual()
    {
@@ -349,7 +349,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    // May FAIL
-	@DeployableTestMethod(duration = 9.4)
+	@DeployableTestMethod(estimatedDuration = 9.4)
    @Test(timeout = 47000)
    public void testBothHandsIn3P2RModeManual()
    {
@@ -381,7 +381,7 @@ public abstract class WholeBodyIkSolverTest
 
 
 
-	@DeployableTestMethod(duration = 6.6)
+	@DeployableTestMethod(estimatedDuration = 6.6)
    @Test(timeout = 33000)
    public void testBothHandsIn3P3RModeManual()
    {
@@ -412,7 +412,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    @Ignore
-   @DeployableTestMethod(duration = 45.0)
+   @DeployableTestMethod(estimatedDuration = 45.0)
    @Test(timeout = 200000)
    public void testLeftHandIn3PModeRegression()
    {
@@ -451,7 +451,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    @Ignore
-   @DeployableTestMethod(duration = 45.0)
+   @DeployableTestMethod(estimatedDuration = 45.0)
    @Test(timeout = 200000)
    public void testRightHandIn3PModeRegression()
    {
@@ -489,7 +489,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    @Ignore
-   @DeployableTestMethod(duration = 45.0)
+   @DeployableTestMethod(estimatedDuration = 45.0)
    @Test(timeout = 200000)
    public void testBothHandsIn3PModeRegression()
    {
@@ -525,7 +525,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    @Ignore
-   @DeployableTestMethod(duration = 45.0)
+   @DeployableTestMethod(estimatedDuration = 45.0)
    @Test(timeout = 200000)
    public void testBothtHandsIn3P2RModeRegression()
    {
@@ -560,7 +560,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
    @Ignore
-   @DeployableTestMethod(duration = 45.0)
+   @DeployableTestMethod(estimatedDuration = 45.0)
    @Test(timeout = 200000)
    public void testBothHandsIn3P3RModeRegression()
    {
@@ -589,7 +589,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
    @Ignore
-   @DeployableTestMethod(duration = 45.0)
+   @DeployableTestMethod(estimatedDuration = 45.0)
    @Test(timeout = 200000)
    public void testWorkingSpaceFor5DoF()
    {

@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 public class QuickHull3DWrapperTest
 {
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimplexHull()
    {
@@ -37,7 +37,7 @@ public class QuickHull3DWrapperTest
       assertTrue(quickHull.getNumFaces() == 4);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testExtraPointInSimplex()
    {
@@ -55,7 +55,7 @@ public class QuickHull3DWrapperTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testExtraPointOnSimplex()
    {
@@ -72,7 +72,7 @@ public class QuickHull3DWrapperTest
       assertTrue(quickHull.getNumFaces() == 4);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFivePointHull()
    {
@@ -89,7 +89,7 @@ public class QuickHull3DWrapperTest
       assertTrue(quickHull.getNumFaces() == 6);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testExtraPointApproximatelyOnSimplex()
    {
@@ -115,7 +115,7 @@ public class QuickHull3DWrapperTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCubeHull()
    {
@@ -141,7 +141,7 @@ public class QuickHull3DWrapperTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTrapezoidalPrismHull()
    {
@@ -186,7 +186,7 @@ public class QuickHull3DWrapperTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFaceToPolygonTrapezoidalPrismHull()
    {

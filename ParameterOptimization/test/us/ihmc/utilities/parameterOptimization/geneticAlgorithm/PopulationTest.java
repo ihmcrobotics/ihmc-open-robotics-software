@@ -14,7 +14,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class PopulationTest
 {
 
-	@DeployableTestMethod(duration = 0.8)
+	@DeployableTestMethod(estimatedDuration = 0.8)
 	@Test(timeout = 30000)
    public void testPopulation()
    {

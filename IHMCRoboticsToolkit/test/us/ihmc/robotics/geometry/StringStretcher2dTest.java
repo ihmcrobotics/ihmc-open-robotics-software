@@ -19,7 +19,7 @@ import static org.junit.Assert.fail;
 public class StringStretcher2dTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleExampleWithNoWaypoints()
    {
@@ -55,7 +55,7 @@ public class StringStretcher2dTest
       JUnitTools.assertTuple2dEquals(endPoint, solution.get(2), 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleExampleWithOneWaypointsNoInterpolation()
    {
@@ -80,7 +80,7 @@ public class StringStretcher2dTest
       assertTrue(maxPoint == waypoints.get(0));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleExampleWithAllWaypointsNoInterpolation()
    {
@@ -119,7 +119,7 @@ public class StringStretcher2dTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testStartAndEnd()
    {
@@ -137,7 +137,7 @@ public class StringStretcher2dTest
       JUnitTools.assertTuple2dEquals(endPoint, waypoints.get(1), 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRandomExample()
    {

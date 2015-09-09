@@ -11,15 +11,15 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@DeployableTestClass(planType={BambooPlanType.UI})
+@DeployableTestClass(targets={TestPlanTarget.UI})
 public class GraphicsDemoToolsTest
 {
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testCreatePointCloud()
    {

@@ -3,11 +3,11 @@ package us.ihmc.communication.producers;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.atlas.AtlasRobotVersion;
 
-@DeployableTestClass(planType = BambooPlanType.Flaky)
+@DeployableTestClass(targets = TestPlanTarget.Flaky)
 public class AtlasRobotConfigurationDataBufferTest extends RobotConfigurationDataBufferTest
 {
 

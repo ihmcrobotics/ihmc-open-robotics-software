@@ -35,7 +35,7 @@ public class RangeOfStep2dTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testExampleUsage()
    {
@@ -52,7 +52,7 @@ public class RangeOfStep2dTest
       assertEquals(range.width, sideLength, 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testEllipseAtCenter()
    {
@@ -91,7 +91,7 @@ public class RangeOfStep2dTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testTranslatedEllipse()
    {

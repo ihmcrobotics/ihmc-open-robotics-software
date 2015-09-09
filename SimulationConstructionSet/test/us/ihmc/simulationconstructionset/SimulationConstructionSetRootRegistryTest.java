@@ -7,18 +7,18 @@ import org.junit.Test;
 import us.ihmc.simulationconstructionset.gui.CombinedVarPanel;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.VarPanel;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-@DeployableTestClass(planType={BambooPlanType.UI})
+@DeployableTestClass(targets={TestPlanTarget.UI})
 public class SimulationConstructionSetRootRegistryTest
 {
    private static final boolean SHOW_GUI = false;
 
-	@DeployableTestMethod(duration = 1.1)
+	@DeployableTestMethod(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void testRootRegistryNothingFancy()
    {
@@ -58,7 +58,7 @@ public class SimulationConstructionSetRootRegistryTest
       scs.closeAndDispose();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000) 
    public void testVarGroups()
    {
@@ -105,7 +105,7 @@ public class SimulationConstructionSetRootRegistryTest
       scs.closeAndDispose();
    }
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testRootRegistryAddYoVariablesAfterConstruction()
    {

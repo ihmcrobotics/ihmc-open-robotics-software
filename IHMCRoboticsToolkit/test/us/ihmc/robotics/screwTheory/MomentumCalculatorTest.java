@@ -24,7 +24,7 @@ public class MomentumCalculatorTest
 {
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSingleRigidBodyTranslation()
    {
@@ -55,7 +55,7 @@ public class MomentumCalculatorTest
       assertTrue(linearMomentum.length() > epsilon);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSingleRigidBodyRotation()
    {
@@ -92,7 +92,7 @@ public class MomentumCalculatorTest
       assertTrue(angularMomentum.length() > epsilon);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChainAgainstCentroidalMomentumMatrix()
    {

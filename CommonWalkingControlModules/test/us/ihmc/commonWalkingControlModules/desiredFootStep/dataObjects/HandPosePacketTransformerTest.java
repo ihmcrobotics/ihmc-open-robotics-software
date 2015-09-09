@@ -31,7 +31,7 @@ public class HandPosePacketTransformerTest
 {
    private final static int numberOfArmJoints = 6;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTransformHandPosePacket()
    {

@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class ConvexPolygonShrinkerTest
 {
 
-   @DeployableTestMethod(duration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSimpleSquareConvexPolygonShrinking()
    {
@@ -47,7 +47,7 @@ public class ConvexPolygonShrinkerTest
       assertEquals(1, shrunkenPolygon.getNumberOfVertices());
    }
    
-   @DeployableTestMethod(duration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSimpleTriangleConvexPolygonShrinking()
    {
@@ -76,7 +76,7 @@ public class ConvexPolygonShrinkerTest
    }
 
    
-   @DeployableTestMethod(duration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSimpleLineConvexPolygonShrinking()
    {
@@ -102,7 +102,7 @@ public class ConvexPolygonShrinkerTest
       assertEquals(1, shrunkenPolygon.getNumberOfVertices());
    }
    
-   @DeployableTestMethod(duration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSimplePointConvexPolygonShrinking()
    {
@@ -119,7 +119,7 @@ public class ConvexPolygonShrinkerTest
       JUnitTools.assertTuple2dEquals(new Point2d(-1.0, 3.0), shrunkenPolygon.getVertexCCW(0), 1e-7);
    }
    
-   @DeployableTestMethod(duration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testShrinkingRandomPolygonsAreCompletelyInsideOriginalPolygons()
    {
@@ -154,7 +154,7 @@ public class ConvexPolygonShrinkerTest
    }
    
    @Ignore("Use manually when making sure no garbage is generated or doing timing tests.")
-   @DeployableTestMethod(duration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testMemoryGarbageGeneration()
    {

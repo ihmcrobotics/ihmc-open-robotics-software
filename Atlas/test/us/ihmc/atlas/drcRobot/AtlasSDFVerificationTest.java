@@ -87,7 +87,7 @@ public class AtlasSDFVerificationTest
     * @throws ControllerFailureException
     */
    @Ignore
-	@DeployableTestMethod(duration = 10.4, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 10.4, quarantined = true)
 	@Test(timeout = 41302)
    public void testSimpleLegSwing() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, IOException, ControllerFailureException
    {

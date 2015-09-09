@@ -89,7 +89,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
    }
 
    @Ignore("Invoked manually to test memory & thread leaks")
-   @DeployableTestMethod(duration = 50.0)
+   @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout=300000)
    public void testForMemoryLeaks() throws Exception
    {
@@ -101,7 +101,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
       }
    }
    
-   @DeployableTestMethod(duration = 14.9)
+   @DeployableTestMethod(estimatedDuration = 14.9)
    @Test(timeout = 54656)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
@@ -148,7 +148,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
    
    public abstract WholeBodyTrajectoryPacket getRobotSpecificWholeBodyTrajectoryPacket(double trajectoryTime);
    
-   @DeployableTestMethod(duration = 38.0)
+   @DeployableTestMethod(estimatedDuration = 38.0)
    @Test(timeout = 124050)
    public void testChestControlWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {
@@ -325,7 +325,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
       BambooTools.reportTestFinishedMessage();
    }
    
-   @DeployableTestMethod(duration = 38.0)
+   @DeployableTestMethod(estimatedDuration = 38.0)
    @Test(timeout = 124050)
    public void testArmMovementsWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {

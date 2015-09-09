@@ -11,7 +11,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class ExampleOptimizationProblemOneTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleXSquaredOptimization()
    {
@@ -87,7 +87,7 @@ public class ExampleOptimizationProblemOneTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleThreeParameterCostFunction()
    {      

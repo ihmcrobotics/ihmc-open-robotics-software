@@ -297,7 +297,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 0.015 , 0.015);
    }
 
-	@DeployableTestMethod(duration = 25.0)
+	@DeployableTestMethod(estimatedDuration = 25.0)
 	@Test(timeout = 130000)
    public void testRandomInterpolationFinals() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

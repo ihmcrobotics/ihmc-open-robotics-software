@@ -70,7 +70,7 @@ public abstract class DRCWholeBodyIKTrajectoryBehaviorTest implements MultiRobot
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-	@DeployableTestMethod(duration = 14.0)
+	@DeployableTestMethod(estimatedDuration = 14.0)
    @Test(timeout = 70000)
    public void testConstructorAndSetInput()
    {
@@ -90,7 +90,7 @@ public abstract class DRCWholeBodyIKTrajectoryBehaviorTest implements MultiRobot
       assertTrue(behaviorB.hasInputBeenSet());
    }
    
-	@DeployableTestMethod(duration = 31.6)
+	@DeployableTestMethod(estimatedDuration = 31.6)
    @Test(timeout = 160000)
    public void testMoveOneHandToPosition() throws SimulationExceededMaximumTimeException
    {
@@ -120,7 +120,7 @@ public abstract class DRCWholeBodyIKTrajectoryBehaviorTest implements MultiRobot
       assertTrue(finalHandPoseRight.getFramePointCopy().epsilonEquals(desiredRight.getFramePointCopy(), 0.01));
    }
    
-	@DeployableTestMethod(duration = 23.0)
+	@DeployableTestMethod(estimatedDuration = 23.0)
    @Test(timeout = 110000)
    public void testMoveBothHandsToPose() throws SimulationExceededMaximumTimeException
    {

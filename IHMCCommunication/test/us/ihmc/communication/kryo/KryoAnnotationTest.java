@@ -16,7 +16,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class KryoAnnotationTest
 {
    @Test(timeout = 30000)
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
    public void testOptionalAnnotation()
    {
       final int ITERATIONS = 1000;

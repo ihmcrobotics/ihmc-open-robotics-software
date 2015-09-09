@@ -9,7 +9,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class IntegerParameterToOptimizeTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetBitsOfResolution()
    {
@@ -38,7 +38,7 @@ public class IntegerParameterToOptimizeTest
       assertEquals(expectedNumberOfBits, integerParameterToOptimize.getBitsOfResolution());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testZeroToOneConversions()
    {

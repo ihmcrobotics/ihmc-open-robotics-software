@@ -8,18 +8,18 @@ import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 
 // This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
-@DeployableTestClass(planType = {BambooPlanType.Fast, BambooPlanType.VideoA})
+@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.VideoA})
 public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;
 
-	@DeployableTestMethod(duration = 208.3)
+	@DeployableTestMethod(estimatedDuration = 208.3)
 	@Test(timeout = 1000000)
    public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -32,7 +32,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       setupAndTestFlatGroundSimulationTrack(robotModel, runName, doPelvisYawWarmup);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testFlatGroundWalkingRunsSameWayTwice() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

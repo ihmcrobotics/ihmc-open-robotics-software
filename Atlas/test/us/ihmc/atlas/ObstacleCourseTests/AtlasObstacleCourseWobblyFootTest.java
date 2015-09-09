@@ -12,7 +12,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseWobblyFootTest;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -20,7 +20,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-@DeployableTestClass(planType = {BambooPlanType.Flaky, BambooPlanType.VideoA})
+@DeployableTestClass(targets = {TestPlanTarget.Flaky, TestPlanTarget.VideoA})
 public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFootTest
 {
    @Override

@@ -104,7 +104,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       return handPosePacket;
    }
 
-	@DeployableTestMethod(duration = 11.8)
+	@DeployableTestMethod(estimatedDuration = 11.8)
 	@Test(timeout = 35449)
    public void testStartedAndCompletedStatusAreSentAndReceivedForOneHandPose() throws SimulationExceededMaximumTimeException
    {
@@ -146,7 +146,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       
    }
 
-	@DeployableTestMethod(duration = 21.5)
+	@DeployableTestMethod(estimatedDuration = 21.5)
 	@Test(timeout = 64372)
    public void testPauseDuringSingleSendAndReceivedForOneHandPose() throws SimulationExceededMaximumTimeException
    {
@@ -222,7 +222,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       
    }
 
-	@DeployableTestMethod(duration = 11.4)
+	@DeployableTestMethod(estimatedDuration = 11.4)
 	@Test(timeout = 34250)
    public void testWhenTwoHandPosesAreSentInARow() throws SimulationExceededMaximumTimeException
    {
@@ -276,7 +276,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       
    }
 
-	@DeployableTestMethod(duration = 11.7)
+	@DeployableTestMethod(estimatedDuration = 11.7)
 	@Test(timeout = 35190)
    public void testEachArmReceiveOneHandPoseAtTheSameTime() throws SimulationExceededMaximumTimeException
    {

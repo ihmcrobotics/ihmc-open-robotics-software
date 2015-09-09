@@ -18,7 +18,7 @@ import com.jme3.scene.shape.Box;
 
 public class CollisionBoxTest
 {
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testInsideBoxPoints()
    {
@@ -36,7 +36,7 @@ public class CollisionBoxTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testOutsideBoxPoints()
    {
@@ -54,7 +54,7 @@ public class CollisionBoxTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void compareWithJMEBox()
    {

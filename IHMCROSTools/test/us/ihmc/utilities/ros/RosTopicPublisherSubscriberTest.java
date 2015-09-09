@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 import std_msgs.String;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
@@ -17,7 +17,7 @@ import us.ihmc.utilities.ros.publisher.RosStringPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
-@DeployableTestClass(planType=BambooPlanType.Flaky)
+@DeployableTestClass(targets=TestPlanTarget.Flaky)
 public class RosTopicPublisherSubscriberTest extends IHMCRosTestWithRosCore
 {
 	@DeployableTestMethod

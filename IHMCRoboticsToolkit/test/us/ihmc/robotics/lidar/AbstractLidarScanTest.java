@@ -15,7 +15,7 @@ public class AbstractLidarScanTest
    Random rand = new Random(1098L);
    private static final double eps = 1e-7;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIdentityScan()
    {
@@ -36,7 +36,7 @@ public class AbstractLidarScanTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleScanRotating()
    {
@@ -65,7 +65,7 @@ public class AbstractLidarScanTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInterpolationWhileRotating()
    {
@@ -109,14 +109,14 @@ public class AbstractLidarScanTest
 
 	
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testLineSegment()
    {
       // TODO Write test case
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRay()
    {

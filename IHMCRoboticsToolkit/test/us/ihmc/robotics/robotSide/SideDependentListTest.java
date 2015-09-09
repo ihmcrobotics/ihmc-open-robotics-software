@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class SideDependentListTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCommonUse()
    {
@@ -43,7 +43,7 @@ public class SideDependentListTest
       System.out.println(sideDependentList);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testWitGenericObjects()
    {
@@ -57,7 +57,7 @@ public class SideDependentListTest
       assertTrue(rightObject == sideDependentList.get(RobotSide.RIGHT));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000) 
    public void testCopyConstructor()
    {
@@ -77,7 +77,7 @@ public class SideDependentListTest
       
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = IndexOutOfBoundsException.class)
    public void testIndexOutOfBoundsException()
    {
@@ -96,7 +96,7 @@ public class SideDependentListTest
       iterator.next();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = UnsupportedOperationException.class)
    public void testIteratorCannotRemove()
    {
@@ -109,7 +109,7 @@ public class SideDependentListTest
       iterator.remove();
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSet()
    {
@@ -129,7 +129,7 @@ public class SideDependentListTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCreateListOfHashMaps()
    {
@@ -152,7 +152,7 @@ public class SideDependentListTest
       assertEquals(sideDependentList.get(RobotSide.RIGHT).get(4.0), "4.0");
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCreateListOfEnumMaps()
    {

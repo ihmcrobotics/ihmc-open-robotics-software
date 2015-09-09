@@ -88,7 +88,7 @@ public class ComplexMatrixTest
       allExamples = null;
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIdentity()
    {
@@ -98,7 +98,7 @@ public class ComplexMatrixTest
       }), 1e-7));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetRowAndColumnDimensions()
    {
@@ -121,7 +121,7 @@ public class ComplexMatrixTest
       assertEquals(4, threeByFour.getColumnDimension());
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testEpsilonEquals()
    {
@@ -137,7 +137,7 @@ public class ComplexMatrixTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructDiagonalMatrix()
    {
@@ -161,7 +161,7 @@ public class ComplexMatrixTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTranspose()
    {
@@ -182,7 +182,7 @@ public class ComplexMatrixTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTimes()
    {
@@ -208,7 +208,7 @@ public class ComplexMatrixTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testMatrixTimes()
    {
@@ -231,7 +231,7 @@ public class ComplexMatrixTest
       assertTrue(result12.epsilonEquals(result.get(1, 2), 1e-7));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInverse()
    {

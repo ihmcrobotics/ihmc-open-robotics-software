@@ -5,11 +5,11 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCRemoveSingleDebrisBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 
 
-@DeployableTestClass(planType = {BambooPlanType.InDevelopment})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment})
 public class AtlasRemoveSingleDebrisBehaviorTest extends DRCRemoveSingleDebrisBehaviorTest 
 {
 	private final AtlasRobotModel robotModel;

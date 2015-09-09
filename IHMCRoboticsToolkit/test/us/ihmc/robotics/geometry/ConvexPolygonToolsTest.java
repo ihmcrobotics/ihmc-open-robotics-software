@@ -16,7 +16,7 @@ public class ConvexPolygonToolsTest
    private static final boolean WAIT_FOR_BUTTON_PUSH = false;
    private static final double epsilon = 1e-7;
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testCombineDisjointPolygons()
    {

@@ -20,7 +20,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class ActiveSearchQuadraticProgramOptimizerTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testUnconstrained()
    {
@@ -43,7 +43,7 @@ public class ActiveSearchQuadraticProgramOptimizerTest
       assertTrue(MatrixFeatures.isConstantVal(axMinusB, 0.0, 1e-12));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstrainedSimple()
    {
@@ -84,7 +84,7 @@ public class ActiveSearchQuadraticProgramOptimizerTest
 	 * Not working, but probably not critical right now. Get this to work some day TODO
 	 */
 	@Ignore
-	@DeployableTestMethod(duration = 0.0, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 0.0, quarantined = true)
 	@Test(timeout = 525)
    public void testFullyConstrained()
    {	   

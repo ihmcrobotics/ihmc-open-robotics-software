@@ -20,7 +20,7 @@ public class ComplexConjugateModeTest
    {
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSecondOrderMassSpringDamper()
    {
@@ -61,7 +61,7 @@ public class ComplexConjugateModeTest
       assertTrue(expectedTransferFunction10.epsilonEquals(transferFunction10, 1e-7));
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCircleGenerator()
    {

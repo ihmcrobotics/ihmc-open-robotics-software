@@ -19,7 +19,7 @@ import boofcv.struct.calib.IntrinsicParameters;
 public class DRCArmKinematicsCalibrationTest
 {
 
-	@DeployableTestMethod(duration = 0.7)
+	@DeployableTestMethod(estimatedDuration = 0.7)
 	@Test(timeout = 30000)
    public void estimateCameraPose()
    {

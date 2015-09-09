@@ -53,7 +53,7 @@ import us.ihmc.robotics.geometry.BoundingBox3d;
       }
 
 
-	@DeployableTestMethod(duration = 19.1)
+	@DeployableTestMethod(estimatedDuration = 19.1)
 	@Test(timeout = 95000)
       public void testStandingYawed() throws SimulationExceededMaximumTimeException
       {

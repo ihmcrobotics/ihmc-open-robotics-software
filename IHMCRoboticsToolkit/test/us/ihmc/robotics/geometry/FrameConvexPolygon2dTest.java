@@ -19,7 +19,7 @@ public class FrameConvexPolygon2dTest
       frameConvexPolygon2d = new FrameConvexPolygon2d(worldFrame, convexPolygon2d);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void thereIsNoTestHere()
    {

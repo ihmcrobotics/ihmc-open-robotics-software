@@ -102,7 +102,7 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
       testDRCOverBlocksField(0.4);
    }
 
-	@DeployableTestMethod(duration = 488.6)
+	@DeployableTestMethod(estimatedDuration = 488.6)
 	@Test(timeout = 2400000)
    public void testDRCOverRandomBars() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

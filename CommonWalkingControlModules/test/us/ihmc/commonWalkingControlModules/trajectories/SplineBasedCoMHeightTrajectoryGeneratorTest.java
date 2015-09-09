@@ -46,7 +46,7 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void raisedFlatSingleSupportCoMHeightTrajectoryTest()
    {
@@ -72,7 +72,7 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
               coMQueries, expectedHeights, 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void raisedFlatDoubleSupportCoMHeightTrajectoryTest()
    {
@@ -98,7 +98,7 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
               coMQueries, expectedHeights, 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void raisedSlopedSingleSupportCoMHeightTrajectoryTest()
    {
@@ -127,7 +127,7 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
               doubleSupport, coMQueries, expectedHeights, 1e-7);
    }
 
-	@DeployableTestMethod(duration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void raisedSlopedDoubleSupportCoMHeightTrajectoryTest()
    {

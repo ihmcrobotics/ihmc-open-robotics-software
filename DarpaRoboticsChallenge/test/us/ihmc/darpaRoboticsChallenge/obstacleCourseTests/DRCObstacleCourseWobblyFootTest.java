@@ -59,7 +59,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
    }
 
 
-   @DeployableTestMethod(duration = 14.9)
+   @DeployableTestMethod(estimatedDuration = 14.9)
    @Test(timeout = 54656)
    public void testStandingForACoupleSecondsWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
@@ -92,7 +92,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
    }
 
 
-   @DeployableTestMethod(duration = 44.4)
+   @DeployableTestMethod(estimatedDuration = 44.4)
    @Test(timeout = 143110)
    public void testWalkingUpToRampWithShortStepsWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
@@ -130,7 +130,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
 
 
 
-   @DeployableTestMethod(duration = 37.4)
+   @DeployableTestMethod(estimatedDuration = 37.4)
    @Test(timeout = 122232)
    public void testTurningInPlaceAndPassingPIWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {

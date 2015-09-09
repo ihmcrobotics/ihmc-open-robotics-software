@@ -32,7 +32,7 @@ import us.ihmc.robotics.geometry.InsufficientDataException;
  */
 public class AtlasFootstepSnapperTest extends FootstepSnapperTest
 {
-	@DeployableTestMethod(duration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {

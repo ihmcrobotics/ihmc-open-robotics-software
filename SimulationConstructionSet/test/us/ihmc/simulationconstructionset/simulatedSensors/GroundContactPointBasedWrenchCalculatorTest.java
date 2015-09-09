@@ -27,7 +27,7 @@ public class GroundContactPointBasedWrenchCalculatorTest
    WrenchCalculatorInterface calculator;
    OneDegreeOfFreedomJoint joint;
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testWrenchCalculation()
    {

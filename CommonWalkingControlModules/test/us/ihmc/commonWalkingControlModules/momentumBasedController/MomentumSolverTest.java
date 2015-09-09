@@ -75,7 +75,7 @@ public class MomentumSolverTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(duration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testFloatingChainWithJointSpaceConstraints()
    {
@@ -128,7 +128,7 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-4);
    }
 
-	@DeployableTestMethod(duration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testFloatingTreeWithJointSpaceConstraints()
    {
@@ -179,7 +179,7 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-4);
    }
 
-	@DeployableTestMethod(duration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testTwoFloatingBodiesWithTaskSpaceAcceleration()
    {
@@ -240,7 +240,7 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, new ArrayList<RevoluteJoint>(), DT, desiredMomentumRate, 1e-4);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testJointSpaceAndTaskSpaceAccelerations()
    {
@@ -299,7 +299,7 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-4);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testInternalSpatialAcceleration()
    {
@@ -349,7 +349,7 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-4);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testTwoInternalSpatialAccelerations()
    {
@@ -518,7 +518,7 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-3);
    }
 
-	@DeployableTestMethod(duration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testSubspaces()
    {
@@ -598,7 +598,7 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, oneDoFJoints, DT, desiredMomentumRate, 1e-4);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testAngularAcceleration()
    {
@@ -649,7 +649,7 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-4);
    }
 
-	@DeployableTestMethod(duration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testNullspaceMultipliers()
    {

@@ -14,7 +14,7 @@ public class SmallQuaternionRelationshipTest
 {
    // Test for some relationships that are used in QuaternionOrientation estimation.
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSmallAngleQuaternionDifferences()
    { 

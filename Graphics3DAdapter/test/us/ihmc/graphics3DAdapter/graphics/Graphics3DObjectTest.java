@@ -14,7 +14,7 @@ public class Graphics3DObjectTest
    private static final double CUBE_SIDE = 2.0;
    private static final double CUBE_X = 5.0;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testValidCubeGraphics()
    {

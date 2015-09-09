@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGe
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
@@ -31,7 +31,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-@DeployableTestClass(planType = {BambooPlanType.UI})
+@DeployableTestClass(targets = {TestPlanTarget.UI})
 public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensationTest
 {
 	private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -337,7 +337,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 		icpVelocityLineSegment = null;
 	}
 
-	@DeployableTestMethod(duration = 1.6)
+	@DeployableTestMethod(estimatedDuration = 1.6)
 	@Test(timeout = 30000)
 	public void visualizePlanner()
 	{

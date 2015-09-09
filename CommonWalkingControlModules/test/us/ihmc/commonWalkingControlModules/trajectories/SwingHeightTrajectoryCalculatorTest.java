@@ -39,7 +39,7 @@ public class SwingHeightTrajectoryCalculatorTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testHeightFromPose()
    {
@@ -71,7 +71,7 @@ public class SwingHeightTrajectoryCalculatorTest
       assertTrue(swingHeight >= boxHeight + verticalBuffer);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testHeightFromOffsetBox()
    {
@@ -107,7 +107,7 @@ public class SwingHeightTrajectoryCalculatorTest
       assertTrue(swingHeight >= boxHeight + verticalBuffer);
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
        @Test(timeout = 30000)
        public void testWithBoxOutOfRange()
 {
@@ -142,7 +142,7 @@ public class SwingHeightTrajectoryCalculatorTest
    assertTrue(swingHeight < boxHeight + verticalBuffer);
 }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithMultipleBoxes()
    {
@@ -222,7 +222,7 @@ public class SwingHeightTrajectoryCalculatorTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSmallXAxisDistanceWithoutHeightMap()
    {
@@ -264,7 +264,7 @@ public class SwingHeightTrajectoryCalculatorTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testBigXAxisDistanceWithoutHeightMap()
    {

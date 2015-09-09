@@ -28,7 +28,7 @@ import us.ihmc.graphics3DAdapter.stlLoader.NormalCalculator;
 import us.ihmc.graphics3DAdapter.stlLoader.STLReader;
 import us.ihmc.graphics3DAdapter.stlLoader.STLReaderFactory;
 import us.ihmc.graphics3DAdapter.stlLoader.Triangle;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
@@ -38,11 +38,11 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
  * @author Jesper Smith
  *
  */
-@DeployableTestClass(planType={BambooPlanType.UI})
+@DeployableTestClass(targets={TestPlanTarget.UI})
 public class NormalCalculatorTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNormalsBasedOnTeapot() throws IOException
    {

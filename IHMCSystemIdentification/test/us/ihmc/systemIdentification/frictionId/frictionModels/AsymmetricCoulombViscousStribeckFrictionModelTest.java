@@ -27,7 +27,7 @@ public class AsymmetricCoulombViscousStribeckFrictionModelTest
    private double negativeOutStribeckVelocity = -0.18;
    private double zeroVelocity = 0.0;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructorAndFormula()
    {

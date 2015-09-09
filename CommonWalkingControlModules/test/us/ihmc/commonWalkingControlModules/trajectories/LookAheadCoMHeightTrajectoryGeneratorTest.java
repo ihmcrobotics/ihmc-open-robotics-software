@@ -59,7 +59,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
    private boolean makeAssertions = true;
 
-	@DeployableTestMethod(duration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testLookAheadCoMHeightTrajectoryGenerator()
    {

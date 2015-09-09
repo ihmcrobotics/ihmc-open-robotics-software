@@ -86,7 +86,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 
-   @DeployableTestMethod(duration = 27.7)
+   @DeployableTestMethod(estimatedDuration = 27.7)
    @Test(timeout = 83115)
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
@@ -113,7 +113,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(duration = 27.7)
+   @DeployableTestMethod(estimatedDuration = 27.7)
    @Test(timeout = 83115)
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {
@@ -153,7 +153,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
    
-   @DeployableTestMethod(duration = 27.7)
+   @DeployableTestMethod(estimatedDuration = 27.7)
    @Test(timeout = 83115)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {

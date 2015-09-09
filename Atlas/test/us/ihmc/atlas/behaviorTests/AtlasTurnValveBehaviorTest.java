@@ -10,11 +10,11 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCTurnValveBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@DeployableTestClass(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Slow})
 public class AtlasTurnValveBehaviorTest extends DRCTurnValveBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -39,56 +39,56 @@ public class AtlasTurnValveBehaviorTest extends DRCTurnValveBehaviorTest
    }
 
    @Override
-	@DeployableTestMethod(duration = 312.1)
+	@DeployableTestMethod(estimatedDuration = 312.1)
    @Test(timeout = 1600000)
    public void testCloseValveByGrabbingCenter() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testCloseValveByGrabbingCenter();
    }
    
    @Override
-	@DeployableTestMethod(duration = 97.6)
+	@DeployableTestMethod(estimatedDuration = 97.6)
    @Test(timeout = 490000)
    public void testCloseValveByGrabbingRim() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testCloseValveByGrabbingRim();
    }
    
    @Override
-	@DeployableTestMethod(duration = 46.6)
+	@DeployableTestMethod(estimatedDuration = 46.6)
    @Test(timeout = 230000)
    public void testGraspValveBehavior() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testGraspValveBehavior();
    }
    
    @Override
-	@DeployableTestMethod(duration = 41.6)
+	@DeployableTestMethod(estimatedDuration = 41.6)
    @Test(timeout = 210000)
    public void testGraspValveUsingWholeBodyIKBehavior() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testGraspValveUsingWholeBodyIKBehavior();
    }
    
    @Override
-	@DeployableTestMethod(duration = 53.2)
+	@DeployableTestMethod(estimatedDuration = 53.2)
    @Test(timeout = 270000)
    public void testOpenValveByGrabbingRim() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testOpenValveByGrabbingRim();
    }
    
    @Override
-	@DeployableTestMethod(duration = 138.6)
+	@DeployableTestMethod(estimatedDuration = 138.6)
    @Test(timeout = 690000)
    public void testWalkToAndCloseValve() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testWalkToAndCloseValve();
    }
 }

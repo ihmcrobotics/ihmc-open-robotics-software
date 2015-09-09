@@ -11,7 +11,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class GenotypeTest
 {
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGenotype()
    {
@@ -90,7 +90,7 @@ public class GenotypeTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000) 
    public void testGenotypeAtExactlyOneAndZero()
    {
@@ -106,7 +106,7 @@ public class GenotypeTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000) 
    public void testGenotypeNearOneAndZero()
    {
@@ -122,7 +122,7 @@ public class GenotypeTest
       }
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPhenotypeTwo()
    {
@@ -147,7 +147,7 @@ public class GenotypeTest
       } 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000) 
    public void testPhenotypeReconstruction()
    {

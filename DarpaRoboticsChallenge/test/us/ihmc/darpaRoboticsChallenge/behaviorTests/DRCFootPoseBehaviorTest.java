@@ -85,7 +85,7 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 
-	@DeployableTestMethod(duration = 29.1)
+	@DeployableTestMethod(estimatedDuration = 29.1)
    @Test(timeout = 87234)
    public void testSimpleFootPoseBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -119,7 +119,7 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(duration = 21.5)
+	@DeployableTestMethod(estimatedDuration = 21.5)
    @Test(timeout = 64598)
    public void testSimulataneousLeftAndRightFootPoses() throws SimulationExceededMaximumTimeException
    {

@@ -21,7 +21,7 @@ public class AsymmetricCoulombViscousFrictionModelTest
    private double negativeVelocity = -1.5;
    private double zeroVelocity = 0.0;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructorAndFormula()
    {

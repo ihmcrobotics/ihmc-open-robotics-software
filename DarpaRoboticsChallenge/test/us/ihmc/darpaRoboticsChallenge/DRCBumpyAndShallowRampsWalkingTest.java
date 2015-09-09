@@ -79,7 +79,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    }
    
 
-	@DeployableTestMethod(duration = 84.2)
+	@DeployableTestMethod(estimatedDuration = 84.2)
 	@Test(timeout = 420000)
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -294,7 +294,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       return new ImmutablePair<CombinedTerrainObject3D, Double>(combinedTerrainObject, xMax);
    }
 
-	@DeployableTestMethod(duration = 104.6)
+	@DeployableTestMethod(estimatedDuration = 104.6)
 	@Test(timeout = 520000)
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
