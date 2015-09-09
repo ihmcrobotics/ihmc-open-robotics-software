@@ -8,8 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import Jama.Matrix;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class QuaternionToolsTest
 {
@@ -26,7 +25,7 @@ public class QuaternionToolsTest
    {
    }
 
-   @EstimatedDuration
+   @DeployableTestMethod
    @Test(timeout = 300000)
    public void testEuler2quat()
    {
@@ -43,7 +42,7 @@ public class QuaternionToolsTest
 //    }
    }
 
-   @EstimatedDuration
+   @DeployableTestMethod
    @Test(timeout = 300000)
    public void testQuat2euler()
    {
@@ -54,9 +53,11 @@ public class QuaternionToolsTest
 //    /**@todo fill in the test code*/
    }
 
+   /**
+    * Pretty old and uses Roll Pitch Yaw which is always flaky.
+    */
    @Ignore
-   @QuarantinedTest("Pretty old and uses Roll Pitch Yaw which is always flaky.")
-   @EstimatedDuration
+   @DeployableTestMethod(quarantined = true)
    @Test(timeout = 300000)
    public void testBackAndForthOne()
    {

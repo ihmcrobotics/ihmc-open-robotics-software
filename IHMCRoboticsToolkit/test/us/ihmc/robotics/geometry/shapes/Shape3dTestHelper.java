@@ -3,7 +3,7 @@ package us.ihmc.robotics.geometry.shapes;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;

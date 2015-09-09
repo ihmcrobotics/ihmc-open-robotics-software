@@ -7,16 +7,16 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+
 public class KryoAnnotationTest
 {
    @Test(timeout = 30000)
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
    public void testOptionalAnnotation()
    {
       final int ITERATIONS = 1000;

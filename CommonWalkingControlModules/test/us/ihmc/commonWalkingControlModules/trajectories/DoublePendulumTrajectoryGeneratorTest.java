@@ -17,19 +17,19 @@ import us.ihmc.plotting.Plotter;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraph;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraphGroup;
 import us.ihmc.simulationconstructionset.util.graphs.JFreePlot;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.geometry.Line2d;
 
 /**
  * Created by agrabertilton on 2/9/15.
  */
 
-@BambooPlan(planType={BambooPlanType.Exclude})
+@DeployableTestClass(planType={BambooPlanType.Exclude})
 public class DoublePendulumTrajectoryGeneratorTest
 {
-   @EstimatedDuration(duration = 1.0)
+   @DeployableTestMethod(duration = 1.0)
    @Test (timeout=600000)
    public void testHybridPendulum()
    {
@@ -86,7 +86,7 @@ public class DoublePendulumTrajectoryGeneratorTest
       }
    }
 
-   @EstimatedDuration(duration = 1.0)
+   @DeployableTestMethod(duration = 1.0)
    @Test (timeout=600000)
    public void testNoTorquePendulum()
    {

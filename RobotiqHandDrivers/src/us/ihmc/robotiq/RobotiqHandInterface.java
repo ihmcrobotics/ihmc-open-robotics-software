@@ -3,10 +3,10 @@ package us.ihmc.robotiq;
 import java.io.IOException;
 import java.util.Arrays;
 
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.communication.ModbusTCPConnection;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 /* GENERAL INFO
  * (This information assumes right hand for convention)

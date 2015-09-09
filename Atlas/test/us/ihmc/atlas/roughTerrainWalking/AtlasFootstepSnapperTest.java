@@ -20,8 +20,8 @@ import us.ihmc.pathGeneration.footstepSnapper.FootstepSnapperTest;
 import us.ihmc.pathGeneration.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.pathGeneration.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundReaderAndWriter;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.robotics.geometry.BoundingBox2d;
@@ -32,7 +32,7 @@ import us.ihmc.robotics.geometry.InsufficientDataException;
  */
 public class AtlasFootstepSnapperTest extends FootstepSnapperTest
 {
-	@EstimatedDuration(duration = 0.4)
+	@DeployableTestMethod(duration = 0.4)
    @Test(timeout = 30000)
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {

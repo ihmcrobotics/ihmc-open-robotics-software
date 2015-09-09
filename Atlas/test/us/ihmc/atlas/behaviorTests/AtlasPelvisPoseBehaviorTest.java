@@ -8,11 +8,11 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCPelvisPoseBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.Flaky})
+@DeployableTestClass(planType = {BambooPlanType.Slow, BambooPlanType.Flaky})
 public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -35,7 +35,7 @@ public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 35.5)
+	@DeployableTestMethod(duration = 35.5)
    @Test(timeout = 180000)
    public void testPelvisPitchRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
@@ -44,7 +44,7 @@ public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 32.0)
+	@DeployableTestMethod(duration = 32.0)
    @Test(timeout = 160000)
    public void testPelvisYawRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
@@ -53,7 +53,7 @@ public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
    }
 
    @Override
-	@EstimatedDuration(duration = 36.0)
+	@DeployableTestMethod(duration = 36.0)
    @Test(timeout = 180000)
    public void testPelvisRollRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
@@ -62,7 +62,7 @@ public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testPelvisXTranslation() throws SimulationExceededMaximumTimeException
    {
@@ -71,7 +71,7 @@ public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 25.1)
+	@DeployableTestMethod(duration = 25.1)
    @Test(timeout = 130000)
    public void testPelvisYTranslation() throws SimulationExceededMaximumTimeException
    {
@@ -80,7 +80,7 @@ public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 23.5)
+	@DeployableTestMethod(duration = 23.5)
    @Test(timeout = 120000)
    public void testSingleRandomPelvisRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {

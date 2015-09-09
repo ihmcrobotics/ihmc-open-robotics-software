@@ -11,13 +11,13 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class ContactableToroidRobotTest
 {
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testIsPointOnOrInsideAtOrigin()
    {
@@ -51,7 +51,7 @@ public class ContactableToroidRobotTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testIsPointOnOrInsideNotAtOriginUsingTransform()
    {
@@ -91,7 +91,7 @@ public class ContactableToroidRobotTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testPointIsntInsideWhenUsingComOffset()
    {

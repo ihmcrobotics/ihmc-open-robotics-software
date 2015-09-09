@@ -16,7 +16,6 @@ import org.junit.Test;
 import us.ihmc.tools.MemoryTools;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -25,7 +24,8 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class CenterOfPressureResolverTest
 {
@@ -43,7 +43,7 @@ public class CenterOfPressureResolverTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testCenterOfPressureResolverSimpleCaseWithNoTorque()
    {      
@@ -63,7 +63,7 @@ public class CenterOfPressureResolverTest
             expectedCenterOfPressure, expectedNormalTorque);
    }
 
-	@EstimatedDuration(duration = 0.4)
+	@DeployableTestMethod(duration = 0.4)
 	@Test(timeout = 30000)
    public void testCenterOfPressureResolverSimpleCaseWithVerticalForce()
    {      
@@ -83,7 +83,7 @@ public class CenterOfPressureResolverTest
             expectedCenterOfPressure, expectedNormalTorque);
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testCenterOfPressureResolverNoForceInZ()
    {      
@@ -103,7 +103,7 @@ public class CenterOfPressureResolverTest
             expectedCenterOfPressure, expectedNormalTorque);
    }
 
-	@EstimatedDuration(duration = 0.4)
+	@DeployableTestMethod(duration = 0.4)
 	@Test(timeout = 30000)
    public void testRandomExamples()
    {

@@ -26,8 +26,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -84,7 +84,7 @@ public abstract class DRCPushRecoveryTest
 
    protected abstract DRCRobotModel getRobotModel();
 
-	@EstimatedDuration(duration = 19.4)
+	@DeployableTestMethod(duration = 19.4)
    @Test(timeout = 97000)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -105,7 +105,7 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-	@EstimatedDuration(duration = 23.1)
+	@DeployableTestMethod(duration = 23.1)
    @Test(timeout = 120000)
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -126,7 +126,7 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-	@EstimatedDuration(duration = 18.0)
+	@DeployableTestMethod(duration = 18.0)
    @Test(timeout = 90000)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
@@ -147,7 +147,7 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-	@EstimatedDuration(duration = 22.8)
+	@DeployableTestMethod(duration = 22.8)
    @Test(timeout = 110000)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
@@ -168,7 +168,7 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-	@EstimatedDuration(duration = 30.2)
+	@DeployableTestMethod(duration = 30.2)
    @Test(timeout = 150000)
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
@@ -189,7 +189,7 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-	@EstimatedDuration(duration = 20.2)
+	@DeployableTestMethod(duration = 20.2)
    @Test(timeout = 100000)
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
@@ -211,7 +211,7 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-	@EstimatedDuration(duration = 11.5)
+	@DeployableTestMethod(duration = 11.5)
    @Test(timeout = 58000)
    public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
    {
@@ -239,7 +239,7 @@ public abstract class DRCPushRecoveryTest
       }
    }
 
-	@EstimatedDuration(duration = 23.7)
+	@DeployableTestMethod(duration = 23.7)
    @Test(timeout = 120000)
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
@@ -260,7 +260,7 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-	@EstimatedDuration(duration = 15.7)
+	@DeployableTestMethod(duration = 15.7)
    @Test(timeout = 78000)
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
@@ -282,7 +282,7 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-	@EstimatedDuration(duration = 16.1)
+	@DeployableTestMethod(duration = 16.1)
    @Test(timeout = 80000)
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
@@ -303,7 +303,7 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-	@EstimatedDuration(duration = 18.9)
+	@DeployableTestMethod(duration = 18.9)
    @Test(timeout = 94000)
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {

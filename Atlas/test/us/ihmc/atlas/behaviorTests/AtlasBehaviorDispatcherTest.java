@@ -8,11 +8,11 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.BehaviorDispatcherTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
+@DeployableTestClass(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
 public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
 {
    private final AtlasRobotModel robotModel;
@@ -35,7 +35,7 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    }
 
    @Override
-	@EstimatedDuration(duration = 50.0)
+	@DeployableTestMethod(duration = 50.0)
    @Test(timeout = 250000)
    public void testDispatchPelvisPoseBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -44,7 +44,7 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    }
    
    @Override
-	@EstimatedDuration(duration = 315.0)
+	@DeployableTestMethod(duration = 315.0)
    @Test(timeout = 1600000)
    public void testDispatchWalkToLocationBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -53,7 +53,7 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    }
    
    @Override
-	@EstimatedDuration(duration = 33.4)
+	@DeployableTestMethod(duration = 33.4)
    @Test(timeout = 170000)
    public void testDispatchWalkToLocationBehaviorAndStop() throws SimulationExceededMaximumTimeException
    {
@@ -62,7 +62,7 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    }
    
    @Override
-	@EstimatedDuration(duration = 314.6)
+	@DeployableTestMethod(duration = 314.6)
    @Test(timeout = 1600000)
    public void testDispatchWalkToLocationBehaviorPauseAndResume() throws SimulationExceededMaximumTimeException
    {

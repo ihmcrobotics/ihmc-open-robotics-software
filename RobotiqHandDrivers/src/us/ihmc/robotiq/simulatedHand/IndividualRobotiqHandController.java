@@ -6,15 +6,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.partNames.FingerName;
 import us.ihmc.communication.packets.dataobjects.FingerState;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.SdfLoader.partNames.FingerName;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;

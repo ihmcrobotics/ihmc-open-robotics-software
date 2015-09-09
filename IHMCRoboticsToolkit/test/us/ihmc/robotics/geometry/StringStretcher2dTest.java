@@ -1,9 +1,10 @@
 package us.ihmc.robotics.geometry;
 
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point2d;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import static org.junit.Assert.fail;
 public class StringStretcher2dTest
 {
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleExampleWithNoWaypoints()
    {
@@ -54,7 +55,7 @@ public class StringStretcher2dTest
       JUnitTools.assertTuple2dEquals(endPoint, solution.get(2), 1e-7);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleExampleWithOneWaypointsNoInterpolation()
    {
@@ -79,7 +80,7 @@ public class StringStretcher2dTest
       assertTrue(maxPoint == waypoints.get(0));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleExampleWithAllWaypointsNoInterpolation()
    {
@@ -118,7 +119,7 @@ public class StringStretcher2dTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testStartAndEnd()
    {
@@ -136,7 +137,7 @@ public class StringStretcher2dTest
       JUnitTools.assertTuple2dEquals(endPoint, waypoints.get(1), 1e-7);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testRandomExample()
    {

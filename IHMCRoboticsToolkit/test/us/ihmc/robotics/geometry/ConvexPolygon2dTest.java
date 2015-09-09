@@ -2,7 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import org.junit.Test;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
 import javax.vecmath.Point2d;
@@ -28,7 +28,7 @@ public class ConvexPolygon2dTest
    private static final boolean WAIT_FOR_BUTTON_PUSH = false;
    private final double epsilon = 1e-10;
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testConstructors()
    {
@@ -73,7 +73,7 @@ public class ConvexPolygon2dTest
       assertTrue(polygonPolygon.isUpToDate());
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testClear()
    {
@@ -91,7 +91,7 @@ public class ConvexPolygon2dTest
       assertFalse(list.isUpToDate());
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testSetAndUpdates()
    {
@@ -108,7 +108,7 @@ public class ConvexPolygon2dTest
       assertTrue(doubleInt.isUpToDate());
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetCentroid()
    {
@@ -125,7 +125,7 @@ public class ConvexPolygon2dTest
       assertEquals("Centroids should be equal", centroid, doubles.getCentroid());
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetBoundingBox()
    {
@@ -144,7 +144,7 @@ public class ConvexPolygon2dTest
       assertEquals("Bounding boxes should be equal", box.getMaxPoint().getY(), 1.0, epsilon);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetNextVertexCCWGetPreviousVertexCCW()
    {
@@ -172,7 +172,7 @@ public class ConvexPolygon2dTest
       assertEquals("Points should be equal", fourNext, twoPrev);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testScale()
    {
@@ -203,7 +203,7 @@ public class ConvexPolygon2dTest
       assertEquals("These should be equal", fourNext, four);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testIsPointInside()
    {
@@ -224,7 +224,7 @@ public class ConvexPolygon2dTest
       } 
    }
    
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testIntersectionWith()
    {
@@ -272,7 +272,7 @@ public class ConvexPolygon2dTest
 //      System.out.println("all" + allIntersect);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testTriangleConstructor()
    {
@@ -290,7 +290,7 @@ public class ConvexPolygon2dTest
       ConvexPolygon2dTestHelpers.verifyPointsAreClockwise(polygon);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testIntersectionWhenFullyInside()
    {
@@ -375,7 +375,7 @@ public class ConvexPolygon2dTest
       assertTrue(epsilonEquals);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testIntersectionWhenFullyInsideWithRepeatedPoint()
    {
@@ -403,7 +403,7 @@ public class ConvexPolygon2dTest
       assertTrue(epsilonEquals);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testConstructorWithRepeatedPoints()
    {
@@ -420,7 +420,7 @@ public class ConvexPolygon2dTest
       assertEquals(3, convexPolygon2d.getNumberOfVertices());
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testNANRay()
    {
@@ -440,7 +440,7 @@ public class ConvexPolygon2dTest
       System.out.println("done");
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testIsInside()
    {
@@ -458,7 +458,7 @@ public class ConvexPolygon2dTest
       assertTrue(isInside);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testDistancePoint2dConvexPolygon2d()
     {
@@ -471,7 +471,7 @@ public class ConvexPolygon2dTest
     }
 
    
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testPerimeterSquare()
    {
@@ -501,7 +501,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testExtremePointsSquare()
    {
@@ -554,7 +554,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testInsideWithSimpleSquare()
    {
@@ -595,7 +595,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testTiming()
    {
@@ -647,7 +647,7 @@ public class ConvexPolygon2dTest
       assertTrue(timePerTest < maxTimeAllowed);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testTimingTwo()
    {
@@ -706,7 +706,7 @@ public class ConvexPolygon2dTest
          throw new RuntimeException();
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testExtremePointsRandom()
    {
@@ -756,7 +756,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testOrthogonalProjectionOne()
    {
@@ -820,7 +820,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testOrthogonalProjectionThree()
    {
@@ -900,7 +900,7 @@ public class ConvexPolygon2dTest
 
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetAroundCornerEdgesOne()
    {
@@ -967,7 +967,7 @@ public class ConvexPolygon2dTest
 
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetLineOfSightVerticesOne()
    {
@@ -987,7 +987,7 @@ public class ConvexPolygon2dTest
 
    }
 
-	@EstimatedDuration(duration = 0.6)
+	@DeployableTestMethod(duration = 0.6)
 	@Test(timeout = 30000)
    public void testGetLineOfSightVerticesTwo()
    {
@@ -1068,7 +1068,7 @@ public class ConvexPolygon2dTest
       }
    }
    
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testPolygonShrinkInto()
    {
@@ -1194,7 +1194,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testPolygonIntersections()
    {
@@ -1325,7 +1325,7 @@ public class ConvexPolygon2dTest
       ConvexPolygon2dTestHelpers.verifyLineOfSightVertices(polygon, pointToTest, lineOfSightVertices);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testPullTowardsCentroid()
    {
@@ -1382,7 +1382,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetNearestVertex()
    {
@@ -1454,7 +1454,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testTroublesomeIntersection()
    {
@@ -1469,7 +1469,7 @@ public class ConvexPolygon2dTest
       assertEquals(2, intersections.length);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testIntersectionWithLinesOne()
    {
@@ -1544,7 +1544,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetOppositeMidEdgeWhenPublic()
    {
@@ -1582,7 +1582,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testCombineOne()
    {
@@ -1647,7 +1647,7 @@ public class ConvexPolygon2dTest
          pauseOneSecond();
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetOutSideFacingOrthoNormalVectors()
    {
@@ -1690,7 +1690,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testApplyTransformWithTranslations()
    {
@@ -1731,7 +1731,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testApplyTransformWithRotation()
    {
@@ -1777,7 +1777,7 @@ public class ConvexPolygon2dTest
 
    
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetClosestEdge()
    {
@@ -1863,7 +1863,7 @@ public class ConvexPolygon2dTest
       return ((point1.getX() == point2.getX()) && (point1.getY() == point2.getY()));
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testArea()
    {
@@ -1896,7 +1896,7 @@ public class ConvexPolygon2dTest
       return polygon;
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testLargeHullWithIntersections()
    {
@@ -1979,7 +1979,7 @@ public class ConvexPolygon2dTest
 
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testGetDistanceInside()
    {
@@ -2045,7 +2045,7 @@ public class ConvexPolygon2dTest
    }
 
    
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testOrthogonalProjectionPointConvexPolygon2d()
    {
@@ -2085,7 +2085,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testAllMethodsForPolygonWithOnePoint()
    {
@@ -2203,7 +2203,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testAllMethodsForPolygonWithTwoPoints()
    {

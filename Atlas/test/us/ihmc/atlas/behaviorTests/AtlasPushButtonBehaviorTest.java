@@ -7,11 +7,11 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCPushButtonBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 
 @Ignore
-@BambooPlan(planType = {BambooPlanType.InDevelopment})
+@DeployableTestClass(planType = {BambooPlanType.InDevelopment})
 public class AtlasPushButtonBehaviorTest extends DRCPushButtonBehaviorTest
 {
    private final AtlasRobotModel robotModel;

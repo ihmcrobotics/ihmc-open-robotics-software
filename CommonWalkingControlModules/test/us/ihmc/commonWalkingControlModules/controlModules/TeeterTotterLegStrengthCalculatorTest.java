@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -46,7 +46,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       virtualToePoints = new SideDependentList<FramePoint2d>();
    }
 
-	@EstimatedDuration(duration = 0.4)
+	@DeployableTestMethod(duration = 0.4)
 	@Test(timeout = 30000)
    public void testCenter()
    {
@@ -62,7 +62,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       }
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testFrameMismatch1()
    {
@@ -72,7 +72,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, coPDesired);
    }
 
-	@EstimatedDuration(duration = 0.4)
+	@DeployableTestMethod(duration = 0.4)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testFrameMismatch2()
    {
@@ -82,7 +82,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, coPDesired);
    }
 
-	@EstimatedDuration(duration = 0.4)
+	@DeployableTestMethod(duration = 0.4)
 	@Test(timeout = 30000)
    public void testAllWeightOnOneLeg()
    {
@@ -99,7 +99,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       }
    }
 
-	@EstimatedDuration(duration = 0.4)
+	@DeployableTestMethod(duration = 0.4)
 	@Test(timeout = 30000)
    public void testCoPOffVTPLineSegment()
    {

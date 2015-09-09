@@ -52,8 +52,8 @@ import us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataC
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.controllers.GainCalculator;
@@ -124,7 +124,7 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
    }
    
    
-	@EstimatedDuration(duration = 46.6)
+	@DeployableTestMethod(duration = 46.6)
 	@Test(timeout = 230000)
    public void testJointSpaceHandPose() throws SimulationExceededMaximumTimeException
    {
@@ -149,7 +149,7 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
       BambooTools.reportTestFinishedMessage();
    }
 	
-	@EstimatedDuration(duration = 31.5)
+	@DeployableTestMethod(duration = 31.5)
    @Test(timeout = 160000)
    public void testTaskSpaceHandPose() throws SimulationExceededMaximumTimeException
    {
@@ -188,7 +188,7 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
       BambooTools.reportTestFinishedMessage();
    }
    
-	@EstimatedDuration(duration = 41.8)
+	@DeployableTestMethod(duration = 41.8)
    @Test(timeout = 210000)
    public void testHandRotateAboutAxis() throws SimulationExceededMaximumTimeException
    {

@@ -6,8 +6,8 @@ import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.robotics.dataStructures.Vector64F;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.io.File;
 import java.util.Random;
@@ -41,7 +41,7 @@ public class CollisionAvoidanceConstraintTest
       forwardKinematicSolver = null;
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testCollisionAvoidanceConstraint()
    {

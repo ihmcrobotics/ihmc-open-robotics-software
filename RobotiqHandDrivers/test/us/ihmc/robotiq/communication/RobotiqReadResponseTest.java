@@ -6,16 +6,15 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.robotiq.communication.RobotiqReadResponse;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@BambooPlan(planType = BambooPlanType.Fast)
+@DeployableTestClass(planType = BambooPlanType.Fast)
 public class RobotiqReadResponseTest
 {
    @Test(timeout = 30000)
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    public void testSetAll()
    {
       final int ITERATIONS = 1000;

@@ -26,9 +26,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestInterface
@@ -51,7 +50,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
    }
 
    
-	@EstimatedDuration(duration = 15.0)
+	@DeployableTestMethod(duration = 15.0)
 	@Test(timeout=300000)
    public void testCanRewindAndGoForward() throws UnreasonableAccelerationException
    {
@@ -74,7 +73,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 30.0)
+   @DeployableTestMethod(duration = 30.0)
    @Test(timeout=300000)
    public void testRunsTheSameWayTwice() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -115,8 +114,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
    }
    
    @Ignore
-   @QuarantinedTest("Bamboo link: https://bamboo.ihmc.us/browse/RC-FASTLOOP-ATLASAFAST/test/case/115277833")
-	@EstimatedDuration
+   // "Bamboo link: https://bamboo.ihmc.us/browse/RC-FASTLOOP-ATLASAFAST/test/case/115277833")
+	@DeployableTestMethod(quarantined = true)
 	@Test(timeout=2400000)
    public void testRewindabilityWithSimpleFastMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
@@ -172,7 +171,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
 
 
 	@Ignore // This takes a long time. Use it for debugging where the broken changes were made when the tests above fail.
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=2400000)
 	public void testRewindabilityWithSlowerMoreExtensiveMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
 	{

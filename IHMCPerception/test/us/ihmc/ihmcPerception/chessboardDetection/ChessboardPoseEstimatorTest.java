@@ -15,15 +15,15 @@ import javax.imageio.ImageIO;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ChessboardPoseEstimatorTest
 {
    static final boolean DEBUG = false;
 
-	@EstimatedDuration(duration = 2.6)
+	@DeployableTestMethod(duration = 2.6)
    @Test(timeout = 30000)
    public void testOpenCVRegression4x7() throws IOException
    {
@@ -42,7 +42,7 @@ public class ChessboardPoseEstimatorTest
       }
    }
 
-	@EstimatedDuration(duration = 0.6)
+	@DeployableTestMethod(duration = 0.6)
    @Test(timeout = 30000)
    public void testOpenCVRegression4x5() throws IOException
    {
@@ -61,7 +61,7 @@ public class ChessboardPoseEstimatorTest
       }
    }
 
-	@EstimatedDuration(duration = 0.6)
+	@DeployableTestMethod(duration = 0.6)
    @Test(timeout = 30000)
    public void testSimpleAlmostFrontChessboard() throws IOException
    {
@@ -73,7 +73,7 @@ public class ChessboardPoseEstimatorTest
       testSingleImage(image, squareNumRow, squareNumCol, gridWidth, 1e-2);
    }
 
-	@EstimatedDuration(duration = 1.2)
+	@DeployableTestMethod(duration = 1.2)
    @Test(timeout = 30000)
    public void testDrivingSimCheckerBoard() throws IOException
    {
@@ -87,7 +87,7 @@ public class ChessboardPoseEstimatorTest
 
    //boofCV can't find checker board
    @Ignore
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 5000)
    public void testImage3() throws IOException
    {
@@ -100,7 +100,7 @@ public class ChessboardPoseEstimatorTest
    }
 
    //boofcv found checkerboard but pose estimated poorly
-	@EstimatedDuration(duration = 1.6)
+	@DeployableTestMethod(duration = 1.6)
    @Test(timeout = 30000)
    public void testImage1() throws IOException
    {

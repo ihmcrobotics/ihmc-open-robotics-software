@@ -6,6 +6,7 @@ import georegression.geometry.UtilPlane3D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import bubo.clouds.detect.tools.PointCloudShapeTools;
 
 /**
@@ -23,7 +23,7 @@ public class IhmcPointCloudOpsTest
 {
    Random rand = new Random(234);
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void convert()
    {
@@ -41,7 +41,7 @@ public class IhmcPointCloudOpsTest
       assertTrue(UtilPlane3D_F64.equals(orig,found,1e-8));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void adjustBoxNormals()
    {

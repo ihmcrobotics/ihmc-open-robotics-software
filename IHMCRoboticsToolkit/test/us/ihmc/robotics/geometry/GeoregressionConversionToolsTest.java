@@ -3,9 +3,10 @@ package us.ihmc.robotics.geometry;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.transform.se.SePointOps_F64;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 
 import javax.vecmath.Point3d;
 import java.util.Random;
@@ -16,7 +17,7 @@ public class GeoregressionConversionToolsTest
 {
    private final static double eps = 1e-7;
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
 	@Test(timeout = 30000)
    public void testTransformConversionFromGeoregressionToVecmath()
    {
@@ -54,7 +55,7 @@ public class GeoregressionConversionToolsTest
       }
    }
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
 	@Test(timeout = 30000)
    public void testTransformConversionFromVecmathToGeoregression()
    {

@@ -57,10 +57,10 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
@@ -74,7 +74,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-@BambooPlan(planType = {BambooPlanType.UI})
+@DeployableTestClass(planType = {BambooPlanType.UI})
 public class SimulationConstructionSetUsingDirectCallsTest
 {
    // Note: some of the tests assume that:
@@ -263,7 +263,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       simpleWrenchContactPoint = null;
    }
 
-	@EstimatedDuration(duration = 3.2)
+	@DeployableTestMethod(duration = 3.2)
 	@Test(timeout = 30000)
    public void testSimulationConstructionSetMiscellaneous() throws AWTException
    {
@@ -338,7 +338,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertArrayOfObjectsContainsTheObject(forceSensorsFromSCS, simpleWrenchContactPoint);
    }
 
-	@EstimatedDuration(duration = 3.1)
+	@DeployableTestMethod(duration = 3.1)
 	@Test(timeout = 30000)
    public void testSimulationManagement()
    {
@@ -417,7 +417,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
    @Ignore // Only run this one locally since it doesn't work on Bamboo on Linux necessarily.
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testFrameMethodsThatOnlyWorkOnSomeOperatingSystems()
    {
@@ -454,7 +454,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(Frame.MAXIMIZED_BOTH, frameStateFromSCS2, epsilon);
    }
 
-	@EstimatedDuration(duration = 13.5)
+	@DeployableTestMethod(duration = 13.5)
 	@Test(timeout = 67000)
    public void testFrameMethods()
    {
@@ -509,7 +509,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(component, componentFromSCS);
    }
 
-	@EstimatedDuration(duration = 3.1)
+	@DeployableTestMethod(duration = 3.1)
 	@Test(timeout = 30000)
    public void testCameraMethods()
    {
@@ -676,7 +676,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertBooleansAreOpposite(initialCameraKeyModeStatus, finalCameraKeyModeStatus);
    }
 
-	@EstimatedDuration(duration = 2.8)
+	@DeployableTestMethod(duration = 2.8)
 	@Test(timeout = 30000)
    public void test3DGraphicsMethods()
    {
@@ -732,7 +732,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertIfGUIComponentsAreDisableOrEnabled(scs, true);
    }
 
-	@EstimatedDuration(duration = 2.6)
+	@DeployableTestMethod(duration = 2.6)
 	@Test(timeout = 30000)
    public void testGetVariableMethods() throws AWTException
    {
@@ -790,7 +790,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(arrayOfVariablesRegExprRobot, arrayOfVariablesRegExprSCS);
    }
 
-	@EstimatedDuration(duration = 2.7)
+	@DeployableTestMethod(duration = 2.7)
 	@Test(timeout = 30000)
    public void testTimingMethods() throws AWTException
    {
@@ -819,7 +819,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(Math.PI, timeFromSCS, epsilon);
    }
 
-	@EstimatedDuration(duration = 3.2)
+	@DeployableTestMethod(duration = 3.2)
 	@Test(timeout = 30000)
    public void testSimulationTickControl()
    {
@@ -963,7 +963,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(keyPoint - 1, currentIndexFromSCS6, epsilon);
    }
 
-	@EstimatedDuration(duration = 8.8)
+	@DeployableTestMethod(duration = 8.8)
 	@Test(timeout = 44000)
    public void testVariablesMethods()
    {
@@ -1018,7 +1018,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertYoVariableListContainsArrayListOfVariables(yoVariableListFromSCS3, yoVariableArrayLists);
    }
 
-	@EstimatedDuration(duration = 2.6)
+	@DeployableTestMethod(duration = 2.6)
 	@Test(timeout = 30000)
    public void testGroupMethods()
    {
@@ -1066,7 +1066,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertNotNull(extraPanelConfigurationPanelFromSCS);
    }
 
-	@EstimatedDuration(duration = 8.7)
+	@DeployableTestMethod(duration = 8.7)
 	@Test(timeout = 43000)
    public void testSimulationListeners()
    {
@@ -1121,7 +1121,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertTrue(toggleKeyPointModeCommandListenerHasBeenCalled.getBooleanValue());
    }
 
-	@EstimatedDuration(duration = 11.1)
+	@DeployableTestMethod(duration = 11.1)
 	@Test(timeout = 56000)
    public void testDataExporting()
    {

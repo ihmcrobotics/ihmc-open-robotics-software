@@ -3,7 +3,7 @@ package us.ihmc.robotics.geometry;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class FrameConvexPolygon2dTest
 {
@@ -19,7 +19,7 @@ public class FrameConvexPolygon2dTest
       frameConvexPolygon2d = new FrameConvexPolygon2d(worldFrame, convexPolygon2d);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void thereIsNoTestHere()
    {

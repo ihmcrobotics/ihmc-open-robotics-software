@@ -15,20 +15,20 @@ import javax.vecmath.Vector3d;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooPlanType;
 
 import com.esotericsoftware.minlog.Log;
 
-@BambooPlan(planType = {BambooPlanType.Flaky})
+@DeployableTestClass(planType = {BambooPlanType.Flaky})
 public class KryoObjectCommunicatorTest
 {
 
    @Ignore("This test causes problems on Linux due to a bug in the way Java does its epoll wrapper")
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testAutomaticReconnect() throws IOException, InterruptedException
    {
@@ -99,7 +99,7 @@ public class KryoObjectCommunicatorTest
       server.close();
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000) 
    public void testStateListener() throws IOException, InterruptedException
    {
@@ -151,7 +151,7 @@ public class KryoObjectCommunicatorTest
       client.close();
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testConnectionLimiter() throws IOException, InterruptedException
    {
@@ -225,7 +225,7 @@ public class KryoObjectCommunicatorTest
       
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSendAndReceive() throws IOException, InterruptedException
    {

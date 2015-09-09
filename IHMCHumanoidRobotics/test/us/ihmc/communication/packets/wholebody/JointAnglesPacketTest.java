@@ -7,15 +7,15 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.tools.ArrayTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@BambooPlan(planType = {BambooPlanType.Fast})
+@DeployableTestClass(planType = {BambooPlanType.Fast})
 public class JointAnglesPacketTest
 {
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testNumberOfJoints()
    {
@@ -31,7 +31,7 @@ public class JointAnglesPacketTest
       assertEquals(numberOfWaistJoints, jointAnglesPacket.getNumberOfSpineJoints());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSetAndPackWaist()
    {
@@ -78,7 +78,7 @@ public class JointAnglesPacketTest
    }
 
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSetAndPackArmJointAngles()
    {
@@ -128,7 +128,7 @@ public class JointAnglesPacketTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSetAndPackLegJointAngles()
    {

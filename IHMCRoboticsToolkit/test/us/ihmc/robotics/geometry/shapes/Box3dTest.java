@@ -8,9 +8,9 @@ import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.geometry.shapes.Box3d.FaceName;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -26,7 +26,7 @@ import static org.junit.Assert.assertTrue;
 public class Box3dTest
 {
 
-	@EstimatedDuration(duration = 0.6)
+	@DeployableTestMethod(duration = 0.6)
 	@Test(timeout = 30000)
    public void testCommonShape3dFunctionality()
    {
@@ -48,7 +48,7 @@ public class Box3dTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSet()
    {
@@ -67,7 +67,7 @@ public class Box3dTest
       assertEverythingDifferent(box1, box2, 1e-14);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCopyConstructor()
    {
@@ -83,7 +83,7 @@ public class Box3dTest
       assertEverythingDifferent(box1, box2, 1e-14);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructors()
    {
@@ -103,7 +103,7 @@ public class Box3dTest
       assertEquals(box1, box3, 0.0);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSetTransform3DAndGetters()
    {
@@ -133,7 +133,7 @@ public class Box3dTest
       assertTrue(vector.epsilonEquals(box.getCenterCopy(), 0.0));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testScale()
    {
@@ -183,7 +183,7 @@ public class Box3dTest
       assertTrue(zFaceMinus.epsilonEquals(expectedZFaceMinus, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIsInsideOrOnSurfaceConvexCombinationOfVertices()
    {
@@ -207,7 +207,7 @@ public class Box3dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testVerticesProjection()
    {
@@ -230,7 +230,7 @@ public class Box3dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIsInsideOrOnSurfaceVertices()
    {
@@ -251,7 +251,7 @@ public class Box3dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testProjectionToVertices()
    {
@@ -290,7 +290,7 @@ public class Box3dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeVertices()
    {
@@ -339,7 +339,7 @@ public class Box3dTest
       Assert.assertEquals(0, expectedVertices.size());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testFacesOrthogonal()
    {
@@ -376,7 +376,7 @@ public class Box3dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testRotation()
    {
@@ -420,7 +420,7 @@ public class Box3dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
 	@Test(timeout = 30000)
    public void testDistanceProjectionAndClosestPointAndNormal()
    {
@@ -503,7 +503,7 @@ public class Box3dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
 	@Test(timeout = 30000)
    public void testApplyTransform()
    {
@@ -537,7 +537,7 @@ public class Box3dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSetYawPitchRoll()
    {

@@ -5,19 +5,20 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 
-@BambooPlan(planType = BambooPlanType.Exclude)
+@DeployableTestClass(planType = BambooPlanType.Exclude)
 public class SimulationRewoundListenerTest
 {
-   @QuarantinedTest("Hangs forever")
+   /**
+    * Hang forever
+    */
    @Ignore
-	@EstimatedDuration(duration = 30.0)
+	@DeployableTestMethod(duration = 30.0, quarantined = true)
 	@Test(timeout=300000)
    public void testSimulationRewoundListener()
    {

@@ -21,14 +21,14 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -36,7 +36,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-@BambooPlan(planType = {BambooPlanType.UI})
+@DeployableTestClass(planType = {BambooPlanType.UI})
 public class SmoothICPComputerTest
 {
    private static final boolean USE_ASSERTS = true; //false;
@@ -105,7 +105,7 @@ public class SmoothICPComputerTest
       icpVelocityLineSegment = null;
    }
 
-	@EstimatedDuration(duration = 0.8)
+	@DeployableTestMethod(duration = 0.8)
 	@Test(timeout = 30000)
    public void testTypicalFourStepExample()
    {
@@ -264,7 +264,7 @@ public class SmoothICPComputerTest
       }
    }
 
-	@EstimatedDuration(duration = 0.7)
+	@DeployableTestMethod(duration = 0.7)
 	@Test(timeout = 30000)
    public void testTypicalFourStepExampleWithSuddenStop()
    {
@@ -671,7 +671,7 @@ public class SmoothICPComputerTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testTrivialTwoStepExample()
    {

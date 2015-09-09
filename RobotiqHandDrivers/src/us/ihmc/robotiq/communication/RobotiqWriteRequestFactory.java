@@ -1,7 +1,6 @@
 package us.ihmc.robotiq.communication;
 
 import net.wimpi.modbus.procimg.Register;
-import net.wimpi.modbus.procimg.SimpleRegister;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rACT;

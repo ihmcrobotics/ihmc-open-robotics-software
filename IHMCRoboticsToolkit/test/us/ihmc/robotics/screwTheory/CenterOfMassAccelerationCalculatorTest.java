@@ -5,8 +5,8 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -21,7 +21,7 @@ public class CenterOfMassAccelerationCalculatorTest
    {
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testOneRigidBody()
    {
@@ -60,7 +60,7 @@ public class CenterOfMassAccelerationCalculatorTest
       JUnitTools.assertTuple3dEquals(expected, comAcceleration.getVectorCopy(), 1e-5);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testTwoSliderJointsZeroAcceleration()
    {
@@ -102,7 +102,7 @@ public class CenterOfMassAccelerationCalculatorTest
       JUnitTools.assertTuple3dEquals(new Vector3d(), comAcceleration.getVectorCopy(), 1e-5);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPendulumCentripetalAcceleration()
    {
@@ -141,7 +141,7 @@ public class CenterOfMassAccelerationCalculatorTest
 
    // Just tests whether it will crash or not for now
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testTree()
    {

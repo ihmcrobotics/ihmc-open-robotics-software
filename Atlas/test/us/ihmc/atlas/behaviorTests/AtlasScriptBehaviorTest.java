@@ -10,12 +10,12 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCScriptBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 
-@BambooPlan(planType = {BambooPlanType.Flaky, BambooPlanType.Slow})
+@DeployableTestClass(planType = {BambooPlanType.Flaky, BambooPlanType.Slow})
 public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -38,7 +38,7 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    }
 
    @Override
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testPauseAndResumeScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -47,7 +47,7 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testScriptWithOneHandPosePacket() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -56,7 +56,7 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 46.5)
+	@DeployableTestMethod(duration = 46.5)
    @Test(timeout = 230000)
    public void testScriptWithTwoComHeightScriptPackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -65,7 +65,7 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    }
    
    @Override
-   @EstimatedDuration(duration = 50.0)
+   @DeployableTestMethod(duration = 50.0)
    @Test(timeout = 300000)
    public void testScriptWithTwoHandPosePackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -74,7 +74,7 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 26.8)
+	@DeployableTestMethod(duration = 26.8)
    @Test(timeout = 130000)
    public void testSimpleScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -83,7 +83,7 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 41.1)
+	@DeployableTestMethod(duration = 41.1)
    @Test(timeout = 210000)
    public void testStopScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {

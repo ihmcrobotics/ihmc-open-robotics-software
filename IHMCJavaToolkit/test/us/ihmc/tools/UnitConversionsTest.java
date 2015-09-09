@@ -2,7 +2,7 @@ package us.ihmc.tools;
 
 import org.junit.Test;
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.Random;
 
@@ -12,7 +12,7 @@ public class UnitConversionsTest
 {
    private static final double EPS = 1e-12;
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void inchToMeter()
    {
@@ -25,7 +25,7 @@ public class UnitConversionsTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void squareInchToSquareMeter()
    {
@@ -41,7 +41,7 @@ public class UnitConversionsTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void cubicInchToCubicMeter()
    {
@@ -60,7 +60,7 @@ public class UnitConversionsTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void degreesToRadians()
    {
@@ -72,7 +72,7 @@ public class UnitConversionsTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void psiToPascals()
    {
@@ -84,7 +84,7 @@ public class UnitConversionsTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void kibibytesToBytes()
    {
@@ -96,7 +96,7 @@ public class UnitConversionsTest
       }
    }
    
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void megabytesToBytes()
    {
@@ -108,7 +108,7 @@ public class UnitConversionsTest
       }
    }
    
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void mebibytesToBytes()
    {

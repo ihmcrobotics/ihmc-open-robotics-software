@@ -19,11 +19,11 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -35,7 +35,7 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolverTestHelper;
 
 //import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 
-@BambooPlan(planType = {BambooPlanType.Fast})
+@DeployableTestClass(planType = {BambooPlanType.Fast})
 public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
 {
    private final ArrayList<SideDependentList<RigidBodyTransform>>  handToFootArray = new ArrayList<SideDependentList<RigidBodyTransform>>() ;

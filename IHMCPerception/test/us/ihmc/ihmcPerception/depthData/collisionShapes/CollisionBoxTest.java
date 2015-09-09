@@ -9,8 +9,8 @@ import javax.vecmath.Point3d;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Mesh;
@@ -18,7 +18,7 @@ import com.jme3.scene.shape.Box;
 
 public class CollisionBoxTest
 {
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testInsideBoxPoints()
    {
@@ -36,7 +36,7 @@ public class CollisionBoxTest
       }
    }
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testOutsideBoxPoints()
    {
@@ -54,7 +54,7 @@ public class CollisionBoxTest
       }
    }
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
    @Test(timeout = 30000)
    public void compareWithJMEBox()
    {

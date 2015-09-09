@@ -7,12 +7,12 @@ import org.junit.Test;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.ThighStatePacket;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ThighStateBehaviorTest
 {
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 300000)
    public void testSetInput()
    {

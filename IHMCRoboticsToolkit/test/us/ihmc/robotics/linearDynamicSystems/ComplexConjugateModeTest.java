@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import static org.junit.Assert.assertTrue;
 
@@ -20,7 +20,7 @@ public class ComplexConjugateModeTest
    {
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSecondOrderMassSpringDamper()
    {
@@ -61,7 +61,7 @@ public class ComplexConjugateModeTest
       assertTrue(expectedTransferFunction10.epsilonEquals(transferFunction10, 1e-7));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCircleGenerator()
    {

@@ -21,7 +21,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalcula
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePose;
@@ -54,7 +54,7 @@ public class FootstepPathCoordinatorTest
     * This test only verifies that polling returns the first footstep in the list *
     */
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testPoll() throws Exception
    {
@@ -83,7 +83,7 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@EstimatedDuration(duration = 0.4)
+	@DeployableTestMethod(duration = 0.4)
 	@Test(timeout = 30000)
    public void testIsEmpty() throws Exception
    {
@@ -117,7 +117,7 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testUpdatePath() throws Exception
    {
@@ -160,7 +160,7 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testSetPaused() throws Exception
    {

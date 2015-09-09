@@ -1,7 +1,8 @@
 package us.ihmc.robotics.robotSide;
 
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -16,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class SideDependentListTest
 {
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCommonUse()
    {
@@ -42,7 +43,7 @@ public class SideDependentListTest
       System.out.println(sideDependentList);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testWitGenericObjects()
    {
@@ -56,7 +57,7 @@ public class SideDependentListTest
       assertTrue(rightObject == sideDependentList.get(RobotSide.RIGHT));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000) 
    public void testCopyConstructor()
    {
@@ -76,7 +77,7 @@ public class SideDependentListTest
       
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = IndexOutOfBoundsException.class)
    public void testIndexOutOfBoundsException()
    {
@@ -95,7 +96,7 @@ public class SideDependentListTest
       iterator.next();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = UnsupportedOperationException.class)
    public void testIteratorCannotRemove()
    {
@@ -108,7 +109,7 @@ public class SideDependentListTest
       iterator.remove();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSet()
    {
@@ -128,7 +129,7 @@ public class SideDependentListTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCreateListOfHashMaps()
    {
@@ -151,7 +152,7 @@ public class SideDependentListTest
       assertEquals(sideDependentList.get(RobotSide.RIGHT).get(4.0), "4.0");
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCreateListOfEnumMaps()
    {

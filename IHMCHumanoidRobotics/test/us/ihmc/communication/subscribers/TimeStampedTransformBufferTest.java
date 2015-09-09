@@ -10,14 +10,14 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class TimeStampedTransformBufferTest
 {
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testEmptyBuffer()
    {
@@ -32,7 +32,7 @@ public class TimeStampedTransformBufferTest
          assertFalse(timeStampedPelvisPoseBuffer.isInRange(random.nextLong()));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testThatPosesAreProperlyStored()
    {
@@ -73,7 +73,7 @@ public class TimeStampedTransformBufferTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testThatPosesAreProperlyStoredEvenAfterFillingTheBuffer()
    {
@@ -115,7 +115,7 @@ public class TimeStampedTransformBufferTest
       }
    }
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testInterpolationBetweenPoses()
    {
@@ -163,7 +163,7 @@ public class TimeStampedTransformBufferTest
       }
    }
 
-	@EstimatedDuration(duration = 0.9)
+	@DeployableTestMethod(duration = 0.9)
    @Test(timeout = 30000)
    public void testInterpolationBetweenPosesAfterFillingBuffer()
    {

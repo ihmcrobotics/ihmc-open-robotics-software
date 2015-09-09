@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.numericalMethods.Differentiator;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
@@ -35,7 +35,7 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration(duration = 0.4)
+	@DeployableTestMethod(duration = 0.4)
 	@Test(timeout = 30000)
    public void testOne()
    {

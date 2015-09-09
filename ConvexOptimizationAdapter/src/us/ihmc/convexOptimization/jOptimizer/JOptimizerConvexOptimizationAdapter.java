@@ -16,8 +16,6 @@ import org.apache.commons.math3.optim.linear.LinearObjectiveFunction;
 import org.apache.commons.math3.optim.linear.Relationship;
 import org.apache.commons.math3.optim.linear.SimplexSolver;
 
-import us.ihmc.convexOptimization.ConvexOptimizationAdapter;
-
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
 import com.joptimizer.functions.SOCPLogarithmicBarrier;
@@ -26,6 +24,8 @@ import com.joptimizer.optimizers.BarrierMethod;
 import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
 import com.joptimizer.optimizers.OptimizationResponse;
+
+import us.ihmc.convexOptimization.ConvexOptimizationAdapter;
 
 public class JOptimizerConvexOptimizationAdapter implements ConvexOptimizationAdapter
 {

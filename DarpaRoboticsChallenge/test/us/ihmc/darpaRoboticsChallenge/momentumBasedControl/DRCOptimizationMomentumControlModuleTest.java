@@ -59,8 +59,8 @@ import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.utilities.exceptions.NoConvergenceException;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -72,7 +72,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public abstract class DRCOptimizationMomentumControlModuleTest implements MultiRobotTestInterface
 {
 
-	@EstimatedDuration(duration = 1.1)
+	@DeployableTestMethod(duration = 1.1)
 	@Test(timeout = 30000)
    public void testAllJointAccelerationsZero() throws IOException, JAXBException
    {
@@ -167,7 +167,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       }
    }
 
-	@EstimatedDuration(duration = 1.1)
+	@DeployableTestMethod(duration = 1.1)
 	@Test(timeout = 30000)
    public void testStandingInDoubleSupport() throws NoConvergenceException
    {

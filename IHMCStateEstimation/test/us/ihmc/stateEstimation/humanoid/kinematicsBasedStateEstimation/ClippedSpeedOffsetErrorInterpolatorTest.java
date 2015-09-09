@@ -1,6 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -15,25 +16,25 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-@BambooPlan(planType={BambooPlanType.Fast})
+@DeployableTestClass(planType={BambooPlanType.Fast})
 public class ClippedSpeedOffsetErrorInterpolatorTest
 {
    SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();
@@ -76,7 +77,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @EstimatedDuration(duration = 6.5)
+   @DeployableTestMethod(duration = 6.5)
    @Test(timeout = 320000)
    public void testRandomTranslationErrorInterpolation()
    {
@@ -154,7 +155,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
    //TODO
    @Ignore
-   @EstimatedDuration(duration = 10.0)
+   @DeployableTestMethod(duration = 10.0)
    @Test(timeout = 600000)
    public void testRandomRotationErrorInterpolation()
    {
@@ -242,7 +243,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    @Ignore //TODO
-   @EstimatedDuration(duration = 10.0)
+   @DeployableTestMethod(duration = 10.0)
    @Test(timeout = 600000)
    public void testTranslationAndRotationErrorsInterpolation()
    {
@@ -319,7 +320,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @EstimatedDuration(duration = 0.5)
+   @DeployableTestMethod(duration = 0.5)
    @Test(timeout = 60000)
    public void testMaxTranslationalCorrectionSpeedClip()
    {
@@ -403,7 +404,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    @Ignore //TODO
-   @EstimatedDuration(duration = 0.3)
+   @DeployableTestMethod(duration = 0.3)
    @Test(timeout = 60000)
    public void testMaxRotationalCorrectionSpeedClip()
    {
@@ -488,7 +489,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    @Ignore // TODO
-   @EstimatedDuration(duration = 0.3)
+   @DeployableTestMethod(duration = 0.3)
    @Test(timeout = 30000)
    public void testMaxCorrectionSpeedClipWorksWhenTranslationAndRotationOffsetsAreBig()
    {
@@ -637,7 +638,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @EstimatedDuration(duration = 6.0)
+   @DeployableTestMethod(duration = 6.0)
    @Test(timeout = 360000)
    public void testRotationCorrectionIsActuallyDeactivatedWhenAskedTo()
    {
@@ -713,7 +714,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @EstimatedDuration(duration = 0.4)
+   @DeployableTestMethod(duration = 0.4)
    @Test(timeout = 30000)
    public void testErrorRotationCheckIsBehavingProperly()
    {

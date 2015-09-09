@@ -10,8 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotics.Axis;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -31,7 +31,7 @@ public class KinematicPointTest
 		kinematicPoint = new KinematicPoint("testPoint", offset, robot.getRobotsYoVariableRegistry());
 	}
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
 	public void testGetAndSetParentJoint() 
 	{
@@ -41,14 +41,14 @@ public class KinematicPointTest
 		assertTrue(joint == kinematicPoint.getParentJoint());
 	}
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
 	public void testToString()
 	{
 		assertEquals("name: testPoint x: 0.0, y: 0.0, z: 0.0", kinematicPoint.toString());
 	}
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
 	public void testSetOffsetJointWithBothVectorAndXYAndZValuesAsParameters()
 	{
@@ -80,14 +80,14 @@ public class KinematicPointTest
 //		assertTrue(3.5 == kinematicPoint.getOffset().getZ());
 //	}
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
 	public void testGetName()
 	{
 		assertTrue(kinematicPoint.getName() == "testPoint");
 	}
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
 	public void testGetPosition()
 	{
@@ -105,7 +105,7 @@ public class KinematicPointTest
 
 	}
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
 	public void testGetPositionPoint()
 	{
@@ -121,7 +121,7 @@ public class KinematicPointTest
 		assertTrue(5.2 == positionReceivedFromGetMethod.z);
 	}
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
 	public void testGetVelocityVector()
 	{
@@ -138,7 +138,7 @@ public class KinematicPointTest
 		
 	}
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
 	public void testGetVelocity()
 	{
@@ -156,7 +156,7 @@ public class KinematicPointTest
 		
 	}
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
 	public void testGetYoPosition()
 	{
@@ -168,7 +168,7 @@ public class KinematicPointTest
 		assertEquals("(5.0, 5.1, 5.2)-" + frameName, yoPosition.toString());
 	}
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
 	public void testGetYoVelocity()
 	{
@@ -180,7 +180,7 @@ public class KinematicPointTest
 		assertEquals("(5.0, 5.1, 5.2)-" + frameName, yoVelocity.toString());
 	}
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
 	public void testChangeableOffset()
 	{

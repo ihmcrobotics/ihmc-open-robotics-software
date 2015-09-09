@@ -6,12 +6,12 @@ import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryWalkingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
 
-@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.VideoB})
+@DeployableTestClass(planType = {BambooPlanType.Slow, BambooPlanType.VideoB})
 public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 {  
    @Override
@@ -27,7 +27,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    }
    
    @Override
-	@EstimatedDuration(duration = 32.7)
+	@DeployableTestMethod(duration = 32.7)
    @Test(timeout = 160000)
    public void testForVideo() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -35,7 +35,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    }
    
    @Override
-	@EstimatedDuration(duration = 34.1)
+	@DeployableTestMethod(duration = 34.1)
    @Test(timeout = 170000)
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -43,7 +43,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    }
    
    @Override
-	@EstimatedDuration(duration = 71.6)
+	@DeployableTestMethod(duration = 71.6)
    @Test(timeout = 360000)
    public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -51,7 +51,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    }
    
    @Override
-	@EstimatedDuration(duration = 52.0)
+	@DeployableTestMethod(duration = 52.0)
    @Test(timeout = 260000)
    public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -59,7 +59,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    }
    
    @Override
-	@EstimatedDuration(duration = 35.5)
+	@DeployableTestMethod(duration = 35.5)
    @Test(timeout = 180000)
    public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -67,7 +67,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    }
    
    @Override
-	@EstimatedDuration(duration = 58.0)
+	@DeployableTestMethod(duration = 58.0)
    @Test(timeout = 290000)
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -75,7 +75,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    }
    
    @Override
-	@EstimatedDuration(duration = 35.5)
+	@DeployableTestMethod(duration = 35.5)
    @Test(timeout = 180000)
    public void testPushRightTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -83,7 +83,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    }
    
    @Override
-	@EstimatedDuration(duration = 31.2)
+	@DeployableTestMethod(duration = 31.2)
    @Test(timeout = 160000)
    public void testPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -91,7 +91,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    }
    
    @Override
-	@EstimatedDuration(duration = 30.9)
+	@DeployableTestMethod(duration = 30.9)
    @Test(timeout = 150000)
    public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {

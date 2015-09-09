@@ -3,7 +3,7 @@ package us.ihmc.robotics.geometry;
 import org.junit.Test;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 public class FrameLineTest
 {
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrameCopy()
    {
@@ -76,7 +76,7 @@ public class FrameLineTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetFrameVector()
    {
@@ -104,7 +104,7 @@ public class FrameLineTest
       assertTrue(line.getDirectionInFrame(target2).epsilonEquals(vector, 1e-12));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetFramePoint()
    {
@@ -132,7 +132,7 @@ public class FrameLineTest
       assertTrue(line.getDirectionInFrame(target2).epsilonEquals(vector, 1e-12));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected=RuntimeException.class)
    public void testConstructorA()
    {
@@ -142,7 +142,7 @@ public class FrameLineTest
       new FrameLine(ReferenceFrame.getWorldFrame(), origin, direction);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected=RuntimeException.class)
    public void testConstructorB()
    {
@@ -152,7 +152,7 @@ public class FrameLineTest
       new FrameLine(origin, direction);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected=RuntimeException.class)
    public void testConstructorC()
    {

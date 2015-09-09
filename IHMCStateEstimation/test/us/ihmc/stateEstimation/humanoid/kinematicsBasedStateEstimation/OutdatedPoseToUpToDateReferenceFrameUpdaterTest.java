@@ -10,22 +10,22 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
-import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@BambooPlan(planType={BambooPlanType.Fast})
+@DeployableTestClass(planType={BambooPlanType.Fast})
 public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @EstimatedDuration(duration = 0.2)
+   @DeployableTestMethod(duration = 0.2)
    @Test(timeout = 3000)
    public void testGetUpToDateTimeStampedBufferNewestTimeStamp()
    {
@@ -48,7 +48,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       }
    }
 
-   @EstimatedDuration(duration = 0.2)
+   @DeployableTestMethod(duration = 0.2)
    @Test(timeout = 3000)
    public void testGetUpToDateTimeStampedBufferOldestTimeStamp()
    {
@@ -75,7 +75,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       }
    }
 
-   @EstimatedDuration(duration = 0.2)
+   @DeployableTestMethod(duration = 0.2)
    @Test(timeout = 3000)
    public void testUpdateOutdatedTransformWithKnownOffsets()
    {

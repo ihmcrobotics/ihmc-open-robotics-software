@@ -10,8 +10,8 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -84,7 +84,7 @@ public class RigidBodyInertiaTest
       inertia = new RigidBodyInertia(frameB, getRandomSymmetricPositiveDefiniteMatrix(), getRandomPositiveNumber());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeKineticCoEnergyNoFrameChange()
    {
@@ -92,7 +92,7 @@ public class RigidBodyInertiaTest
       assertKineticCoEnergyFrameIndependent(twist, inertia);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeKineticCoEnergyWithFrameChange()
    {
@@ -103,7 +103,7 @@ public class RigidBodyInertiaTest
       assertKineticCoEnergyFrameIndependent(twist, inertia);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrame()
    {
@@ -124,7 +124,7 @@ public class RigidBodyInertiaTest
       JUnitTools.assertMatrixEquals(inertiaCheap, inertiaExpensive.getMatrix(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrameKineticCoEnergyConsistency()
    {
@@ -142,7 +142,7 @@ public class RigidBodyInertiaTest
       assertEquals(kineticCoEnergyFrameB, kineticCoEnergyFrameC, epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSantiyIfChangeFramePurelyRotational()
    {

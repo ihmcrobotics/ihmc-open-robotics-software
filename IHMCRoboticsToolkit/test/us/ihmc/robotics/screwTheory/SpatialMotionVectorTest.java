@@ -8,9 +8,9 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Vector3d;
 import java.util.Random;
@@ -69,7 +69,7 @@ public class SpatialMotionVectorTest
     * Test inverting a twist
     */
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testInvert()
    {
@@ -105,7 +105,7 @@ public class SpatialMotionVectorTest
     * Constructing using a matrix
     */
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructUsingMatrix()
    {
@@ -116,7 +116,7 @@ public class SpatialMotionVectorTest
       JUnitTools.assertMatrixEquals(matrix, matrixBack, 0.0);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testConstructUsingMatrixTooSmall()
    {
@@ -124,7 +124,7 @@ public class SpatialMotionVectorTest
       createSpatialMotionVector(frameC, frameD, frameA, matrix);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testConstructUsingMatrixTooBig()
    {
@@ -132,7 +132,7 @@ public class SpatialMotionVectorTest
       createSpatialMotionVector(frameC, frameD, frameA, matrix);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testConstructUsingMatrixTooBig2()
    {
@@ -140,7 +140,7 @@ public class SpatialMotionVectorTest
       createSpatialMotionVector(frameC, frameD, frameA, matrix);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testLimitLinearAndAngularParts()
    {

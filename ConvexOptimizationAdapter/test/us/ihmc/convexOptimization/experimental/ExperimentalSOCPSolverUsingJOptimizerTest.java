@@ -9,10 +9,10 @@ import org.ejml.ops.CommonOps;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ExperimentalSOCPSolverUsingJOptimizerTest
 {
@@ -20,7 +20,7 @@ public class ExperimentalSOCPSolverUsingJOptimizerTest
 
    @Ignore //At time of test writing JOptimizer wasn't working for SOCPs...
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testASimpleSecondOrderConeProblem()
    {
@@ -54,7 +54,7 @@ public class ExperimentalSOCPSolverUsingJOptimizerTest
    
    @Ignore //At time of test writing JOptimizer wasn't working for SOCPs...
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testARotatedSecondOrderConeProblem()
    {

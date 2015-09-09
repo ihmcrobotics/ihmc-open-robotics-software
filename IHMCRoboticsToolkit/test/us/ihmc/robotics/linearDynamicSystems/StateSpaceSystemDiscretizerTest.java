@@ -18,8 +18,8 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.junit.Test;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
 import javax.swing.*;
@@ -33,7 +33,7 @@ public class StateSpaceSystemDiscretizerTest
    private static final boolean DEBUG = false;
    private static final boolean DISPLAY_GRAPHS_AND_SLEEP_FOREVER = false;
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testWithSimpleSpringDamperSystem()
    {
@@ -182,7 +182,7 @@ public class StateSpaceSystemDiscretizerTest
          ThreadTools.sleepForever();
    }
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
 	@Test(timeout = 30000)
    public void testCompareDifferentImplementations()
    {

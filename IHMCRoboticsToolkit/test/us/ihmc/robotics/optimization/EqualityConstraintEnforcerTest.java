@@ -3,8 +3,8 @@ package us.ihmc.robotics.optimization;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,7 +12,7 @@ public class EqualityConstraintEnforcerTest
 {
    //TODO: Add test where JQ doesn't equal zero after constraint due to damped least squares.
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleCaseOne()
    {
@@ -49,7 +49,7 @@ public class EqualityConstraintEnforcerTest
       assertEquals(xSolution.get(1), 3.0, 1e-7);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleCaseTwo()
    {
@@ -85,7 +85,7 @@ public class EqualityConstraintEnforcerTest
       assertEquals(xSolution.get(2), 4.0, 1e-7);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleCaseThree()
    {
@@ -122,7 +122,7 @@ public class EqualityConstraintEnforcerTest
       assertEquals(xSolution.get(2), 4.0, 1e-7);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleOverconstrainedCaseFour()
    {

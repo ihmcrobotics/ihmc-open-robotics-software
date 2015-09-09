@@ -23,8 +23,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoUtilities.time.GlobalTimer;
@@ -83,7 +83,7 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 
-   @EstimatedDuration(duration = 16.1)
+   @DeployableTestMethod(duration = 16.1)
    @Test(timeout = 48271)
    public void testMoveToMinHeight() throws SimulationExceededMaximumTimeException
    {
@@ -97,7 +97,7 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 21.9)
+   @DeployableTestMethod(duration = 21.9)
    @Test(timeout = 65777)
    public void testMoveToMaxHeight() throws SimulationExceededMaximumTimeException
    {
@@ -111,7 +111,7 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 16.4)
+   @DeployableTestMethod(duration = 16.4)
    @Test(timeout = 49241)
    public void testRandomComHeight() throws SimulationExceededMaximumTimeException
    {

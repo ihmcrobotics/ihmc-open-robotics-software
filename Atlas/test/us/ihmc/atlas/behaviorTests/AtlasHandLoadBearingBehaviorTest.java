@@ -9,12 +9,12 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCHandLoadBearingBehaviorTe
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 
-@BambooPlan(planType = {BambooPlanType.Slow})
+@DeployableTestClass(planType = {BambooPlanType.Slow})
 public class AtlasHandLoadBearingBehaviorTest extends DRCHandLoadBearingBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -39,7 +39,7 @@ public class AtlasHandLoadBearingBehaviorTest extends DRCHandLoadBearingBehavior
    }
 
    @Override
-	@EstimatedDuration(duration = 61.3)
+	@DeployableTestMethod(duration = 61.3)
    @Test(timeout = 310000)
    public void testHandLoadBearingBehavior() throws SimulationExceededMaximumTimeException
    {

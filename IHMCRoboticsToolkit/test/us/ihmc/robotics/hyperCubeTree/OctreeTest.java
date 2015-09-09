@@ -2,7 +2,7 @@ package us.ihmc.robotics.hyperCubeTree;
 
 import org.junit.Test;
 import us.ihmc.robotics.geometry.LineSegment3d;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import java.util.List;
@@ -16,7 +16,7 @@ public class OctreeTest
 {
    private static final String[] axes = { "x", "y", "z" };
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSimplePutGetOctree()
    {
@@ -47,7 +47,7 @@ public class OctreeTest
       assertEquals(2, tree.listAllLeaves().size());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void test3DPutGetRemoveTwoLevel()
    {
@@ -88,7 +88,7 @@ public class OctreeTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testOctreeInternalBoarders()
    {
@@ -100,7 +100,7 @@ public class OctreeTest
       assertEquals(2, tree.listAllLeaves().size());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testOctreeLineSearch()
    {
@@ -124,7 +124,7 @@ public class OctreeTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPrint()
    {
@@ -132,7 +132,7 @@ public class OctreeTest
       System.out.println(tree.toString());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPutLidarInOctree()
    {
@@ -149,7 +149,7 @@ public class OctreeTest
       assertEquals(true, tree.get(new double[] { 0.375, 0.0, 0.0 }).getValue());
    }
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
 	@Test(timeout = 30000)
    public void testShootOctreeIntoSphereWithLidarBullets()
    {

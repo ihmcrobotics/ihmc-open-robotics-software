@@ -16,17 +16,17 @@ import org.junit.Test;
 import org.ros.internal.message.Message;
 
 import us.ihmc.communication.packets.IHMCRosApiPacket;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.utilities.io.printing.PrintTools;
 
-@BambooPlan(planType = BambooPlanType.Fast)
+@DeployableTestClass(planType = BambooPlanType.Fast)
 public class ROSMessageConverterTest
 {
    private static final int NUMBER_OF_TIMES_TO_RUN_EACH_PACKET_TYPE = 10000;
 
-	@EstimatedDuration(duration = 23.6)
+	@DeployableTestMethod(duration = 23.6)
    @Test(timeout = 120000)
    public void AllPacketTest()
    {
@@ -53,7 +53,7 @@ public class ROSMessageConverterTest
       assertEquals("Packets not translated correctly: " + packetTranslationResults, 0, packetTranslationResults.keySet().size());
    }
 
-//   @EstimatedDuration(duration = 0.1)
+//   @DeployableTestMethod(duration = 0.1)
 //   @Test(timeout=300000)
 //   public void SinglePacketTest()
 //   {      

@@ -3,7 +3,8 @@ package us.ihmc.robotics.trajectories;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.AfterClass;
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -86,7 +87,7 @@ public class PolynomialTrajectoryTest
       }
    }
    
-   @EstimatedDuration
+   @DeployableTestMethod
    @Test(timeout = 30000)
    public void testSimpleTwoPoints() throws Exception
    {
@@ -95,7 +96,7 @@ public class PolynomialTrajectoryTest
       buildAndValidateTrajectory( positions, 10, 20 );
    }
    
-   @EstimatedDuration
+   @DeployableTestMethod
    @Test(timeout = 30000)
    public void testMultiplePoints() throws Exception
    {
@@ -104,7 +105,7 @@ public class PolynomialTrajectoryTest
       buildAndValidateTrajectory( positions, 10, 20 );
    }
    
-   @EstimatedDuration
+   @DeployableTestMethod
    @Test(timeout = 30000)
    public void testRandomPoints() throws Exception
    {
@@ -125,7 +126,7 @@ public class PolynomialTrajectoryTest
    
 
   // @Ignore
-   @EstimatedDuration
+   @DeployableTestMethod
    @Test(timeout = 3000)
    public void testBumpyResult() throws Exception
    {

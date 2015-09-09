@@ -10,12 +10,12 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCHandPoseBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
+@DeployableTestClass(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
 public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -38,7 +38,7 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
 
    @Override
-	@EstimatedDuration(duration = 26.2)
+	@DeployableTestMethod(duration = 26.2)
    @Test(timeout = 130000)
    public void testAimPalmNormalXaxis() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -47,7 +47,7 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 28.1)
+	@DeployableTestMethod(duration = 28.1)
    @Test(timeout = 140000)
    public void testAimPalmNormalXaxisZupGrasp() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -56,7 +56,7 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 26.1)
+	@DeployableTestMethod(duration = 26.1)
    @Test(timeout = 130000)
    public void testAimPalmNormalYaxis() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -65,7 +65,7 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 26.6)
+	@DeployableTestMethod(duration = 26.6)
    @Test(timeout = 130000)
    public void testAimPalmNormalYaxisZupGrasp() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -74,7 +74,7 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 33.2)
+	@DeployableTestMethod(duration = 33.2)
    @Test(timeout = 170000)
    public void testJointSpaceHandPoseMove() throws SimulationExceededMaximumTimeException
    {
@@ -83,7 +83,7 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 42.2)
+	@DeployableTestMethod(duration = 42.2)
    @Test(timeout = 210000)
    public void testMoveHandToHome() throws SimulationExceededMaximumTimeException
    {
@@ -92,7 +92,7 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 43.4)
+	@DeployableTestMethod(duration = 43.4)
    @Test(timeout = 220000)
    public void testPauseAndResume() throws SimulationExceededMaximumTimeException
    {
@@ -101,7 +101,7 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 34.1)
+	@DeployableTestMethod(duration = 34.1)
    @Test(timeout = 170000)
    public void testStop() throws SimulationExceededMaximumTimeException
    {
@@ -110,7 +110,7 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 57.8)
+	@DeployableTestMethod(duration = 57.8)
    @Test(timeout = 290000)
    public void testTaskSpaceMoveToPoseAchievedInJointSpace() throws SimulationExceededMaximumTimeException
    {
@@ -119,7 +119,7 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 35.2)
+	@DeployableTestMethod(duration = 35.2)
    @Test(timeout = 180000)
    public void testTwoSequentialHandPoses() throws SimulationExceededMaximumTimeException
    {
@@ -128,7 +128,7 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 35.9)
+	@DeployableTestMethod(duration = 35.9)
    @Test(timeout = 180000)
    public void testTwoSimultaneousHandPoseBehaviors() throws SimulationExceededMaximumTimeException
    {
@@ -137,7 +137,7 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    }
    
    @Override
-	@EstimatedDuration(duration = 27.6)
+	@DeployableTestMethod(duration = 27.6)
    @Test(timeout = 140000)
    public void testUnreachableHandPoseMove() throws SimulationExceededMaximumTimeException
    {

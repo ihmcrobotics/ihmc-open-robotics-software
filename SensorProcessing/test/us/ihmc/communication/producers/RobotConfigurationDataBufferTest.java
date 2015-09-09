@@ -15,12 +15,12 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class RobotConfigurationDataBufferTest
 {
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
    @Test(timeout = 30000)
    public void testAddingStuff()
    {
@@ -56,7 +56,7 @@ public abstract class RobotConfigurationDataBufferTest
       }
    }
 
-	@EstimatedDuration(duration = 100.0)
+	@DeployableTestMethod(duration = 100.0)
    @Test(timeout = 300000)
    public void waitForTimestampTest()
    {

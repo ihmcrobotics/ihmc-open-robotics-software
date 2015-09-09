@@ -29,8 +29,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.environments.ContactableButtonRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -111,7 +111,7 @@ public abstract class DRCPushButtonBehaviorTest implements MultiRobotTestInterfa
       return new DRCButtonEnvironment(buttonLocations, buttonPushDirections);
    }
 
-   @EstimatedDuration(duration = 100.0)
+   @DeployableTestMethod(duration = 100.0)
    @Test(timeout = 500000)
 
    public void testPushButton() throws FileNotFoundException, SimulationExceededMaximumTimeException

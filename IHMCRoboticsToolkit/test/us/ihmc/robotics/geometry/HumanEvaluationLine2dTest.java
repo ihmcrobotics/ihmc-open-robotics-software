@@ -18,11 +18,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.UI})
+@DeployableTestClass(planType = {BambooPlanType.Fast, BambooPlanType.UI})
 public class HumanEvaluationLine2dTest
 {
    private final boolean WAIT_FOR_BUTTON_PUSH = false;
@@ -74,7 +74,7 @@ public class HumanEvaluationLine2dTest
    {
    }
 
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
 	@Test(timeout = 30000)
    public void testIsOnLeftSideOfLine()
    {
@@ -120,7 +120,7 @@ public class HumanEvaluationLine2dTest
       testFrame.dispose();
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testIsInFrontOfLine()
    {
@@ -180,7 +180,7 @@ public class HumanEvaluationLine2dTest
       testFrame.dispose();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransform()
    {
@@ -210,7 +210,7 @@ public class HumanEvaluationLine2dTest
       // TODO: test rotation
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testContainsEpsilon()
    {
@@ -242,7 +242,7 @@ public class HumanEvaluationLine2dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetNormalizedVectorCopy()
    {
@@ -258,7 +258,7 @@ public class HumanEvaluationLine2dTest
             vector.y, EPSILON_FOR_EQUALS);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetSlope()
    {
@@ -273,7 +273,7 @@ public class HumanEvaluationLine2dTest
       assertTrue("Point should have been on the line", line2dPointPoint.containsEpsilon(shouldBeOnLineToo, epsilon));
    }
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
 	@Test(timeout = 30000)
    public void testInteriorBisector()
    {
@@ -325,7 +325,7 @@ public class HumanEvaluationLine2dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testNegateDirection()
    {
@@ -344,7 +344,7 @@ public class HumanEvaluationLine2dTest
       assertEquals(directionVectorBefore, someLine.normalizedVector);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testNegateDirectionCopy()
    {
@@ -366,7 +366,7 @@ public class HumanEvaluationLine2dTest
       assertNotSame(someLine, copy);
    }
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
 	@Test(timeout = 30000)
    public void testPerpendicularVector()
    {
@@ -385,7 +385,7 @@ public class HumanEvaluationLine2dTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testZeroLength()
    {

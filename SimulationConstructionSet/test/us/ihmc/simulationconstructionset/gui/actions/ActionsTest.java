@@ -37,12 +37,12 @@ import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.ViewportWindow;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AboutAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.AboutDialogConstructor;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ActionsTest
 {
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testAboutAction()
    {
@@ -62,7 +62,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testAddCameraKeyAction()
    {
@@ -82,7 +82,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testAddKeyPointAction()
    {
@@ -102,7 +102,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testCreateNewGraphWindowAction()
    {
@@ -139,7 +139,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testCreateNewViewportWindowAction()
    {
@@ -175,7 +175,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testCropBufferAction()
    {
@@ -195,7 +195,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testCutBufferAction()
    {
@@ -215,7 +215,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testGotoInPointAction()
    {
@@ -235,7 +235,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testGotoOutPointAction()
    {
@@ -255,7 +255,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testHideShowViewportAction()
    {
@@ -312,7 +312,7 @@ public class ActionsTest
       assertTrue(executorCalled[1]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testNextCameraKeyAction()
    {
@@ -332,7 +332,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testPackBufferAction()
    {
@@ -352,7 +352,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testPlayAction()
    {
@@ -372,7 +372,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testPreviousCameraKeyAction()
    {
@@ -392,7 +392,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testRemoveCameraKeyAction()
    {
@@ -412,7 +412,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSetInPointAction()
    {
@@ -432,7 +432,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSetOutPointAction()
    {
@@ -452,7 +452,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSimulateAction()
    {
@@ -477,7 +477,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testStepBackwardAction()
    {
@@ -497,7 +497,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testStepForwardAction()
    {
@@ -517,7 +517,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
  public void testStopAction()
  {
@@ -537,7 +537,7 @@ public class ActionsTest
     assertTrue(executorCalled[0]);
  }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
  public void testToggleCameraKeyModeAction()
  {
@@ -557,7 +557,7 @@ public class ActionsTest
     assertTrue(executorCalled[0]);
  }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
  public void testToggleKeyPointModeAction()
  {
@@ -612,7 +612,7 @@ public class ActionsTest
 
  }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
  public void testZoomInAction()
  {
@@ -637,7 +637,7 @@ public class ActionsTest
     assertTrue(executorCalled[0]);
  }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
  public void testZoomOutAction()
  {

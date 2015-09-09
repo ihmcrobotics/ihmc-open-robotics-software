@@ -31,7 +31,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.robotics.Axis;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -44,7 +43,8 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
@@ -86,7 +86,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
    private static final boolean DO_ASSERTS = true;
    private static final boolean DO_TWIST_ASSERTS = true;
 
-	@EstimatedDuration(duration = 2.1)
+	@DeployableTestMethod(duration = 2.1)
 	@Test(timeout = 30000)
    public void testSinglePinJoint() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -120,7 +120,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-	@EstimatedDuration(duration = 1.6)
+	@DeployableTestMethod(duration = 1.6)
 	@Test(timeout = 30000)
    public void testTwoPinJoints() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -173,7 +173,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-	@EstimatedDuration(duration = 1.7)
+	@DeployableTestMethod(duration = 1.7)
 	@Test(timeout = 30000)
    public void testSingleFloatingJoint() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -211,7 +211,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-	@EstimatedDuration(duration = 4.1)
+	@DeployableTestMethod(duration = 4.1)
 	@Test(timeout = 30000)
    public void testRandomLinearChainRobot() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

@@ -9,13 +9,12 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCWholeBodyInverseKinematic
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment})
+@DeployableTestClass(planType = {BambooPlanType.InDevelopment})
 public class AtlasWholeBodyInverseKinematicBehaviorTest extends DRCWholeBodyInverseKinematicBehaviorTest
 {
 	private final AtlasRobotModel robotModel;
@@ -36,20 +35,24 @@ public class AtlasWholeBodyInverseKinematicBehaviorTest extends DRCWholeBodyInve
 		return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
 	}
 	
+	/**
+	 * Memory hog. Crashing a lot.
+	 */
 	@Override
 	@Ignore
-	@QuarantinedTest("Memory hog. Crashing a lot.")
-	@EstimatedDuration(duration = 90.0)
+	@DeployableTestMethod(duration = 90.0, quarantined = true)
    @Test(timeout = 300000)
 	public void testRandomRightHandPose() throws SimulationExceededMaximumTimeException
 	{
 	   super.testRandomRightHandPose();
 	}
 	
-	@Override
+	/**
+    * Memory hog. Crashing a lot.
+    */
+   @Override
    @Ignore
-   @QuarantinedTest("Memory hog. Crashing a lot.")
-	@EstimatedDuration(duration = 90.0)
+   @DeployableTestMethod(duration = 90.0, quarantined = true)
    @Test(timeout = 300000)
 	public void testWholeBodyInverseKinematicsMoveToPoseAcheivedInJointSpace() throws SimulationExceededMaximumTimeException
 	{

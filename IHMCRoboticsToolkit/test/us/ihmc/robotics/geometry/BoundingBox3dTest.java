@@ -4,8 +4,8 @@ import org.junit.Test;
 
 import com.github.quickhull3d.Vector3d;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
@@ -20,7 +20,7 @@ public class BoundingBox3dTest
 {
    double epsilon = 0.00001;
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testCreateUsingCenterAndPlusMinusVector()
    {
@@ -36,7 +36,7 @@ public class BoundingBox3dTest
       assertEquals(box.getZMax(), 1.0, 1e-7);
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetMinPoint()
    {
@@ -58,7 +58,7 @@ public class BoundingBox3dTest
       assertEquals(minPoint.getZ(), lowerLeftPoint.getZ(), epsilon);
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetMinPoint_2()
    {
@@ -81,7 +81,7 @@ public class BoundingBox3dTest
       assertEquals(minPoint.getZ(), lowerLeftPoint.getZ(), epsilon);
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testVerifyBounds()
    {
@@ -90,7 +90,7 @@ public class BoundingBox3dTest
       BoundingBox3d boundingBox3d = new BoundingBox3d(4.0, lowerLeftPoint.y, lowerLeftPoint.z, upperRightPoint.x, upperRightPoint.y, upperRightPoint.z);
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testVerifyBounds_2()
    {
@@ -99,7 +99,7 @@ public class BoundingBox3dTest
       BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.x, 4.0, lowerLeftPoint.z, upperRightPoint.x, upperRightPoint.y, upperRightPoint.z);
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testVerifyBounds_3()
    {
@@ -108,7 +108,7 @@ public class BoundingBox3dTest
       BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.x, lowerLeftPoint.y, 10.0, upperRightPoint.x, upperRightPoint.y, upperRightPoint.z);
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetMin()
    {
@@ -125,7 +125,7 @@ public class BoundingBox3dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetMax()
    {
@@ -142,7 +142,7 @@ public class BoundingBox3dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetMaxPoint()
    {
@@ -164,7 +164,7 @@ public class BoundingBox3dTest
       assertEquals(maxPoint.getZ(), upperRightPoint.getZ(), epsilon);
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testGetCenterPointCopy()
    {
@@ -195,7 +195,7 @@ public class BoundingBox3dTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testIsAtOrAbove()
    {
@@ -209,7 +209,7 @@ public class BoundingBox3dTest
       assertFalse(BoundingBox3d.isBoxAtOrAbove(5.0));
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testIsAtOrBelow()
    {
@@ -223,7 +223,7 @@ public class BoundingBox3dTest
       assertFalse(BoundingBox3d.isBoxAtOrBelow(2.69));
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testIsAtOrLeftOf()
    {
@@ -237,7 +237,7 @@ public class BoundingBox3dTest
       assertFalse(BoundingBox3d.isBoxAtOrLeftOf(3.0));
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testIsAtOrRightOf()
    {
@@ -251,7 +251,7 @@ public class BoundingBox3dTest
       assertFalse(BoundingBox3d.isBoxAtOrRightOf(1.0));
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testIsBoxAtOrInFrontOf()
    {
@@ -265,7 +265,7 @@ public class BoundingBox3dTest
       assertFalse(BoundingBox3d.isBoxAtOrInFrontOf(0.6));
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testIsBoxAtOrBehind()
    {
@@ -279,7 +279,7 @@ public class BoundingBox3dTest
       assertFalse(BoundingBox3d.isBoxAtOrBehind(-0.2));
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testIsInside()
    {
@@ -345,7 +345,7 @@ public class BoundingBox3dTest
 
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testPointIntersects()
    {
@@ -387,7 +387,7 @@ public class BoundingBox3dTest
       assertTrue(BoundingBox3dA.intersects(start, end));
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testBoxIntersects()
    {
@@ -433,7 +433,7 @@ public class BoundingBox3dTest
       assertFalse(BoundingBox3dA.intersects(BoundingBox3dG));
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testConstructors()
    {
@@ -468,7 +468,7 @@ public class BoundingBox3dTest
       assertEquals(expectedCenterPoint.getZ(), actualCenterPoint.getZ(), epsilon);
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testUnion()
    {
@@ -492,7 +492,7 @@ public class BoundingBox3dTest
       JUnitTools.assertTuple3dEquals(upperRightPointB, maxPoint, epsilon);
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testToString()
    {

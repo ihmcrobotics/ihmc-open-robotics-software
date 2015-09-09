@@ -8,8 +8,8 @@ import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ThreadToolsTest
 {
@@ -18,7 +18,7 @@ public class ThreadToolsTest
     * does not produce an error, which is the most likely
     * failure mode.
     */
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testRunCommandLineStringedCommmands()
    {
@@ -43,7 +43,7 @@ public class ThreadToolsTest
    /**
     * Tests capturing the output of an echo.
     */
-   @EstimatedDuration(duration = 0.1)
+   @DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testRunCommandLineEchoOutput()
    {

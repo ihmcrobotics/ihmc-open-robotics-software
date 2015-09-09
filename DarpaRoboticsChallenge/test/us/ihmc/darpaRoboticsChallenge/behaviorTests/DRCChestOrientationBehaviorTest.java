@@ -24,8 +24,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -86,7 +86,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 
-	@EstimatedDuration(duration = 16.4)
+	@DeployableTestMethod(duration = 16.4)
    @Test(timeout = 49112)
    public void testSingleRandomChestOrientationMove() throws SimulationExceededMaximumTimeException
    {
@@ -102,7 +102,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 16.1)
+	@DeployableTestMethod(duration = 16.1)
    @Test(timeout = 48244)
    public void testSingleChestPitchOrientationMove() throws SimulationExceededMaximumTimeException
    {
@@ -122,7 +122,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 16.6)
+	@DeployableTestMethod(duration = 16.6)
    @Test(timeout = 49935)
    public void testSingleChestRollOrientationMove() throws SimulationExceededMaximumTimeException
    {
@@ -142,7 +142,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 16.9)
+	@DeployableTestMethod(duration = 16.9)
    @Test(timeout = 50793)
    public void testSingleChestYawOrientationMove() throws SimulationExceededMaximumTimeException
    {
@@ -162,7 +162,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 	
-	@EstimatedDuration(duration = 15)
+	@DeployableTestMethod(duration = 15)
 	@Test(timeout = 50000)
 	public void testTranformOrientation() throws SimulationExceededMaximumTimeException
 	{

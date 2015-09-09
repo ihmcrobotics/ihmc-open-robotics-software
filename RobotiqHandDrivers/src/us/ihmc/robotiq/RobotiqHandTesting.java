@@ -15,8 +15,8 @@ import javax.swing.event.ChangeListener;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.packets.manipulation.ManualHandControlPacket;
-import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 
 public class RobotiqHandTesting
 {

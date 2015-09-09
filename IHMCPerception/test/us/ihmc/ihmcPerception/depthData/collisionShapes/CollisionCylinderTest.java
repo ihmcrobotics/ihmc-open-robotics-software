@@ -10,12 +10,12 @@ import javax.vecmath.Vector2d;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class CollisionCylinderTest
 {
-	@EstimatedDuration(duration = 0.1)
+	@DeployableTestMethod(duration = 0.1)
    @Test(timeout = 30000)
    public void testInsideCylinderPoints()
    {
@@ -36,7 +36,7 @@ public class CollisionCylinderTest
          assertTrue(cylinder.contains(point));
       }
    }
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
    @Test(timeout = 30000)
    public void testOutideCylinderPoints()
    {

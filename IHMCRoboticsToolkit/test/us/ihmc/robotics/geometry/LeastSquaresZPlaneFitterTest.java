@@ -4,9 +4,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 
 public class LeastSquaresZPlaneFitterTest
 {
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleFlatCase()
    {
@@ -37,7 +37,7 @@ public class LeastSquaresZPlaneFitterTest
       JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 1.0), plane3d.getNormalCopy(), 1e-7);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testRandomlyGeneratedPointsOnRandomPlanes()
    {
@@ -106,7 +106,7 @@ public class LeastSquaresZPlaneFitterTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCornerCaseWithOnlyTwoPoints()
    {
@@ -124,7 +124,7 @@ public class LeastSquaresZPlaneFitterTest
       assertTrue(isNaN(plane3d.getNormalCopy()));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCornerCaseWithColinearPoints()
    {
@@ -155,7 +155,7 @@ public class LeastSquaresZPlaneFitterTest
 
    @Ignore("Straight up and down fails with LeastSquaresZPlaneFitter since it assumes equation Ax + By + z + C = 0")
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testStraightUpAndDownPlane()
    {

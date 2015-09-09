@@ -11,14 +11,14 @@ import java.io.PrintStream;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.io.StreamGobbler;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class StreamGobblerTest
 {
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testStreamGobblerWithASingleLine() throws IOException
    {
@@ -46,7 +46,7 @@ public class StreamGobblerTest
       assertEquals(0, inputStream.available());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testStreamGobblerToGobbleMultipleLines() throws IOException
    {

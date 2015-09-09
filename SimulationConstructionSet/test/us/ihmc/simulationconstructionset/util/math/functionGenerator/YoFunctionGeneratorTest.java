@@ -6,7 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class YoFunctionGeneratorTest
@@ -24,7 +24,7 @@ public class YoFunctionGeneratorTest
    {
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testZeroFrequencyDC()
    {
@@ -41,7 +41,7 @@ public class YoFunctionGeneratorTest
 	   }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testOutputContinuityDuringFrequencyChange()
    {
@@ -78,7 +78,7 @@ public class YoFunctionGeneratorTest
 	   assertEquals("|"+output0+"-"+output1+"|<" + tolerance,0,output1-output0, tolerance);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testZeroFrequencySine()
    {
@@ -96,7 +96,7 @@ public class YoFunctionGeneratorTest
 	   }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testTriangle()
    {

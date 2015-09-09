@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
@@ -39,7 +39,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
       epsilon = 1e-7;
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testStartValue()
    {
@@ -48,7 +48,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
       assertEquals(0.0, trajectoryGenerator.getValue(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testEndValue()
    {
@@ -57,7 +57,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
       assertEquals(1.0, trajectoryGenerator.getValue(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testMidValue()
    {
@@ -66,7 +66,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
       assertEquals(0.5, trajectoryGenerator.getValue(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testAfterEndValue()
    {
@@ -75,7 +75,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
       assertEquals(1.0, trajectoryGenerator.getValue(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testIsDone()
    {

@@ -3,7 +3,8 @@ package us.ihmc.robotics.functionApproximation;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.ArrayList;
 
@@ -40,7 +41,7 @@ public class LinearMappingTest
       linearMappingTwoD = null;
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testMapFromInputSpaceToOutputSpace()
    {
@@ -64,7 +65,7 @@ public class LinearMappingTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testMapFromOutputSpaceToInputSpace()
    {

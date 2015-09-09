@@ -4,9 +4,9 @@ import java.util.Random;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 
 public class DRCSimulatedSensorNoiseParameters
 {

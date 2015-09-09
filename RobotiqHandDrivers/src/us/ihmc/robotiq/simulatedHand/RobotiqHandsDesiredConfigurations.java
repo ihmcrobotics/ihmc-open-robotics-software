@@ -2,9 +2,9 @@ package us.ihmc.robotiq.simulatedHand;
 
 import java.util.EnumMap;
 
-import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 
 public class RobotiqHandsDesiredConfigurations
 {

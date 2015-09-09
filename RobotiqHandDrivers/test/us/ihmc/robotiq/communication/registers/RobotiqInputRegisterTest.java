@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public abstract class RobotiqInputRegisterTest
 {
@@ -14,7 +14,7 @@ public abstract class RobotiqInputRegisterTest
    protected abstract byte getValueToSet();
    
    @Test(timeout = 30000)
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    public void testSetRegister()
    {
       RobotiqInputRegister inputRegister = getInputRegister();
@@ -24,7 +24,7 @@ public abstract class RobotiqInputRegisterTest
    }
 
    @Test(timeout = 30000)
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    public void testGetRegister()
    {
       assertEquals(getValueToSet(), getExpectedRegister().getRegisterValue());

@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -34,7 +34,7 @@ public class VirtualChainConstructorFromARobotTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testOneAtZero()
    {
@@ -109,7 +109,7 @@ public class VirtualChainConstructorFromARobotTest
       assertTupleEquals(centerOfMass, comEstimateAtZero);
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testOnePartTwo()
    {
@@ -117,7 +117,7 @@ public class VirtualChainConstructorFromARobotTest
       testRobotInRandomPositions(testRobotOne);
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testTwo()
    {
@@ -125,7 +125,7 @@ public class VirtualChainConstructorFromARobotTest
       testRobotInRandomPositions(testRobotTwo);
    }
 
-	@EstimatedDuration(duration = 0.3)
+	@DeployableTestMethod(duration = 0.3)
 	@Test(timeout = 30000)
    public void testThree()
    {
@@ -133,7 +133,7 @@ public class VirtualChainConstructorFromARobotTest
       testRobotInRandomPositions(testRobotThree);
    }
 
-	@EstimatedDuration(duration = 0.4)
+	@DeployableTestMethod(duration = 0.4)
 	@Test(timeout = 30000)
    public void testFour()
    {

@@ -1,10 +1,10 @@
 package us.ihmc.robotiq.data;
 
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.communication.RobotiqReadResponse;
 import us.ihmc.robotiq.communication.registers.FaultStatusRegister.gFLT;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gACT;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RobotiqHandSensorDizzata implements HandSensorData
 {

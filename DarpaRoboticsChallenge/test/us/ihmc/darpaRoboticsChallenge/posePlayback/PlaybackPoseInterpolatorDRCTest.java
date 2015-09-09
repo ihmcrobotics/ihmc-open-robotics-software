@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceRead
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
@@ -25,7 +25,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
 {
    private static final boolean SHOW_GUI = false;
 
-	@EstimatedDuration(duration = 1.3)
+	@DeployableTestMethod(duration = 1.3)
 	@Test(timeout = 30000)
    public void testMoveElbowExample()
    {
@@ -41,7 +41,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       playASequence(sdfRobot, sequence);
    }
 
-	@EstimatedDuration(duration = 1.6)
+	@DeployableTestMethod(duration = 1.6)
 	@Test(timeout = 30000)
    public void testRandomExample()
    {
@@ -75,7 +75,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
 //      playASequence(sdfRobot, sequence);
 //   }
 
-	@EstimatedDuration(duration = 1.6)
+	@DeployableTestMethod(duration = 1.6)
 	@Test(timeout = 30000)
    public void testLoadingAndPlayingASequence()
    {
@@ -88,7 +88,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       playASequence(sdfRobot, sequence);
    }
 
-	@EstimatedDuration(duration = 1.0)
+	@DeployableTestMethod(duration = 1.0)
 	@Test(timeout = 30000)
    public void testLoadingAndPlayingAnotherSequence()
    {

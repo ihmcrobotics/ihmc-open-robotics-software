@@ -1,8 +1,9 @@
 package us.ihmc.robotics.geometry;
 
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.test.JUnitTools;
+
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -13,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 public class LineSegment3dTest {
 	private static Random ran = new Random(100L);
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void testLenght() {
 		Point3d point0 = new Point3d(1.0,1.0,0.0);
@@ -32,7 +33,7 @@ public class LineSegment3dTest {
 	    assertEquals(3.0, segment.length(),1e-14);
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void testDistanceToPoint() {
 		Point3d point0 = new Point3d(0.0,0.0,0.0);
@@ -69,7 +70,7 @@ public class LineSegment3dTest {
 	    assertEquals(segment.length(), segment.distanceToAPoint(point),1e-14);		    
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void testProjection(){
 		Point3d pointA = new Point3d(1.0,2.0,3.0);
@@ -95,7 +96,7 @@ public class LineSegment3dTest {
 	        
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
 	public void testRandom(){
 		Point3d pointA = new Point3d(1.0,2.0,3.0);
@@ -159,7 +160,7 @@ public class LineSegment3dTest {
 		return returnPoint;
 	}
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void directionTest()
    {

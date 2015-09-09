@@ -11,18 +11,18 @@ import org.ros.internal.message.Message;
 
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter;
 
-@BambooPlan(planType = BambooPlanType.InDevelopment)
+@DeployableTestClass(planType = BambooPlanType.InDevelopment)
 public class GenericROSMessageConverterTest
 {
    private int numberOfTimesToRunEachPacketType = 1000;
 
-	@EstimatedDuration(duration = 10.7)
+	@DeployableTestMethod(duration = 10.7)
    @Test(timeout = 54000)
    public void AllPacketTest()
    {
@@ -53,7 +53,7 @@ public class GenericROSMessageConverterTest
    }
 
 
-//   @EstimatedDuration(duration = 0.05)
+//   @DeployableTestMethod(duration = 0.05)
 //   @Test(timeout=300000)
 //   public void SinglePacketTest()
 //   {

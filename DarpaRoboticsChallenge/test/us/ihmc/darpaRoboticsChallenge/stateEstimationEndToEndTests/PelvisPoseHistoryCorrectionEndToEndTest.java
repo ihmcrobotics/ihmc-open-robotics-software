@@ -58,9 +58,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.time.TimeTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -326,7 +325,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    }
 
-	@EstimatedDuration(duration = 7.8)
+	@DeployableTestMethod(duration = 7.8)
 	@Test(timeout = 39000)
    public void testPelvisCorrectionControllerOutOfTheLoop() throws SimulationExceededMaximumTimeException
    {
@@ -370,7 +369,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    }
 
-	@EstimatedDuration(duration = 12.1)
+	@DeployableTestMethod(duration = 12.1)
 	@Test(timeout = 61000)
    public void testPelvisCorrectionDuringSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
@@ -397,8 +396,12 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       BambooTools.reportTestFinishedMessage();
    }
 
-	@QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
-	@EstimatedDuration(duration = 7.7)
+	/**
+	 * Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.
+	 * 
+	 * @throws SimulationExceededMaximumTimeException
+	 */
+	@DeployableTestMethod(duration = 7.7, quarantined = true)
 	@Test(timeout = 39000)
    public void testBigYawInDoubleSupport() throws SimulationExceededMaximumTimeException
    {
@@ -423,9 +426,12 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       BambooTools.reportTestFinishedMessage();
    }
 
-//	@Ignore
-	@QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
-	@EstimatedDuration(duration = 9.4)
+	/**
+	 * Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.
+	 * 
+	 * @throws SimulationExceededMaximumTimeException
+	 */
+	@DeployableTestMethod(duration = 9.4, quarantined = true)
 	@Test(timeout = 47000)
    public void testBigYawInSingleSupport() throws SimulationExceededMaximumTimeException
    {
@@ -452,9 +458,12 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
    }
 
 	
-//	@Ignore
-	@QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
-	@EstimatedDuration(duration = 8.1)
+	/**
+	 * Work in progress. Fix these tests in order to make Atlas more robust to Localization drift
+	 * 
+	 * @throws SimulationExceededMaximumTimeException
+	 */
+	@DeployableTestMethod(duration = 8.1, quarantined = true)
 	@Test(timeout = 41000)
    public void testLocalizationOffsetOutsideOfFootInSingleSupport() throws SimulationExceededMaximumTimeException
    {
@@ -508,9 +517,13 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
    }
 
-//   @Ignore
-   @QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
-	@EstimatedDuration(duration = 5.0)
+   /**
+    * Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.
+    * 
+    * @throws SimulationExceededMaximumTimeException
+    * @throws ControllerFailureException
+    */
+	@DeployableTestMethod(duration = 5.0, quarantined = true)
 	@Test(timeout = 30000)
    public void testWalkingDuringBigPelvisCorrection() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

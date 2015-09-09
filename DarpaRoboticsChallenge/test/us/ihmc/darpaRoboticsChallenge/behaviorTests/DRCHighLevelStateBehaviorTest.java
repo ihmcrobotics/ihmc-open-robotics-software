@@ -22,8 +22,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
@@ -76,7 +76,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 
-   @EstimatedDuration(duration = 21.5)
+   @DeployableTestMethod(duration = 21.5)
    @Test(timeout = 64580)
    public void testDoNothingBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -121,7 +121,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 21.5)
+   @DeployableTestMethod(duration = 21.5)
    @Test(timeout = 64580)
    public void testRandomState() throws SimulationExceededMaximumTimeException
    {

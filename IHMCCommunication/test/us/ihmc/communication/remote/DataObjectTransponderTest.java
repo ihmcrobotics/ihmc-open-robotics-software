@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 
 public class DataObjectTransponderTest
@@ -69,7 +69,7 @@ public class DataObjectTransponderTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=20000)
    public void testBidirectionalCommunication() throws InterruptedException
    {
@@ -81,7 +81,7 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=200000)
    public void testDoubleBidirectionalCommunication() throws InterruptedException
    {
@@ -95,7 +95,7 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSerializabilityOfInteger() throws IOException
    {
@@ -103,7 +103,7 @@ public class DataObjectTransponderTest
       JUnitTools.assertSerializable(integer);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSerializabilityOfIntPacket() throws IOException
    {
@@ -111,7 +111,7 @@ public class DataObjectTransponderTest
       JUnitTools.assertSerializable(intPacket);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSerializabilityOfStringPacket() throws IOException
    {
@@ -119,7 +119,7 @@ public class DataObjectTransponderTest
       JUnitTools.assertSerializable(packet);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=20000)
    public void testServerClientIntPacketCommunication() throws InterruptedException
    {
@@ -130,7 +130,7 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=20000)
    public void testServerClientStringPacketCommunication() throws InterruptedException
    {
@@ -141,7 +141,7 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=20000)
    public void testTwoPacketTypesAtTheSameTime() throws InterruptedException
    {
@@ -153,7 +153,7 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=20000)
    public void testUnhandledPackets() throws InterruptedException
    {

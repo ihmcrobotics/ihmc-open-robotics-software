@@ -12,8 +12,8 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import java.util.Arrays;
@@ -28,7 +28,7 @@ import static org.junit.Assert.fail;
 public class MatrixToolsTest
 {
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testCompare()
    {
@@ -49,7 +49,7 @@ public class MatrixToolsTest
 
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSetToNaN()
    {
@@ -65,7 +65,7 @@ public class MatrixToolsTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSetToNaNDenseMatrix()
    {
@@ -81,7 +81,7 @@ public class MatrixToolsTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSetToZero()
    {
@@ -97,7 +97,7 @@ public class MatrixToolsTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSetToZeroDenseMatrix()
    {
@@ -113,7 +113,7 @@ public class MatrixToolsTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSetMatrixColumnFromArray()
    {
@@ -128,7 +128,7 @@ public class MatrixToolsTest
 
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSetMatrixColumnFromArrayDenseMatrix()
    {
@@ -143,7 +143,7 @@ public class MatrixToolsTest
 
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSetMatrixFromOneBasedArray()
    {
@@ -158,7 +158,7 @@ public class MatrixToolsTest
 
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSetMatrixFromOneBasedArrayDenseMatrix()
    {
@@ -173,7 +173,7 @@ public class MatrixToolsTest
 
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testDiffMatrixIntIntMatrix()
    {
@@ -189,7 +189,7 @@ public class MatrixToolsTest
 
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testDiffDenseMatrixIntIntDenseMatrix()
    {
@@ -205,7 +205,7 @@ public class MatrixToolsTest
 
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testDiffMatrixMatrix()
    {
@@ -224,7 +224,7 @@ public class MatrixToolsTest
 
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testDiffDoubleArrayMatrix()
    {
@@ -240,7 +240,7 @@ public class MatrixToolsTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testDiffDoubleArrayDenseMatrix()
    {
@@ -256,7 +256,7 @@ public class MatrixToolsTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testSetMatrixBlock()
    {
@@ -272,7 +272,7 @@ public class MatrixToolsTest
       assertTrue(MatrixTools.compare(resA, resB, 1e-8));
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testAddMatrixBlock()
    {
@@ -292,7 +292,7 @@ public class MatrixToolsTest
       assertTrue(MatrixTools.compare(resA, resB, 1e-8));
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testTimes()
    {
@@ -308,7 +308,7 @@ public class MatrixToolsTest
 
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void tranformSe3IntoTransform3D()
    {
@@ -331,7 +331,7 @@ public class MatrixToolsTest
       assertEquals(p0.z, p1.z, 1e-8);
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testPseudoinverse()
    {
@@ -408,7 +408,7 @@ public class MatrixToolsTest
 
    }
 
-   @EstimatedDuration(duration = 0.02)
+   @DeployableTestMethod(duration = 0.02)
    @Test(timeout = 30000)
    public void testRemoveRow()
    {
@@ -440,7 +440,7 @@ public class MatrixToolsTest
       }
    }
 
-   @EstimatedDuration(duration = 0.02)
+   @DeployableTestMethod(duration = 0.02)
    @Test(timeout = 30000)
    public void testRemoveZeroRows()
    {
@@ -484,7 +484,7 @@ public class MatrixToolsTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testInsertFrameTupleIntoEJMLVector()
    {
@@ -503,7 +503,7 @@ public class MatrixToolsTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testExtractFrameTupleFromEJMLVector()
    {
@@ -523,7 +523,7 @@ public class MatrixToolsTest
       }
    }
    
-   @EstimatedDuration(duration = 0.4)
+   @DeployableTestMethod(duration = 0.4)
    @Test(timeout = 30000)
    public void testCheckDenseMatrixDimensions()
    {

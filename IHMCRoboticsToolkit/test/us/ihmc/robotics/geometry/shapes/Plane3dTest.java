@@ -2,8 +2,8 @@ package us.ihmc.robotics.geometry.shapes;
 
 import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.test.JUnitTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 public class Plane3dTest
 {
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void test()
    {
@@ -30,7 +30,7 @@ public class Plane3dTest
       assertTrue(plane2.epsilonEquals(plane, 1e-17));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testEmptyConstructor()
    {
@@ -43,7 +43,7 @@ public class Plane3dTest
       assertTrue(plane.getPointCopy().z == 0.0);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIsOnOrAbove()
    {
@@ -56,7 +56,7 @@ public class Plane3dTest
       assertFalse(plane.isOnOrAbove(Q));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIsOnOrBelow()
    {
@@ -67,7 +67,7 @@ public class Plane3dTest
       assertFalse(plane.isOnOrBelow(Q));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testOrthogonalProjection()
    {
@@ -83,7 +83,7 @@ public class Plane3dTest
       assertTrue(v.equals(plane.orthogonalProjectionCopy(q)));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetZOnPlane()
    {
@@ -106,7 +106,7 @@ public class Plane3dTest
       assertTrue(Double.isNaN(z));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testDistance()
    {
@@ -115,7 +115,7 @@ public class Plane3dTest
       assertEquals(1.0, plane.distance(q), 1e-14);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransform()
    {

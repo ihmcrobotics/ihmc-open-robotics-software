@@ -24,8 +24,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -260,7 +260,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       return debrisTransformBeforeRemove;
    }
    
-	@EstimatedDuration(duration = 30.0)
+	@DeployableTestMethod(duration = 30.0)
    @Test(timeout = 150000)
    public void testRemovingStandingDebris() throws SimulationExceededMaximumTimeException
    {
@@ -304,7 +304,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       BambooTools.reportTestFinishedMessage();
    }
    
-	@EstimatedDuration(duration = 167.2)
+	@DeployableTestMethod(duration = 167.2)
    @Test(timeout = 840000)
    public void testRemovingHorizontalDebris() throws SimulationExceededMaximumTimeException
    {
@@ -347,7 +347,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       BambooTools.reportTestFinishedMessage();
    }
    
-	@EstimatedDuration(duration = 164.2)
+	@DeployableTestMethod(duration = 164.2)
    @Test(timeout = 820000)
    public void testRemovingLeaningOnAWallDebris() throws SimulationExceededMaximumTimeException
    {

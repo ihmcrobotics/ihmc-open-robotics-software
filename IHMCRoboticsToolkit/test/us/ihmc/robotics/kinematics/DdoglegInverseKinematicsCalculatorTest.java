@@ -6,8 +6,8 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.time.TimeTools;
 
 import javax.vecmath.AxisAngle4d;
@@ -32,7 +32,7 @@ public class DdoglegInverseKinematicsCalculatorTest
     * make sure there are no exceptions when you pass in an infeasible desired transform
     */
 
-	@EstimatedDuration(duration = 6.4)
+	@DeployableTestMethod(duration = 6.4)
 	@Test(timeout = 31842)
    public void testInfeasible()
    {
@@ -77,7 +77,7 @@ public class DdoglegInverseKinematicsCalculatorTest
       printStatistics(iterationStatistics, timeStatistics);
    }
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
 	@Test(timeout = 30000)
    public void testForwardThenInverse()
    {

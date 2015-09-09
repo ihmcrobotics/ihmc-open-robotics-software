@@ -7,11 +7,6 @@ import java.util.ArrayList;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
-
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
 import com.joptimizer.functions.PSDQuadraticMultivariateRealFunction;
@@ -22,15 +17,23 @@ import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
 import com.joptimizer.optimizers.OptimizationResponse;
 
-@BambooPlan(planType = {BambooPlanType.Exclude}) // Revisit JOptimzer some day and see if they ever got their act in gear...
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+
+@DeployableTestClass(planType = {BambooPlanType.Exclude}) // Revisit JOptimzer some day and see if they ever got their act in gear...
 public class SimpleJOptimizerTest
 {
    private static final boolean VERBOSE = true;
 
+   /**
+    * JOptimizer has not been properly implemented and very simple tests fail
+    * 
+    * @throws Exception
+    */
    @Ignore
-   @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@DeployableTestMethod(quarantined = true)
+	@Test(timeout = 300000)
    public void testReallyReallySimpleOptimizationProblem() throws Exception
    {
       // Minimize x subject to x = 2
@@ -51,10 +54,14 @@ public class SimpleJOptimizerTest
    }
    
 
+   /**
+    * JOptimizer has not been properly implemented and very simple tests fail
+    * 
+    * @throws Exception
+    */
    @Ignore
-   @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
-	@EstimatedDuration
-	@Test(timeout=300000)
+   @DeployableTestMethod(quarantined = true)
+   @Test(timeout = 300000)
    public void testASimpleRedundantEqualityCase() throws Exception
    {
       // Minimize x subject to x = 2 and x = 2;
@@ -73,10 +80,14 @@ public class SimpleJOptimizerTest
    }
    
 
+   /**
+    * JOptimizer has not been properly implemented and very simple tests fail
+    * 
+    * @throws Exception
+    */
    @Ignore
-   @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
-   @EstimatedDuration
-	@Test(timeout=300000)
+   @DeployableTestMethod(quarantined = true)
+   @Test(timeout = 300000)
    public void testAnotherReallySimpleOptimizationProblem() throws Exception
    {
       // Minimize x subject to -x <= -2  (x >= 2);
@@ -93,7 +104,7 @@ public class SimpleJOptimizerTest
       assertEquals(2.0, solution[0], 1e-5);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 3000)
    public void testReallySimpleOptimizationProblem() throws Exception
    {
@@ -113,7 +124,7 @@ public class SimpleJOptimizerTest
       assertEquals(5.0, solution[0], 1e-5);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 3000)
    public void testLinearCostQuadraticInequalityOptimizationProblem() throws Exception
    {
@@ -138,10 +149,14 @@ public class SimpleJOptimizerTest
       assertEquals(Math.sqrt(2.0), solution[1], 1e-5);
    }
 	
+	/**
+    * JOptimizer has not been properly implemented and very simple tests fail
+    * 
+    * @throws Exception
+    */
    @Ignore
-   @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
-	@EstimatedDuration
-	@Test(timeout=300000)
+   @DeployableTestMethod(quarantined = true)
+   @Test(timeout = 300000)
    public void testLinearCostFullyLinearConstrainedEqualityOptimizationProblem() throws Exception
    {
       // Minimize x subject to x+y=4 and x-y=2. Should return (3,1).
@@ -159,7 +174,7 @@ public class SimpleJOptimizerTest
       assertEquals(1.0, solution[1], 1e-5);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 3000)
    public void testZeroCostLinearEqualityOptimizationProblem() throws Exception
    {
@@ -177,7 +192,7 @@ public class SimpleJOptimizerTest
       assertEquals(4.0, solution[0] + solution[1], 1e-5);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 3000)
    public void testLinearCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
@@ -205,10 +220,14 @@ public class SimpleJOptimizerTest
       assertEquals(1.0/2.0 * (9.0 + Math.sqrt(17.0)), solution[1], 1e-5);
    }
 
+	/**
+    * JOptimizer has not been properly implemented and very simple tests fail
+    * 
+    * @throws Exception
+    */
    @Ignore
-   @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
-	@EstimatedDuration
-	@Test(timeout=300000)
+   @DeployableTestMethod(quarantined = true)
+   @Test(timeout = 300000)
    public void testQuadraticCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
       // Minimize -x^2 subject to x+y=4 and y >= x^2. Answer should be ((-1-sqrt(17))/2, (9+sqrt(17))/2))
@@ -285,10 +304,14 @@ public class SimpleJOptimizerTest
       return solution;
    }
 
+   /**
+    * JOptimizer has not been properly implemented and very simple tests fail
+    * 
+    * @throws Exception
+    */
    @Ignore
-   @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
-	@EstimatedDuration
-	@Test(timeout=300000)
+   @DeployableTestMethod(quarantined = true)
+   @Test(timeout = 300000)
    public void testASecondOrderLorenzConeProblemUsingSquaring() throws Exception
    {
       // Minimize -(x + y) subject to z <= sqrt(18) and sqrt(x^2 + y^2) <= z. Answer should be (3, 3, sqrt(18))
@@ -358,10 +381,14 @@ public class SimpleJOptimizerTest
    }
    
    
+   /**
+    * JOptimizer has not been properly implemented and very simple tests fail
+    * 
+    * @throws Exception
+    */
    @Ignore
-   @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
-	@EstimatedDuration
-	@Test(timeout=300000)
+   @DeployableTestMethod(quarantined = true)
+   @Test(timeout = 300000)
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
    {
       // Minimize -(x + y) subject to z <= sqrt(18) and sqrt(x^2 + y^2) <= z. Answer should be (3, 3, sqrt(18))

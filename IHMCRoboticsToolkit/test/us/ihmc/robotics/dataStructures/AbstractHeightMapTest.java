@@ -3,7 +3,7 @@ package us.ihmc.robotics.dataStructures;
 import org.junit.Test;
 import us.ihmc.robotics.geometry.InclusionFunction;
 import us.ihmc.robotics.geometry.InsufficientDataException;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
 import javax.vecmath.GMatrix;
@@ -39,7 +39,7 @@ public abstract class AbstractHeightMapTest
       super();
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSinglePoint()
    {
@@ -70,7 +70,7 @@ public abstract class AbstractHeightMapTest
       assertSinglePointGridHandlesPoint(x, y, xIndex, yIndex, z);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGettingAreas()
    {
@@ -121,7 +121,7 @@ public abstract class AbstractHeightMapTest
    /* To use test unhandled points include this.
     * 
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testUnhandledPoints()
    {
@@ -184,7 +184,7 @@ public abstract class AbstractHeightMapTest
    }
    public abstract HeightMapWithPoints getHeightMap(double minX, double minY, double maxX, double maxY, double resolution);
 
-	@EstimatedDuration(duration = 2.0)
+	@DeployableTestMethod(duration = 2.0)
 	@Test(timeout = 30000)
    public void rowModificationSynchronizationTest()
    {
@@ -276,7 +276,7 @@ public abstract class AbstractHeightMapTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testKernelMasking() throws InsufficientDataException
    {

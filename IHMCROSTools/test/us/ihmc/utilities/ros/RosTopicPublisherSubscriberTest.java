@@ -9,18 +9,18 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 import std_msgs.String;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.utilities.ros.publisher.RosStringPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
-@BambooPlan(planType=BambooPlanType.Flaky)
+@DeployableTestClass(planType=BambooPlanType.Flaky)
 public class RosTopicPublisherSubscriberTest extends IHMCRosTestWithRosCore
 {
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=2000)
    public void testPubSubMultipleMessages() throws URISyntaxException, InterruptedException
    {

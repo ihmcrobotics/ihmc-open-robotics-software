@@ -3,7 +3,8 @@ package us.ihmc.robotics.geometry;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point2d;
 import java.util.Random;
@@ -67,7 +68,7 @@ public class LineSegment2dTest
       testSegment2 = null;
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testDistancePoint2dLineSegment2d()
    {
@@ -93,7 +94,7 @@ public class LineSegment2dTest
       assertEquals(0.0, line1.distance(point9), delta);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testLineSegment2dDoubleDoubleDoubleDouble()
    {
@@ -133,7 +134,7 @@ public class LineSegment2dTest
       assertTrue(fail);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testLineSegment2dPoint2dArray()
    {
@@ -177,7 +178,7 @@ public class LineSegment2dTest
       assertTrue(fail);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testLineSegment2dPoint2dPoint2d()
    {
@@ -221,7 +222,7 @@ public class LineSegment2dTest
       assertTrue(fail);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testLineSegment2dLineSegment2d()
    {
@@ -247,7 +248,7 @@ public class LineSegment2dTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetEndpointsCopy()
    {
@@ -268,13 +269,13 @@ public class LineSegment2dTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetEndpointsPoint2dPoint2d()
    {
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetEndpoints()
    {
@@ -293,7 +294,7 @@ public class LineSegment2dTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetFirstEndPointCopy()
    {
@@ -310,7 +311,7 @@ public class LineSegment2dTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testGetSecondEndPointCopy()
    {
@@ -326,7 +327,7 @@ public class LineSegment2dTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSetPoint2dPoint2d()
    {
@@ -354,7 +355,7 @@ public class LineSegment2dTest
       assertTrue(throwEx);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSetDoubleDoubleDoubleDouble()
    {
@@ -381,7 +382,7 @@ public class LineSegment2dTest
       assertTrue(throwEx);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSetPoint2dArray()
    {
@@ -410,7 +411,7 @@ public class LineSegment2dTest
       assertTrue(throwEx);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSetLineSegment2d()
    {
@@ -420,7 +421,7 @@ public class LineSegment2dTest
       assertEquals(testSegment2.getSecondEndPointCopy(), testSegment1.getSecondEndPointCopy());
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testFlipDirection()
    {
@@ -430,7 +431,7 @@ public class LineSegment2dTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testMidpoint()
    {
@@ -438,7 +439,7 @@ public class LineSegment2dTest
       assertEquals(midPoint.distance(testSegment1.getFirstEndPointCopy()), midPoint.distance(testSegment1.getSecondEndPointCopy()), 0.001);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testLength()
    {
@@ -460,7 +461,7 @@ public class LineSegment2dTest
 //    fail("Not yet implemented");
 // }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testPercentageAlongLineSegment()
    {
@@ -484,7 +485,7 @@ public class LineSegment2dTest
 //    fail("Not yet implemented");
 // }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionWithLineSegment2d()
    {
@@ -517,7 +518,7 @@ public class LineSegment2dTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionWithLine2d()
    {
@@ -556,7 +557,7 @@ public class LineSegment2dTest
 // }
 //
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testDistancePoint2d()
    {
@@ -641,7 +642,7 @@ public class LineSegment2dTest
 //    fail("Not yet implemented");
 // }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testShiftToLeftAndRightCopy()
    {
@@ -716,7 +717,7 @@ public class LineSegment2dTest
       assertEquals(1.0 + distanceAtFortyFiveDegrees, secondShiftedEndpoint.getY(), epsilon);
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testShiftToLeftAndRight()
    {
@@ -798,7 +799,7 @@ public class LineSegment2dTest
       assertEquals(1.0 + distanceAtFortyFiveDegrees, secondShiftedEndpoint.getY(), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIsPointOnLeftRightSide()
    {
@@ -825,7 +826,7 @@ public class LineSegment2dTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testOrthogonalProjectionCopyPoint2dLineSegment2d()
    {
@@ -873,7 +874,7 @@ public class LineSegment2dTest
 
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionLine2dLineSegment2d()
    {
@@ -903,7 +904,7 @@ public class LineSegment2dTest
       assertEquals(null, line1.intersectionWith(line9));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionLineSegment2dLineSegment2d()
    {

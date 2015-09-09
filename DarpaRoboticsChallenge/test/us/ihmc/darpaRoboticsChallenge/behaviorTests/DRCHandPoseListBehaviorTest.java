@@ -39,8 +39,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataChecker;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.time.GlobalTimer;
@@ -116,7 +116,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       }
    }
 
-	@EstimatedDuration(duration = 93.3)
+	@DeployableTestMethod(duration = 93.3)
    @Test(timeout = 470000)
    public void testRandomJointSpaceMoveAndTaskSpaceMoveBackToHome() throws SimulationExceededMaximumTimeException
    {
@@ -215,7 +215,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
    
-	@EstimatedDuration(duration = 52.5)
+	@DeployableTestMethod(duration = 52.5)
    @Test(timeout = 260000)
    public void testMoveOneRandomJoint20Deg() throws SimulationExceededMaximumTimeException
    {
@@ -257,7 +257,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
    }
 
    
-	@EstimatedDuration(duration = 53.1)
+	@DeployableTestMethod(duration = 53.1)
    @Test(timeout = 270000)
    public void testWristRoll() throws SimulationExceededMaximumTimeException
    {
@@ -297,7 +297,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
       
-	@EstimatedDuration(duration = 82.1)
+	@DeployableTestMethod(duration = 82.1)
    @Test(timeout = 410000)
    public void testMultipleArmPosesOnBothArms() throws SimulationExceededMaximumTimeException
    {

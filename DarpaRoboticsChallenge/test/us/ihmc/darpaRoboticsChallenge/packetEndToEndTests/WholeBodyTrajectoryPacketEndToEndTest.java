@@ -27,8 +27,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
@@ -51,7 +51,7 @@ public abstract class WholeBodyTrajectoryPacketEndToEndTest implements MultiRobo
       simulationTestingParameters.setKeepSCSUp(false);
    }
    
-	@EstimatedDuration(duration = 42.2)
+	@DeployableTestMethod(duration = 42.2)
    @Test(timeout = 210000)
    public void testArmPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -86,7 +86,7 @@ public abstract class WholeBodyTrajectoryPacketEndToEndTest implements MultiRobo
       executePacket(packet);
    }
    
-	@EstimatedDuration(duration = 19.4)
+	@DeployableTestMethod(duration = 19.4)
    @Test(timeout = 97000)
    public void testPelvisHeightPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

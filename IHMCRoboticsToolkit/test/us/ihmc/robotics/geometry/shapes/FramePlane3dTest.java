@@ -6,7 +6,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Vector3d;
 
@@ -19,7 +19,7 @@ public class FramePlane3dTest
 	private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 	private static double epsilon = 1e-14;
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIsOnOrAbove()
    {
@@ -32,7 +32,7 @@ public class FramePlane3dTest
       assertFalse(plane.isOnOrAbove(q));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIsOnOrBelow()
    {
@@ -43,7 +43,7 @@ public class FramePlane3dTest
       assertFalse(plane.isOnOrBelow(q));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testOrthogonalProjection()
    {
@@ -59,7 +59,7 @@ public class FramePlane3dTest
       assertTrue(expectedPoint.epsilonEquals(plane.orthogonalProjectionCopy(point), 1e-14));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testDistance()
    {
@@ -73,7 +73,7 @@ public class FramePlane3dTest
       assertEquals(Math.sqrt(2), plane.distance(point), epsilon);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransform()
    {
@@ -115,7 +115,7 @@ public class FramePlane3dTest
       assertTrue(plane5.epsilonEquals(new FramePlane3d(expectedNormal, expectedPoint), epsilon));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionWithLine()
    {

@@ -36,9 +36,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.tools.MemoryTools;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
@@ -103,7 +102,7 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
       testDRCOverBlocksField(0.4);
    }
 
-	@EstimatedDuration(duration = 488.6)
+	@DeployableTestMethod(duration = 488.6)
 	@Test(timeout = 2400000)
    public void testDRCOverRandomBars() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

@@ -38,12 +38,12 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
-@BambooPlan(planType = BambooPlanType.Fast)
+@DeployableTestClass(planType = BambooPlanType.Fast)
 public class DesiredFootstepTest
 {
    private static final RobotSide robotSide = RobotSide.LEFT;
@@ -67,7 +67,7 @@ public class DesiredFootstepTest
     * @throws IOException 
     */
 
-	@EstimatedDuration(duration = 1.6)
+	@DeployableTestMethod(duration = 1.6)
    @Test(timeout = 30000)
    public void testPassingFootstepData() throws IOException
    {
@@ -102,7 +102,7 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-	@EstimatedDuration(duration = 1.4)
+	@DeployableTestMethod(duration = 1.4)
    @Test(timeout = 30000)
    public void testPassingFootstepPath() throws IOException
    {
@@ -132,7 +132,7 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-	@EstimatedDuration(duration = 1.5)
+	@DeployableTestMethod(duration = 1.5)
    @Test(timeout = 30000)
    public void testPassingPauseCommand() throws IOException
    {
@@ -173,7 +173,7 @@ public class DesiredFootstepTest
       }
    }
 
-	@EstimatedDuration(duration = 2.4)
+	@DeployableTestMethod(duration = 2.4)
    @Test(timeout = 30000)
    public void testPassingFootstepPathAndPauseCommands() throws IOException
    {
@@ -244,7 +244,7 @@ public class DesiredFootstepTest
       }
    }
 
-	@EstimatedDuration(duration = 1.4)
+	@DeployableTestMethod(duration = 1.4)
    @Test(timeout = 30000)
    public void testPassingFootstepStatus() throws IOException
    {

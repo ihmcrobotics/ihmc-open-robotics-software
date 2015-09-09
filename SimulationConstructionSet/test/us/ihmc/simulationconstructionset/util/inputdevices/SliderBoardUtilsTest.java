@@ -7,12 +7,12 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class SliderBoardUtilsTest
 {
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSimpleConversion()
    {
@@ -46,7 +46,7 @@ public class SliderBoardUtilsTest
       assertEquals(intValue, sliderValue);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSimpleSquareConversion()
    {
@@ -97,7 +97,7 @@ public class SliderBoardUtilsTest
       assertEquals(intValue, sliderValue);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testRandomConversions()
    {
@@ -117,7 +117,7 @@ public class SliderBoardUtilsTest
       }
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testRandomConversionsWithHires()
    {

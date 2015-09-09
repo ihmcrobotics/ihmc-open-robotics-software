@@ -2,8 +2,8 @@ package us.ihmc.robotics.kinematics;
 
 import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.Random;
 
@@ -15,7 +15,7 @@ public class TimeStampedTransform3DTest
 
    private static final double EPSILON = 1.0e-15;
 
-   @EstimatedDuration(duration = 0.01)
+   @DeployableTestMethod(duration = 0.01)
    @Test(timeout = 300000)
    public void testEmptyConstructor()
    {
@@ -28,7 +28,7 @@ public class TimeStampedTransform3DTest
       assertTrue("Transform is different from what was expected", expectedTransform.epsilonEquals(toBeTested.getTransform3D(), EPSILON));
    }
 
-   @EstimatedDuration(duration = 0.01)
+   @DeployableTestMethod(duration = 0.01)
    @Test(timeout = 300000)
    public void testConstructor()
    {
@@ -45,7 +45,7 @@ public class TimeStampedTransform3DTest
       assertTrue("TimestampedTransform should only copy the given transform into an internal variable", expectedTransform != toBeTested.getTransform3D());
    }
 
-   @EstimatedDuration(duration = 0.01)
+   @DeployableTestMethod(duration = 0.01)
    @Test(timeout = 300000)
    public void testSetters()
    {
@@ -80,7 +80,7 @@ public class TimeStampedTransform3DTest
       assertTrue("Transform is different from what was expected", expectedTimeStampedTransform.getTransform3D().epsilonEquals(toBeTested.getTransform3D(), EPSILON));
    }
 
-   @EstimatedDuration(duration = 0.01)
+   @DeployableTestMethod(duration = 0.01)
    @Test(timeout = 300000)
    public void testGetTransform()
    {

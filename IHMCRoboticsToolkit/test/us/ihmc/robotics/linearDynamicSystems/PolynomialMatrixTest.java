@@ -5,7 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.robotics.dataStructures.Polynomial;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import static org.junit.Assert.assertTrue;
 
@@ -21,7 +21,7 @@ public class PolynomialMatrixTest
    {
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeDeterminantOne()
    {
@@ -53,7 +53,7 @@ public class PolynomialMatrixTest
       assertTrue(determinant.epsilonEquals(two.times(-1.0), 1e-7));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeDeterminantTwo()
    {
@@ -76,7 +76,7 @@ public class PolynomialMatrixTest
       assertTrue(determinant.epsilonEquals(expectedDeterminant, 1e-7));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeDeterminantAndConstructSIMinusA()
    {
@@ -105,7 +105,7 @@ public class PolynomialMatrixTest
       assertTrue(expectedPolynomial.epsilonEquals(determinant, 1e-7));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeDeterminantAndCofactors()
    {

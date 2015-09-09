@@ -1,7 +1,8 @@
 package us.ihmc.robotics.hyperCubeTree;
 
 import org.junit.Test;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -12,7 +13,7 @@ public class HyperCubeNodeTest
 {
    public static final double eps = 1.0e-6;
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testAssumptions()
    {
@@ -27,7 +28,7 @@ public class HyperCubeNodeTest
       assertTrue(index == 7);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testToIndex()
    {
@@ -44,7 +45,7 @@ public class HyperCubeNodeTest
       assertEquals(2, index);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testToBooleanArray()
    {
@@ -85,7 +86,7 @@ public class HyperCubeNodeTest
       return node;
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testLocatePoint()
    {
@@ -110,7 +111,7 @@ public class HyperCubeNodeTest
       assertEquals(expectation, index);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testIndexing()
    {
@@ -124,7 +125,7 @@ public class HyperCubeNodeTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testWithinBounds()
    {
@@ -137,7 +138,7 @@ public class HyperCubeNodeTest
       assertFalse(HyperCubeNode.withinBounds(bounds, test3));
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSubdivideBounds()
    {
@@ -152,7 +153,7 @@ public class HyperCubeNodeTest
       assertEquals(0.5, subBounds[2].max(), eps);
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testSplit()
    {
@@ -167,7 +168,7 @@ public class HyperCubeNodeTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
 	@Test(timeout = 30000)
    public void testReplaceLeaf()
    {

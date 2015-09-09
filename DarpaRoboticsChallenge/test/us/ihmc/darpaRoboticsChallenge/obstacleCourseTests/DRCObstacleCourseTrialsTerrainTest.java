@@ -16,16 +16,15 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
+import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTestInterface
 {
@@ -57,7 +56,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration(duration = 44.2)
+	@DeployableTestMethod(duration = 44.2)
 	@Test(timeout = 1200000)
    public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
    {
@@ -90,7 +89,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 45.8)
+	@DeployableTestMethod(duration = 45.8)
 	@Test(timeout = 1200000)
    public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
@@ -134,7 +133,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 23.3)
+	@DeployableTestMethod(duration = 23.3)
 	@Test(timeout = 1200000)
    public void testTrialsTerrainZigzagHurdlesScript() throws SimulationExceededMaximumTimeException
    {
@@ -167,7 +166,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 30.0)
+	@DeployableTestMethod(duration = 30.0)
 	@Test(timeout = 1200000)
    public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
@@ -211,7 +210,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 64.7)
+	@DeployableTestMethod(duration = 64.7)
 	@Test(timeout = 1200000)
    public void testTrialsTerrainCinderblockFieldPartOneScript() throws SimulationExceededMaximumTimeException
    {
@@ -243,7 +242,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 83.9)
+	@DeployableTestMethod(duration = 83.9)
 	@Test(timeout = 1200000)
    public void testTrialsTerrainCinderblockFieldPartTwoScript() throws SimulationExceededMaximumTimeException
    {
@@ -275,9 +274,9 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration
 	@Ignore
-	@QuarantinedTest("Need to rerecord")
+	// "Need to rerecord")
+	@DeployableTestMethod(quarantined = true)
    @Test(timeout=1200000)
    public void testTrialsTerrainUpFlatCinderblocksScript() throws SimulationExceededMaximumTimeException
    {
@@ -310,9 +309,13 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration
+	/**
+	 * Need to rerecord
+	 * 
+	 * @throws SimulationExceededMaximumTimeException
+	 */
    @Ignore
-   @QuarantinedTest("Need to rerecord")
+   @DeployableTestMethod(quarantined = true)
    @Test(timeout = 1200000)
    public void testTrialsTerrainUpSlantedCinderblocksScript() throws SimulationExceededMaximumTimeException
    {
@@ -345,7 +348,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 90.6)
+	@DeployableTestMethod(duration = 90.6)
 	@Test(timeout = 1800000)
    public void testTrialsTerrainCinderblockEntireFieldScript() throws SimulationExceededMaximumTimeException
    {
@@ -431,7 +434,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
     * BambooTools.reportTestFinishedMessage(); }
     */
 
-	@EstimatedDuration(duration = 43.4)
+	@DeployableTestMethod(duration = 43.4)
 	@Test(timeout = 1200000)
    public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
    {

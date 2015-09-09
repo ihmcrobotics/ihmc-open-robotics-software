@@ -3,8 +3,8 @@ package us.ihmc.simulationconstructionset.gui;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.robotics.linearDynamicSystems.TransferFunction;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 /**
  * All tests ignored because they are human assisted. They also might not work.
@@ -13,7 +13,7 @@ public class BodePlotConstructorTest
 {
    @Ignore
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSimpleFilter()
    {
@@ -43,7 +43,7 @@ public class BodePlotConstructorTest
       humanAssistedTestFrame.setVisible(false);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    @Ignore
    public void testSingleFreqPhaseShift()
@@ -74,7 +74,7 @@ public class BodePlotConstructorTest
       humanAssistedTestFrame.setVisible(false);
    }
 
-	@EstimatedDuration
+	@DeployableTestMethod
 	@Test(timeout=300000)
    @Ignore
    public void testSecondOrderResponse()
