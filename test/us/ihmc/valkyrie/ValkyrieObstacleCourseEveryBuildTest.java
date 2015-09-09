@@ -29,7 +29,7 @@ public class ValkyrieObstacleCourseEveryBuildTest extends DRCObstacleCourseEvery
     */
    @Ignore
    @Override
-   @DeployableTestMethod(quarantined = true)
+   @DeployableTestMethod
    @Test(timeout = 300000)
    public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException
    {

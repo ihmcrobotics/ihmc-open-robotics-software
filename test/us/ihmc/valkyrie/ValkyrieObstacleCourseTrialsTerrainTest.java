@@ -49,7 +49,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
     */
    @Override
    @Ignore
-   @DeployableTestMethod(estimatedDuration = 20.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 20.0)
    @Test(timeout = 1200000)
    public void testTrialsTerrainUpSlantedCinderblocksScript() throws SimulationExceededMaximumTimeException
    {
@@ -89,7 +89,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
     */
    @Override
    @Ignore
-   @DeployableTestMethod(estimatedDuration = 20.0, quarantined = true)
+   @DeployableTestMethod(estimatedDuration = 20.0)
    @Test(timeout=1200000)
    public void testTrialsTerrainUpFlatCinderblocksScript() throws SimulationExceededMaximumTimeException
    {
