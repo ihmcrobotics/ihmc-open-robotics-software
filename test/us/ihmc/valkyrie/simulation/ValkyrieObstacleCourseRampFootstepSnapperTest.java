@@ -3,11 +3,11 @@ package us.ihmc.valkyrie.simulation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseRampFootstepSnapperTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoB})
+@DeployableTestClass(planType = {BambooPlanType.Fast, BambooPlanType.VideoB})
 public class ValkyrieObstacleCourseRampFootstepSnapperTest extends DRCObstacleCourseRampFootstepSnapperTest
 {
    @Override

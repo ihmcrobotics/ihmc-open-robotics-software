@@ -33,10 +33,10 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.posePlayback.ValkyrieWarmupPoseSequencePacket;
@@ -44,7 +44,7 @@ import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
+@DeployableTestClass(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
 public class ValkyriePosePlaybackDemoTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
@@ -98,7 +98,7 @@ public class ValkyriePosePlaybackDemoTest
       }
    }
 
-	@EstimatedDuration(duration = 6.2)
+	@DeployableTestMethod(duration = 6.2)
 	@Test(timeout = 31000)
    public void testPosePlaybackControllerWithWarmupPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -122,7 +122,7 @@ public class ValkyriePosePlaybackDemoTest
 
    // FlakyUnitTest: Hung on https://bamboo.ihmc.us/browse/RC-ALLGRADLE-VAL-952
 
-	@EstimatedDuration(duration = 25.8)
+	@DeployableTestMethod(duration = 25.8)
 	@Test(timeout = 128797)
    public void testPosePlaybackControllerWithRandomPoses() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -146,7 +146,7 @@ public class ValkyriePosePlaybackDemoTest
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 23.7)
+	@DeployableTestMethod(duration = 23.7)
 	@Test(timeout = 118283)
    public void testPosePlaybackControllerWithRandomPosesWithSomeJointsUncontrolled() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

@@ -5,11 +5,11 @@ import org.junit.Test;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.pushRecovery.DRCPushRecoveryTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
+@DeployableTestClass(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
 public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
 {
    protected DRCRobotModel getRobotModel()
@@ -18,7 +18,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-   @EstimatedDuration(duration = 25.0)
+   @DeployableTestMethod(duration = 25.0)
    @Test(timeout = 163619)
    public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
    {
@@ -27,7 +27,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-	@EstimatedDuration(duration = 26.0)
+	@DeployableTestMethod(duration = 26.0)
    @Test(timeout = 130000)
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
@@ -36,7 +36,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-	@EstimatedDuration(duration = 16.4)
+	@DeployableTestMethod(duration = 16.4)
    @Test(timeout = 82000)
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
@@ -45,7 +45,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-	@EstimatedDuration(duration = 15.7)
+	@DeployableTestMethod(duration = 15.7)
    @Test(timeout = 78000)
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
@@ -54,7 +54,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-	@EstimatedDuration(duration = 17.2)
+	@DeployableTestMethod(duration = 17.2)
    @Test(timeout = 86000)
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
@@ -63,7 +63,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-	@EstimatedDuration(duration = 35.7)
+	@DeployableTestMethod(duration = 35.7)
    @Test(timeout = 180000)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -72,7 +72,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-	@EstimatedDuration(duration = 22.2)
+	@DeployableTestMethod(duration = 22.2)
    @Test(timeout = 110000)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
@@ -81,7 +81,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-	@EstimatedDuration(duration = 14.7)
+	@DeployableTestMethod(duration = 14.7)
    @Test(timeout = 73000)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
@@ -90,7 +90,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-	@EstimatedDuration(duration = 14.4)
+	@DeployableTestMethod(duration = 14.4)
    @Test(timeout = 72000)
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
@@ -99,7 +99,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-	@EstimatedDuration(duration = 14.3)
+	@DeployableTestMethod(duration = 14.3)
    @Test(timeout = 71000)
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -108,7 +108,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-	@EstimatedDuration(duration = 25.2)
+	@DeployableTestMethod(duration = 25.2)
    @Test(timeout = 130000)
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {

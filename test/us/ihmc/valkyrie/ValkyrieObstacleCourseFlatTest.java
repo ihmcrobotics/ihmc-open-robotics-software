@@ -10,13 +10,12 @@ import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseFlatT
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.InDevelopment, BambooPlanType.VideoB})
+@DeployableTestClass(planType = {BambooPlanType.Slow, BambooPlanType.InDevelopment, BambooPlanType.VideoB})
 public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
@@ -52,10 +51,12 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       return 0.1;
    }
    
+   /**
+    * Doesn't work with Valkyrie yet. Need to get it working some day.
+    */
    @Ignore
-   @QuarantinedTest("Doesn't work with Valkyrie yet. Need to get it working some day")
    @Override
-   @EstimatedDuration
+   @DeployableTestMethod(quarantined = true)
    @Test(timeout = 300000)
    public void testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees() throws SimulationExceededMaximumTimeException
    {
@@ -64,7 +65,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 80.0)
+	@DeployableTestMethod(duration = 80.0)
    @Test(timeout = 400000)
    public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
@@ -73,7 +74,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 41.4)
+	@DeployableTestMethod(duration = 41.4)
    @Test(timeout = 210000)
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
    {
@@ -82,7 +83,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 81.9)
+	@DeployableTestMethod(duration = 81.9)
    @Test(timeout = 410000)
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
@@ -91,7 +92,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 51.5)
+	@DeployableTestMethod(duration = 51.5)
    @Test(timeout = 260000)
    public void testWalkingUpToRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
@@ -100,7 +101,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 44.4)
+	@DeployableTestMethod(duration = 44.4)
    @Test(timeout = 220000)
    public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
    {
@@ -109,7 +110,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 18.8)
+	@DeployableTestMethod(duration = 18.8)
    @Test(timeout = 94000)
    public void testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly() throws SimulationExceededMaximumTimeException
    {
@@ -118,7 +119,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 23.4)
+	@DeployableTestMethod(duration = 23.4)
    @Test(timeout = 120000)
    public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
@@ -127,7 +128,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 14.8)
+	@DeployableTestMethod(duration = 14.8)
    @Test(timeout = 74000)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
@@ -136,7 +137,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 43.6)
+	@DeployableTestMethod(duration = 43.6)
    @Test(timeout = 220000)
    public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException
    {
@@ -145,7 +146,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 55.3)
+	@DeployableTestMethod(duration = 55.3)
    @Test(timeout = 280000)
    public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
    {
@@ -154,7 +155,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 26.5)
+	@DeployableTestMethod(duration = 26.5)
    @Test(timeout = 130000)
    public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
    {
@@ -163,7 +164,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 38.9)
+	@DeployableTestMethod(duration = 38.9)
    @Test(timeout = 190000)
    public void testChestControlWithPackets() throws SimulationExceededMaximumTimeException
    {
@@ -172,7 +173,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 31.9)
+	@DeployableTestMethod(duration = 31.9)
    @Test(timeout = 160000)
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
@@ -181,7 +182,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
    
    @Override
-	@EstimatedDuration(duration = 159.1)
+	@DeployableTestMethod(duration = 159.1)
    @Test(timeout = 800000)
    public void testForMemoryLeaks() throws Exception
    {

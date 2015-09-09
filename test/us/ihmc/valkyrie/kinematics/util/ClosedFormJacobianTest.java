@@ -7,15 +7,15 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.agileTesting.BambooPlanType;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobian;
 import us.ihmc.valkyrie.kinematics.transmissions.InterpolatedPushRodTransmission;
 import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
 import us.ihmc.valkyrie.kinematics.util.ClosedFormJacobian;
 
-@BambooPlan(planType = { BambooPlanType.InDevelopment, BambooPlanType.Fast })
+@DeployableTestClass(planType = { BambooPlanType.InDevelopment, BambooPlanType.Fast })
 public class ClosedFormJacobianTest
 {
    private static final boolean DEBUG = false;
@@ -36,7 +36,7 @@ public class ClosedFormJacobianTest
    private double[] m21_matlab_waist = new double[] { -0.045200359335076, -0.042531256340934, -0.047683204352025, -0.040960816370066, -0.039979762559698, -0.051849035209403, -0.043582905494040 };
    private double[] m22_matlab_waist = new double[] { 0.045200359335076, 0.040960816370066, 0.049961508736648, 0.042531256340934, 0.039979762559698, 0.051849035209403, 0.044875400766635 };
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testJacobianMatchesMATLABAnkle()
    {
@@ -56,7 +56,7 @@ public class ClosedFormJacobianTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testJacobianMatchesMATLABWaist()
    {
@@ -76,7 +76,7 @@ public class ClosedFormJacobianTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testEfficientMatchesInefficientJacobianAnkle()
    {
@@ -102,7 +102,7 @@ public class ClosedFormJacobianTest
    // The following test is just for achieving proper renishaw jacobian matrix signs/element indices. It should never be used in Bamboo.
    @Ignore
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 9000)
    public void testEfficientKindaMatchesInefficientJacobianAnkle()
    {
@@ -128,7 +128,7 @@ public class ClosedFormJacobianTest
       }
    }
 
-	@EstimatedDuration(duration = 0.0)
+	@DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void testEfficientMatchesInefficientJacobianWaist()
    {
@@ -151,7 +151,7 @@ public class ClosedFormJacobianTest
       }
    }
 
-   @EstimatedDuration(duration = 1.4)
+   @DeployableTestMethod(duration = 1.4)
    @Test(timeout = 30000)
    public void testEfficentMatchesInterpolatedJacobianAnkle()
    {
@@ -175,7 +175,7 @@ public class ClosedFormJacobianTest
       }
    }
 
-	@EstimatedDuration(duration = 0.2)
+	@DeployableTestMethod(duration = 0.2)
    @Test(timeout = 30000)
    public void testEfficentMatchesInterpolatedJacobianWaist()
    {
@@ -199,7 +199,7 @@ public class ClosedFormJacobianTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void cosineTestAnkles()
    {
@@ -238,7 +238,7 @@ public class ClosedFormJacobianTest
       }
    }
 
-   @EstimatedDuration(duration = 0.0)
+   @DeployableTestMethod(duration = 0.0)
    @Test(timeout = 30000)
    public void consineTestWaist()
    {

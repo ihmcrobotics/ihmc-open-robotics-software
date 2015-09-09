@@ -7,8 +7,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseEveryBuildTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooAnnotations.QuarantinedTest;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ValkyrieObstacleCourseEveryBuildTest extends DRCObstacleCourseEveryBuildTest
 {
@@ -25,10 +24,12 @@ public class ValkyrieObstacleCourseEveryBuildTest extends DRCObstacleCourseEvery
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
+   /**
+    * Doesn't work with Valkyrie yet. Need to get it working some day
+    */
    @Ignore
-   @QuarantinedTest("Doesn't work with Valkyrie yet. Need to get it working some day")
    @Override
-   @EstimatedDuration
+   @DeployableTestMethod(quarantined = true)
    @Test(timeout = 300000)
    public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException
    {
