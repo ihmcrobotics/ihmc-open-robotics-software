@@ -21,7 +21,7 @@ public class InefficientPushrodTransmissionJacobianTest
    private final boolean DEBUG = false;
    private final boolean visualizeAndKeepUp = false;
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInefficientPushrodTransmissionJacobianForAnklesAtZero()
    {
@@ -43,7 +43,7 @@ public class InefficientPushrodTransmissionJacobianTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInefficientPushrodTransmissionJacobianForWaistAtZero()
    {
@@ -64,7 +64,7 @@ public class InefficientPushrodTransmissionJacobianTest
       assertJacobianEquals(jacobian, -0.04520035766057378, 0.04520035766057378, -0.06336787027660956, -0.06336787027660956); // Regression. Need to double check with Solid Works numbers.
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInefficientPushrodTransmissionForAnkles()
    {
@@ -164,7 +164,7 @@ public class InefficientPushrodTransmissionJacobianTest
 
    }
 
-	@DeployableTestMethod(duration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInefficientPushrodTransmissionForWaist()
    {

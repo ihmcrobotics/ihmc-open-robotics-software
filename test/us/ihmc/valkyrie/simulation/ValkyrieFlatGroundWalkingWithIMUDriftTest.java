@@ -28,7 +28,7 @@ public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalk
     * @throws ControllerFailureException
     */
    @Ignore
-	@DeployableTestMethod(duration = 50.3, quarantined = true)
+	@DeployableTestMethod(estimatedDuration = 50.3, quarantined = true)
 	@Test(timeout = 150919)
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

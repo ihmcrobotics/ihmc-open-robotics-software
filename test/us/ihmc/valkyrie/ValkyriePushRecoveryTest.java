@@ -5,11 +5,11 @@ import org.junit.Test;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.pushRecovery.DRCPushRecoveryTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@DeployableTestClass(planType = {BambooPlanType.InDevelopment, BambooPlanType.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Slow})
 public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
 {
    protected DRCRobotModel getRobotModel()
@@ -18,101 +18,101 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
    
    @Override
-   @DeployableTestMethod(duration = 25.0)
+   @DeployableTestMethod(estimatedDuration = 25.0)
    @Test(timeout = 163619)
    public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Fast);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
       super.testControllerFailureKicksIn();
    }
    
    @Override
-	@DeployableTestMethod(duration = 26.0)
+	@DeployableTestMethod(estimatedDuration = 26.0)
    @Test(timeout = 130000)
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testLongBackwardPushWhileStanding();
    }
    
    @Override
-	@DeployableTestMethod(duration = 16.4)
+	@DeployableTestMethod(estimatedDuration = 16.4)
    @Test(timeout = 82000)
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testLongBackwardPushWhileStandingAfterControllerFailureKickedIn();
    }
    
    @Override
-	@DeployableTestMethod(duration = 15.7)
+	@DeployableTestMethod(estimatedDuration = 15.7)
    @Test(timeout = 78000)
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testLongForwardPushWhileStanding();
    }
    
    @Override
-	@DeployableTestMethod(duration = 17.2)
+	@DeployableTestMethod(estimatedDuration = 17.2)
    @Test(timeout = 86000)
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testLongForwardPushWhileStandingAfterControllerFailureKickedIn();
    }
    
    @Override
-	@DeployableTestMethod(duration = 35.7)
+	@DeployableTestMethod(estimatedDuration = 35.7)
    @Test(timeout = 180000)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.Slow);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testPushWhileInSwing();
    }
    
    @Override
-	@DeployableTestMethod(duration = 22.2)
+	@DeployableTestMethod(estimatedDuration = 22.2)
    @Test(timeout = 110000)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testPushWhileInTransfer();
    }
    
    @Override
-	@DeployableTestMethod(duration = 14.7)
+	@DeployableTestMethod(estimatedDuration = 14.7)
    @Test(timeout = 73000)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testPushWhileStanding();
    }
    
    @Override
-	@DeployableTestMethod(duration = 14.4)
+	@DeployableTestMethod(estimatedDuration = 14.4)
    @Test(timeout = 72000)
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testPushWhileStandingRecoveringAfterControllerFailureKickedIn();
    }
    
    @Override
-	@DeployableTestMethod(duration = 14.3)
+	@DeployableTestMethod(estimatedDuration = 14.3)
    @Test(timeout = 71000)
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testRecoveringWithSwingSpeedUpWhileInSwing();
    }
    
    @Override
-	@DeployableTestMethod(duration = 25.2)
+	@DeployableTestMethod(estimatedDuration = 25.2)
    @Test(timeout = 130000)
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
-      BambooPlanType.assumeRunningOnPlanIfRunningOnBamboo(BambooPlanType.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testRecoveryWhileInFlamingoStance();
    }
 }
