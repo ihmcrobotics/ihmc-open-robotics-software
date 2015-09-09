@@ -8,16 +8,16 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.steppr.parameters.BonoRobotModel;
-import us.ihmc.tools.agileTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.tools.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.tools.agileTesting.BambooPlanType;
+import us.ihmc.tools.testing.BambooPlanType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@BambooPlan(planType = BambooPlanType.Slow)
+@DeployableTestClass(planType = BambooPlanType.Slow)
 public class BonoFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private BonoRobotModel robotModel;
 
-	@EstimatedDuration(duration = 104.2)
+	@DeployableTestMethod(duration = 104.2)
 	@Test(timeout = 520000)
    public void testBONOFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
