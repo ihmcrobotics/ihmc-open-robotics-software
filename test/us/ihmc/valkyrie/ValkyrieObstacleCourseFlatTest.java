@@ -56,7 +56,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
     */
    @Ignore
    @Override
-   @DeployableTestMethod(quarantined = true)
+   @DeployableTestMethod
    @Test(timeout = 300000)
    public void testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees() throws SimulationExceededMaximumTimeException
    {
