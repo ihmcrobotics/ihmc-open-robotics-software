@@ -51,12 +51,12 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.stateMachines.State;
-import us.ihmc.yoUtilities.stateMachines.StateChangedListener;
-import us.ihmc.yoUtilities.stateMachines.StateMachineTools;
-import us.ihmc.yoUtilities.stateMachines.StateTransition;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.StateChangedListener;
+import us.ihmc.robotics.stateMachines.StateMachineTools;
+import us.ihmc.robotics.stateMachines.StateTransition;
+import us.ihmc.robotics.stateMachines.StateTransitionAction;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 
 public class ScriptBehavior extends BehaviorInterface
 {

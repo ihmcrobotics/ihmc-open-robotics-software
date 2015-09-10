@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
-import us.ihmc.yoUtilities.stateMachines.State;
+import us.ihmc.robotics.stateMachines.State;
 
 public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
 {

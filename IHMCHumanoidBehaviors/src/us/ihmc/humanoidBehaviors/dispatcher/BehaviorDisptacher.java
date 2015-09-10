@@ -22,11 +22,11 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.stateMachines.StateMachineTools;
+import us.ihmc.robotics.stateMachines.StateTransitionAction;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.stateMachines.StateMachineTools;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
 
 /**
  * The BehaviorDispatcher is used to select the behavior to run and to execute operator's commands as pause, resume, stop, etc.

@@ -17,10 +17,10 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 public class DRCPushRobotController implements RobotController
 {

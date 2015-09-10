@@ -35,7 +35,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 
 public abstract class DRCPushRecoveryTest
 {

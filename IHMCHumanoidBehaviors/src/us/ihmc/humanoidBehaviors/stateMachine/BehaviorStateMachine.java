@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.stateMachine;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.stateMachines.GenericStateMachine;
+import us.ihmc.robotics.stateMachines.GenericStateMachine;
 
 public class BehaviorStateMachine <E extends Enum<E>> extends GenericStateMachine<E, BehaviorStateWrapper<E>>
 {

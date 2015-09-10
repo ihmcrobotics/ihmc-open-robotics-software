@@ -12,12 +12,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.yoUtilities.controllers.PositionController;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
-import us.ihmc.yoUtilities.stateMachines.State;
 
 
 /**

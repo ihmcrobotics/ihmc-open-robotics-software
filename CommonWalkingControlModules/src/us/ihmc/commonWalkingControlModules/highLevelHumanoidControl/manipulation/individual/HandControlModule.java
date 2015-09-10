@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual;
 
-import static us.ihmc.yoUtilities.stateMachines.StateMachineTools.addRequestedStateTransition;
+import static us.ihmc.robotics.stateMachines.StateMachineTools.addRequestedStateTransition;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -49,6 +49,12 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.StateChangedListener;
+import us.ihmc.robotics.stateMachines.StateMachine;
+import us.ihmc.robotics.stateMachines.StateTransition;
+import us.ihmc.robotics.stateMachines.StateTransitionAction;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -68,12 +74,6 @@ import us.ihmc.yoUtilities.math.trajectories.StraightLinePoseTrajectoryGenerator
 import us.ihmc.yoUtilities.math.trajectories.VelocityConstrainedPoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.yoUtilities.stateMachines.State;
-import us.ihmc.yoUtilities.stateMachines.StateChangedListener;
-import us.ihmc.yoUtilities.stateMachines.StateMachine;
-import us.ihmc.yoUtilities.stateMachines.StateTransition;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 public class HandControlModule
 {

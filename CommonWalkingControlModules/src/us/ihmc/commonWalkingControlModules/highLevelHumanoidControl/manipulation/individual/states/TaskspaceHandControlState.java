@@ -12,7 +12,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.yoUtilities.stateMachines.State;
+import us.ihmc.robotics.stateMachines.State;
 
 
 public abstract class TaskspaceHandControlState extends State<HandControlState>
