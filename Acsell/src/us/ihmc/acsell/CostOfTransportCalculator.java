@@ -7,7 +7,7 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.time.TimeTools;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
