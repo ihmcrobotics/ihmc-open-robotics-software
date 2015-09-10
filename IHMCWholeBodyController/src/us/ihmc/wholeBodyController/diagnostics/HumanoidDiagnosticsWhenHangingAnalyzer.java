@@ -14,11 +14,11 @@ import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class HumanoidDiagnosticsWhenHangingAnalyzer
 {

@@ -8,7 +8,7 @@ import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.time.CallFrequencyCalculator;
 
 public class MocapDataClient

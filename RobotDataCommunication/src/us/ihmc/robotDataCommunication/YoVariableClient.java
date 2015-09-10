@@ -7,7 +7,7 @@ import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionDisplay;
 import us.ihmc.multicastLogDataProtocol.control.LogControlClient;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public class YoVariableClient
 {

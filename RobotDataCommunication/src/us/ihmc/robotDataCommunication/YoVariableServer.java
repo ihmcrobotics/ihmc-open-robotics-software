@@ -19,10 +19,10 @@ import us.ihmc.robotDataCommunication.logger.LogSettings;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.util.PeriodicThreadScheduler;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 

@@ -8,8 +8,8 @@ import java.util.concurrent.Future;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class MultiThreadedRobotControllerExecutor implements RobotControllerExecutor
 {

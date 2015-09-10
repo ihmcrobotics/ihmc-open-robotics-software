@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.agileHexapod;
 
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 
 

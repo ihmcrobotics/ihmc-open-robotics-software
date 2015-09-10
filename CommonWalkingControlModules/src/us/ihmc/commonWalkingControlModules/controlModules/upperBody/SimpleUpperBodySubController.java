@@ -9,11 +9,11 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineControlM
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.UpperBodySubController;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.tools.containers.ContainerTools;
 import us.ihmc.yoUtilities.controllers.PIDController;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
 public class SimpleUpperBodySubController implements UpperBodySubController

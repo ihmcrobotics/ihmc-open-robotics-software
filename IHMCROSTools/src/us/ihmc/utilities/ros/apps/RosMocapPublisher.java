@@ -8,10 +8,10 @@ import javax.vecmath.Quat4d;
 import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosTf2Publisher;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.time.CallFrequencyCalculator;
 
 public class RosMocapPublisher implements MocapRigidbodiesListener, Runnable

@@ -14,13 +14,13 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.util.globalParameters.BooleanGlobalParameter;
 import us.ihmc.simulationconstructionset.util.globalParameters.DoubleGlobalParameter;
 import us.ihmc.simulationconstructionset.util.globalParameters.EnumGlobalParameter;
 import us.ihmc.simulationconstructionset.util.globalParameters.GlobalParameter;
 import us.ihmc.simulationconstructionset.util.globalParameters.GlobalParameterChangedListener;
 import us.ihmc.simulationconstructionset.util.globalParameters.IntGlobalParameter;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
 

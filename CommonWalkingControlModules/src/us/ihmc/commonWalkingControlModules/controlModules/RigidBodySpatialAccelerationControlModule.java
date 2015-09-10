@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -14,7 +15,6 @@ import us.ihmc.yoUtilities.controllers.SE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.controllers.YoPositionPIDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 

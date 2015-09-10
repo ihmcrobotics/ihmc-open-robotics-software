@@ -15,6 +15,8 @@ import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.RemovePieceOfDebrisTask;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -22,8 +24,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.utilities.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class RemoveMultipleDebrisBehavior extends BehaviorInterface
 {

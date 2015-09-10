@@ -4,9 +4,9 @@ import java.util.List;
 
 import us.ihmc.communication.packets.sensing.RawIMUPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class DRCSimulatedIMUPublisher implements MultiThreadedRobotControlElement

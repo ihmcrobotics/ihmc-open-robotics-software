@@ -5,13 +5,13 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class HandPoseRelativeToCurrentTask extends BehaviorTask
 {

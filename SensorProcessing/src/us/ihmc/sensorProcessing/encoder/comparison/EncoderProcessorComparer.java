@@ -3,6 +3,9 @@ package us.ihmc.sensorProcessing.encoder.comparison;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.sensorProcessing.encoder.SimulatedEncoder;
 import us.ihmc.sensorProcessing.encoder.processors.EncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.JerryEncoderProcessor;
@@ -17,9 +20,6 @@ import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
 public class EncoderProcessorComparer
 {

@@ -24,13 +24,13 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingController.DiagnosticsWhenHangingState;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerFactory;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidDiagnosticsWhenHangingAnalyzer;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class HumanoidDiagnosticsWhenHangingSimulation
 {

@@ -4,8 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.GlitchFilteredBooleanYoVariable;
 
 /**

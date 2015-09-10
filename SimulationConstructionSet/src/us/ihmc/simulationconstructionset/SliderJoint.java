@@ -4,9 +4,9 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.simulationconstructionset.physics.engine.jerry.SliderJointPhysics;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 /**
  * Title:        Yobotics! Simulation Construction Set<p>

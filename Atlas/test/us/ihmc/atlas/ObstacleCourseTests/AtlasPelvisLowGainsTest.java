@@ -15,9 +15,9 @@ import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 @DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.VideoA})
 public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest

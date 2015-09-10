@@ -14,18 +14,18 @@ import com.jmatio.types.MLInt32;
 import com.jmatio.types.MLInt64;
 import com.jmatio.types.MLNumericArray;
 
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.YoGraph;
 import us.ihmc.utilities.gui.CustomProgressMonitor;
 import us.ihmc.tools.time.TimeTools;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class YoVariableExporter extends YoVariableLogReader
 {

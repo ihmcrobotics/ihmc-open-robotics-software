@@ -20,6 +20,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -33,8 +35,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 
 /**

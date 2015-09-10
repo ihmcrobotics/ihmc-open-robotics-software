@@ -2,13 +2,13 @@ package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
 import javax.vecmath.Matrix3d;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.screwTheory.Momentum;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
 public class GroundReactionMomentControlModule

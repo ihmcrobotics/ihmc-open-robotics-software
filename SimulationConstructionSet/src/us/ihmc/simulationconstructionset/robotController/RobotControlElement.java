@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.robotController;
 
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public interface RobotControlElement
 {

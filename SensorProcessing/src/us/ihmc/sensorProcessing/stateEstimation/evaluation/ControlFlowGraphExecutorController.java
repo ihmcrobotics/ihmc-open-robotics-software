@@ -3,8 +3,8 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 import java.util.ArrayList;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ControlFlowGraphExecutorController implements RobotController
 {

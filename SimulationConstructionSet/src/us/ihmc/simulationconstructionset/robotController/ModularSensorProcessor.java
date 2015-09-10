@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset.robotController;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class ModularSensorProcessor implements SensorProcessor
 {

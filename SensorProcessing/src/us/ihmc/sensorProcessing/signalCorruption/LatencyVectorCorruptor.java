@@ -3,8 +3,8 @@ package us.ihmc.sensorProcessing.signalCorruption;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 
 
 public class LatencyVectorCorruptor implements SignalCorruptor<Tuple3d>

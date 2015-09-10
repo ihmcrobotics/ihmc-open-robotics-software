@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public abstract class OneDegreeOfFreedomJoint extends Joint
 {

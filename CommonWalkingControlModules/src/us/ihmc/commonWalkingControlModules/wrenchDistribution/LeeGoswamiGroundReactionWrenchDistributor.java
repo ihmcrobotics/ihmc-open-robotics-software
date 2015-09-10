@@ -6,11 +6,11 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.LeeGoswamiCoPAndNormalTorqueOptimizer;
 import us.ihmc.commonWalkingControlModules.controlModules.LeeGoswamiForceOptimizer;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReactionWrenchDistributor
 {

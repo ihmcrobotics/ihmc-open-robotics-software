@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset.commands;
 import java.io.File;
 import java.util.ArrayList;
 
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public interface WriteDataCommandExecutor
 {

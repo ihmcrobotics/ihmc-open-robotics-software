@@ -1,12 +1,12 @@
 package us.ihmc.robotDataCommunication;
 
 import us.ihmc.robotDataCommunication.logger.LogSettings;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
 
 public class TestYoVariableConnection

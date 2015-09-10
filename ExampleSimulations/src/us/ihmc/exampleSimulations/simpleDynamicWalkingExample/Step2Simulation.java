@@ -3,8 +3,8 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 import javax.vecmath.Point3d;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 /**

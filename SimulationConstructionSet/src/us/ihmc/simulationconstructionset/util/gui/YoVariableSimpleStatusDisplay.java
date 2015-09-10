@@ -6,8 +6,8 @@ import java.awt.Color;
 
 import javax.swing.JLabel;
 
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.simulationconstructionset.NewDataListener;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 public class YoVariableSimpleStatusDisplay extends JLabel implements NewDataListener
 {

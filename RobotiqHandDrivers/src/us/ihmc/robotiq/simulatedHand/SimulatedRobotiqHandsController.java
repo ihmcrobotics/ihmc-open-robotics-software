@@ -12,6 +12,10 @@ import us.ihmc.communication.packets.dataobjects.HandJointName;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel;
@@ -22,10 +26,6 @@ import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.tools.time.TimeTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SimulatedRobotiqHandsController implements MultiThreadedRobotControlElement

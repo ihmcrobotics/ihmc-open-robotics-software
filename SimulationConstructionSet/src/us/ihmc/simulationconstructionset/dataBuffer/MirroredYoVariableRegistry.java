@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 @SuppressWarnings("rawtypes")
 public class MirroredYoVariableRegistry extends YoVariableRegistry

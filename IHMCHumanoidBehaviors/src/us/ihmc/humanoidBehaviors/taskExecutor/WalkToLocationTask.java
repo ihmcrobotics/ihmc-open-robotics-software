@@ -2,8 +2,8 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior.WalkingOrientation;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class WalkToLocationTask extends BehaviorTask
 {

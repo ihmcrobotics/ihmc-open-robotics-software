@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
@@ -16,7 +17,6 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
 {

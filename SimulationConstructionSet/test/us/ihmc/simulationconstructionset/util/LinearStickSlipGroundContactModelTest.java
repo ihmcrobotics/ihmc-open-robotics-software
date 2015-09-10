@@ -17,10 +17,10 @@ import us.ihmc.simulationconstructionset.GroundContactPointsHolder;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.SlopedPlaneGroundProfile;
 import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class LinearStickSlipGroundContactModelTest
 {

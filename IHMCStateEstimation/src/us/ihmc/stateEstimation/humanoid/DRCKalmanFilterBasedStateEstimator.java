@@ -5,6 +5,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -19,7 +20,6 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.ControlFlowGraphExecu
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.SensorAndEstimatorAssembler;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 

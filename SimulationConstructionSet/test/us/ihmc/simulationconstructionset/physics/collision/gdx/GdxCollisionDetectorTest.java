@@ -1,8 +1,8 @@
 package us.ihmc.simulationconstructionset.physics.collision.gdx;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.SCSCollisionDetectorTest;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 /**
  * @author Peter Abeles

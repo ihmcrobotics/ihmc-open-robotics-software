@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 public class SwitchableFootstepProvider implements FootstepProvider

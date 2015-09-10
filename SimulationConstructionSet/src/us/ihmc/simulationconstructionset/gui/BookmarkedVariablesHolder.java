@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.gui;
 
 import java.util.ArrayList;
 
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public class BookmarkedVariablesHolder
 {

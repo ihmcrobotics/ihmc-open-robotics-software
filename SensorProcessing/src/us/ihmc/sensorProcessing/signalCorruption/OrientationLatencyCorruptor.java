@@ -2,8 +2,8 @@ package us.ihmc.sensorProcessing.signalCorruption;
 
 import javax.vecmath.Matrix3d;
 
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 
 
 public class OrientationLatencyCorruptor implements SignalCorruptor<Matrix3d>

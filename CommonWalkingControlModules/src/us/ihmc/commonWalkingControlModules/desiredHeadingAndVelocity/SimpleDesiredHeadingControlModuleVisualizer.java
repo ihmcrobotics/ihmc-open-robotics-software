@@ -3,10 +3,10 @@ package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
    import java.awt.Color;
 
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;

@@ -4,9 +4,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.utilities.io.DatagramInputStream;
 import us.ihmc.utilities.io.DatagramOutputStream;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class UDPYoWhiteBoard extends DataStreamYoWhiteBoard
 {

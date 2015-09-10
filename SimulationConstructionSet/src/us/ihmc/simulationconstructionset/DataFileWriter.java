@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.zip.GZIPOutputStream;
 
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.jmatio.io.MatFileIncrementalWriter;
 import com.jmatio.types.MLDouble;

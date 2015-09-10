@@ -17,12 +17,13 @@ import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHan
 import us.ihmc.robotDataCommunication.jointState.JointHolder;
 import us.ihmc.robotDataCommunication.jointState.JointHolderFactory;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.RemoteYoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;

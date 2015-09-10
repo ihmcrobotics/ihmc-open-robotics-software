@@ -27,6 +27,8 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.gui.RegularExpression;
@@ -34,8 +36,6 @@ import us.ihmc.simulationconstructionset.robotcommprotocol.CreatedNewRegistriesL
 import us.ihmc.simulationconstructionset.robotcommprotocol.RegistrySettingsChangedListener;
 import us.ihmc.simulationconstructionset.util.SimpleFileReader;
 import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener, FocusListener, CreatedNewRegistriesListener
 {

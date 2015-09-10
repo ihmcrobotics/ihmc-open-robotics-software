@@ -1,7 +1,7 @@
 package us.ihmc.SdfLoader.visualizer;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public interface RobotVisualizer

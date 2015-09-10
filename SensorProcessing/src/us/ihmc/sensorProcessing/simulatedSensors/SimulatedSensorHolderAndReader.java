@@ -12,11 +12,11 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.utilities.maps.ObjectObjectMap;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.tools.time.TimeTools;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
 public class SimulatedSensorHolderAndReader implements SensorReader
 {

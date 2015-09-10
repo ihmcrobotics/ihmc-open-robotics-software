@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyPacketBehavior;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class WholeBodyPacketTask extends BehaviorTask
 {

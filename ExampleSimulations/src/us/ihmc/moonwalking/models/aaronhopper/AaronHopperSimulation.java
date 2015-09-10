@@ -1,9 +1,9 @@
 package us.ihmc.moonwalking.models.aaronhopper;
 
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class AaronHopperSimulation
 {

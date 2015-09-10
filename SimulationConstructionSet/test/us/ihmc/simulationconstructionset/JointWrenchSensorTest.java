@@ -11,10 +11,10 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class JointWrenchSensorTest
 {

@@ -6,13 +6,13 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
 public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchronizerInterface
 {

@@ -8,11 +8,11 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchHost;
 import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationToDispatch;
 import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 
 public class ShowSelectedAction extends AbstractAction implements Runnable

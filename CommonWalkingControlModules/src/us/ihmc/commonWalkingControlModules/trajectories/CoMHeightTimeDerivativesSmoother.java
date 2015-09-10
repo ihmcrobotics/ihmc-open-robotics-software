@@ -7,11 +7,11 @@ import us.ihmc.robotics.linearDynamicSystems.EigenvalueDecomposer;
 import us.ihmc.robotics.linearDynamicSystems.SingleRealMode;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import Jama.Matrix;
 
 public class CoMHeightTimeDerivativesSmoother

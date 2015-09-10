@@ -11,6 +11,7 @@ import org.ejml.ops.RandomMatrices;
 
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -23,7 +24,6 @@ import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.tools.random.RandomTools;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class MomentumSolverComparer
 {

@@ -1,9 +1,9 @@
 package us.ihmc.simulationDispatcherExamples.gaSliderRobotTest;
 
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.SimulationConstructor;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
 public class SliderSimulationConstructor implements SimulationConstructor, SimulationDoneCriterion

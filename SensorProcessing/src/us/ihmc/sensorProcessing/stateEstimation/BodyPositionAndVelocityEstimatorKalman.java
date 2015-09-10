@@ -15,12 +15,12 @@ import us.ihmc.sensorProcessing.sensors.ProcessedBodyPositionSensorsWriteOnlyInt
 import us.ihmc.sensorProcessing.sensors.ProcessedIMUSensorsReadOnlyInterface;
 import us.ihmc.sensorProcessing.sensors.ProcessedTimeSensorsReadOnlyInterface;
 import us.ihmc.simulationconstructionset.robotController.SensorProcessor;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVelocityEstimator
 {

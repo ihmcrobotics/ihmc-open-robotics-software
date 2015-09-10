@@ -10,10 +10,10 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import us.ihmc.robotics.dataStructures.registry.NameSpace;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
 public class VariablesThatShouldMatchListTest

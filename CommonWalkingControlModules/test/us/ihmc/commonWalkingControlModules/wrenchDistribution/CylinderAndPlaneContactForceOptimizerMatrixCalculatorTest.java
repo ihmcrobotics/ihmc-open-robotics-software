@@ -23,6 +23,7 @@ import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchD
 import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.OptimizerCylinderContactModel;
 import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.OptimizerPlaneContactModel;
 import us.ihmc.utilities.exceptions.NoConvergenceException;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -30,7 +31,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 

@@ -2,9 +2,9 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class AimPalmNormalAtPointTask extends BehaviorTask
 {

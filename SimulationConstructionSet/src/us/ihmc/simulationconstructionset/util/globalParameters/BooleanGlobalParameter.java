@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.util.globalParameters;
 
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
 public class BooleanGlobalParameter extends GlobalParameter
 {

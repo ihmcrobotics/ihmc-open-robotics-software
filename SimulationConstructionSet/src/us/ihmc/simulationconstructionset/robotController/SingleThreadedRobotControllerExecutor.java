@@ -1,8 +1,8 @@
 package us.ihmc.simulationconstructionset.robotController;
 
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 class SingleThreadedRobotControllerExecutor implements RobotControllerExecutor
 {

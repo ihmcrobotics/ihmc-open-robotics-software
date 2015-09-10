@@ -10,8 +10,8 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.robotDataCommunication.YoVariablesUpdatedListener;
-import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public class LogControlClient implements NetStateListener
 {

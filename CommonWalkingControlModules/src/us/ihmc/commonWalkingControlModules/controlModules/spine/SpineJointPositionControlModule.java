@@ -5,11 +5,11 @@ import java.util.EnumMap;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.tools.containers.ContainerTools;
 import us.ihmc.yoUtilities.controllers.PIDController;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
 public class SpineJointPositionControlModule implements SpineControlModule

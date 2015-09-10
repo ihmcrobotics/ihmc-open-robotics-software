@@ -2,12 +2,12 @@ package us.ihmc.darpaRoboticsChallenge.frictionCompensation;
 
 import java.util.EnumMap;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionState;
 import us.ihmc.systemIdentification.frictionId.frictionModels.JointFrictionModel;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 

@@ -8,13 +8,13 @@ import java.io.File;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 @DeployableTestClass(targets = {TestPlanTarget.UI})
 public class SimulationConstructionSetMemoryReclamationTest

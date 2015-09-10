@@ -6,8 +6,8 @@ import java.util.List;
 
 import javax.swing.event.ChangeListener;
 
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 
 public class VarListVarPanel extends VarPanel
 {

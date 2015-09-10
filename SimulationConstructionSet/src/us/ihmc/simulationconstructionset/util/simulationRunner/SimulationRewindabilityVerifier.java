@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset.util.simulationRunner;
 
 import java.util.ArrayList;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class SimulationRewindabilityVerifier
 {

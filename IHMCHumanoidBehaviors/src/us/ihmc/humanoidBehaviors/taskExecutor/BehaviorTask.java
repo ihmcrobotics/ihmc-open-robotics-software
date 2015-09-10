@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.utilities.taskExecutor.Task;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public abstract class BehaviorTask implements Task
 {

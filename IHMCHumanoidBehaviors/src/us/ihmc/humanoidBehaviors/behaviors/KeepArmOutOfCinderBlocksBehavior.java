@@ -4,8 +4,8 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class KeepArmOutOfCinderBlocksBehavior extends BehaviorInterface
 {

@@ -7,9 +7,9 @@ import org.junit.Test;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandStatePacket;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class HandStateBehaviorTest
 {

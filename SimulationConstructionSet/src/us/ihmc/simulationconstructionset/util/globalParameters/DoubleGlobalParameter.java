@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.util.globalParameters;
 
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class DoubleGlobalParameter extends GlobalParameter
 {

@@ -30,14 +30,14 @@ import javax.swing.TransferHandler;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 
+import us.ihmc.robotics.dataStructures.registry.NameSpace;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.GraphConfiguration;
 import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
 import us.ihmc.simulationconstructionset.dataBuffer.DataEntryHolder;
 import us.ihmc.simulationconstructionset.dataBuffer.TimeDataHolder;
 import us.ihmc.simulationconstructionset.gui.dialogs.GraphPropertiesDialog;
 import us.ihmc.simulationconstructionset.robotcommprotocol.GUISideCommandListener;
-import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class YoGraph extends JPanel implements MouseListener, MouseMotionListener, KeyListener, FocusListener
 {

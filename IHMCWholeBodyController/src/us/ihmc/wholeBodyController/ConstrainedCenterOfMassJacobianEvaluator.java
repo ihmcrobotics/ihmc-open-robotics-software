@@ -15,6 +15,8 @@ import org.ejml.ops.NormOps;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.robotics.linearAlgebra.ColumnSpaceProjector;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -27,8 +29,6 @@ import us.ihmc.robotics.screwTheory.Momentum;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.google.common.primitives.Doubles;

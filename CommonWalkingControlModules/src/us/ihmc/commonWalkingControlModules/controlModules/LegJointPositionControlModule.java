@@ -14,10 +14,10 @@ import us.ihmc.simulationconstructionset.gui.GUISetterUpper;
 import us.ihmc.simulationconstructionset.gui.GUISetterUpperRegistry;
 import us.ihmc.tools.containers.ContainerTools;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoUtilities.controllers.PIDController;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class LegJointPositionControlModule
 {

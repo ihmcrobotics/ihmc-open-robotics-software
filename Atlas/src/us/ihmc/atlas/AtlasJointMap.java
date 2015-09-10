@@ -33,12 +33,12 @@ import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class AtlasJointMap implements DRCRobotJointMap
 {

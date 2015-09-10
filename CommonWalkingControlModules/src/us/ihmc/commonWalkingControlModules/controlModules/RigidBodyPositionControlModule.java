@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -8,7 +9,6 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.controllers.EuclideanPositionController;
 import us.ihmc.yoUtilities.controllers.YoPositionPIDGains;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 
 public class RigidBodyPositionControlModule

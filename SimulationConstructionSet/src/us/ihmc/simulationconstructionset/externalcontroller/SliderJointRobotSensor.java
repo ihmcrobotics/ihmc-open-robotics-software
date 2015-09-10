@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.externalcontroller;
 
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.SliderJoint;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 class SliderJointRobotSensor implements SensorInterface
 {

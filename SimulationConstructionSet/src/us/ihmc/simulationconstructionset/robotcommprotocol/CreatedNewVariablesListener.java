@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.robotcommprotocol;
 
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 
 
 public interface CreatedNewVariablesListener

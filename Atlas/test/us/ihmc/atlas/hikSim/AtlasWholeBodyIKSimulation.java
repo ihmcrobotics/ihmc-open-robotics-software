@@ -9,12 +9,10 @@ import us.ihmc.atlas.AtlasRobotVersion;
 //import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIKSimController;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-//import us.ihmc.wholeBodyController.WholeBodyControlParameters;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-//import wholeBodyInverseKinematicsController.WholeBodyIkController;
 
 public class AtlasWholeBodyIKSimulation
 {

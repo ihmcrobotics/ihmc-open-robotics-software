@@ -2,10 +2,10 @@ package us.ihmc.simulationconstructionset.whiteBoard;
 
 import java.io.IOException;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
 public class YoWhiteBoardWriteController implements RobotController, OutputProcessor
 {

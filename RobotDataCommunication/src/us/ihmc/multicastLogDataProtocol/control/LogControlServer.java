@@ -10,10 +10,11 @@ import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.robotDataCommunication.VariableChangedMessage;
 import us.ihmc.robotDataCommunication.YoVariableHandShakeBuilder;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class LogControlServer
 {

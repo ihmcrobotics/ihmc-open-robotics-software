@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class FootstepListTask extends BehaviorTask
 {
