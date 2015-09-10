@@ -37,6 +37,8 @@ dependencies {
 	runtime project(':IHMCHumanoidOperatorInterface')
 	compile project(':IHMCRoboticsToolkit')
 	
+	testCompile project(':IHMCUnitTesting')
+	
 	testCompile project(':IHMCUtilities').sourceSets.test.output
 	testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
 	testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
