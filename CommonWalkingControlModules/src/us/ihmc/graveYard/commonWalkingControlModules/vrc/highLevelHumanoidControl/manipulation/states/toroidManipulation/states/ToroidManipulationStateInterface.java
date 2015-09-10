@@ -3,7 +3,7 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContr
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.yoUtilities.stateMachines.State;
+import us.ihmc.robotics.stateMachines.State;
 
 
 public abstract class ToroidManipulationStateInterface<T extends Enum<T>> extends State<T>

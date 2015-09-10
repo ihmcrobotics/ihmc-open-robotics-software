@@ -30,6 +30,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.stateMachines.StateMachine;
+import us.ihmc.robotics.stateMachines.StateTransition;
+import us.ihmc.robotics.stateMachines.StateTransitionAction;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.FilteredDiscreteVelocityYoVariable;
@@ -39,10 +43,6 @@ import us.ihmc.yoUtilities.math.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.ProviderBasedConstantOrientationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.yoUtilities.stateMachines.StateMachine;
-import us.ihmc.yoUtilities.stateMachines.StateTransition;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 
 public class ToroidManipulationStateMachine

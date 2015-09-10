@@ -39,16 +39,16 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.StateMachine;
+import us.ihmc.robotics.stateMachines.StateTransition;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.yoUtilities.stateMachines.State;
-import us.ihmc.yoUtilities.stateMachines.StateMachine;
-import us.ihmc.yoUtilities.stateMachines.StateTransition;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 /**
  * This module can be used to allow a terrain exploration using the foot. 

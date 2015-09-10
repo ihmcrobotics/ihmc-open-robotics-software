@@ -14,12 +14,12 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.OneDoFJointTrajectoryGenerator;
-import us.ihmc.yoUtilities.stateMachines.State;
 
 public class JointSpaceHandControlState extends State<HandControlState>
 {

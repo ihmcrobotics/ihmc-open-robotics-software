@@ -66,18 +66,18 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.StateChangedListener;
+import us.ihmc.robotics.stateMachines.StateMachine;
+import us.ihmc.robotics.stateMachines.StateTransition;
+import us.ihmc.robotics.stateMachines.StateTransitionAction;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
-import us.ihmc.yoUtilities.stateMachines.State;
-import us.ihmc.yoUtilities.stateMachines.StateChangedListener;
-import us.ihmc.yoUtilities.stateMachines.StateMachine;
-import us.ihmc.yoUtilities.stateMachines.StateTransition;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {

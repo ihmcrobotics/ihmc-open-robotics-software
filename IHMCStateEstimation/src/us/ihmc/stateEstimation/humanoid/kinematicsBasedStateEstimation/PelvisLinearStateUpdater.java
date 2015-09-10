@@ -30,6 +30,9 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.StateMachine;
+import us.ihmc.robotics.stateMachines.StateMachineTools;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -40,9 +43,6 @@ import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPosition;
 import us.ihmc.yoUtilities.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
-import us.ihmc.yoUtilities.stateMachines.State;
-import us.ihmc.yoUtilities.stateMachines.StateMachine;
-import us.ihmc.yoUtilities.stateMachines.StateMachineTools;
 
 
 /**

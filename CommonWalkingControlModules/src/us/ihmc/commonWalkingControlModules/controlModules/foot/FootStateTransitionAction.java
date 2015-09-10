@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
+import us.ihmc.robotics.stateMachines.StateTransitionAction;
 
 public class FootStateTransitionAction implements StateTransitionAction
 {

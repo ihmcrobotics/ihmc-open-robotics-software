@@ -22,10 +22,10 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoUtilities.stateMachines.State;
-import us.ihmc.yoUtilities.stateMachines.StateChangedListener;
-import us.ihmc.yoUtilities.stateMachines.StateMachine;
-import us.ihmc.yoUtilities.stateMachines.StateMachineTools;
+import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.StateChangedListener;
+import us.ihmc.robotics.stateMachines.StateMachine;
+import us.ihmc.robotics.stateMachines.StateMachineTools;
 
 public class HighLevelHumanoidControllerManager implements RobotController
 {

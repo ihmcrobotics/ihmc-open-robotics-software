@@ -10,8 +10,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoUtilities.stateMachines.State;
 
 public abstract class AbstractFootControlState extends State<ConstraintType>
 {

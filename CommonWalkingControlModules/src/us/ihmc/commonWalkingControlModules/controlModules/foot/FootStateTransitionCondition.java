@@ -8,7 +8,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 
 public class FootStateTransitionCondition implements StateTransitionCondition
 {

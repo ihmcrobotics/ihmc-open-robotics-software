@@ -5,9 +5,9 @@ import java.awt.Container;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
+import us.ihmc.robotics.stateMachines.StateMachine;
+import us.ihmc.robotics.stateMachines.StateMachinesJPanel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoUtilities.stateMachines.StateMachine;
-import us.ihmc.yoUtilities.stateMachines.StateMachinesJPanel;
 
 public class StateMachineJPanelGuiSetterUpper implements GUISetterUpper
 {

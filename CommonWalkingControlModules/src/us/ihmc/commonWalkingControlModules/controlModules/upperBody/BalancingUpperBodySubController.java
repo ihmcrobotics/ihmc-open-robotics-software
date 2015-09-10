@@ -32,6 +32,10 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.StateMachine;
+import us.ihmc.robotics.stateMachines.StateTransition;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
@@ -39,10 +43,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
-import us.ihmc.yoUtilities.stateMachines.State;
-import us.ihmc.yoUtilities.stateMachines.StateMachine;
-import us.ihmc.yoUtilities.stateMachines.StateTransition;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 
 public class BalancingUpperBodySubController implements UpperBodySubController

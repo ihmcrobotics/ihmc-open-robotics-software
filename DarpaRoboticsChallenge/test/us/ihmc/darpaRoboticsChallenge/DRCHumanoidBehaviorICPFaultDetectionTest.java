@@ -28,8 +28,8 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiRobotTestInterface
 {
