@@ -5,7 +5,7 @@ import java.util.EnumMap;
 
 import us.ihmc.acsell.hardware.AcsellActuator;
 import us.ihmc.acsell.hardware.AcsellJoint;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public abstract class AcsellCommand<ACTUATOR extends Enum<ACTUATOR> & AcsellActuator, JOINT extends Enum<JOINT> & AcsellJoint>
 {

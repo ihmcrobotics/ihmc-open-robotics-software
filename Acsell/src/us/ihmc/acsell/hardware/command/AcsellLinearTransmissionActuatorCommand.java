@@ -1,7 +1,7 @@
 package us.ihmc.acsell.hardware.command;
 
 import us.ihmc.acsell.hardware.AcsellActuator;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class AcsellLinearTransmissionActuatorCommand extends AcsellActuatorCommand
 {

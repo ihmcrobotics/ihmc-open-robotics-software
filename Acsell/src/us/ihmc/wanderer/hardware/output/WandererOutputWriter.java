@@ -16,6 +16,10 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wanderer.hardware.WandererJoint;
@@ -28,10 +32,6 @@ import us.ihmc.wanderer.hardware.configuration.WandererRightAnkleSpringPropertie
 import us.ihmc.wanderer.hardware.configuration.WandererRightHipXSpringProperties;
 import us.ihmc.wanderer.hardware.controllers.WandererStandPrep;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class WandererOutputWriter implements DRCOutputWriter, ControllerStateChangedListener,  ControllerFailureListener
 {

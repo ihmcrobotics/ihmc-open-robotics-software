@@ -3,10 +3,10 @@ package us.ihmc.steppr.hardware.controllers;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.steppr.hardware.StepprJoint;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.tools.time.TimeTools;
 import us.ihmc.yoUtilities.controllers.PDController;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class StepprFunctionGeneratorJointController extends StepprPDJointController
 {

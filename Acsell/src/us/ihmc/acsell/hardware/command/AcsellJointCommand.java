@@ -1,8 +1,8 @@
 package us.ihmc.acsell.hardware.command;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class AcsellJointCommand
 {
