@@ -9,8 +9,8 @@ import javax.vecmath.Vector3f;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.random.RandomTools;
 
 public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
 {

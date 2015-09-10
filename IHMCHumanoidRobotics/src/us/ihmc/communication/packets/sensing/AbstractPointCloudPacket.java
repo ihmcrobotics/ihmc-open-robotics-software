@@ -7,7 +7,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 
 public abstract class AbstractPointCloudPacket extends Packet<AbstractPointCloudPacket>
 {

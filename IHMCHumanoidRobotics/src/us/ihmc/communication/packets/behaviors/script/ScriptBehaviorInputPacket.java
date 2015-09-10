@@ -10,7 +10,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 
 public class ScriptBehaviorInputPacket extends Packet<ScriptBehaviorInputPacket>
 {

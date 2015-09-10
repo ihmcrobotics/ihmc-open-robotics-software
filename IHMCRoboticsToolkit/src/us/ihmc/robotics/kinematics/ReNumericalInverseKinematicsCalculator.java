@@ -9,13 +9,13 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.tools.random.RandomTools;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.posePlayback;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.tools.time.TimeTools;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
 

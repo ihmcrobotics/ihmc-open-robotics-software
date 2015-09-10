@@ -9,11 +9,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class StraightUpThenParabolicCartesianTrajectoryGeneratorTest

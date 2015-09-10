@@ -25,7 +25,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.utilities.exceptions.NoConvergenceException;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;

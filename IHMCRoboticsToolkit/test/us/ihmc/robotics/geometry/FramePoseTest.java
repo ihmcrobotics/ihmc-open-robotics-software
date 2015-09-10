@@ -4,9 +4,9 @@ import org.junit.Test;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationFunctions.ComparisonMode;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 

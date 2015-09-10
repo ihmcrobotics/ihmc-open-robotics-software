@@ -2,8 +2,9 @@ package us.ihmc.robotics.geometry;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point2d;

@@ -1,9 +1,10 @@
 package us.ihmc.robotics.hyperCubeTree;
 
-import us.ihmc.tools.random.RandomTools;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
+import us.ihmc.robotics.random.RandomTools;
+
 import java.util.Random;
 
 public class HyperCubeTreeStaticTestingUtilities

@@ -7,8 +7,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
 
 /**
  * <p>Title: FramePoint2d</p>

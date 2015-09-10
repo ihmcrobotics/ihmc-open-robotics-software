@@ -11,9 +11,9 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;

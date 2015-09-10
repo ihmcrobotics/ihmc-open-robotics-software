@@ -10,13 +10,13 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.utilities.maps.ObjectObjectMap;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.tools.time.TimeTools;
 
 public class SimulatedSensorHolderAndReader implements SensorReader
 {

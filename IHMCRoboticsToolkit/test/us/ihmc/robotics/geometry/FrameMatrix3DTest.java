@@ -2,9 +2,10 @@ package us.ihmc.robotics.geometry;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
+
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Matrix3d;

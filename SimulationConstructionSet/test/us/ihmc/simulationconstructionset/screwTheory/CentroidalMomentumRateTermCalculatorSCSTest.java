@@ -11,8 +11,8 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

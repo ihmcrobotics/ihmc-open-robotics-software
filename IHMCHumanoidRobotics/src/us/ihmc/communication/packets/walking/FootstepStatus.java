@@ -9,7 +9,7 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.tools.DocumentedEnum;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**

@@ -2,7 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.AxisAngle4f;

@@ -41,6 +41,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMap;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -52,7 +53,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.time.TimeTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCSimulationOutputWriter;

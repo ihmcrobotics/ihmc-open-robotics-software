@@ -9,7 +9,7 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.communication.remote.DataObjectServer;
 import us.ihmc.communication.remote.DataObjectTransponder;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class SpoofNetoworkSimulatedLidar

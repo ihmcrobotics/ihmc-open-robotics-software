@@ -20,12 +20,12 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.YoGraph;
 import us.ihmc.utilities.gui.CustomProgressMonitor;
-import us.ihmc.tools.time.TimeTools;
 
 public class YoVariableExporter extends YoVariableLogReader
 {

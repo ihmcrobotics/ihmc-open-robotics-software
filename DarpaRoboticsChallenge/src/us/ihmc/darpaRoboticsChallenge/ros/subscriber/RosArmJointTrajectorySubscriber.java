@@ -10,7 +10,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.JointTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.time.TimeTools;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 public class RosArmJointTrajectorySubscriber extends AbstractRosTopicSubscriber<trajectory_msgs.JointTrajectory>

@@ -14,8 +14,8 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.geometry.TransformTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.random.RandomTools;
 
 @ClassDocumentation("This message commands the controller to move the desired foot to a given location\n"
                                   + "and orientation in world coordinates. This message is not intended to specify footsteps\n"

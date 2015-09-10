@@ -1,4 +1,4 @@
-package us.ihmc.tools.random;
+package us.ihmc.robotics.random;
 
 import Jama.Matrix;
 import org.ejml.data.DenseMatrix64F;

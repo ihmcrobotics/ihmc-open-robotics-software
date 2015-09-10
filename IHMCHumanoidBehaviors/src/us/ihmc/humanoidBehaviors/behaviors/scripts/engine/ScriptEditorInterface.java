@@ -36,7 +36,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 import us.ihmc.communication.ComparableDataObject;
-import us.ihmc.tools.time.TimeTools;
+import us.ihmc.robotics.time.TimeTools;
 
 public class ScriptEditorInterface
 {

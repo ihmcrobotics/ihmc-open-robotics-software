@@ -19,8 +19,8 @@ import us.ihmc.simulationconstructionset.util.environments.ContactableStaticCyli
 import us.ihmc.simulationconstructionset.util.environments.ContactableToroidRobot;
 import us.ihmc.simulationconstructionset.util.environments.PointMassRobot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 
 public class ExampleContactSimulationWithMultipleObjects
 {

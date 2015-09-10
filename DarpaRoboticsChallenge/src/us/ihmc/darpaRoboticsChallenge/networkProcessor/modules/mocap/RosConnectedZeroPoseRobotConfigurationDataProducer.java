@@ -25,13 +25,13 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.utilities.ros.RosTools;
 
 public class RosConnectedZeroPoseRobotConfigurationDataProducer extends AbstractNodeMain

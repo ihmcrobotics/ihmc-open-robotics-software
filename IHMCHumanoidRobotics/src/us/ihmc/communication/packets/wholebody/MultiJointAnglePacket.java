@@ -3,7 +3,7 @@ package us.ihmc.communication.packets.wholebody;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 
 import java.util.Random;
 

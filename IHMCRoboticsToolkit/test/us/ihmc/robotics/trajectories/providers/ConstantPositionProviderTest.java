@@ -2,8 +2,8 @@ package us.ihmc.robotics.trajectories.providers;
 
 import org.junit.Test;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.Random;

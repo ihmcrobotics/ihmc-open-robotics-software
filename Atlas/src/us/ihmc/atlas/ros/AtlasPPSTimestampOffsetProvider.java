@@ -6,7 +6,7 @@ import multisense_ros.StampedPps;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
-import us.ihmc.tools.time.TimeTools;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosTimestampSubscriber;
 

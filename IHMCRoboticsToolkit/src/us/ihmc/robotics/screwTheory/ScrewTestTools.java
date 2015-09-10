@@ -3,8 +3,8 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.RandomMatrices;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
