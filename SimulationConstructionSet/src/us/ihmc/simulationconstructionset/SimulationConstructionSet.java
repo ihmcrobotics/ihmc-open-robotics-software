@@ -448,7 +448,29 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
 
       mySimulation.getDataBuffer().copyValuesThrough(); // Copy the values through so that anything the user changed during initialization will be YoVariablized, and the default on all graphs.
-
+      
+      attachPlaybackListener(new PlaybackListener() {
+		
+		@Override
+		public void indexChanged(int newIndex, double newTime) {
+			
+			
+		}
+		
+		@Override
+		public void stop() {
+			if (myGUI.getGraphics3dAdapter() != null)
+				myGUI.getGraphics3dAdapter().pause();
+			
+		}
+		
+		@Override
+		public void play(double realTimeRate) {
+			if (myGUI.getGraphics3dAdapter() != null)
+				myGUI.getGraphics3dAdapter().play();
+			
+		}
+	});
       if (robots != null)
       {
          for (Robot robot : robots)

@@ -123,6 +123,9 @@ public class JMEGPULidarTestEnviroment implements Graphics3DFrameListener
 
    public void postFrame(double timePerFrame)
    {
+      if (gpuLidarScanBuffer == null)
+         return;
+      
       while (!gpuLidarScanBuffer.isEmpty())
       {
          gpuScan = gpuLidarScanBuffer.poll();

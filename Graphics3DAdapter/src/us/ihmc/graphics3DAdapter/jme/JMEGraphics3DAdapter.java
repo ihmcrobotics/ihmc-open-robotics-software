@@ -161,4 +161,15 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
    {
       return jmeRenderer.createGPULidar(lidarScanParameters);
    }
+
+	@Override
+	public void play() {
+		jmeRenderer.play();
+	}
+	
+	@Override
+	public void pause() {
+		jmeRenderer.pause();
+		
+	}
 }
