@@ -12,4 +12,5 @@ dependencies
     compile project(':IHMCYoUtilities')
     compile project(':SDFLoader')
     compile project(':SensorProcessing')
+    testCompile project(':IHMCUnitTesting')
 }
