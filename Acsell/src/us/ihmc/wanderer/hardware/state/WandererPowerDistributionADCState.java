@@ -3,10 +3,10 @@ package us.ihmc.wanderer.hardware.state;
 import java.nio.ByteBuffer;
 
 import us.ihmc.acsell.hardware.state.AcsellPowerDistributionADCState;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.wanderer.parameters.WandererRobotModel;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 public class WandererPowerDistributionADCState implements AcsellPowerDistributionADCState

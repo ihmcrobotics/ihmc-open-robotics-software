@@ -26,10 +26,10 @@ import us.ihmc.acsell.hardware.state.slowSensors.RawPhaseCurrentADTicks;
 import us.ihmc.acsell.hardware.state.slowSensors.SensorMCUTime;
 import us.ihmc.acsell.hardware.state.slowSensors.StatorHallSwitches;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.wanderer.hardware.WandererActuator;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
 public class AcsellActuatorState
 {

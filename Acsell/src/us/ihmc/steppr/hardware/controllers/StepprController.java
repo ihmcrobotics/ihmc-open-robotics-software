@@ -1,7 +1,7 @@
 package us.ihmc.steppr.hardware.controllers;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public interface StepprController
 {

@@ -13,12 +13,12 @@ import us.ihmc.acsell.hardware.configuration.AcsellRobot;
 import us.ihmc.acsell.hardware.configuration.StrainGaugeInformation;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.steppr.hardware.state.StepprPowerDistributionADCState;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wanderer.hardware.state.WandererPowerDistributionADCState;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
 public abstract class AcsellState<ACTUATOR extends Enum<ACTUATOR> & AcsellActuator, JOINT extends Enum<JOINT> & AcsellJoint>
 {

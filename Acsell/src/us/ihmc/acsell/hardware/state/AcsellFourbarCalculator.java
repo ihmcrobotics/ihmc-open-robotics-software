@@ -3,10 +3,10 @@ package us.ihmc.acsell.hardware.state;
 import us.ihmc.acsell.fourbar.FourbarCalculator;
 import us.ihmc.acsell.fourbar.FourbarProperties;
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class AcsellFourbarCalculator extends FourbarCalculator {
 

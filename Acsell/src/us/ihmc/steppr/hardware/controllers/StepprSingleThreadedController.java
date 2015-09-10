@@ -17,6 +17,7 @@ import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeMemory;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
@@ -29,7 +30,6 @@ import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class StepprSingleThreadedController extends RealtimeThread
 {
