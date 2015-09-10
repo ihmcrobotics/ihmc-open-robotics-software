@@ -8,14 +8,14 @@ import org.junit.Test;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingWithIMUDriftTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.sensorProcessing.signalCorruption.OrientationConstantAcceleratingYawDriftCorruptor;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalkingWithIMUDriftTest
 {

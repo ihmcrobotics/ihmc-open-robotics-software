@@ -5,10 +5,10 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 
+import us.ihmc.robotics.dataStructures.registry.NameSpaceRenamer;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoUtilities.dataStructure.registry.NameSpaceRenamer;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ValkyrieDataFileNamespaceRenamer
 {

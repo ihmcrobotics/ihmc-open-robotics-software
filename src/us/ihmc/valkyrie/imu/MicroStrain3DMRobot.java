@@ -15,10 +15,10 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 @SuppressWarnings("serial")
 public class MicroStrain3DMRobot extends Robot

@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -24,7 +25,6 @@ import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ValkyrieWalkingControllerParameters implements WalkingControllerParameters
 {

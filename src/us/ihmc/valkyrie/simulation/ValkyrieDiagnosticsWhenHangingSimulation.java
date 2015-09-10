@@ -16,6 +16,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.virtualHoist.VirtualHoist;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
@@ -25,7 +26,6 @@ import us.ihmc.valkyrie.kinematics.transmissions.InefficientPushRodTransmission;
 import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingController;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class ValkyrieDiagnosticsWhenHangingSimulation
 {

@@ -18,13 +18,13 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ValkyrieJointMap implements DRCRobotJointMap
 {
