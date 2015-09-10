@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
 import us.ihmc.simulationconstructionset.gui.dialogs.VarPropertiesDialog;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class YoVariableDoubleClickListener implements DoubleClickListener
 {

@@ -2,10 +2,10 @@ package us.ihmc.simulationconstructionset.robotController;
 
 import java.util.ArrayList;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
 
 public abstract class AbstractThreadedRobotController implements RobotController

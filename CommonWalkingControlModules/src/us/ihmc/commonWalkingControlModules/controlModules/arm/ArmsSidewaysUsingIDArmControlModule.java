@@ -4,11 +4,11 @@ import java.util.EnumMap;
 
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ArmsSidewaysUsingIDArmControlModule extends IDArmControlModule
 {

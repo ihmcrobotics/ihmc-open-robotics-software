@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.YoVariableHolder;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 
 public interface DataBufferListener

@@ -6,9 +6,9 @@ import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizerStateListener;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;

@@ -6,6 +6,7 @@ import java.util.Map;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.controllers.GainCalculator;
@@ -13,7 +14,6 @@ import us.ihmc.yoUtilities.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 
 public class AtlasArmControllerParameters implements ArmControllerParameters

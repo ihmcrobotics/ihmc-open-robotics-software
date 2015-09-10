@@ -10,12 +10,12 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotics.dataStructures.YoVariableHolder;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.frames.YoFrameVariableNameTools;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;

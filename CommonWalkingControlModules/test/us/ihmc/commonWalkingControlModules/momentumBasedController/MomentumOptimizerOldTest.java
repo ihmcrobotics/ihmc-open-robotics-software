@@ -15,6 +15,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -29,7 +30,6 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class MomentumOptimizerOldTest
 {

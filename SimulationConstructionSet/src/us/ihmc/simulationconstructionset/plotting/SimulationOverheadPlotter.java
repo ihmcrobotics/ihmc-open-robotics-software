@@ -12,8 +12,8 @@ import javax.swing.JPanel;
 
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterLegendPanel;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.PlaybackListener;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class SimulationOverheadPlotter implements PlaybackListener
 {

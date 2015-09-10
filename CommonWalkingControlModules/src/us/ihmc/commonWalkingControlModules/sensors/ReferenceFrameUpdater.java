@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.robotController.SensorProcessor;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ReferenceFrameUpdater implements SensorProcessor
 {

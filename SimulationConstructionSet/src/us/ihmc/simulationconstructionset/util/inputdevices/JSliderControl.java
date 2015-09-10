@@ -3,10 +3,10 @@ package us.ihmc.simulationconstructionset.util.inputdevices;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl.SliderType;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class JSliderControl extends JSlider implements CloseableAndDisposable
 {

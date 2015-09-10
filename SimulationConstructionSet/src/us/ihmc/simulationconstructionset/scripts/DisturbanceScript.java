@@ -3,9 +3,9 @@ package us.ihmc.simulationconstructionset.scripts;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.simulationconstructionset.util.perturbance.ForcePerturbable;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
 public class DisturbanceScript implements Script
 {

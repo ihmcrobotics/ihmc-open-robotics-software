@@ -4,8 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class Constrained5thOrderPolyForSwingTrajectoryTest
 {

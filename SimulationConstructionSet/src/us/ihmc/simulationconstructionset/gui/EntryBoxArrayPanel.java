@@ -10,8 +10,8 @@ import java.util.TimerTask;
 
 import javax.swing.JPanel;
 
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 
 public class EntryBoxArrayPanel extends JPanel

@@ -2,11 +2,11 @@ package us.ihmc.exampleSimulations.exampleContact;
 
 import java.util.ArrayList;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.ground.SimpleStickSlipContactModel;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ContactController implements RobotController
 {

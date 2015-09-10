@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controllers;
 
-import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 /**
  * This class produces a square dither signal in the case were the controller frequency is close to the dither

@@ -4,9 +4,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.utilities.exceptions.NoConvergenceException;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ConstrainedQPSolverTest
 {

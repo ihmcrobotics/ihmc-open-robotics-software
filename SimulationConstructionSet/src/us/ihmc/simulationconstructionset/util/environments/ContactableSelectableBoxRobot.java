@@ -26,11 +26,11 @@ import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.shapes.Box3d.FaceName;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.shapes.FrameBox3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 

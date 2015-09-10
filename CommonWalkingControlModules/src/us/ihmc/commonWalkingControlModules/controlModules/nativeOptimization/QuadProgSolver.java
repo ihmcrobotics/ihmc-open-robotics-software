@@ -6,8 +6,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.QuadProgWrapper;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.utilities.exceptions.NoConvergenceException;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 //~--- JDK imports ------------------------------------------------------------
 

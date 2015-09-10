@@ -15,8 +15,8 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 
 public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionListener

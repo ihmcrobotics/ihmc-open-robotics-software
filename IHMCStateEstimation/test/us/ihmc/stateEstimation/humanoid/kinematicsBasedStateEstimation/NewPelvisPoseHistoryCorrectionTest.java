@@ -16,6 +16,8 @@ import us.ihmc.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
@@ -32,8 +34,6 @@ import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 

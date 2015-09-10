@@ -16,7 +16,7 @@ import javax.swing.plaf.ColorUIResource;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
 
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class NameSpaceHierarchyNodeRenderer extends JPanel implements TreeCellRenderer
 {

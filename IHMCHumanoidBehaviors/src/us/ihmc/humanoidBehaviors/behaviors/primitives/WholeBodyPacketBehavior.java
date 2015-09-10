@@ -6,11 +6,11 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.WholeBodyIKPacketCreator;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class WholeBodyPacketBehavior extends BehaviorInterface
 {

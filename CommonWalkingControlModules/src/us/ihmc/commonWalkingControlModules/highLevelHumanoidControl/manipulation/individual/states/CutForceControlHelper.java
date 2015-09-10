@@ -4,9 +4,9 @@ import java.util.Random;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 public class CutForceControlHelper {

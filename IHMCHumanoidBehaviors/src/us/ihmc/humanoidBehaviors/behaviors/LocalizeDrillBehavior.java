@@ -18,8 +18,8 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import boofcv.struct.calib.IntrinsicParameters;
 
 public class LocalizeDrillBehavior extends BehaviorInterface implements VideoStreamer

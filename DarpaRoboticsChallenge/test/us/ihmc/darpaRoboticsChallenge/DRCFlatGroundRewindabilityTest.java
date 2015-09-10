@@ -15,6 +15,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -28,7 +29,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifferenc
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestInterface
 {

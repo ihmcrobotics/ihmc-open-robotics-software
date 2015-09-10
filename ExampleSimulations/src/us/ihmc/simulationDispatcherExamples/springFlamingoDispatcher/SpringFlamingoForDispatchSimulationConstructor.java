@@ -1,11 +1,11 @@
 package us.ihmc.simulationDispatcherExamples.springFlamingoDispatcher;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.SimulationConstructor;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class SpringFlamingoForDispatchSimulationConstructor implements SimulationConstructor, SimulationDoneCriterion
 {

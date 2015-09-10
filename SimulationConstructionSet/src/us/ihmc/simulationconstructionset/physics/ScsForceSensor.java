@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.physics;
 
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
 /**

@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.utilities.exceptions.NoConvergenceException;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoMatrix;
 
 public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface

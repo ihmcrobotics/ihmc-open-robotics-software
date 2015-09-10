@@ -25,12 +25,12 @@ import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVeloc
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ComposableOrientationEstimatorCreator
 {

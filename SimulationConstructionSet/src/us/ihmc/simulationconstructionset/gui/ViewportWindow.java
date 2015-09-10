@@ -27,6 +27,8 @@ import us.ihmc.graphics3DAdapter.camera.CameraPropertiesHolder;
 import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
 import us.ihmc.graphics3DAdapter.camera.TrackingDollyCameraController;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
+import us.ihmc.robotics.dataStructures.YoVariableHolder;
+import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -55,8 +57,6 @@ import us.ihmc.simulationconstructionset.gui.dialogConstructors.ResizeViewportDi
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ResizeViewportDialogGenerator;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.videos.ExportVideo;
-import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
 
 public class ViewportWindow implements ViewportSelectorCommandExecutor, ActiveCanvas3DHolder, ExtraPanelSelector
 {

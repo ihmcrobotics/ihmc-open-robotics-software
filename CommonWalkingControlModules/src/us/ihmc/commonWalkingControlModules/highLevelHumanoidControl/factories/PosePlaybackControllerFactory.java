@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackController;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 
 public class PosePlaybackControllerFactory implements HighLevelBehaviorFactory

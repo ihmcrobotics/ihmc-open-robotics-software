@@ -18,13 +18,13 @@ import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.camera.TrackingDollyCameraController;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
+import us.ihmc.robotics.dataStructures.YoVariableHolder;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.ViewportConfiguration;
 import us.ihmc.simulationconstructionset.ViewportPanelConfiguration;
 import us.ihmc.simulationconstructionset.commands.RunCommandsExecutor;
 import us.ihmc.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import us.ihmc.simulationconstructionset.gui.config.CameraSelector;
-import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class ViewportPanel extends JPanel implements CameraSelector, ActiveCameraHolder, ActiveCanvas3DHolder
 {

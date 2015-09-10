@@ -5,6 +5,8 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -13,8 +15,6 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.corruptors.NoisyDoubleYoVariable;
 import us.ihmc.yoUtilities.math.corruptors.NoisyYoRotationMatrix;
 

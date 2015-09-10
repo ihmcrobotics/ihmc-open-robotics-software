@@ -18,8 +18,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.TransferHandler;
 
-import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 
 public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListener, FocusListener

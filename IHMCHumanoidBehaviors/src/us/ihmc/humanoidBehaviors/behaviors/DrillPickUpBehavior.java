@@ -18,6 +18,8 @@ import us.ihmc.humanoidBehaviors.taskExecutor.ObjectWeightTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyIKTrajectoryTask;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -31,8 +33,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class DrillPickUpBehavior extends BehaviorInterface
 {

@@ -2,9 +2,9 @@ package us.ihmc.exampleSimulations.flyballGovernor;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 
 public class FlyballGovernorSimulation

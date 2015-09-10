@@ -14,16 +14,16 @@ import us.ihmc.robotDataCommunication.LogIndex;
 import us.ihmc.robotDataCommunication.VisualizerRobot;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotDataCommunication.visualizer.JointUpdater;
+import us.ihmc.robotics.dataStructures.listener.RewoundListener;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.compression.SnappyUtils;
 import us.ihmc.tools.time.TimeTools;
-import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
-import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class YoVariableLogPlaybackRobot extends VisualizerRobot implements RewoundListener
 {

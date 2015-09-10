@@ -19,6 +19,8 @@ import us.ihmc.humanoidBehaviors.taskExecutor.GraspValveTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseRelativeToCurrentTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.RotateHandAboutAxisTask;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -28,8 +30,6 @@ import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
 {

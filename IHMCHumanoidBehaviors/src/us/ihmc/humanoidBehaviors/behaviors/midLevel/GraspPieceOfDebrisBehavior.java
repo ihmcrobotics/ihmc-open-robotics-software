@@ -23,6 +23,8 @@ import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyInverseKinematicTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyPacketTask;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -34,8 +36,6 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class GraspPieceOfDebrisBehavior extends BehaviorInterface
 {

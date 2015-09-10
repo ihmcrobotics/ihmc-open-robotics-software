@@ -29,6 +29,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -39,7 +40,6 @@ import us.ihmc.robotics.trajectories.TrajectoryND.WaypointND;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicShape;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;

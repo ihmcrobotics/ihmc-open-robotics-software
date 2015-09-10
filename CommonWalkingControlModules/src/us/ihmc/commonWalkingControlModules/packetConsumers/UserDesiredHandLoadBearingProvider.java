@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 
 public class UserDesiredHandLoadBearingProvider implements HandLoadBearingProvider

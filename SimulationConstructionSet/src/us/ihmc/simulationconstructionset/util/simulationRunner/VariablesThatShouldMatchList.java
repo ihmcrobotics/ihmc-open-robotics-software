@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 
 public class VariablesThatShouldMatchList
 {

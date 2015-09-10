@@ -22,12 +22,12 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.videos.VideoFileFilter;
-import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class YoVariableLogVisualizerGUI extends JPanel
 {

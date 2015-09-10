@@ -24,11 +24,11 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.dataStructures.DoubleHashHeightMap;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 

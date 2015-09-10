@@ -4,8 +4,8 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.simulationconstructionset.physics.engine.jerry.NullJointPhysics;
+import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
 
 public class NullJoint extends Joint
 {

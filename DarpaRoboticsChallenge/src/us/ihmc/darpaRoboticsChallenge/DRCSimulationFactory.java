@@ -29,6 +29,7 @@ import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterfa
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
@@ -61,7 +62,6 @@ import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchroniz
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class DRCSimulationFactory
 {

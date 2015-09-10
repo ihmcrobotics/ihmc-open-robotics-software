@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.util.globalParameters;
 
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 
 public class IntGlobalParameter extends GlobalParameter
 {

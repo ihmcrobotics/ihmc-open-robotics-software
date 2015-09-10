@@ -4,8 +4,8 @@ import us.ihmc.humanoidBehaviors.behaviors.GraspTurnAndUnGraspValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveGraspLocation;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior.ValveGraspMethod;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class GraspTurnAndUnGraspValveTask extends BehaviorTask
 {

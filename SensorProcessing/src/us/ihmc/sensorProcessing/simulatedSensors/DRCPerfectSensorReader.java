@@ -1,10 +1,10 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
 import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class DRCPerfectSensorReader implements SensorReader
 {

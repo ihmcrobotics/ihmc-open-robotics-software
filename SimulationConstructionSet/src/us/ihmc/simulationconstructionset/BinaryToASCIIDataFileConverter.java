@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 
 public class BinaryToASCIIDataFileConverter
 {

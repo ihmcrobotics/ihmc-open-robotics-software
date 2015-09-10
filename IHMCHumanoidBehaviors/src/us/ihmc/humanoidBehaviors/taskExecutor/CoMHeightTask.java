@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class CoMHeightTask extends BehaviorTask
 {

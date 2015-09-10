@@ -2,9 +2,9 @@ package us.ihmc.sensorProcessing.signalCorruption;
 
 import javax.vecmath.Matrix3d;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RotationFunctions;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
 public class OrientationConstantAcceleratingYawDriftCorruptor implements SignalCorruptor<Matrix3d>

@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.util.simulationRunner;
 
 import java.util.List;
 
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public class VariableDifference
 {

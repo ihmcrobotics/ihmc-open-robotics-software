@@ -17,6 +17,8 @@ import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.YoVariablesUpdatedListener;
 import us.ihmc.robotDataCommunication.jointState.JointState;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.Joint;
@@ -24,8 +26,6 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.tools.time.TimeTools;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionListener, SCSVisualizerStateListener

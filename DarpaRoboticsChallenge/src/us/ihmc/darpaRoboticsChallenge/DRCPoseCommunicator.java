@@ -15,6 +15,7 @@ import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -31,7 +32,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 import us.ihmc.util.PeriodicThreadScheduler;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 // fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 
 public class DRCPoseCommunicator implements RawOutputWriter

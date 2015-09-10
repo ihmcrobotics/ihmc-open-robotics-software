@@ -16,6 +16,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -31,8 +33,6 @@ import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 @DeployableTestClass(targets={TestPlanTarget.Fast})
 public class ClippedSpeedOffsetErrorInterpolatorTest

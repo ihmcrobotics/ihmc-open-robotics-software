@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public interface BookmarkedVariableRemovedListener
 {

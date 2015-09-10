@@ -5,11 +5,11 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 
 @DeployableTestClass(targets = TestPlanTarget.Exclude)
 public class SimulationRewoundListenerTest

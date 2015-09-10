@@ -5,10 +5,10 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class FootPoseTask extends BehaviorTask
 {

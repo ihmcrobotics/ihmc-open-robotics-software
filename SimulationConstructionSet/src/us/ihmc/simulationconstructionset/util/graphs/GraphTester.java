@@ -5,11 +5,11 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.util.graphs.JFreePlot.PlotTypes;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class GraphTester
 {

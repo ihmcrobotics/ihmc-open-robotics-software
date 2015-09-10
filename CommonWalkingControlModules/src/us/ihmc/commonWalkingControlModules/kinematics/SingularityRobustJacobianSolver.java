@@ -10,11 +10,11 @@ import org.ejml.ops.SingularOps;
 
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.JacobianSolver;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
 /*

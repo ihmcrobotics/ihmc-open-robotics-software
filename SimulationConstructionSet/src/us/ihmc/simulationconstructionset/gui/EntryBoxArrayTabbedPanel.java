@@ -22,7 +22,7 @@ import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public class EntryBoxArrayTabbedPanel extends JTabbedPane
 {

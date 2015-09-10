@@ -1,8 +1,8 @@
 package us.ihmc.robotDataCommunication.visualizer;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public interface SCSVisualizerStateListener
 {

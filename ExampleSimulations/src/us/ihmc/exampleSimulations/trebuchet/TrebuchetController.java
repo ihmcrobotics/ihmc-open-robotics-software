@@ -2,9 +2,9 @@ package us.ihmc.exampleSimulations.trebuchet;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
 public class TrebuchetController extends TrebuchetControllerBase implements RobotController

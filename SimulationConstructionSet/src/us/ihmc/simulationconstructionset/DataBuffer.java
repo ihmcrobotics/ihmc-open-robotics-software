@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 import us.ihmc.graphics3DAdapter.camera.TrackingDollyCameraController;
+import us.ihmc.robotics.dataStructures.listener.RewoundListener;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.commands.DataBufferCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
@@ -13,10 +17,6 @@ import us.ihmc.simulationconstructionset.gui.KeyPoints;
 import us.ihmc.simulationconstructionset.gui.RegularExpression;
 import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
-import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
 
 public class DataBuffer extends YoVariableHolderImplementation
         implements java.io.Serializable, DataBufferCommandsExecutor, ToggleKeyPointModeCommandExecutor, TimeDataHolder, DataEntryHolder

@@ -28,6 +28,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -53,8 +55,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.yoUtilities.controllers.AxisAngleOrientationController;
 import us.ihmc.yoUtilities.controllers.GainCalculator;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 /**

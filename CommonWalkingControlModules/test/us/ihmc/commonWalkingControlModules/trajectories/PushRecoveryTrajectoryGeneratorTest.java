@@ -9,6 +9,7 @@ import javax.vecmath.Point3d;
 
 import org.junit.Test;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -19,7 +20,6 @@ import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoPositionProvider;

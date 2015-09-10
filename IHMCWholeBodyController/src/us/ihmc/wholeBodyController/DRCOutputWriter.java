@@ -2,8 +2,8 @@ package us.ihmc.wholeBodyController;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public interface DRCOutputWriter
 {

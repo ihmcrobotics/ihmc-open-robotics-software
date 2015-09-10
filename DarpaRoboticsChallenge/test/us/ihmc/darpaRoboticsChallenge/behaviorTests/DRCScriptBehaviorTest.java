@@ -50,6 +50,8 @@ import us.ihmc.humanoidRobotics.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.pathGeneration.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -70,8 +72,6 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface

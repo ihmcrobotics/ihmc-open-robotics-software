@@ -21,6 +21,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -29,7 +30,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 

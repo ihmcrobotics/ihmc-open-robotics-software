@@ -29,9 +29,9 @@ import javax.swing.TransferHandler;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 
 public abstract class VarPanel extends JPanel implements KeyListener, MouseListener, FocusListener, ComponentListener
 {

@@ -3,12 +3,12 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 

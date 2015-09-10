@@ -11,13 +11,13 @@ import us.ihmc.pathGeneration.footstepGenerator.TurnInPlaceFootstepGenerator;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 public class TurnInPlaceBehavior extends BehaviorInterface
 {

@@ -2,9 +2,9 @@ package us.ihmc.exampleSimulations.m2.Output;
 
 
 import us.ihmc.exampleSimulations.m2.JointName;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 /**
  * <p>

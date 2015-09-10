@@ -2,8 +2,8 @@ package us.ihmc.simulationconstructionset.joystick;
 
 import net.java.games.input.Component;
 import net.java.games.input.Event;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.utilities.inputDevices.joystick.JoystickEventListener;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 
 public class BooleanYoVariableJoystickEventListener implements JoystickEventListener

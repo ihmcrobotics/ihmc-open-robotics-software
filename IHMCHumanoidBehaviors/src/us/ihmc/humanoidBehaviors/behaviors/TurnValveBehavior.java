@@ -24,6 +24,8 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -32,8 +34,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.taskExecutor.PipeLine;
 import us.ihmc.utilities.taskExecutor.Task;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class TurnValveBehavior extends BehaviorInterface
 {

@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.robotController;
 
 import java.util.ArrayList;
 
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class ModularOutputProcessor implements OutputProcessor
 {

@@ -13,11 +13,11 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
 import us.ihmc.simulationconstructionset.GraphConfiguration;
 import us.ihmc.simulationconstructionset.commands.ZoomGraphCommandExecutor;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class GraphArrayPanel extends JPanel implements GraphIndicesHolder, YoGraphRemover, DataBufferChangeListener, Printable, ZoomGraphCommandExecutor
 {

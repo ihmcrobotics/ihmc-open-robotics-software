@@ -1,6 +1,6 @@
 package us.ihmc.utilities.parameterOptimization;
 
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class DoubleYoVariableParameterToOptimize extends DoubleParameterToOptimize
 {

@@ -1,6 +1,6 @@
 package us.ihmc.utilities.parameterOptimization;
 
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 
 public class IntegerYoVariableParameterToOptimize extends IntegerParameterToOptimize
 {

@@ -29,11 +29,11 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 /**
  * Created by agrabertilton on 4/15/15.

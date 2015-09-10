@@ -6,10 +6,10 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.kalman.imu.QuaternionBasedFullIMUKalmanFilter;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.QuaternionTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import Jama.Matrix;
 
 public class TestIMUKalmanFilterControllerJerryOne implements RobotController

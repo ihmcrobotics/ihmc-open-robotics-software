@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.util.inputdevices;
 
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public class MidiControl
 {

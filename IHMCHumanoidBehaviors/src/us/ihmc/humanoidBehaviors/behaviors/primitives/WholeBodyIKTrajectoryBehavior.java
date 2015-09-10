@@ -5,6 +5,8 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryND;
@@ -15,8 +17,6 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.LockLevel;
 import us.ihmc.wholeBodyController.WholeBodyTrajectory;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class WholeBodyIKTrajectoryBehavior extends BehaviorInterface
 {

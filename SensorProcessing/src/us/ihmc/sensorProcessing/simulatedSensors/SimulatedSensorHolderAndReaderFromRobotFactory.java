@@ -26,9 +26,9 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorReaderFactory
 {

@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.controlModules.arm;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
 public class SwingArmWithOppositeLegControlModule extends PDArmControlModule

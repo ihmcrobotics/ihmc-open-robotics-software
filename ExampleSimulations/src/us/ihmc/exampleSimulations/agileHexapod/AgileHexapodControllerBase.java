@@ -2,8 +2,8 @@ package us.ihmc.exampleSimulations.agileHexapod;
 
 import java.util.ArrayList;
 
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 
 public class AgileHexapodControllerBase

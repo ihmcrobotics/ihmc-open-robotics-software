@@ -14,11 +14,11 @@ import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 /**
  * @author twan

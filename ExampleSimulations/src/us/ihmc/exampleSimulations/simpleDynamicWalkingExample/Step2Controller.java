@@ -1,9 +1,9 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.yoUtilities.controllers.PIDController;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class Step2Controller implements RobotController
 {

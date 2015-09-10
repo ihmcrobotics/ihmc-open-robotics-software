@@ -6,8 +6,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JMenuItem;
 
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 
 public class BookmarkedVariablesPanel extends VarListVarPanel
 {
