@@ -21,7 +21,6 @@ import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.XMLReaderUtility;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
-import us.ihmc.tools.MemoryTools;
 
 public class ExportVideo implements ExportVideoCommandExecutor
 {
@@ -203,8 +202,6 @@ public class ExportVideo implements ExportVideoCommandExecutor
          while (!reachedEndPoint)
          {
             printIfDebug("ExportVideo: Capturing Frame");
-            if (DEBUG)
-               MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " capturing frame: ");
    
       
             movieBuilder.encodeFrame(captureDevice.exportSnapshotAsBufferedImage());

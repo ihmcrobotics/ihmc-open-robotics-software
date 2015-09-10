@@ -11,4 +11,6 @@ dependencies
 	
 	compile project(':IHMCUtilities')
 	compile project(':IHMCRoboticsToolkit')
+    testCompile project(':IHMCUnitTesting')
+	
 }

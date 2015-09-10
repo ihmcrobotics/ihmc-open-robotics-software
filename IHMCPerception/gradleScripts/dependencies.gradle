@@ -30,4 +30,5 @@ dependencies {
     compile project(':SDFLoader')
     compile project(':IHMCJavaToolkit')
     compile project(':IHMCRoboticsToolkit')
+    testCompile project(':IHMCUnitTesting')
 }

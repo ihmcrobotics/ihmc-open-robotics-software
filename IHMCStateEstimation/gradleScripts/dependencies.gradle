@@ -12,4 +12,5 @@ dependencies {
 	compile project(':Plotting')
 	compile project(':IHMCJavaToolkit')
 	compile project(':IHMCRoboticsToolkit')
+	testCompile project(':IHMCUnitTesting')
 }
