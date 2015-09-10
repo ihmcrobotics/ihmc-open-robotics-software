@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
@@ -13,6 +14,7 @@ import javax.vecmath.Vector2d;
 import us.ihmc.robotics.geometry.ConvexPolygonTools.EmptyPolygonException;
 import us.ihmc.robotics.geometry.ConvexPolygonTools.OutdatedPolygonException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.random.RandomTools;
 
 /**
  * <p>Title: ConvexPolygon2d</p>
@@ -119,19 +121,19 @@ public class ConvexPolygon2d implements Geometry2d
       setAndUpdate(firstPolygon, secondPolygon);
    }
 
-//   public static ConvexPolygon2d generateRandomConvexPolygon2d(Random random, double maxAbsoluteXY, int numberOfPossiblePoints)
-//   {
-//      ArrayList<Point2d> vertices = new ArrayList<Point2d>();
-//
-//      for (int i=0; i<numberOfPossiblePoints; i++)
-//      {
-//         vertices.add(RandomTools.generateRandomPoint2d(random, maxAbsoluteXY, maxAbsoluteXY));
-//      }
-//
-//      ConvexPolygon2d polygonToReturn = new ConvexPolygon2d(vertices);
-//
-//      return polygonToReturn;
-//   }
+   public static ConvexPolygon2d generateRandomConvexPolygon2d(Random random, double maxAbsoluteXY, int numberOfPossiblePoints)
+   {
+      ArrayList<Point2d> vertices = new ArrayList<Point2d>();
+
+      for (int i=0; i<numberOfPossiblePoints; i++)
+      {
+         vertices.add(RandomTools.generateRandomPoint2d(random, maxAbsoluteXY, maxAbsoluteXY));
+      }
+
+      ConvexPolygon2d polygonToReturn = new ConvexPolygon2d(vertices);
+
+      return polygonToReturn;
+   }
 
    /**
     * After calling this method, the polygon has no vertex, area, or centroid.
