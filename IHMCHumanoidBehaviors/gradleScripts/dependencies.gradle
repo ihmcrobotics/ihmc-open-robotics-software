@@ -22,4 +22,5 @@ dependencies {
 	compile project(':IHMCPerception')
 	compile project(':IHMCJavaToolkit')
 	compile project(':IHMCRoboticsToolkit')
+   testCompile project(':IHMCUnitTesting')
 }

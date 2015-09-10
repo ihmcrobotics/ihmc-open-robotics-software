@@ -11,7 +11,6 @@ import org.junit.runners.Suite;
    us.ihmc.tools.containers.ContainerToolsTest.class,
    us.ihmc.tools.FormattingToolsTest.class,
    us.ihmc.tools.io.StreamGobblerTest.class,
-   us.ihmc.tools.test.JUnitToolsTest.class,
    us.ihmc.tools.thread.ThreadToolsTest.class,
    us.ihmc.tools.UnitConversionsTest.class
 })
