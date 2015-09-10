@@ -1,4 +1,4 @@
-package us.ihmc.tools.time;
+package us.ihmc.robotics.time;
 
 import static org.junit.Assert.assertEquals;
 
