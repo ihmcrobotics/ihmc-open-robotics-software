@@ -27,4 +27,5 @@ dependencies {
 	compile project(':IHMCJavaToolkit')
     compile project(':IHMCHumanoidOperatorInterface')
 	compile project(':IHMCRoboticsToolkit')
+   testCompile project(':IHMCUnitTesting')
 }
