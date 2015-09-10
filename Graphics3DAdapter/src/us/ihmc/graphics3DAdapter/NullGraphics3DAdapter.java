@@ -260,4 +260,15 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
    {
       return null;
    }
+	
+	@Override
+	public void play() {
+		
+		
+	}
+	
+	@Override
+	public void pause() {
+		
+	}
 }

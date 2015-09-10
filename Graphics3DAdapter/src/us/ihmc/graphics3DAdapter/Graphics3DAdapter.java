@@ -5,6 +5,8 @@ import java.net.URL;
 
 import javax.vecmath.Color3f;
 
+
+
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
@@ -14,7 +16,7 @@ import us.ihmc.utilities.inputDevices.mouse.MouseListener;
 import us.ihmc.utilities.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 
-public interface Graphics3DAdapter
+public interface Graphics3DAdapter 
 {
    public void setupSky();
    
@@ -59,4 +61,7 @@ public interface Graphics3DAdapter
    public GPULidar createGPULidar(GPULidarListener listener, LidarScanParameters lidarScanParameters);
    
    public GPULidar createGPULidar(LidarScanParameters lidarScanParameters);
+   
+   void play();
+   void pause();
 }

@@ -64,6 +64,8 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
 
    private DirectionalLight primaryLight;
    private FilterPostProcessor fpp;
+   
+   private final JMERenderer jmeRenderer;
 
    private Timer frameTimer = new Timer().start();
 
@@ -79,6 +81,7 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
 
    public JMEViewportAdapter(JMERenderer jmeRenderer, Node rootNode, boolean isMainViewport, ViewportType viewportType, boolean addExtraVisuals, Color backgroundColor)
    {
+      this.jmeRenderer = jmeRenderer;
       this.assetManager = jmeRenderer.getAssetManager();
       this.stateManager = jmeRenderer.getStateManager();
       this.context = jmeRenderer.getContext();
@@ -112,7 +115,11 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
       jmeRenderer.registerViewport(this);
    }
 
-
+   @Override
+   public void addFrameListener(Graphics3DFrameListener frameListener) {
+      super.addFrameListener(frameListener);
+      jmeRenderer.play();
+   }
 
    public void setupViewport(double left, double right, double bottom, double top)
    {

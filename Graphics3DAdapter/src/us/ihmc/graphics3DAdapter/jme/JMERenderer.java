@@ -2,8 +2,15 @@ package us.ihmc.graphics3DAdapter.jme;
 
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
@@ -17,6 +24,25 @@ import java.util.logging.Logger;
 import javax.vecmath.Color3f;
 
 import org.jmonkeyengine.scene.plugins.ogre.MaterialLoader;
+
+import com.google.common.collect.HashBiMap;
+import com.jme3.app.SimpleApplication;
+import com.jme3.asset.AssetManager;
+import com.jme3.input.InputManager;
+import com.jme3.light.AmbientLight;
+import com.jme3.light.DirectionalLight;
+import com.jme3.material.TechniqueDef;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
+import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
+import com.jme3.system.AppSettings;
+import com.jme3.system.JmeCanvasContext;
+import com.jme3.system.NativeLibraryLoader;
+import com.jme3.system.awt.AwtPanelsContext;
+import com.jme3.texture.plugins.AWTLoader;
+import com.jme3.util.SkyFactory;
 
 import jme3dae.ColladaLoader;
 import us.ihmc.graphics3DAdapter.GPULidarListener;
@@ -40,6 +66,8 @@ import us.ihmc.graphics3DAdapter.jme.util.JMENodeTools;
 import us.ihmc.graphics3DAdapter.stlLoader.STLLoader;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.utilities.inputDevices.keyboard.KeyListener;
 import us.ihmc.utilities.inputDevices.keyboard.KeyListenerHolder;
@@ -50,27 +78,7 @@ import us.ihmc.utilities.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.utilities.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
 import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.utilities.time.Timer;
-
-import com.google.common.collect.HashBiMap;
-import com.jme3.app.SimpleApplication;
-import com.jme3.asset.AssetManager;
-import com.jme3.input.InputManager;
-import com.jme3.light.AmbientLight;
-import com.jme3.light.DirectionalLight;
-import com.jme3.material.TechniqueDef;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
-import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
-import com.jme3.system.AppSettings;
-import com.jme3.system.JmeCanvasContext;
-import com.jme3.system.NativeLibraryLoader;
-import com.jme3.system.awt.AwtPanelsContext;
-import com.jme3.texture.plugins.AWTLoader;
-import com.jme3.util.SkyFactory;
 
 public class JMERenderer extends SimpleApplication implements Graphics3DAdapter, PBOAwtPanelListener
 {
@@ -81,6 +89,10 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    public final static boolean DEBUG_GPU_LIDAR_PARALLEL_SCENE = false;
    private final RenderType renderType;
    public static boolean tickUpdated = false;
+   
+   private Object repaintNotifier = new Object(); // If we aren't rendering at a continuous FPS, this condition is used for waking up the renderer if a repaint is required
+   private boolean lazyRendering = true; // If lazy rendering is true, we render only when window repaint is needed
+   private int lazyRendersToPerform = 10; // How many render loops to do after a lazy render wake-up call - some events such as resize or startup need multiple passes to properly reinstate the image
 
    static
    {
@@ -147,8 +159,20 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             throw new RuntimeException("Loading interrupted");
          }
       }
+      
    }
-
+   
+   private void notifyRepaint(int rendersToPerform) {
+      synchronized (repaintNotifier) {
+         lazyRendersToPerform = rendersToPerform;
+         repaintNotifier.notifyAll();
+      }
+   }
+   
+   private void notifyRepaint() {
+      notifyRepaint(1);
+   }
+   
    @Override
    @Deprecated
    public Node getRootNode()
@@ -180,6 +204,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             addNodesRecursively(child, jmeNode);
          }
          
+         notifyRepaint();
+         
          return jmeNode;
       }
    }
@@ -199,6 +225,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             }
          }
       });
+      notifyRepaint();
    }
    
    public void registerViewport(JMEViewportAdapter viewportAdapter)
@@ -220,6 +247,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       }
       
       JMEViewportAdapter newViewport = new JMEViewportAdapter(this, rootNode, isMainViewport, isOffScreen ? ViewportType.OFFSCREEN : ViewportType.CANVAS, false, Color.LIGHT_GRAY);
+      notifyRepaint();
       
       return newViewport;
    }
@@ -229,6 +257,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       ((JMEViewportAdapter) viewport).closeViewportAdapter();
       while (viewportAdapters.remove(viewport))
       ;
+      notifyRepaint();
    }
 
    public Object getGraphicsConch()
@@ -266,6 +295,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       ctx.getCanvas().setPreferredSize(dim);
 
       contextManager = new CanvasContextManager(this);
+      addRepaintListeners(ctx.getCanvas());
 
       startCanvas();
    }
@@ -354,6 +384,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
                   node.removeFromParent();
                   recursivelyRemoveNodesFromMap(rootNode);
                }
+               
+               notifyRepaint();
 
                return node;
             }
@@ -383,6 +415,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    public void setAmbientLightBrightness(float brightness)
    {
       ambientLight.setColor(ColorRGBA.White.mult(brightness));
+      notifyRepaint();
    }
 
    private void setupLighting()
@@ -417,6 +450,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       Spatial sky = SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", false);
       sky.setLocalScale(1000);
       rootNode.attachChild(sky);
+      notifyRepaint();
    }
 
    @Override
@@ -460,6 +494,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       if (alreadyClosing) return;
       
+
       synchronized (graphicsConch)
       {
          if (alreadyClosing) return;
@@ -477,6 +512,18 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
       updateCameras();
       count++;
+      
+      lazyRendersToPerform = Math.max(0, lazyRendersToPerform - 1);
+      
+      if (lazyRendering && lazyRendersToPerform <= 0 && gpuLidars.isEmpty()) {
+         synchronized (repaintNotifier) {
+            try {
+               repaintNotifier.wait();
+            } catch (InterruptedException e) {
+               // ignore
+            }
+         }
+      }
    }
 
    private void updateCameras()
@@ -512,6 +559,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             return isVisible;
          }
       });
+      notifyRepaint();
    }
 
    public void setHeightMap(final HeightMap heightMap)
@@ -537,6 +585,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             return jmeTerrain;
          }
       });
+      notifyRepaint();
    }
 
    public HashBiMap<Graphics3DNode, JMEGraphics3DNode> getJmeGraphicsNodes()
@@ -567,6 +616,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             transparentNode.setLocalScale(0);
          }
       }
+      notifyRepaint();
    }
 
    public void setTransparentNodesScaleToOne()
@@ -582,6 +632,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             transparentNode.setLocalScale(1);
          }
       }
+      notifyRepaint();
    }
    
    @Override
@@ -589,12 +640,56 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       PrintTools.info(this, "A " + pboAwtPanel.getClass().getSimpleName() + " showed on screen.");
       
+      addRepaintListeners(pboAwtPanel);
+      
       if (!gpuLidars.isEmpty())
       {
          updateGPULidarScenes();
       }
    }
 
+   private void addRepaintListeners(Component panel) 
+   {
+      panel.addMouseListener(new MouseAdapter() {
+         @Override
+         public void mousePressed(MouseEvent e) 
+         {
+            notifyRepaint();
+         }
+      });
+
+      panel.addMouseMotionListener(new MouseAdapter() {
+         @Override
+         public void mouseDragged(MouseEvent e) 
+         {
+            notifyRepaint();
+         }
+      });
+
+      panel.addKeyListener(new KeyAdapter() {
+         @Override
+         public void keyPressed(KeyEvent e) 
+         {
+            notifyRepaint();
+         }
+      });
+
+      panel.addComponentListener(new ComponentAdapter() {
+         @Override
+         public void componentResized(ComponentEvent e) 
+         {
+            notifyRepaint(3);
+         }
+
+         @Override
+         public void componentMoved(ComponentEvent e) 
+         {
+            notifyRepaint();
+         }
+      });
+
+   }
+   
    @Override
    public void isCreated(PBOAwtPanel pboAwtPanel)
    {
@@ -615,6 +710,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             gpuLidar.updateViewPortScenes();
          }
 
+         notifyRepaint();
          PrintTools.info(this, "GPULidar scene updated. Took " + FormattingTools.roundToSignificantFigures(timer.totalElapsed(), 2) + " s");
       }
    }
@@ -665,6 +761,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       }
       
       subsceneRoot.updateGeometricState();
+      notifyRepaint();
    }
    
    private Spatial findChildWithName(Node node, String name)
@@ -748,6 +845,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       }
       
       rootNode.updateGeometricState();
+      notifyRepaint();
       
       return num;
    }
@@ -902,6 +1000,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             return null;
          }
       });
+      notifyRepaint();
    }
 
    private boolean alreadyClosing = false;
@@ -910,6 +1009,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       if (alreadyClosing) return;
       alreadyClosing = true;
+      notifyRepaint();
       
       stop();
       
@@ -1028,7 +1128,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    public JMEGPULidar createGPULidar(GPULidarListener listener, LidarScanParameters lidarScanParameters)
    {
       JMEGPULidar gpuLidar = createGPULidar(listener, lidarScanParameters.getPointsPerSweep(), lidarScanParameters.getFieldOfView(),
-                                lidarScanParameters.getMinRange(), lidarScanParameters.getMaxRange());
+                                lidarScanParameters.getMinRange(), lidarScanParameters.getMaxRange());    
 
       return gpuLidar;
    }
@@ -1037,8 +1137,22 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    public JMEGPULidar createGPULidar(LidarScanParameters lidarScanParameters)
    {
       JMEGPULidar gpuLidar = createGPULidar(lidarScanParameters.getPointsPerSweep(), lidarScanParameters.getFieldOfView(), lidarScanParameters.getMinRange(),
-                                lidarScanParameters.getMaxRange());
+                                lidarScanParameters.getMaxRange());    
 
       return gpuLidar;
    }
+	
+   @Override
+   public void play() 
+   {
+      notifyRepaint();
+      this.lazyRendering = false;
+   }
+
+   @Override
+   public void pause() 
+   {
+      this.lazyRendering = true;
+   }
+	
 }
