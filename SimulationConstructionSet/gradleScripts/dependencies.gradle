@@ -46,4 +46,5 @@ dependencies {
 	compile project(':IHMCCommunication')
 	compile project(':IHMCJavaToolkit')
 	compile project(':IHMCRoboticsToolkit')
+	testCompile project(':IHMCUnitTesting')
 }

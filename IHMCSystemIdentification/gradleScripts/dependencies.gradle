@@ -5,4 +5,5 @@ dependencies {
 	
 	compile project(':Plotting')
 	compile project(':SimulationConstructionSet')
+	testCompile project(':IHMCUnitTesting')
 }
