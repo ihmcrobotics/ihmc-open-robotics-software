@@ -1,15 +1,15 @@
 package us.ihmc.robotics.filters;
 
-import org.junit.Test;
-import us.ihmc.tools.ArrayTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class GlitchFilterForDataSetTest
 {
@@ -40,7 +40,7 @@ public class GlitchFilterForDataSetTest
 
       double[] answerFromMatlab = getDataforBasic0();
 
-      assertTrue(ArrayTools.deltaEquals(filteredFata, answerFromMatlab, 1e-8));
+      JUnitTools.assertDoubleArrayEquals(filteredFata, answerFromMatlab, 1e-8);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -61,7 +61,7 @@ public class GlitchFilterForDataSetTest
 
       double[] filteredFata = glitchFilterForDataSet.getGlitchFilteredSet(data);
 
-      assertTrue(ArrayTools.deltaEquals(filteredFata, data, 1e-8));
+      JUnitTools.assertDoubleArrayEquals(filteredFata, data, 1e-8);
 
       ArrayList<Integer> listOfNumberOfPoints = glitchFilterForDataSet.getNumberOfPointsFiltered();
 
@@ -84,7 +84,7 @@ public class GlitchFilterForDataSetTest
 
       double[] answerFromMatlab = getDataAnswerforBasic2();
 
-      assertTrue(ArrayTools.deltaEquals(filteredFata, answerFromMatlab, 1e-8));
+      JUnitTools.assertDoubleArrayEquals(filteredFata, answerFromMatlab, 1e-8);
    }
 
    private static double[] getDataforBasic0()
@@ -219,14 +219,18 @@ public class GlitchFilterForDataSetTest
       int windowSizeOnEitherSide = 3;
       double[] ret = GlitchFilterForDataSet.getSetFilteredWithWindowedAverage(dataSet, windowSizeOnEitherSide);
 
-      assertTrue(ArrayTools.deltaEquals(dataSet, ret, 1e-8));
+      JUnitTools.assertDoubleArrayEquals(dataSet, ret, 1e-8);
 
       dataSet = new double[] { 1.0, 5345.345, 34598034.40899, 48904980.9322398, 234.234, 7654.23890, 567.234 };
       ret = GlitchFilterForDataSet.getSetFilteredWithWindowedAverage(dataSet, windowSizeOnEitherSide);
 
-      assertFalse(ArrayTools.deltaEquals(dataSet, ret, 1e-8));
+      for(int i = 0; i < dataSet.length; i++)
+      {
+         assertNotEquals(dataSet[i], ret[i], 1e-8);
+      }
    }
 
+   
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testData()
@@ -236,7 +240,7 @@ public class GlitchFilterForDataSetTest
             0.858234479, 0.009643666, 0.429069297, 0.925070226, 0.727177783, 0.931716238, 0.212067611, 0.025299622, 0.826825957, 0.913296044, 0.962683791, 0.75052438, 0.607596536, 0.17719696, 0.968524695, 0.528280179, 0.659702894, 0.249516652,
             0.774485908, 0.885395586, 0.670705795, 0.220334711, 0.113960946, 0.462188593 };
 
-      double[] dataSetOriginal = ArrayTools.copyArray(dataSet);
+      double[] dataSetOriginal = Arrays.copyOf(dataSet, dataSet.length);
 
       double[] answer = new double[] { 0.373593508, 0.405280451, 0.475994817, 0.530347702, 0.523111272, 0.529864902, 0.519264295, 0.464636407, 0.550256152, 0.634830387, 0.661449729, 0.584331792, 0.589972805, 0.543025714, 0.529378034, 0.498880309,
             0.555479444, 0.486660007, 0.425946758, 0.351563121, 0.423495239, 0.321493074, 0.323442326, 0.316772006, 0.353757489, 0.300827588, 0.329897136, 0.405499253, 0.496809509, 0.410169655, 0.500688205, 0.49506647, 0.534998392, 0.56396736,
@@ -246,14 +250,14 @@ public class GlitchFilterForDataSetTest
       int windowSizeOnEitherSide = 4;
       double[] ret = GlitchFilterForDataSet.getSetFilteredWithWindowedAverage(dataSet, windowSizeOnEitherSide);
 
-      assertTrue(ArrayTools.deltaEquals(ret, answer, 1e-8));
+      JUnitTools.assertDoubleArrayEquals(ret, answer, 1e-8);
 
       //Make sure that its does not change the original data set
-      assertTrue(ArrayTools.deltaEquals(dataSet, dataSetOriginal, 1e-8));
+      JUnitTools.assertDoubleArrayEquals(dataSet, dataSetOriginal, 1e-8);
 
       windowSizeOnEitherSide = 0;
       ret = GlitchFilterForDataSet.getSetFilteredWithWindowedAverage(dataSet, windowSizeOnEitherSide);
 
-      assertTrue(ArrayTools.deltaEquals(ret, dataSet, 1e-8));
+      JUnitTools.assertDoubleArrayEquals(ret, dataSet, 1e-8);
    }
 }

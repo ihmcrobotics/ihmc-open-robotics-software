@@ -7,12 +7,12 @@ import java.util.Random;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.tools.random.RandomTools;
 
 public class FlatGroundPlaneContactState implements PlaneContactState
 {

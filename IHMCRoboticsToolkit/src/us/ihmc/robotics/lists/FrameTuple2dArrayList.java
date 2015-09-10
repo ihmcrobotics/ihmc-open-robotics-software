@@ -1,13 +1,13 @@
 package us.ihmc.robotics.lists;
 
+import java.util.List;
+
+import javax.vecmath.Tuple2d;
+
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameTuple2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.lists.RecyclingArrayList;
-
-import javax.vecmath.Tuple2d;
-import java.util.List;
 
 public class FrameTuple2dArrayList<T extends FrameTuple2d<?>> extends RecyclingArrayList<T>
 {

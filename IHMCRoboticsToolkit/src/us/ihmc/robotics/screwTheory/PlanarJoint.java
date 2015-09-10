@@ -1,13 +1,14 @@
 package us.ihmc.robotics.screwTheory;
 
+import java.util.ArrayList;
+
+import javax.vecmath.Vector2d;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.compare.GenericCRC32;
-
-import javax.vecmath.Vector2d;
-import java.util.ArrayList;
 
 public class PlanarJoint extends AbstractInverseDynamicsJoint
 {

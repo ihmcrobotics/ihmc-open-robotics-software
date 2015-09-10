@@ -15,12 +15,15 @@ import java.util.StringTokenizer;
 public class ArrayTools
 {
    /**
+    * Deprecated, use stringWriter.println(Arrays.toString(array))
+    * 
     * Prints an Array of Longs
     * with StringWriter
     *
     * @param longs long[]
     * @param stringWriter StringWriter
     */
+   @Deprecated
    public static void printArrayOfLongs(long[] longs, StringWriter stringWriter)
    {
       stringWriter.append("{");
@@ -34,12 +37,15 @@ public class ArrayTools
    }
 
    /**
+    * Deprecated, use stringWriter.println(Arrays.toString(array))
+    * 
     * Prints an Array of strings
     * with StringWriter
     *
     * @param strings String[]
     * @param stringWriter StringWriter
     */
+   @Deprecated
    public static void printArray(String[] strings, StringWriter stringWriter)
    {
       stringWriter.append("{");
@@ -53,12 +59,15 @@ public class ArrayTools
    }
 
    /**
+    * Deprecated, use stringWriter.println(Arrays.toString(array))
+    * 
     * Prints an Array of integers
     * with StringWriter
     *
     * @param ints int[]
     * @param stringWriter StringWriter
     */
+   @Deprecated
    public static void printArray(int[] ints, StringWriter stringWriter)
    {
       stringWriter.append("{");
@@ -72,12 +81,15 @@ public class ArrayTools
    }
 
    /**
+    * Deprecated, use stringWriter.println(Arrays.toString(array))
+    * 
     * Prints an Array of Doubles
     * with StringWriter
     *
     * @param doubles double[]
     * @param stringWriter StringWriter
     */
+   @Deprecated
    public static void printArray(double[] doubles, StringWriter stringWriter)
    {
       stringWriter.append("{");
@@ -91,12 +103,15 @@ public class ArrayTools
    }
 
    /**
+    * Deprecated, use stringWriter.println(Arrays.toString(array))
+    * 
     * Prints an Array of strings
     * with PrintWriter
     *
     * @param strings String[]
     * @param printWriter PrintWriter
     */
+   @Deprecated
    public static void printArray(String[] strings, PrintWriter printWriter)
    {
       printWriter.print("{");
@@ -110,12 +125,15 @@ public class ArrayTools
    }
 
    /**
+    * Deprecated, use stringWriter.println(Arrays.deepToString(array))
+    * 
     * Prints an Array of Stings
     * with PrintStream
     *
     * @param strings String[]
     * @param printStream PrintStream
     */
+   @Deprecated
    public static void printArray(String[] strings, PrintStream printStream)
    {
       PrintWriter printWriter = new PrintWriter(printStream);
@@ -541,11 +559,14 @@ public class ArrayTools
    }
 
    /**
+    * Use Arrays.copyOf
+    * 
     * Copys an Array of Floats
     *
     * @param array float[]
     * @return float[]
     */
+   @Deprecated
    public static float[] copyArray(float[] array)
    {
       float[] ret = new float[array.length];
@@ -589,6 +610,8 @@ public class ArrayTools
       return ret;
    }
 
+
+	@Deprecated
    public static double[] getReserveredOrderedArrayCopy(double[] arrayToReverseAndCopy)
    {
       int length = arrayToReverseAndCopy.length;
@@ -617,10 +640,12 @@ public class ArrayTools
    }
 
    /**
+    * Use ArrayUtils.addAll
     *
     * @param arrayOfArraysToConcatenate int[][]
     * @return int[]
     */
+   @Deprecated
    public static int[] concatentateArrays(int[][] arrayOfArraysToConcatenate)
    {
       int retSize = 0;
@@ -643,10 +668,12 @@ public class ArrayTools
    }
 
    /**
+    * Use ArrayUtils.addAll
     *
     * @param arrayOfArraysToConcatenate double[][]
     * @return double[]
     */
+   @Deprecated
    public static double[] concatentateArrays(double[][] arrayOfArraysToConcatenate)
    {
       int retSize = 0;
@@ -669,10 +696,12 @@ public class ArrayTools
    }
 
    /**
+    * Use ArrayUtils.addAll
     *
     * @param arrayOfArraysToConcatenate Object[][]
     * @return Object[]
     */
+   @Deprecated
    public static Object[] concatentateArrays(Object[][] arrayOfArraysToConcatenate)
    {
       int retSize = 0;
@@ -714,6 +743,10 @@ public class ArrayTools
       System.out.println(builder.toString());
    }
 
+   /**
+    * Use JUnitTools.assertArraysEquals
+    */
+   @Deprecated
    public static boolean deltaEquals(double[] a, double[] b, double delta)
    {
       if(a == null || b == null)

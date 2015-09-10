@@ -26,7 +26,7 @@ public class CollisionAvoidanceConstraintTest
    public void setUp() throws Exception
    {
       // load the C++ shared library. Generate it first with cmake (and make install)
-      NativeLibraryLoader.loadLibrary("us.ihmc.robotics.hierarchicalKinematics", "hik_java");
+      HikSupport.loadLibrary();
 
       model = new RobotModel();
       model.loadURDF(getClass().getResource("test_collision.urdf").getPath(), false);

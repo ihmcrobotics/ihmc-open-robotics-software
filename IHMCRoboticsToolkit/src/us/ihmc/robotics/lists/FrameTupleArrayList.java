@@ -1,11 +1,10 @@
 package us.ihmc.robotics.lists;
 
+import java.util.ArrayList;
+
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.tools.lists.RecyclingArrayList;
-
-import java.util.ArrayList;
 
 public class FrameTupleArrayList<T extends FrameTuple<?>> extends RecyclingArrayList<T>
 {

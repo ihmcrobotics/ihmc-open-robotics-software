@@ -6,11 +6,11 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.geometry.TransformTools;
+import us.ihmc.tools.random.RandomTools;
 
 public class TorusPosePacket extends Packet<TorusPosePacket> implements TransformableDataObject<TorusPosePacket>
 {

@@ -1,12 +1,13 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
+import java.util.List;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
-import java.util.List;
-import java.util.Random;
+
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.random.RandomTools;
 
 /**
  * One of the main goals of this class is to check, at runtime, that operations on points occur within the same Frame.

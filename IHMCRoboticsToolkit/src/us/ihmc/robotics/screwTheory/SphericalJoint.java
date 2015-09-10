@@ -1,15 +1,16 @@
 package us.ihmc.robotics.screwTheory;
 
+import java.util.ArrayList;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4d;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.compare.GenericCRC32;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import java.util.ArrayList;
 
 public class SphericalJoint extends AbstractInverseDynamicsJoint
 {

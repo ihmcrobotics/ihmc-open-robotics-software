@@ -1,13 +1,10 @@
 package us.ihmc.robotics.dataStructures;
 
-import org.junit.Test;
-import us.ihmc.robotics.geometry.InclusionFunction;
-import us.ihmc.robotics.geometry.InsufficientDataException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.thread.ThreadTools;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import javax.vecmath.GMatrix;
-import javax.vecmath.Point3d;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -17,10 +14,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import javax.vecmath.GMatrix;
+import javax.vecmath.Point3d;
+
+import org.junit.Test;
+
+import us.ihmc.robotics.geometry.InclusionFunction;
+import us.ihmc.robotics.geometry.InsufficientDataException;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public abstract class AbstractHeightMapTest
 {
@@ -198,7 +199,13 @@ public abstract class AbstractHeightMapTest
          dataWriters.add(createWriter(simpleMap, service));
          dataReaders.add(createReader(simpleMap, service));
       }
-      ThreadTools.sleep(2000);
+      try
+      {
+         Thread.sleep(2000);
+      }
+      catch (InterruptedException e)
+      {
+      }
       for (int i = 0; i < NUMBER_OF_SYNCHRONOUS_PAIRS; i++)
       {
          handleFuture(dataWriters.get(i));

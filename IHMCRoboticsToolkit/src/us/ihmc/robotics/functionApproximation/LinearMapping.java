@@ -1,11 +1,8 @@
 package us.ihmc.robotics.functionApproximation;
 
-import us.ihmc.tools.ArrayTools;
-
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * <p>Title: LinearMapping</p>
@@ -79,37 +76,37 @@ public class LinearMapping
 
       for (double[] inputArray : inputDimensions)
       {
-         ArrayTools.printArray(inputArray, printWriter);
+         printWriter.println(Arrays.toString(inputArray));
       }
 
       for (double[] inputArray : outputDimensions)
       {
-         ArrayTools.printArray(inputArray, printWriter);
+         printWriter.println(Arrays.toString(inputArray));
       }
    }
 
-   public static LinearMapping readIn(BufferedReader bufferedReader) throws IOException
-   {
-      ArrayList<double[]> inputDimensions = new ArrayList<double[]>();
-      ArrayList<double[]> outputDimensions = new ArrayList<double[]>();
-
-      int numberOfDimensions = Integer.parseInt(bufferedReader.readLine());
-      for (int i = 0; i < numberOfDimensions; i++)
-      {
-         double[] inputArray = ArrayTools.parseDoubleArray(bufferedReader);
-         inputDimensions.add(inputArray);
-      }
-
-      for (int i = 0; i < numberOfDimensions; i++)
-      {
-         double[] outputArray = ArrayTools.parseDoubleArray(bufferedReader);
-         outputDimensions.add(outputArray);
-      }
-
-      LinearMapping ret = new LinearMapping(inputDimensions, outputDimensions);
-
-      return ret;
-   }
+//   public static LinearMapping readIn(BufferedReader bufferedReader) throws IOException
+//   {
+//      ArrayList<double[]> inputDimensions = new ArrayList<double[]>();
+//      ArrayList<double[]> outputDimensions = new ArrayList<double[]>();
+//
+//      int numberOfDimensions = Integer.parseInt(bufferedReader.readLine());
+//      for (int i = 0; i < numberOfDimensions; i++)
+//      {
+//         double[] inputArray = ArrayTools.parseDoubleArray(bufferedReader);
+//         inputDimensions.add(inputArray);
+//      }
+//
+//      for (int i = 0; i < numberOfDimensions; i++)
+//      {
+//         double[] outputArray = ArrayTools.parseDoubleArray(bufferedReader);
+//         outputDimensions.add(outputArray);
+//      }
+//
+//      LinearMapping ret = new LinearMapping(inputDimensions, outputDimensions);
+//
+//      return ret;
+//   }
 
    /**
     * Takes a vector in the input space, and copies the mapped vector in the output space into the supplied output array.

@@ -30,7 +30,7 @@ public class HierarchicalKinematicSolverTest {
    public void setUp() throws Exception {
 
       // load the C++ shared library. Generate it first with cmake (and make install)
-      NativeLibraryLoader.loadLibrary("us.ihmc.robotics.hierarchicalKinematics", "hik_java");
+      HikSupport.loadLibrary();
       NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
       //		NativeLibraryLoader.loadLibrary("us.ihmc.utilities.qpSolver", "qpOASES_java");
 

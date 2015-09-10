@@ -1,8 +1,5 @@
 package us.ihmc.robotics.geometry;
 
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-
-import javax.vecmath.Point2d;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +9,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+
+import javax.vecmath.Point2d;
+
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 /**
  * Adapted from http://algs4.cs.princeton.edu/99hull/GrahamScan.java.html

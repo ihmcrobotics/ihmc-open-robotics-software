@@ -9,7 +9,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.RandomMatrices;
 
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -23,6 +22,7 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.tools.random.RandomTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class MomentumSolverComparer
