@@ -1,23 +1,24 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.Test;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.thread.ThreadTools;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
+import javax.vecmath.Vector3d;
+
+import org.junit.Test;
+
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ConvexPolygon2dTest
 {
@@ -1043,7 +1044,13 @@ public class ConvexPolygon2dTest
       }
 
       System.gc();
-      ThreadTools.sleep(100L);
+      try
+      {
+         Thread.sleep(100);
+      }
+      catch (InterruptedException e)
+      {
+      }
       long startTime = System.currentTimeMillis();
       for (FramePoint2d testPoint : randomOutsidePoints)
       {

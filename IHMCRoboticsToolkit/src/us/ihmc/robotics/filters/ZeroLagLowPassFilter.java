@@ -1,10 +1,11 @@
 package us.ihmc.robotics.filters;
 
-import us.ihmc.robotics.MathTools;
-import us.ihmc.tools.ArrayTools;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import org.apache.commons.lang3.ArrayUtils;
+
+import us.ihmc.robotics.MathTools;
 
 public class ZeroLagLowPassFilter
 {
@@ -21,18 +22,20 @@ public class ZeroLagLowPassFilter
    
    public static ArrayList<Double> getFilteredArray(ArrayList<Double> arrayToFilter, double alpha)
    {
-       return ArrayTools.getArrayListFromArray(getFilteredArray(ArrayTools.getArrayFromArrayList(arrayToFilter), alpha));
+       double[] filteredArray = getFilteredArray(ArrayUtils.toPrimitive(arrayToFilter.toArray(new Double[arrayToFilter.size()])), alpha);
+      return new ArrayList<Double>(Arrays.asList(ArrayUtils.toObject(filteredArray)));
+      
    }
    
    public static double[] getFilteredArray(double[] arrayToFilter, double alpha)
    {
       if (arrayToFilter.length < 3)
-         return ArrayTools.copyArray(arrayToFilter);
+         return Arrays.copyOf(arrayToFilter, arrayToFilter.length);
       
       alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
 
-      ArrayList<Double> arrayListToFilter = ArrayTools.getArrayListFromArray(arrayToFilter);
-            
+      ArrayList<Double> arrayListToFilter = new ArrayList<>(Arrays.asList(ArrayUtils.toObject(arrayToFilter)));
+      
       int originalArrayLength = arrayListToFilter.size();
    
       //Extrapolate at the ends
@@ -54,7 +57,7 @@ public class ZeroLagLowPassFilter
          filteredList[i] = alpha * filteredList[i - 1] + (1.0 - alpha) * listToFilter[i];
       }
  
-      double[] reverseOrderFilteredList = ArrayTools.getReserveredOrderedArrayCopy(filteredList);
+      double[] reverseOrderFilteredList = getReserveredOrderedArrayCopy(filteredList);
       
       filteredList[0] = reverseOrderFilteredList[0];
 
@@ -63,7 +66,7 @@ public class ZeroLagLowPassFilter
          filteredList[i] = alpha * filteredList[i - 1] + (1.0 - alpha) * reverseOrderFilteredList[i];
       }
       
-      filteredList = ArrayTools.getReserveredOrderedArrayCopy(filteredList);
+      filteredList = getReserveredOrderedArrayCopy(filteredList);
    
       //trim beginning and end
       double[] ret = Arrays.copyOfRange(filteredList, numberFactor, originalArrayLength + numberFactor);
@@ -113,7 +116,22 @@ public class ZeroLagLowPassFilter
 
       double[] filteredList = ZeroLagLowPassFilter.getFilteredArray(newList, 0.5);
       
-      ArrayTools.printArray(filteredList, System.out);
+      System.out.println(Arrays.toString(filteredList));
    }
+
+      
+   private static double[] getReserveredOrderedArrayCopy(double[] arrayToReverseAndCopy)
+   {
+      int length = arrayToReverseAndCopy.length;
+      double[] ret = new double[length];
+
+      for (int i = 0; i < length; i++)
+      {
+         ret[i] = arrayToReverseAndCopy[length - i - 1];
+      }
+
+      return ret;
+   }
+
 
 }

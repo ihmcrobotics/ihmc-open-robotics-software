@@ -7,8 +7,8 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.random.RandomTools;
 
 public class HandPoseStatus extends Packet<HandPoseStatus>
 {

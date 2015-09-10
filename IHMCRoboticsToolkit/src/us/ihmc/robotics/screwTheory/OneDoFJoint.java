@@ -1,12 +1,12 @@
 package us.ihmc.robotics.screwTheory;
 
+import java.util.ArrayList;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.compare.GenericCRC32;
-
-import java.util.ArrayList;
 
 public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 {

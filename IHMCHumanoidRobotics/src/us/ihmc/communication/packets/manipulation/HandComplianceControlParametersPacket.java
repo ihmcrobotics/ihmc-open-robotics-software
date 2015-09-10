@@ -3,8 +3,8 @@ package us.ihmc.communication.packets.manipulation;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.random.RandomTools;
 
 import javax.vecmath.Vector3f;
 import java.util.Arrays;

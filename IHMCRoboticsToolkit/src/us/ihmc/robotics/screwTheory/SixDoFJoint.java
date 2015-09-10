@@ -1,16 +1,17 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.compare.GenericCRC32;
+import java.util.ArrayList;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
-import java.util.ArrayList;
+
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SixDoFJoint extends AbstractInverseDynamicsJoint
 {

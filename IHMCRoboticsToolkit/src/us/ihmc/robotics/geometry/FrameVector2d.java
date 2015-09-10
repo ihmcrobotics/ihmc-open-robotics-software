@@ -1,12 +1,13 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
+import java.util.Random;
 
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
-import java.util.Random;
+
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.random.RandomTools;
 
 /**
  * One of the main goals of this class is to check, at runtime, that operations on vectors occur within the same Frame.

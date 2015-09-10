@@ -1,5 +1,15 @@
 package us.ihmc.robotics.screwTheory;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.Random;
+
+import javax.vecmath.Vector3d;
+
+import org.apache.commons.lang3.ArrayUtils;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
@@ -7,20 +17,12 @@ import org.ejml.ops.RandomMatrices;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import javax.vecmath.Vector3d;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class WrenchTest
 {
@@ -162,10 +164,7 @@ public class WrenchTest
          linearArray[i] = random.nextDouble();
       }
 
-      double[] array = ArrayTools.concatentateArrays(new double[][]
-      {
-         angularArray, linearArray
-      });
+      double array[] = ArrayUtils.addAll(angularArray, linearArray);
 
       Wrench wrench = new Wrench(frameC, frameA, array);
       assertEquals(wrench.getBodyFrame(), frameC);

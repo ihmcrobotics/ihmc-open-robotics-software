@@ -2,10 +2,7 @@ package us.ihmc.robotics.robotSide;
 
 import java.util.Random;
 
-import us.ihmc.tools.DocumentedEnum;
-import us.ihmc.tools.FormattingTools;
-
-public enum RobotEnd implements DocumentedEnum<RobotEnd>
+public enum RobotEnd
 {
    HIND, FRONT;
 
@@ -38,7 +35,10 @@ public enum RobotEnd implements DocumentedEnum<RobotEnd>
 
    public String getCamelCaseNameForStartOfExpression()
    {
-      return FormattingTools.lowerCaseFirstLetter(getCamelCaseNameForMiddleOfExpression());
+      if (this == HIND)
+         return "hind";
+      else
+         return "front";
    }
 
    public String getCamelCaseNameForMiddleOfExpression()
@@ -136,7 +136,6 @@ public enum RobotEnd implements DocumentedEnum<RobotEnd>
       return null;
    }
 
-   @Override
    public String getDocumentation(RobotEnd var)
    {
       switch (var)
@@ -151,7 +150,6 @@ public enum RobotEnd implements DocumentedEnum<RobotEnd>
       }
    }
 
-   @Override
    public RobotEnd[] getDocumentedValues()
    {
       return values;

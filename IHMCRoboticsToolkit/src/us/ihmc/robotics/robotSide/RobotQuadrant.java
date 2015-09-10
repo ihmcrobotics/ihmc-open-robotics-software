@@ -3,8 +3,6 @@ package us.ihmc.robotics.robotSide;
 import java.awt.Color;
 import java.util.ArrayList;
 
-import us.ihmc.tools.FormattingTools;
-
 public enum RobotQuadrant
 {
    FRONT_LEFT(RobotEnd.FRONT, RobotSide.LEFT),
@@ -342,7 +340,33 @@ public enum RobotQuadrant
    
    public String getCamelCaseNameForStartOfExpression()
    {
-      return FormattingTools.lowerCaseFirstLetter(getCamelCaseNameForMiddleOfExpression());
+      switch (this)
+      {
+         case FRONT_LEFT:
+         {
+            return "FrontLeft";
+         }
+   
+         case FRONT_RIGHT:
+         {
+            return "FrontRight";
+         }
+   
+         case HIND_RIGHT:
+         {
+            return "HindRight";
+         }
+   
+         case HIND_LEFT:
+         {
+            return "HindLeft";
+         }
+   
+         default:
+         {
+            throw new RuntimeException();
+         }
+      }
    }
    
    public String getCamelCaseNameForMiddleOfExpression()

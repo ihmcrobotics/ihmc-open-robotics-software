@@ -5,8 +5,8 @@ import java.util.Random;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.tools.random.RandomTools;
 
 public class HeadPosePacket extends Packet<HeadPosePacket>
 {

@@ -15,4 +15,6 @@ dependencies {
 
 	compile group: 'com.sun.jersey', name: 'jersey-core', version: '1.9'
 	compile group: 'com.sun.jersey', name: 'jersey-client', version: '1.9'
+   
+   testCompile project(':IHMCUnitTesting')
 }

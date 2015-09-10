@@ -1,8 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
+import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -10,7 +8,10 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
-import java.util.Random;
+
+import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.random.RandomTools;
 
 public class FramePose extends ReferenceFrameHolder
 {

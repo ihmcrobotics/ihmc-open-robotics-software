@@ -1,8 +1,8 @@
 package us.ihmc.communication.packets.manipulation;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.random.RandomTools;
 
 import java.util.Random;
 

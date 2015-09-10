@@ -1,15 +1,16 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
+import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3d;
-import java.util.Random;
+
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.random.RandomTools;
 
 // TODO: This should only be orientation. If you want a full transform, you want to use a FramePose.
 // So the transform3D should be replaced with a rotation matrix.

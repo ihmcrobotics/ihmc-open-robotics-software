@@ -29,8 +29,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.ArrayTools;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ArrayToolsTest
@@ -810,16 +808,6 @@ public class ArrayToolsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testGetReverseOrderedArrayCopy()
-   {
-      double[] array = generateDoubleArray();
-      double[] reversedCopyOfArray = ArrayTools.getReserveredOrderedArrayCopy(array);
-      
-      for(int i = 0; i < array.length; i++)
-         assertEquals(array[array.length - i - 1], reversedCopyOfArray[i], 0);
-   }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
@@ -857,36 +845,36 @@ public class ArrayToolsTest
       assertEquals(stringBuilder.toString(), outputStream.toString());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testDeltaEquals()
-   {
-      double[] array1 = generateDoubleArray();
-      double[] array2 = generateDoubleArray(array1.length);
-      
-      Double[] arrayOfDifferences = new Double[array1.length];
-      
-      for(int i = 0; i < array1.length; i++)
-         arrayOfDifferences[i] = Math.abs(array1[i] - array2[i]);
-      
-      double largestDifference = (Double) (Collections.max(Arrays.asList(arrayOfDifferences)));
-      System.out.println(largestDifference);
-      assertTrue(ArrayTools.deltaEquals(array1, array2, largestDifference + 1));
-      assertFalse(ArrayTools.deltaEquals(array1, array2, largestDifference - 1));
-   }
+//	@DeployableTestMethod(estimatedDuration = 0.0)
+//	@Test(timeout = 30000)
+//   public void testDeltaEquals()
+//   {
+//      double[] array1 = generateDoubleArray();
+//      double[] array2 = generateDoubleArray(array1.length);
+//      
+//      Double[] arrayOfDifferences = new Double[array1.length];
+//      
+//      for(int i = 0; i < array1.length; i++)
+//         arrayOfDifferences[i] = Math.abs(array1[i] - array2[i]);
+//      
+//      double largestDifference = (Double) (Collections.max(Arrays.asList(arrayOfDifferences)));
+//      System.out.println(largestDifference);
+//      assertTrue(ArrayTools.deltaEquals(array1, array2, largestDifference + 1));
+//      assertFalse(ArrayTools.deltaEquals(array1, array2, largestDifference - 1));
+//   }
 	
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-	public void testDeltaEqualsWithNull()
-	{
-	   double[] array1 = null;
-	   double[] array2 = null;
-	   double[] array3 = generateDoubleArray();
-	   double dummyDelta = 10e-2; // dummy value
-	   
-	   assertFalse(ArrayTools.deltaEquals(array1, array2, dummyDelta)); // 2 null arrays should return false
-	   assertFalse(ArrayTools.deltaEquals(array1, array3, dummyDelta));
-	}
+//	@DeployableTestMethod(estimatedDuration = 0.0)
+//	@Test(timeout = 30000)
+//	public void testDeltaEqualsWithNull()
+//	{
+//	   double[] array1 = null;
+//	   double[] array2 = null;
+//	   double[] array3 = generateDoubleArray();
+//	   double dummyDelta = 10e-2; // dummy value
+//	   
+//	   assertFalse(ArrayTools.deltaEquals(array1, array2, dummyDelta)); // 2 null arrays should return false
+//	   assertFalse(ArrayTools.deltaEquals(array1, array3, dummyDelta));
+//	}
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
@@ -1222,27 +1210,6 @@ public class ArrayToolsTest
 
       return array;
    }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testGetReversedArrayList()
-   {
-      ArrayList<Integer> arrayList = new ArrayList<Integer>();
-      ArrayList<Integer> arrayList2 = new ArrayList<Integer>();
-      arrayList.add(1);
-      arrayList.add(2);
-      arrayList.add(3);
-
-      arrayList2.add(3);
-      arrayList2.add(2);
-      arrayList2.add(1);
-
-      ArrayList<Integer> expectedReturn = arrayList2;
-      ArrayList<Integer> actualReturn = ArrayTools.getReversedArrayList(arrayList);
-      assertEquals("return value", expectedReturn, actualReturn);
-
-      /** @todo fill in the test code */
-   }
 	
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -1273,9 +1240,15 @@ public class ArrayToolsTest
    public void testGetArrayListFromArray()
    {
       Random random = new Random(1561361L);
-      int length = RandomTools.generateRandomInt(random, 0, 1000);
-      double amplitude = RandomTools.generateRandomDouble(random, 0.0, 100.0);
-      double[] array = RandomTools.generateRandomDoubleArray(random, length, amplitude);
+      int length = random.nextInt(1000);
+      double amplitude = 100.0 * random.nextDouble();
+      
+      
+      double[] array = new double[length];
+      for(int i = 0; i < length; i++)
+      {
+         array[i] = -0.5 * amplitude + amplitude * random.nextDouble();
+      }
       ArrayList<Double> arrayList = ArrayTools.getArrayListFromArray(array);
       
       for (int i = 0; i < array.length; i++)

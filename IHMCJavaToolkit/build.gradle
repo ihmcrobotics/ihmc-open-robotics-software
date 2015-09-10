@@ -19,29 +19,6 @@ jar {
    }
 }
 
-task bambooBabysitterDaemonJar(type: Jar) {
-    archiveName = "BambooBabysitterDaemon-1.4.jar"
-
-    from sourceSets.main.output
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-
-    /*from {
-        sourceSets.main.output
-
-        configurations.runtime.collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-
-        configurations.compile.collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }*/
-
-    manifest {
-        attributes 'Main-Class': 'us.ihmc.tools.agileTesting.agileDaemon.view.BambooBabysitterDaemon'
-    }
-}
-
 setupDefaultDirectoryStructure()
 
 setupDefaultRepositories()

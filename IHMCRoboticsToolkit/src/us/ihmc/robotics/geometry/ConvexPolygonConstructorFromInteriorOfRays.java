@@ -1,11 +1,13 @@
 package us.ihmc.robotics.geometry;
 
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import us.ihmc.tools.lists.RecyclingArrayList;
-
-import javax.vecmath.Point2d;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.vecmath.Point2d;
+
+import org.apache.commons.lang3.mutable.MutableBoolean;
+
+import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public class ConvexPolygonConstructorFromInteriorOfRays
 {

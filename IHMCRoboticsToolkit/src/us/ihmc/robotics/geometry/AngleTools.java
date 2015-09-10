@@ -1,12 +1,12 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.MathTools;
-import us.ihmc.tools.random.RandomTools;
+import java.util.Random;
 
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
-import java.util.Random;
+
+import us.ihmc.robotics.MathTools;
 
 public class AngleTools
 {
@@ -166,7 +166,7 @@ public class AngleTools
     */
    public static double generateRandomAngle(Random random)
    {
-      return RandomTools.generateRandomDoubleInRange(random, -2.0 * Math.PI, 2.0 * Math.PI);
+      return -2.0 * Math.PI + 4 * Math.PI * random.nextDouble();
    }
 
    /**

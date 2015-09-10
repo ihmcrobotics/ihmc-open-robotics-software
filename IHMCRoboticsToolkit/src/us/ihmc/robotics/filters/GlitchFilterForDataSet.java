@@ -1,10 +1,11 @@
 package us.ihmc.robotics.filters;
 
-import us.ihmc.tools.ArrayTools;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 public class GlitchFilterForDataSet
 {
@@ -22,7 +23,8 @@ public class GlitchFilterForDataSet
 
    public ArrayList<Double> getGlitchFilteredSet(ArrayList<Double> dataSetToFilter)
    {
-      return ArrayTools.getArrayListFromArray(getGlitchFilteredSet(ArrayTools.getArrayFromArrayList(dataSetToFilter)));
+      double[] filteredArray = getGlitchFilteredSet(ArrayUtils.toPrimitive(dataSetToFilter.toArray(new Double[dataSetToFilter.size()])));
+      return new ArrayList<Double>(Arrays.asList(ArrayUtils.toObject(filteredArray)));
    }
 
    public double[] getGlitchFilteredSet(double[] dataSetToFilter)
@@ -30,7 +32,7 @@ public class GlitchFilterForDataSet
       fractionOfPointsFilteredList = new ArrayList<Double>();
       numberOfPointsFilteredList = new ArrayList<Integer>();
 
-      double[] ret = ArrayTools.copyArray(dataSetToFilter);
+      double[] ret = Arrays.copyOf(dataSetToFilter, dataSetToFilter.length);
       int totalNumberOfPoints = ret.length;
 
       int numberOfRuns = 0;
@@ -88,7 +90,7 @@ public class GlitchFilterForDataSet
 
       //Replace all data points for the glitch indicies with smoothed points
 
-      double[] ret = ArrayTools.copyArray(dataToFilter);
+      double[] ret = Arrays.copyOf(dataToFilter, dataToFilter.length);
 
       replaceGlitchesWithSmoothedData(ret, listOfHighAccelIndecies);
 
@@ -177,7 +179,7 @@ public class GlitchFilterForDataSet
       if ((dataSetToFilter == null) || (2 * numberOfPointsOnEitherSideFormingWindow + 1) > dataSetToFilter.length)
          return dataSetToFilter;
 
-      double[] ret = ArrayTools.copyArray(dataSetToFilter);
+      double[] ret = Arrays.copyOf(dataSetToFilter, dataSetToFilter.length);
       for (int i = 0; i < (dataSetToFilter.length); i++)
       {
          double total = 0;
@@ -230,7 +232,7 @@ public class GlitchFilterForDataSet
 
       System.out.println("Actual number of glitches = " + glitchConter);
 
-      ArrayTools.printArray(glitchFilterForDataSet.getNumberOfPointsFiltered(), System.out);
+      System.out.println(glitchFilterForDataSet.getNumberOfPointsFiltered());
 
       System.out.print("dataFromJava=[");
       for (double value : data)

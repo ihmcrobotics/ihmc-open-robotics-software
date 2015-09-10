@@ -1,13 +1,14 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
+import java.util.Random;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Vector3d;
-import java.util.Random;
+
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.random.RandomTools;
 
 /**
  * <p>Title: FramePoint2d</p>

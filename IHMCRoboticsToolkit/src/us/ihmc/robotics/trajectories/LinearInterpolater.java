@@ -1,8 +1,7 @@
 package us.ihmc.robotics.trajectories;
 
-import us.ihmc.tools.ArrayTools;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class LinearInterpolater
@@ -30,7 +29,7 @@ public class LinearInterpolater
 
       if (!areXPointsInIncreasingOrder(xPoints))
       {
-         ArrayTools.printArray(xPoints, System.err);
+         System.err.println(Arrays.toString(xPoints));
 
          throw new RuntimeException("LinearInterpolater: xPoints must be in increasing order");
       }
@@ -72,7 +71,7 @@ public class LinearInterpolater
 
       if (!areXPointsInIncreasingOrder(xPoints))
       {
-         ArrayTools.printArray(xPoints, System.err);
+         System.err.println(Arrays.toString(xPoints));
 
          throw new Exception("LinearInterpolater: xPoints must be in increasing order");
       }
@@ -101,7 +100,7 @@ public class LinearInterpolater
 
       if (!areXPointsInIncreasingOrder(xPoints))
       {
-         ArrayTools.printArray(xPoints, System.err);
+         System.err.println(Arrays.toString(xPoints));
 
          throw new Exception("LinearInterpolater: xPoints must be in increasing order");
       }

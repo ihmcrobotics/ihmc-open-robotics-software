@@ -1,5 +1,12 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+
+import javax.swing.JFrame;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
@@ -17,16 +24,10 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.junit.Test;
+
 import us.ihmc.robotics.MathTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.thread.ThreadTools;
-
-import javax.swing.*;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class StateSpaceSystemDiscretizerTest
 {
@@ -179,7 +180,16 @@ public class StateSpaceSystemDiscretizerTest
       assertEquals("Regression Test. Only will be true for certain values. If failing, check changes.", 0.25136292086153883, squaredErrorDiscreteSimple, 1e-7);
 
       if (DISPLAY_GRAPHS_AND_SLEEP_FOREVER)
-         ThreadTools.sleepForever();
+         while(true)
+         {
+            try
+            {
+               Thread.sleep(10000);
+            }
+            catch (InterruptedException e)
+            {
+            }
+         }
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.1)

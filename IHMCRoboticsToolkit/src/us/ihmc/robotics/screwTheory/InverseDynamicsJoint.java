@@ -1,9 +1,9 @@
 package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.robotics.kinematics.CommonJoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.compare.GenericCRC32;
 
 public abstract interface InverseDynamicsJoint extends CommonJoint
 {

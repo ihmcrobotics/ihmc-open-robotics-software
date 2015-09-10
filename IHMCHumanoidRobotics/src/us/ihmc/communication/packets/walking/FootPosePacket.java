@@ -9,13 +9,13 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.random.RandomTools;
 
 @ClassDocumentation("This message commands the controller to move the desired foot to a given location\n"
                                   + "and orientation in world coordinates. This message is not intended to specify footsteps\n"

@@ -1,10 +1,11 @@
 package us.ihmc.robotics.sensors;
 
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.tools.compare.GenericCRC32;
 
 public class ForceSensorData implements ForceSensorDataReadOnly
 {

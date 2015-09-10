@@ -6,8 +6,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.random.RandomTools;
 
 public class DebrisData extends Packet<DebrisData>
 {

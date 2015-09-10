@@ -26,7 +26,7 @@ public class ForwardKinematicSolverTest
 	@Test(timeout = 30000)
    public void test() 
    {
-      NativeLibraryLoader.loadLibrary("us.ihmc.robotics.hierarchicalKinematics", "hik_java");
+      HikSupport.loadLibrary();
       model =  new RobotModel();
       model.loadURDF(getClass().getResource("test_collision.urdf").getPath(), false);
       forward_solver = new ForwardKinematicSolver(model);

@@ -1,8 +1,5 @@
 package us.ihmc.robotics.robotSide;
 
-import us.ihmc.tools.DocumentedEnum;
-import us.ihmc.tools.FormattingTools;
-
 import java.util.Random;
 
 /**
@@ -17,7 +14,7 @@ import java.util.Random;
  * @author not attributable
  * @version 1.0
  */
-public enum RobotSide implements DocumentedEnum<RobotSide>
+public enum RobotSide
 {
    LEFT, RIGHT;
 
@@ -50,7 +47,10 @@ public enum RobotSide implements DocumentedEnum<RobotSide>
 
    public String getCamelCaseNameForStartOfExpression()
    {
-      return FormattingTools.lowerCaseFirstLetter(getCamelCaseNameForMiddleOfExpression());
+      if (this == RIGHT)
+         return "right";
+      else
+         return "left";
    }
 
    public String getCamelCaseNameForMiddleOfExpression()
@@ -184,7 +184,6 @@ public enum RobotSide implements DocumentedEnum<RobotSide>
       System.out.println(side.toString());
    }
 
-   @Override
    public String getDocumentation(RobotSide var)
    {
       switch (var)
@@ -199,7 +198,6 @@ public enum RobotSide implements DocumentedEnum<RobotSide>
       }
    }
 
-   @Override
    public RobotSide[] getDocumentedValues()
    {
       return values;

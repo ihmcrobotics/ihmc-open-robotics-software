@@ -1,12 +1,9 @@
 package us.ihmc.robotics.trajectories;
 
-import us.ihmc.tools.DocumentedEnum;
-
-public enum TrajectoryType implements DocumentedEnum<TrajectoryType>
+public enum TrajectoryType
 {
    DEFAULT, BASIC, PUSH_RECOVERY, OBSTACLE_CLEARANCE;
 
-   @Override
    public String getDocumentation(TrajectoryType var)
    {
       switch (var)
@@ -25,7 +22,6 @@ public enum TrajectoryType implements DocumentedEnum<TrajectoryType>
       }
    }
 
-   @Override
    public TrajectoryType[] getDocumentedValues()
    {
       return values();

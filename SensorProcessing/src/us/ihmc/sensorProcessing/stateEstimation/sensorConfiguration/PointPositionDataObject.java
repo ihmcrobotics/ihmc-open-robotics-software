@@ -2,9 +2,9 @@ package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.tools.compare.GenericCRC32;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.GenericCRC32;
 
 public class PointPositionDataObject
 {

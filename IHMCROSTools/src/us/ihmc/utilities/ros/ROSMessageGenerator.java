@@ -200,6 +200,7 @@ public class ROSMessageGenerator
       }
       else if (clazz.isEnum())
       {
+         
          if (DocumentedEnum.class.isAssignableFrom(clazz))
          {
             DocumentedEnum[] enumList = (DocumentedEnum[]) clazz.getEnumConstants();

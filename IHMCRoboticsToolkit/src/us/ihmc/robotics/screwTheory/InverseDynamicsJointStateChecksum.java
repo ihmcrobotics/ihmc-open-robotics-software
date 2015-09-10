@@ -1,7 +1,5 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.tools.compare.GenericCRC32;
-
 public class InverseDynamicsJointStateChecksum extends AbstractInverseDynamicsChecksum
 {
 

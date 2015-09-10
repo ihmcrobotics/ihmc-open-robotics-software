@@ -1,13 +1,14 @@
 package us.ihmc.robotics.hyperCubeTree;
 
-import org.junit.Test;
-
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.thread.ThreadTools;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+
+import java.util.concurrent.locks.LockSupport;
+
+import org.junit.Test;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class HyperCubeTreeTest
 {
@@ -298,7 +299,7 @@ public class HyperCubeTreeTest
       for (int i = 0; i < 1000; i++)
       {
          this.startTime = System.nanoTime();
-         ThreadTools.sleep(1L);
+         LockSupport.parkNanos(1000000);
          averageTime = (averageTime >> alpha) * ((1 << alpha) - 1) + System.nanoTime() - startTime;
          averageSeconds = (double) averageTime * DIVISOR * 1e-9;
       }

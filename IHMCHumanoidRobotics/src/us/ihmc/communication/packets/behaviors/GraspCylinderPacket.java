@@ -1,8 +1,8 @@
 package us.ihmc.communication.packets.behaviors;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.random.RandomTools;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;

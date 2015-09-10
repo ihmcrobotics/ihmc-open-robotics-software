@@ -12,12 +12,12 @@ import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.geometry.TransformTools;
+import us.ihmc.tools.random.RandomTools;
 
 /**
  * User: Matt
