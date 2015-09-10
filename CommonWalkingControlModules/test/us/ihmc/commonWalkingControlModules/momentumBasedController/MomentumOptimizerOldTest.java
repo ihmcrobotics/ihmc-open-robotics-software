@@ -12,8 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;

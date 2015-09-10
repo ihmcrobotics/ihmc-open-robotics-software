@@ -5,7 +5,7 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point2d;

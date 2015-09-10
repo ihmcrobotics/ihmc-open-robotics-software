@@ -6,7 +6,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 
 public class ButtonData extends Packet<ButtonData>
 {

@@ -26,6 +26,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.imu.FusedIMUSensor;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -34,7 +35,6 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.DRCStateEstimatorInterface;
-import us.ihmc.tools.time.TimeTools;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 

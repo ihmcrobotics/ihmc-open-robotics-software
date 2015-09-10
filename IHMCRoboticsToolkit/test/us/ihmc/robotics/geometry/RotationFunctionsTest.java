@@ -17,7 +17,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationFunctions.ComparisonMode;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class RotationFunctionsTest

@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.time.TimeTools;
 
 public class TimeToolsTest
 {

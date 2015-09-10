@@ -3,12 +3,12 @@ package us.ihmc.robotics.kinematics;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.time.TimeTools;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;

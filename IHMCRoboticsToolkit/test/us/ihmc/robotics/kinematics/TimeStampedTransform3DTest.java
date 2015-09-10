@@ -2,7 +2,7 @@ package us.ihmc.robotics.kinematics;
 
 import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.Random;

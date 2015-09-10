@@ -40,7 +40,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.tools.time.TimeTools;
+import us.ihmc.robotics.time.TimeTools;
 
 public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 {

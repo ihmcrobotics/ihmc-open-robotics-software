@@ -9,9 +9,9 @@ import javax.vecmath.Point3d;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.random.RandomTools;
 
 public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
 {

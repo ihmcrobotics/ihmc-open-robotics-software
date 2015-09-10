@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.geometry.shapes.Box3d.FaceName;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 

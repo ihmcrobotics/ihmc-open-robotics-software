@@ -9,8 +9,8 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 

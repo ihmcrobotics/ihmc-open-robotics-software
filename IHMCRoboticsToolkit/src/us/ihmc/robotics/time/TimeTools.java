@@ -1,4 +1,4 @@
-package us.ihmc.tools.time;
+package us.ihmc.robotics.time;
 
 /**
  * Note that TimeUnit.[UNIT].convert(period, TimeUnit) exists as well.

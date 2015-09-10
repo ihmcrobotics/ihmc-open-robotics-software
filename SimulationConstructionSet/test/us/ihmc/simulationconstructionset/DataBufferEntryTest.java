@@ -9,7 +9,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class DataBufferEntryTest

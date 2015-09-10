@@ -9,11 +9,11 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.geometry.TransformTools;
+import us.ihmc.robotics.random.RandomTools;
 
 public class VehiclePosePacket extends Packet<VehiclePosePacket> implements TransformableDataObject<VehiclePosePacket>
 {

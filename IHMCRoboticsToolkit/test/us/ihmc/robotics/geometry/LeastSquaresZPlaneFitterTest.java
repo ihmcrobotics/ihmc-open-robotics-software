@@ -4,7 +4,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 

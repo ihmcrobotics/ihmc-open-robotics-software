@@ -9,10 +9,10 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class TimeStampedTransformBufferTest

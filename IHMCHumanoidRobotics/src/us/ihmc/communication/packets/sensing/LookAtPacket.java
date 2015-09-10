@@ -7,7 +7,7 @@ import javax.vecmath.Point3d;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 
 @ClassDocumentation("This message specifies a point in world coordinates for the robot to look at.\n"
                                   + "The controller will attempt to orient the head such that the point is within\n"

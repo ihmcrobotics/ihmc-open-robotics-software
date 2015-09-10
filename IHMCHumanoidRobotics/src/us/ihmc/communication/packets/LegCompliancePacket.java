@@ -3,8 +3,8 @@ package us.ihmc.communication.packets;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.random.RandomTools;
 
 import java.util.Random;
 

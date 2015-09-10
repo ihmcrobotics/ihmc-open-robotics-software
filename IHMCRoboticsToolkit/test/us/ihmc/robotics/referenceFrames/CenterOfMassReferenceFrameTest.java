@@ -3,13 +3,13 @@ package us.ihmc.robotics.referenceFrames;
 import org.junit.Test;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 

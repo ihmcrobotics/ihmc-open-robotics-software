@@ -13,12 +13,12 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.tools.random.RandomTools;
 
 @ClassDocumentation("Full configuration data for the robot")
 public class RobotConfigurationData extends IHMCRosApiPacket<RobotConfigurationData>

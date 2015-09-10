@@ -3,7 +3,7 @@ package us.ihmc.robotics.quadTree;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 

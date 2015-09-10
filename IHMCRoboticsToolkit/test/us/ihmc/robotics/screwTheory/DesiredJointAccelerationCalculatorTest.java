@@ -6,8 +6,8 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Vector3d;

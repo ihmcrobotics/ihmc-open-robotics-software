@@ -22,8 +22,8 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RigidBodyTransformTest;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 

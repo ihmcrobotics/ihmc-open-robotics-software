@@ -23,8 +23,8 @@ import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.random.RandomTools;
 
 @ClassDocumentation("Send whole body trajectories to the robot. A best effort is \n" +
                "made to execute the trajectory while balance is kept.\n"

@@ -5,8 +5,8 @@ import java.util.Random;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
 
 /**
  * One of the main goals of this class is to check, at runtime, that operations on vectors occur within the same Frame.

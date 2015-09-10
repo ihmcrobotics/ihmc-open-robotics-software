@@ -3,7 +3,7 @@ package us.ihmc.communication.packets.behaviors;
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 
 public class HumanoidBehaviorControlModePacket extends Packet<HumanoidBehaviorControlModePacket>
 {

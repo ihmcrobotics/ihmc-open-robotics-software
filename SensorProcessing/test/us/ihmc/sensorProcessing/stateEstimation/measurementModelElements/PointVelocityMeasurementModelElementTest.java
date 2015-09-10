@@ -20,12 +20,12 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
 import us.ihmc.sensorProcessing.stateEstimation.measurementModelElements.PointVelocityMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.robotics.screwTheory.RigidBody;

@@ -8,9 +8,9 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.tools.random.RandomTools;
 
 public class PosePlaybackExampleSequence
 {

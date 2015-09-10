@@ -22,14 +22,14 @@ import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.tools.time.TimeTools;
 
 public class AtlasNoSimPacketBlaster implements Runnable
 {

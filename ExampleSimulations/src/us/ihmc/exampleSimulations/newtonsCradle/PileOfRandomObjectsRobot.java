@@ -16,9 +16,9 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 
 public class PileOfRandomObjectsRobot
 {

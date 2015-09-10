@@ -18,7 +18,7 @@ import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.time.TimeTools;
+import us.ihmc.robotics.time.TimeTools;
 import boofcv.struct.calib.IntrinsicParameters;
 
 public class H264CompressedVideoDataServer implements NetStateListener, CompressedVideoDataServer

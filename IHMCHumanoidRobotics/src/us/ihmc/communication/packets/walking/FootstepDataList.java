@@ -11,11 +11,11 @@ import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.tools.ArrayTools;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @ClassDocumentation("This message commands the controller to execute a list of footsteps. See FootstepDataMessage\n"

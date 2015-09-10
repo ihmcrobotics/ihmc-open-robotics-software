@@ -10,8 +10,8 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
 
 public class FramePose extends ReferenceFrameHolder
 {

@@ -23,9 +23,9 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.testing.JUnitTools;

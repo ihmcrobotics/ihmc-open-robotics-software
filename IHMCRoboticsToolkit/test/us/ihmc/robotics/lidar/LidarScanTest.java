@@ -13,7 +13,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.RigidBodyTransformTest;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;

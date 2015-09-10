@@ -9,10 +9,10 @@ import org.junit.Test;
 
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFrameQuaternionControlFlowOutputPortTest

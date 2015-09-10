@@ -4,7 +4,7 @@ import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
-import us.ihmc.tools.random.RandomTools;
+import us.ihmc.robotics.random.RandomTools;
 
 public class HumanoidBehaviorControlModeResponsePacket extends Packet<HumanoidBehaviorControlModeResponsePacket>
 {

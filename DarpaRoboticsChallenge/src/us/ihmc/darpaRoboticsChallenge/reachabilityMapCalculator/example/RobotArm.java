@@ -12,10 +12,10 @@ import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.example.RobotPar
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;

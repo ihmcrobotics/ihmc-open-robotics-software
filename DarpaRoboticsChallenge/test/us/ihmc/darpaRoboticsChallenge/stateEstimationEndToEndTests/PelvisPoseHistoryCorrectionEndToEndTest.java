@@ -47,8 +47,10 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -63,10 +65,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.time.TimeTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 

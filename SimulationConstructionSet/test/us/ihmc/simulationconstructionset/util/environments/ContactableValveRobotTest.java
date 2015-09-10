@@ -26,13 +26,13 @@ import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.tools.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.random.RandomTools;
 
 public class ContactableValveRobotTest
 {

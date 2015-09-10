@@ -13,8 +13,8 @@ import javax.vecmath.Vector2d;
 
 import us.ihmc.robotics.geometry.ConvexPolygonTools.EmptyPolygonException;
 import us.ihmc.robotics.geometry.ConvexPolygonTools.OutdatedPolygonException;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.random.RandomTools;
 
 /**
  * <p>Title: ConvexPolygon2d</p>

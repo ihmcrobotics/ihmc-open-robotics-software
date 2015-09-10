@@ -23,6 +23,7 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
@@ -30,7 +31,6 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import us.ihmc.tools.time.TimeTools;
 
 public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorOutputMapReadOnly, SensorRawOutputMapReadOnly
 {
