@@ -5,7 +5,7 @@ import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionG
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.tools.time.TimeTools;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.yoUtilities.controllers.PDController;
 
 public class StepprFunctionGeneratorJointController extends StepprPDJointController
