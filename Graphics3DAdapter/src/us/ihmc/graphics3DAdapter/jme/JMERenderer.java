@@ -91,7 +91,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    public static boolean tickUpdated = false;
    
    private Object repaintNotifier = new Object(); // If we aren't rendering at a continuous FPS, this condition is used for waking up the renderer if a repaint is required
-   private boolean lazyRendering = true; // If lazy rendering is true, we render only when window repaint is needed
+   private boolean lazyRendering = false; // If lazy rendering is true, we render only when window repaint is needed
    private int lazyRendersToPerform = 10; // How many render loops to do after a lazy render wake-up call - some events such as resize or startup need multiple passes to properly reinstate the image
 
    static
