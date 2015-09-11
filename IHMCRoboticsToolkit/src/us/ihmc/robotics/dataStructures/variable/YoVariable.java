@@ -30,7 +30,7 @@ public abstract class YoVariable<T extends YoVariable<T>>
    public static final int MAX_LENGTH_SHORT_NAME = 20;
    public static boolean warnAboutNullRegistries = true;
 
-   protected String stackTraceAtInitialization;
+   protected transient String stackTraceAtInitialization;
    protected ArrayList<VariableChangedListener> variableChangedListeners;
    protected double manualMinScaling = 0.0, manualMaxScaling = 1.0, stepSize = 0.1;
 
