@@ -2,7 +2,7 @@ package us.ihmc.acsell.springs;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 
 public class HystereticSpringCalculator implements SpringCalculator {
 

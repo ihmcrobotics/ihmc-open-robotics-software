@@ -8,8 +8,8 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.steppr.hardware.StepprActuator;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 public abstract class AcsellActuatorCommand
 {
