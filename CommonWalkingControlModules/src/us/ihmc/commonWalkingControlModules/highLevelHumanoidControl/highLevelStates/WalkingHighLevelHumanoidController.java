@@ -47,6 +47,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.controllers.PDController;
+import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -75,8 +77,6 @@ import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionAction;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
-import us.ihmc.yoUtilities.controllers.PDController;
-import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 
 public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoidControlPattern

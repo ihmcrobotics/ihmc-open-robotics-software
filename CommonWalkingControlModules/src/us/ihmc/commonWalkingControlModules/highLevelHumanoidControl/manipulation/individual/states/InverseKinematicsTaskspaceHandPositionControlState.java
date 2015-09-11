@@ -13,6 +13,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.controllers.PIDController;
+import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -24,8 +26,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.yoUtilities.controllers.PIDController;
-import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class InverseKinematicsTaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceHandControlState

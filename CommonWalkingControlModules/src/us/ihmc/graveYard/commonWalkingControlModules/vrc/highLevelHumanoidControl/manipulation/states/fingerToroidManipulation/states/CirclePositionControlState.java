@@ -3,6 +3,7 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContr
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.FingerToroidManipulationState;
 import us.ihmc.tools.FormattingTools;
+import us.ihmc.robotics.controllers.SE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.trajectories.CirclePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
@@ -17,7 +18,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.yoUtilities.controllers.SE3PIDGains;
 
 
 

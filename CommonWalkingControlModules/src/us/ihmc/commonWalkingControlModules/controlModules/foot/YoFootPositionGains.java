@@ -2,13 +2,13 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import javax.vecmath.Matrix3d;
 
+import us.ihmc.robotics.controllers.GainCalculator;
+import us.ihmc.robotics.controllers.MatrixUpdater;
+import us.ihmc.robotics.controllers.YoPositionPIDGains;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.yoUtilities.controllers.GainCalculator;
-import us.ihmc.yoUtilities.controllers.MatrixUpdater;
-import us.ihmc.yoUtilities.controllers.YoPositionPIDGains;
 
 
 public class YoFootPositionGains implements YoPositionPIDGains
