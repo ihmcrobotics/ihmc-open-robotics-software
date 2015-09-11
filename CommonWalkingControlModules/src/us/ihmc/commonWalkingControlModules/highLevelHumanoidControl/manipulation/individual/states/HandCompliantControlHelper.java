@@ -13,11 +13,11 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.robotics.math.filters.DeadzoneYoFrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.yoUtilities.math.filters.DeadzoneYoFrameVector;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 public class HandCompliantControlHelper
 {

@@ -1,16 +1,16 @@
 package us.ihmc.kalman;
 
 import static org.ejml.ops.CommonOps.addEquals;
-import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.checkPositiveSemiDefinite;
-import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.getFromYoVariablesMatrix;
-import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.getFromYoVariablesSymmetric;
-import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.getFromYoVariablesVector;
-import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.populateYoVariablesMatrix;
-import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.populateYoVariablesSymmetricMatrix;
-import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.populateYoVariablesVector;
-import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.storeInYoVariablesMatrix;
-import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.storeInYoVariablesSymmetric;
-import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.storeInYoVariablesVector;
+import static us.ihmc.robotics.math.MatrixYoVariableConversionTools.checkPositiveSemiDefinite;
+import static us.ihmc.robotics.math.MatrixYoVariableConversionTools.getFromYoVariablesMatrix;
+import static us.ihmc.robotics.math.MatrixYoVariableConversionTools.getFromYoVariablesSymmetric;
+import static us.ihmc.robotics.math.MatrixYoVariableConversionTools.getFromYoVariablesVector;
+import static us.ihmc.robotics.math.MatrixYoVariableConversionTools.populateYoVariablesMatrix;
+import static us.ihmc.robotics.math.MatrixYoVariableConversionTools.populateYoVariablesSymmetricMatrix;
+import static us.ihmc.robotics.math.MatrixYoVariableConversionTools.populateYoVariablesVector;
+import static us.ihmc.robotics.math.MatrixYoVariableConversionTools.storeInYoVariablesMatrix;
+import static us.ihmc.robotics.math.MatrixYoVariableConversionTools.storeInYoVariablesSymmetric;
+import static us.ihmc.robotics.math.MatrixYoVariableConversionTools.storeInYoVariablesVector;
 
 import java.util.ArrayList;
 import java.util.List;

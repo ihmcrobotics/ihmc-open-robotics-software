@@ -21,12 +21,12 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.filters.FirstOrderBandPassFilteredYoVariable;
+import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable;
+import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable.FirstOrderFilterType;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.yoUtilities.math.filters.FirstOrderBandPassFilteredYoVariable;
-import us.ihmc.yoUtilities.math.filters.FirstOrderFilteredYoVariable;
-import us.ihmc.yoUtilities.math.filters.FirstOrderFilteredYoVariable.FirstOrderFilterType;
 
 public class WristForceSensorFilteredUpdatable implements Updatable
 {

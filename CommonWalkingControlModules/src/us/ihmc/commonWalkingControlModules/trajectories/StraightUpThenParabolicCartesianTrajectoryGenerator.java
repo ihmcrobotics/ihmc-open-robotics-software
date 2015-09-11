@@ -5,13 +5,13 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.trajectories.CartesianTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
+import us.ihmc.robotics.math.trajectories.YoParabolicTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
-import us.ihmc.yoUtilities.math.trajectories.CartesianTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.YoMinimumJerkTrajectory;
-import us.ihmc.yoUtilities.math.trajectories.YoParabolicTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
 
 public class StraightUpThenParabolicCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator

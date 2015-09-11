@@ -12,14 +12,14 @@ import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.filters.AccelerationLimitedYoVariable;
+import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.yoUtilities.math.filters.AccelerationLimitedYoVariable;
-import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoVariable;
 
 public class AccelerationLimitedYoVariableSCSTest
 {

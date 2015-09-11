@@ -33,7 +33,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 
 public class DataExporterExcelWorkbookCreator
 {

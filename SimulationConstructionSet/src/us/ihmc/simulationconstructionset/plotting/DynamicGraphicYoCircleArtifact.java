@@ -7,7 +7,7 @@ import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Drawing2DTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 
 
 public class DynamicGraphicYoCircleArtifact extends Artifact

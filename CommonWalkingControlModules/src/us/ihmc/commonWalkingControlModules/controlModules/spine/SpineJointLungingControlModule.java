@@ -20,6 +20,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CompositeRigidBodyInertia;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
@@ -30,7 +31,6 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoUtilities.controllers.PIDController;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 
 public class SpineJointLungingControlModule implements SpineLungingControlModule

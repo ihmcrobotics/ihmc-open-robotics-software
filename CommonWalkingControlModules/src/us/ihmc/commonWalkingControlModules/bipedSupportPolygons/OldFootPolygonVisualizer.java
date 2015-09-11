@@ -4,12 +4,12 @@ import java.awt.Color;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
-import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
 
 public class OldFootPolygonVisualizer implements Updatable

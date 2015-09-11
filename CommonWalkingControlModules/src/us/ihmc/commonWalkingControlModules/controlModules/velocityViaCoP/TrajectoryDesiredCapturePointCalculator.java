@@ -15,12 +15,12 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.math.frames.YoFrameLine2d;
+import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLine2d;
-import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
-import us.ihmc.yoUtilities.math.trajectories.YoMinimumJerkTrajectory;
 
 
 public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePointCalculator

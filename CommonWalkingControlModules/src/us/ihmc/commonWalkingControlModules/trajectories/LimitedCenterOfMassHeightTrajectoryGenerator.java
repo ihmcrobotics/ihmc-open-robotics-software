@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.math.trajectories.DoubleTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 
 
 public class LimitedCenterOfMassHeightTrajectoryGenerator implements DoubleTrajectoryGenerator

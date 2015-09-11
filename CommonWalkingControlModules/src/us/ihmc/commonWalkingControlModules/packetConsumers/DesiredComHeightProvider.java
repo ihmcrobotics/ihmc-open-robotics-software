@@ -11,8 +11,8 @@ import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.math.trajectories.WaypointPositionTrajectoryData;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
 
 import com.google.common.util.concurrent.AtomicDouble;
 

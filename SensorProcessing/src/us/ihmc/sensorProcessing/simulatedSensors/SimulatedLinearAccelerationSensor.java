@@ -6,10 +6,10 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 
 public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3d>

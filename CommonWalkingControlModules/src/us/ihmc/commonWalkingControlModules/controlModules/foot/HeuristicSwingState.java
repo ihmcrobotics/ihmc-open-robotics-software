@@ -17,6 +17,10 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.providers.YoSE3ConfigurationProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.CurrentConfigurationProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
@@ -26,10 +30,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
-import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
-import us.ihmc.yoUtilities.math.trajectories.providers.YoSE3ConfigurationProvider;
 
 public class HeuristicSwingState extends AbstractFootControlState implements SwingStateInterface
 {

@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class StackOfBouncyBallsRobot extends Robot
 {

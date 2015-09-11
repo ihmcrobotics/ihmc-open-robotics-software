@@ -9,16 +9,16 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.WaypointOrientationTrajectoryData;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
-import us.ihmc.yoUtilities.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.OrientationTrajectoryGeneratorInMultipleFrames;
-import us.ihmc.yoUtilities.math.trajectories.SimpleOrientationTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.WaypointOrientationTrajectoryData;
 
 
 public class ChestOrientationManager

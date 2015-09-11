@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import javax.vecmath.Point2d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
 
 public class FourPointSpline1D
