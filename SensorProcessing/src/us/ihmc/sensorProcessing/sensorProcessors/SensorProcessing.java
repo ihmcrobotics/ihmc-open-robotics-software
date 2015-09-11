@@ -27,18 +27,18 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.math.filters.BacklashCompensatingVelocityYoVariable;
+import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.robotics.math.filters.ProcessingYoVariable;
+import us.ihmc.robotics.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
+import us.ihmc.robotics.math.frames.YoFrameQuaternion;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameQuaternion;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.yoUtilities.math.filters.BacklashCompensatingVelocityYoVariable;
-import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoVariable;
-import us.ihmc.yoUtilities.math.filters.ProcessingYoVariable;
-import us.ihmc.yoUtilities.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
-import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutputMapReadOnly
 {

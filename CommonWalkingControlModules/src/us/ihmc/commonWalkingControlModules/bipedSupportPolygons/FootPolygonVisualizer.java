@@ -8,10 +8,10 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
-import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
 
 public class FootPolygonVisualizer implements Updatable

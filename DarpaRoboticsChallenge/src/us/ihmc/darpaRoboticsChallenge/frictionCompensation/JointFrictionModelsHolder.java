@@ -5,10 +5,10 @@ import java.util.EnumMap;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionState;
 import us.ihmc.systemIdentification.frictionId.frictionModels.JointFrictionModel;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 
 public abstract class JointFrictionModelsHolder

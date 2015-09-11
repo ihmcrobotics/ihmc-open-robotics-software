@@ -7,9 +7,9 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 
 public class SineWaveDesiredPelvisOrientationControlModule implements DesiredPelvisOrientationControlModule

@@ -3,8 +3,8 @@ package us.ihmc.darpaRoboticsChallenge.sensors;
 import java.util.ArrayList;
 
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
+import us.ihmc.robotics.math.YoVariableLimitChecker;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.yoUtilities.math.YoVariableLimitChecker;
 
 
 public class RobotJointLimitWatcherForUI extends RobotJointLimitWatcher

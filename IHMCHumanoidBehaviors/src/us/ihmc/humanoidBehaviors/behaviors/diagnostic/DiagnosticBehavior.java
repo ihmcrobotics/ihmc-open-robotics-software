@@ -74,6 +74,11 @@ import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFrameOrientation;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -94,11 +99,6 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint;
-import us.ihmc.yoUtilities.math.frames.YoFramePose;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
 public class DiagnosticBehavior extends BehaviorInterface
 {

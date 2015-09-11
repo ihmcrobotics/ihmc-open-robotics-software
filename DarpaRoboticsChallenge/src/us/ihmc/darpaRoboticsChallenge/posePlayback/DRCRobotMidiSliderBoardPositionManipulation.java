@@ -30,6 +30,8 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -47,8 +49,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicLineSegment;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint;
-import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
 public class DRCRobotMidiSliderBoardPositionManipulation
 {

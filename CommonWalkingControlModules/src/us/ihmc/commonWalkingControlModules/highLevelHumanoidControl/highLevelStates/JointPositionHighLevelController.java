@@ -44,6 +44,10 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -60,13 +64,9 @@ import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.math.frames.YoFramePose;
 import us.ihmc.yoUtilities.math.trajectories.CirclePoseTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.SteeringPoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePoseTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 public class JointPositionHighLevelController extends HighLevelBehavior implements Stoppable
 {   

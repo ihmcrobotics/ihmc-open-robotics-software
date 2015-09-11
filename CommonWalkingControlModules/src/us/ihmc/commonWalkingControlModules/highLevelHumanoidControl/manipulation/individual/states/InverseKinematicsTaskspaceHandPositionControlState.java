@@ -17,6 +17,8 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
+import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -25,8 +27,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.math.filters.RateLimitedYoVariable;
-import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 
 public class InverseKinematicsTaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceHandControlState
 {

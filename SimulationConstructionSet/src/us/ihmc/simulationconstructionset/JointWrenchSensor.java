@@ -4,7 +4,7 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class JointWrenchSensor
 {

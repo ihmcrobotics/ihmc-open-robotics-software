@@ -12,6 +12,10 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.providers.YoPositionProvider;
+import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantVectorProvider;
@@ -20,10 +24,6 @@ import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint;
-import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.providers.YoPositionProvider;
-import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 public class PushRecoveryTrajectoryGeneratorTest
 {

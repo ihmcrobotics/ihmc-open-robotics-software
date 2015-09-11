@@ -6,10 +6,10 @@ import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoUtilities.controllers.PDController;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 
 public class SwingLegCompensationPelvisHeightControlModule implements PelvisHeightControlModule

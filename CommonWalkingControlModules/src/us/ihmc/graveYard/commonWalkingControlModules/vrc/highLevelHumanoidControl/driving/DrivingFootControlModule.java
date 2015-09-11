@@ -21,6 +21,12 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.providers.YoPositionProvider;
+import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.AverageVelocityTrajectoryTimeProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
@@ -39,12 +45,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
-import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.providers.YoPositionProvider;
-import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 
 /**

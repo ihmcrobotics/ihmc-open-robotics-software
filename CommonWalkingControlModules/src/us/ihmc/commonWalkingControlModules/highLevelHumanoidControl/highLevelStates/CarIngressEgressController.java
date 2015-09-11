@@ -31,6 +31,13 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.trajectories.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.WaypointPositionTrajectoryData;
+import us.ihmc.robotics.math.trajectories.providers.YoPositionProvider;
+import us.ihmc.robotics.math.trajectories.providers.YoQuaternionProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
@@ -39,13 +46,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.yoUtilities.controllers.GainCalculator;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
-import us.ihmc.yoUtilities.math.trajectories.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
-import us.ihmc.yoUtilities.math.trajectories.providers.YoPositionProvider;
-import us.ihmc.yoUtilities.math.trajectories.providers.YoQuaternionProvider;
 
 public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern
 {

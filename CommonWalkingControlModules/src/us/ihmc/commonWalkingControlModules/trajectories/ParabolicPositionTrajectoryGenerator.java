@@ -5,12 +5,12 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
+import us.ihmc.robotics.math.trajectories.YoParabolicTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
-import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.YoMinimumJerkTrajectory;
-import us.ihmc.yoUtilities.math.trajectories.YoParabolicTrajectoryGenerator;
 
 
 public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryGenerator

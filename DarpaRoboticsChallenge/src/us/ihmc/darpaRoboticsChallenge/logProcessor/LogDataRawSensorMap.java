@@ -13,12 +13,12 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.robotics.math.frames.YoFrameQuaternion;
+import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
-import us.ihmc.yoUtilities.math.frames.YoFrameVariableNameTools;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 public class LogDataRawSensorMap
 {

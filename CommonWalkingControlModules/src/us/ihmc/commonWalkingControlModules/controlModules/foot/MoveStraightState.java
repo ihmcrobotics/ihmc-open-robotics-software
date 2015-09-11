@@ -6,6 +6,10 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.providers.YoSE3ConfigurationProvider;
+import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ChangeableConfigurationProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantVectorProvider;
@@ -14,10 +18,6 @@ import us.ihmc.robotics.trajectories.providers.SettablePositionProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
-import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.providers.YoSE3ConfigurationProvider;
-import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 public class MoveStraightState extends AbstractUnconstrainedState
 {

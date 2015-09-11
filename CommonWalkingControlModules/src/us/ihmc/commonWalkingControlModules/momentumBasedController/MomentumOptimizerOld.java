@@ -6,6 +6,8 @@ import org.ejml.ops.CommonOps;
 import us.fed.fs.fpl.optimization.Lmdif_fcn;
 import us.fed.fs.fpl.optimization.Minpack_f77;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.MatrixYoVariableConversionTools;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -16,8 +18,6 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Momentum;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 
 public abstract class MomentumOptimizerOld implements Lmdif_fcn

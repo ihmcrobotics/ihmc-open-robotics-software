@@ -11,11 +11,11 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoUtilities.controllers.AxisAngleOrientationController;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 
 public class SpineOrientationInHeadingFrameControlModule implements SpineControlModule

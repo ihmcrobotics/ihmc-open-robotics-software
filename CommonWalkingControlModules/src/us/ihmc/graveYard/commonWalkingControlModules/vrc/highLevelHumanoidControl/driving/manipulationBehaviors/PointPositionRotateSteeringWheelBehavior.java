@@ -11,6 +11,8 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.trajectories.CirclePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -20,8 +22,6 @@ import us.ihmc.utilities.taskExecutor.Task;
 import us.ihmc.yoUtilities.controllers.EuclideanPositionController;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.math.trajectories.CirclePositionTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 
 /**

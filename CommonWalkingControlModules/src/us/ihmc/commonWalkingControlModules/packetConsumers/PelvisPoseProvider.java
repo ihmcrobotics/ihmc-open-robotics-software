@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.math.trajectories.WaypointOrientationTrajectoryData;
+import us.ihmc.robotics.math.trajectories.WaypointPositionTrajectoryData;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoUtilities.math.trajectories.WaypointOrientationTrajectoryData;
-import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
 
 public interface PelvisPoseProvider
 {

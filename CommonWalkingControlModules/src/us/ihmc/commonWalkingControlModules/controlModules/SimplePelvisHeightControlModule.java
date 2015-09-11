@@ -4,9 +4,9 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisHeightC
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoUtilities.controllers.PDController;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 
 public class SimplePelvisHeightControlModule implements PelvisHeightControlModule

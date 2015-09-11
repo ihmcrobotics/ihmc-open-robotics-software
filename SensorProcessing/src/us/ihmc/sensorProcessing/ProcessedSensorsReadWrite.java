@@ -11,7 +11,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RotationFunctions;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class ProcessedSensorsReadWrite implements ProcessedIMUSensorsReadOnlyInterface, ProcessedIMUSensorsWriteOnlyInterface
 {

@@ -8,10 +8,10 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.yoUtilities.math.YoSignalDerivative;
-import us.ihmc.yoUtilities.math.YoSignalDerivative.DifferentiationMode;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.robotics.math.YoSignalDerivative;
+import us.ihmc.robotics.math.YoSignalDerivative.DifferentiationMode;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 
 
 /**

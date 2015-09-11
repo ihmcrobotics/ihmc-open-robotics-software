@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.posePlayback;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
 
 public class PlaybackPoseInterpolator

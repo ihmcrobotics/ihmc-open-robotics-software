@@ -25,6 +25,8 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -33,8 +35,6 @@ import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 @DeployableTestClass(targets = {TestPlanTarget.UI})
 public class SmoothICPComputerTest

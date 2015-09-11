@@ -8,6 +8,8 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -15,8 +17,6 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
 
 public class SmoothenedConstantCoPICPTrajectoryGenerator

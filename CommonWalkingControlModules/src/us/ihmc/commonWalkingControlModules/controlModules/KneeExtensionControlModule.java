@@ -5,8 +5,8 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorquesInterfa
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoUtilities.math.trajectories.YoMinimumJerkTrajectory;
 
 
 public class KneeExtensionControlModule

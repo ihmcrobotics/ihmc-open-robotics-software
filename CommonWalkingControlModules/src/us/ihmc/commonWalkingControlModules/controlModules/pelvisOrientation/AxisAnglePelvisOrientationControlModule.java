@@ -7,12 +7,12 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoUtilities.controllers.AxisAngleOrientationController;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 
 public class AxisAnglePelvisOrientationControlModule implements PelvisOrientationControlModule

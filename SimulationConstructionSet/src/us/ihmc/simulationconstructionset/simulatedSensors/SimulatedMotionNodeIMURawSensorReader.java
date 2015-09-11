@@ -4,11 +4,11 @@ import javax.vecmath.Matrix3d;
 
 import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.corruptors.NoisyDoubleYoVariable;
+import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.yoUtilities.math.corruptors.NoisyDoubleYoVariable;
-import us.ihmc.yoUtilities.math.corruptors.NoisyYoRotationMatrix;
 
 public class SimulatedMotionNodeIMURawSensorReader extends SimulatedIMURawSensorReader
 {

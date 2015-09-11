@@ -12,6 +12,12 @@ import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
+import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
@@ -19,12 +25,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFramePoint2d;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector2d;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoFrameVector2d;
-import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoVariable;
-import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 
 /**
  * The FootRotationCalculator is a tool to detect if the foot is rotating around a steady line of rotation.

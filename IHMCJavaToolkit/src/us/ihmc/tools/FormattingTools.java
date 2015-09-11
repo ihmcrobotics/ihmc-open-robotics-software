@@ -48,6 +48,12 @@ public class FormattingTools
       return shifted / magnitude;
    }
 
+   /**
+    * Use StringUtils.captilize
+    * @param s
+    * @return
+    */
+   @Deprecated
    public static String capitalizeFirstLetter(String s)
    {
       if (s.length() == 0)
@@ -56,6 +62,12 @@ public class FormattingTools
       return s.substring(0, 1).toUpperCase() + s.substring(1);
    }
    
+   /**
+    * Use StringUtils.uncaptilize
+    * @param s
+    * @return
+    */
+   @Deprecated
    public static String lowerCaseFirstLetter(String s)
    {
       if (s.length() == 0)
