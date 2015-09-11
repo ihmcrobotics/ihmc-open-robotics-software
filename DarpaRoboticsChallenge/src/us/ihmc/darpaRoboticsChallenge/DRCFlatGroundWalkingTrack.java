@@ -20,8 +20,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 
 
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class DRCFlatGroundWalkingTrack
 {

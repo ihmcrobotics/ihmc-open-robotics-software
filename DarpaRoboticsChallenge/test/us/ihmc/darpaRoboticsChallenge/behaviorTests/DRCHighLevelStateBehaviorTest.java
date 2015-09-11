@@ -17,6 +17,7 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HighLevelStateBehavior;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -25,7 +26,6 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInterface
 {

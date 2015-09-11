@@ -51,7 +51,7 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
-import us.ihmc.yoUtilities.time.GlobalTimer;
+import us.ihmc.robotics.time.GlobalTimer;
 
 public class DRCSimulationTestHelper
 {

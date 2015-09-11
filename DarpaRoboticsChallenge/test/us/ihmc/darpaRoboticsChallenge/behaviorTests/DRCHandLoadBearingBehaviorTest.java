@@ -33,7 +33,7 @@ import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoUtilities.time.GlobalTimer;
+import us.ihmc.robotics.time.GlobalTimer;
 
 public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestInterface
 {

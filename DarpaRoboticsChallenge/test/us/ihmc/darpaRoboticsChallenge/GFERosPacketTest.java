@@ -41,6 +41,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMap;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
@@ -59,7 +60,6 @@ import us.ihmc.wholeBodyController.DRCSimulationOutputWriter;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class GFERosPacketTest implements MultiRobotTestInterface
 {

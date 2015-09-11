@@ -52,6 +52,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.robotics.stateMachines.StateMachinesJPanel;
+import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
@@ -102,7 +103,6 @@ import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 /**
  * <p>Title: SimulationConstructionSet</p>

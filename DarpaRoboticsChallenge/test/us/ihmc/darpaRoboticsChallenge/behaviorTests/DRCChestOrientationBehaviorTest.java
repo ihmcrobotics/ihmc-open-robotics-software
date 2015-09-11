@@ -28,9 +28,9 @@ import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestInterface
 {

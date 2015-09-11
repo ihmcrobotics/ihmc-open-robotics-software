@@ -16,6 +16,7 @@ import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -30,7 +31,6 @@ import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterface
 {

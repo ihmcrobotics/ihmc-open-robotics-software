@@ -6,7 +6,7 @@ import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.time.CallFrequencyCalculator;
+import us.ihmc.robotics.time.CallFrequencyCalculator;
 
 public class Example_TrackMultipleRigidBodies implements MocapRigidbodiesListener
 {

@@ -27,8 +27,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoUtilities.time.ExecutionTimer;
 
 
 public class MomentumControlModuleBridge implements MomentumControlModule

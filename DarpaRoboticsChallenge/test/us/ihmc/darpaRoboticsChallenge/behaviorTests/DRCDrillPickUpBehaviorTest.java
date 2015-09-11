@@ -30,7 +30,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoUtilities.time.GlobalTimer;
+import us.ihmc.robotics.time.GlobalTimer;
 
 import com.jme3.math.Vector3f;
 

@@ -38,7 +38,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoUtilities.time.GlobalTimer;
+import us.ihmc.robotics.time.GlobalTimer;
 
 public abstract class DRCDetectCollisionUsingWristSensorTest implements MultiRobotTestInterface
 {

@@ -33,7 +33,7 @@ import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoUtilities.time.GlobalTimer;
+import us.ihmc.robotics.time.GlobalTimer;
 
 public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterface
 {
