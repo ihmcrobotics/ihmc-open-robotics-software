@@ -459,14 +459,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 		
 		@Override
 		public void stop() {
-			if (myGUI.getGraphics3dAdapter() != null)
+			if (myGUI != null && myGUI.getGraphics3dAdapter() != null)
 				myGUI.getGraphics3dAdapter().pause();
 			
 		}
 		
 		@Override
 		public void play(double realTimeRate) {
-			if (myGUI.getGraphics3dAdapter() != null)
+			if (myGUI != null && myGUI.getGraphics3dAdapter() != null)
 				myGUI.getGraphics3dAdapter().play();
 			
 		}
