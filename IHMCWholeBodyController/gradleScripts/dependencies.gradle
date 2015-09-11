@@ -9,7 +9,6 @@ dependencies {
 	compile project(':IHMCHumanoidRobotics')
 	compile project(':IHMCRealtime')
 	compile project(':IHMCUtilities')
-	compile project(':IHMCYoUtilities')
 	compile project(':SDFLoader')
 	compile project(':SensorProcessing')
 	compile project(':SimulationConstructionSet')

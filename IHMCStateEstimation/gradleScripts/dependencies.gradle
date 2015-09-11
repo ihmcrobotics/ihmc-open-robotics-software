@@ -5,7 +5,6 @@ dependencies {
  	compile project(':IHMCCommunication')
  	compile project(':IHMCControlFlow')
  	compile project(':IHMCUtilities')
- 	compile project(':IHMCYoUtilities')
 	compile project(':SensorProcessing')
 	compile project(':Graphics3DAdapter')
 	compile project(':SimulationConstructionSet')

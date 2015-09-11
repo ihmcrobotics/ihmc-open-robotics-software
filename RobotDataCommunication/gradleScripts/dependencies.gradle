@@ -17,7 +17,6 @@ dependencies {
 	compile project(':Graphics3DAdapter')
 	compile project(':IHMCRealtime')
 	compile project(':IHMCUtilities')
-	compile project(':IHMCYoUtilities')
 	compile project(':Plotting')
 	compile project(':SDFLoader')
 	compile project(':SimulationConstructionSet')
