@@ -7,7 +7,6 @@ dependencies {
 	compile project(':CommonWalkingControlModules')
 	compile project(':IHMCCommunication')
 	compile project(':SDFLoader')
-	compile project(':IHMCYoUtilities')
 	compile project(':SimulationConstructionSet')
 	compile project(':IHMCWholeBodyController')
 	compile project(':IHMCJavaToolkit')

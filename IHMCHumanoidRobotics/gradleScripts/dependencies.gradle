@@ -9,7 +9,6 @@ dependencies
     compile project(':IHMCRoboticsToolkit')
     compile project(':IHMCCommunication')
     testCompile project(':IHMCCommunication').sourceSets.test.output
-    compile project(':IHMCYoUtilities')
     compile project(':SDFLoader')
     compile project(':SensorProcessing')
     testCompile project(':IHMCUnitTesting')

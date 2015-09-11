@@ -13,7 +13,6 @@ dependencies {
 	compile project(':IHMCHumanoidRobotics')
 	compile project(':CommonWalkingControlModules')
 	compile project(':SimulationConstructionSet')
-	compile project(':IHMCYoUtilities')
 	compile project(':RobotDataCommunication')
     compile project(':PathGeneration')
 	compile project(':Planning')

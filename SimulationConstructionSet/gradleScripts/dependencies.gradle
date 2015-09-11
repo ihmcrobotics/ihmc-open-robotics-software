@@ -37,7 +37,6 @@ dependencies {
 	}
 	
 	compile project(':IHMCUtilities')
-	compile project(':IHMCYoUtilities')
 	testCompile project(':IHMCUtilities').sourceSets.test.output
 	testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
     compile project(':Plotting')
