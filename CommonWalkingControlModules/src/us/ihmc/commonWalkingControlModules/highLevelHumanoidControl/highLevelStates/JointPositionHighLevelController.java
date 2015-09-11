@@ -33,6 +33,9 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.MultiJointPositionPro
 import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
+import us.ihmc.commonWalkingControlModules.trajectories.CirclePoseTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.SteeringPoseTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
@@ -64,9 +67,6 @@ import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.math.trajectories.CirclePoseTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.SteeringPoseTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.StraightLinePoseTrajectoryGenerator;
 
 public class JointPositionHighLevelController extends HighLevelBehavior implements Stoppable
 {   

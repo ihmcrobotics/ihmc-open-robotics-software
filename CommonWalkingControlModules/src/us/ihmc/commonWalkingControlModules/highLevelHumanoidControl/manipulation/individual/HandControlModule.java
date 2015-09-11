@@ -25,6 +25,12 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
+import us.ihmc.commonWalkingControlModules.trajectories.CirclePoseTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.FinalApproachPoseTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.InitialClearancePoseTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.LeadInOutPoseTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseTrajectoryGenerator;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.MathTools;
@@ -68,12 +74,6 @@ import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionAction;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.math.trajectories.CirclePoseTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.FinalApproachPoseTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.InitialClearancePoseTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.LeadInOutPoseTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.StraightLinePoseTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.VelocityConstrainedPoseTrajectoryGenerator;
 
 public class HandControlModule
 {
