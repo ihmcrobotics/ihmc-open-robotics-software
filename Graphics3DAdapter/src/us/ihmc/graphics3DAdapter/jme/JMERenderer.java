@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 import javax.vecmath.Color3f;
 
+import com.jme3.profile.AppStep;
 import org.jmonkeyengine.scene.plugins.ogre.MaterialLoader;
 
 import com.google.common.collect.HashBiMap;
@@ -90,7 +91,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    private final RenderType renderType;
    public static boolean tickUpdated = false;
    
-   private Object repaintNotifier = new Object(); // If we aren't rendering at a continuous FPS, this condition is used for waking up the renderer if a repaint is required
+   private final Object repaintNotifier = new Object(); // If we aren't rendering at a continuous FPS, this condition is used for waking up the renderer if a repaint is required
    private boolean lazyRendering = false; // If lazy rendering is true, we render only when window repaint is needed
    private int lazyRendersToPerform = 10; // How many render loops to do after a lazy render wake-up call - some events such as resize or startup need multiple passes to properly reinstate the image
 
@@ -384,7 +385,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
                   node.removeFromParent();
                   recursivelyRemoveNodesFromMap(rootNode);
                }
-               
+
                notifyRepaint();
 
                return node;
@@ -493,7 +494,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    public void simpleUpdate(float tpf)
    {
       if (alreadyClosing) return;
-      
+
 
       synchronized (graphicsConch)
       {
@@ -512,10 +513,10 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
       updateCameras();
       count++;
-      
+
       lazyRendersToPerform = Math.max(0, lazyRendersToPerform - 1);
-      
-      if (lazyRendering && lazyRendersToPerform <= 0 && gpuLidars.isEmpty()) {
+
+      /*if (lazyRendering && lazyRendersToPerform <= 0 && gpuLidars.isEmpty()) {
          synchronized (repaintNotifier) {
             try {
                repaintNotifier.wait();
@@ -523,8 +524,46 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
                // ignore
             }
          }
-      }
+      }*/
    }
+
+   /*@Override
+   public void update() {
+      if (prof!=null) prof.appStep(AppStep.BeginFrame);
+
+      super.update(); // makes sure to execute AppTasks
+      if (speed == 0 || paused) {
+         return;
+      }
+
+      float tpf = timer.getTimePerFrame() * speed;
+
+      // update states
+      if (prof!=null) prof.appStep(AppStep.StateManagerUpdate);
+      stateManager.update(tpf);
+
+      // simple update and root node
+      simpleUpdate(tpf);
+
+      if (prof!=null) prof.appStep(AppStep.SpatialUpdate);
+      rootNode.updateLogicalState(tpf);
+      guiNode.updateLogicalState(tpf);
+
+      rootNode.updateGeometricState();
+      guiNode.updateGeometricState();
+
+      // render states
+      if (prof!=null) prof.appStep(AppStep.StateManagerRender);
+      stateManager.render(renderManager);
+
+      if (prof!=null) prof.appStep(AppStep.RenderFrame);
+      if (!(lazyRendering && lazyRendersToPerform <= 0 && gpuLidars.isEmpty()))
+         renderManager.render(tpf, context.isRenderable());
+      simpleRender(renderManager);
+      stateManager.postRender();
+
+      if (prof!=null) prof.appStep(AppStep.EndFrame);
+   }*/
 
    private void updateCameras()
    {
