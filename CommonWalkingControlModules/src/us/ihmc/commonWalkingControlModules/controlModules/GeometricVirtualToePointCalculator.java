@@ -23,9 +23,9 @@ import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 
 public class GeometricVirtualToePointCalculator implements VirtualToePointCalculator

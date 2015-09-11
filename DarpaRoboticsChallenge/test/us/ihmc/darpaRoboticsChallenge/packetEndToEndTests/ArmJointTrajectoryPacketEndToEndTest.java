@@ -25,8 +25,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class ArmJointTrajectoryPacketEndToEndTest implements MultiRobotTestInterface
 {

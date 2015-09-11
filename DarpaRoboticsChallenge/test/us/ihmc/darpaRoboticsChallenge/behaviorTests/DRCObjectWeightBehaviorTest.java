@@ -21,7 +21,7 @@ import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoUtilities.time.GlobalTimer;
+import us.ihmc.robotics.time.GlobalTimer;
 
 public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInterface
 {

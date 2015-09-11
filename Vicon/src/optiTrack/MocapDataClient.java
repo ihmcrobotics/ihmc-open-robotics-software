@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.time.CallFrequencyCalculator;
+import us.ihmc.robotics.time.CallFrequencyCalculator;
 
 public class MocapDataClient
 {

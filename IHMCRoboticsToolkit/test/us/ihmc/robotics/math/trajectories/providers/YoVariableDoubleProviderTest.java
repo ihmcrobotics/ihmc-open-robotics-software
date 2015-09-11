@@ -1,4 +1,4 @@
-package us.ihmc.yoUtilities.math.trajectories.providers;
+package us.ihmc.robotics.math.trajectories.providers;
 
 import static org.junit.Assert.assertEquals;
 

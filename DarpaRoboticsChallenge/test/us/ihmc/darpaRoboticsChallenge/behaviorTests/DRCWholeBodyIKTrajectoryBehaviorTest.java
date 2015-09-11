@@ -26,9 +26,9 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.LockLevel;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCWholeBodyIKTrajectoryBehaviorTest implements MultiRobotTestInterface
 {

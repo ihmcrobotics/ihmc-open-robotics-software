@@ -4,10 +4,10 @@ package us.ihmc.simulationconstructionset.whiteBoard;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.robotController.SensorProcessor;
 import us.ihmc.simulationconstructionset.util.IndexOrderChecker;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class YoWhiteBoardReadController implements RobotController, SensorProcessor
 {

@@ -10,8 +10,8 @@ import us.ihmc.userInterface.ThirdPersonPerspective;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.time.CallFrequencyCalculator;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.time.CallFrequencyCalculator;
 
 public class IHMCMocapClient extends MocapDataClient
 {

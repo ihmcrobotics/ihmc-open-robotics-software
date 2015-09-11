@@ -34,8 +34,8 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCRemoveMultipleDebrisBehaviorTest implements MultiRobotTestInterface
 {
