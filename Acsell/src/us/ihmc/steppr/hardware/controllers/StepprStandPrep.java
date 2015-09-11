@@ -6,6 +6,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.utilities.maps.EnumDoubleMap;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -13,7 +14,6 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.yoUtilities.controllers.PDController;
 
 public class StepprStandPrep implements StepprController
 {

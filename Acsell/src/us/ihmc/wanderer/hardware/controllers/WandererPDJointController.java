@@ -3,11 +3,11 @@ package us.ihmc.wanderer.hardware.controllers;
 import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wanderer.parameters.WandererRobotModel;
-import us.ihmc.yoUtilities.controllers.PDController;
 
 public class WandererPDJointController implements WandererController
 {
