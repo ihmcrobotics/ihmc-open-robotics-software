@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisOrienta
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -12,7 +13,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.yoUtilities.controllers.AxisAngleOrientationController;
 
 
 public class AxisAnglePelvisOrientationControlModule implements PelvisOrientationControlModule

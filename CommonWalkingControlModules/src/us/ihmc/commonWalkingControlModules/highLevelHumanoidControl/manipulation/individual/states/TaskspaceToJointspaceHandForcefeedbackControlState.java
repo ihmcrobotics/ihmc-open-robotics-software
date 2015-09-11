@@ -12,6 +12,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.controllers.PIDController;
+import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -33,8 +35,6 @@ import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.yoUtilities.controllers.PIDController;
-import us.ihmc.yoUtilities.controllers.YoPIDGains;
 
 public class TaskspaceToJointspaceHandForcefeedbackControlState extends TrajectoryBasedTaskspaceHandControlState
 {

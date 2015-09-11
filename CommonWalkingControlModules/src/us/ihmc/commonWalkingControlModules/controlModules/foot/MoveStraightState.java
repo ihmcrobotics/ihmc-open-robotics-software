@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
+import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
@@ -17,7 +18,6 @@ import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.SettablePositionProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 
 public class MoveStraightState extends AbstractUnconstrainedState
 {

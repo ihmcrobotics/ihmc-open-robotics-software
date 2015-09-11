@@ -1,5 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import us.ihmc.robotics.controllers.SE3PIDController;
+import us.ihmc.robotics.controllers.SE3PIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoPositionPIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -11,11 +16,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.yoUtilities.controllers.SE3PIDController;
-import us.ihmc.yoUtilities.controllers.SE3PIDGains;
-import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
-import us.ihmc.yoUtilities.controllers.YoPositionPIDGains;
-import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 
 
 public class RigidBodySpatialAccelerationControlModule

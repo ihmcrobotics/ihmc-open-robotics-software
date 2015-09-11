@@ -11,6 +11,8 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.controllers.PDController;
+import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -28,8 +30,6 @@ import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.yoUtilities.controllers.PDController;
-import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 
 public class HeuristicSwingState extends AbstractFootControlState implements SwingStateInterface
 {

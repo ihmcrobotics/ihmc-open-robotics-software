@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -30,7 +31,6 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.yoUtilities.controllers.GainCalculator;
 
 
 /**
