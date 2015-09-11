@@ -19,9 +19,9 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.PlaybackListener;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 public class WandererExpoFrame extends JFrame implements PlaybackListener
 {

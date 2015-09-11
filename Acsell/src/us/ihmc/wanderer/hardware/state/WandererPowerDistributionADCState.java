@@ -6,8 +6,8 @@ import us.ihmc.acsell.hardware.state.AcsellPowerDistributionADCState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.wanderer.parameters.WandererRobotModel;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 public class WandererPowerDistributionADCState implements AcsellPowerDistributionADCState
 {

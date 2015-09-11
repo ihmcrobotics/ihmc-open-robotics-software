@@ -10,10 +10,10 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.yoUtilities.controllers.PDController;
-import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
 public class StepprStandPrep implements StepprController
 {
