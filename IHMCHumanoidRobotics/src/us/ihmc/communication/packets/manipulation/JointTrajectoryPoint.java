@@ -1,5 +1,6 @@
 package us.ihmc.communication.packets.manipulation;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
@@ -30,10 +31,16 @@ public class JointTrajectoryPoint
    public JointTrajectoryPoint(JointTrajectoryPoint jointTrajectoryPoint)
    {
       if (jointTrajectoryPoint.positions != null)
-            this.positions = ArrayTools.copyArray(jointTrajectoryPoint.positions);
+      {
+         double[] array = jointTrajectoryPoint.positions;
+         this.positions = Arrays.copyOf(array, array.length);
+      }
       
       if (jointTrajectoryPoint.velocities != null)
-         this.velocities = ArrayTools.copyArray(jointTrajectoryPoint.velocities);
+      {
+         double[] array1 = jointTrajectoryPoint.velocities;
+         this.velocities = Arrays.copyOf(array1, array1.length);
+      }
       
       this.time = jointTrajectoryPoint.time;
    }
