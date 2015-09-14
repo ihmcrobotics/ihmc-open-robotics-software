@@ -15,8 +15,8 @@ import javax.imageio.ImageIO;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ChessboardPoseEstimatorTest

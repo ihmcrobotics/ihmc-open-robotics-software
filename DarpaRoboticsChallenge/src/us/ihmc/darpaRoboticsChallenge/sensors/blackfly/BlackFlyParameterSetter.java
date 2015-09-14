@@ -7,8 +7,8 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.communication.packets.sensing.UIConnectedPacket;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.ros.RosDynamicReconfigure;
 import us.ihmc.utilities.ros.RosMainNode;
 

@@ -93,7 +93,7 @@ import us.ihmc.robotics.screwTheory.SixDoFJointReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.taskExecutor.NullTask;
 import us.ihmc.utilities.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;

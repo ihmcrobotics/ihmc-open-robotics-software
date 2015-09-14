@@ -15,12 +15,12 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.example.RobotArm;
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
-import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.tools.io.files.FileTools;
 
 public class ReachabilityMapFileWriter
 {

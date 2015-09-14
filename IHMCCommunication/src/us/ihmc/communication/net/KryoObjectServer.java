@@ -10,7 +10,8 @@ import com.esotericsoftware.kryonet.KryoSerialization;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Serialization;
 import com.esotericsoftware.kryonet.Server;
-import us.ihmc.utilities.io.printing.PrintTools;
+
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class KryoObjectServer extends KryoObjectCommunicator
 {

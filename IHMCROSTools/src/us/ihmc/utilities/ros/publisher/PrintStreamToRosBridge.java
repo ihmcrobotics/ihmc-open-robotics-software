@@ -3,7 +3,7 @@ package us.ihmc.utilities.ros.publisher;
 import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
 
-import us.ihmc.utilities.io.TimerBasedOutputStream;
+import us.ihmc.tools.io.TimerBasedOutputStream;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTopicEchoer;
 

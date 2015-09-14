@@ -16,8 +16,8 @@ import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBox;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionCylinder;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionSphere;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class SDFCollisionBoxProvider implements CollisionBoxProvider
 {

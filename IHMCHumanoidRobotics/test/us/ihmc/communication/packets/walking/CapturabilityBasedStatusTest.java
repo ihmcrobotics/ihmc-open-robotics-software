@@ -17,11 +17,11 @@ import us.ihmc.communication.net.KryoStreamDeSerializer;
 import us.ihmc.communication.net.KryoStreamSerializer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.utilities.io.files.FileTools;
 
 @DeployableTestClass(targets = TestPlanTarget.Fast)
 public class CapturabilityBasedStatusTest

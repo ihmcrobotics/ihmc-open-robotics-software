@@ -41,7 +41,6 @@ import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.communication.packets.wholebody.MultiJointAnglePacket;
 import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -65,6 +64,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 

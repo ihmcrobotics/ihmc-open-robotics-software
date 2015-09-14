@@ -15,7 +15,6 @@ import us.ihmc.pathGeneration.footstepGenerator.TurnStraightTurnFootstepGenerato
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
@@ -33,6 +32,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class WalkToLocationBehavior extends BehaviorInterface
 {

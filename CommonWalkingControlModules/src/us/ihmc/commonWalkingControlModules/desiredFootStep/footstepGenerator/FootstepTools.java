@@ -3,10 +3,10 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.io.printing.PrintTools;
 
 import javax.vecmath.Point2d;
 

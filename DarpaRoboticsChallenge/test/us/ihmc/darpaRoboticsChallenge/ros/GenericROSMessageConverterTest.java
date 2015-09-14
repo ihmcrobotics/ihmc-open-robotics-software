@@ -11,10 +11,10 @@ import org.ros.internal.message.Message;
 
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter;
 
 @DeployableTestClass(targets = TestPlanTarget.InDevelopment)

@@ -5,8 +5,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.utilities.io.DatagramInputStream;
-import us.ihmc.utilities.io.DatagramOutputStream;
+import us.ihmc.tools.io.DatagramInputStream;
+import us.ihmc.tools.io.DatagramOutputStream;
 
 public class UDPYoWhiteBoard extends DataStreamYoWhiteBoard
 {

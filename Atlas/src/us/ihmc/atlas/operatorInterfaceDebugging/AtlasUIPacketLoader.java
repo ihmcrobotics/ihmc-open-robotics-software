@@ -12,9 +12,9 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.utilities.io.files.FileTools;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.io.files.FileTools;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class AtlasUIPacketLoader
 {

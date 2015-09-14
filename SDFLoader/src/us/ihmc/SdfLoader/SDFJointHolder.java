@@ -7,8 +7,8 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class SDFJointHolder
 {
