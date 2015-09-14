@@ -3,7 +3,7 @@ package us.ihmc.communication.net;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
-import us.ihmc.utilities.TimestampProvider;
+import us.ihmc.tools.TimestampProvider;
 
 public class AtomicSettableTimestampProvider implements TimestampProvider
 {

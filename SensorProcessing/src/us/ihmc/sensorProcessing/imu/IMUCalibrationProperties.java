@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.imu;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.calibration.CalibrationProperties;
+import us.ihmc.tools.calibration.CalibrationProperties;
 
 public class IMUCalibrationProperties extends CalibrationProperties
 {

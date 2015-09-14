@@ -19,8 +19,8 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.utilities.time.DateTools;
-import us.ihmc.utilities.time.Timer;
+import us.ihmc.tools.time.DateTools;
+import us.ihmc.tools.time.Timer;
 
 public class AtlasUIPacketRecorder
 {

@@ -10,8 +10,8 @@ import java.util.Arrays;
 
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
-import us.ihmc.utilities.exceptions.NoConvergenceException;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;

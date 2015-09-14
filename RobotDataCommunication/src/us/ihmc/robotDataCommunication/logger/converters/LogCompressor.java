@@ -22,7 +22,7 @@ import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.logger.LogProperties;
 import us.ihmc.robotDataCommunication.logger.LogPropertiesReader;
 import us.ihmc.robotDataCommunication.logger.YoVariableLoggerListener;
-import us.ihmc.utilities.compression.SnappyUtils;
+import us.ihmc.tools.compression.SnappyUtils;
 
 public class LogCompressor extends SimpleFileVisitor<Path>
 {

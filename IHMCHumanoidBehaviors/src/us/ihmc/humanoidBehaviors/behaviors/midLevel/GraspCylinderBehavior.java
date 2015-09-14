@@ -19,7 +19,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.utilities.taskExecutor.PipeLine;
+import us.ihmc.tools.taskExecutor.PipeLine;
 
 public class GraspCylinderBehavior extends BehaviorInterface
 {

@@ -11,7 +11,7 @@ import java.util.List;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.simulationconstructionset.PlaybackListener;
-import us.ihmc.utilities.gui.CustomProgressMonitor;
+import us.ihmc.tools.gui.CustomProgressMonitor;
 
 public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
 {

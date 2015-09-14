@@ -10,13 +10,13 @@ dependencies {
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 	compile group: 'com.google.guava', name: 'guava', version: '17.0'
-	
+	compile group: 'org.yaml', name: 'snakeyaml', version: '1.13'
    compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'
 
 	
 	compile project(':Graphics3DAdapter')
 	compile project(':IHMCRealtime')
-	compile project(':IHMCUtilities')
+	
 	compile project(':Plotting')
 	compile project(':SDFLoader')
 	compile project(':SimulationConstructionSet')

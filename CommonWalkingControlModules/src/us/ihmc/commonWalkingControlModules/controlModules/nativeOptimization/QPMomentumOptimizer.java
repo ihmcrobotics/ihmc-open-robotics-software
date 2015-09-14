@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.utilities.exceptions.NoConvergenceException;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 /*
  *       [vd  ]'[ A' C A + Js' Ws Js + Lambda     0               ] [vd  ]  + 2 [vd  ]' [ -A' C b - Js' Ws ps          ]    +  b' C b + ps' Ws ps + Pprev' Wpsm Pprev + Ppavg' Wpcop Ppavg 

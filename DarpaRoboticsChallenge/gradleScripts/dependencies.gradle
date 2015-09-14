@@ -1,4 +1,3 @@
-evaluationDependsOn(':IHMCUtilities')
 evaluationDependsOn(':IHMCRoboticsToolkit')
 evaluationDependsOn(':IHMCJavaToolkit')
 evaluationDependsOn(':CommonWalkingControlModules')
@@ -44,7 +43,7 @@ dependencies {
 	compile project(':Graphics3DAdapter')
 	compile project(':IHMCControlFlow')
 	compile project(':IHMCSystemIdentification')
-	compile project(':IHMCUtilities')
+	
 	compile project(':ImageProcessing')
     compile project(':Plotting')
 	compile project(':RobotDataCommunication')
@@ -68,7 +67,7 @@ dependencies {
 
    testCompile project(':IHMCUnitTesting')
 	testCompile project(':CommonWalkingControlModules').sourceSets.test.output
-	testCompile project(':IHMCUtilities').sourceSets.test.output
+	testCompile project(':IHMCJavaToolkit').sourceSets.test.output
 	testCompile project(':IHMCHumanoidRobotics').sourceSets.test.output
 	testCompile project(':IHMCJavaToolkit').sourceSets.test.output
 	testCompile project(':IHMCCommunication').sourceSets.test.output

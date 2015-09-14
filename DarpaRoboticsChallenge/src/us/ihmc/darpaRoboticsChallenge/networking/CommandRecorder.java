@@ -9,8 +9,8 @@ import org.fest.util.Files;
 import us.ihmc.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngineSettings;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileSaver;
-import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 

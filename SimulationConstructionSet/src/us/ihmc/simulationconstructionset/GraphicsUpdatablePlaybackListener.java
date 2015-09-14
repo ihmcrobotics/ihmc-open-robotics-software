@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.gui.GraphicsUpdatable;
+import us.ihmc.tools.gui.GraphicsUpdatable;
 
 public class GraphicsUpdatablePlaybackListener implements PlaybackListener
 {

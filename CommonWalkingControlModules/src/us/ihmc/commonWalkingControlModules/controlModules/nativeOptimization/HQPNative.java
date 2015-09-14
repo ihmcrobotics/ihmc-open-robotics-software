@@ -6,8 +6,8 @@ import java.nio.DoubleBuffer;
 import java.util.Arrays;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
-import us.ihmc.utilities.exceptions.NoConvergenceException;
 
 public class HQPNative
 {

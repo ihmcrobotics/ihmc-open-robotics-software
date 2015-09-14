@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.processManagement;
 
 import org.apache.commons.lang3.SystemUtils;
 
-import us.ihmc.utilities.processManagement.FuzzyStringClassLauncher;
+import us.ihmc.tools.processManagement.FuzzyStringClassLauncher;
 
 public class DRCFuzzyStringClassLauncher extends FuzzyStringClassLauncher
 {

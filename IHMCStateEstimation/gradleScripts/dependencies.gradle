@@ -4,7 +4,7 @@ dependencies {
 	compile project(':CommonWalkingControlModules')
  	compile project(':IHMCCommunication')
  	compile project(':IHMCControlFlow')
- 	compile project(':IHMCUtilities')
+ 	
 	compile project(':SensorProcessing')
 	compile project(':Graphics3DAdapter')
 	compile project(':SimulationConstructionSet')

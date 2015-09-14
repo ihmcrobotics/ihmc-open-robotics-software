@@ -20,7 +20,7 @@ dependencies {
 	
 	compile project(':IHMCCommunication')
     compile project(':IHMCROSTools')
-	compile project(':IHMCUtilities')
+	
 	compile project(':IHMCWholeBodyController')
     compile project(':Planning')
     testCompile project(':Planning').sourceSets.test.output

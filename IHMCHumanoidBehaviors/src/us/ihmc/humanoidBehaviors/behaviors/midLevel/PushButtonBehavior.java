@@ -29,7 +29,7 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.taskExecutor.PipeLine;
+import us.ihmc.tools.taskExecutor.PipeLine;
 
 public class PushButtonBehavior extends BehaviorInterface
 {

@@ -8,8 +8,8 @@ import javax.vecmath.Quat4d;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.graphics3DAdapter.CameraAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class OffscreenBufferVideoServer

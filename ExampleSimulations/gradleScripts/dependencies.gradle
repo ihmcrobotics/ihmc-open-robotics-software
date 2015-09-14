@@ -4,7 +4,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 	
 				
-	compile project(':IHMCUtilities')
+	
 	compile project(':SimulationConstructionSet')
 	compile project(':Graphics3DAdapter')
 	compile project(':SensorProcessing')

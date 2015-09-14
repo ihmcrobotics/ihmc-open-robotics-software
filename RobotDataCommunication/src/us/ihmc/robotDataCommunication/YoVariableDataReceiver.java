@@ -4,7 +4,7 @@ import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
 import us.ihmc.multicastLogDataProtocol.ThreadedLogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
-import us.ihmc.utilities.compression.SnappyUtils;
+import us.ihmc.tools.compression.SnappyUtils;
 
 import java.io.IOException;
 import java.net.InetAddress;

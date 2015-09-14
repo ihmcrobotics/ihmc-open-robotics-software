@@ -3,7 +3,7 @@ package us.ihmc.graphics3DAdapter.jme.lidar;
 import java.util.concurrent.Callable;
 
 import us.ihmc.graphics3DAdapter.jme.JMERenderer;
-import us.ihmc.utilities.time.Timer;
+import us.ihmc.tools.time.Timer;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;

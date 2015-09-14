@@ -17,7 +17,7 @@ import us.ihmc.graphics3DAdapter.jme.context.PBOAwtPanelsContext;
 import us.ihmc.graphics3DAdapter.jme.input.JMEInputManager;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.utilities.time.Timer;
+import us.ihmc.tools.time.Timer;
 
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;

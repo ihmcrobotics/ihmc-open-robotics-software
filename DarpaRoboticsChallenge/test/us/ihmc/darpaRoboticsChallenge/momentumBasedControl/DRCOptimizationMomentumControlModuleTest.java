@@ -61,8 +61,8 @@ import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.utilities.exceptions.NoConvergenceException;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 /**

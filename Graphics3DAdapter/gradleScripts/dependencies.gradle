@@ -1,4 +1,3 @@
-evaluationDependsOn(':IHMCUtilities')
 evaluationDependsOn(':IHMCRoboticsToolkit')
 evaluationDependsOn(':IHMCJavaToolkit')
 
@@ -29,10 +28,10 @@ dependencies {
     compile group: 'net.lingala.zip4j', name: 'zip4j', version: '1.3.2'
     compile group: 'commons-codec', name: 'commons-codec', version: '1.9'
 	
-	compile project(':IHMCUtilities')
+	
 	compile project(':IHMCJavaToolkit')
 	compile project(':IHMCRoboticsToolkit')
 	testCompile project(':IHMCUnitTesting')
-	testCompile project(':IHMCUtilities').sourceSets.test.output
+	testCompile project(':IHMCJavaToolkit').sourceSets.test.output
 	testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
 }

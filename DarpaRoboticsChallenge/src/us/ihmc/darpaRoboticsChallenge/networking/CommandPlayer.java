@@ -13,8 +13,8 @@ import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngineSettings;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class CommandPlayer implements TimestampListener

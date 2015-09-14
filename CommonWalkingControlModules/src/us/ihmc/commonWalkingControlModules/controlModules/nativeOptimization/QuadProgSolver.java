@@ -7,7 +7,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.QuadProgWrapper;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.utilities.exceptions.NoConvergenceException;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 //~--- JDK imports ------------------------------------------------------------
 
