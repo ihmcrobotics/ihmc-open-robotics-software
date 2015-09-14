@@ -1,4 +1,5 @@
-evaluationDependsOn(':IHMCUtilities')
+evaluationDependsOn(':IHMCJavaToolkit')
+evaluationDependsOn(':IHMCRoboticsToolkit')
 evaluationDependsOn(':DarpaRoboticsChallenge')
 
 dependencies {
@@ -24,7 +25,7 @@ dependencies {
 	compile project(':IHMCControlFlow')
 	compile project(':IHMCRealtime')
 	compile project(':IHMCROSTools')
-	compile project(':IHMCUtilities')
+	
 	compile project(':RobotDataCommunication')
 	compile project(':ROSJavaMessages')
 	compile project(':SDFLoader')
@@ -39,7 +40,7 @@ dependencies {
 	
 	testCompile project(':IHMCUnitTesting')
 	
-	testCompile project(':IHMCUtilities').sourceSets.test.output
+	testCompile project(':IHMCJavaToolkit').sourceSets.test.output
 	testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
 	testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
 }
