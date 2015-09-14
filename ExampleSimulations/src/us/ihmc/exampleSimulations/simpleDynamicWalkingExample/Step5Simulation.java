@@ -6,17 +6,18 @@ public class Step5Simulation
 {
 
    //Variables 
-   SimulationConstructionSet sim;
-   private double deltaT = 0.0001;
+   private SimulationConstructionSet sim;
+   private double deltaT = 0.000001;
    private int recordFrequency = 10;
    
    public Step5Simulation()
    {
       //Robot
-      Step5IDandSCSRobot v5Robot = new Step5IDandSCSRobot();
+//      Step5IDandSCSRobot v5Robot = new Step5IDandSCSRobot();
+      Step5IDandSCSRobot_pinKnee v5Robot = new Step5IDandSCSRobot_pinKnee();
       
       //Controller 
-      Step5Controller v5Controller = new Step5Controller(v5Robot, "v5Robot", deltaT);
+      Step5WalkingController v5Controller = new Step5WalkingController(v5Robot, "v5Robot", deltaT);
       v5Robot.setController(v5Controller);
       
       //Simulation Object  
@@ -24,7 +25,8 @@ public class Step5Simulation
       sim.setGroundVisible(true);
       sim.setDT(deltaT, recordFrequency);
       sim.setCameraFix(0.0, 0.025, 1.05);
-      sim.setCameraPosition(12.6, -15.4, 2.3);
+//      sim.setCameraPosition(12.6, -15.4, 2.3);
+      sim.setCameraPosition(0.8643, -17.188, 2.72);
       sim.changeBufferSize(32000);
       sim.selectConfiguration("Step5GUI.guiConf");
 

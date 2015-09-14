@@ -86,7 +86,7 @@ public class Step5Controller implements RobotController
    /////////////////////////////////////////////////////////////////////////////////////////////
    public void doControl()
    {
-      rob.updateIDRobot();
+      rob.updatePositionsIDrobot();
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -96,7 +96,7 @@ public class Step5Controller implements RobotController
          
          /*********** Ankle Pitch **************/
          ankleTau.set(controllerAnkle.compute(rob.getAnklePitch(robotSide), desiredAnklePitch.getDoubleValue(), -rob.getAnkleVelocity(robotSide), 0.0, deltaT));
-         rob.setKneeTau(robotSide, ankleTau.getDoubleValue());
+         rob.setAnkleTau(robotSide, ankleTau.getDoubleValue());
 
     /**
      * 1
@@ -175,7 +175,7 @@ public class Step5Controller implements RobotController
          //         rob.setHipTau(robotSide, hipTau.getDoubleValue());
          //         }
 
-         rob.applyTorques(); //Note: this is getting called twice, one per side
+         rob.updateTorquesSCSrobot(); //Note: this is getting called twice, one per side
       }
    }
 

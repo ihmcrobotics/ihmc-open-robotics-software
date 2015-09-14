@@ -6,7 +6,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
 
-public class Step5RobotParameters
+public class RobotParameters
 {
    public enum JointNames
    {
@@ -59,8 +59,8 @@ public class Step5RobotParameters
    public final static EnumMap<LinkNames, Double> MASSES = new EnumMap<LinkNames, Double>(LinkNames.class); //MASSES is the name of the enumMap object 
    static
    {
-      MASSES.put(LinkNames.BODY_LINK, 20.0); //you can do: MASSES.get(BodyNames.FEMUR);
-      MASSES.put(LinkNames.UPPER_LINK, 7.0);
+      MASSES.put(LinkNames.BODY_LINK, 22.0); //you can do: MASSES.get(BodyNames.FEMUR);
+      MASSES.put(LinkNames.UPPER_LINK, 7.0); //TODO originally 0.8
       MASSES.put(LinkNames.LOWER_LINK, 4.0);
       MASSES.put(LinkNames.FOOT_LINK, 0.5);
    }
@@ -69,7 +69,7 @@ public class Step5RobotParameters
    static
    {
       LENGTHS.put(LinkNames.UPPER_LINK, 0.9);
-      LENGTHS.put(LinkNames.LOWER_LINK, 0.8);
+      LENGTHS.put(LinkNames.LOWER_LINK, 0.7);
       LENGTHS.put(LinkNames.BODY_LINK, 0.0); //TODO try removing
       LENGTHS.put(LinkNames.FOOT_LINK, 0.0);
    }
