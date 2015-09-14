@@ -1,6 +1,7 @@
 package us.ihmc.communication.packets.walking;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -8,20 +9,19 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import us.ihmc.communication.TransformableDataObject;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
-import us.ihmc.tools.ArrayTools;
-import us.ihmc.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 @ClassDocumentation("This message specifies the position, orientation and side (left or right) of a desired footstep in\n"
                                   + "world frame")
@@ -208,7 +208,7 @@ public class FootstepData extends IHMCRosApiPacket<FootstepData> implements Tran
       FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), this.orientation);
       double[] ypr = frameOrientation.getYawPitchRoll();
       ret = location.toString();
-      ret += ", YawPitchRoll = " + ArrayTools.arrayToString(ypr) + "\n";
+      ret += ", YawPitchRoll = " + Arrays.toString(ypr) + "\n";
       ret += "Predicted Contact Points: ";
       if(predictedContactPoints != null)
       {

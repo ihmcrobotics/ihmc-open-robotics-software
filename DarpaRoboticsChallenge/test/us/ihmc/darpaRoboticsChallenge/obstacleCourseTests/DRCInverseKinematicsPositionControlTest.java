@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
@@ -54,7 +55,6 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataChecker;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
@@ -218,7 +218,7 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
       success = rotateSingleArmJoint(robotSide, jointToRotateName, q_armJointDesired, trajectoryTime);
       assertTrue(success);
       
-      String jointLimits = ArrayTools.arrayToString(getArmJointLimits(robotSide, jointToRotateName));
+      String jointLimits = Arrays.toString(getArmJointLimits(robotSide, jointToRotateName));
       assertEquals(jointToRotateName + " position should equal " + q_armJointDesired + " radians.  Joint limits: " + jointLimits, q_armJointDesired,
             jointToRotate.getQ(), Math.toRadians(3.0));
 

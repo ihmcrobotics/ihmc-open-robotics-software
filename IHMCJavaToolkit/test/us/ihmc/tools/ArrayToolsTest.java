@@ -35,633 +35,6 @@ public class ArrayToolsTest
 {
    private static final double EPSILON = 1e-10;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintArrayOfLongs()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      long[] originalArrayOfLongs = new long[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder.append("{");
-
-      for (int i = 0; i < arraySize; i++)
-      {
-         originalArrayOfLongs[i] = random.nextLong();
-         stringBuilder.append(originalArrayOfLongs[i]);
-         stringBuilder.append(", ");
-      }
-
-      stringBuilder.append("}");
-
-      StringWriter writer = new StringWriter();
-      ArrayTools.printArrayOfLongs(originalArrayOfLongs, writer);
-      assertEquals(stringBuilder.toString(), writer.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintArrayNumbersAsStrings()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      String[] arrayElements = new String[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-      NumberFormat formatter = new DecimalFormat("0.000");
-
-      stringBuilder.append("{");
-
-      for (int i = 0; i < arraySize; i++)
-         arrayElements[i] = formatter.format(random.nextGaussian());
-
-      for (String s : arrayElements)
-         stringBuilder.append(s + ", ");
-
-      stringBuilder.append("}\n");
-
-      StringWriter writer = new StringWriter();
-
-      ArrayTools.printArray(arrayElements, writer);
-
-      assertEquals(stringBuilder.toString(), writer.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintArrayOfInts()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      int[] originalArrayOfLongs = new int[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder.append("{");
-
-      for (int i = 0; i < arraySize; i++)
-      {
-         originalArrayOfLongs[i] = random.nextInt();
-         stringBuilder.append(originalArrayOfLongs[i]);
-         stringBuilder.append(", ");
-      }
-
-      stringBuilder.append("}\n");
-
-      StringWriter writer = new StringWriter();
-      ArrayTools.printArray(originalArrayOfLongs, writer);
-      assertEquals(stringBuilder.toString(), writer.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintArrayOfDoubles()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      double[] arrayElements = new double[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-      NumberFormat formatter = new DecimalFormat("0.000");
-
-      stringBuilder.append("{");
-
-      for (int i = 0; i < arraySize; i++)
-         arrayElements[i] = Double.parseDouble(formatter.format(random.nextGaussian()));
-
-      for (double num : arrayElements)
-         stringBuilder.append(num + ", ");
-
-      stringBuilder.append("}\n");
-
-      StringWriter writer = new StringWriter();
-
-      ArrayTools.printArray(arrayElements, writer);
-
-      assertEquals(stringBuilder.toString(), writer.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintArrayFromStringsToPrintWriter()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      String[] arrayElements = new String[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-      NumberFormat formatter = new DecimalFormat("0.000");
-
-      stringBuilder.append("{");
-
-      for (int i = 0; i < arraySize; i++)
-         arrayElements[i] = formatter.format(random.nextGaussian());
-
-      for (String s : arrayElements)
-         stringBuilder.append(s + ", ");
-
-      stringBuilder.append("}" + newLine());
-
-      StringWriter stringWriter = new StringWriter();
-      PrintWriter printWriter = new PrintWriter(stringWriter);
-
-      ArrayTools.printArray(arrayElements, printWriter);
-
-      printWriter.flush();
-
-      assertEquals(stringBuilder.toString(), stringWriter.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintArrayFromStringsToPrintStream()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      String[] arrayElements = new String[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-      NumberFormat formatter = new DecimalFormat("0.000");
-
-      stringBuilder.append("{");
-
-      for (int i = 0; i < arraySize; i++)
-         arrayElements[i] = formatter.format(random.nextGaussian());
-
-      for (String s : arrayElements)
-         stringBuilder.append(s + ", ");
-
-      stringBuilder.append("}" + newLine());
-
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      PrintStream printStream = new PrintStream(outputStream);
-
-      ArrayTools.printArray(arrayElements, printStream);
-
-      printStream.flush();
-
-      assertEquals(stringBuilder.toString(), outputStream.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintArrayToStandardOutFromArrayList()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      ArrayList<String> arrayElements = new ArrayList<String>(arraySize);
-      StringBuilder stringBuilder = new StringBuilder();
-      NumberFormat formatter = new DecimalFormat("0.000");
-
-      String separator = (arraySize * 5) < 100 ? ", " : "\n";
-
-      stringBuilder.append("[");
-
-      for (int i = 0; i < arraySize; i++)
-         arrayElements.add(i, formatter.format(Math.abs(random.nextGaussian())));
-
-      for (String s : arrayElements)
-         stringBuilder.append(s + separator);
-
-      stringBuilder.append("]" + newLine());
-
-      PrintStream stdout = System.out;
-
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      PrintStream printStream = new PrintStream(outputStream);
-
-      System.setOut(printStream);
-      ArrayTools.printArray(arrayElements, null);
-      printStream.flush();
-
-      System.setOut(stdout);
-
-      assertEquals(stringBuilder.toString(), outputStream.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintArrayOfDoublesForMATLABWithPrintWriter()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      double[] arrayElements = new double[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-      NumberFormat formatter = new DecimalFormat("0.000");
-
-      stringBuilder.append("[");
-
-      for (int i = 0; i < arraySize; i++)
-      {
-         arrayElements[i] = Double.parseDouble(formatter.format(random.nextGaussian()));
-         stringBuilder.append(arrayElements[i]);
-         if (i < arraySize - 1)
-            stringBuilder.append(", ");
-      }
-
-      stringBuilder.append("]");
-
-      StringWriter stringWriter = new StringWriter();
-      PrintWriter printWriter = new PrintWriter(stringWriter);
-
-      ArrayTools.printArrayForMATLAB(arrayElements, printWriter);
-
-      printWriter.flush();
-
-      assertEquals(stringBuilder.toString(), stringWriter.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintArrayOfDoublesFOrMATLABWithPrintStream()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      double[] arrayElements = new double[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-      NumberFormat formatter = new DecimalFormat("0.000");
-
-      stringBuilder.append("[");
-
-      for (int i = 0; i < arraySize; i++)
-      {
-         arrayElements[i] = Double.parseDouble(formatter.format(random.nextGaussian()));
-         stringBuilder.append(arrayElements[i]);
-         if (i < arraySize - 1)
-            stringBuilder.append(", ");
-      }
-
-      stringBuilder.append("]");
-
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      PrintStream printStream = new PrintStream(outputStream);
-
-      ArrayTools.printArrayForMATLAB(arrayElements, printStream);
-
-      printStream.flush();
-
-      assertEquals(stringBuilder.toString(), outputStream.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintNamedArrayForMATLABWithPrintWriter()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      double[] arrayElements = new double[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-      NumberFormat formatter = new DecimalFormat("0.000");
-
-      String arrayName = "testArray";
-
-      stringBuilder.append(arrayName + " = [");
-
-      for (int i = 0; i < arraySize; i++)
-      {
-         arrayElements[i] = Double.parseDouble(formatter.format(random.nextGaussian()));
-         stringBuilder.append(arrayElements[i]);
-         if (i < arraySize - 1)
-            stringBuilder.append(", ");
-      }
-
-      stringBuilder.append("]" + newLine());
-
-      StringWriter stringWriter = new StringWriter();
-      PrintWriter printWriter = new PrintWriter(stringWriter);
-
-      ArrayTools.printArrayForMATLAB(arrayName, arrayElements, printWriter);
-
-      printWriter.flush();
-
-      assertEquals(stringBuilder.toString(), stringWriter.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintNamedArrayForMATLABWithPrintStream()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      double[] arrayElements = new double[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-      NumberFormat formatter = new DecimalFormat("0.000");
-
-      String arrayName = "testArray";
-
-      stringBuilder.append(arrayName + " = [");
-
-      for (int i = 0; i < arraySize; i++)
-      {
-         arrayElements[i] = Double.parseDouble(formatter.format(random.nextGaussian()));
-         stringBuilder.append(arrayElements[i]);
-         if (i < arraySize - 1)
-            stringBuilder.append(", ");
-      }
-
-      stringBuilder.append("]" + newLine());
-
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      PrintStream printStream = new PrintStream(outputStream);
-
-      ArrayTools.printArrayForMATLAB(arrayName, arrayElements, printStream);
-
-      printStream.flush();
-
-      assertEquals(stringBuilder.toString(), outputStream.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintArrayOfDoublesToDataOutputStream()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      double[] arrayElements = new double[arraySize];
-
-      for (int i = 0; i < arraySize; i++)
-      {
-         arrayElements[i] = random.nextGaussian();
-
-      }
-
-      ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-      DataOutputStream dataOutputStream = new DataOutputStream(byteStream);
-
-      try
-      {
-         ArrayTools.printArray(arrayElements, dataOutputStream);
-         dataOutputStream.flush();
-         ByteBuffer buffer = ByteBuffer.wrap(byteStream.toByteArray());
-
-         assertEquals(arrayElements.length, buffer.getInt());
-
-         int i = 0;
-         while (buffer.hasRemaining())
-            assertEquals(arrayElements[i++], buffer.getDouble(), 0);
-
-         dataOutputStream.close();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-         fail();
-      }
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintArrayOfDoublesWithPrintWriter()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      double[] arrayElements = new double[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-      NumberFormat formatter = new DecimalFormat("0.000");
-
-      stringBuilder.append("{");
-
-      for (int i = 0; i < arraySize; i++)
-      {
-         arrayElements[i] = Double.parseDouble(formatter.format(random.nextGaussian()));
-         stringBuilder.append(arrayElements[i]);
-         if (i < arraySize - 1)
-            stringBuilder.append(", ");
-      }
-
-      stringBuilder.append("}" + newLine());
-
-      StringWriter stringWriter = new StringWriter();
-      PrintWriter printWriter = new PrintWriter(stringWriter);
-
-      ArrayTools.printArray(arrayElements, printWriter);
-
-      printWriter.flush();
-
-      assertEquals(stringBuilder.toString(), stringWriter.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testArrayToString()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      double[] arrayElements = new double[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-      NumberFormat formatter = new DecimalFormat("0.000");
-
-      for (int i = 0; i < arraySize; i++)
-      {
-         arrayElements[i] = Double.parseDouble(formatter.format(random.nextGaussian()));
-         stringBuilder.append(arrayElements[i]);
-         if (i < arraySize - 1)
-            stringBuilder.append(", ");
-      }
-
-      assertEquals(stringBuilder.toString(), ArrayTools.arrayToString(arrayElements));
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintDoubleArrayWithPrintStream()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      double[] arrayElements = new double[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-      NumberFormat formatter = new DecimalFormat("0.000");
-
-      stringBuilder.append("{");
-
-      for (int i = 0; i < arraySize; i++)
-      {
-         arrayElements[i] = Double.parseDouble(formatter.format(random.nextGaussian()));
-         stringBuilder.append(arrayElements[i]);
-         if (i < arraySize - 1)
-            stringBuilder.append(", ");
-      }
-
-      stringBuilder.append("}" + newLine());
-
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      PrintStream printStream = new PrintStream(outputStream);
-
-      ArrayTools.printArray(arrayElements, printStream);
-
-      printStream.flush();
-
-      assertEquals(stringBuilder.toString(), outputStream.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.1)
-	@Test(timeout = 30000)
-   public void testPrintTwoDimensionalArrayOfDoublesWithPrintStream()
-   {
-      Random random = new Random();
-      int arraySizeRows = random.nextInt(500) + 1;
-      int arraySizeCols = random.nextInt(500) + 1;
-      double[][] arrayElements = new double[arraySizeRows][arraySizeCols];
-      StringBuilder stringBuilder = new StringBuilder();
-      NumberFormat formatter = new DecimalFormat("0.000");
-
-      stringBuilder.append("{" + newLine());
-
-      for (int i = 0; i < arraySizeRows; i++)
-      {
-         stringBuilder.append("{");
-         for (int j = 0; j < arraySizeCols; j++)
-         {
-            arrayElements[i][j] = Double.parseDouble(formatter.format(random.nextGaussian()));
-            stringBuilder.append(arrayElements[i][j]);
-            if (j < arraySizeCols - 1)
-               stringBuilder.append(", ");
-         }
-         stringBuilder.append("}" + newLine());
-      }
-
-      stringBuilder.append("}" + newLine());
-
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      PrintStream printStream = new PrintStream(outputStream);
-
-      ArrayTools.printArray(arrayElements, printStream);
-
-      printStream.flush();
-
-      assertEquals(stringBuilder.toString(), outputStream.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintArrayOfIntsToPrintWriter()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      int[] arrayElements = new int[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-
-      stringBuilder.append("{");
-
-      for (int i = 0; i < arraySize; i++)
-      {
-         arrayElements[i] = random.nextInt();
-         stringBuilder.append(arrayElements[i]);
-         if (i < arraySize - 1)
-            stringBuilder.append(", ");
-      }
-
-      stringBuilder.append("}" + newLine());
-
-      StringWriter stringWriter = new StringWriter();
-      PrintWriter printWriter = new PrintWriter(stringWriter);
-
-      ArrayTools.printArray(arrayElements, printWriter);
-
-      printWriter.flush();
-
-      assertEquals(stringBuilder.toString(), stringWriter.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintArrayOfIntsToPrintStream()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      int[] arrayElements = new int[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-
-      stringBuilder.append("{");
-
-      for (int i = 0; i < arraySize; i++)
-      {
-         arrayElements[i] = random.nextInt();
-         stringBuilder.append(arrayElements[i]);
-         if (i < arraySize - 1)
-            stringBuilder.append(", ");
-      }
-
-      stringBuilder.append("}" + newLine());
-
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      PrintStream printStream = new PrintStream(outputStream);
-
-      ArrayTools.printArray(arrayElements, printStream);
-
-      printStream.flush();
-
-      assertEquals(stringBuilder.toString(), outputStream.toString());
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testPrintArrayOfIntsToDataOutputStream()
-   {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      int[] arrayElements = new int[arraySize];
-
-      for (int i = 0; i < arraySize; i++)
-      {
-         arrayElements[i] = random.nextInt();
-
-      }
-
-      ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-      DataOutputStream dataOutputStream = new DataOutputStream(byteStream);
-
-      try
-      {
-         ArrayTools.printArray(arrayElements, dataOutputStream);
-         dataOutputStream.flush();
-         ByteBuffer buffer = ByteBuffer.wrap(byteStream.toByteArray());
-
-         assertEquals(arrayElements.length, buffer.getInt());
-
-         int i = 0;
-         while (buffer.hasRemaining())
-            assertEquals(arrayElements[i++], buffer.getInt(), 0);
-
-         dataOutputStream.close();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-         fail();
-      }
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.2)
-	@Test(timeout = 30000)
-   public void testPrintTwoDimensionalArrayOfIntsToPrintStream()
-   {
-      Random random = new Random();
-      int arraySizeRows = random.nextInt(500) + 1;
-      int arraySizeCols = random.nextInt(500) + 1;
-      int[][] arrayElements = new int[arraySizeRows][arraySizeCols];
-      StringBuilder stringBuilder = new StringBuilder();
-
-      stringBuilder.append("{" + newLine());
-
-      for (int i = 0; i < arraySizeRows; i++)
-      {
-         stringBuilder.append("{");
-         for (int j = 0; j < arraySizeCols; j++)
-         {
-            arrayElements[i][j] = random.nextInt();
-            stringBuilder.append(arrayElements[i][j]);
-            if (j < arraySizeCols - 1)
-               stringBuilder.append(", ");
-         }
-         stringBuilder.append("}" + newLine());
-      }
-
-      stringBuilder.append("}" + newLine());
-
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      PrintStream printStream = new PrintStream(outputStream);
-
-      ArrayTools.printIntArray(arrayElements, printStream);
-
-      printStream.flush();
-
-      assertEquals(stringBuilder.toString(), outputStream.toString());
-   }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
@@ -672,7 +45,7 @@ public class ArrayToolsTest
          double[] expectedArray = generateDoubleArray();
          StringWriter stringWriter = new StringWriter();
          PrintWriter printWriter = new PrintWriter(stringWriter);
-         ArrayTools.printArrayForMATLAB(expectedArray, printWriter);
+         printWriter.print(Arrays.toString(expectedArray));
 
          String matlabString = stringWriter.toString();
          double[] parsedArray = ArrayTools.parseDoubleArrayFromMATLAB(matlabString);
@@ -696,7 +69,7 @@ public class ArrayToolsTest
          double[] expectedArray = generateDoubleArray();
          StringWriter stringWriter = new StringWriter();
          PrintWriter printWriter = new PrintWriter(stringWriter);
-         ArrayTools.printArrayForMATLAB(expectedArray, printWriter);
+         printWriter.print(Arrays.toString(expectedArray));
 
          String matlabString = stringWriter.toString();
          BufferedReader reader = new BufferedReader(new StringReader(matlabString));
@@ -721,8 +94,11 @@ public class ArrayToolsTest
          double[] expectedArray = generateDoubleArray();
          ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
          DataOutputStream dataOutputStream = new DataOutputStream(byteOutStream);
-         ArrayTools.printArray(expectedArray, dataOutputStream);
-
+         dataOutputStream.writeInt(expectedArray.length);
+         for(double expected : expectedArray)
+            dataOutputStream.writeDouble(expected);
+         
+         
          DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(byteOutStream.toByteArray()));
          double[] parsedArray = ArrayTools.parseDoubleArray(dataInputStream);
 
@@ -744,10 +120,8 @@ public class ArrayToolsTest
       {
          int[] expectedArray = generateIntegerArray();
          StringWriter stringWriter = new StringWriter();
-         PrintWriter printWriter = new PrintWriter(stringWriter);
-         ArrayTools.printArray(expectedArray, printWriter);
 
-         String sourceString = stringWriter.toString();
+         String sourceString = Arrays.toString(expectedArray);
          int[] parsedArray = ArrayTools.parseIntegerArray(sourceString);
 
          for (int i = 0; i < expectedArray.length; i++)
@@ -767,11 +141,8 @@ public class ArrayToolsTest
       try
       {
          int[] expectedArray = generateIntegerArray();
-         StringWriter stringWriter = new StringWriter();
-         PrintWriter printWriter = new PrintWriter(stringWriter);
-         ArrayTools.printArray(expectedArray, printWriter);
 
-         BufferedReader reader = new BufferedReader(new StringReader(stringWriter.toString()));
+         BufferedReader reader = new BufferedReader(new StringReader(Arrays.toString(expectedArray)));
          int[] parsedArray = ArrayTools.parseIntegerArray(reader);
 
          for (int i = 0; i < expectedArray.length; i++)
@@ -793,7 +164,10 @@ public class ArrayToolsTest
          int[] expectedArray = generateIntegerArray();
          ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
          DataOutputStream dataOutputStream = new DataOutputStream(byteOutStream);
-         ArrayTools.printArray(expectedArray, dataOutputStream);
+         dataOutputStream.writeInt(expectedArray.length);
+         for(int expected : expectedArray)
+            dataOutputStream.writeInt(expected);
+         dataOutputStream.flush();
 
          DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(byteOutStream.toByteArray()));
          int[] parsedArray = ArrayTools.parseIntArray(dataInputStream);
@@ -811,70 +185,34 @@ public class ArrayToolsTest
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testPrintGenericArray()
+   public void testDeltaEquals()
    {
-      Random random = new Random();
-      int arraySize = random.nextInt(500) + 1;
-      String[] arrayElements = new String[arraySize];
-      StringBuilder stringBuilder = new StringBuilder();
-      NumberFormat formatter = new DecimalFormat("0.000");
-
-      String separator = (arraySize * 5) < 100 ? ", " : "\n";
-
-      stringBuilder.append("[");
-
-      for (int i = 0; i < arraySize; i++)
-         arrayElements[i] = formatter.format(Math.abs(random.nextGaussian()));
-
-      for (String s : arrayElements)
-         stringBuilder.append(s + separator);
-
-      stringBuilder.append("]" + newLine());
-
-      PrintStream stdout = System.out;
-
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      PrintStream printStream = new PrintStream(outputStream);
-
-      System.setOut(printStream);
-      ArrayTools.printArray(arrayElements);
-      printStream.flush();
-
-      System.setOut(stdout);
-
-      assertEquals(stringBuilder.toString(), outputStream.toString());
+      double[] array1 = generateDoubleArray();
+      double[] array2 = generateDoubleArray(array1.length);
+      
+      Double[] arrayOfDifferences = new Double[array1.length];
+      
+      for(int i = 0; i < array1.length; i++)
+         arrayOfDifferences[i] = Math.abs(array1[i] - array2[i]);
+      
+      double largestDifference = (Double) (Collections.max(Arrays.asList(arrayOfDifferences)));
+      System.out.println(largestDifference);
+      assertTrue(ArrayTools.deltaEquals(array1, array2, largestDifference + 1));
+      assertFalse(ArrayTools.deltaEquals(array1, array2, largestDifference - 1));
    }
-
-//	@DeployableTestMethod(estimatedDuration = 0.0)
-//	@Test(timeout = 30000)
-//   public void testDeltaEquals()
-//   {
-//      double[] array1 = generateDoubleArray();
-//      double[] array2 = generateDoubleArray(array1.length);
-//      
-//      Double[] arrayOfDifferences = new Double[array1.length];
-//      
-//      for(int i = 0; i < array1.length; i++)
-//         arrayOfDifferences[i] = Math.abs(array1[i] - array2[i]);
-//      
-//      double largestDifference = (Double) (Collections.max(Arrays.asList(arrayOfDifferences)));
-//      System.out.println(largestDifference);
-//      assertTrue(ArrayTools.deltaEquals(array1, array2, largestDifference + 1));
-//      assertFalse(ArrayTools.deltaEquals(array1, array2, largestDifference - 1));
-//   }
 	
-//	@DeployableTestMethod(estimatedDuration = 0.0)
-//	@Test(timeout = 30000)
-//	public void testDeltaEqualsWithNull()
-//	{
-//	   double[] array1 = null;
-//	   double[] array2 = null;
-//	   double[] array3 = generateDoubleArray();
-//	   double dummyDelta = 10e-2; // dummy value
-//	   
-//	   assertFalse(ArrayTools.deltaEquals(array1, array2, dummyDelta)); // 2 null arrays should return false
-//	   assertFalse(ArrayTools.deltaEquals(array1, array3, dummyDelta));
-//	}
+	@DeployableTestMethod(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
+	public void testDeltaEqualsWithNull()
+	{
+	   double[] array1 = null;
+	   double[] array2 = null;
+	   double[] array3 = generateDoubleArray();
+	   double dummyDelta = 10e-2; // dummy value
+	   
+	   assertFalse(ArrayTools.deltaEquals(array1, array2, dummyDelta)); // 2 null arrays should return false
+	   assertFalse(ArrayTools.deltaEquals(array1, array3, dummyDelta));
+	}
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)

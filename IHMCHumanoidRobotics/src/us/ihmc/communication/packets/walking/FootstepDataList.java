@@ -1,6 +1,7 @@
 package us.ihmc.communication.packets.walking;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -111,7 +112,7 @@ public class FootstepDataList extends IHMCRosApiPacket<FootstepDataList> impleme
          Quat4d quat4d = this.get(0).getOrientation();
 
          FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), quat4d);
-         startingFootstep = startingFootstep + ", ypr= " + ArrayTools.arrayToString(frameOrientation.getYawPitchRoll());
+         startingFootstep = startingFootstep + ", ypr= " + Arrays.toString(frameOrientation.getYawPitchRoll());
       }
 
       System.out.println(this.size());

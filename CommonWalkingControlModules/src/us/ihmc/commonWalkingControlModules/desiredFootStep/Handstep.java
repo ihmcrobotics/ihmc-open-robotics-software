@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import java.util.Arrays;
+
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -250,7 +252,7 @@ public class Handstep
       frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       double[] ypr = frameOrientation.getYawPitchRoll();
-      String yawPitchRoll = "YawPitchRoll = " + ArrayTools.arrayToString(ypr);
+      String yawPitchRoll = "YawPitchRoll = " + Arrays.toString(ypr);
 
       return "id: " + id + " - pose: " + poseReferenceFrame + "\n\tYawPitchRoll= {" + yawPitchRoll + "}";
    }
