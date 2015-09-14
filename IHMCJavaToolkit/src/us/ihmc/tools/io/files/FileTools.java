@@ -19,6 +19,7 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -27,7 +28,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.UnitConversions;
 
 public class FileTools
@@ -78,6 +78,18 @@ public class FileTools
    public static PrintWriter newPrintWriter(Path path)
    {
       return newPrintWriter(path, false);
+   }
+   
+   public static void write(Path path, byte[] bytes, OpenOption... options)
+   {
+      try
+      {
+         Files.write(path, bytes, options);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
    }
    
    public static BufferedReader newBufferedReader(Path path) throws IOException
