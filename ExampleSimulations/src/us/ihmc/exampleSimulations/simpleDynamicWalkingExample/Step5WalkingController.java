@@ -9,7 +9,9 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -17,31 +19,45 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 public class Step5WalkingController implements RobotController
 {
 
+   /**
+    * Initialization
+    */
+
    //Variables
-   private Step5IDandSCSRobot rob;
+   private Step5IDandSCSRobot_pinKnee rob;
+   //private Step5IDandSCSRobot rob;
    private String name;
    private YoVariableRegistry controllerRegistry = new YoVariableRegistry("controllerRegistry");
    private double deltaT;
 
    private PIDController controllerBodyZ;
-   private PIDController controllerLegPitch;
-   private PIDController controllerKneeZ;
-   private PIDController controllerAnkle;
-   
-   private DoubleYoVariable desiredBodyZ;
-   private DoubleYoVariable desiredLegPitch;
-   private DoubleYoVariable desiredKneeZ;
-   private DoubleYoVariable desiredBodyPitch;
-   private DoubleYoVariable desiredAnklePitch;
+   private PIDController controllerBodyPitch, controllerHipPitch;
+   private PIDController controllerKneePitch;
+   private PIDController controllerAnkleStraighten, controllerAnkleToeOff, controllerAnkleSwing;
 
+   private DoubleYoVariable desiredBodyZ, desiredKneePitchSwing, desiredKneePitchStraighten, desiredKneePitchToeOff;
+   private DoubleYoVariable desiredHipPitch, desiredBodyPitch;
+   private DoubleYoVariable desiredAnklePitchSwing , desiredAnklePitchToeOff, desiredAnklePitchStraighten;
+
+   private DoubleYoVariable ankleTauToeOff;
    private DoubleYoVariable kneeTau;
    private DoubleYoVariable hipTau;
    private DoubleYoVariable ankleTau;
 
-   Point3d bodyPositionToPack = new Point3d(); //global so that it is created only once to avoid generating garbage
+   private Point3d bodyPositionToPack = new Point3d(); //global so that it is created only once to avoid generating garbage
    private Quat4d rotationToPack = new Quat4d();
-   private double ffComponent = -38.0 * 9.81;
+   //private double ffComponent = -38.0 * 9.81;
    private Vector3d velocityToPack = new Vector3d();
+
+   //private final DoubleYoVariable heelForce_thresh = new DoubleYoVariable("force_thresh", controllerRegistry);
+   private boolean onTheFloor, stopSwing;
+   //   private final DoubleYoVariable toe_off_time = new DoubleYoVariable("toe_off_time", controllerRegistry);
+   private final DoubleYoVariable min_support_time = new DoubleYoVariable("min_support_time", controllerRegistry);
+   private final DoubleYoVariable min_toeOff_time = new DoubleYoVariable("min_toeOff_time", controllerRegistry);
+   private final DoubleYoVariable swing_time = new DoubleYoVariable("swing_time", controllerRegistry);
+   
+   private final DoubleYoVariable startTime;
+//   private final DoubleYoVariable oppositeHeelX, toeX;
 
    // State Machine
    private enum States
@@ -49,219 +65,457 @@ public class Step5WalkingController implements RobotController
       SUPPORT, TOE_OFF, SWING, STRAIGHTEN
    }
 
-   // Controllers and Gains
-   public Step5WalkingController(Step5IDandSCSRobot rob, String name, double deltaT)
+   private final StateMachine<States> leftStateMachine, rightStateMachine;
+   private final SideDependentList<StateMachine<States>> stateMachines;
+
+   /**
+    * Constructor
+    */
+
+//   public Step5WalkingController(Step5IDandSCSRobot rob, String name, double deltaT)
+   public Step5WalkingController(Step5IDandSCSRobot_pinKnee rob, String name, double deltaT)
    {
       this.rob = rob;
       this.name = name;
       this.deltaT = deltaT;
 
+      // Controllers and Gains
       controllerBodyZ = new PIDController("bodyZ", controllerRegistry);
-      controllerBodyZ.setProportionalGain(50000.0);
-      controllerBodyZ.setDerivativeGain(5000.0);
+      controllerBodyZ.setProportionalGain(1000000.0);
+      controllerBodyZ.setDerivativeGain(50000.0); //50000.0
       desiredBodyZ = new DoubleYoVariable("desiredBodyZ", controllerRegistry);
-      desiredBodyZ.set(1.2);
+      desiredBodyZ.set(1.2); //1.2
 
-      controllerLegPitch = new PIDController("legPitch", controllerRegistry);
-      controllerLegPitch.setProportionalGain(50000.0);
-      controllerLegPitch.setDerivativeGain(5000.0);
-      desiredLegPitch = new DoubleYoVariable("desiredLegPitch", controllerRegistry);
-      desiredLegPitch.set(0.2);
-
-      controllerKneeZ = new PIDController("kneeZ", controllerRegistry);
-      controllerKneeZ.setProportionalGain(15000.0);
-      controllerKneeZ.setDerivativeGain(2000.0);
-      desiredKneeZ = new DoubleYoVariable("desiredKneeZ", controllerRegistry);
-      desiredKneeZ.set(0.2);
-      
-      controllerAnkle = new PIDController("anklePitch", controllerRegistry);
-      controllerAnkle.setProportionalGain(1000.0);
-      controllerAnkle.setDerivativeGain(100.0);
-      desiredAnklePitch = new DoubleYoVariable("desiredAnklePitch", controllerRegistry);
-      desiredAnklePitch.set(0.0);
-      
+      controllerBodyPitch = new PIDController("bodyPitch", controllerRegistry);
+      controllerBodyPitch.setProportionalGain(5000.0);
+      controllerBodyPitch.setDerivativeGain(500.0);
       desiredBodyPitch = new DoubleYoVariable("desiredBodyPitch", controllerRegistry);
       desiredBodyPitch.set(0.0);
+      
+      controllerHipPitch = new PIDController("hipPitch", controllerRegistry);
+      controllerHipPitch.setProportionalGain(25000.0);
+      controllerHipPitch.setDerivativeGain(2000.0);
+      desiredHipPitch = new DoubleYoVariable("desiredHipPitch", controllerRegistry);
+      desiredHipPitch.set(-0.55);
+      
+      controllerKneePitch = new PIDController("kneePitch", controllerRegistry);
+      controllerKneePitch.setProportionalGain(25000.0);
+      controllerKneePitch.setDerivativeGain(2000.0);
+      desiredKneePitchSwing = new DoubleYoVariable("desiredKneePitchSwing", controllerRegistry);
+      desiredKneePitchSwing.set(1.3); //TODO changed from 0.2
+      desiredKneePitchStraighten = new DoubleYoVariable("desiredKneePitchStraighten", controllerRegistry);
+      desiredKneePitchStraighten.set(0.0); //-0.5 //TODO changed from -0.2  
+      desiredKneePitchToeOff = new DoubleYoVariable("desiredKneePitchToeOff", controllerRegistry);
+      desiredKneePitchToeOff.set(1.0); //0.6 //0.45 //TODO changed from -0.2
+      
+      controllerAnkleStraighten = new PIDController("ankleStraighten", controllerRegistry);
+      controllerAnkleStraighten.setProportionalGain(2000.0);
+      controllerAnkleStraighten.setDerivativeGain(10.0);
+      desiredAnklePitchStraighten = new DoubleYoVariable("desiredAnklePitchStraighten", controllerRegistry);
+      desiredAnklePitchStraighten.set(-0.3);
+//      desiredAnklePitchSupport = new DoubleYoVariable("desiredAnklePitchSupport", controllerRegistry);
+//      desiredAnklePitchSupport.set(0.0);
+         
+      controllerAnkleToeOff = new PIDController("ankleToeOff", controllerRegistry);
+      controllerAnkleToeOff.setProportionalGain(100.0);
+      controllerAnkleToeOff.setDerivativeGain(8.0);
+      desiredAnklePitchToeOff = new DoubleYoVariable("desiredAnklePitchToeOff", controllerRegistry);
+      desiredAnklePitchToeOff.set(0.08);  //0.2
+      
+      controllerAnkleSwing = new PIDController("ankleSwing", controllerRegistry);
+      controllerAnkleSwing.setProportionalGain(1000.0);
+      controllerAnkleSwing.setDerivativeGain(100.0);
+      desiredAnklePitchSwing = new DoubleYoVariable("desiredAnklePitchSwing", controllerRegistry);
+      desiredAnklePitchSwing.set(-0.2);
       
       hipTau = new DoubleYoVariable("hipTau", controllerRegistry);
       kneeTau = new DoubleYoVariable("kneeTau", controllerRegistry);
       ankleTau = new DoubleYoVariable("ankleTau", controllerRegistry);
+      
+      ankleTauToeOff = new DoubleYoVariable("ankleTauToeOff", controllerRegistry);
+      ankleTauToeOff.set(200.0);
+      
+      // Create the state machines:
+      leftStateMachine = new StateMachine<States>("leftState", "leftSwitchTime", States.class, rob.getYoTime(), controllerRegistry);
+      rightStateMachine = new StateMachine<States>("rightState", "rightSwitchTime", States.class, rob.getYoTime(), controllerRegistry);
+      stateMachines = new SideDependentList<StateMachine<States>>(leftStateMachine, rightStateMachine);
+
+      startTime = new DoubleYoVariable("startTime", controllerRegistry);
+//      oppositeHeelX = new DoubleYoVariable("oppositeHeelX", controllerRegistry);
+//      toeX = new DoubleYoVariable("toeX", controllerRegistry);
+      
+      initConditions();
+      setupStateMachines();
+   }
+
+   /**
+    * State Machine Related Methods
+    */
+
+   public void initConditions()
+   {
+      //heelForce_thresh.set(13.6078);
+      //toe_off_time.set(0.05);
+      min_support_time.set(0.04); 
+      min_toeOff_time.set(0.035);
+      swing_time.set(0.11);
+
+      rob.initializeForBallisticWalking();
+   }
+
+   private void setupStateMachines()  //TODO use side dependent lists!!
+   {
+      // States and Actions:
+      State<States> leftSupportState = new SupportState(RobotSide.LEFT, States.SUPPORT);
+      State<States> rightSupportState = new SupportState(RobotSide.RIGHT, States.SUPPORT);
+      State<States> leftToeOffState = new ToeOffState(RobotSide.LEFT, States.TOE_OFF);
+      State<States> rightToeOffState = new ToeOffState(RobotSide.RIGHT, States.TOE_OFF);
+      State<States> leftSwingState = new SwingState(RobotSide.LEFT, States.SWING);
+      State<States> rightSwingState = new SwingState(RobotSide.RIGHT, States.SWING);
+      State<States> leftStraightenState = new StraightenState(RobotSide.LEFT, States.STRAIGHTEN);
+      State<States> rightStraightenState = new StraightenState(RobotSide.RIGHT, States.STRAIGHTEN);
+
+      // Transition Conditions:
+      StateTransitionCondition leftHeelUnloaded = new HeelOffGroundCondition(RobotSide.LEFT);
+      StateTransitionCondition leftToeUnloaded = new ToeOffGroundCondition(RobotSide.LEFT);
+      StateTransitionCondition leftToeTouchedDown = new HeelOnGroundCondition(RobotSide.LEFT);
+
+      StateTransitionCondition rightHeelUnloaded = new HeelOffGroundCondition(RobotSide.RIGHT);
+      StateTransitionCondition rightToeUnloaded = new ToeOffGroundCondition(RobotSide.RIGHT);
+      StateTransitionCondition rightHealTouchedDown = new HeelOnGroundCondition(RobotSide.RIGHT);
+
+      // Left State Transitions:
+      StateTransition<States> leftSupportToToeOff = new StateTransition<States>(States.TOE_OFF, leftHeelUnloaded);
+      leftSupportToToeOff.addTimePassedCondition(min_support_time);
+      leftSupportState.addStateTransition(leftSupportToToeOff);
+
+      StateTransition<States> leftToeOffToSwing = new StateTransition<States>(States.SWING, leftToeUnloaded);
+      leftToeOffToSwing.addTimePassedCondition(min_toeOff_time);
+      leftToeOffState.addStateTransition(leftToeOffToSwing);
+
+      StateTransition<States> leftSwingToStraighten = new StateTransition<States>(States.STRAIGHTEN, swing_time);
+      leftSwingState.addStateTransition(leftSwingToStraighten);
+
+      StateTransition<States> leftStraightenToSupport = new StateTransition<States>(States.SUPPORT, leftToeTouchedDown);
+      leftStraightenState.addStateTransition(leftStraightenToSupport);
+
+      // Right State Transitions:
+      StateTransition<States> rightSupportToToeOff = new StateTransition<States>(States.TOE_OFF, rightHeelUnloaded);
+      rightSupportToToeOff.addTimePassedCondition(min_support_time);
+      rightSupportState.addStateTransition(rightSupportToToeOff);
+
+      StateTransition<States> rightToeOffToSwing = new StateTransition<States>(States.SWING, rightToeUnloaded);
+      rightToeOffToSwing.addTimePassedCondition(min_toeOff_time);
+      rightToeOffState.addStateTransition(rightToeOffToSwing);
+
+      StateTransition<States> rightSwingToStraighten = new StateTransition<States>(States.STRAIGHTEN, swing_time);
+      rightSwingState.addStateTransition(rightSwingToStraighten);
+
+      StateTransition<States> rightStraightenToSupport = new StateTransition<States>(States.SUPPORT, rightHealTouchedDown);
+      rightStraightenState.addStateTransition(rightStraightenToSupport);
+
+      // Assemble the Left State Machine:
+      leftStateMachine.addState(leftSupportState);
+      leftStateMachine.addState(leftToeOffState);
+      leftStateMachine.addState(leftSwingState);
+      leftStateMachine.addState(leftStraightenState);
+
+      // Assemble the Right State Machine:
+      rightStateMachine.addState(rightSupportState);
+      rightStateMachine.addState(rightToeOffState);
+      rightStateMachine.addState(rightSwingState);
+      rightStateMachine.addState(rightStraightenState);
+
+      // Set the Initial States:
+      leftStateMachine.setCurrentState(States.STRAIGHTEN);
+      rightStateMachine.setCurrentState(States.SUPPORT);
+   }
+
+   private void walkingStateMachine()
+   {
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         // Do action and check transition conditions
+         stateMachines.get(robotSide).doAction();
+         StateMachine<States> stateMachine = stateMachines.get(robotSide);
+         stateMachine.checkTransitionConditions();
+
+         // ID and SCS cross talk
+         rob.updatePositionsIDrobot();
+         rob.updateTorquesSCSrobot(); //Note: this is getting called twice, one per side
+      }
+   }
+
+   private DoubleYoVariable controlBodyPitch()
+   {
+      rob.getBodyPitch(rotationToPack);
+      double pitchFromQuaternion = RotationFunctions.getPitchFromQuaternion(rotationToPack);
+
+      rob.getBodyAngularVel(velocityToPack);
+      double bodyAngularVel = velocityToPack.getY();
+
+      hipTau.set(controllerBodyPitch.compute(pitchFromQuaternion, desiredBodyPitch.getDoubleValue(), bodyAngularVel, 0.0, deltaT));
+      return hipTau;
+   }
+
+   /**
+    * State Classes
+    */
+
+   /////////////////////////////////// (1) Support
+   private class SupportState extends State<States>
+   {
+      private final RobotSide robotSide;
+
+      public SupportState(RobotSide robotSide, States stateEnum)
+      {
+         super(States.SUPPORT);
+         this.robotSide = robotSide;
+      }
+
+      public void doAction()
+      {
+         //Hip --> Body pitch
+         hipTau = controlBodyPitch();
+         rob.setHipTau(robotSide, -hipTau.getDoubleValue());
+
+         //Knee --> Body height
+         kneeTau.set(controllerBodyZ.compute(rob.getBodyPositionZ(), desiredBodyZ.getDoubleValue(), -rob.getKneeVelocity(robotSide), 0.0, deltaT));
+         rob.setKneeTau(robotSide, -kneeTau.getDoubleValue()); //+ ffComponent); //TODO need the feed forward?
+
+         //Ankle --> Keep foot on the ground
+         //         ankleTau.set(controllerAnkle.compute(rob.getAnklePitch(robotSide), desiredAnklePitchSwing.getDoubleValue(), -rob.getAnkleVelocity(robotSide), 0.0, deltaT));
+         //         rob.setAnkleTau(robotSide, ankleTau.getDoubleValue());
+//         rob.setAnkleTau(robotSide, 1.0);
+      }
+
+      public void doTransitionIntoAction()
+      {
+      }
+
+      public void doTransitionOutOfAction()
+      {
+      }
+   }
+
+   ///////////////////////////////////  (2) Toe Off
+   private class ToeOffState extends State<States>
+   {
+      private final RobotSide robotSide;
+
+      public ToeOffState(RobotSide robotSide, States stateEnum)
+      {
+         super(States.TOE_OFF);
+         this.robotSide = robotSide;
+      }
+
+      public void doAction()
+      {
+         //Hip --> Body pitch
+         hipTau = controlBodyPitch();
+         rob.setHipTau(robotSide, -hipTau.getDoubleValue());
+
+         //Knee --> Body height
+//         kneeTau.set(controllerBodyZ.compute(rob.getBodyPositionZ(), desiredBodyZ.getDoubleValue(), -rob.getKneeVelocity(robotSide), 0.0, deltaT));
+//         rob.setKneeTau(robotSide, -kneeTau.getDoubleValue() ); //+ ffComponent); //TODO need the feed forward?
+         kneeTau.set(controllerKneePitch.compute(rob.getKneePosition(robotSide), desiredKneePitchToeOff.getDoubleValue(), rob.getKneeVelocity(robotSide), 0.0, deltaT));
+         rob.setKneeTau(robotSide, kneeTau.getDoubleValue());
+         
+         //Ankle --> Ankle pitch
+//                  ankleTau.set(controllerAnkleToeOff.compute(rob.getAnklePitch(robotSide), desiredAnklePitchToeOff.getDoubleValue(), -rob.getAnkleVelocity(robotSide), 0.0, deltaT));
+//                  rob.setAnkleTau(robotSide, ankleTau.getDoubleValue());
+         //         
+         //         if (rob.getAnklePitch(robotSide) == desiredAnklePitchToeOff.getDoubleValue())
+         //         {
+         onTheFloor = rob.toeOnTheFloor(robotSide);
+         if (onTheFloor)
+         {
+            rob.setAnkleTau(robotSide, 350.0); //Only exert fixed torque if toe is contact with the floor  
+         }
+         else
+         {
+//            rob.setAnkleTau(robotSide, 10.0);  //TODO
+            ankleTau.set(controllerAnkleToeOff.compute(rob.getAnklePitch(robotSide), desiredAnklePitchToeOff.getDoubleValue(), rob.getAnkleVelocity(robotSide), 0.0, deltaT));
+            rob.setAnkleTau(robotSide, ankleTau.getDoubleValue());
+         }
+         //         }
+      }
+
+      public void doTransitionIntoAction()
+      {
+      }
+
+      public void doTransitionOutOfAction()
+      {
+      }
+   }
+
+   ///////////////////////////////////  (3) Swing
+   private class SwingState extends State<States>
+   {
+      
+      private final RobotSide robotSide;
+//      private final DoubleYoVariable startTime;
+      
+      public SwingState(RobotSide robotSide, States stateEnum)
+      {
+         super(States.SWING);
+         this.robotSide = robotSide;    
+         
+//         startTime = new DoubleYoVariable("startTime", controllerRegistry); //TODO timer =)
+      }
+
+      public void doAction()
+      {
+         
+         //Hip --> Body pitch
+         hipTau = controlBodyPitch();
+//         hipTau.set(controllerHipPitch.compute(rob.getHipPitch(robotSide), desiredHipPitch.getDoubleValue(), rob.getHipVelocity(robotSide), 0.0, deltaT));
+//         rob.setHipTau(robotSide, hipTau.getDoubleValue()); //TODO minus sign?
+
+         //Knee --> Leg contracted
+         kneeTau.set(controllerKneePitch.compute(rob.getKneePosition(robotSide), desiredKneePitchSwing.getDoubleValue(), rob.getKneeVelocity(robotSide), 0.0, deltaT));
+         rob.setKneeTau(robotSide, kneeTau.getDoubleValue());
+         
+//         kneeTau.set(controllerBodyZ.compute(rob.getBodyPositionZ(), desiredBodyZ.getDoubleValue(), -rob.getKneeVelocity(robotSide), 0.0, deltaT));
+//         rob.setKneeTau(robotSide, -kneeTau.getDoubleValue() + ffComponent);
+         
+         //Ankle --> Keep foot parallel to ground
+         ankleTau.set(controllerAnkleSwing.compute(rob.getAnklePitch(robotSide), desiredAnklePitchSwing.getDoubleValue(), rob.getAnkleVelocity(robotSide), 0.0, deltaT));
+         rob.setAnkleTau(robotSide, ankleTau.getDoubleValue());
+      }
+
+      public void doTransitionIntoAction()
+      {
+         startTime.set(rob.getYoTime().getDoubleValue());
+      }
+
+      public void doTransitionOutOfAction()
+      {
+      }
+   }
+
+   ///////////////////////////////////  (4)  Straighten
+   private class StraightenState extends State<States>
+   {
+      private final RobotSide robotSide;
+
+      public StraightenState(RobotSide robotSide, States stateEnum)
+      {
+         super(States.STRAIGHTEN);
+         this.robotSide = robotSide;
+      }
+
+      public void doAction()
+      {
+         //Hip --> Body pitch
+         hipTau = controlBodyPitch();
+         rob.setHipTau(robotSide, -hipTau.getDoubleValue());
+
+         //Knee --> Leg straight
+         kneeTau.set(controllerKneePitch.compute(rob.getKneePosition(robotSide), desiredKneePitchStraighten.getDoubleValue(), rob.getKneeVelocity(robotSide), 0.0, deltaT));
+         rob.setKneeTau(robotSide, kneeTau.getDoubleValue());
+         
+//         kneeTau.set(controllerBodyZ.compute(rob.getBodyPositionZ(), desiredBodyZ.getDoubleValue(), -rob.getKneeVelocity(robotSide), 0.0, deltaT));
+//         rob.setKneeTau(robotSide, -kneeTau.getDoubleValue()); //+ ffComponent);
+
+         //Ankle --> Foot pointing upwards
+         ankleTau.set(controllerAnkleStraighten.compute(rob.getAnklePitch(robotSide), desiredAnklePitchStraighten.getDoubleValue(), -rob.getAnkleVelocity(robotSide),
+               0.0, deltaT));
+         rob.setAnkleTau(robotSide, ankleTau.getDoubleValue());
+      }
+
+      public void doTransitionIntoAction()
+      {
+      }
+
+      public void doTransitionOutOfAction()
+      {
+      }
+   }
+
+   /**
+    * State Transition Conditions
+    */
+
+   // Support To ToeOff
+   public class HeelOffGroundCondition implements StateTransitionCondition
+   {
+      private final RobotSide robotSide;
+
+      public HeelOffGroundCondition(RobotSide robotSide)
+      {
+         this.robotSide = robotSide;
+      }
+
+      public boolean checkCondition()
+      {
+         onTheFloor = rob.heelOnTheFloor(robotSide); //onTheFloor will be true if the heel is on the floor, but we want the opposite
+//         heelAhead = rob.heelToeOffAhead(robotSide);
+//         currentBodyZ = rob.getBodyPositionZ() <= 1.4;
+         
+         double toeX = rob.getToeX(robotSide);
+         double oppositeHeelX = rob.getHeelX(robotSide.getOppositeSide());
+         return (!onTheFloor); //&& (oppositeHeelX > toeX); //&& currentBodyZ; // && heelAhead;
+      }
+   }
+
+   //ToeOff To Swing
+   public class ToeOffGroundCondition implements StateTransitionCondition
+   {
+      private final RobotSide robotSide;
+
+      public ToeOffGroundCondition(RobotSide robotSide)
+      {
+         this.robotSide = robotSide;
+      }
+
+      public boolean checkCondition()
+      {
+//         onTheFloor = rob.toeOnTheFloor(robotSide);
+         boolean oppositeHeelOnTheFloor = rob.heelOnTheFloor(robotSide.getOppositeSide());
+//         return !onTheFloor && oppositeHeelOnTheFloor;
+         return oppositeHeelOnTheFloor;
+      }
+   }
+   
+   //Swing To Straighten
+//   public class SwingToStraightenCondition implements StateTransitionCondition
+//   {
+//      public SwingToStraightenCondition(DoubleYoVariable startTime)
+//      {
+//         
+//      }
+//      
+//      public boolean checkCondition()
+//      {
+//         stopSwing = (rob.getYoTime().getDoubleValue() - startTime.getDoubleValue()) > 0.15;
+//         return stopSwing;
+//      }
+//   }
+
+   //Straighten To Support
+   public class HeelOnGroundCondition implements StateTransitionCondition
+   {
+      private final RobotSide robotSide;
+
+      public HeelOnGroundCondition(RobotSide robotSide)
+      {
+         this.robotSide = robotSide;
+      }
+
+      public boolean checkCondition()
+      {
+         onTheFloor = rob.heelOnTheFloor(robotSide);
+         return onTheFloor;
+      }
    }
 
    /////////////////////////////////////////////////////////////////////////////////////////////
    public void doControl()
    {
-      rob.updateIDRobot();
-
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         /********** Body Height ****************/
-         kneeTau.set(controllerBodyZ.compute(rob.getBodyPositionZ(), desiredBodyZ.getDoubleValue(), -rob.getKneeVelocity(robotSide), 0.0, deltaT));
-         rob.setKneeTau(robotSide, -kneeTau.getDoubleValue()); // + ffComponent);
-         
-         /*********** Ankle Pitch **************/
-         ankleTau.set(controllerAnkle.compute(rob.getAnklePitch(robotSide), desiredAnklePitch.getDoubleValue(), -rob.getAnkleVelocity(robotSide), 0.0, deltaT));
-         rob.setKneeTau(robotSide, ankleTau.getDoubleValue());
-
-         /**
-          * 1
-          */
-         
-//         if (robotSide == RobotSide.RIGHT)
-//         {
-//
-//            /********** Body Height (RIGHT KNEE) ****************/
-//            kneeTau.set(controllerBodyZ.compute(rob.getBodyPositionZ(), desiredBodyZ.getDoubleValue(), -rob.getKneeVelocity(robotSide), 0.0, deltaT));
-//            rob.setKneeTau(robotSide, -kneeTau.getDoubleValue()); // + ffComponent);
-//
-//            /********** Body Pitch (RIGHT HIP) ****************/
-//            rob.getBodyPitch(rotationToPack);
-//            double pitchFromQuaternion = RotationFunctions.getPitchFromQuaternion(rotationToPack);
-//            
-//            rob.getBodyAngularVel(velocityToPack);
-//            double bodyAngularVel = velocityToPack.getY(); //pitch velocity
-//            
-//            hipTau.set(controllerLegPitch.compute(pitchFromQuaternion, desiredBodyPitch.getDoubleValue(), bodyAngularVel, 0.0, deltaT));
-//            rob.setHipTau(robotSide, -hipTau.getDoubleValue());
-//         }
-//
-//         else
-//         {
-//            /********** Knee Height (LEFT KNEE) ****************/
-//            kneeTau.set(controllerKneeZ.compute(rob.getKneePositionZ(robotSide), desiredKneeZ.getDoubleValue(), rob.getKneeVelocity(robotSide), 0.0, deltaT));
-//            rob.setKneeTau(robotSide, kneeTau.getDoubleValue());
-//
-//            /********** Right Leg Pitch (LEFT HIP)************/
-//            hipTau.set(controllerLegPitch.compute(rob.getHipPitch(robotSide), desiredLegPitch.getDoubleValue(), rob.getHipVelocity(robotSide), 0.0, deltaT));
-//            rob.setHipTau(robotSide, hipTau.getDoubleValue());
-//         }
-
-    /**
-     * 2     
-     */
-         
-         //         /********** Body height ****************/
-         //         rob.getBodyPoint(bodyPositionToPack);
-         //         kneeTau.set(controllerBodyZ.compute(bodyPositionToPack.getZ(), desiredBodyZ.getDoubleValue(), -rob.getKneeVelocity(robotSide), 0.0, deltaT));
-         //         rob.setKneeTau(robotSide, -kneeTau.getDoubleValue());
-         //
-         //         if (robotSide == RobotSide.LEFT)
-         //         {
-         //            /********** Body Pitch ************/
-         //            rob.getBodyPitch(rotationToPack);
-         //            double pitchFromQuaternion = RotationFunctions.getPitchFromQuaternion(rotationToPack);
-         //            hipTau.set(controllerLegPitch.compute(pitchFromQuaternion, desiredBodyPitch.getDoubleValue(), rob.getHipVelocity(robotSide), 0.0, deltaT));
-         //            rob.setHipTau(robotSide, hipTau.getDoubleValue());
-         //         }
-         //         else
-         //         {
-         //            /********** Body Pitch ************/
-         //            rob.getBodyPitch(rotationToPack);
-         //            double pitchFromQuaternion = RotationFunctions.getPitchFromQuaternion(rotationToPack);
-         //            hipTau.set(controllerLegPitch.compute(pitchFromQuaternion, desiredBodyPitch.getDoubleValue(), rob.getHipVelocity(robotSide), 0.0, deltaT));
-         //            rob.setHipTau(robotSide, -hipTau.getDoubleValue());
-         //         }
-
-         /**
-          * 2.b
-          */
-         
-         
-         //         if (robotSide == RobotSide.LEFT)
-         //         {
-         //         /********** Leg Swing ************/
-         //         hipTau.set(controllerLegPitch.compute(rob.getHipPitch(robotSide), -desiredLegPitch.getDoubleValue(), rob.getHipVelocity(robotSide), 0.0, deltaT));
-         //         rob.setHipTau(robotSide, hipTau.getDoubleValue());
-         //         }
-         //         else
-         //         {
-         //         /********** Leg Swing ************/
-         //         hipTau.set(controllerLegPitch.compute(rob.getHipPitch(robotSide), desiredLegPitch.getDoubleValue(), rob.getHipVelocity(robotSide), 0.0, deltaT));
-         //         rob.setHipTau(robotSide, hipTau.getDoubleValue());
-         //         }
-
-         rob.applyTorques(); //Note: this is getting called twice, one per side
-      }
+      walkingStateMachine();
    }
-
-   /////////////////////////////////////////////////////////////////////////////////////////////
-
-   /**
-    * State Machine
-    */
-
-   //   private void setUpStateMachine()
-   //   {
-   //         // States and Actions:
-   //         State<States> leftSupportState = new SupportState(RobotSide.LEFT, States.SUPPORT);
-   //         State<States> rightSupportState = new SupportState(RobotSide.RIGHT, States.SUPPORT);  
-   //         State<States> leftToeOffState = new ToeOffState(RobotSide.LEFT, States.TOE_OFF);
-   //         State<States> rightToeOffState = new ToeOffState(RobotSide.RIGHT, States.TOE_OFF);
-   //         State<States> leftSwingState = new SwingState(RobotSide.LEFT, States.SWING);
-   //         State<States> rightSwingState = new SwingState(RobotSide.RIGHT, States.SWING);
-   //         State<States> leftStraightenState = new StraightenState(RobotSide.LEFT, States.STRAIGHTEN);
-   //         State<States> rightStraightenState = new StraightenState(RobotSide.RIGHT, States.STRAIGHTEN);
-   //
-   //         // Transition Conditions:
-   //         StateTransitionCondition leftHealUnloaded = new HealUnloadedCondition(RobotSide.LEFT);
-   //         StateTransitionCondition leftFootUnloaded = new FootUnloadedCondition(RobotSide.LEFT);
-   //         StateTransitionCondition leftFootTouchedDown = new FootTouchedDownCondition(RobotSide.LEFT);
-   //
-   //         StateTransitionCondition rightHealUnloaded = new HealUnloadedCondition(RobotSide.RIGHT);
-   //         StateTransitionCondition rightFootUnloaded = new FootUnloadedCondition(RobotSide.RIGHT);
-   //         StateTransitionCondition rightFootTouchedDown = new FootTouchedDownCondition(RobotSide.RIGHT);
-   //
-   //         // Left State Transitions:
-   //         StateTransition<States> leftSupportToToeOff = new StateTransition<States>(States.TOE_OFF, leftHealUnloaded);
-   //         leftSupportToToeOff.addTimePassedCondition(min_support_time);
-   //         leftSupportState.addStateTransition(leftSupportToToeOff);
-   //
-   //         StateTransition<States> leftToeOffToSwing = new StateTransition<States>(States.SWING, leftFootUnloaded);
-   //         leftToeOffState.addStateTransition(leftToeOffToSwing);
-   //
-   //         StateTransition<States> leftSwingToStraighten = new StateTransition<States>(States.STRAIGHTEN, swing_time);
-   //         leftSwingState.addStateTransition(leftSwingToStraighten);
-   //
-   //         StateTransition<States> leftStraightenToSupport = new StateTransition<States>(States.SUPPORT, leftFootTouchedDown);
-   //         leftStraightenState.addStateTransition(leftStraightenToSupport);
-   //
-   //         // Right State Transitions:
-   //         StateTransition<States> rightSupportToToeOff = new StateTransition<States>(States.TOE_OFF, rightHealUnloaded);
-   //         rightSupportToToeOff.addTimePassedCondition(min_support_time);
-   //         rightSupportState.addStateTransition(rightSupportToToeOff);
-   //
-   //         StateTransition<States> rightToeOffToSwing = new StateTransition<States>(States.SWING, rightFootUnloaded);
-   //         rightToeOffState.addStateTransition(rightToeOffToSwing);
-   //
-   //         StateTransition<States> rightSwingToStraighten = new StateTransition<States>(States.STRAIGHTEN, swing_time);
-   //         rightSwingState.addStateTransition(rightSwingToStraighten);
-   //
-   //         StateTransition<States> rightStraightenToSupport = new StateTransition<States>(States.SUPPORT, rightFootTouchedDown);
-   //         rightStraightenState.addStateTransition(rightStraightenToSupport);
-   //
-   //
-   //         // Assemble the Left State Machine:
-   //         leftStateMachine.addState(leftSupportState);
-   //         leftStateMachine.addState(leftToeOffState);
-   //         leftStateMachine.addState(leftSwingState);
-   //         leftStateMachine.addState(leftStraightenState);
-   //
-   //
-   //         // Assemble the Right State Machine:
-   //         rightStateMachine.addState(rightSupportState);
-   //         rightStateMachine.addState(rightToeOffState);
-   //         rightStateMachine.addState(rightSwingState);
-   //         rightStateMachine.addState(rightStraightenState);
-   //
-   //         // Set the Initial States:
-   //
-   //         leftStateMachine.setCurrentState(States.STRAIGHTEN);
-   //         rightStateMachine.setCurrentState(States.SUPPORT);
-   //   }
-   //
-   //  
-
-   /////////////////////////////////////////////////////////////////////////////////////////////
 
    public void initialize()
    {

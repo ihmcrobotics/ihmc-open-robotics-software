@@ -3,8 +3,8 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.Step5RobotParameters.JointNames;
-import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.Step5RobotParameters.LinkNames;
+import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.JointNames;
+import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.LinkNames;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -102,7 +102,7 @@ public class Step5IDController implements RobotController
    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    public void doControl()
    {
-      robot.updateIDRobot();
+      robot.updatePositionsIDrobot();
 
       double hipPulse = 2.0 * Math.PI / hipPeriod.getDoubleValue();
       qDesiredHip.set(hipAmplitude.getDoubleValue() * Math.sin(hipPulse * robot.getTime()));
@@ -114,7 +114,7 @@ public class Step5IDController implements RobotController
       
       doControlUsingInverseDynamicsCalculatorOnly();
       
-      robot.applyTorques();
+      robot.updateTorquesSCSrobot();
    }
 
    private void doControlUsingInverseDynamicsCalculatorOnly()
