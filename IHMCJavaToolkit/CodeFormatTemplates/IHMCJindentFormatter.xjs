@@ -1,0 +1,4821 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_17" class="java.beans.XMLDecoder"> 
+ <object class="jindent.JindentSettings"> 
+  <object class="java.util.HashMap"> 
+   <void method="put"> 
+    <string>java.combinePaddingParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.combinePaddingParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesBeforeBlockComments</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesBeforeBlockComments</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.formatHeader</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.formatHeader</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>general.reportEveryFileAccess</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>general.reportEveryFileAccess</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.enumBraceStyle</string> 
+    <object class="jindent.settings.BracesSetting"> 
+     <string>java.enumBraceStyle</string> 
+     <void property="settingsMap"> 
+      <void method="get"> 
+       <string>indentAfterRightBrace</string> 
+       <void property="value"> 
+        <int>1</int> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>minLinesToInsertBlankLineAfterLeftBrace</string> 
+       <void property="infinite"> 
+        <boolean>true</boolean> 
+       </void> 
+       <void property="value"> 
+        <int>2</int> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>noBlankLinesAfterLeftBrace</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>doNotInsertBeforeSingleRightBrace</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>rightBraceNewLine</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>leftBraceNewLine</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>minLinesToInsertBlankLineBeforeRightBrace</string> 
+       <void property="infinite"> 
+        <boolean>true</boolean> 
+       </void> 
+       <void property="value"> 
+        <int>2</int> 
+       </void> 
+      </void> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.minimumCommentIndent</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.minimumCommentIndent</string> 
+     <void property="value"> 
+      <int>4</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeCommas</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeCommas</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertParenthesesIntoConditions</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertParenthesesIntoConditions</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.noPaddingOfEmptyBrackets</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.noPaddingOfEmptyBrackets</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeCaseColons</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeCaseColons</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.labelNewLine</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.labelNewLine</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createPublicClassJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createPublicClassJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createPrivateFieldJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createPrivateFieldJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeIfParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeIfParentheses</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeTernaryHooks</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeTernaryHooks</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.enumConstantsSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.enumConstantsSeparator</string> 
+     <void property="value"> 
+      <string>--- constant enums -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocMethodReturn</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocMethodReturn</string> 
+     <void property="value"> 
+      <string> *
+ * @return</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterLastImport</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterLastImport</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentWrappedThrows</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.indentWrappedThrows</string> 
+     <void property="value"> 
+      <int>8</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.setMethodsSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.setMethodsSeparator</string> 
+     <void property="value"> 
+      <string>--- set methods -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertMethodsSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertMethodsSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertEnumConstantsSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertEnumConstantsSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertStaticFieldsSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertStaticFieldsSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertSeparatorCommentsOnlyBetweenTypeDeclarations</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertSeparatorCommentsOnlyBetweenTypeDeclarations</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createPrivateInterfaceJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createPrivateInterfaceJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.importNonJDKSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.importNonJDKSeparator</string> 
+     <void property="value"> 
+      <string>--- non-JDK imports -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.deleteBlockComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.deleteBlockComments</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>ide.eclipse.formatEditorFileBeforeSave</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>ide.eclipse.formatEditorFileBeforeSave</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.maxNumOfAnnotationValuesInOneLine</string> 
+    <object class="jindent.settings.INumberSetting"> 
+     <string>java.maxNumOfAnnotationValuesInOneLine</string> 
+     <void property="value"> 
+      <int>3</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterHeader</string> 
+    <object class="jindent.settings.NZNumberSetting"> 
+     <string>java.blankLinesAfterHeader</string> 
+     <void property="value"> 
+      <int>3</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesBetweenCaseBlocks</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesBetweenCaseBlocks</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapParametersOfMethodConstructorDeclarations</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapParametersOfMethodConstructorDeclarations</string> 
+     <void property="index"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapFirstArgumentOfMethodConstructorCalls</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapFirstArgumentOfMethodConstructorCalls</string> 
+     <void property="index"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapBeforeRightParenthesisOfMethodConstructorCalls</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapBeforeRightParenthesisOfMethodConstructorCalls</string> 
+     <void property="index"> 
+      <int>3</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeCatchParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeCatchParentheses</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.deleteSingleLineComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.deleteSingleLineComments</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingConditionalOperators</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingConditionalOperators</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.separatorCommentFillCharacters</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.separatorCommentFillCharacters</string> 
+     <void property="value"> 
+      <string>-</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.headerInsertionMode</string> 
+    <object class="jindent.settings.HeaderSetting"> 
+     <string>java.headerInsertionMode</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.formatEndOfLineComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.formatEndOfLineComments</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeForSemicolons</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeForSemicolons</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.maxNumOfMarkerAnnotationInOneLine</string> 
+    <object class="jindent.settings.INumberSetting"> 
+     <string>java.maxNumOfMarkerAnnotationInOneLine</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertInterfacesSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertInterfacesSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>environment.conventionName</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>environment.conventionName</string> 
+     <void property="value"> 
+      <string>Sun Code Convention</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.allowWrappingOfFirstArgumentOfNestedMethodCalls</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.allowWrappingOfFirstArgumentOfNestedMethodCalls</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentCommentsByTabs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.indentCommentsByTabs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapImplements</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapImplements</string> 
+     <void property="index"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeBangsAfterAndOr</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeBangsAfterAndOr</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeTernaryColons</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeTernaryColons</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeEnumConstantsParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeEnumConstantsParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.footerTemplate</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.footerTemplate</string> 
+     <void property="value"> 
+      <string>/*
+ * @(#)$fileName$   $date$
+ * 
+ * Copyright (c) 2005 your company name
+ *
+ * License agreement text here ...
+ *
+ *
+ *
+ */</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocInterfaceParamSeparator</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocInterfaceParamSeparator</string> 
+     <void property="value"> 
+      <string> *</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.tryCatchBraceStyle</string> 
+    <object class="jindent.settings.BracesSetting"> 
+     <string>java.tryCatchBraceStyle</string> 
+     <void property="settingsMap"> 
+      <void method="get"> 
+       <string>indentAfterRightBrace</string> 
+       <void property="value"> 
+        <int>1</int> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>minLinesToInsertBlankLineAfterLeftBrace</string> 
+       <void property="infinite"> 
+        <boolean>true</boolean> 
+       </void> 
+       <void property="value"> 
+        <int>2</int> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>noBlankLinesAfterLeftBrace</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>doNotInsertBeforeSingleRightBrace</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>rightBraceNewLine</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>leftBraceNewLine</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>minLinesToInsertBlankLineBeforeRightBrace</string> 
+       <void property="infinite"> 
+        <boolean>true</boolean> 
+       </void> 
+       <void property="value"> 
+        <int>2</int> 
+       </void> 
+      </void> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createProtectedAnnotationTypeJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createProtectedAnnotationTypeJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.separatorCommentLineLength</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.separatorCommentLineLength</string> 
+     <void property="value"> 
+      <int>79</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.footerDetectionExcludeKeys</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.footerDetectionExcludeKeys</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentWrappedRightParenthesisOfMethodConstructorDeclarations</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.indentWrappedRightParenthesisOfMethodConstructorDeclarations</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapLines</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.wrapLines</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>environment.dateFormat</string> 
+    <object class="jindent.settings.DateFormatSetting"> 
+     <string>environment.dateFormat</string> 
+     <void property="value"> 
+      <string>yy/MM/dd</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesBeforeJavaDocComments</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesBeforeJavaDocComments</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterFooter</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterFooter</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.deepIndentForMultipleDeclarations</string> 
+    <object class="jindent.settings.AbsoluteRelativeINumberSetting"> 
+     <string>java.deepIndentForMultipleDeclarations</string> 
+     <void property="value"> 
+      <int>20</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createFriendlyConstructorJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createFriendlyConstructorJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>general.formatterMessages</string> 
+    <object class="jindent.settings.MessageReportSetting"> 
+     <string>general.formatterMessages</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.alignExceedingAnnotationDefaults</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.alignExceedingAnnotationDefaults</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>general.parserMessages</string> 
+    <object class="jindent.settings.MessageReportSetting"> 
+     <string>general.parserMessages</string> 
+     <void property="index"> 
+      <int>2</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesBeforeStatementsContainingBlocks</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesBeforeStatementsContainingBlocks</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertImportJDKSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertImportJDKSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.formatTrailingComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.formatTrailingComments</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.jindentNotePosition</string> 
+    <object class="jindent.settings.PositionSetting"> 
+     <string>java.jindentNotePosition</string> 
+     <void property="index"> 
+      <int>2</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingWhileParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingWhileParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.noPaddingOfEmptyBracesInInitializers</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.noPaddingOfEmptyBracesInInitializers</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>ide.netbeans.formatEditorFileBeforeSave</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>ide.netbeans.formatEditorFileBeforeSave</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertClassesSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertClassesSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createProtectedInterfaceJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createProtectedInterfaceJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesBeforeFilteredCode</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesBeforeFilteredCode</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.alignAssignments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.alignAssignments</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingEqualityOperators</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingEqualityOperators</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.deleteTrailingComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.deleteTrailingComments</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeReturnParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeReturnParentheses</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingMultiplicativeOperators</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingMultiplicativeOperators</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingIfParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingIfParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createPublicEnumJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createPublicEnumJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesToSeparateStaticImportGroups</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesToSeparateStaticImportGroups</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapFirstParameterOfMethodConstructorDeclarations</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapFirstParameterOfMethodConstructorDeclarations</string> 
+     <void property="index"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createProtectedEnumJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createProtectedEnumJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.maxLineLength</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.maxLineLength</string> 
+     <void property="value"> 
+      <int>160</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocInterfaceBottom</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocInterfaceBottom</string> 
+     <void property="value"> 
+      <string> *
+ * @version        $version$, $date$
+ * @author         $author$    
+ */</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentWrappedFirstParameterOfMethodConstructorDeclarations</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.indentWrappedFirstParameterOfMethodConstructorDeclarations</string> 
+     <void property="value"> 
+      <int>8</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterMethods</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterMethods</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.classInterfaceBraceStyle</string> 
+    <object class="jindent.settings.BracesSetting"> 
+     <string>java.classInterfaceBraceStyle</string> 
+     <void property="settingsMap"> 
+      <void method="get"> 
+       <string>indentAfterRightBrace</string> 
+       <void property="value"> 
+        <int>1</int> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>minLinesToInsertBlankLineAfterLeftBrace</string> 
+       <void property="infinite"> 
+        <boolean>true</boolean> 
+       </void> 
+       <void property="value"> 
+        <int>2</int> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>noBlankLinesAfterLeftBrace</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>doNotInsertBeforeSingleRightBrace</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>rightBraceNewLine</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>leftBraceNewLine</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>minLinesToInsertBlankLineBeforeRightBrace</string> 
+       <void property="infinite"> 
+        <boolean>true</boolean> 
+       </void> 
+       <void property="value"> 
+        <int>2</int> 
+       </void> 
+      </void> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.headerDetectionIncludeKeys</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.headerDetectionIncludeKeys</string> 
+     <void property="value"> 
+      <string>Copyright, (c)</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createPrivateConstructorJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createPrivateConstructorJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.formatBlockComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.formatBlockComments</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createPublicInterfaceJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createPublicInterfaceJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterEnumerations</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterEnumerations</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocConstructorBottom</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocConstructorBottom</string> 
+     <void property="value"> 
+      <string> */</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentWrappedExtends</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.indentWrappedExtends</string> 
+     <void property="value"> 
+      <int>8</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeBracesOfArrayInitializers</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeBracesOfArrayInitializers</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocConstructorParamSeparator</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocConstructorParamSeparator</string> 
+     <void property="value"> 
+      <string> *</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapComparisonOperators</string> 
+    <object class="jindent.settings.BAWrappingSetting"> 
+     <string>java.wrapComparisonOperators</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.noSpacesBetweenEmptyForSemicolons</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.noSpacesBetweenEmptyForSemicolons</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesToSeparateJindentNote</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesToSeparateJindentNote</string> 
+     <void property="value"> 
+      <int>2</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.headerTemplate</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.headerTemplate</string> 
+     <void property="value"> 
+      <string>/*
+ * @(#)$fileName$   $date$
+ * 
+ * Copyright (c) 2005 your company name
+ *
+ * License agreement text here ...
+ *
+ *
+ *
+ */</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesBeforeSingleLineComments</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesBeforeSingleLineComments</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.alternativeIndent</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.alternativeIndent</string> 
+     <void property="value"> 
+      <int>8</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapBeforeLeftParenthesisOfMethodConstructorCalls</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapBeforeLeftParenthesisOfMethodConstructorCalls</string> 
+     <void property="index"> 
+      <int>3</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.outputEndOfLineFormat</string> 
+    <object class="jindent.settings.EndOfLineFormatSetting"> 
+     <string>java.outputEndOfLineFormat</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertMissingJavaDocTags</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertMissingJavaDocTags</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapArgumentsOfMethodConstructorCalls</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapArgumentsOfMethodConstructorCalls</string> 
+     <void property="index"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertSetMethodsSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertSetMethodsSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeEllipses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeEllipses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentWrappedImplements</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.indentWrappedImplements</string> 
+     <void property="value"> 
+      <int>8</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createFriendlyAnnotationTypeJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createFriendlyAnnotationTypeJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createProtectedClassJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createProtectedClassJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertGetMethodsSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertGetMethodsSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeBracketsInTypes</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeBracketsInTypes</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceAfterAssertColons</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceAfterAssertColons</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.separateChunksByExceedingLines</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.separateChunksByExceedingLines</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeAssertColons</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeAssertColons</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeAnnotationTypeMemberParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeAnnotationTypeMemberParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.fieldsSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.fieldsSeparator</string> 
+     <void property="value"> 
+      <string>--- fields -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.staticFieldsSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.staticFieldsSeparator</string> 
+     <void property="value"> 
+      <string>--- static fields -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.emptyStatementsDeclarationsOnNewLine</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.emptyStatementsDeclarationsOnNewLine</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.outputEncoding</string> 
+    <object class="jindent.settings.EncodingSetting"> 
+     <string>java.outputEncoding</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingAssignmentOperators</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingAssignmentOperators</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocAnnotationType</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocAnnotationType</string> 
+     <void property="value"> 
+      <string>/**
+ * Annotation type description
+ *
+ */</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocInterfaceParam</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocInterfaceParam</string> 
+     <void property="value"> 
+      <string> * @param $paramName$</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertSeparatorCommentsInTypeDeclarations</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertSeparatorCommentsInTypeDeclarations</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapBeforeRightParenthesisOfMethodConstructorDeclarations</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapBeforeRightParenthesisOfMethodConstructorDeclarations</string> 
+     <void property="index"> 
+      <int>3</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocInterfaceTop</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocInterfaceTop</string> 
+     <void property="value"> 
+      <string>/**
+ * Interface description
+ *</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.importJDKSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.importJDKSeparator</string> 
+     <void property="value"> 
+      <string>--- JDK imports -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeMethodConstructorDeclarationParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeMethodConstructorDeclarationParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentCaseFromSwitch</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.indentCaseFromSwitch</string> 
+     <void property="value"> 
+      <int>3</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesBeforeFooter</string> 
+    <object class="jindent.settings.NZNumberSetting"> 
+     <string>java.blankLinesBeforeFooter</string> 
+     <void property="value"> 
+      <int>3</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createProtectedFieldJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createProtectedFieldJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.noPaddingOfEmptyParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.noPaddingOfEmptyParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createPrivateEnumJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createPrivateEnumJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>environment.systemVariables</string> 
+    <object class="jindent.settings.SystemVariablesSetting"> 
+     <string>environment.systemVariables</string> 
+     <void property="variablesMap"> 
+      <void method="remove"> 
+       <string>idea.active</string> 
+      </void> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.conventionNote</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.conventionNote</string> 
+     <void property="value"> 
+      <string> Formatted in $conventionName$ on $date$</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocClassParam</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocClassParam</string> 
+     <void property="value"> 
+      <string> * @param $paramName$</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertBracesIntoDoWhileStatements</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertBracesIntoDoWhileStatements</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertSeparatorCommentsOnlyBetweenClassInterfaceEnumDeclarations</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertSeparatorCommentsOnlyBetweenClassInterfaceEnumDeclarations</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocMethodBottom</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocMethodBottom</string> 
+     <void property="value"> 
+      <string> */</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceAfterLabelColons</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceAfterLabelColons</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceAfterCastParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceAfterCastParentheses</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.neverDeleteFirstColumnComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.neverDeleteFirstColumnComments</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertSeparatorCommentsInImportDeclarations</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertSeparatorCommentsInImportDeclarations</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeMethodConstructorCallParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeMethodConstructorCallParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.classesSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.classesSeparator</string> 
+     <void property="value"> 
+      <string>--- classes -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingBrackets</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingBrackets</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentWrappedFirstArgumentOfMethodConstructorCalls</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.indentWrappedFirstArgumentOfMethodConstructorCalls</string> 
+     <void property="value"> 
+      <int>4</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocConstructorExceptionSeparator</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocConstructorExceptionSeparator</string> 
+     <void property="value"> 
+      <string> *</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.annotationOnNewLine</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.annotationOnNewLine</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocConstructorParam</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocConstructorParam</string> 
+     <void property="value"> 
+      <string> * @param $paramName$</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.getMethodsSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.getMethodsSeparator</string> 
+     <void property="value"> 
+      <string>--- get methods -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertInitializersSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertInitializersSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertSeparatorCommentsInNestedClassInterfaceEnumDeclarations</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertSeparatorCommentsInNestedClassInterfaceEnumDeclarations</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapExtendsClasses</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapExtendsClasses</string> 
+     <void property="index"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterClasses</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterClasses</string> 
+     <void property="value"> 
+      <int>2</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.headerDetectionSmartMode</string> 
+    <object class="jindent.settings.INumberSetting"> 
+     <string>java.headerDetectionSmartMode</string> 
+     <void property="infinite"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="value"> 
+      <int>3</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocClassTop</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocClassTop</string> 
+     <void property="value"> 
+      <string>/**
+ * Class description
+ *</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>ide.eclipse.formatEditorFileAfterOpen</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>ide.eclipse.formatEditorFileAfterOpen</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.formatFooter</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.formatFooter</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createPublicMethodJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createPublicMethodJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertStaticInitializersSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertStaticInitializersSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocClassBottom</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocClassBottom</string> 
+     <void property="value"> 
+      <string> *
+ * @version        $version$, $date$
+ * @author         $author$    
+ */</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapNumericalOperators</string> 
+    <object class="jindent.settings.BAWrappingSetting"> 
+     <string>java.wrapNumericalOperators</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocMethodTop</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocMethodTop</string> 
+     <void property="value"> 
+      <string>/**
+ * Method description
+ *</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.alignAnnotationDefaults</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.alignAnnotationDefaults</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesBeforeEndOfLineComments</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesBeforeEndOfLineComments</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesBeforeBranchingStatements</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesBeforeBranchingStatements</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createPublicAnnotationTypeJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createPublicAnnotationTypeJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentLeadingsByTabs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.indentLeadingsByTabs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.generalBraceStyle</string> 
+    <object class="jindent.settings.BracesSetting"> 
+     <string>java.generalBraceStyle</string> 
+     <void property="settingsMap"> 
+      <void method="get"> 
+       <string>indentAfterRightBrace</string> 
+       <void property="value"> 
+        <int>1</int> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>minLinesToInsertBlankLineAfterLeftBrace</string> 
+       <void property="infinite"> 
+        <boolean>true</boolean> 
+       </void> 
+       <void property="value"> 
+        <int>2</int> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>noBlankLinesAfterLeftBrace</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>doNotInsertBeforeSingleRightBrace</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>rightBraceNewLine</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>leftBraceNewLine</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>minLinesToInsertBlankLineBeforeRightBrace</string> 
+       <void property="infinite"> 
+        <boolean>true</boolean> 
+       </void> 
+       <void property="value"> 
+        <int>2</int> 
+       </void> 
+      </void> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.alignExceedingComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.alignExceedingComments</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>general.javaDocMessages</string> 
+    <object class="jindent.settings.MessageReportSetting"> 
+     <string>general.javaDocMessages</string> 
+     <void property="index"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createPrivateAnnotationTypeJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createPrivateAnnotationTypeJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.alignExceedingDeclarations</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.alignExceedingDeclarations</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.separateChunksByComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.separateChunksByComments</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterConstructors</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterConstructors</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterEndOfLineComments</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterEndOfLineComments</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createPrivateMethodJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createPrivateMethodJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapAfterMethodConstructorDeclarationModifiers</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapAfterMethodConstructorDeclarationModifiers</string> 
+     <void property="index"> 
+      <int>3</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingMethodConstructorCallParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingMethodConstructorCallParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentAssignmentsByTabs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.indentAssignmentsByTabs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentWrappedLeftParenthesisOfMethodConstructorCalls</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.indentWrappedLeftParenthesisOfMethodConstructorCalls</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeSingleMemberAnnotationParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeSingleMemberAnnotationParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceAfterTernaryHooks</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceAfterTernaryHooks</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterInstanceInitializers</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterInstanceInitializers</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingNormalAnnotationParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingNormalAnnotationParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createFriendlyFieldJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createFriendlyFieldJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeBangs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeBangs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesBeforeHeader</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesBeforeHeader</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertAnnotationsSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertAnnotationsSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterBlockComments</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterBlockComments</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.enumsSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.enumsSeparator</string> 
+     <void property="value"> 
+      <string>--- enums -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.nestedInterfacesSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.nestedInterfacesSeparator</string> 
+     <void property="value"> 
+      <string>--- inner interfaces -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeLabelColons</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeLabelColons</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeSynchronizedParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeSynchronizedParentheses</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterStaticInitializers</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterStaticInitializers</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertFieldsSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertFieldsSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingCatchParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingCatchParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocMethodParam</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocMethodParam</string> 
+     <void property="value"> 
+      <string> * @param $paramName$</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesBeforeLocalVariables</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesBeforeLocalVariables</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapBecauseOfComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.wrapBecauseOfComments</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceAfterForSemicolons</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceAfterForSemicolons</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.useCaseSensitiveNameSorting</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.useCaseSensitiveNameSorting</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeBrackets</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeBrackets</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.alignDeclarations</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.alignDeclarations</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterFilteredCode</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterFilteredCode</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceAfterForColons</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceAfterForColons</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertEnumsSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertEnumsSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.constructorsSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.constructorsSeparator</string> 
+     <void property="value"> 
+      <string>--- constructors -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterInterfaces</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterInterfaces</string> 
+     <void property="value"> 
+      <int>2</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertConstructorsSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertConstructorsSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.neverIndentAndFormatFirstColumnComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.neverIndentAndFormatFirstColumnComments</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.optimizeImports</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.optimizeImports</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.deleteJavaDocComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.deleteJavaDocComments</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentAnnotationDefaultsByTabs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.indentAnnotationDefaultsByTabs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertSeparatorCommentsInClassInterfaceEnumDeclarations</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertSeparatorCommentsInClassInterfaceEnumDeclarations</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.sortClassInterfaceEnumDeclarations</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.sortClassInterfaceEnumDeclarations</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>version</string> 
+    <object class="jindent.settings.FloatSetting"> 
+     <string>version</string> 
+     <void property="value"> 
+      <float>4.4</float> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentDeclarationsByTabs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.indentDeclarationsByTabs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createPrivateClassJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createPrivateClassJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocMethodException</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocMethodException</string> 
+     <void property="value"> 
+      <string> * @throws $exceptionName$</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertImportNonJDKSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertImportNonJDKSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapChainedMethodConstructorCalls</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.wrapChainedMethodConstructorCalls</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.staticInitializersSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.staticInitializersSeparator</string> 
+     <void property="value"> 
+      <string>--- static initializers -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.alignFirstTernaryExpression</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.alignFirstTernaryExpression</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeForParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeForParentheses</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeSemicolons</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeSemicolons</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapConditionalOperators</string> 
+    <object class="jindent.settings.BAWrappingSetting"> 
+     <string>java.wrapConditionalOperators</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertBracesIntoWhileStatements</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertBracesIntoWhileStatements</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentSize</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.indentSize</string> 
+     <void property="value"> 
+      <int>3</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertBracesIntoForStatements</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertBracesIntoForStatements</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocConstructorTop</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocConstructorTop</string> 
+     <void property="value"> 
+      <string>/**
+ * Constructs ...
+ *</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.importDeclarationsSorter</string> 
+    <object class="jindent.settings.SorterSetting"> 
+     <string>java.importDeclarationsSorter</string> 
+     <void property="sorterRoot"> 
+      <object class="jindent.settings.sorter.SorterElement"> 
+       <string>Java</string> 
+       <int>2</int> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Imports</string> 
+         <int>19</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Package Membership</string> 
+           <int>31</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-JDK Packages</string> 
+             <int>33</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>JDK Packages</string> 
+             <int>32</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Modifiers</string> 
+           <int>39</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Static</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Static</string> 
+             <int>40</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Name</string> 
+           <int>22</int> 
+           <boolean>false</boolean> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+      </object> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesBetweenDifferentStatements</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesBetweenDifferentStatements</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.allowWrappingAfterAssignments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.allowWrappingAfterAssignments</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.typeDeclarationsSorter</string> 
+    <object class="jindent.settings.SorterSetting"> 
+     <string>java.typeDeclarationsSorter</string> 
+     <void property="sorterRoot"> 
+      <object class="jindent.settings.sorter.SorterElement"> 
+       <string>Java</string> 
+       <int>2</int> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Annotation Types</string> 
+         <int>13</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Name</string> 
+           <int>22</int> 
+           <boolean>true</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Access Modifiers</string> 
+           <int>34</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Public</string> 
+             <int>35</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Friendly</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Abstract Modifier</string> 
+           <int>43</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Abstract</string> 
+             <int>44</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Abstract</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Enum Constants</string> 
+         <int>12</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Name</string> 
+           <int>22</int> 
+           <boolean>true</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Access Modifiers</string> 
+           <int>34</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Public</string> 
+             <int>35</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Friendly</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Annotation Modifier</string> 
+           <int>51</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Annotated</string> 
+             <int>52</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Annotated</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Abstract Modifier</string> 
+           <int>43</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Abstract</string> 
+             <int>44</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Abstract</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Final Modifier</string> 
+           <int>41</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Final</string> 
+             <int>42</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Final</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by StrictFP Modifier</string> 
+           <int>47</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>StrictFP</string> 
+             <int>48</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-StrictFP</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Enums</string> 
+         <int>11</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Name</string> 
+           <int>22</int> 
+           <boolean>true</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Access Modifiers</string> 
+           <int>34</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Public</string> 
+             <int>35</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Friendly</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Annotation Modifier</string> 
+           <int>51</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Annotated</string> 
+             <int>52</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Annotated</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Abstract Modifier</string> 
+           <int>43</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Abstract</string> 
+             <int>44</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Abstract</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Final Modifier</string> 
+           <int>41</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Final</string> 
+             <int>42</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Final</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by StrictFP Modifier</string> 
+           <int>47</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>StrictFP</string> 
+             <int>48</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-StrictFP</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Classes</string> 
+         <int>3</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Name</string> 
+           <int>22</int> 
+           <boolean>true</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Access Modifiers</string> 
+           <int>34</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Public</string> 
+             <int>35</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Friendly</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Annotation Modifier</string> 
+           <int>51</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Annotated</string> 
+             <int>52</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Annotated</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Abstract Modifier</string> 
+           <int>43</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Abstract</string> 
+             <int>44</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Abstract</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Final Modifier</string> 
+           <int>41</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Final</string> 
+             <int>42</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Final</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by StrictFP Modifier</string> 
+           <int>47</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>StrictFP</string> 
+             <int>48</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-StrictFP</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Interfaces</string> 
+         <int>4</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Name</string> 
+           <int>22</int> 
+           <boolean>true</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Access Modifiers</string> 
+           <int>34</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Public</string> 
+             <int>35</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Friendly</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Annotation Modifier</string> 
+           <int>51</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Annotated</string> 
+             <int>52</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Annotated</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Abstract Modifier</string> 
+           <int>43</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Abstract</string> 
+             <int>44</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Abstract</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by StrictFP Modifier</string> 
+           <int>47</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>StrictFP</string> 
+             <int>48</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-StrictFP</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+      </object> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createPublicFieldJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createPublicFieldJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesToSeparateConventionNote</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesToSeparateConventionNote</string> 
+     <void property="value"> 
+      <int>2</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingMethodConstructorDeclarationParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingMethodConstructorDeclarationParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeAssertParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeAssertParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapThrows</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapThrows</string> 
+     <void property="index"> 
+      <int>2</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertBracesIntoIfElseStatements</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertBracesIntoIfElseStatements</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceAfterTernaryColons</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceAfterTernaryColons</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingExpressionParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingExpressionParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesToSeparateImportGroups</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesToSeparateImportGroups</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeThrowParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeThrowParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeWhileParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeWhileParentheses</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createPublicConstructorJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createPublicConstructorJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapForEachColon</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapForEachColon</string> 
+     <void property="index"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesBetweenEnumElementsAndClassBody</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesBetweenEnumElementsAndClassBody</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>environment.userVariables</string> 
+    <object class="jindent.settings.UserVariablesSetting"> 
+     <string>environment.userVariables</string> 
+     <void property="variablesMap"> 
+      <void method="put"> 
+       <string>author</string> 
+       <object class="jindent.settings.uservariables.UserVariable"> 
+        <string>author</string> 
+        <string>Twan Koolen</string> 
+       </object> 
+      </void> 
+      <void method="put"> 
+       <string>version</string> 
+       <object class="jindent.settings.uservariables.UserVariable"> 
+        <string>version</string> 
+        <string></string> 
+       </object> 
+      </void> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapThrowsExceptions</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapThrowsExceptions</string> 
+     <void property="index"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.allowWrappingAfterLeftParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.allowWrappingAfterLeftParentheses</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.deepIndent</string> 
+    <object class="jindent.settings.AbsoluteRelativeINumberSetting"> 
+     <string>java.deepIndent</string> 
+     <void property="value"> 
+      <int>35</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingSingleMemberAnnotationParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingSingleMemberAnnotationParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingBitwiseOperators</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingBitwiseOperators</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.alignExceedingAssignments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.alignExceedingAssignments</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.footerDetectionIncludeKeys</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.footerDetectionIncludeKeys</string> 
+     <void property="value"> 
+      <string>Copyright, (c)</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterPackage</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterPackage</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceAfterBangs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceAfterBangs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterFields</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterFields</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createFriendlyInterfaceJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createFriendlyInterfaceJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocMethodParamSeparator</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocMethodParamSeparator</string> 
+     <void property="value"> 
+      <string> *</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.singleIfStatementInOneLine</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.singleIfStatementInOneLine</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentWrappedLeftParenthesisOfMethodConstructorDeclarations</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.indentWrappedLeftParenthesisOfMethodConstructorDeclarations</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeSwitchParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeSwitchParentheses</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapExtends</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapExtends</string> 
+     <void property="index"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.sortExceptionsInTemplates</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.sortExceptionsInTemplates</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertSeparatorCommentsOnlyBetweenImportDeclarations</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertSeparatorCommentsOnlyBetweenImportDeclarations</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesBeforeFirstCaseBlock</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesBeforeFirstCaseBlock</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapAfterMethodDeclarationReturnTypes</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapAfterMethodDeclarationReturnTypes</string> 
+     <void property="index"> 
+      <int>3</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingEnumConstantsParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingEnumConstantsParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeNormalAnnotationParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeNormalAnnotationParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.deleteEndOfLineComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.deleteEndOfLineComments</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocEnum</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocEnum</string> 
+     <void property="value"> 
+      <string>/**
+ * Enum description
+ *
+ */</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.footerInsertionMode</string> 
+    <object class="jindent.settings.FooterSetting"> 
+     <string>java.footerInsertionMode</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createFriendlyMethodJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createFriendlyMethodJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.maxEnumElementsInOneLine</string> 
+    <object class="jindent.settings.INumberSetting"> 
+     <string>java.maxEnumElementsInOneLine</string> 
+     <void property="value"> 
+      <int>5</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingRelationalOperators</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingRelationalOperators</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.importGroupingDepth</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.importGroupingDepth</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingAdditiveOperators</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingAdditiveOperators</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceAfterBangsAfterAndOr</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceAfterBangsAfterAndOr</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocMethodExceptionSeparator</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocMethodExceptionSeparator</string> 
+     <void property="value"> 
+      <string> *</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.tabulatorSize</string> 
+    <object class="jindent.settings.NZNumberSetting"> 
+     <string>java.tabulatorSize</string> 
+     <void property="value"> 
+      <int>6</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.footerDetectionSmartMode</string> 
+    <object class="jindent.settings.INumberSetting"> 
+     <string>java.footerDetectionSmartMode</string> 
+     <void property="infinite"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="value"> 
+      <int>3</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.specialElseIfTreatment</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.specialElseIfTreatment</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapDeclarationInitializersToRightSide</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.wrapDeclarationInitializersToRightSide</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.headerDetectionExcludeKeys</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.headerDetectionExcludeKeys</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>general.logFile</string> 
+    <object class="jindent.settings.LogFileSetting"> 
+     <string>general.logFile</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.firstLevelIndent</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.firstLevelIndent</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.conventionNotePosition</string> 
+    <object class="jindent.settings.PositionSetting"> 
+     <string>java.conventionNotePosition</string> 
+     <void property="index"> 
+      <int>2</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertNestedClassesSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertNestedClassesSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterAnnotationTypes</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterAnnotationTypes</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.avoidConfusingIndentationsForMethodConstructorDeclarations</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.avoidConfusingIndentationsForMethodConstructorDeclarations</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>general.extensionManager</string> 
+    <object class="jindent.settings.ExtensionManagerSetting"> 
+     <string>general.extensionManager</string> 
+     <void property="extensionsMap"> 
+      <void method="put"> 
+       <string>java</string> 
+       <object class="jindent.settings.extensionmanager.ExtensionAssignment"> 
+        <string>java</string> 
+        <string>Java Formatter</string> 
+       </object> 
+      </void> 
+      <void method="put"> 
+       <string>sqlj</string> 
+       <object class="jindent.settings.extensionmanager.ExtensionAssignment"> 
+        <string>sqlj</string> 
+        <string>Java/SQLJ Formatter</string> 
+       </object> 
+      </void> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeForColons</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeForColons</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.keepBlankLines</string> 
+    <object class="jindent.settings.INumberSetting"> 
+     <string>java.keepBlankLines</string> 
+     <void property="value"> 
+      <int>4</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createFriendlyClassJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createFriendlyClassJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocField</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocField</string> 
+     <void property="value"> 
+      <string>/** Field description */</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createProtectedConstructorJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createProtectedConstructorJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.alignComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.alignComments</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.formatSingleLineComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.formatSingleLineComments</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocConstructorException</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocConstructorException</string> 
+     <void property="value"> 
+      <string> * @throws $exceptionName$</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.avoidConfusingIndentations</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.avoidConfusingIndentations</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingBracesOfInitializers</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingBracesOfInitializers</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createProtectedMethodJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createProtectedMethodJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.initializersSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.initializersSeparator</string> 
+     <void property="value"> 
+      <string>--- initializers -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingSwitchParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingSwitchParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingSynchronizedParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingSynchronizedParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingShiftOperators</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingShiftOperators</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.singleElseStatementInOneLine</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.singleElseStatementInOneLine</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterJavaDocComments</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterJavaDocComments</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.sortImportDeclarations</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.sortImportDeclarations</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingCastParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingCastParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterStatementsContainingBlocks</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterStatementsContainingBlocks</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.alignTernaryExpressions</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.alignTernaryExpressions</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterLocalVariables</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterLocalVariables</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentLabels</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.indentLabels</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.annotationsSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.annotationsSeparator</string> 
+     <void property="value"> 
+      <string>--- annotations -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.sortTypeDeclarations</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.sortTypeDeclarations</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.methodsSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.methodsSeparator</string> 
+     <void property="value"> 
+      <string>--- methods -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.inputTabulatorSize</string> 
+    <object class="jindent.settings.NZNumberSetting"> 
+     <string>java.inputTabulatorSize</string> 
+     <void property="value"> 
+      <int>8</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.methodConstructorBraceStyle</string> 
+    <object class="jindent.settings.BracesSetting"> 
+     <string>java.methodConstructorBraceStyle</string> 
+     <void property="settingsMap"> 
+      <void method="get"> 
+       <string>indentAfterRightBrace</string> 
+       <void property="value"> 
+        <int>1</int> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>minLinesToInsertBlankLineAfterLeftBrace</string> 
+       <void property="infinite"> 
+        <boolean>true</boolean> 
+       </void> 
+       <void property="value"> 
+        <int>2</int> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>noBlankLinesAfterLeftBrace</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>doNotInsertBeforeSingleRightBrace</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>rightBraceNewLine</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>leftBraceNewLine</string> 
+       <void property="value"> 
+        <boolean>true</boolean> 
+       </void> 
+      </void> 
+      <void method="get"> 
+       <string>minLinesToInsertBlankLineBeforeRightBrace</string> 
+       <void property="infinite"> 
+        <boolean>true</boolean> 
+       </void> 
+       <void property="value"> 
+        <int>2</int> 
+       </void> 
+      </void> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.blankLinesAfterSingleLineComments</string> 
+    <object class="jindent.settings.NumberSetting"> 
+     <string>java.blankLinesAfterSingleLineComments</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.insertNestedInterfacesSeparator</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.insertNestedInterfacesSeparator</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.deleteObsoleteJavaDocTags</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.deleteObsoleteJavaDocTags</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceAfterTildes</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceAfterTildes</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.createFriendlyEnumJavaDocs</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.createFriendlyEnumJavaDocs</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapBeforeLeftParenthesisOfMethodConstructorDeclarations</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapBeforeLeftParenthesisOfMethodConstructorDeclarations</string> 
+     <void property="index"> 
+      <int>3</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.maxArrayElementsInOneLine</string> 
+    <object class="jindent.settings.INumberSetting"> 
+     <string>java.maxArrayElementsInOneLine</string> 
+     <void property="value"> 
+      <int>5</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceBeforeTildes</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceBeforeTildes</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingBracesOfGenerics</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingBracesOfGenerics</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.maxNumOfAnnotationAssignmentsInOneLine</string> 
+    <object class="jindent.settings.INumberSetting"> 
+     <string>java.maxNumOfAnnotationAssignmentsInOneLine</string> 
+     <void property="value"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.classInterfaceEnumDeclarationsSorter</string> 
+    <object class="jindent.settings.SorterSetting"> 
+     <string>java.classInterfaceEnumDeclarationsSorter</string> 
+     <void property="sorterRoot"> 
+      <object class="jindent.settings.sorter.SorterElement"> 
+       <string>Java</string> 
+       <int>2</int> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Static Fields</string> 
+         <int>8</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Initialized</string> 
+           <int>9</int> 
+           <boolean>true</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Initialized</string> 
+             <int>20</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Initialized</string> 
+             <int>21</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Name</string> 
+           <int>22</int> 
+           <boolean>true</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Access Modifiers</string> 
+           <int>34</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Public</string> 
+             <int>35</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Friendly</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Protected</string> 
+             <int>37</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Private</string> 
+             <int>36</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Annotation Modifier</string> 
+           <int>51</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Annotated</string> 
+             <int>52</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Annotated</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Final Modifier</string> 
+           <int>41</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Final</string> 
+             <int>42</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Final</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Transient Modifier</string> 
+           <int>53</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Transient</string> 
+             <int>54</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Transient</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Volatile Modifier</string> 
+           <int>55</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Volatile</string> 
+             <int>56</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Volatile</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Types</string> 
+           <int>30</int> 
+           <boolean>false</boolean> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Static Initializers</string> 
+         <int>10</int> 
+        </object> 
+       </void> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Fields</string> 
+         <int>7</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Initialized</string> 
+           <int>9</int> 
+           <boolean>true</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Initialized</string> 
+             <int>20</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Initialized</string> 
+             <int>21</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Name</string> 
+           <int>22</int> 
+           <boolean>true</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Access Modifiers</string> 
+           <int>34</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Public</string> 
+             <int>35</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Friendly</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Protected</string> 
+             <int>37</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Private</string> 
+             <int>36</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Annotation Modifier</string> 
+           <int>51</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Annotated</string> 
+             <int>52</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Annotated</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Final Modifier</string> 
+           <int>41</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Final</string> 
+             <int>42</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Final</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Transient Modifier</string> 
+           <int>53</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Transient</string> 
+             <int>54</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Transient</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Volatile Modifier</string> 
+           <int>55</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Volatile</string> 
+             <int>56</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Volatile</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Types</string> 
+           <int>30</int> 
+           <boolean>false</boolean> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Initializers</string> 
+         <int>9</int> 
+        </object> 
+       </void> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Enum Constants</string> 
+         <int>12</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Name</string> 
+           <int>22</int> 
+           <boolean>true</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Access Modifiers</string> 
+           <int>34</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Public</string> 
+             <int>35</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Friendly</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Protected</string> 
+             <int>37</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Private</string> 
+             <int>36</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Annotation Modifier</string> 
+           <int>51</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Annotated</string> 
+             <int>52</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Annotated</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Final Modifier</string> 
+           <int>41</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Final</string> 
+             <int>42</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Final</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Abstract Modifier</string> 
+           <int>43</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Abstract</string> 
+             <int>44</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Abstract</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Static Modifier</string> 
+           <int>39</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Static</string> 
+             <int>40</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Static</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by StrictFP Modifier</string> 
+           <int>47</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>StrictFP</string> 
+             <int>48</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-StrictFP</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Constructors</string> 
+         <int>6</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Parameter Count</string> 
+           <int>23</int> 
+           <boolean>true</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Access Modifiers</string> 
+           <int>34</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Public</string> 
+             <int>35</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Friendly</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Protected</string> 
+             <int>37</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Private</string> 
+             <int>36</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Annotation Modifier</string> 
+           <int>51</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Annotated</string> 
+             <int>52</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Annotated</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Annotation Types</string> 
+         <int>52</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Name</string> 
+           <int>22</int> 
+           <boolean>true</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Access Modifiers</string> 
+           <int>34</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Public</string> 
+             <int>35</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Friendly</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Protected</string> 
+             <int>37</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Private</string> 
+             <int>36</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Final Modifier</string> 
+           <int>41</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Final</string> 
+             <int>42</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Final</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Abstract Modifier</string> 
+           <int>43</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Abstract</string> 
+             <int>44</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Abstract</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Static Modifier</string> 
+           <int>39</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Static</string> 
+             <int>40</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Static</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by StrictFP Modifier</string> 
+           <int>47</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>StrictFP</string> 
+             <int>48</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-StrictFP</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Enums</string> 
+         <int>11</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Name</string> 
+           <int>22</int> 
+           <boolean>true</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Access Modifiers</string> 
+           <int>34</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Public</string> 
+             <int>35</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Friendly</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Protected</string> 
+             <int>37</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Private</string> 
+             <int>36</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Annotation Modifier</string> 
+           <int>51</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Annotated</string> 
+             <int>52</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Annotated</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Final Modifier</string> 
+           <int>41</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Final</string> 
+             <int>42</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Final</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Abstract Modifier</string> 
+           <int>43</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Abstract</string> 
+             <int>44</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Abstract</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Static Modifier</string> 
+           <int>39</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Static</string> 
+             <int>40</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Static</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by StrictFP Modifier</string> 
+           <int>47</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>StrictFP</string> 
+             <int>48</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-StrictFP</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Methods</string> 
+         <int>5</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Method Type</string> 
+           <int>24</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Ordinary Methods</string> 
+             <int>29</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Getters</string> 
+             <int>25</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Has Getters</string> 
+             <int>27</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Is Getters</string> 
+             <int>28</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Setters</string> 
+             <int>26</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Name</string> 
+           <int>22</int> 
+           <boolean>false</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Parameter Count</string> 
+           <int>23</int> 
+           <boolean>false</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Access Modifiers</string> 
+           <int>34</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Public</string> 
+             <int>35</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Friendly</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Protected</string> 
+             <int>37</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Private</string> 
+             <int>36</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Annotation Modifier</string> 
+           <int>51</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Annotated</string> 
+             <int>52</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Annotated</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Final Modifier</string> 
+           <int>41</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Final</string> 
+             <int>42</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Final</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Abstract Modifier</string> 
+           <int>43</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Abstract</string> 
+             <int>44</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Abstract</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Static Modifier</string> 
+           <int>39</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Static</string> 
+             <int>40</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Static</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Synchronized Modifier</string> 
+           <int>49</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Synchronized</string> 
+             <int>50</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Synchronized</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Native Modifier</string> 
+           <int>45</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Native</string> 
+             <int>46</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Native</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by StrictFP Modifier</string> 
+           <int>47</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>StrictFP</string> 
+             <int>48</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-StrictFP</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Inner Interfaces</string> 
+         <int>4</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Name</string> 
+           <int>22</int> 
+           <boolean>true</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Access Modifiers</string> 
+           <int>34</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Public</string> 
+             <int>35</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Friendly</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Protected</string> 
+             <int>37</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Private</string> 
+             <int>36</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Annotation Modifier</string> 
+           <int>51</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Annotated</string> 
+             <int>52</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Annotated</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Final Modifier</string> 
+           <int>41</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Final</string> 
+             <int>42</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Final</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Abstract Modifier</string> 
+           <int>43</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Abstract</string> 
+             <int>44</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Abstract</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Static Modifier</string> 
+           <int>39</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Static</string> 
+             <int>40</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Static</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by StrictFP Modifier</string> 
+           <int>47</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>StrictFP</string> 
+             <int>48</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-StrictFP</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+       <void method="add"> 
+        <object class="jindent.settings.sorter.SorterElement"> 
+         <string>Inner Classes</string> 
+         <int>3</int> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Name</string> 
+           <int>22</int> 
+           <boolean>true</boolean> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Access Modifiers</string> 
+           <int>34</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Public</string> 
+             <int>35</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Friendly</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Protected</string> 
+             <int>37</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Private</string> 
+             <int>36</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Annotation Modifier</string> 
+           <int>51</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Annotated</string> 
+             <int>52</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Annotated</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Final Modifier</string> 
+           <int>41</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Final</string> 
+             <int>42</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Final</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Abstract Modifier</string> 
+           <int>43</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Abstract</string> 
+             <int>44</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Abstract</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by Static Modifier</string> 
+           <int>39</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Static</string> 
+             <int>40</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-Static</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+         <void method="add"> 
+          <object class="jindent.settings.sorter.OptionalSorterElement"> 
+           <string>Sort by StrictFP Modifier</string> 
+           <int>47</int> 
+           <boolean>false</boolean> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>StrictFP</string> 
+             <int>48</int> 
+            </object> 
+           </void> 
+           <void method="add"> 
+            <object class="jindent.settings.sorter.SorterElement"> 
+             <string>Non-StrictFP</string> 
+             <int>38</int> 
+            </object> 
+           </void> 
+          </object> 
+         </void> 
+        </object> 
+       </void> 
+      </object> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.interfacesSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.interfacesSeparator</string> 
+     <void property="value"> 
+      <string>--- interfaces -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.indentContentOfFirstColumnComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.indentContentOfFirstColumnComments</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.wrapImplementsInterfaces</string> 
+    <object class="jindent.settings.WrappingSetting"> 
+     <string>java.wrapImplementsInterfaces</string> 
+     <void property="index"> 
+      <int>1</int> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.javaDocClassParamSeparator</string> 
+    <object class="jindent.settings.StringArraySetting"> 
+     <string>java.javaDocClassParamSeparator</string> 
+     <void property="value"> 
+      <string> *</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.spaceAfterCommas</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.spaceAfterCommas</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.nestedClassesSeparator</string> 
+    <object class="jindent.settings.StringSetting"> 
+     <string>java.nestedClassesSeparator</string> 
+     <void property="value"> 
+      <string>--- inner classes -</string> 
+     </void> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.inputEncoding</string> 
+    <object class="jindent.settings.EncodingSetting"> 
+     <string>java.inputEncoding</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.paddingForParentheses</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.paddingForParentheses</string> 
+    </object> 
+   </void> 
+   <void method="put"> 
+    <string>java.formatJavaDocComments</string> 
+    <object class="jindent.settings.BooleanSetting"> 
+     <string>java.formatJavaDocComments</string> 
+     <void property="value"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+  </object> 
+ </object> 
+</java> 
