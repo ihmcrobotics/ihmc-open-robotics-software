@@ -30,6 +30,6 @@ public class PrintToolsTest
       
       System.out.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
       
-      assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:24): Test log tools!"));
+      assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:25): Test log tools!"));
    }
 }
