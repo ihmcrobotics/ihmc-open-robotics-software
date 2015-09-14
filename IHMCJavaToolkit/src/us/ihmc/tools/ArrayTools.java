@@ -2,16 +2,9 @@ package us.ihmc.tools;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.StringTokenizer;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 public class ArrayTools
 {
@@ -177,89 +170,6 @@ public class ArrayTools
       return ret;
    }
 
-   /**
-    * Use ArrayUtils.addAll
-    *
-    * @param arrayOfArraysToConcatenate int[][]
-    * @return int[]
-    */
-   @Deprecated
-   public static int[] concatentateArrays(int[][] arrayOfArraysToConcatenate)
-   {
-      int retSize = 0;
-      for (int i = 0; i < arrayOfArraysToConcatenate.length; i++)
-      {
-         retSize += arrayOfArraysToConcatenate[i].length;
-      }
-
-      int[] ret = new int[retSize];
-      int currentIndexIntoRet = 0;
-      for (int i = 0; i < arrayOfArraysToConcatenate.length; i++)
-      {
-         for (int j = 0; j < arrayOfArraysToConcatenate[i].length; j++)
-         {
-            ret[currentIndexIntoRet++] = arrayOfArraysToConcatenate[i][j];
-         }
-      }
-
-      return ret;
-   }
-
-   /**
-    * Use ArrayUtils.addAll
-    *
-    * @param arrayOfArraysToConcatenate double[][]
-    * @return double[]
-    */
-   @Deprecated
-   public static double[] concatentateArrays(double[][] arrayOfArraysToConcatenate)
-   {
-      int retSize = 0;
-      for (int i = 0; i < arrayOfArraysToConcatenate.length; i++)
-      {
-         retSize += arrayOfArraysToConcatenate[i].length;
-      }
-
-      double[] ret = new double[retSize];
-      int currentIndexIntoRet = 0;
-      for (int i = 0; i < arrayOfArraysToConcatenate.length; i++)
-      {
-         for (int j = 0; j < arrayOfArraysToConcatenate[i].length; j++)
-         {
-            ret[currentIndexIntoRet++] = arrayOfArraysToConcatenate[i][j];
-         }
-      }
-
-      return ret;
-   }
-
-   /**
-    * Use ArrayUtils.addAll
-    *
-    * @param arrayOfArraysToConcatenate Object[][]
-    * @return Object[]
-    */
-   @Deprecated
-   public static Object[] concatentateArrays(Object[][] arrayOfArraysToConcatenate)
-   {
-      int retSize = 0;
-      for (int i = 0; i < arrayOfArraysToConcatenate.length; i++)
-      {
-         retSize += arrayOfArraysToConcatenate[i].length;
-      }
-
-      Object[] ret = new Object[retSize];
-      int currentIndexIntoRet = 0;
-      for (int i = 0; i < arrayOfArraysToConcatenate.length; i++)
-      {
-         for (int j = 0; j < arrayOfArraysToConcatenate[i].length; j++)
-         {
-            ret[currentIndexIntoRet++] = arrayOfArraysToConcatenate[i][j];
-         }
-      }
-
-      return ret;
-   }
 
    /**
     * Use JUnitTools.assertArraysEquals
@@ -303,50 +213,7 @@ public class ArrayTools
       return ret;
    }
 
-   /**
-    * Returns the Array in Reverse Order
-    *
-    * @param arrayList ArrayList
-    * @return ArrayList
-    */
-   public static <T> ArrayList<T> getReversedArrayList(ArrayList<T> arrayList)
-   {
-      ArrayList<T> ret = new ArrayList<T>();
-      for (int i = arrayList.size() - 1; i >= 0; i--)
-      {
-         ret.add(arrayList.get(i));
-      }
 
-      return ret;
-   }
-
-   public static ArrayList<Double> getArrayListFromArray(double[] array)
-   {
-      ArrayList<Double> ret = new ArrayList<Double>();
-
-      for (int i = 0; i < array.length; i++)
-      {
-         ret.add(array[i]);
-      }
-
-      return ret;
-   }
-
-   public static double[] getArrayFromArrayList(List<Double> arrayList)
-   {
-      // TODO: rename this method getArrayFromList
-      if (arrayList == null)
-         return null;
-
-      double[] ret = new double[arrayList.size()];
-
-      for (int i = 0; i < arrayList.size(); i++)
-      {
-         ret[i] = arrayList.get(i);
-      }
-
-      return ret;
-   }
    
    public static double getMaximumAbsoluteChangeBetweenTicks(double[] values)
    {
