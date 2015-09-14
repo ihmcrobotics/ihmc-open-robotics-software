@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.steppr.hardware.StepprJoint;
-import us.ihmc.utilities.maps.EnumDoubleMap;
+import us.ihmc.tools.maps.EnumDoubleMap;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

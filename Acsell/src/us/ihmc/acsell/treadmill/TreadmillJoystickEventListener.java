@@ -5,7 +5,7 @@ import java.io.OutputStream;
 
 import net.java.games.input.Component;
 import net.java.games.input.Event;
-import us.ihmc.utilities.inputDevices.joystick.JoystickEventListener;
+import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 
 public class TreadmillJoystickEventListener implements JoystickEventListener
 {
