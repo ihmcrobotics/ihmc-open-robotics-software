@@ -2,12 +2,12 @@ package us.ihmc.acsell;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
