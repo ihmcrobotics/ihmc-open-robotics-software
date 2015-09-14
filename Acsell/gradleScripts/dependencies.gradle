@@ -4,7 +4,7 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
-	
+	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1'
 	//testCompile project(':CommonWalkingControlModules').sourceSets.test.output
 	//test.sourceSets.test.output
 	testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
@@ -17,7 +17,6 @@ dependencies {
 	compile project(':SensorProcessing')
 	compile project(':SimulationConstructionSet')
 	compile project(':RobotDataCommunication')
-	compile project(':IHMCRealtime')
 	compile project(':IHMCHumanoidBehaviors')
     compile project(':IHMCPerception')
     compile project(':IHMCWholeBodyController')
