@@ -32,9 +32,10 @@ import us.ihmc.ihmcPerception.OpenCVFaceDetector;
 import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
+import us.ihmc.tools.io.printing.PrintTools;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import boofcv.struct.calib.IntrinsicParameters;
 import bubo.clouds.FactoryPointCloudShape;

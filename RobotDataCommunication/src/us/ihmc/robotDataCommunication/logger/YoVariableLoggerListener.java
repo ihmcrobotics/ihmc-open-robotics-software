@@ -20,8 +20,8 @@ import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.YoVariablesUpdatedListener;
 import us.ihmc.robotDataCommunication.logger.util.CookieJar;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.compression.SnappyUtils;
-import us.ihmc.utilities.io.printing.PrintTools;
 
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {

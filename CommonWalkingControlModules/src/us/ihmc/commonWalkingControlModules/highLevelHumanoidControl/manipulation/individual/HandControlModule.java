@@ -32,7 +32,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.LeadInOutPoseTrajectoryG
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseTrajectoryGenerator;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
@@ -61,6 +60,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.trajectories.providers.CurrentPositionProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;

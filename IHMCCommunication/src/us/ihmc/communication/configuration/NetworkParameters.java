@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 import java.util.EnumMap;
 import java.util.Properties;
 
-import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class NetworkParameters
 {

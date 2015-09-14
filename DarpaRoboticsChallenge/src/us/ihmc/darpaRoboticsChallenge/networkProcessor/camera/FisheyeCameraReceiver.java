@@ -13,7 +13,7 @@ import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
-import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;

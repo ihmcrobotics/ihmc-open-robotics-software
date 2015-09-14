@@ -5,7 +5,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructor;
 import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchDoneListener;
 import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationDispatcher;
 import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationToDispatch;
-import us.ihmc.utilities.io.files.FileTools;
+import us.ihmc.tools.io.files.FileTools;
 
 public class FlamingoDispatcher
 {

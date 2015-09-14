@@ -46,7 +46,6 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateWrapper;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -57,6 +56,7 @@ import us.ihmc.robotics.stateMachines.StateMachineTools;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionAction;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class ScriptBehavior extends BehaviorInterface
 {

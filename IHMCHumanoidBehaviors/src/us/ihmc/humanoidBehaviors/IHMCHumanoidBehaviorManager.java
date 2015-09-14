@@ -45,9 +45,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 

@@ -11,7 +11,7 @@ import us.ihmc.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.PauseCommand;
-import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * Created with IntelliJ IDEA.

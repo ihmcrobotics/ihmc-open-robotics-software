@@ -4,8 +4,8 @@ import static org.junit.Assert.assertTrue;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class TimeBasedStopThreadUpdatable extends StopThreadUpdatable
 {

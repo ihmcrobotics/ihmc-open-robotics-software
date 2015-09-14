@@ -21,7 +21,7 @@ import java.util.Random;
 
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
-import us.ihmc.utilities.io.files.FileTools;
+import us.ihmc.tools.io.files.FileTools;
 
 public class LogSessionBroadcaster extends Thread
 {

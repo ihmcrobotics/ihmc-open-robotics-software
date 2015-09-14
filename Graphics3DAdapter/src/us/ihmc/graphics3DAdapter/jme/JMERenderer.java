@@ -70,6 +70,8 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.tools.FormattingTools;
+import us.ihmc.tools.io.files.FileTools;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.inputDevices.keyboard.KeyListener;
 import us.ihmc.utilities.inputDevices.keyboard.KeyListenerHolder;
 import us.ihmc.utilities.inputDevices.mouse.MouseListener;
@@ -77,8 +79,6 @@ import us.ihmc.utilities.inputDevices.mouse.MouseListenerHolder;
 import us.ihmc.utilities.inputDevices.mouse3DJoystick.Mouse3DJoystick;
 import us.ihmc.utilities.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.utilities.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
-import us.ihmc.utilities.io.files.FileTools;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.time.Timer;
 
 public class JMERenderer extends SimpleApplication implements Graphics3DAdapter, PBOAwtPanelListener

@@ -9,8 +9,8 @@ import java.util.Comparator;
 import org.apache.commons.lang3.SystemUtils;
 
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.utilities.io.printing.PrintTools;
 
 public class BambooVideoWall
 {
