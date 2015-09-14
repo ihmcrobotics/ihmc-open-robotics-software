@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.footstep;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.vecmath.Matrix3d;
@@ -473,7 +474,7 @@ public class Footstep
       frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       double[] ypr = frameOrientation.getYawPitchRoll();
-      String yawPitchRoll = "YawPitchRoll = " + ArrayTools.arrayToString(ypr);
+      String yawPitchRoll = "YawPitchRoll = " + Arrays.toString(ypr);
 
       return "id: " + id + " - pose: " + ankleReferenceFrame + " - trustHeight = " + trustHeight + "\n\tYawPitchRoll= {" + yawPitchRoll + "}";
    }

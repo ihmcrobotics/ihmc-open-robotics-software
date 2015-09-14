@@ -14,6 +14,8 @@ import us.ihmc.tools.ArrayTools;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
+
+import java.util.Arrays;
 import java.util.Random;
 
 public class HandstepPacket extends Packet<HandstepPacket> implements TransformableDataObject<HandstepPacket>
@@ -118,7 +120,7 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), this.orientation);
       double[] ypr = frameOrientation.getYawPitchRoll();
       ret = location.toString();
-      ret += ", YawPitchRoll = " + ArrayTools.arrayToString(ypr) + "\n";
+      ret += ", YawPitchRoll = " + Arrays.toString(ypr) + "\n";
 
       return ret;
    }

@@ -1,5 +1,6 @@
 package us.ihmc.communication.packets.wholebody;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
@@ -394,13 +395,13 @@ public class JointAnglesPacket extends IHMCRosApiPacket<JointAnglesPacket> imple
 
       double[] angles = new double[] { 0.0, 1.0, 2.0, 3.0, 4.0 };
 
-      ArrayTools.printArray(angles, System.out);
+      System.out.println(Arrays.toString(angles));
 
       jointAnglesPacket.setLeftLegJointAngle(angles);
 
       angles[0] = 99.0;
 
-      ArrayTools.printArray(jointAnglesPacket.leftLegJointAngle, System.out);
+      System.out.println(Arrays.toString(jointAnglesPacket.leftLegJointAngle));
    }
 
    private static void copyArray(double[] sourceArray, double[] destinationArray)

@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
-import us.ihmc.tools.ArrayTools;
+import java.util.Arrays;
+
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -70,6 +71,6 @@ public class ArmTorques
    {
       String ret = "\n\n" + this.robotSide + "\n";
       System.out.println(ret);
-      ArrayTools.printArray(this.torques, System.out);
+      System.out.println(Arrays.toString(this.torques));
    }
 }
