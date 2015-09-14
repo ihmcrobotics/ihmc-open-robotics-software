@@ -1,5 +1,3 @@
-//evaluationDependsOn(':IHMCUtilities')
-//evaluationDependsOn(':CommonWalkingControlModules')
 evaluationDependsOn(':DarpaRoboticsChallenge')
 
 dependencies {
@@ -8,13 +6,13 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 	
 	//testCompile project(':CommonWalkingControlModules').sourceSets.test.output
-	//testCompile project(':IHMCUtilities').sourceSets.test.output
+	//test.sourceSets.test.output
 	testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
 			
 	compile project(':CommonWalkingControlModules')
 	compile project(':DarpaRoboticsChallenge')
 	compile project(':Graphics3DAdapter')
-	compile project(':IHMCUtilities')
+	
 	compile project(':SDFLoader')
 	compile project(':SensorProcessing')
 	compile project(':SimulationConstructionSet')
