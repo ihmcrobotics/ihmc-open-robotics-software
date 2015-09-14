@@ -25,8 +25,11 @@ public class JMEGraphics3DNode extends Node implements JMEUpdatable
    private final Vector3d scale = new Vector3d();
    
    private final Quaternion jmeRotation = new Quaternion();
+   private Quaternion oldJmeRotation = new Quaternion(Float.NaN,Float.NaN,Float.NaN,Float.NaN);
    private final Vector3f jmeTranslation = new Vector3f();
+   private Vector3f oldJmeTranslation = new Vector3f(Float.NaN,Float.NaN,Float.NaN);
    private final Vector3f jmeScale = new Vector3f();
+   private Vector3f oldJmeScale = new Vector3f(Float.NaN,Float.NaN,Float.NaN);
 
    private JMEGraphicsObject graphics;
    private Node graphicsObjectNode;
@@ -78,11 +81,26 @@ public class JMEGraphics3DNode extends Node implements JMEUpdatable
       JMEDataTypeUtils.packVecMathTuple3dInJMEVector3f(translation, jmeTranslation);
       JMEDataTypeUtils.packVectMathQuat4dInJMEQuaternion(rotation, jmeRotation);
       JMEDataTypeUtils.packVecMathTuple3dInJMEVector3f(scale, jmeScale);
-      
-      setLocalRotation(jmeRotation);
-      setLocalTranslation(jmeTranslation);
-      setLocalScale(jmeScale);
-      
+
+      // Check that the state has really changed before setting the transforms
+      // This avoids unnecessary repaints in JME
+      if (!oldJmeRotation.equals(jmeRotation))
+      {
+         setLocalRotation(jmeRotation);
+         oldJmeRotation = new Quaternion(jmeRotation);
+      }
+
+      if (!oldJmeScale.equals(jmeScale))
+      {
+         setLocalScale(jmeScale);
+         oldJmeScale = new Vector3f(jmeScale);
+      }
+
+      if (!oldJmeTranslation.equals(jmeTranslation))
+      {
+         setLocalTranslation(jmeTranslation);
+         oldJmeTranslation = new Vector3f(jmeTranslation);
+      }
    }
    
    public Graphics3DNode getGraphics3DNode()

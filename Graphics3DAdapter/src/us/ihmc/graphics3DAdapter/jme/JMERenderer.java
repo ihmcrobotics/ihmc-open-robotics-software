@@ -1,40 +1,17 @@
 package us.ihmc.graphics3DAdapter.jme;
 
-import java.awt.Canvas;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.GraphicsDevice;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.File;
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.vecmath.Color3f;
-
-import com.jme3.profile.AppStep;
-import org.jmonkeyengine.scene.plugins.ogre.MaterialLoader;
-
 import com.google.common.collect.HashBiMap;
+import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
+import com.jme3.audio.AudioContext;
 import com.jme3.input.InputManager;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.TechniqueDef;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.profile.AppStep;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -44,8 +21,8 @@ import com.jme3.system.NativeLibraryLoader;
 import com.jme3.system.awt.AwtPanelsContext;
 import com.jme3.texture.plugins.AWTLoader;
 import com.jme3.util.SkyFactory;
-
 import jme3dae.ColladaLoader;
+import org.jmonkeyengine.scene.plugins.ogre.MaterialLoader;
 import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
@@ -67,7 +44,6 @@ import us.ihmc.graphics3DAdapter.jme.util.JMENodeTools;
 import us.ihmc.graphics3DAdapter.stlLoader.STLLoader;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.inputDevices.keyboard.KeyListener;
@@ -81,6 +57,22 @@ import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.time.Timer;
 
+import javax.swing.*;
+import javax.vecmath.Color3f;
+import java.applet.Applet;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.File;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class JMERenderer extends SimpleApplication implements Graphics3DAdapter, PBOAwtPanelListener
 {
    public enum RenderType {CANVAS, AWTPANELS}
@@ -92,7 +84,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    public static boolean tickUpdated = false;
    
    private final Object repaintNotifier = new Object(); // If we aren't rendering at a continuous FPS, this condition is used for waking up the renderer if a repaint is required
-   private boolean lazyRendering = false; // If lazy rendering is true, we render only when window repaint is needed
+   private boolean lazyRendering = true; // If lazy rendering is true, we render only when window repaint is needed
    private int lazyRendersToPerform = 10; // How many render loops to do after a lazy render wake-up call - some events such as resize or startup need multiple passes to properly reinstate the image
 
    static
@@ -513,25 +505,34 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
       updateCameras();
       count++;
-
-      lazyRendersToPerform = Math.max(0, lazyRendersToPerform - 1);
-
-      /*if (lazyRendering && lazyRendersToPerform <= 0 && gpuLidars.isEmpty()) {
-         synchronized (repaintNotifier) {
-            try {
-               repaintNotifier.wait();
-            } catch (InterruptedException e) {
-               // ignore
-            }
-         }
-      }*/
    }
 
-   /*@Override
+   /**
+    * Checks refreshFlags of the root node. If there is no need to refresh the scene,
+    * no rendering is performed in lazy rendering mode.
+    * @return true if the scene needs re-rendering
+    */
+   private boolean shouldRepaint() {
+      // We have to use reflection because JME does not provide a getter
+      try {
+         Field field = Spatial.class.getDeclaredField("refreshFlags");
+         field.setAccessible(true);
+         int refresh = field.getInt(rootNode);
+         return refresh != 0;
+      } catch (Exception ex) {
+         return true; // In case of exceptions render always
+      }
+   }
+
+   /**
+    * We override {@link SimpleApplication#update()} with our custom implementation that does not
+    * render anything unless necessary.
+    */
+   @Override
    public void update() {
       if (prof!=null) prof.appStep(AppStep.BeginFrame);
 
-      super.update(); // makes sure to execute AppTasks
+      applicationUpdate(); // makes sure to execute AppTasks
       if (speed == 0 || paused) {
          return;
       }
@@ -544,6 +545,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
       // simple update and root node
       simpleUpdate(tpf);
+      boolean change = shouldRepaint();
 
       if (prof!=null) prof.appStep(AppStep.SpatialUpdate);
       rootNode.updateLogicalState(tpf);
@@ -557,13 +559,47 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       stateManager.render(renderManager);
 
       if (prof!=null) prof.appStep(AppStep.RenderFrame);
-      if (!(lazyRendering && lazyRendersToPerform <= 0 && gpuLidars.isEmpty()))
+
+      // Do not render anything unless necessary
+      if (change || !(lazyRendering && lazyRendersToPerform <= 0 && gpuLidars.isEmpty())) {
          renderManager.render(tpf, context.isRenderable());
+         lazyRendersToPerform = Math.max(0, lazyRendersToPerform - 1);
+      }
       simpleRender(renderManager);
       stateManager.postRender();
 
       if (prof!=null) prof.appStep(AppStep.EndFrame);
-   }*/
+   }
+
+   /**
+    * This is copied verbatim from {@link Application#update()} because we override
+    * the {@link #update()} method and this is the only way to call the original code.
+    */
+   public void applicationUpdate()
+   {
+      // Make sure the audio renderer is available to callables
+      AudioContext.setAudioRenderer(audioRenderer);
+
+      if (prof!=null) prof.appStep(AppStep.QueuedTasks);
+      runQueuedTasks();
+
+      if (speed == 0 || paused)
+         return;
+
+      timer.update();
+
+      if (inputEnabled){
+         if (prof!=null) prof.appStep(AppStep.ProcessInput);
+         inputManager.update(timer.getTimePerFrame());
+      }
+
+      if (audioRenderer != null){
+         if (prof!=null) prof.appStep(AppStep.ProcessAudio);
+         audioRenderer.update(timer.getTimePerFrame());
+      }
+
+      // user code here..
+   }
 
    private void updateCameras()
    {
@@ -687,43 +723,63 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       }
    }
 
-   private void addRepaintListeners(Component panel) 
+   public void addRepaintListeners(final Component panel)
    {
       panel.addMouseListener(new MouseAdapter() {
          @Override
-         public void mousePressed(MouseEvent e) 
-         {
+         public void mousePressed(MouseEvent e) {
             notifyRepaint();
          }
       });
 
       panel.addMouseMotionListener(new MouseAdapter() {
          @Override
-         public void mouseDragged(MouseEvent e) 
-         {
+         public void mouseDragged(MouseEvent e) {
             notifyRepaint();
          }
       });
 
       panel.addKeyListener(new KeyAdapter() {
          @Override
-         public void keyPressed(KeyEvent e) 
-         {
+         public void keyPressed(KeyEvent e) {
             notifyRepaint();
          }
       });
 
       panel.addComponentListener(new ComponentAdapter() {
          @Override
-         public void componentResized(ComponentEvent e) 
-         {
+         public void componentResized(ComponentEvent e) {
             notifyRepaint(3);
          }
 
          @Override
-         public void componentMoved(ComponentEvent e) 
-         {
+         public void componentMoved(ComponentEvent e) {
             notifyRepaint();
+         }
+      });
+
+      final RepaintManager oldManager = RepaintManager.currentManager(panel);
+      RepaintManager.setCurrentManager(new RepaintManager() {
+         @Override
+         public void addDirtyRegion(Applet applet, int x, int y, int w, int h) {
+            oldManager.addDirtyRegion(applet, x, y, w, h);
+         }
+
+         @Override
+         public void addDirtyRegion(Window window, int x, int y, int w, int h) {
+            oldManager.addDirtyRegion(window, x, y, w, h);
+         }
+
+         @Override
+         public synchronized void addInvalidComponent(JComponent invalidComponent) {
+            oldManager.addInvalidComponent(invalidComponent);
+         }
+
+         @Override
+         public void addDirtyRegion(JComponent c, int x, int y, int w, int h) {
+            oldManager.addDirtyRegion(c, x, y, w, h);
+            if (c == panel)
+               notifyRepaint();
          }
       });
 
