@@ -2,6 +2,7 @@ package us.ihmc.communication.packets.wholebody;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import org.junit.Test;
@@ -62,7 +63,7 @@ public class JointAnglesPacketTest
 
 
       // Check to make sure that a defensive copy was made
-      double[] waistAnglesCopy = ArrayTools.copyArray(waistAngles);
+      double[] waistAnglesCopy = Arrays.copyOf(waistAngles, waistAngles.length);
 
       // change the original
       for (int i = 0; i < numberOfWaistJoints; i++)
@@ -112,7 +113,7 @@ public class JointAnglesPacketTest
 
 
          // Check to make sure that a defensive copy was made
-         double[] armAnglesCopy = ArrayTools.copyArray(armAngles);
+         double[] armAnglesCopy = Arrays.copyOf(armAngles, armAngles.length);
 
          // change the original
          for (int i = 0; i < numberOfArmJoints; i++)
@@ -162,7 +163,7 @@ public class JointAnglesPacketTest
 
 
          // Check to make sure that a defensive copy was made
-         double[] legAnglesCopy = ArrayTools.copyArray(legAngles);
+         double[] legAnglesCopy = Arrays.copyOf(legAngles, legAngles.length);
 
          // change the original
          for (int i = 0; i < numberOfLegJoints; i++)

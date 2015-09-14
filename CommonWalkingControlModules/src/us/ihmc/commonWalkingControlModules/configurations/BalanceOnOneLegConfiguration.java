@@ -18,7 +18,7 @@ public class BalanceOnOneLegConfiguration
 
    public BalanceOnOneLegConfiguration(double[] yawPitchRoll, FramePoint desiredCapturePoint, FramePoint desiredSwingFootPosition, double kneeBendSupportLeg)
    {
-      this.yawPitchRoll = ArrayTools.copyArray(yawPitchRoll);
+      this.yawPitchRoll = Arrays.copyOf(yawPitchRoll, yawPitchRoll.length);
       this.desiredCapturePoint = new FramePoint(desiredCapturePoint);
       this.desiredSwingFootPosition = new FramePoint(desiredSwingFootPosition);
       this.kneeBendSupportLeg = kneeBendSupportLeg;

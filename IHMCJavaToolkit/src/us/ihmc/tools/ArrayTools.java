@@ -8,7 +8,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -558,60 +557,7 @@ public class ArrayTools
       return ret;
    }
 
-   /**
-    * Use Arrays.copyOf
-    * 
-    * Copys an Array of Floats
-    *
-    * @param array float[]
-    * @return float[]
-    */
    @Deprecated
-   public static float[] copyArray(float[] array)
-   {
-      float[] ret = new float[array.length];
-      System.arraycopy(array, 0, ret, 0, array.length);
-
-      return ret;
-   }
-
-   /**
-    * Copys an Array of Doubles
-    *
-    * @param array double[]
-    * @return double[]
-    */
-   public static double[] copyArray(double[] array)
-   {
-      double[] ret = new double[array.length];
-      System.arraycopy(array, 0, ret, 0, array.length);
-
-      return ret;
-   }
-
-   /**
-    * Copys an Array of intgers
-    *
-    * @param array int[]
-    * @return int[]
-    */
-   public static int[] copyArray(int[] array)
-   {
-      int[] ret = new int[array.length];
-      System.arraycopy(array, 0, ret, 0, array.length);
-
-      return ret;
-   }
-
-   public static <T> T[] copyArray(T[] array)
-   {
-      T[] ret = Arrays.copyOf(array, array.length);
-
-      return ret;
-   }
-
-
-	@Deprecated
    public static double[] getReserveredOrderedArrayCopy(double[] arrayToReverseAndCopy)
    {
       int length = arrayToReverseAndCopy.length;
@@ -621,20 +567,6 @@ public class ArrayTools
       {
          ret[i] = arrayToReverseAndCopy[length - i - 1];
       }
-
-      return ret;
-   }
-
-   /**
-    * Copys an Array of Longs
-    *
-    * @param array long[]
-    * @return long[]
-    */
-   public static long[] copyArray(long[] array)
-   {
-      long[] ret = new long[array.length];
-      System.arraycopy(array, 0, ret, 0, array.length);
 
       return ret;
    }
@@ -746,7 +678,7 @@ public class ArrayTools
    /**
     * Use JUnitTools.assertArraysEquals
     */
-   @Deprecated
+
    public static boolean deltaEquals(double[] a, double[] b, double delta)
    {
       if(a == null || b == null)

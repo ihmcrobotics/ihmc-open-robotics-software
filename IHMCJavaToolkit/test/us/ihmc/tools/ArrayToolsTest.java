@@ -945,7 +945,7 @@ public class ArrayToolsTest
    {
       double[] array = { 0.2, -1.6 };
       double[] expectedReturn = { 0.2, -1.6 };
-      double[] actualReturn = ArrayTools.copyArray(array);
+      double[] actualReturn = Arrays.copyOf(array, array.length);
 
       /** @todo fill in the test code */
       assertTrue("Test Failed", (actualReturn[0] == expectedReturn[0]) && (actualReturn[1] == expectedReturn[1]));
@@ -957,7 +957,7 @@ public class ArrayToolsTest
    {
       float[] array = { 10, -20, 30 };
       float[] expectedReturn = { 10, -20, 30 };
-      float[] actualReturn = ArrayTools.copyArray(array);
+      float[] actualReturn = Arrays.copyOf(array, array.length);
 
       /** @todo fill in the test code */
       assertTrue("Test Failed", (actualReturn[0] == expectedReturn[0]) && (actualReturn[1] == expectedReturn[1]) && (actualReturn[2] == expectedReturn[2]));
@@ -969,7 +969,7 @@ public class ArrayToolsTest
    {
       int[] array = { 1, -45, 5 };
       int[] expectedReturn = { 1, -45, 5 };
-      int[] actualReturn = ArrayTools.copyArray(array);
+      int[] actualReturn = Arrays.copyOf(array, array.length);
 
       /** @todo fill in the test code */
       assertTrue("Test Failed", (actualReturn[0] == expectedReturn[0]) && (actualReturn[1] == expectedReturn[1]) && (actualReturn[2] == expectedReturn[2]));
@@ -981,7 +981,7 @@ public class ArrayToolsTest
    {
       long[] array = { 18, -20, 7 };
       long[] expectedReturn = { 18, -20, 7 };
-      long[] actualReturn = ArrayTools.copyArray(array);
+      long[] actualReturn = Arrays.copyOf(array, array.length);
 
       /** @todo fill in the test code */
       assertTrue("Test Failed", (actualReturn[0] == expectedReturn[0]) && (actualReturn[1] == expectedReturn[1]) && (actualReturn[2] == expectedReturn[2]));
@@ -995,7 +995,7 @@ public class ArrayToolsTest
       Pear pear = new Pear();
       Orange orange = new Orange();
       Fruit[] fruits = {apple, pear, orange};
-      Fruit[] copiedFruits = ArrayTools.copyArray(fruits);
+      Fruit[] copiedFruits = Arrays.copyOf(fruits, fruits.length);
       
       assertNotSame(fruits, copiedFruits);
       assertEquals(fruits.length, copiedFruits.length);
