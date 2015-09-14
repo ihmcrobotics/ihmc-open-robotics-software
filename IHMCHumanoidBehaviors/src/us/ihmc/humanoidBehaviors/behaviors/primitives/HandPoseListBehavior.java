@@ -1,5 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
@@ -43,7 +45,7 @@ public class HandPoseListBehavior extends BehaviorInterface
       super(namePrefix, outgoingCommunicationBridge);
 
       this.yoTime = yoTime;
-      String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
+      String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
       hasPacketBeenSent = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
       startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);

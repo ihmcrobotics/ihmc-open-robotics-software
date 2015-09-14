@@ -2,6 +2,7 @@ package us.ihmc.tools;
 
 import static org.junit.Assert.assertTrue;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import us.ihmc.tools.FormattingTools;
@@ -41,21 +42,21 @@ public class FormattingToolsTest
 	@Test(timeout = 30000)
    public void testCapitalizeFirstLetter()
    {
-      String resultingString = FormattingTools.capitalizeFirstLetter("capital");
+      String resultingString = StringUtils.capitalize("capital");
       assertTrue(resultingString.equals("Capital"));
-      resultingString = FormattingTools.lowerCaseFirstLetter(resultingString);
+      resultingString = StringUtils.uncapitalize(resultingString);
       assertTrue(resultingString.equals("capital"));
 
-      resultingString = FormattingTools.capitalizeFirstLetter("robot");
+      resultingString = StringUtils.capitalize("robot");
       assertTrue(resultingString.equals("Robot"));
-      resultingString = FormattingTools.lowerCaseFirstLetter(resultingString);
+      resultingString = StringUtils.uncapitalize(resultingString);
       assertTrue(resultingString.equals("robot"));
 
-      resultingString = FormattingTools.capitalizeFirstLetter("Robot");
+      resultingString = StringUtils.capitalize("Robot");
       assertTrue(resultingString.equals("Robot"));
-      resultingString = FormattingTools.lowerCaseFirstLetter(resultingString);
+      resultingString = StringUtils.uncapitalize(resultingString);
       assertTrue(resultingString.equals("robot"));
-      resultingString = FormattingTools.lowerCaseFirstLetter(resultingString);
+      resultingString = StringUtils.uncapitalize(resultingString);
       assertTrue(resultingString.equals("robot"));
 
    }

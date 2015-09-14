@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
@@ -52,7 +54,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         String prefix = FormattingTools.lowerCaseFirstLetter(robotSide.getSideNameFirstLetter());
+         String prefix = StringUtils.uncapitalize(robotSide.getSideNameFirstLetter());
          robot.getOneDegreeOfFreedomJoint(prefix + "_leg_hpy").setQ(legInitialJointPositions.get(LegJointName.HIP_PITCH));
          robot.getOneDegreeOfFreedomJoint(prefix + "_leg_kny").setQ(legInitialJointPositions.get(LegJointName.KNEE));
          robot.getOneDegreeOfFreedomJoint(prefix + "_leg_aky").setQ(legInitialJointPositions.get(LegJointName.ANKLE_PITCH));

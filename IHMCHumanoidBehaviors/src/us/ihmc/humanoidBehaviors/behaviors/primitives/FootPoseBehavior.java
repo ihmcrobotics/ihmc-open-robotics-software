@@ -1,5 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
@@ -26,7 +28,7 @@ public class FootPoseBehavior extends BehaviorInterface
       this.yoTime = yoTime;
       this.doubleSupport = yoDoubleSupport;
 
-      String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
+      String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
       hasPacketBeenSent = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
       startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);

@@ -2,6 +2,8 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import javax.vecmath.Point3d;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.LookAtStatus;
 import us.ihmc.communication.packets.sensing.LookAtPacket;
@@ -35,7 +37,7 @@ public class LookAtBehavior extends BehaviorInterface
    {
       super(outgoingCommunicationBridge);
       this.yoTime = yoTime;
-      String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
+      String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
       startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);
       trajectoryTime = walkingControllerParameters.getTrajectoryTimeHeadOrientation();

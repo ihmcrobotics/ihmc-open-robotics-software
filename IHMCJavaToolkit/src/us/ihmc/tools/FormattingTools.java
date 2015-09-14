@@ -2,6 +2,8 @@ package us.ihmc.tools;
 
 import java.text.DecimalFormat;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class FormattingTools
 {
    private static final DecimalFormat decimal3DPrintFormatter = new DecimalFormat("0.000");
@@ -48,34 +50,6 @@ public class FormattingTools
       return shifted / magnitude;
    }
 
-   /**
-    * Use StringUtils.captilize
-    * @param s
-    * @return
-    */
-   @Deprecated
-   public static String capitalizeFirstLetter(String s)
-   {
-      if (s.length() == 0)
-         return s;
-
-      return s.substring(0, 1).toUpperCase() + s.substring(1);
-   }
-   
-   /**
-    * Use StringUtils.uncaptilize
-    * @param s
-    * @return
-    */
-   @Deprecated
-   public static String lowerCaseFirstLetter(String s)
-   {
-      if (s.length() == 0)
-         return s;
-
-      return s.substring(0, 1).toLowerCase() + s.substring(1);
-   }
-   
    public static String underscoredToCamelCase(String underscoredString, boolean capitalizeFirstLetter)
    {
       char[] charArray = underscoredString.toCharArray();
@@ -103,19 +77,6 @@ public class FormattingTools
       }
       return new String(charArray, 0, outIndex);
    }
-   
-   final protected static char[] hexArray = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F',' '};
-   public static String bytesToHex(byte[] bytes) {
-       char[] hexChars = new char[bytes.length * 3 -1];
-       int v;
-       for ( int j = 0; j < bytes.length; j++ ) {
-           v = bytes[j] & 0xFF;
-           hexChars[j * 3] = hexArray[v >>> 4];
-           hexChars[j * 3 + 1] = hexArray[v & 0x0F];
-           if (j<bytes.length-1)hexChars[j * 3 + 2] = hexArray[16];
-       }
-       return new String(hexChars);
-   }
 
    public static String toHumanReadable(double bits)
    {
@@ -142,7 +103,7 @@ public class FormattingTools
 
    public static String addPrefixAndKeepCamelCaseForMiddleOfExpression(String namePrefix, String originalName)
    {
-      return capitalizeFirstLetter(addPrefixAndKeepCamelCase(namePrefix, originalName));
+      return StringUtils.capitalize(addPrefixAndKeepCamelCase(namePrefix, originalName));
    }
 
    public static String addPrefixAndKeepCamelCase(String namePrefix, String originalName)
@@ -152,6 +113,6 @@ public class FormattingTools
       else if (namePrefix.endsWith("_"))
          return namePrefix + originalName;
       else
-         return namePrefix + capitalizeFirstLetter(originalName);
+         return namePrefix + StringUtils.capitalize(originalName);
    }
 }

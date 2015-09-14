@@ -1,5 +1,7 @@
 package us.ihmc.SdfLoader.partNames;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.tools.FormattingTools;
 
 public enum SpineJointName
@@ -36,7 +38,7 @@ public enum SpineJointName
 
    public String getCamelCaseNameForMiddleOfExpression()
    {
-      return FormattingTools.capitalizeFirstLetter(getCamelCaseNameForStartOfExpression());
+      return StringUtils.capitalize(getCamelCaseNameForStartOfExpression());
    }
 
    public String toString()

@@ -8,6 +8,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.lang3.StringUtils;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
@@ -310,7 +311,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       icpTimeDelay.set(0.99);
       ///////////////////
 
-      String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
+      String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       flyingTrajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "flyingTrajectoryTime", registry);
 

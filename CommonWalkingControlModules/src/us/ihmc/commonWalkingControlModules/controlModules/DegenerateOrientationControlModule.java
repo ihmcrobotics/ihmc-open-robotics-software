@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
@@ -108,7 +109,7 @@ public abstract class DegenerateOrientationControlModule
    public int addBase(RigidBody base)
    {
       bases.add(base);
-      String baseName = FormattingTools.capitalizeFirstLetter(base.getName());
+      String baseName = StringUtils.capitalize(base.getName());
       RigidBodyOrientationControlModule rigidBodyOrientationControlModule = new RigidBodyOrientationControlModule(namePrefix + baseName, base, endEffector,
             twistCalculator, controlDT, gains, registry);
 
