@@ -30,10 +30,11 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceMaterial;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
-import us.ihmc.utilities.ClassLoaderTools;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.tools.ClassLoaderTools;
 import us.ihmc.tools.io.files.FileTools;
 
 public class JMEAppearanceMaterial

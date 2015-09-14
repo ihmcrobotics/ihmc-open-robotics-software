@@ -19,7 +19,7 @@ import javax.xml.bind.JAXBException;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotDataCommunication.VisualizerRobot;
-import us.ihmc.utilities.ClassLoaderTools;
+import us.ihmc.tools.ClassLoaderTools;
 
 public class SDFModelLoader implements LogModelLoader
 {

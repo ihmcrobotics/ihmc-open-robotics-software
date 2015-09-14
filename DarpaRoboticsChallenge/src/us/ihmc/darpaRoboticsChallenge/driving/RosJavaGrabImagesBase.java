@@ -14,7 +14,7 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
 
 import sensor_msgs.CompressedImage;
-import us.ihmc.utilities.inputDevices.keyboard.linux.RepeatingReleasedEventsFixer;
+import us.ihmc.tools.inputDevices.keyboard.linux.RepeatingReleasedEventsFixer;
 import us.ihmc.utilities.ros.RosTools;
 
 /**

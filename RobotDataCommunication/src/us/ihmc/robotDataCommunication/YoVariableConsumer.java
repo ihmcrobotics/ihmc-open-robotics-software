@@ -17,7 +17,7 @@ import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.utilities.compression.SnappyUtils;
+import us.ihmc.tools.compression.SnappyUtils;
 
 public class YoVariableConsumer extends YoVariableDataReceiver
 {

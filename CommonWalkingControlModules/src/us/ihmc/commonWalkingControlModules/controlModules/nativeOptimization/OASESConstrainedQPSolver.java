@@ -8,7 +8,7 @@ import us.ihmc.convexOptimization.QpOASESCWrapper;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.utilities.exceptions.NoConvergenceException;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 //~--- JDK imports ------------------------------------------------------------
 

@@ -7,8 +7,8 @@ import java.nio.DoubleBuffer;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
-import us.ihmc.utilities.exceptions.NoConvergenceException;
 
 
 public class CylinderAndPlaneContactForceOptimizerNative

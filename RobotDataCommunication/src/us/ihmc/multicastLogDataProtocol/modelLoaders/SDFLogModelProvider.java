@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 
-import us.ihmc.utilities.ClassLoaderTools;
+import us.ihmc.tools.ClassLoaderTools;
 
 public class SDFLogModelProvider implements LogModelProvider
 {

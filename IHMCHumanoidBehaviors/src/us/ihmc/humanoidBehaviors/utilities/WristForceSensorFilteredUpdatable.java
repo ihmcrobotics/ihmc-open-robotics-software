@@ -2,18 +2,10 @@ package us.ihmc.humanoidBehaviors.utilities;
 
 import java.util.List;
 
-import org.codehaus.jackson.map.RuntimeJsonMappingException;
-
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandCollisionDetectedPacket;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
-import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.robotics.sensors.ForceSensorData;
-import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -27,6 +19,12 @@ import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable.FirstOrderFilt
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.sensors.ForceSensorData;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class WristForceSensorFilteredUpdatable implements Updatable
 {
@@ -82,7 +80,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       }
       if (wristSensorDefinition == null)
       {
-         throw new RuntimeJsonMappingException("No Wrist Sensor Definition Found!  Make sure that forceSensorName is properly set.");
+         throw new RuntimeException("No Wrist Sensor Definition Found!  Make sure that forceSensorName is properly set.");
       }
       this.forceSensorData = forceSensorDataHolder.getByName(forceSensorName);
 

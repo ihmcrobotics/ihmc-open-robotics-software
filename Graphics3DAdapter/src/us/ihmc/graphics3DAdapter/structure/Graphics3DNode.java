@@ -11,10 +11,10 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.robotics.Axis;
-import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.geometry.TransformTools;
+import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class Graphics3DNode
 {

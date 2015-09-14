@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import us.ihmc.utilities.gui.CustomProgressMonitor;
-
 import com.google.common.io.Files;
+
+import us.ihmc.tools.gui.CustomProgressMonitor;
 
 public class YoVariableLogCropper extends YoVariableLogReader
 {

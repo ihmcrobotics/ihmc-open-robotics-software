@@ -9,7 +9,7 @@ import java.nio.channels.FileChannel;
 
 import us.ihmc.robotDataCommunication.LogIndex;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
-import us.ihmc.utilities.compression.SnappyUtils;
+import us.ihmc.tools.compression.SnappyUtils;
 
 public class YoVariableLogReader
 {

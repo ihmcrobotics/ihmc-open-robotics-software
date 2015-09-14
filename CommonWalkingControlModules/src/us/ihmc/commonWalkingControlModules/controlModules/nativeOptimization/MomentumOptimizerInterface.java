@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.utilities.exceptions.NoConvergenceException;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public interface MomentumOptimizerInterface 
 {

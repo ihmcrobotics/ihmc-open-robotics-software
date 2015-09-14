@@ -11,8 +11,8 @@ import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.MultiClientStreamingDataTCPServer;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.tools.compression.SnappyUtils;
 import us.ihmc.util.PeriodicThreadScheduler;
-import us.ihmc.utilities.compression.SnappyUtils;
 
 public class YoVariableProducer implements Runnable
 {

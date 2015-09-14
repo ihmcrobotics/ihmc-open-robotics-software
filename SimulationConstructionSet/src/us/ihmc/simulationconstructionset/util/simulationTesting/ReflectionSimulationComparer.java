@@ -17,8 +17,8 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.utilities.reflect.RecursiveObjectComparer;
-import us.ihmc.utilities.reflect.StringFieldMatcher;
+import us.ihmc.tools.reflect.RecursiveObjectComparer;
+import us.ihmc.tools.reflect.StringFieldMatcher;
 
 /**
  * SimulationComparer wrapper around RecursiveObjectComparer

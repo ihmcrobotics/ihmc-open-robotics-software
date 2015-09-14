@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoMatrix;
-import us.ihmc.utilities.exceptions.NoConvergenceException;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
 {

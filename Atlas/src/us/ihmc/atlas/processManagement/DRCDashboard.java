@@ -58,8 +58,8 @@ import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCPluginTasks;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROSTasks;
 import us.ihmc.darpaRoboticsChallenge.processManagement.GazeboRemoteSimulationAdapter;
+import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 public class DRCDashboard
 {

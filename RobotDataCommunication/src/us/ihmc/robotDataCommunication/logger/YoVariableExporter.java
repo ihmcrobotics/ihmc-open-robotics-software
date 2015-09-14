@@ -25,7 +25,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.YoGraph;
-import us.ihmc.utilities.gui.CustomProgressMonitor;
+import us.ihmc.tools.gui.CustomProgressMonitor;
 
 public class YoVariableExporter extends YoVariableLogReader
 {

@@ -5,8 +5,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.utilities.exceptions.NoConvergenceException;
 
 public class ConstrainedQPSolverTest
 {

@@ -12,7 +12,7 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Subscriber;
 
-import us.ihmc.utilities.inputDevices.keyboard.linux.RepeatingReleasedEventsFixer;
+import us.ihmc.tools.inputDevices.keyboard.linux.RepeatingReleasedEventsFixer;
 import us.ihmc.utilities.ros.RosTools;
 
 public class RosCameraBenchmarker extends AbstractNodeMain

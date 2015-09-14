@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
+import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
-import us.ihmc.utilities.exceptions.NoConvergenceException;
 
 public class LeeGoswamiForceOptimizerNative
 {

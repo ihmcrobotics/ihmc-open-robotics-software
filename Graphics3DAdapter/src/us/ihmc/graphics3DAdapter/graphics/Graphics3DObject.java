@@ -30,12 +30,12 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DTran
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.robotics.Axis;
-import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Shape3d;
 import us.ihmc.robotics.geometry.shapes.Sphere3d;
+import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class Graphics3DObject
 {

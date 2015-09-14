@@ -5,8 +5,8 @@ import java.util.List;
 
 import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Plotter;
-import us.ihmc.utilities.gui.GraphicsUpdatable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.gui.GraphicsUpdatable;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 
 public class YoGraphicsListRegistry

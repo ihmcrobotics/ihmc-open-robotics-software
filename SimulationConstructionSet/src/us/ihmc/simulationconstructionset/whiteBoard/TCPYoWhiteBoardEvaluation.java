@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.utilities.thread.NonRealTimeThreadCreatorAndStarter;
-import us.ihmc.utilities.thread.ThreadCreatorAndStarter;
+import us.ihmc.tools.thread.NonRealTimeThreadCreatorAndStarter;
+import us.ihmc.tools.thread.ThreadCreatorAndStarter;
 
 
 public class TCPYoWhiteBoardEvaluation

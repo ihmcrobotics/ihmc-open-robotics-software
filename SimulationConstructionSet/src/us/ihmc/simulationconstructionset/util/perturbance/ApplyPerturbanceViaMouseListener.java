@@ -12,8 +12,8 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.utilities.inputDevices.keyboard.Key;
-import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
+import us.ihmc.tools.inputDevices.keyboard.Key;
+import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class ApplyPerturbanceViaMouseListener implements RobotController, SelectedListener
 {

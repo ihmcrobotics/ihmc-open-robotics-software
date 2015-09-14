@@ -23,7 +23,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.utilities.compression.SnappyUtils;
+import us.ihmc.tools.compression.SnappyUtils;
 
 public class YoVariableLogPlaybackRobot extends VisualizerRobot implements RewoundListener
 {

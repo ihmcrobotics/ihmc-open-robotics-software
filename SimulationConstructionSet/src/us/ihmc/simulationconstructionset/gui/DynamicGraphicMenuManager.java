@@ -4,7 +4,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import us.ihmc.simulationconstructionset.util.graphics.DynamicGraphicCheckBoxMenuItem;
-import us.ihmc.utilities.gui.MultiButtonSelectionDeselectionAction;
+import us.ihmc.tools.gui.MultiButtonSelectionDeselectionAction;
 
 public class DynamicGraphicMenuManager
 {

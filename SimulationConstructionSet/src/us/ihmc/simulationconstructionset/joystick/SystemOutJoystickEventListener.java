@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.joystick;
 
 import net.java.games.input.Component;
 import net.java.games.input.Event;
-import us.ihmc.utilities.inputDevices.joystick.JoystickEventListener;
+import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 
 public class SystemOutJoystickEventListener implements JoystickEventListener
 {

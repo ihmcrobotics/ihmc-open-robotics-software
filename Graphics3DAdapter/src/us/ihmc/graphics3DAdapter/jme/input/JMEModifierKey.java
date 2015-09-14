@@ -1,8 +1,8 @@
 package us.ihmc.graphics3DAdapter.jme.input;
 
-import us.ihmc.utilities.inputDevices.keyboard.Key;
-
 import com.jme3.input.KeyInput;
+
+import us.ihmc.tools.inputDevices.keyboard.Key;
 
 public class JMEModifierKey
 {

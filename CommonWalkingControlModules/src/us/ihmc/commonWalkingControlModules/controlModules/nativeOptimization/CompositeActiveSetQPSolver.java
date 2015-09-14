@@ -7,7 +7,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPStandaloneSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import us.ihmc.utilities.exceptions.NoConvergenceException;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class CompositeActiveSetQPSolver extends ConstrainedQPSolver {
    

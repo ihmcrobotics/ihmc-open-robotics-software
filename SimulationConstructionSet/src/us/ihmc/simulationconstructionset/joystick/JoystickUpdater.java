@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
+import us.ihmc.tools.inputDevices.JInputLibraryLoader;
+import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
-import us.ihmc.utilities.inputDevices.JInputLibraryLoader;
-import us.ihmc.utilities.inputDevices.joystick.JoystickEventListener;
 
 public class JoystickUpdater implements Runnable
 {

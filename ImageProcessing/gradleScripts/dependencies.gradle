@@ -21,7 +21,7 @@ dependencies
 	compile group: 'net.sourceforge.jexcelapi', name: 'jxl', version: '2.6.12'
 	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.9'
 	
-	compile project(':IHMCUtilities')
+	
 	compile project(':Plotting')
 	compile project(':IHMCCommunication')
 	compile project(':IHMCRoboticsToolkit')

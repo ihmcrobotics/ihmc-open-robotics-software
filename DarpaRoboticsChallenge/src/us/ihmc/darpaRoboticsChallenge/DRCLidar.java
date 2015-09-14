@@ -12,7 +12,7 @@ import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
-import us.ihmc.utilities.TimestampProvider;
+import us.ihmc.tools.TimestampProvider;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
