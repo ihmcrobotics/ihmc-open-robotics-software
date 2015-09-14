@@ -4,7 +4,6 @@ dependencies
     compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 
     
-    compile project(':IHMCRealtime')
     compile project(':IHMCJavaToolkit')
     compile project(':IHMCRoboticsToolkit')
     compile project(':IHMCCommunication')
