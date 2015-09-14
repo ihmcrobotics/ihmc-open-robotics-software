@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.lang3.StringUtils;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -167,7 +168,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
          for (OneDoFJoint joint : oneDoFJoints)
          {
-            String suffix = FormattingTools.lowerCaseFirstLetter(joint.getName());
+            String suffix = StringUtils.uncapitalize(joint.getName());
             PIDController pidController = new PIDController(gains.getYoKp(), gains.getYoKi(), gains.getYoKd(), gains.getYoMaxIntegralError(), suffix, registry);
             pidControllers.put(joint, pidController);
 

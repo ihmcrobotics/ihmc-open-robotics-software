@@ -1,5 +1,7 @@
 package us.ihmc.SdfLoader.partNames;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.tools.FormattingTools;
 
 public enum NeckJointName
@@ -39,7 +41,7 @@ public enum NeckJointName
 
    public String getCamelCaseNameForMiddleOfExpression()
    {
-      return FormattingTools.capitalizeFirstLetter(getCamelCaseNameForStartOfExpression());
+      return StringUtils.capitalize(getCamelCaseNameForStartOfExpression());
    }
 
    public String toString()

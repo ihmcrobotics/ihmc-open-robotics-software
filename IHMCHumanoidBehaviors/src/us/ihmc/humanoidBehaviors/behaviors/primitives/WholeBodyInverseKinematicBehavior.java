@@ -2,6 +2,8 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packets.Packet;
@@ -47,7 +49,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
 
       this.yoTime = yoTime;
 
-      String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
+      String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
       startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);

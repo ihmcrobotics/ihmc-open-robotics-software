@@ -6,6 +6,8 @@ import java.util.Random;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
@@ -182,7 +184,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 
 			for (OneDoFJoint joint : oneDoFJoints)
 			{
-				String suffix = FormattingTools.lowerCaseFirstLetter(joint.getName());
+				String suffix = StringUtils.uncapitalize(joint.getName());
 				PIDController pidController = new PIDController(gains.getYoKp(), gains.getYoKi(), gains.getYoKd(),
 						gains.getYoMaxIntegralError(), suffix, registry);
 				jointPIDControllers.put(joint, pidController);

@@ -2,6 +2,8 @@ package us.ihmc.SdfLoader.partNames;
 
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.tools.FormattingTools;
 
 /**
@@ -90,7 +92,7 @@ public enum LegJointName
 
    public String getCamelCaseNameForMiddleOfExpression()
    {
-      return FormattingTools.capitalizeFirstLetter(getCamelCaseNameForStartOfExpression());
+      return StringUtils.capitalize(getCamelCaseNameForStartOfExpression());
    }
 
    public Vector3d getJointAxis()

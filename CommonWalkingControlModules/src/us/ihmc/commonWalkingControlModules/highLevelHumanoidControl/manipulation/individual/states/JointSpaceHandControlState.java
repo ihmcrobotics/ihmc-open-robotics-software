@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.tools.FormattingTools;
@@ -67,7 +69,7 @@ public class JointSpaceHandControlState extends State<HandControlState>
 
          for (OneDoFJoint joint : oneDoFJoints)
          {
-            String suffix = FormattingTools.lowerCaseFirstLetter(joint.getName());
+            String suffix = StringUtils.uncapitalize(joint.getName());
             PIDController pidController = new PIDController(gains.getYoKp(), gains.getYoKi(), gains.getYoKd(), gains.getYoMaxIntegralError(), suffix, registry);
             pidControllers.put(joint, pidController);
 

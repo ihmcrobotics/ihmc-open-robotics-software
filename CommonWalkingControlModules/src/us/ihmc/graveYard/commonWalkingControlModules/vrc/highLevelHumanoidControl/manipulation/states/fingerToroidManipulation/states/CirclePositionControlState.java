@@ -1,5 +1,7 @@
 package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.states;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.FingerToroidManipulationState;
 import us.ihmc.tools.FormattingTools;
@@ -39,7 +41,7 @@ public class CirclePositionControlState extends State<FingerToroidManipulationSt
                                      SideDependentList<ReferenceFrame> fingerPositionControlFrames, SE3PIDGains gains, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
-      registry = new YoVariableRegistry(FormattingTools.lowerCaseFirstLetter(stateEnum.toString()));
+      registry = new YoVariableRegistry(StringUtils.uncapitalize(stateEnum.toString()));
 
       this.rootBody = rootBody;
       this.individualHandControlModules = individualHandControlModules;
