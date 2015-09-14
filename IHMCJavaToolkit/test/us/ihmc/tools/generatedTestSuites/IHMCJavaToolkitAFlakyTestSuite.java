@@ -10,7 +10,7 @@ import org.junit.runners.Suite;
    us.ihmc.tools.processManagement.ProcessSpawnerTest.class
 })
 
-public class IHMCUtilitiesAFlakyTestSuite
+public class IHMCJavaToolkitAFlakyTestSuite
 {
    public static void main(String[] args)
    {
