@@ -3,6 +3,8 @@ package us.ihmc.robotics.robotSide;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 public enum RobotQuadrant
 {
    FRONT_LEFT(RobotEnd.FRONT, RobotSide.LEFT),
@@ -11,7 +13,11 @@ public enum RobotQuadrant
    HIND_LEFT(RobotEnd.HIND, RobotSide.LEFT);
    
    public static final RobotQuadrant[] values = values();
-   
+   public static final RobotQuadrant[] reversedValues = values();
+   static 
+   {
+      ArrayUtils.reverse(reversedValues);
+   }
    private final RobotEnd end;
    private final RobotSide side;
 
