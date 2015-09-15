@@ -121,7 +121,7 @@ public class LogVisualizer
          resourceStream.readFully(resourceData);
          resourceStream.close();
 
-         loader.load(modelName, modelData, resourceDirectories, resourceData);
+         loader.load(modelName, modelData, resourceDirectories, resourceData, null);
 
          generalizedSDFRobotModel = loader.createJaxbSDFLoader().getGeneralizedSDFRobotModel(modelName);
       }

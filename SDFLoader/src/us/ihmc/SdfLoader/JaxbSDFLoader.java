@@ -23,12 +23,12 @@ public class JaxbSDFLoader
    private final ArrayList<SDFWorld.Road> roads = new ArrayList<SDFWorld.Road>();
 
 
-   public JaxbSDFLoader(File file, String resourceDirectory, SDFDescriptionMutator... mutators) throws JAXBException, FileNotFoundException
+   public JaxbSDFLoader(File file, String resourceDirectory, SDFDescriptionMutator mutator) throws JAXBException, FileNotFoundException
    {
-      this(new FileInputStream(file), Arrays.asList(resourceDirectory), mutators);
+      this(new FileInputStream(file), Arrays.asList(resourceDirectory), mutator);
    }
 
-   public JaxbSDFLoader(InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator... mutators)
+   public JaxbSDFLoader(InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator)
            throws JAXBException, FileNotFoundException
    {
       JAXBContext context = JAXBContext.newInstance(SDFRoot.class);
@@ -54,27 +54,14 @@ public class JaxbSDFLoader
       for (SDFModel modelInstance : models)
       {
          final String modelName = modelInstance.getName();
-         GeneralizedSDFRobotModel generalizedSDFRobotModel = null;
 
-         if (mutators != null && mutators.length > 0)
-         {
-            for (SDFDescriptionMutator mutator : mutators)
-            {
-               generalizedSDFRobotModel = new GeneralizedSDFRobotModel(modelName, modelInstance, resourceDirectories, mutator);
-            }
-         }
-         else
-         {
-            generalizedSDFRobotModel = new GeneralizedSDFRobotModel(modelName, modelInstance, resourceDirectories, null);
-         }
-
-         generalizedSDFRobotModels.put(modelName, generalizedSDFRobotModel);
+         generalizedSDFRobotModels.put(modelName, new GeneralizedSDFRobotModel(modelName, modelInstance, resourceDirectories, mutator));
       }
    }
 
-   public JaxbSDFLoader(File file, List<String> resourceDirectories, SDFDescriptionMutator... mutators) throws FileNotFoundException, JAXBException
+   public JaxbSDFLoader(File file, List<String> resourceDirectories, SDFDescriptionMutator mutator) throws FileNotFoundException, JAXBException
    {
-      this(new FileInputStream(file), resourceDirectories, mutators);
+      this(new FileInputStream(file), resourceDirectories, mutator);
    }
 
    public Collection<GeneralizedSDFRobotModel> getGeneralizedSDFRobotModels()
@@ -122,7 +109,9 @@ public class JaxbSDFLoader
    {
       checkModelName(modelName);
 
-      return new SDFHumanoidRobot(generalizedSDFRobotModels.get(modelName), sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+      GeneralizedSDFRobotModel generalizedSDFRobotModel = generalizedSDFRobotModels.get(modelName);
+
+      return new SDFHumanoidRobot(generalizedSDFRobotModel, generalizedSDFRobotModel.getSDFDescriptionMutator(), sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
    }
 
    public void addForceSensor(SDFJointNameMap jointMap, String sensorName, String parentJointName, RigidBodyTransform transformToParentJoint)

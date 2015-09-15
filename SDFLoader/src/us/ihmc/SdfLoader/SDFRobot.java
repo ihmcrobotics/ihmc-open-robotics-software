@@ -70,10 +70,14 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    private final LinkedHashMap<String, SDFCamera> cameras = new LinkedHashMap<String, SDFCamera>();
    protected final LinkedHashMap<Joint, ArrayList<GroundContactPoint>> jointToGroundContactPointsMap = new LinkedHashMap<Joint, ArrayList<GroundContactPoint>>();
 
-   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
+
+   private final SDFDescriptionMutator descriptionMutator;
+
+   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFDescriptionMutator descriptionMutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
          boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       super(generalizedSDFRobotModel.getName());
+      this.descriptionMutator = descriptionMutator;
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
       
       ArrayList<SDFLinkHolder> rootLinks = generalizedSDFRobotModel.getRootLinks();
@@ -473,6 +477,10 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       {
          for (SDFSensor sensor : child.getSensors())
          {
+            if(this.descriptionMutator != null)
+            {
+               this.descriptionMutator.mutateSensorForModel(getName(), sensor);
+            }
             switch (sensor.getType())
             {
             case "camera":

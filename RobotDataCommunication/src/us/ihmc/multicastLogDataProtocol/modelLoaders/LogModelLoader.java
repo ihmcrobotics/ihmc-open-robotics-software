@@ -5,7 +5,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 
 public interface LogModelLoader
 {
-   public void load(String modelName, byte[] model, String[] resourceDirectories, byte[] resourceZip, SDFDescriptionMutator... mutators);
+   public void load(String modelName, byte[] model, String[] resourceDirectories, byte[] resourceZip, SDFDescriptionMutator descriptionMutator);
    public SDFRobot createRobot();
    
    public String getModelName();

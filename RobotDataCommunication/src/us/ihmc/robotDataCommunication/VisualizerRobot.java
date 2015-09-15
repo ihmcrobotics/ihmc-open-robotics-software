@@ -13,7 +13,7 @@ public class VisualizerRobot extends SDFHumanoidRobot
    
    public VisualizerRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap)
    {
-      super(generalizedSDFRobotModel, sdfJointNameMap, false);
+      super(generalizedSDFRobotModel, null, sdfJointNameMap, false);
       this.reducedRegistry = new YoVariableRegistry(generalizedSDFRobotModel.getName());
 
       reducedRegistry.registerVariable(getRootJoint().getQx());

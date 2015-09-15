@@ -17,15 +17,15 @@ public class SDFHumanoidRobot extends SDFRobot
 
    private final SideDependentList<ArrayList<GroundContactPoint>> handGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
    
-   public SDFHumanoidRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   public SDFHumanoidRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFDescriptionMutator descriptionMutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
    {
-      this(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, true, true);
+      this(generalizedSDFRobotModel, descriptionMutator, sdfJointNameMap, useCollisionMeshes, true, true);
    }
 
-   public SDFHumanoidRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
+   public SDFHumanoidRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFDescriptionMutator descriptionMutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
          boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
-      super(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+      super(generalizedSDFRobotModel, descriptionMutator, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
       
       for (RobotSide robotSide : RobotSide.values)
       {
