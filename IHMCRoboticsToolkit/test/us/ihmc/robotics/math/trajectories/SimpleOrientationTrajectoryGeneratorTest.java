@@ -1,4 +1,4 @@
-package us.ihmc.robotics.trajectories;
+package us.ihmc.robotics.math.trajectories;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
