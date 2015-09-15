@@ -200,7 +200,7 @@ public class WandererControllerFactory
       boolean useArms = false;
       boolean robotIsHanging = true;
       
-      DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingHighLevelBehaviorFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging);
+      DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingHighLevelBehaviorFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
       // Configure the MomentumBasedControllerFactory so we start with the diagnostic controller
       diagnosticsWhenHangingHighLevelBehaviorFactory.setTransitionRequested(true);
       controllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingHighLevelBehaviorFactory);
