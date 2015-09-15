@@ -87,19 +87,19 @@ public class JMEGraphics3DNode extends Node implements JMEUpdatable
       if (!oldJmeRotation.equals(jmeRotation))
       {
          setLocalRotation(jmeRotation);
-         oldJmeRotation = new Quaternion(jmeRotation);
+         oldJmeRotation.set(jmeRotation);
       }
 
       if (!oldJmeScale.equals(jmeScale))
       {
          setLocalScale(jmeScale);
-         oldJmeScale = new Vector3f(jmeScale);
+         oldJmeScale.set(jmeScale);
       }
 
       if (!oldJmeTranslation.equals(jmeTranslation))
       {
          setLocalTranslation(jmeTranslation);
-         oldJmeTranslation = new Vector3f(jmeTranslation);
+         oldJmeTranslation.set(jmeTranslation);
       }
    }
    
