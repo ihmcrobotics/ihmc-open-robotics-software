@@ -12,7 +12,7 @@ import us.ihmc.SdfLoader.SDFDescriptionMutator;
 public class DRCRobotSDFLoader
 {
      
-   public static JaxbSDFLoader loadDRCRobot(String[] resourceDirectories, InputStream sdfFile, boolean headless, SDFDescriptionMutator... mutators)
+   public static JaxbSDFLoader loadDRCRobot(String[] resourceDirectories, InputStream sdfFile, boolean headless, SDFDescriptionMutator descriptionMutator)
    {
       ArrayList<String> resources = new ArrayList<String>();
 
@@ -32,7 +32,7 @@ public class DRCRobotSDFLoader
       JaxbSDFLoader jaxbSDFLoader;
       try
       {
-         jaxbSDFLoader = new JaxbSDFLoader(sdfFile, resources, mutators);
+         jaxbSDFLoader = new JaxbSDFLoader(sdfFile, resources, descriptionMutator);
       }
       catch (FileNotFoundException e)
       {

@@ -14,10 +14,10 @@ public class SDFRobotTest
    @Test(timeout = 30000)
    public void testNullJointMap() throws FileNotFoundException, JAXBException
    {
-      JaxbSDFLoader loader = new JaxbSDFLoader(getClass().getClassLoader().getResourceAsStream("sdfRobotTest.sdf"), null);
+      JaxbSDFLoader loader = new JaxbSDFLoader(getClass().getClassLoader().getResourceAsStream("sdfRobotTest.sdf"), null, null);
       
       GeneralizedSDFRobotModel generalizedSDFRobotModel = loader.getGeneralizedSDFRobotModel("atlas");
-      new SDFHumanoidRobot(generalizedSDFRobotModel, null, true);
+      new SDFHumanoidRobot(generalizedSDFRobotModel, null, null, true);
    }
 
 }

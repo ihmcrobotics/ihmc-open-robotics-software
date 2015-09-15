@@ -19,7 +19,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
 {
    private final String name;
    private final List<String> resourceDirectories;
-   private final SDFDescriptionMutator modelMutator;
+   private final SDFDescriptionMutator descriptionMutator;
    private final ArrayList<SDFLinkHolder> rootLinks = new ArrayList<SDFLinkHolder>();
    private final RigidBodyTransform transformToRoot;
    private final LinkedHashMap<String, SDFJointHolder> joints = new LinkedHashMap<String, SDFJointHolder>();
@@ -30,11 +30,11 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       this(name, model, resourceDirectories, null);
    }
 
-   public GeneralizedSDFRobotModel(String name, SDFModel model, List<String> resourceDirectories, SDFDescriptionMutator modelMutator)
+   public GeneralizedSDFRobotModel(String name, SDFModel model, List<String> resourceDirectories, SDFDescriptionMutator descriptionMutator)
    {
       this.name = name;
       this.resourceDirectories = resourceDirectories;
-      this.modelMutator = modelMutator;
+      this.descriptionMutator = descriptionMutator;
       List<SDFLink> sdfLinks = model.getLinks();
       List<SDFJoint> sdfJoints = model.getJoints();
       
@@ -44,9 +44,9 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       for (SDFLink sdfLink : sdfLinks)
       {
          SDFLinkHolder linkHolder = new SDFLinkHolder(sdfLink);
-         if(this.modelMutator != null)
+         if(this.descriptionMutator != null)
          {
-            this.modelMutator.mutateLinkForModel(name, linkHolder);
+            this.descriptionMutator.mutateLinkForModel(name, linkHolder);
          }
 
          links.put(SDFConversionsHelper.sanitizeJointName(sdfLink.getName()), linkHolder);
@@ -61,9 +61,9 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
             try
             {
                SDFJointHolder jointHolder = new SDFJointHolder(sdfJoint, links.get(parent), links.get(child));
-               if(this.modelMutator != null)
+               if(this.descriptionMutator != null)
                {
-                  this.modelMutator.mutateJointForModel(name, jointHolder);
+                  this.descriptionMutator.mutateJointForModel(name, jointHolder);
                }
                joints.put(SDFConversionsHelper.sanitizeJointName(sdfJoint.getName()), jointHolder);
             }
@@ -168,5 +168,10 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
    {
       SDFContactSensor sdfContactSensor = new SDFContactSensor(sensorName, parentJointName, type);
       joints.get(parentJointName).addContactSensor(sdfContactSensor);
+   }
+
+   public SDFDescriptionMutator getSDFDescriptionMutator()
+   {
+      return descriptionMutator;
    }
 }

@@ -36,7 +36,7 @@ public class DRCVehicleSDFLoader extends DRCWorld
       InputStream inputStream = DRCVehicleSDFLoader.class.getClassLoader().getResourceAsStream("models/polaris_ranger_xp900_no_roll_cage/model.sdf");
       try
       {
-         JaxbSDFLoader jaxbSDFLoader = new JaxbSDFLoader(inputStream, resourceDirectories);
+         JaxbSDFLoader jaxbSDFLoader = new JaxbSDFLoader(inputStream, resourceDirectories, null);
          GeneralizedSDFRobotModel generalizedSDFRobotModel = jaxbSDFLoader.getGeneralizedSDFRobotModel("polaris_ranger_xp900");
          return new SDFModelVisual(generalizedSDFRobotModel, loadCollisionModel);
       }

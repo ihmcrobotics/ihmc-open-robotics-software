@@ -30,16 +30,16 @@ public class SDFModelLoader implements LogModelLoader
    private byte[] model;
    private String[] resourceDirectories;
    private byte[] resourceZip;
-   private SDFDescriptionMutator[] mutators;
+   private SDFDescriptionMutator descriptionMutator;
 
    @Override
-   public void load(String modelName, byte[] model, String[] resourceDirectories, byte[] resourceZip, SDFDescriptionMutator... mutators)
+   public void load(String modelName, byte[] model, String[] resourceDirectories, byte[] resourceZip, SDFDescriptionMutator descriptionMutator)
    {
       this.modelName = modelName;
       this.model = model;
       this.resourceDirectories = resourceDirectories;
       this.resourceZip = resourceZip;
-      this.mutators = mutators;
+      this.descriptionMutator = descriptionMutator;
    }
 
    @Override
@@ -101,7 +101,7 @@ public class SDFModelLoader implements LogModelLoader
       ByteArrayInputStream is = new ByteArrayInputStream(model);
       try
       {
-         return new JaxbSDFLoader(is, Arrays.asList(resourceDirectories), mutators);
+         return new JaxbSDFLoader(is, Arrays.asList(resourceDirectories), descriptionMutator);
       }
       catch (FileNotFoundException | JAXBException e)
       {

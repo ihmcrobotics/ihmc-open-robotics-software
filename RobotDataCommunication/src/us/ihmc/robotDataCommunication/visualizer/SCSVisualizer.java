@@ -176,7 +176,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       if (handshake.modelLoaderClass != null)
       {
          SDFModelLoader modelLoader = new SDFModelLoader();
-         modelLoader.load(handshake.modelName, handshake.model, handshake.resourceDirectories, handshake.resourceZip);
+         modelLoader.load(handshake.modelName, handshake.model, handshake.resourceDirectories, handshake.resourceZip, null);
          robot = modelLoader.createRobot();
       }
 
