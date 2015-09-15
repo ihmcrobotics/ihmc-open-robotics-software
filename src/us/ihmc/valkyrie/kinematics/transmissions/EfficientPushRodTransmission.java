@@ -207,6 +207,37 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
       actuatorData[1].setEffortCommand(actuatorForce1);
 
    }
+   
+   public double[] jointToActuatorEffortForTorqueOffsets(TurboDriver[] actuatorData, ValkyrieJointInterface[] jointData)
+   {
+      assertTrue((numActuators() == actuatorData.length) && (numJoints() == jointData.length));
+
+      double pitchAngle = jointData[0].getPosition();
+      if (pitchAngleOffset != null)
+         pitchAngle += pitchAngleOffset.getDoubleValue();
+      double rollAngle = reflect * jointData[1].getPosition();
+      double pitchTorque = jointData[0].getEffort();
+      double rollTorque = reflect * jointData[1].getEffort();
+
+      if ((Math.abs(pitchAngle) > INFINITY_THRESHOLD) || (Math.abs(rollAngle) > INFINITY_THRESHOLD))
+      {
+         throw new RuntimeException("jointToActuatorEffort: pitchAngle or rollAngle is infinity!!\n");
+      }
+
+      jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(rollAngle, pitchAngle);
+      transposeMatrix(jacobian, jacobianTranspose);
+      invertMatrix(jacobianTranspose, jacobianInvertedTranspose);
+
+      // F = (J^T)^-1 * tau
+      double actuatorForce0 = jacobianInvertedTranspose[0][0] * pitchTorque + jacobianInvertedTranspose[0][1] * rollTorque;
+      double actuatorForce1 = jacobianInvertedTranspose[1][0] * pitchTorque + jacobianInvertedTranspose[1][1] * rollTorque;
+
+      checkInfinity(actuatorForce0);
+      checkInfinity(actuatorForce1);
+
+      return new double[]{actuatorForce0, actuatorForce1};
+
+   }
 
    @Override
    public void jointToActuatorVelocity(TurboDriver[] act_data, ValkyrieJointInterface[] jnt_data)
