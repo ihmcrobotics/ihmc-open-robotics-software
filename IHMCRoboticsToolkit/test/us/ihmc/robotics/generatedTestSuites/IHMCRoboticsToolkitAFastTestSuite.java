@@ -207,7 +207,7 @@ import org.junit.runners.Suite;
    us.ihmc.robotics.trajectories.providers.ConstantDoubleProviderTest.class,
    us.ihmc.robotics.trajectories.providers.ConstantPositionProviderTest.class,
    us.ihmc.robotics.trajectories.providers.CurrentPositionProviderTest.class,
-   us.ihmc.robotics.trajectories.SimpleOrientationTrajectoryGeneratorTest.class,
+   us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGeneratorTest.class,
    us.ihmc.robotics.trajectories.StraightLinePositionTrajectoryGeneratorTest.class,
    us.ihmc.robotics.trajectories.TrapezoidalVelocityTrajectoryTest.class,
    us.ihmc.robotics.trajectories.WaypointMotionGeneratorTest.class,
