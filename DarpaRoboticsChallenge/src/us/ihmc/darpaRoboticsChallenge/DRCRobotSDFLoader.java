@@ -7,11 +7,12 @@ import java.util.ArrayList;
 import javax.xml.bind.JAXBException;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.SDFDescriptionMutator;
 
 public class DRCRobotSDFLoader
 {
      
-   public static JaxbSDFLoader loadDRCRobot(String[] resourceDirectories, InputStream sdfFile, boolean headless)
+   public static JaxbSDFLoader loadDRCRobot(String[] resourceDirectories, InputStream sdfFile, boolean headless, SDFDescriptionMutator... mutators)
    {
       ArrayList<String> resources = new ArrayList<String>();
 
@@ -31,7 +32,7 @@ public class DRCRobotSDFLoader
       JaxbSDFLoader jaxbSDFLoader;
       try
       {
-         jaxbSDFLoader = new JaxbSDFLoader(sdfFile, resources);
+         jaxbSDFLoader = new JaxbSDFLoader(sdfFile, resources, mutators);
       }
       catch (FileNotFoundException e)
       {
