@@ -80,6 +80,19 @@ public enum TestPlanTarget
       assumeTrue("Test only set to run on " + bambooPlanType, isRunningOnPlan);
    }
    
+   public static TestPlanTarget fromString(String name)
+   {
+      for (TestPlanTarget testPlanTarget : values)
+      {
+         if (testPlanTarget.name().equals(name))
+         {
+            return testPlanTarget;
+         }
+      }
+      
+      return null;
+   }
+   
    public boolean isIncludedAndNotLoadBalanced()
    {
       return !isExcluded() && !isLoadBalanced();
