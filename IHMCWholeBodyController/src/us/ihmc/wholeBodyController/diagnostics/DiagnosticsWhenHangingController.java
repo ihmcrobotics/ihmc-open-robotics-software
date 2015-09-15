@@ -90,10 +90,12 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    private final DoubleYoVariable alphaFootForce = new DoubleYoVariable("alphaDiagFootForce", registry);
    private final SideDependentList<AlphaFilteredYoFrameVector> footForcesRawFiltered = new SideDependentList<AlphaFilteredYoFrameVector>();
    private final SideDependentList<AlphaFilteredYoFrameVector> footTorquesRawFiltered = new SideDependentList<AlphaFilteredYoFrameVector>();
+   
+   private final TorqueOffsetPrinter torqueOffsetPrinter;
 
    private final HumanoidJointPoseList humanoidJointPoseList;
 
-   public DiagnosticsWhenHangingController(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, MomentumBasedController momentumBasedController)
+   public DiagnosticsWhenHangingController(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, MomentumBasedController momentumBasedController, TorqueOffsetPrinter torqueOffsetPrinter)
    {
       super(HighLevelState.DIAGNOSTICS);
 
@@ -105,6 +107,8 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 //    desiredPoseSetterIndex.set(0);
       this.useArms = useArms;
 
+      this.torqueOffsetPrinter = torqueOffsetPrinter;
+      
       ditherAmplitude.set(0.3);
       ditherFrequency.set(5.0);
 
@@ -269,10 +273,11 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          transferTorqueOffsetsToOutputWriter();
       }
 
-      if (printTorqueOffsets.getBooleanValue())
+      if (printTorqueOffsets.getBooleanValue() && torqueOffsetPrinter!=null)
       {
          printTorqueOffsets.set(false);
-         System.err.println("Need to reimplement this again!");
+//         System.err.println("Need to reimplement this again!");
+         torqueOffsetPrinter.printTorqueOffsets(this);
 //         printOffsetsForCoeffsForValkyrie();
       }
 
