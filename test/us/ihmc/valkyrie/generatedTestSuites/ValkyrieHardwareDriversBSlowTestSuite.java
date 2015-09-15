@@ -7,7 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.valkyrie.ValkyrieObstacleCourseFlatTest.class
+   us.ihmc.valkyrie.ValkyrieObstacleCourseTrialsTerrainTest.class
 })
 
 public class ValkyrieHardwareDriversBSlowTestSuite

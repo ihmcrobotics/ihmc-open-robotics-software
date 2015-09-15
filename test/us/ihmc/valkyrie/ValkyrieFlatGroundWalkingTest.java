@@ -15,7 +15,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 @DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.VideoB})
 public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
-
    private DRCRobotModel robotModel;
 
 	@DeployableTestMethod(estimatedDuration = 700.0)
