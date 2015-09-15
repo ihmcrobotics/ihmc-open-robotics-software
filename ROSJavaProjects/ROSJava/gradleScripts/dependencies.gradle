@@ -1,6 +1,8 @@
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile group: 'org.apache.ws.commons.util', name: 'ws-commons-util', version: '1.0.2'
+    compile('org.apache.ws.commons.util:ws-commons-util:1.0.2') {
+    	exclude group: 'junit', module: 'junit' // Includes old version
+    }
    	compile group: 'commons-httpclient', name: 'commons-httpclient', version: '3.1'
     compile project(':ROSDependencies').fileTree(dir: 'Jars')
     

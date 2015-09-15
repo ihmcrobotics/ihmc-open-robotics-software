@@ -23,6 +23,16 @@ public class JaxbSDFLoader
    private final ArrayList<SDFWorld.Road> roads = new ArrayList<SDFWorld.Road>();
 
 
+   public JaxbSDFLoader(File file, List<String> resourceDirectories) throws JAXBException, FileNotFoundException
+   {
+      this(new FileInputStream(file), resourceDirectories);
+   }
+   
+   public JaxbSDFLoader(InputStream inputStream, List<String> resourceDirectories) throws JAXBException, FileNotFoundException
+   {
+      this(inputStream, resourceDirectories, null);
+   }
+
    public JaxbSDFLoader(File file, String resourceDirectory, SDFDescriptionMutator mutator) throws JAXBException, FileNotFoundException
    {
       this(new FileInputStream(file), Arrays.asList(resourceDirectory), mutator);

@@ -10,7 +10,6 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.8-internal'
 	compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: '0.7-internal'
 	compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
-	compile group: 'org.jfree', name: 'jcommon', version: '1.0.17'
    compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.1.1'
