@@ -54,7 +54,7 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
    private final PushRodTransmissionJoint pushRodTransmissionJoint;
    
    public InefficientPushRodTransmission(PushRodTransmissionJoint pushRodTransmissionJoint, 
-         double reflectTop, double reflectBottom, boolean topJointFirst,
+			double reflectTop, double reflectBottom, boolean topJointFirst,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.pushRodTransmissionJoint = pushRodTransmissionJoint;
@@ -239,6 +239,56 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
 
       rightTurboDriver.setEffortCommand(rightJointForce);
       leftTurboDriver.setEffortCommand(leftJointForce);
+   }
+   
+   public double[] jointToActuatorEffortForTorqueOffsets(TurboDriver[] actuatorData, ValkyrieJointInterface[] jointData)
+   {
+      if(printOutActuatorEffortHasBeenCalled)
+      {
+         System.out.println("\njointToActuatorEffort():");
+         printOutTransmissionInformation(actuatorData, jointData);
+         printOutActuatorEffortHasBeenCalled = false;
+      }
+      
+      assertTrue(numActuators() == actuatorData.length && numJoints() == jointData.length);
+
+      TurboDriver rightTurboDriver = actuatorData[0];
+      TurboDriver leftTurboDriver = actuatorData[1];
+      
+      ValkyrieJointInterface topJointInterface, bottomJointInterface;
+
+      if (topJointFirst)
+      {
+         topJointInterface = jointData[0];
+         bottomJointInterface = jointData[1];
+      }
+      else
+      {
+         topJointInterface = jointData[1];
+         bottomJointInterface = jointData[0];
+      }
+      
+      double topJointAngle = reflectTop * topJointInterface.getPosition();
+      double bottomJointAngle = reflectBottom * bottomJointInterface.getPosition();
+      if (topJointAngleOffset != null) topJointAngle += topJointAngleOffset.getDoubleValue();
+
+      double topJointTorque = reflectTop * topJointInterface.getEffort();
+      double bottomJointTorque = reflectBottom * bottomJointInterface.getEffort();
+
+      if (Math.abs(topJointAngle) > INFINITY_THRESHOLD || Math.abs(bottomJointAngle) > INFINITY_THRESHOLD)
+      {
+         throw new RuntimeException("jointToActuatorEffort: pitchAngle or rollAngle is infinity!!\n");
+      }
+
+      pushrodTransmissionJacobian.computeJacobian(jacobian, topJointAngle, bottomJointAngle);
+      invertMatrix(jacobian, jacobianInverse);
+      double leftJointForce = jacobianInverse[0][0] * topJointTorque + jacobianInverse[0][1] * bottomJointTorque;
+      double rightJointForce = jacobianInverse[1][0] * topJointTorque + jacobianInverse[1][1] * bottomJointTorque;
+
+      checkInfinity(leftJointForce);
+      checkInfinity(rightJointForce);
+
+      return new double[]{rightJointForce, leftJointForce};   
    }
    
    public double[] jointToActuatorEffortAtZero(double[] jointTorques)
