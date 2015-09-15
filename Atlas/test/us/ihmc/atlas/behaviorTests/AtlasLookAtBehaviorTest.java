@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.Fast})
 public class AtlasLookAtBehaviorTest extends DRCLookAtBehaviorTest
 {
    private final AtlasRobotModel robotModel;

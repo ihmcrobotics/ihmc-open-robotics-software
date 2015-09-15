@@ -14,7 +14,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.Fast})
 public class AtlasHandLoadBearingBehaviorTest extends DRCHandLoadBearingBehaviorTest
 {
    private final AtlasRobotModel robotModel;
