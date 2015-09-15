@@ -17,6 +17,7 @@ import javax.management.IntrospectionException;
 import javax.xml.bind.JAXBException;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.SDFDescriptionMutator;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotDataCommunication.VisualizerRobot;
 import us.ihmc.tools.ClassLoaderTools;
@@ -29,15 +30,16 @@ public class SDFModelLoader implements LogModelLoader
    private byte[] model;
    private String[] resourceDirectories;
    private byte[] resourceZip;
-   
+   private SDFDescriptionMutator[] mutators;
+
    @Override
-   public void load(String modelName, byte[] model, String[] resourceDirectories, byte[] resourceZip)
+   public void load(String modelName, byte[] model, String[] resourceDirectories, byte[] resourceZip, SDFDescriptionMutator... mutators)
    {
       this.modelName = modelName;
       this.model = model;
       this.resourceDirectories = resourceDirectories;
       this.resourceZip = resourceZip;
-      
+      this.mutators = mutators;
    }
 
    @Override
@@ -99,7 +101,7 @@ public class SDFModelLoader implements LogModelLoader
       ByteArrayInputStream is = new ByteArrayInputStream(model);
       try
       {
-         return new JaxbSDFLoader(is, Arrays.asList(resourceDirectories));
+         return new JaxbSDFLoader(is, Arrays.asList(resourceDirectories), mutators);
       }
       catch (FileNotFoundException | JAXBException e)
       {

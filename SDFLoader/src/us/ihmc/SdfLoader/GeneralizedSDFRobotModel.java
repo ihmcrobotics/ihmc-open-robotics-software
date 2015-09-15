@@ -19,16 +19,22 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
 {
    private final String name;
    private final List<String> resourceDirectories;
+   private final SDFDescriptionMutator modelMutator;
    private final ArrayList<SDFLinkHolder> rootLinks = new ArrayList<SDFLinkHolder>();
    private final RigidBodyTransform transformToRoot;
    private final LinkedHashMap<String, SDFJointHolder> joints = new LinkedHashMap<String, SDFJointHolder>();
    private final LinkedHashMap<String, SDFLinkHolder> links = new LinkedHashMap<String, SDFLinkHolder>();
-   
-   
+
    public GeneralizedSDFRobotModel(String name, SDFModel model, List<String> resourceDirectories)
+   {
+      this(name, model, resourceDirectories, null);
+   }
+
+   public GeneralizedSDFRobotModel(String name, SDFModel model, List<String> resourceDirectories, SDFDescriptionMutator modelMutator)
    {
       this.name = name;
       this.resourceDirectories = resourceDirectories;
+      this.modelMutator = modelMutator;
       List<SDFLink> sdfLinks = model.getLinks();
       List<SDFJoint> sdfJoints = model.getJoints();
       
@@ -37,7 +43,13 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       // Populate maps
       for (SDFLink sdfLink : sdfLinks)
       {
-         links.put(SDFConversionsHelper.sanitizeJointName(sdfLink.getName()), new SDFLinkHolder(sdfLink));
+         SDFLinkHolder linkHolder = new SDFLinkHolder(sdfLink);
+         if(this.modelMutator != null)
+         {
+            this.modelMutator.mutateLinkForModel(name, linkHolder);
+         }
+
+         links.put(SDFConversionsHelper.sanitizeJointName(sdfLink.getName()), linkHolder);
       }
       
       if(sdfJoints != null)
@@ -48,7 +60,12 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
             String child = SDFConversionsHelper.sanitizeJointName(sdfJoint.getChild());
             try
             {
-               joints.put(SDFConversionsHelper.sanitizeJointName(sdfJoint.getName()), new SDFJointHolder(sdfJoint, links.get(parent), links.get(child)));
+               SDFJointHolder jointHolder = new SDFJointHolder(sdfJoint, links.get(parent), links.get(child));
+               if(this.modelMutator != null)
+               {
+                  this.modelMutator.mutateJointForModel(name, jointHolder);
+               }
+               joints.put(SDFConversionsHelper.sanitizeJointName(sdfJoint.getName()), jointHolder);
             }
             catch (IOException e)
             {

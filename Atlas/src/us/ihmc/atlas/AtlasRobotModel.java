@@ -103,6 +103,8 @@ public class AtlasRobotModel implements DRCRobotModel
 
    private boolean enableJointDamping = true;
 
+   private final AtlasRobotModelMutator modelMutator = new AtlasRobotModelMutator();
+
    @Override
    public WholeBodyIkSolver createWholeBodyIkSolver()
    {
@@ -131,13 +133,13 @@ public class AtlasRobotModel implements DRCRobotModel
 
       if (!headless)
       {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), false);
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), false, modelMutator);
       }
       else
       {
          this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[]
          {
-         }, selectedVersion.getSdfFileAsStream(), headless);
+         }, selectedVersion.getSdfFileAsStream(), headless, modelMutator);
       }
 
       for (String forceSensorNames : AtlasSensorInformation.forceSensorNames)
