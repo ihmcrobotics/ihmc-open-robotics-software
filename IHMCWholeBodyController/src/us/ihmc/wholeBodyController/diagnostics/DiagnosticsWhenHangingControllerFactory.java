@@ -21,14 +21,16 @@ public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehavio
 
    private final boolean useArms;
    private final boolean robotIsHanging;
+   private final TorqueOffsetPrinter torqueOffsetPrinter;
    
    private final HumanoidJointPoseList humanoidJointPoseList;
 
-   public DiagnosticsWhenHangingControllerFactory(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging)
+   public DiagnosticsWhenHangingControllerFactory(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, TorqueOffsetPrinter torqueOffsetPrinter)
    {
       this.humanoidJointPoseList = humanoidJointPoseList;
       this.useArms = useArms;
       this.robotIsHanging = robotIsHanging;
+      this.torqueOffsetPrinter = torqueOffsetPrinter;
    }
 
    public FullRobotModel getFullRobotModel()
@@ -55,7 +57,7 @@ public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehavio
    public HighLevelBehavior createHighLevelBehavior(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          MomentumBasedController momentumBasedController, ICPAndMomentumBasedController icpAndMomentumBasedController)
    {
-      controller = new DiagnosticsWhenHangingController(humanoidJointPoseList, useArms, robotIsHanging, momentumBasedController);
+      controller = new DiagnosticsWhenHangingController(humanoidJointPoseList, useArms, robotIsHanging, momentumBasedController, this.torqueOffsetPrinter);
 
       controller.addUpdatables(updatables);
 
