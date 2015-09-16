@@ -1,4 +1,4 @@
-package us.ihmc.communication.producers;
+package us.ihmc.sensorProcessing.communication.producers;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -11,8 +11,8 @@ import javax.vecmath.Vector3f;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 

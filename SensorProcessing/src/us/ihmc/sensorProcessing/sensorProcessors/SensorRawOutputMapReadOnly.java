@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.sensorProcessors;
 
 import java.util.List;
 
-import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

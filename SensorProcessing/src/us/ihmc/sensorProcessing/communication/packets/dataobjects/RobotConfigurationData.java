@@ -1,4 +1,4 @@
-package us.ihmc.communication.packets.dataobjects;
+package us.ihmc.sensorProcessing.communication.packets.dataobjects;
 
 import java.util.ArrayList;
 import java.util.Random;

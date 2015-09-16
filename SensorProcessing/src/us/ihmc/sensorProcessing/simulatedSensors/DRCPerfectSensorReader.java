@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
