@@ -1,4 +1,4 @@
-package us.ihmc.communication.subscribers;
+package us.ihmc.humanoidRobotics.communication.subscribers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

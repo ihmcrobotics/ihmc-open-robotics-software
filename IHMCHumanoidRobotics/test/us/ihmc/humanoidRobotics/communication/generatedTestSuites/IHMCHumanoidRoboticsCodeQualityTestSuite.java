@@ -1,4 +1,4 @@
-package us.ihmc.communication.generatedTestSuites;
+package us.ihmc.humanoidRobotics.communication.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -7,7 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.communication.packets.PacketCodeQualityTest.class
+   us.ihmc.humanoidRobotics.communication.packets.PacketCodeQualityTest.class
 })
 
 public class IHMCHumanoidRoboticsCodeQualityTestSuite

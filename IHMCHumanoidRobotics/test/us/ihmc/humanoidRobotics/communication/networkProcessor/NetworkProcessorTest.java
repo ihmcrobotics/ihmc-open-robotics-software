@@ -1,4 +1,4 @@
-package us.ihmc.communication.networkProcessor;
+package us.ihmc.humanoidRobotics.communication.networkProcessor;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
