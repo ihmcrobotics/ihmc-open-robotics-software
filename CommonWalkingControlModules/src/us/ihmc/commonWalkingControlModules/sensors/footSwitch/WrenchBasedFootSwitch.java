@@ -8,6 +8,9 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -20,9 +23,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.yoUtilities.graphics.BagOfBalls;
-import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 
 //TODO Probably make an EdgeSwitch interface that has all the HeelSwitch and ToeSwitch stuff

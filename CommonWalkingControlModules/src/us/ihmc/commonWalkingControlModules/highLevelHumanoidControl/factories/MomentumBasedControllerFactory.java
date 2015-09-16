@@ -53,8 +53,8 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class MomentumBasedControllerFactory
 {

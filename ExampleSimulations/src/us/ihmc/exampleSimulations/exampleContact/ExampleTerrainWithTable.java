@@ -2,8 +2,8 @@ package us.ihmc.exampleSimulations.exampleContact;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 
 public class ExampleTerrainWithTable extends CombinedTerrainObject3D
 {

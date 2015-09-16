@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.plotting.Artifact;
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake;
@@ -16,19 +17,17 @@ import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHan
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType;
 import us.ihmc.robotDataCommunication.jointState.JointHolder;
 import us.ihmc.robotDataCommunication.jointState.JointHolderFactory;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.yoUtilities.graphics.RemoteYoGraphic;
-import us.ihmc.yoUtilities.graphics.YoGraphic;
-import us.ihmc.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
 
 public class YoVariableHandShakeBuilder
 {

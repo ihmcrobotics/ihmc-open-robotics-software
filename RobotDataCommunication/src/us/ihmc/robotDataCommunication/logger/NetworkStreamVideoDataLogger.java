@@ -12,13 +12,13 @@ import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 
+import com.esotericsoftware.kryo.io.ByteBufferInputStream;
+
 import us.ihmc.codecs.builder.MP4MJPEGMovieBuilder;
 import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.robotDataCommunication.LogDataHeader;
 import us.ihmc.robotDataCommunication.gui.GUICaptureReceiver;
-
-import com.esotericsoftware.kryo.io.ByteBufferInputStream;
 
 public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface implements LogPacketHandler
 {

@@ -19,8 +19,8 @@ import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.yoUtilities.graphics.YoGraphic;
-import us.ihmc.yoUtilities.graphics.YoGraphicVector;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 
 public class DRCPushRobotController implements RobotController
 {

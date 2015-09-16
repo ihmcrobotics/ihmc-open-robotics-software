@@ -4,15 +4,15 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.simulationconstructionset.CameraMount;
 import us.ihmc.simulationconstructionset.GimbalJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
-import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class ExampleLidarRobot extends Robot
 {

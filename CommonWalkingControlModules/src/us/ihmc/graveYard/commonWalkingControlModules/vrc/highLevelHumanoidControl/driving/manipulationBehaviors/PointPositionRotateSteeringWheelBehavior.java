@@ -16,12 +16,12 @@ import us.ihmc.robotics.math.trajectories.CirclePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.taskExecutor.Task;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 
 /**

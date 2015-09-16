@@ -6,11 +6,12 @@ import java.util.List;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 
 public abstract class RobotContactPointParameters
 {

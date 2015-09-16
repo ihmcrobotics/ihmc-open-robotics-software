@@ -2,8 +2,6 @@ package us.ihmc.SdfLoader.partNames;
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.tools.FormattingTools;
-
 public enum ArmJointName
 {
    SHOULDER_YAW, SHOULDER_ROLL, SHOULDER_PITCH, ELBOW_PITCH, WRIST_ROLL, FIRST_WRIST_PITCH, SECOND_WRIST_PITCH, ELBOW_ROLL, ELBOW_YAW;

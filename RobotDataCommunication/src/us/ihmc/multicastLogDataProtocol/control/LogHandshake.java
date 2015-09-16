@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 
-import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
-
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.ByteBufferInputStream;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+
+import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
 
 // Kryo is only temporary, re-use handshake protobuf for generic improvements to protocol 
 public class LogHandshake

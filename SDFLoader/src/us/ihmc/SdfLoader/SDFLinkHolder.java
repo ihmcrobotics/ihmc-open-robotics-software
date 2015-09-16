@@ -10,8 +10,8 @@ import us.ihmc.SdfLoader.xmlDescription.Collision;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class SDFLinkHolder
 {

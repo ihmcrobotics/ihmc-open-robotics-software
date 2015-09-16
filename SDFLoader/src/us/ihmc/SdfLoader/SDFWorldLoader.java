@@ -12,13 +12,14 @@ import java.util.Map.Entry;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.JMEGeneratedHeightMap;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class SDFWorldLoader
 {

@@ -8,17 +8,17 @@ import java.util.Random;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
-import us.ihmc.simulationconstructionset.DataBuffer;
-import us.ihmc.simulationconstructionset.DataProcessingFunction;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.simulationconstructionset.DataProcessingFunction;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class HumanoidDiagnosticsWhenHangingAnalyzer
 {

@@ -2,13 +2,10 @@ package us.ihmc.SdfLoader.models;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.partNames.FingerName;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;

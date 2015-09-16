@@ -3,10 +3,10 @@ package us.ihmc.wholeBodyController;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 

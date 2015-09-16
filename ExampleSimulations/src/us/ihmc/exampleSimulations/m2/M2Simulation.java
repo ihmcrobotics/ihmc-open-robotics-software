@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
-import javax.vecmath.Point3d;
 
 import us.ihmc.exampleSimulations.m2.Output.PerfectProcessedOutputs;
 import us.ihmc.exampleSimulations.m2.Sensors.PerfectSensorProcessing;

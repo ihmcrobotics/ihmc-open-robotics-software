@@ -12,9 +12,9 @@ import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.simulationconstructionset.graphics.GraphicsObjectsHolder;
-import us.ihmc.robotics.sensors.ContactSensorType;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.sensors.ContactSensorType;
+import us.ihmc.simulationconstructionset.graphics.GraphicsObjectsHolder;
 
 public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
 {

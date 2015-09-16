@@ -5,8 +5,6 @@ import java.awt.Container;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
-import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -17,6 +15,8 @@ import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateMachinesJPanel;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 /**
  * <p>Title: SpringFlamingoController</p>

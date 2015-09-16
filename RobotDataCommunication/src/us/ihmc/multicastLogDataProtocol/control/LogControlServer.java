@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.BindException;
 import java.util.LinkedHashMap;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -12,8 +14,6 @@ import us.ihmc.robotDataCommunication.VariableChangedMessage;
 import us.ihmc.robotDataCommunication.YoVariableHandShakeBuilder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class LogControlServer

@@ -1,16 +1,16 @@
 package us.ihmc.robotDataCommunication;
 
-import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
-import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
-import us.ihmc.multicastLogDataProtocol.ThreadedLogPacketHandler;
-import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
-import us.ihmc.tools.compression.SnappyUtils;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.zip.CRC32;
+
+import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
+import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
+import us.ihmc.multicastLogDataProtocol.ThreadedLogPacketHandler;
+import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
+import us.ihmc.tools.compression.SnappyUtils;
 
 public abstract class YoVariableDataReceiver implements LogPacketHandler
 {
