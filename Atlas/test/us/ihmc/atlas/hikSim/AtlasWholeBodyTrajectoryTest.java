@@ -1,5 +1,7 @@
 package us.ihmc.atlas.hikSim;
 
+import org.junit.Test;
+
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.atlas.AtlasRobotModel;
@@ -9,12 +11,13 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyTrajectoryTest;
 import us.ihmc.wholeBodyController.WholeBodyTrajectoryTestHelper;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Slow})
 public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
 {
    @Override 
@@ -41,4 +44,30 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
       return wholeBodyTrajectoryTestHelper;
    }
 
+   @Override
+   @DeployableTestMethod(estimatedDuration = 2.8)
+   @Test(timeout = 30000)
+   public void testPointToPointLeft() throws Exception
+   {
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
+      super.testPointToPointLeft();
+   }
+   
+   @Override
+   @DeployableTestMethod(estimatedDuration = 1.3)
+   @Test(timeout = 30000)
+   public void testPointToPointRight() throws Exception
+   {
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
+      super.testPointToPointRight();
+   }
+   
+   @Override
+   @DeployableTestMethod(estimatedDuration = 4.1)
+   @Test(timeout = 22445)
+   public void testTrajectory() throws Exception
+   {
+      TestPlanTarget.assumeRunningLocally();
+      super.testTrajectory();
+   }
 }

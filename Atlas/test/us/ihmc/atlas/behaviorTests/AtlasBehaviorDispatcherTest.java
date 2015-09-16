@@ -39,7 +39,7 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    @Test(timeout = 250000)
    public void testDispatchPelvisPoseBehavior() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testDispatchPelvisPoseBehavior();
    }
    
@@ -66,7 +66,7 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    @Test(timeout = 1600000)
    public void testDispatchWalkToLocationBehaviorPauseAndResume() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testDispatchWalkToLocationBehaviorPauseAndResume();
    }
 }
