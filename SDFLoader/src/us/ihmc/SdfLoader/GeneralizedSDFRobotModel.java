@@ -47,14 +47,14 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
          SDFLinkHolder linkHolder = new SDFLinkHolder(sdfLink);
          if(this.descriptionMutator != null)
          {
-            this.descriptionMutator.mutateLinkForModel(name, linkHolder);
+            this.descriptionMutator.mutateLinkForModel(this, linkHolder);
 
             List<SDFSensor> sensors = linkHolder.getSensors();
             if (sensors != null)
             {
                for (SDFSensor sdfSensor : sensors)
                {
-                  this.descriptionMutator.mutateSensorForModel(name, sdfSensor);
+                  this.descriptionMutator.mutateSensorForModel(this, sdfSensor);
                }
             }
          }
@@ -73,16 +73,16 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
                SDFJointHolder jointHolder = new SDFJointHolder(sdfJoint, links.get(parent), links.get(child));
                if(this.descriptionMutator != null)
                {
-                  this.descriptionMutator.mutateJointForModel(name, jointHolder);
+                  this.descriptionMutator.mutateJointForModel(this, jointHolder);
 
                   for (SDFContactSensor sdfContactSensor : jointHolder.getContactSensors())
                   {
-                     this.descriptionMutator.mutateContactSensorForModel(name, sdfContactSensor);
+                     this.descriptionMutator.mutateContactSensorForModel(this, sdfContactSensor);
                   }
 
                   for (SDFForceSensor sdfForceSensor : jointHolder.getForceSensors())
                   {
-                     this.descriptionMutator.mutateForceSensorForModel(name, sdfForceSensor);
+                     this.descriptionMutator.mutateForceSensorForModel(this, sdfForceSensor);
                   }
                }
                joints.put(SDFConversionsHelper.sanitizeJointName(sdfJoint.getName()), jointHolder);
@@ -92,6 +92,11 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
                System.err.println(e);
             }
          }
+      }
+
+      if(this.descriptionMutator != null)
+      {
+         this.descriptionMutator.mutateModelWithAdditions(this);
       }
 
       // Calculate transformations between joints
