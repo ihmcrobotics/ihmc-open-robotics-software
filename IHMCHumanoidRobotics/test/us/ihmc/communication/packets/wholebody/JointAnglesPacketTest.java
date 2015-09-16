@@ -11,6 +11,7 @@ import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @DeployableTestClass(targets = {TestPlanTarget.Fast})
