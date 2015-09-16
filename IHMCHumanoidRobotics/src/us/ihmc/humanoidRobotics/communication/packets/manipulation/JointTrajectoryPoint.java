@@ -7,7 +7,6 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.ArrayTools;
 
 
 @ClassDocumentation("Sub-Packet for a point in an arm joint trajectory. It works similar to the\n"

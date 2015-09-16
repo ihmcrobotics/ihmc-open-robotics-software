@@ -1,12 +1,12 @@
 package us.ihmc.humanoidBehaviors;
 
-import us.ihmc.robotDataCommunication.YoVariableClient;
-import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
-
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
+
+import us.ihmc.robotDataCommunication.YoVariableClient;
+import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 
 public class BehaviorVisualizer extends SCSVisualizer
 {

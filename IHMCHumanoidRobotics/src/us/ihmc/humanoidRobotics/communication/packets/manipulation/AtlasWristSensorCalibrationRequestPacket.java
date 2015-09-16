@@ -1,11 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
+import java.util.Random;
+
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.Random;
 
 @ClassDocumentation("Request taring of the wrist force/torque sensors.")
 public class AtlasWristSensorCalibrationRequestPacket extends IHMCRosApiPacket<AtlasWristSensorCalibrationRequestPacket>

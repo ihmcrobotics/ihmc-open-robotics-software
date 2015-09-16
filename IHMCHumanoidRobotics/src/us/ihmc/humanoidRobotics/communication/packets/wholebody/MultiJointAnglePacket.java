@@ -1,11 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
+import java.util.Random;
+
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.random.RandomTools;
-
-import java.util.Random;
 
 @ClassDocumentation("This message contains wraps up multiple SingleJointAnglePackets so they will be"
 		+ "executed simultaneusly.")

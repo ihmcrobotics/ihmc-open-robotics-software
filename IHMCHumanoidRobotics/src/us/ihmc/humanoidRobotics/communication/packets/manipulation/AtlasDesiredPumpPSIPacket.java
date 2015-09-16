@@ -1,10 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
+import java.util.Random;
+
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.PacketDestination;
-
-import java.util.Random;
 
 /**
  *

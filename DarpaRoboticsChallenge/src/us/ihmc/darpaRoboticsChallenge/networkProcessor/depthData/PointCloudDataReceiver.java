@@ -15,7 +15,6 @@ import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
@@ -35,6 +34,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class PointCloudDataReceiver extends Thread implements NetStateListener

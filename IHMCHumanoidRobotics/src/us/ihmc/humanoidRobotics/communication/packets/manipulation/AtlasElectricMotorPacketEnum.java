@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.tools.DocumentedEnum;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.DocumentedEnum;
 
 /**
 * Created by dstephen on 3/26/15.

@@ -10,8 +10,8 @@ import javax.imageio.ImageIO;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.CalibrateArmPacket;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

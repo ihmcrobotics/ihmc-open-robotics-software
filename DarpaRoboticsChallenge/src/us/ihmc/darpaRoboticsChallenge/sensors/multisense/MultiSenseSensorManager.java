@@ -4,7 +4,6 @@ import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraLogger;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
@@ -13,6 +12,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudSourc
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.RosPointCloudReceiver;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;

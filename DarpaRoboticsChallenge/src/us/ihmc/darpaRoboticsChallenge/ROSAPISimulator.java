@@ -6,6 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.ros.internal.message.Message;
+
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
+
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JointPositionControllerFactory;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -20,12 +27,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameter
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
-import com.martiansoftware.jsap.Switch;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 

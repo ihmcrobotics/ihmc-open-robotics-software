@@ -2,7 +2,6 @@ package us.ihmc.humanoidRobotics.frames;
 
 import java.util.EnumMap;
 
-import us.ihmc.tools.containers.ContainerTools;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
@@ -17,6 +16,7 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.tools.containers.ContainerTools;
 
 /**
  * <p>Title: </p>

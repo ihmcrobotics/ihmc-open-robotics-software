@@ -21,10 +21,10 @@ import us.ihmc.humanoidRobotics.communication.remote.serialization.JointConfigur
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = TestPlanTarget.Flaky)
 public class JointConfigurationDataSenderTest

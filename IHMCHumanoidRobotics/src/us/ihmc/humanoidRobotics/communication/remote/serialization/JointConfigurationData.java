@@ -5,8 +5,8 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.tools.ArrayTools;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.tools.ArrayTools;
 
 public class JointConfigurationData extends Packet<JointConfigurationData>
 {

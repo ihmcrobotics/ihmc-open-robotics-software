@@ -9,7 +9,6 @@ import javax.vecmath.Vector3f;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.IMUPacket;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.humanoidRobotics.communication.streamingData.AtomicLastPacketHolder.LastPacket;
 import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
@@ -22,6 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;

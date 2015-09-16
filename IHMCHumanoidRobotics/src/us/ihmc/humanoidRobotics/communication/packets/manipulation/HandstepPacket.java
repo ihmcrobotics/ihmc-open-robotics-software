@@ -1,5 +1,12 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
+import java.util.Arrays;
+import java.util.Random;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -9,14 +16,6 @@ import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.ArrayTools;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import java.util.Arrays;
-import java.util.Random;
 
 public class HandstepPacket extends Packet<HandstepPacket> implements TransformableDataObject<HandstepPacket>
 {

@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.kryo;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public interface PPSTimestampOffsetProvider extends PacketConsumer<RobotConfigurationData>
 {

@@ -8,10 +8,10 @@ import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
-import us.ihmc.tools.ArrayTools;
-import us.ihmc.tools.FormattingTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.ArrayTools;
+import us.ihmc.tools.FormattingTools;
 
 @ClassDocumentation("This message commands the IHMC joint position controller to move Atlas's joints to the desired angles.")
 public class JointAnglesPacket extends IHMCRosApiPacket<JointAnglesPacket> implements VisualizablePacket

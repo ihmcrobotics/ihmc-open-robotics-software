@@ -4,11 +4,11 @@ import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 
 /**
  *  Generate simulated camera data and camera info packet from SCS, we use only left eye.

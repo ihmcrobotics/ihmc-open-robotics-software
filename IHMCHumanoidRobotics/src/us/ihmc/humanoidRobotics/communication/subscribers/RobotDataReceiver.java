@@ -10,12 +10,12 @@ import javax.vecmath.Vector3f;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.tools.gui.GraphicsUpdatable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.tools.gui.GraphicsUpdatable;
 
 public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
 {

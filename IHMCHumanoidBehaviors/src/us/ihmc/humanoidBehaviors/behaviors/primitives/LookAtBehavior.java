@@ -12,7 +12,6 @@ import us.ihmc.humanoidRobotics.communication.packets.LookAtStatus;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LookAtPacket;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class LookAtBehavior extends BehaviorInterface

@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.InclusionFunction;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 public class SimpleFootstepMask implements InclusionFunction<Point3d>
 {

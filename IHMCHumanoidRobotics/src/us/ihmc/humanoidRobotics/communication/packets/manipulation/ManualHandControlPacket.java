@@ -1,10 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
+import java.util.Random;
+
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.Random;
 
 
 public class ManualHandControlPacket extends Packet<ManualHandControlPacket>

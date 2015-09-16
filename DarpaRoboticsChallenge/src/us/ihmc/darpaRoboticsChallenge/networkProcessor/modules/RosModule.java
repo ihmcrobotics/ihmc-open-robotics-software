@@ -12,7 +12,6 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
@@ -26,6 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.ihmcPerception.IHMCETHRosLocalizationUpdateSubscriber;
 import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;

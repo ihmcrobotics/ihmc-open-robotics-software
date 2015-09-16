@@ -3,9 +3,9 @@ package us.ihmc.humanoidRobotics.communication.packets.sensing;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.packets.HighBandwidthPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
-import boofcv.struct.calib.IntrinsicParameters;
 
 @HighBandwidthPacket
 public class FisheyePacket extends VideoPacket

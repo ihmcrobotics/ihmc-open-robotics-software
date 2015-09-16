@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import us.ihmc.communication.blackoutGenerators.CommunicationBlackoutGenerator;
 import us.ihmc.communication.blackoutGenerators.StandardBlackoutSimulator;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class SimulationTimeBasedBlackoutSimulator extends StandardBlackoutSimulator implements PacketConsumer<RobotConfigurationData>
 {

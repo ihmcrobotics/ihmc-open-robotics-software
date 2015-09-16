@@ -9,6 +9,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Quat4d;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.producers.CompressedVideoDataClient;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.VideoStreamer;
@@ -17,10 +18,9 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import boofcv.struct.calib.IntrinsicParameters;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class LocalizeDrillBehavior extends BehaviorInterface implements VideoStreamer
 {

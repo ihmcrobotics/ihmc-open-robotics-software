@@ -7,12 +7,12 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.StreamException;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
+
+import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class ScriptFileLoader
 {
