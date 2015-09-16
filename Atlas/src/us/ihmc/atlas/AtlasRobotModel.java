@@ -663,6 +663,90 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
    }
 
+   @Override
+   public void mutateSensorForModel(GeneralizedSDFRobotModel model, SDFSensor sensor)
+   {
+      if(this.jointMap.getModelName().equals(model.getName()))
+      {
+         if(sensor.getType().equals("imu") && sensor.getName().equals("imu_sensor"))
+         {
+            sensor.setName("imu_sensor_at_pelvis_frame");
+         }
+
+         if(sensor.getType().equals("gpu_ray") && sensor.getName().equals("head_hokuyo_sensor"))
+         {
+            sensor.getRay().getScan().getHorizontal().setSamples("720");
+            sensor.getRay().getScan().getHorizontal().setMinAngle("-1.5708");
+            sensor.getRay().getScan().getHorizontal().setMaxAngle("1.5708");
+         }
+      }
+   }
+
+   @Override
+   public void mutateForceSensorForModel(GeneralizedSDFRobotModel model, SDFForceSensor forceSensor)
+   {
+      if(this.jointMap.getModelName().equals(model.getName()))
+      {
+
+      }
+   }
+
+   @Override
+   public void mutateContactSensorForModel(GeneralizedSDFRobotModel model, SDFContactSensor contactSensor)
+   {
+      if(this.jointMap.getModelName().equals(model.getName()))
+      {
+
+      }
+   }
+
+   @Override public void mutateModelWithAdditions(GeneralizedSDFRobotModel model)
+   {
+      if(this.jointMap.getModelName().equals(model.getName()))
+      {
+         addAdditionalImuInImuFrame(model);
+      }
+   }
+
+   private void addAdditionalImuInImuFrame(GeneralizedSDFRobotModel model)
+   {
+      SDFSensor sdfImu = new SDFSensor();
+      sdfImu.setName("imu_sensor_at_imu_frame");
+      sdfImu.setType("imu");
+      sdfImu.setPose("-0.0905 -0.000004 -0.0125 0.0 3.14159265359 -0.78539816339");
+
+      SDFSensor.IMU imu = new SDFSensor.IMU();
+
+      SDFSensor.IMU.IMUNoise imuNoise = new SDFSensor.IMU.IMUNoise();
+      imuNoise.setType("gaussian");
+
+      SDFSensor.IMU.IMUNoise.NoiseParameters rateNoise = new SDFSensor.IMU.IMUNoise.NoiseParameters();
+      rateNoise.setMean("0");
+      rateNoise.setStddev("0.0002");
+      rateNoise.setBias_mean("7.5e-06");
+      rateNoise.setBias_stddev("8e-07");
+
+      SDFSensor.IMU.IMUNoise.NoiseParameters accelNoise = new SDFSensor.IMU.IMUNoise.NoiseParameters();
+      accelNoise.setMean("0");
+      accelNoise.setStddev("0.017");
+      accelNoise.setBias_mean("0.1");
+      accelNoise.setBias_stddev("0.001");
+
+      imuNoise.setRate(rateNoise);
+      imuNoise.setAccel(accelNoise);
+
+      imu.setNoise(imuNoise);
+      sdfImu.setImu(imu);
+
+      for (SDFLinkHolder sdfLinkHolder : model.getRootLinks())
+      {
+         if(sdfLinkHolder.getName().equals("pelvis"))
+         {
+            sdfLinkHolder.getSensors().add(sdfImu);
+         }
+      }
+   }
+
    private void modifyHokuyoInertia(SDFLinkHolder linkHolder)
    {
       linkHolder.getInertia().m00 = 0.000401606; // i_xx
@@ -775,87 +859,4 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       linkHolder.setInertialFrameWithRespectToLinkFrame(SDFConversionsHelper.poseToTransform(pose));
    }
 
-   @Override
-   public void mutateSensorForModel(GeneralizedSDFRobotModel model, SDFSensor sensor)
-   {
-      if(this.jointMap.getModelName().equals(model.getName()))
-      {
-         if(sensor.getType().equals("imu") && sensor.getName().equals("imu_sensor"))
-         {
-            sensor.setName("imu_sensor_at_pelvis_frame");
-         }
-
-         if(sensor.getType().equals("gpu_ray") && sensor.getName().equals("head_hokuyo_sensor"))
-         {
-            sensor.getRay().getScan().getHorizontal().setSamples("720");
-            sensor.getRay().getScan().getHorizontal().setMinAngle("-1.5708");
-            sensor.getRay().getScan().getHorizontal().setMaxAngle("1.5708");
-         }
-      }
-   }
-
-   @Override
-   public void mutateForceSensorForModel(GeneralizedSDFRobotModel model, SDFForceSensor forceSensor)
-   {
-      if(this.jointMap.getModelName().equals(model.getName()))
-      {
-
-      }
-   }
-
-   @Override
-   public void mutateContactSensorForModel(GeneralizedSDFRobotModel model, SDFContactSensor contactSensor)
-   {
-      if(this.jointMap.getModelName().equals(model.getName()))
-      {
-
-      }
-   }
-
-   @Override public void mutateModelWithAdditions(GeneralizedSDFRobotModel model)
-   {
-      if(this.jointMap.getModelName().equals(model.getName()))
-      {
-         addAdditionalImuInImuFrame(model);
-      }
-   }
-
-   private void addAdditionalImuInImuFrame(GeneralizedSDFRobotModel model)
-   {
-      SDFSensor sdfImu = new SDFSensor();
-      sdfImu.setName("imu_sensor_at_imu_frame");
-      sdfImu.setType("imu");
-      sdfImu.setPose("-0.0905 -0.000004 -0.0125 0.0 3.14159265359 -0.78539816339");
-
-      SDFSensor.IMU imu = new SDFSensor.IMU();
-
-      SDFSensor.IMU.IMUNoise imuNoise = new SDFSensor.IMU.IMUNoise();
-      imuNoise.setType("gaussian");
-
-      SDFSensor.IMU.IMUNoise.NoiseParameters rateNoise = new SDFSensor.IMU.IMUNoise.NoiseParameters();
-      rateNoise.setMean("0");
-      rateNoise.setStddev("0.0002");
-      rateNoise.setBias_mean("7.5e-06");
-      rateNoise.setBias_stddev("8e-07");
-
-      SDFSensor.IMU.IMUNoise.NoiseParameters accelNoise = new SDFSensor.IMU.IMUNoise.NoiseParameters();
-      accelNoise.setMean("0");
-      accelNoise.setStddev("0.017");
-      accelNoise.setBias_mean("0.1");
-      accelNoise.setBias_stddev("0.001");
-
-      imuNoise.setRate(rateNoise);
-      imuNoise.setAccel(accelNoise);
-
-      imu.setNoise(imuNoise);
-      sdfImu.setImu(imu);
-
-      for (SDFLinkHolder sdfLinkHolder : model.getRootLinks())
-      {
-         if(sdfLinkHolder.getName().equals("pelvis"))
-         {
-            sdfLinkHolder.getSensors().add(sdfImu);
-         }
-      }
-   }
 }
