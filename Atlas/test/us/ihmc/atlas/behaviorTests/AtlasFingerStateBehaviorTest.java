@@ -1,7 +1,6 @@
 package us.ihmc.atlas.behaviorTests;
 
 import org.junit.Test;
-
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCFingerStateBehaviorTest;
@@ -16,12 +15,12 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class AtlasFingerStateBehaviorTest extends DRCFingerStateBehaviorTest
 {
    private final AtlasRobotModel robotModel;
-   
+
    public AtlasFingerStateBehaviorTest()
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
    }
-   
+
    @Override
    public DRCRobotModel getRobotModel()
    {
@@ -35,25 +34,25 @@ public class AtlasFingerStateBehaviorTest extends DRCFingerStateBehaviorTest
    }
 
    @Override
-	@DeployableTestMethod(estimatedDuration = 97.9)
+   @DeployableTestMethod(estimatedDuration = 97.9)
    @Test(timeout = 490000)
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
       TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testCloseHand();
    }
-   
+
    @Override
-	@DeployableTestMethod(estimatedDuration = 36.1)
-   @Test(timeout = 180000)
+   @DeployableTestMethod(estimatedDuration = 53.6)
+   @Test(timeout = 270000)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {
       TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testPauseAndResumeCloseHand();
    }
-   
+
    @Override
-	@DeployableTestMethod(estimatedDuration = 24.2)
+   @DeployableTestMethod(estimatedDuration = 24.2)
    @Test(timeout = 120000)
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {

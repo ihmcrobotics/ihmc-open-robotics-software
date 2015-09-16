@@ -1,12 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
@@ -36,18 +34,23 @@ import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 
 public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+
    private BlockingSimulationRunner blockingSimulationRunner;
+
    private DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack;
-   private final static boolean VISUALIZE_FORCE = false;
+
+   private static final boolean VISUALIZE_FORCE = false;
 
    private double swingTime, transferTime;
-   private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
-   private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
+
+   private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList();
+
+   private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList();
 
    private DRCPushRobotController pushRobotController;
-   private RobotVisualizer robotVisualizer;
 
+   private RobotVisualizer robotVisualizer;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -81,19 +84,17 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          robotVisualizer.close();
          robotVisualizer = null;
       }
-      
-      pushRobotController = null;
 
+      pushRobotController = null;
       swingStartConditions = null;
       swingFinishConditions = null;
-   
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    // cropped to 1.5 - 6.3 seconds
    @Ignore
-	@DeployableTestMethod(estimatedDuration = 50.0)
-	@Test(timeout=300000)
+   @DeployableTestMethod(estimatedDuration = 50.0)
+   @Test(timeout = 300000)
    public void testForVideo() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
@@ -108,12 +109,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 38.9)
-	@Test(timeout = 190000)
+   @DeployableTestMethod(estimatedDuration = 40.4)
+   @Test(timeout = 200000)
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
@@ -128,12 +128,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 42.2)
-	@Test(timeout = 210000)
+   @DeployableTestMethod(estimatedDuration = 48.5)
+   @Test(timeout = 240000)
    public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
@@ -148,12 +147,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 52.9)
-	@Test(timeout = 260000)
+   @DeployableTestMethod(estimatedDuration = 63.2)
+   @Test(timeout = 320000)
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
@@ -177,12 +175,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 38.7)
-	@Test(timeout = 190000)
+   @DeployableTestMethod(estimatedDuration = 41.2)
+   @Test(timeout = 210000)
    public void testPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
@@ -197,12 +194,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 36.1)
-	@Test(timeout = 180000)
+   @DeployableTestMethod(estimatedDuration = 42.8)
+   @Test(timeout = 210000)
    public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
@@ -217,12 +213,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 65.8)
-	@Test(timeout = 330000)
+   @DeployableTestMethod(estimatedDuration = 71.9)
+   @Test(timeout = 360000)
    public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
@@ -237,7 +232,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInTransferState, side, swingFinishConditions, transferTime);
-      
+
       // push the robot again with new parameters
       forceDirection = new Vector3d(0.5, -1.0, 0.0);
       magnitude = 700.0;
@@ -247,12 +242,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 75.4)
-	@Test(timeout = 380000)
+   @DeployableTestMethod(estimatedDuration = 77.2)
+   @Test(timeout = 390000)
    public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
@@ -267,7 +261,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInTransferState, side, swingFinishConditions, transferTime);
-      
+
       // push the robot again with new parameters
       forceDirection = new Vector3d(0.0, 1.0, 0.0);
       magnitude = 600.0;
@@ -277,12 +271,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 37.4)
-	@Test(timeout = 190000)
+   @DeployableTestMethod(estimatedDuration = 49.6)
+   @Test(timeout = 250000)
    public void testPushRightTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
@@ -292,14 +285,15 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
       double magnitude = 700.0;
       double duration = 0.05;
+
       // This doesn't work for 0.5 or higher. We need to do more development to get this working better. So for now, just stick with 0.4.
-      double percentInTransferState = 0.4; //0.9 * Math.random();
+      // 0.9 * Math.random();
+      double percentInTransferState = 0.4;
       PrintTools.info(this, "percentInTransferState = " + percentInTransferState);
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInTransferState, side, swingFinishConditions, transferTime);
-
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -311,7 +305,6 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       pushRobotController = new DRCPushRobotController(drcFlatGroundWalkingTrack.getDrcSimulation().getRobot(), fullRobotModel);
-
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
       cameraConfiguration.setCameraFix(0.6, 0.0, 0.6);
@@ -330,19 +323,17 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       // get YoVariables
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
-
       for (RobotSide robotSide : RobotSide.values)
       {
          String prefix = fullRobotModel.getFoot(robotSide).getName();
-         @SuppressWarnings("unchecked")
-         final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(prefix + "FootControlModule", prefix
-               + "State");
-         @SuppressWarnings("unchecked")
-         final EnumYoVariable<WalkingState> walkingState = (EnumYoVariable<WalkingState>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
-         
+         @SuppressWarnings("unchecked") final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(prefix
+                                                                                                     + "FootControlModule", prefix + "State");
+         @SuppressWarnings("unchecked") final EnumYoVariable<WalkingState> walkingState =
+            (EnumYoVariable<WalkingState>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
          swingStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          swingFinishConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
+
       // simulate for a while
       enable.set(true);
       walk.set(false);
@@ -355,25 +346,20 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    {
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
       GroundProfile3D groundProfile = new FlatGroundProfile();
-
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
       scsInitialSetup.setInitializeEstimatorToActual(true);
       scsInitialSetup.setDrawGroundProfile(true);
       scsInitialSetup.setRunMultiThreaded(runMultiThreaded);
-
       DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-
-      drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false,
-            robotModel);
+      drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false, robotModel);
    }
 
-   private void testPush(Vector3d forceDirection, double magnitude, double duration, double percentInState, RobotSide side, SideDependentList<StateTransitionCondition> condition, double stateTime)
-         throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   private void testPush(Vector3d forceDirection, double magnitude, double duration, double percentInState, RobotSide side,
+                         SideDependentList<StateTransitionCondition> condition, double stateTime)
+           throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       double delay = stateTime * percentInState;
-
       pushRobotController.applyForceDelayed(condition.get(side), delay, forceDirection, magnitude, duration);
-
       blockingSimulationRunner.simulateAndBlock(8.0);
    }
 
@@ -392,10 +378,12 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          return footConstraintType.getEnumValue() == ConstraintType.SWING;
       }
    }
-   
+
+
    private class DoubleSupportStartCondition implements StateTransitionCondition
    {
       private final EnumYoVariable<WalkingState> walkingState;
+
       private final RobotSide side;
 
       public DoubleSupportStartCondition(EnumYoVariable<WalkingState> walkingState, RobotSide side)
@@ -409,11 +397,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       {
          if (side == RobotSide.LEFT)
          {
-            return walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT || walkingState.getEnumValue() == WalkingState.TRANSFER_TO_LEFT_SUPPORT;
+            return (walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT) || (walkingState.getEnumValue() == WalkingState.TRANSFER_TO_LEFT_SUPPORT);
          }
          else
          {
-            return walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT || walkingState.getEnumValue() == WalkingState.TRANSFER_TO_RIGHT_SUPPORT;
+            return (walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT) || (walkingState.getEnumValue() == WalkingState.TRANSFER_TO_RIGHT_SUPPORT);
          }
       }
    }

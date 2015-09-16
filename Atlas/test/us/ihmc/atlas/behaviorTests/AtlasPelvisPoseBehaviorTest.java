@@ -1,7 +1,6 @@
 package us.ihmc.atlas.behaviorTests;
 
 import org.junit.Test;
-
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCPelvisPoseBehaviorTest;
@@ -16,12 +15,12 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
 {
    private final AtlasRobotModel robotModel;
-   
+
    public AtlasPelvisPoseBehaviorTest()
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
    }
-   
+
    @Override
    public DRCRobotModel getRobotModel()
    {
@@ -33,19 +32,19 @@ public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
-   
+
    @Override
-	@DeployableTestMethod(estimatedDuration = 35.5)
-   @Test(timeout = 180000)
+   @DeployableTestMethod(estimatedDuration = 39.4)
+   @Test(timeout = 200000)
    public void testPelvisPitchRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
       TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testPelvisPitchRotationNoTranslation();
    }
-   
+
    @Override
-	@DeployableTestMethod(estimatedDuration = 32.0)
-   @Test(timeout = 160000)
+   @DeployableTestMethod(estimatedDuration = 33.9)
+   @Test(timeout = 170000)
    public void testPelvisYawRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
       TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
@@ -53,14 +52,14 @@ public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
    }
 
    @Override
-	@DeployableTestMethod(estimatedDuration = 36.0)
-   @Test(timeout = 180000)
+   @DeployableTestMethod(estimatedDuration = 35.0)
+   @Test(timeout = 170000)
    public void testPelvisRollRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
       TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testPelvisRollRotationNoTranslation();
    }
-   
+
    @Override
    @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 300000)
@@ -69,19 +68,19 @@ public class AtlasPelvisPoseBehaviorTest extends DRCPelvisPoseBehaviorTest
       TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Flaky);
       super.testPelvisXTranslation();
    }
-   
+
    @Override
-	@DeployableTestMethod(estimatedDuration = 25.1)
-   @Test(timeout = 130000)
+   @DeployableTestMethod(estimatedDuration = 34.7)
+   @Test(timeout = 170000)
    public void testPelvisYTranslation() throws SimulationExceededMaximumTimeException
    {
       TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testPelvisYTranslation();
    }
-   
+
    @Override
-	@DeployableTestMethod(estimatedDuration = 23.5)
-   @Test(timeout = 120000)
+   @DeployableTestMethod(estimatedDuration = 29.7)
+   @Test(timeout = 150000)
    public void testSingleRandomPelvisRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
       TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
