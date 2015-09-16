@@ -1,4 +1,4 @@
-package us.ihmc.gazebo;
+package us.ihmc.darpaRoboticsChallenge.gazebo;
 
 import us.ihmc.tools.thread.ThreadTools;
 

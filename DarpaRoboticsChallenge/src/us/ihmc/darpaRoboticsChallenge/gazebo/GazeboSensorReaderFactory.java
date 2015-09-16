@@ -1,4 +1,4 @@
-package us.ihmc.gazebo;
+package us.ihmc.darpaRoboticsChallenge.gazebo;
 
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;

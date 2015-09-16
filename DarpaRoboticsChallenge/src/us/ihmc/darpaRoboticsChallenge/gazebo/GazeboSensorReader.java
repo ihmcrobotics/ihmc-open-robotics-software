@@ -1,4 +1,4 @@
-package us.ihmc.gazebo;
+package us.ihmc.darpaRoboticsChallenge.gazebo;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
