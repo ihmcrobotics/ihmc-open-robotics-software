@@ -2,7 +2,7 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 
-   ['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
+   compile group: 'org.ejml', name: 'all', version: '0.28'
    
 	compile group: 'us.ihmc.thirdparty.com.esotericsoftware', name: 'kryonet', version: '2.21'
 	compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'

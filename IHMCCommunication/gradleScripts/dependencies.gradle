@@ -6,7 +6,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.com.esotericsoftware', name: 'kryonet', version: '2.21'
     compile group: 'us.ihmc.thirdparty', name: 'boofcv-geo', version: '0.19-internal2'
 	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
-	['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
+	compile group: 'org.ejml', name: 'all', version: '0.28'
 	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.9'
 	
    testCompile project(':IHMCUnitTesting')

@@ -106,4 +106,10 @@ public class ConfigurableSolvePseudoInverseSVD implements LinearSolver<DenseMatr
    {
       return false;
    }
+   
+   @Override
+   public SingularValueDecomposition<DenseMatrix64F> getDecomposition()
+   {
+      return svd;
+   }
 }
