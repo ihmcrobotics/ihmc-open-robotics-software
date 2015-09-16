@@ -4,8 +4,6 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.tools.FormattingTools;
-
 /**
  * Enum for Leg Joint Names. The user should not assume any ordering, or assume anything about the total
  * number of Enums here. They are meant to support multiple robots with common control modules. So joints

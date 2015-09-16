@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -17,23 +17,29 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.robotics.hierarchicalKinematics.*;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.Vector64F;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.hierarchicalKinematics.ForwardKinematicSolver;
+import us.ihmc.robotics.hierarchicalKinematics.HierarchicalKinematicSolver;
+import us.ihmc.robotics.hierarchicalKinematics.HierarchicalTask;
+import us.ihmc.robotics.hierarchicalKinematics.HierarchicalTaskBodyPose;
+import us.ihmc.robotics.hierarchicalKinematics.HierarchicalTaskCOM;
+import us.ihmc.robotics.hierarchicalKinematics.HierarchicalTaskJointsPose;
+import us.ihmc.robotics.hierarchicalKinematics.RobotModel;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 
 /**

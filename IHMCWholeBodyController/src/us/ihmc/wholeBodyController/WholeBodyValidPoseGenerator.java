@@ -1,8 +1,5 @@
 package us.ihmc.wholeBodyController;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 public abstract class WholeBodyValidPoseGenerator
 {
 //   public void executeHandTargetTest(ControlledDoF dofToControlLeft, ControlledDoF dofToControlRight,

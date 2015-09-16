@@ -3,8 +3,9 @@ package us.ihmc.multicastLogDataProtocol;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import us.ihmc.robotDataCommunication.LogDataHeader;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import us.ihmc.robotDataCommunication.LogDataHeader;
 
 public class ThreadedLogPacketHandler extends Thread implements LogPacketHandler
 {

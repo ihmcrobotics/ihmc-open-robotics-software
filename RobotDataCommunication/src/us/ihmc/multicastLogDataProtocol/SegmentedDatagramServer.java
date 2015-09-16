@@ -9,8 +9,6 @@ import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
-import com.google.common.util.concurrent.RateLimiter;
-
 public class SegmentedDatagramServer
 {   
    private final int maximumPacketSize;

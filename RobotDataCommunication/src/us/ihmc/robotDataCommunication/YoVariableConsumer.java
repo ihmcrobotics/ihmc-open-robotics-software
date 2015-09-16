@@ -1,23 +1,14 @@
 package us.ihmc.robotDataCommunication;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.CRC32;
 
-import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
-import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
-import us.ihmc.multicastLogDataProtocol.ThreadedLogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.control.LogControlClient.LogControlVariableChangeListener;
-import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.tools.compression.SnappyUtils;
 
 public class YoVariableConsumer extends YoVariableDataReceiver
 {

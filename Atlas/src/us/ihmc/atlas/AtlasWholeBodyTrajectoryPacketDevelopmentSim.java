@@ -28,10 +28,10 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicShape;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.WholeBodyIKPacketCreator;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
-import us.ihmc.yoUtilities.graphics.YoGraphicShape;
 
 public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
 {

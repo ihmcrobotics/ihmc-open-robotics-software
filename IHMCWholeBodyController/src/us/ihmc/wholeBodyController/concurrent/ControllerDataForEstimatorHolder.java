@@ -4,13 +4,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.humanoidRobotics.model.IntermediateDesiredJointDataHolder;
-import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 
 public class ControllerDataForEstimatorHolder
 {

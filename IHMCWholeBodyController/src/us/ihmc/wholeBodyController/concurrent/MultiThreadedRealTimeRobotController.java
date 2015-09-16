@@ -2,12 +2,13 @@ package us.ihmc.wholeBodyController.concurrent;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+
 import us.ihmc.affinity.Processor;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 public class MultiThreadedRealTimeRobotController
 {

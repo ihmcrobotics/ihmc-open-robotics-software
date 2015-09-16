@@ -1,5 +1,7 @@
 package us.ihmc.robotDataCommunication;
 
+import static org.junit.Assert.assertEquals;
+
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -8,8 +10,6 @@ import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
-
-import static org.junit.Assert.assertEquals;
 
 public class YoVariableConnectionBurstTest
 {

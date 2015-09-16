@@ -1,9 +1,9 @@
 package us.ihmc.robotDataCommunication;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class VisualizerRobot extends SDFHumanoidRobot

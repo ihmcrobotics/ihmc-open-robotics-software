@@ -2,8 +2,6 @@ package us.ihmc.SdfLoader.partNames;
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.tools.FormattingTools;
-
 public enum LimbName
 {
    ARM, LEG;

@@ -1,9 +1,5 @@
 package us.ihmc.multicastLogDataProtocol.broadcast;
 
-import gnu.trove.impl.Constants;
-import gnu.trove.iterator.TLongObjectIterator;
-import gnu.trove.map.hash.TLongObjectHashMap;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -19,6 +15,9 @@ import java.nio.channels.Selector;
 
 import org.apache.commons.lang3.SystemUtils;
 
+import gnu.trove.impl.Constants;
+import gnu.trove.iterator.TLongObjectIterator;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest.AnnounceType;
 

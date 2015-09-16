@@ -1,11 +1,11 @@
 package us.ihmc.robotDataCommunication.visualizer;
 
-import us.ihmc.robotDataCommunication.YoVariableClient;
-
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
+
+import us.ihmc.robotDataCommunication.YoVariableClient;
 
 public class SCSYoVariablesVisualizer
 {
