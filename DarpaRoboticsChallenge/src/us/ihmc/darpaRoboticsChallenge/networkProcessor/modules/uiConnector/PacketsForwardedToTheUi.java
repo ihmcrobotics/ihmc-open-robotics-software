@@ -2,7 +2,6 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector;
 
 import java.util.HashMap;
 
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.humanoidRobotics.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.InvalidPacketNotificationPacket;
@@ -36,6 +35,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class PacketsForwardedToTheUi
 {

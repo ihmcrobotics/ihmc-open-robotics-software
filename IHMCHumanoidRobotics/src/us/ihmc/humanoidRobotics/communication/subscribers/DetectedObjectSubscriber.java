@@ -5,8 +5,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class DetectedObjectSubscriber implements PacketConsumer<DetectedObjectPacket>, Runnable
 {

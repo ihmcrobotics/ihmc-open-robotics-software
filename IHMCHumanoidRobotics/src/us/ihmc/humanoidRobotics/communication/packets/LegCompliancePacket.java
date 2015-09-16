@@ -1,13 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import java.util.Random;
+
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.Random;
 
 @ClassDocumentation("This packet controls the stiffness of LegJoints. i.e., the maximum force a joint puts out"
       + "when it is (pushed) away from a desired position. This is useful to prevent robot from falling when leg hit things unexpectedly." 

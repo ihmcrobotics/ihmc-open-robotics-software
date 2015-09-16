@@ -1,13 +1,12 @@
 package us.ihmc.humanoidRobotics.communication.packets.driving;
 
-import georegression.struct.point.Vector3D_F64;
-import georegression.struct.se.Se3_F64;
-
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import georegression.struct.point.Vector3D_F64;
+import georegression.struct.se.Se3_F64;
 import us.ihmc.communication.packets.Packet;
 
 

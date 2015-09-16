@@ -3,8 +3,8 @@ package us.ihmc.atlas.communication.producers;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.communication.producers.RobotConfigurationDataBufferTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBufferTest;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanTarget;
 

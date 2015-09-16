@@ -1,11 +1,11 @@
 package us.ihmc.humanoidRobotics.bipedSupportPolygons;
 
+import java.util.List;
+
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-
-import java.util.List;
 
 public interface ContactablePlaneBody
 {

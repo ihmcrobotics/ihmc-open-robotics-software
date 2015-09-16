@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+import com.thoughtworks.xstream.XStream;
+
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-
-import com.thoughtworks.xstream.XStream;
 
 public class ScriptFileSaver
 {

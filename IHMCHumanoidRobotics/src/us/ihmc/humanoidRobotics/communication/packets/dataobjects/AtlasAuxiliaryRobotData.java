@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.dataobjects;
 
-import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 
 /**
  *

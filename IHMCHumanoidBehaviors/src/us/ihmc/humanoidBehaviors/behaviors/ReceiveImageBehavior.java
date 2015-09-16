@@ -9,6 +9,7 @@ import javax.swing.JLabel;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.producers.CompressedVideoDataClient;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.VideoStreamer;
@@ -16,7 +17,6 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import boofcv.struct.calib.IntrinsicParameters;
 
 public class ReceiveImageBehavior extends BehaviorInterface implements VideoStreamer{
 

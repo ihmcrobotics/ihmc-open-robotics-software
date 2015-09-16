@@ -2,8 +2,8 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.time;
 
 import org.ros.time.WallTimeProvider;
 
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class DirtySimulationRosClockPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffsetProvider

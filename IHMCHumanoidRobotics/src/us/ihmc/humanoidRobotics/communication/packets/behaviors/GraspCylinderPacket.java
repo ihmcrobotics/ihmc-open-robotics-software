@@ -1,12 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-import java.util.Random;
+
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class GraspCylinderPacket extends Packet<GraspCylinderPacket>
 {

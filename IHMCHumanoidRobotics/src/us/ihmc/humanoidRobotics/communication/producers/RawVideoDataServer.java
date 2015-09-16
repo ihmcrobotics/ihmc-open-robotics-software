@@ -5,11 +5,11 @@ import java.awt.image.BufferedImage;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
-import boofcv.struct.calib.IntrinsicParameters;
 
 public class RawVideoDataServer implements VideoDataServer
 {

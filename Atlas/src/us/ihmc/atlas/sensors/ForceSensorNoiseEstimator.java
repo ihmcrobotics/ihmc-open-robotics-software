@@ -9,8 +9,8 @@ import org.jtransforms.fft.FloatFFT_1D;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class ForceSensorNoiseEstimator implements PacketConsumer<RobotConfigurationData>
 {

@@ -11,7 +11,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatu
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatus.Status;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class HandPoseListBehavior extends BehaviorInterface

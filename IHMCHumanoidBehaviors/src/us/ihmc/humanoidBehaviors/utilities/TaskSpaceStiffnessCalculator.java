@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.utilities;
 
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -11,6 +10,7 @@ import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
 
 public class TaskSpaceStiffnessCalculator
 {

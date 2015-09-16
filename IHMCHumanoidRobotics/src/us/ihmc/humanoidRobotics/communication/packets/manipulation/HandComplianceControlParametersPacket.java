@@ -1,14 +1,15 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
+import java.util.Arrays;
+import java.util.Random;
+
+import javax.vecmath.Vector3f;
+
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import javax.vecmath.Vector3f;
-import java.util.Arrays;
-import java.util.Random;
 
 @ClassDocumentation("This message setup the hand controller to activate a compliance module if at least one of the fields is set and deactivate if the message is empty.\n"
                                   + "To compliance module works only when the last hand command sent with the HandPosePacket is a hand pose (not joint angles).\n"

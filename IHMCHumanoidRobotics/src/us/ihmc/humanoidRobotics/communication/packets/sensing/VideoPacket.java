@@ -5,6 +5,7 @@ import java.util.Random;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.packets.HighBandwidthPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
@@ -14,7 +15,6 @@ import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import boofcv.struct.calib.IntrinsicParameters;
 
 @HighBandwidthPacket
 public class VideoPacket extends Packet<VideoPacket> implements TransformableDataObject<VideoPacket>
