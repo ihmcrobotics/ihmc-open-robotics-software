@@ -552,6 +552,11 @@ public abstract class FrameTuple<T extends Tuple3d> extends ReferenceFrameHolder
     */
    public final boolean epsilonEquals(Tuple3d tuple1, double threshold)
    {
+      if(tuple1 == null)
+      {
+         return false;
+      }
+      
       return tuple.epsilonEquals(tuple1, threshold);
    }
 
@@ -564,6 +569,11 @@ public abstract class FrameTuple<T extends Tuple3d> extends ReferenceFrameHolder
     */
    public final boolean epsilonEquals(FrameTuple<?> frameTuple1, double threshold)
    {
+      if(frameTuple1 == null)
+      {
+         return false;
+      }
+      
       checkReferenceFrameMatch(frameTuple1);
 
       return epsilonEquals(frameTuple1.tuple, threshold);
@@ -577,6 +587,11 @@ public abstract class FrameTuple<T extends Tuple3d> extends ReferenceFrameHolder
     */
    public final boolean epsilonEquals(Tuple2d tuple1, double threshold)
    {
+      if(tuple1 == null)
+      {
+         return false;
+      }
+      
       double diff;
 
       diff = tuple.x - tuple1.x;
@@ -609,6 +624,11 @@ public abstract class FrameTuple<T extends Tuple3d> extends ReferenceFrameHolder
     */
    public final boolean epsilonEquals(FrameTuple2d<?> frameTuple2d, double threshold)
    {
+      if(frameTuple2d == null)
+      {
+         return false;
+      }
+      
       checkReferenceFrameMatch(frameTuple2d);
 
       return epsilonEquals(frameTuple2d.tuple, threshold);
