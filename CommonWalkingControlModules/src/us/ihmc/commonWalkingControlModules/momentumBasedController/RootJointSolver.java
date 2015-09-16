@@ -2,13 +2,13 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.LinkedHashMap;
 
-import org.ejml.alg.dense.mult.MatrixDimensionException;
 import org.ejml.data.D1Matrix64F;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.data.RowD1Matrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
+import org.ejml.ops.MatrixDimensionException;
 import org.ejml.ops.MatrixFeatures;
 
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
