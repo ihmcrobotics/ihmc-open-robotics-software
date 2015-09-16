@@ -5,10 +5,6 @@ import java.util.LinkedHashMap;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
-import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
-import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -19,6 +15,10 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
+import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 
 public class LogDataRawSensorMap
 {

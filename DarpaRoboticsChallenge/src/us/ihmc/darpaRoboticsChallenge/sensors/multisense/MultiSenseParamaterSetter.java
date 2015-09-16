@@ -9,19 +9,19 @@ import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.sensing.MultisenseParameterPacket;
-import us.ihmc.tools.processManagement.ProcessStreamGobbler;
-import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosServiceClient;
-import us.ihmc.utilities.ros.publisher.RosDoublePublisher;
 import dynamic_reconfigure.BoolParameter;
 import dynamic_reconfigure.DoubleParameter;
 import dynamic_reconfigure.Reconfigure;
 import dynamic_reconfigure.ReconfigureRequest;
 import dynamic_reconfigure.ReconfigureResponse;
 import dynamic_reconfigure.StrParameter;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseParameterPacket;
+import us.ihmc.tools.processManagement.ProcessStreamGobbler;
+import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosServiceClient;
+import us.ihmc.utilities.ros.publisher.RosDoublePublisher;
 
 public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParameterPacket>
 {

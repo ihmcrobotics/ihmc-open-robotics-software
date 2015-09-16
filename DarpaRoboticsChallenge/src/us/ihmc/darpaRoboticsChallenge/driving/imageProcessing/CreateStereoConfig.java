@@ -1,9 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.driving.imageProcessing;
 
-import georegression.struct.se.Se3_F64;
 import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.calib.StereoParameters;
+import georegression.struct.se.Se3_F64;
 
 /**
  * Creates a StereoParameters config file for DARPA robotics challenge simulation.

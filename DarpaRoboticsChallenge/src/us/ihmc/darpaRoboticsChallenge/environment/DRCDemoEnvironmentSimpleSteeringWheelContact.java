@@ -10,6 +10,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -25,7 +26,6 @@ import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListe
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvatarEnvironmentInterface

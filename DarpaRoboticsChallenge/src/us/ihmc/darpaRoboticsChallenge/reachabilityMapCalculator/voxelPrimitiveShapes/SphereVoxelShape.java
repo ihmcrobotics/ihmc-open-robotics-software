@@ -17,8 +17,8 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * SphereVoxelShape creates N points uniformly distributed on the surface of a sphere.

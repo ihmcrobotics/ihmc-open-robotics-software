@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.microphone;
 
 import javax.swing.JFrame;
+
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.AxisLocation;

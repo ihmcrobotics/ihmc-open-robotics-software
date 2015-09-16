@@ -1,9 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import sensor_msgs.CameraInfo;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
-import boofcv.struct.calib.IntrinsicParameters;
 
 public class RosCameraInfoSubscriber extends AbstractRosTopicSubscriber<CameraInfo>
 {

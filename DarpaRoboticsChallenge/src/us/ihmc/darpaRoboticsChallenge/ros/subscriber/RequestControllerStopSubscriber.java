@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.ros.subscriber;
 import std_msgs.Empty;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.bdi.BDIBehaviorCommandPacket;
+import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorCommandPacket;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 

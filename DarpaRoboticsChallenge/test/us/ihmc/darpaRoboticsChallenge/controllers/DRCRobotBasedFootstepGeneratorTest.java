@@ -14,18 +14,19 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.FootstepGeneratorVisualizer;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
+import us.ihmc.humanoidRobotics.footstep.FootstepValidityMetric;
+import us.ihmc.humanoidRobotics.footstep.footsepGenerator.SimplePathParameters;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.pathGeneration.footstepGenerator.SemiCircularStepValidityMetric;
 import us.ihmc.pathGeneration.footstepGenerator.TurningThenStraightFootstepGenerator;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -33,11 +34,10 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
-import us.ihmc.humanoidRobotics.footstep.FootstepValidityMetric;
-import us.ihmc.humanoidRobotics.footstep.footsepGenerator.SimplePathParameters;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTestInterface
 {

@@ -9,8 +9,8 @@ import javax.vecmath.Vector3d;
 import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class IHMCMocapDataClient extends MocapDataClient
 {

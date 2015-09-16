@@ -1,16 +1,16 @@
 package us.ihmc.darpaRoboticsChallenge.odometry;
 
-import georegression.geometry.RotationMatrixGenerator;
-import georegression.metric.UtilAngle;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
-import georegression.transform.se.SePointOps_F64;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import georegression.geometry.RotationMatrixGenerator;
+import georegression.metric.UtilAngle;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.se.Se3_F64;
+import georegression.transform.se.SePointOps_F64;
 
 /**
  * //head pos(-0.0025047332, 1.3634932, 1.5311656)

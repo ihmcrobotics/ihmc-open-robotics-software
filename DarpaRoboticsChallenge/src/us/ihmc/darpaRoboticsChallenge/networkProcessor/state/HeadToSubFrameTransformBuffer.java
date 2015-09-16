@@ -1,8 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.state;
 
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class HeadToSubFrameTransformBuffer implements PendableBuffer
 {

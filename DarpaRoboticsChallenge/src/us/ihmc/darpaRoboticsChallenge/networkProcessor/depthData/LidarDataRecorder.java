@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
 
-import georegression.struct.point.Point3D_F64;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -9,6 +7,7 @@ import java.util.Date;
 
 import javax.vecmath.Point3d;
 
+import georegression.struct.point.Point3D_F64;
 import us.ihmc.darpaRoboticsChallenge.odometry.CarLocalizerFileWritingUtils;
 import us.ihmc.tools.thread.ThreadTools;
 

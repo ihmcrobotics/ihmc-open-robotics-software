@@ -5,12 +5,12 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 /**
  * This is a non-contactable Polaris model only for visualizing in SCS

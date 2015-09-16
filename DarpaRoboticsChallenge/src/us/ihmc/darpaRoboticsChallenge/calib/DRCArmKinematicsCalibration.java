@@ -1,12 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.calib;
 
-import georegression.struct.se.Se3_F64;
-
 import java.awt.image.BufferedImage;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
 import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.alg.geo.PerspectiveOps;
@@ -17,6 +14,8 @@ import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
+import georegression.struct.se.Se3_F64;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 
 /**
  * Using a camera calibration target verify the robot arm's kinematics.

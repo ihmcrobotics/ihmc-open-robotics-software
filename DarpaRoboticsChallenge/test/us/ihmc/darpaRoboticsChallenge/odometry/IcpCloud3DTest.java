@@ -2,13 +2,6 @@ package us.ihmc.darpaRoboticsChallenge.odometry;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import georegression.fitting.MotionTransformPoint;
-import georegression.fitting.se.MotionSe3PointSVD_F64;
-import georegression.geometry.RotationMatrixGenerator;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
-import georegression.transform.se.SePointOps_F64;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +10,14 @@ import java.util.Random;
 import org.ddogleg.nn.FactoryNearestNeighbor;
 import org.ddogleg.nn.NearestNeighbor;
 import org.junit.Test;
+
+import georegression.fitting.MotionTransformPoint;
+import georegression.fitting.se.MotionSe3PointSVD_F64;
+import georegression.geometry.RotationMatrixGenerator;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.se.Se3_F64;
+import georegression.transform.se.SePointOps_F64;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 /**
  * @author Peter Abeles

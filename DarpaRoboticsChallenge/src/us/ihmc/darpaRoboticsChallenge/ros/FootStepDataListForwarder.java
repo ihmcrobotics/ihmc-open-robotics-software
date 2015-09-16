@@ -1,14 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import ihmc_msgs.FootstepDataListMessage;
-import ihmc_msgs.FootstepDataMessage;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import ihmc_msgs.FootstepDataListMessage;
+import ihmc_msgs.FootstepDataMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.walking.FootstepData;
-import us.ihmc.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 public class FootStepDataListForwarder extends AbstractRosTopicSubscriber<ihmc_msgs.FootstepDataListMessage>

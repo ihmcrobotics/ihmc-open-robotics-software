@@ -6,23 +6,22 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
-import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
-import us.ihmc.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
-import us.ihmc.communication.packets.sensing.StateEstimatorModePacket;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
-import us.ihmc.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
+import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
-import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
@@ -41,6 +40,8 @@ import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
@@ -60,7 +61,6 @@ import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 
 public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 {

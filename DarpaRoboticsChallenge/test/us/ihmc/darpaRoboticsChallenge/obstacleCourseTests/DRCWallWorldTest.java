@@ -1,33 +1,37 @@
 package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
 import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
-import us.ihmc.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.communication.packets.manipulation.HandstepPacket;
-import us.ihmc.communication.packets.walking.FootstepDataList;
-import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.util.PacketControllerTools;
+import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public abstract class DRCWallWorldTest implements MultiRobotTestInterface
 {

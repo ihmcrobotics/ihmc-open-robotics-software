@@ -4,11 +4,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Random;
 
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
-import us.ihmc.simulationconstructionset.util.perturbance.GroundContactPointsSlipper;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -18,6 +15,9 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
+import us.ihmc.simulationconstructionset.util.perturbance.GroundContactPointsSlipper;
 
 public class SlipRandomOnNextStepPerturber extends ModularRobotController
 {

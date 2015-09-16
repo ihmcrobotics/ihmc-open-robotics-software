@@ -1,16 +1,15 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import geometry_msgs.Quaternion;
-import geometry_msgs.Vector3;
-import ihmc_msgs.FootstepDataMessage;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.communication.packets.walking.FootstepData;
+import geometry_msgs.Quaternion;
+import geometry_msgs.Vector3;
+import ihmc_msgs.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootStepDataMessageConverter

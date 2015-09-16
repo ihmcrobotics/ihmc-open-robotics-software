@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.microphone;
 
-import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 import us.ihmc.robotics.linearDynamicSystems.BodeUnitsConverter;
+import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 
 public class DrillDetectionAlgorithmSimple extends DrillDetectionAlgorithm
 {

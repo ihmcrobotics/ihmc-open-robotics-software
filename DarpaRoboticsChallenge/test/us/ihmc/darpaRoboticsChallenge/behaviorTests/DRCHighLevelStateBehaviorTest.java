@@ -9,13 +9,13 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.communication.packets.HighLevelStatePacket;
-import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HighLevelStateBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;

@@ -2,8 +2,8 @@ package us.ihmc.darpaRoboticsChallenge.controllers;
 
 import java.util.List;
 
-import us.ihmc.communication.packets.sensing.RawIMUPacket;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;

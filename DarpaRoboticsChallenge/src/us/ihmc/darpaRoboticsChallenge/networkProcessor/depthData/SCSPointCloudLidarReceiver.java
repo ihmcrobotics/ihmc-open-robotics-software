@@ -8,9 +8,9 @@ import javax.vecmath.Point3d;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class SCSPointCloudLidarReceiver implements ObjectConsumer<SimulatedLidarScanPacket>
 {

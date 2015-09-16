@@ -1,13 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
 
-import georegression.struct.point.Point3D_F64;
-
 import java.util.List;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import georegression.struct.point.Point3D_F64;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class CarLocalizerTransformKeeper

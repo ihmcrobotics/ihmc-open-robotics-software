@@ -16,14 +16,17 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
-import us.ihmc.communication.packets.manipulation.HandLoadBearingPacket;
-import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandLoadBearingBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacket;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -31,9 +34,6 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.time.GlobalTimer;
 
 public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestInterface
 {

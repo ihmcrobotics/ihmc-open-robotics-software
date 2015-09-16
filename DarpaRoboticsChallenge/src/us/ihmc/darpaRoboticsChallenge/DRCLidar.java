@@ -10,12 +10,12 @@ import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.graphics3DAdapter.GPULidar;
 import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.lidar.LidarScanParameters;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class DRCLidar

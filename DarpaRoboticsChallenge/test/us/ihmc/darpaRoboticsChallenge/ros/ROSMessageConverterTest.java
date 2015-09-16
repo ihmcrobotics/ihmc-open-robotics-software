@@ -17,9 +17,9 @@ import org.ros.internal.message.Message;
 
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = TestPlanTarget.Fast)
 public class ROSMessageConverterTest

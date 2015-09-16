@@ -5,9 +5,10 @@ import java.io.IOException;
 
 import javax.swing.JFileChooser;
 
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
@@ -18,7 +19,6 @@ import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 

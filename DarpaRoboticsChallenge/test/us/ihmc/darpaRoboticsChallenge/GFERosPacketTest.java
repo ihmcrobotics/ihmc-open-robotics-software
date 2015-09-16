@@ -14,8 +14,9 @@ import org.junit.Test;
 import org.ros.RosCore;
 import org.ros.internal.message.Message;
 
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -26,11 +27,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mo
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
@@ -38,6 +36,9 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMap;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -59,7 +60,6 @@ import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCSimulationOutputWriter;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
-import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 
 public abstract class GFERosPacketTest implements MultiRobotTestInterface
 {

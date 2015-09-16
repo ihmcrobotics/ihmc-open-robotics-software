@@ -4,8 +4,8 @@ import java.io.InputStream;
 
 import javax.sound.sampled.AudioFormat;
 
-import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 import us.ihmc.robotics.linearDynamicSystems.BodeUnitsConverter;
+import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 
 public abstract class DrillDetectionAlgorithm
 {

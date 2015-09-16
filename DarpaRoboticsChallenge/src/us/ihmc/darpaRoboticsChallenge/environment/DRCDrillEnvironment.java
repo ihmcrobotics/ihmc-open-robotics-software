@@ -8,6 +8,7 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -18,7 +19,6 @@ import us.ihmc.simulationconstructionset.util.environments.ContactableRobot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class DRCDrillEnvironment implements CommonAvatarEnvironmentInterface
 {

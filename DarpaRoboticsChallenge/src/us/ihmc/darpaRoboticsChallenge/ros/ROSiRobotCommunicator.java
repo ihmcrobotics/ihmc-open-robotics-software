@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import handle_msgs.HandleControl;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -10,7 +8,8 @@ import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 
-import us.ihmc.communication.packets.manipulation.FingerStatePacket;
+import handle_msgs.HandleControl;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 

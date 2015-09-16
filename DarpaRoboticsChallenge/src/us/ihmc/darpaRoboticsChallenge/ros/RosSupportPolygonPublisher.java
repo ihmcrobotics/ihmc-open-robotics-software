@@ -1,14 +1,16 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import ihmc_msgs.Point2dMessage;
-import ihmc_msgs.SupportPolygonMessage;
-import org.ros.message.MessageFactory;
-import org.ros.node.NodeConfiguration;
-import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
+import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point2f;
-import java.util.List;
+
+import org.ros.message.MessageFactory;
+import org.ros.node.NodeConfiguration;
+
+import ihmc_msgs.Point2dMessage;
+import ihmc_msgs.SupportPolygonMessage;
+import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 
 /**
  *
