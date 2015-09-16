@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.fingers;
 
-import us.ihmc.communication.packets.dataobjects.HandJointName;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.SdfLoader.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
