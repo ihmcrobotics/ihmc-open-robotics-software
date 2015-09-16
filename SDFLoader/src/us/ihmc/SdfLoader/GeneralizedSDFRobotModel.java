@@ -70,6 +70,16 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
                if(this.descriptionMutator != null)
                {
                   this.descriptionMutator.mutateJointForModel(name, jointHolder);
+
+                  for (SDFContactSensor sdfContactSensor : jointHolder.getContactSensors())
+                  {
+                     this.descriptionMutator.mutateContactSensorForModel(name, sdfContactSensor);
+                  }
+
+                  for (SDFForceSensor sdfForceSensor : jointHolder.getForceSensors())
+                  {
+                     this.descriptionMutator.mutateForceSensorForModel(name, sdfForceSensor);
+                  }
                }
                joints.put(SDFConversionsHelper.sanitizeJointName(sdfJoint.getName()), jointHolder);
             }

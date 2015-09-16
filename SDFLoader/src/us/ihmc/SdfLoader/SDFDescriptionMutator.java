@@ -13,4 +13,8 @@ public interface SDFDescriptionMutator
    void mutateLinkForModel(String modelName, SDFLinkHolder linkHolder);
 
    void mutateSensorForModel(String modelName, SDFSensor sensor);
+
+   void mutateForceSensorForModel(String modelName, SDFForceSensor forceSensor);
+
+   void mutateContactSensorForModel(String modelName, SDFContactSensor contactSensor);
 }
