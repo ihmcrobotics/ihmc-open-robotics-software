@@ -18,7 +18,7 @@ public class SDFLinkHolder
    // From SDF File
    private final String name;
    private final RigidBodyTransform transformToModelReferenceFrame;
-   private final double mass;
+   private double mass;
    private final RigidBodyTransform inertialFrameWithRespectToLinkFrame;
    private final Matrix3d inertia;
    
@@ -194,6 +194,14 @@ public class SDFLinkHolder
    {
       return collisions;
    }
-   
-   
+
+   public void setMass(double mass)
+   {
+      this.mass = mass;
+   }
+
+   public void setInertialFrameWithRespectToLinkFrame(RigidBodyTransform newTransform)
+   {
+      this.inertialFrameWithRespectToLinkFrame.set(newTransform);
+   }
 }

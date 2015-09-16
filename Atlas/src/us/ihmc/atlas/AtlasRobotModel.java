@@ -6,7 +6,9 @@ import us.ihmc.SdfLoader.*;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
+import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.*;
 import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
@@ -55,6 +57,7 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
@@ -528,47 +531,331 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public void mutateJointForModel(String modelName, SDFJointHolder jointHolder)
+   public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
    {
-      if(this.jointMap.getModelName().equals(modelName))
+      if(this.jointMap.getModelName().equals(model.getName()))
       {
 
       }
    }
 
    @Override
-   public void mutateLinkForModel(String modelName, SDFLinkHolder linkHolder)
+   public void mutateLinkForModel(GeneralizedSDFRobotModel model, SDFLinkHolder linkHolder)
    {
-      if(this.jointMap.getModelName().equals(modelName))
+      if(this.jointMap.getModelName().equals(model.getName()))
+      {
+         List<SDFVisual> visuals = linkHolder.getVisuals();
+         if(visuals != null)
+         {
+            for (SDFVisual sdfVisual : visuals)
+            {
+               SDFGeometry geometry = sdfVisual.getGeometry();
+               if(geometry != null)
+               {
+                  SDFGeometry.Mesh mesh = geometry.getMesh();
+                  if(mesh != null)
+                  {
+                     String meshUri = mesh.getUri();
+                     if(meshUri.contains("meshes_unplugged"))
+                     {
+                        String replacedURI = meshUri.replace(".dae", ".obj");
+                        mesh.setUri(replacedURI);
+                     }
+                  }
+               }
+
+            }
+         }
+
+         switch(linkHolder.getName())
+         {
+         case "utorso":
+            modifyLinkInertialPose(linkHolder, "-0.043 0.00229456 0.316809 0 -0 0");
+            addCustomCrashProtectionVisual(linkHolder);
+            break;
+         case "l_lfarm":
+         case "r_lfarm":
+            modifyLinkMass(linkHolder, 1.6);
+            break;
+         case "l_hand":
+            modifyLeftHand(linkHolder);
+            break;
+         case "r_hand":
+            modifyRightHand(linkHolder);
+            break;
+         case "l_finger_1_link_0":
+            modifyLinkPose(linkHolder, "0.0903097 1.15155 0.38309 1.5708 0.000796327 1.5708");
+            break;
+         case "l_finger_1_link_1":
+            modifyLinkPose(linkHolder, "0.0903097 1.15155 0.38309 1.5708 0.000796327 1.5708");
+            break;
+         case "l_finger_1_link_2":
+            modifyLinkPose(linkHolder, "0.0903092 1.20153 0.35505 1.5708 0.520796 1.57081");
+            break;
+         case "l_finger_1_link_3":
+            modifyLinkPose(linkHolder, "0.0903088 1.23536 0.335645 1.5708 0.000796327 1.5708");
+            break;
+         case "l_finger_2_link_0":
+            modifyLinkPose(linkHolder, "0.16231 1.15155 0.38309 1.5708 0.000796327 1.5708");
+            break;
+         case "l_finger_2_link_1":
+            modifyLinkPose(linkHolder, "0.16231 1.15155 0.38309 1.5708 0.000796327 1.5708");
+            break;
+         case "l_finger_2_link_2":
+            modifyLinkPose(linkHolder, "0.162309 1.20153 0.35505 1.5708 0.520796 1.57081");
+            break;
+         case "l_finger_2_link_3":
+            modifyLinkPose(linkHolder, "0.162309 1.23536 0.335645 1.5708 0.000796327 1.5708");
+            break;
+         case "l_finger_middle_link_0":
+            modifyLinkPose(linkHolder, "0.12631 1.15155 0.47409 -1.57079 -0.000796327 1.5708");
+            break;
+         case "l_finger_middle_link_1":
+            modifyLinkPose(linkHolder, "0.12631 1.15155 0.47409 -1.57079 -0.000796327 1.5708");
+            break;
+         case "l_finger_middle_link_2":
+            modifyLinkPose(linkHolder, "0.12631 1.20153 0.50213 -1.57079 -0.520796 1.57079");
+            break;
+         case "l_finger_middle_link_3":
+            modifyLinkPose(linkHolder, "0.126311 1.23536 0.521535 -1.57079 -0.000796327 1.5708");
+            break;
+         case "r_finger_1_link_0":
+            modifyLinkPose(linkHolder, "0.16231 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
+            break;
+         case "r_finger_1_link_1":
+            modifyLinkPose(linkHolder, "0.16231 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
+            break;
+         case "r_finger_1_link_2":
+            modifyLinkPose(linkHolder, "0.16231 -1.20153 0.35505 1.57079 0.520796 -1.57079");
+            break;
+         case "r_finger_1_link_3":
+            modifyLinkPose(linkHolder, "0.16231 -1.23536 0.335645 1.57079 0.000796327 -1.57079");
+            break;
+         case "r_finger_2_link_0":
+            modifyLinkPose(linkHolder, "0.0903097 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
+            break;
+         case "r_finger_2_link_1":
+            modifyLinkPose(linkHolder, "0.0903097 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
+            break;
+         case "r_finger_2_link_2":
+            modifyLinkPose(linkHolder, "0.0903099 -1.20153 0.35505 1.57079 0.520796 -1.57079");
+            break;
+         case "r_finger_2_link_3":
+            modifyLinkPose(linkHolder, "0.09031 -1.23536 0.335645 1.57079 0.000796327 -1.57079");
+            break;
+         case "r_finger_middle_link_0":
+            modifyLinkPose(linkHolder, "0.12631 -1.15155 0.47409 -1.5708 -0.000796327 -1.5708");
+            break;
+         case "r_finger_middle_link_1":
+            modifyLinkPose(linkHolder, "0.12631 -1.15155 0.47409 -1.5708 -0.000796327 -1.5708");
+            break;
+         case "r_finger_middle_link_2":
+            modifyLinkPose(linkHolder, "0.12631 -1.20153 0.50213 -1.5708 -0.520796 -1.57079");
+            break;
+         case "r_finger_middle_link_3":
+            modifyLinkPose(linkHolder, "0.126311 -1.23536 0.521535 -1.5708 -0.000796327 -1.5708");
+            break;
+         case "hokuyo_link":
+            modifyHokuyoInertia(linkHolder);
+         default:
+            break;
+         }
+      }
+   }
+
+   private void modifyHokuyoInertia(SDFLinkHolder linkHolder)
+   {
+      linkHolder.getInertia().m00 = 0.000401606; // i_xx
+      linkHolder.getInertia().m01 = 4.9927e-08; // i_xy
+      linkHolder.getInertia().m02 = 1.0997e-05; // i_xz
+      linkHolder.getInertia().m11 = 0.00208115; // i_yy
+      linkHolder.getInertia().m12 = -9.8165e-09; // i_yz
+      linkHolder.getInertia().m22 = 0.00178402; // i_zz
+   }
+
+   private void addCustomCrashProtectionVisual(SDFLinkHolder linkHolder)
+   {
+      List<SDFVisual> visuals = linkHolder.getVisuals();
+
+      SDFVisual crashProtectionVisual = new SDFVisual();
+      crashProtectionVisual.setName("utorso_crash_visual");
+
+      SDFVisual.SDFMaterial crashProtectionVisualMaterial = new SDFVisual.SDFMaterial();
+      crashProtectionVisualMaterial.setLighting("1");
+      crashProtectionVisualMaterial.setAmbient("0.75686275 0 0.75686275 1");
+      crashProtectionVisualMaterial.setDiffuse(".7 0 .7 1");
+      crashProtectionVisualMaterial.setSpecular("1 0 1 1");
+      crashProtectionVisualMaterial.setEmissive("0 0 1 1");
+
+      SDFGeometry crashProtectionGeometry = new SDFGeometry();
+      SDFGeometry.Mesh crashProtectionGeometryMesh = new SDFGeometry.Mesh();
+      crashProtectionGeometryMesh.setScale("1 1 1");
+      crashProtectionGeometryMesh.setUri("model://atlas_description/meshes_unplugged/ATLAS_UNPLUGGED_UPPER_BODY_CRASH_PROTECTION_NO_SHOULDER.stl");
+
+      crashProtectionGeometry.setMesh(crashProtectionGeometryMesh);
+
+      crashProtectionVisual.setMaterial(crashProtectionVisualMaterial);
+      crashProtectionVisual.setPose("0 0 0 0 -0 0");
+      crashProtectionVisual.setGeometry(crashProtectionGeometry);
+
+      visuals.add(crashProtectionVisual);
+   }
+
+   private void modifyLeftHand(SDFLinkHolder linkHolder)
+   {
+      modifyLinkMass(linkHolder, 2.7);
+      modifyLinkInertialPose(linkHolder, "-0.0 0.04 0.0 0 -0 0");
+      List<SDFVisual> visuals = linkHolder.getVisuals();
+      if(visuals != null)
+      {
+         for (SDFVisual sdfVisual : visuals)
+         {
+            if(sdfVisual.getName().equals("l_hand_visual"))
+            {
+               sdfVisual.setPose("-0.00179 0.126 0 0 -1.57079 0");
+            }
+         }
+      }
+   }
+
+   private void modifyRightHand(SDFLinkHolder linkHolder)
+   {
+      modifyLinkMass(linkHolder, 2.7);
+      modifyLinkInertialPose(linkHolder, "-0.0 -0.04 0.0 0 -0 0");
+      List<SDFVisual> visuals = linkHolder.getVisuals();
+
+      if(visuals != null)
+      {
+         for (SDFVisual sdfVisual : visuals)
+         {
+            if(sdfVisual.getName().equals("r_hand_visual"))
+            {
+               sdfVisual.setPose("-0.00179 -0.126 0 3.14159 -1.57079 0");
+
+               sdfVisual.getGeometry().getMesh().setUri("model://robotiq_hand_description/meshes/s-model_articulated/visual/palmRight.STL");
+            }
+         }
+
+         addCheckerboardToRightHand(visuals);
+      }
+
+   }
+
+   private void addCheckerboardToRightHand(List<SDFVisual> visuals)
+   {
+      SDFVisual chessboardVisual = new SDFVisual();
+      chessboardVisual.setName("r_hand_chessboard");
+      chessboardVisual.setPose("0.065 -0.198 0.04 0 1.57 0");
+
+      SDFGeometry chessboardVisualGeometry = new SDFGeometry();
+      SDFGeometry.Mesh chessboardVisualGeometryMesh = new SDFGeometry.Mesh();
+
+      chessboardVisualGeometryMesh.setScale(".75 .75 .01");
+      chessboardVisualGeometryMesh.setUri("model://ihmc/calibration_cube.dae");
+
+      chessboardVisualGeometry.setMesh(chessboardVisualGeometryMesh);
+
+      chessboardVisual.setGeometry(chessboardVisualGeometry);
+
+      visuals.add(chessboardVisual);
+   }
+
+   private void modifyLinkMass(SDFLinkHolder linkHolder, double mass)
+   {
+      linkHolder.setMass(mass);
+   }
+
+   private void modifyLinkPose(SDFLinkHolder linkHolder, String pose)
+   {
+      linkHolder.getTransformFromModelReferenceFrame().set(SDFConversionsHelper.poseToTransform(pose));
+   }
+
+   private void modifyLinkInertialPose(SDFLinkHolder linkHolder, String pose)
+   {
+      linkHolder.setInertialFrameWithRespectToLinkFrame(SDFConversionsHelper.poseToTransform(pose));
+   }
+
+   @Override
+   public void mutateSensorForModel(GeneralizedSDFRobotModel model, SDFSensor sensor)
+   {
+      if(this.jointMap.getModelName().equals(model.getName()))
+      {
+         if(sensor.getType().equals("imu") && sensor.getName().equals("imu_sensor"))
+         {
+            sensor.setName("imu_sensor_at_pelvis_frame");
+         }
+
+         if(sensor.getType().equals("gpu_ray") && sensor.getName().equals("head_hokuyo_sensor"))
+         {
+            sensor.getRay().getScan().getHorizontal().setSamples("720");
+            sensor.getRay().getScan().getHorizontal().setMinAngle("-1.5708");
+            sensor.getRay().getScan().getHorizontal().setMaxAngle("1.5708");
+         }
+      }
+   }
+
+   @Override
+   public void mutateForceSensorForModel(GeneralizedSDFRobotModel model, SDFForceSensor forceSensor)
+   {
+      if(this.jointMap.getModelName().equals(model.getName()))
       {
 
       }
    }
 
    @Override
-   public void mutateSensorForModel(String modelName, SDFSensor sensor)
+   public void mutateContactSensorForModel(GeneralizedSDFRobotModel model, SDFContactSensor contactSensor)
    {
-      if(this.jointMap.getModelName().equals(modelName))
+      if(this.jointMap.getModelName().equals(model.getName()))
       {
 
       }
    }
 
-   @Override
-   public void mutateForceSensorForModel(String modelName, SDFForceSensor forceSensor)
+   @Override public void mutateModelWithAdditions(GeneralizedSDFRobotModel model)
    {
-      if(this.jointMap.getModelName().equals(modelName))
+      if(this.jointMap.getModelName().equals(model.getName()))
       {
-
+         addAdditionalImuInImuFrame(model);
       }
    }
 
-   @Override
-   public void mutateContactSensorForModel(String modelName, SDFContactSensor contactSensor)
+   private void addAdditionalImuInImuFrame(GeneralizedSDFRobotModel model)
    {
-      if(this.jointMap.getModelName().equals(modelName))
-      {
+      SDFSensor sdfImu = new SDFSensor();
+      sdfImu.setName("imu_sensor_at_imu_frame");
+      sdfImu.setType("imu");
+      sdfImu.setPose("-0.0905 -0.000004 -0.0125 0.0 3.14159265359 -0.78539816339");
 
+      SDFSensor.IMU imu = new SDFSensor.IMU();
+
+      SDFSensor.IMU.IMUNoise imuNoise = new SDFSensor.IMU.IMUNoise();
+      imuNoise.setType("gaussian");
+
+      SDFSensor.IMU.IMUNoise.NoiseParameters rateNoise = new SDFSensor.IMU.IMUNoise.NoiseParameters();
+      rateNoise.setMean("0");
+      rateNoise.setStddev("0.0002");
+      rateNoise.setBias_mean("7.5e-06");
+      rateNoise.setBias_stddev("8e-07");
+
+      SDFSensor.IMU.IMUNoise.NoiseParameters accelNoise = new SDFSensor.IMU.IMUNoise.NoiseParameters();
+      accelNoise.setMean("0");
+      accelNoise.setStddev("0.017");
+      accelNoise.setBias_mean("0.1");
+      accelNoise.setBias_stddev("0.001");
+
+      imuNoise.setRate(rateNoise);
+      imuNoise.setAccel(accelNoise);
+
+      imu.setNoise(imuNoise);
+      sdfImu.setImu(imu);
+
+      for (SDFLinkHolder sdfLinkHolder : model.getRootLinks())
+      {
+         if(sdfLinkHolder.getName().equals("pelvis"))
+         {
+            sdfLinkHolder.getSensors().add(sdfImu);
+         }
       }
    }
 }

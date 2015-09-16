@@ -22,42 +22,47 @@ public interface SDFDescriptionMutator
 {
    /**
     * Tweak the properties of a joint belonging to the model given in the input argument.
-    * @param modelName Name of the model to which this joint belongs
+    * @param model The model to which this joint belongs
     * @param jointHolder The joint to be modified
     */
-   void mutateJointForModel(String modelName, SDFJointHolder jointHolder);
+   void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder);
 
    /**
     * Tweak the properties of a link belonging to the model given in the input argument
-    * @param modelName Name of the model to which this link belongs
+    * @param model The model to which this link belongs
     * @param linkHolder The link to be modified
     */
-   void mutateLinkForModel(String modelName, SDFLinkHolder linkHolder);
+   void mutateLinkForModel(GeneralizedSDFRobotModel model, SDFLinkHolder linkHolder);
 
    /**
     * Tweak the properties of the sensor belonging to the model given in the input argument.
     *
     * Note that this does not apply to Force or Contact sensors; they have their own methods.
     * This will be fixed in the future.
-    *
-    * @param modelName Name of the model to which this sensor belongs
+    *  @param model The model to which this sensor belongs
     * @param sensor The sensor to be modified
     */
-   void mutateSensorForModel(String modelName, SDFSensor sensor);
+   void mutateSensorForModel(GeneralizedSDFRobotModel model, SDFSensor sensor);
 
    /**
     * Tweak the properties of a force sensor belonging to the model given in the input argument.
-    *
-    * @param modelName Name of the model to which this sensor belongs
+    *  @param model The model to which this sensor belongs
     * @param forceSensor The sensor to be modified
     */
-   void mutateForceSensorForModel(String modelName, SDFForceSensor forceSensor);
+   void mutateForceSensorForModel(GeneralizedSDFRobotModel model, SDFForceSensor forceSensor);
 
    /**
     * Tweak the properties of a contact sensor belonging to the model given in the input argument.
-    *
-    * @param modelName Name of the model to which this sensor belongs
+    *  @param model The model to which this sensor belongs
     * @param contactSensor The sensor to be modified
     */
-   void mutateContactSensorForModel(String modelName, SDFContactSensor contactSensor);
+   void mutateContactSensorForModel(GeneralizedSDFRobotModel model, SDFContactSensor contactSensor);
+
+   /**
+    * Perform a generic mutation on the given model. Can be used to add sensors/elements not described
+    * in the .SDF file
+    *
+    * @param model The model you wish to mutate
+    */
+   void mutateModelWithAdditions(GeneralizedSDFRobotModel model);
 }
