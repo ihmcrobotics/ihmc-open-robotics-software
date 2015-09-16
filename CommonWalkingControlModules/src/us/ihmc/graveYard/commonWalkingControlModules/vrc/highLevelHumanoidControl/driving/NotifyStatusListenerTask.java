@@ -1,7 +1,7 @@
 package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.tools.taskExecutor.Task;
 
 public class NotifyStatusListenerTask<T extends Packet> implements Task

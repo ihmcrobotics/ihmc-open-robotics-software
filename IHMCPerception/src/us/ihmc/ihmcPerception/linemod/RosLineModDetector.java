@@ -11,11 +11,11 @@ import java.util.Collections;
 import javax.swing.JFrame;
 import javax.vecmath.Point3d;
 
+import boofcv.gui.image.ImagePanel;
+import boofcv.gui.image.ShowImages;
 import sensor_msgs.PointCloud2;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
-import boofcv.gui.image.ImagePanel;
-import boofcv.gui.image.ShowImages;
 
 public class RosLineModDetector extends LineModDetector
 {

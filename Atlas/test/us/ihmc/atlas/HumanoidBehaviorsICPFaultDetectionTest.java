@@ -4,8 +4,8 @@ package us.ihmc.atlas;
 import us.ihmc.darpaRoboticsChallenge.DRCHumanoidBehaviorICPFaultDetectionTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 
 @DeployableTestClass(targets = {TestPlanTarget.InDevelopment})

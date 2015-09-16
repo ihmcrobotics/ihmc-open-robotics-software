@@ -9,12 +9,12 @@ import javax.vecmath.Point3d;
 
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.shape.Box;
+
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class CollisionBoxTest
 {

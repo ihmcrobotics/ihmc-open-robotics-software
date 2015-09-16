@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.packetProducers;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.communication.packets.manipulation.HandPoseStatus;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatus;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandPoseStatusProducer

@@ -31,7 +31,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.InitialClearancePoseTraj
 import us.ihmc.commonWalkingControlModules.trajectories.LeadInOutPoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseTrajectoryGenerator;
-import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;

@@ -14,18 +14,18 @@ import us.ihmc.commonWalkingControlModules.configurations.FootstepParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.pathGeneration.footstepSnapper.AtlasFootstepSnappingParameters;
 import us.ihmc.pathGeneration.footstepSnapper.ConvexHullFootstepSnapper;
 import us.ihmc.pathGeneration.footstepSnapper.FootstepSnapperTest;
 import us.ihmc.pathGeneration.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.pathGeneration.footstepSnapper.SimpleFootstepValueFunction;
+import us.ihmc.robotics.geometry.BoundingBox2d;
+import us.ihmc.robotics.geometry.InsufficientDataException;
+import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundReaderAndWriter;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.robotics.quadTree.Box;
-import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.robotics.geometry.BoundingBox2d;
-import us.ihmc.robotics.geometry.InsufficientDataException;
 
 /**
  * Created by agrabertilton on 3/4/15.

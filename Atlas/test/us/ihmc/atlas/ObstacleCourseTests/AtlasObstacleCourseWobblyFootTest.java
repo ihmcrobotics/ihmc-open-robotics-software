@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -13,11 +15,8 @@ import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseWobbl
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 @DeployableTestClass(targets = {TestPlanTarget.Flaky, TestPlanTarget.VideoA})

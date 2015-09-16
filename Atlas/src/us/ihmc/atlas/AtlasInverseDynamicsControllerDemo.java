@@ -1,5 +1,7 @@
 package us.ihmc.atlas;
 
+import com.martiansoftware.jsap.JSAPException;
+
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCInverseDynamicsControllerDemo;
@@ -8,8 +10,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-
-import com.martiansoftware.jsap.JSAPException;
 
 public class AtlasInverseDynamicsControllerDemo
 {

@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import javax.swing.JFileChooser;
 import javax.vecmath.Point3d;
 
-import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundReaderAndWriter;
 import us.ihmc.robotics.quadTree.Box;
+import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundReaderAndWriter;
 
 /**
  * Created by agrabertilton on 1/26/15.

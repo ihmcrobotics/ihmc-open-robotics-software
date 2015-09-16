@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import us.ihmc.communication.packets.manipulation.HandLoadBearingPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingPacket;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
 public class HandLoadBearingBehavior extends BehaviorInterface

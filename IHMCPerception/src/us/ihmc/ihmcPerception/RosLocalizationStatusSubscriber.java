@@ -2,7 +2,7 @@ package us.ihmc.ihmcPerception;
 
 import std_msgs.Float64;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.sensing.LocalizationStatusPacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationStatusPacket;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;

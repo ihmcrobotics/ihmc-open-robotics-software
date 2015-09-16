@@ -2,13 +2,13 @@ package us.ihmc.atlas;
 
 import java.io.InputStream;
 
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCHandType;
-
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
+
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.DRCHandType;
 
 public enum AtlasRobotVersion
 {

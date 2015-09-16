@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.walking.AbortWalkingPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingPacket;
 
 /**
  * Created by agrabertilton on 4/28/15.

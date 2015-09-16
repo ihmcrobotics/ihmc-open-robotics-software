@@ -3,16 +3,16 @@ package us.ihmc.ihmcPerception;
 import org.ros.exception.RemoteException;
 import org.ros.node.service.ServiceResponseListener;
 
+import ethz_asl_icp_mapper.SetMode;
+import ethz_asl_icp_mapper.SetModeRequest;
+import ethz_asl_icp_mapper.SetModeResponse;
 import std_srvs.Empty;
 import std_srvs.EmptyRequest;
 import std_srvs.EmptyResponse;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.sensing.LocalizationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
-import ethz_asl_icp_mapper.SetMode;
-import ethz_asl_icp_mapper.SetModeRequest;
-import ethz_asl_icp_mapper.SetModeResponse;
 
 
 public class RosLocalizationServiceClient implements PacketConsumer<LocalizationPacket>

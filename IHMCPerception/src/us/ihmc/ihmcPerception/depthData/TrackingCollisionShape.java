@@ -6,8 +6,8 @@ import java.util.List;
 import javax.vecmath.Point3d;
 
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class TrackingCollisionShape
 {

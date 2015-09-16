@@ -1,9 +1,6 @@
 package us.ihmc.atlas.calib;
 
 import static java.lang.Double.parseDouble;
-import georegression.struct.point.Point2D_F64;
-import georegression.struct.point.Vector3D_F64;
-import georegression.struct.se.Se3_F64;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -34,30 +31,33 @@ import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
 
-import us.ihmc.SdfLoader.partNames.LimbName;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
-import us.ihmc.simulationconstructionset.IndexChangedListener;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
-import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
+import georegression.struct.point.Point2D_F64;
+import georegression.struct.point.Vector3D_F64;
+import georegression.struct.se.Se3_F64;
+import us.ihmc.SdfLoader.partNames.LimbName;
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.simulationconstructionset.IndexChangedListener;
+import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 
 public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 {   

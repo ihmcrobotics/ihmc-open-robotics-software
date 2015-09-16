@@ -3,11 +3,11 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packets.StampedPosePacket;
-import us.ihmc.communication.packets.sensing.LocalizationPacket;
-import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
-import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;

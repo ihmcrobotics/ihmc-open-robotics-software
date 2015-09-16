@@ -14,12 +14,12 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import com.jme3.math.FastMath;
+
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import com.jme3.math.FastMath;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = TestPlanTarget.Exclude) // Doesn't work right on all machines
 public class LineModDetectorTest

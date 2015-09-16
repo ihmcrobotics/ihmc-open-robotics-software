@@ -3,10 +3,10 @@ package us.ihmc.humanoidBehaviors.utilities;
 import java.util.LinkedHashMap;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
-import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface.BehaviorStatus;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;

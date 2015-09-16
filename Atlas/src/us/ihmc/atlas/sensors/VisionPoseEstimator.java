@@ -1,8 +1,5 @@
 package us.ihmc.atlas.sensors;
 
-import georegression.struct.plane.PlaneGeneral3D_F64;
-import georegression.struct.point.Point3D_F64;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -19,24 +16,9 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.opencv.core.Rect;
 
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.DetectedObjectPacket;
-import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
-import us.ihmc.humanoidOperatorInterface.sensors.DetectedObjectManager.DetectedObjectId;
-import us.ihmc.ihmcPerception.OpenCVFaceDetector;
-import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
-import us.ihmc.sensorProcessing.sensorData.CameraData;
-import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
-import us.ihmc.tools.io.printing.PrintTools;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import boofcv.struct.calib.IntrinsicParameters;
 import bubo.clouds.FactoryPointCloudShape;
 import bubo.clouds.detect.CloudShapeTypes;
@@ -44,6 +26,21 @@ import bubo.clouds.detect.PointCloudShapeFinder;
 import bubo.clouds.detect.PointCloudShapeFinder.Shape;
 import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
 import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
+import georegression.struct.plane.PlaneGeneral3D_F64;
+import georegression.struct.point.Point3D_F64;
+import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
+import us.ihmc.humanoidOperatorInterface.sensors.DetectedObjectManager.DetectedObjectId;
+import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
+import us.ihmc.ihmcPerception.OpenCVFaceDetector;
+import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.sensorProcessing.sensorData.CameraData;
+import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class VisionPoseEstimator implements DRCStereoListener
 {

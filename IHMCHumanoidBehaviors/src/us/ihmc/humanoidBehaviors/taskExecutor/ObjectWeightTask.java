@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
-import us.ihmc.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ObjectWeightBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 

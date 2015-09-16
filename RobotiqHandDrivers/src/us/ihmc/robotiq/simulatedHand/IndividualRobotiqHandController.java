@@ -7,7 +7,7 @@ import java.util.List;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.partNames.FingerName;
-import us.ihmc.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

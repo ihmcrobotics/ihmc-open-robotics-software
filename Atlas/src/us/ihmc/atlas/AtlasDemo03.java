@@ -1,13 +1,13 @@
 package us.ihmc.atlas;
 
+import com.martiansoftware.jsap.JSAPException;
+
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.atlas.initialSetup.VRCTask1InVehicleHovering;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo03;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-
-import com.martiansoftware.jsap.JSAPException;
 
 public class AtlasDemo03 extends DRCDemo03
 {

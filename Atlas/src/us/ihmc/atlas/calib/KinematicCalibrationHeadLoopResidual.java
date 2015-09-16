@@ -1,7 +1,5 @@
 package us.ihmc.atlas.calib;
 
-import georegression.struct.point.Point2D_F64;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,16 +13,17 @@ import javax.vecmath.Vector3d;
 
 import org.ddogleg.optimization.functions.FunctionNtoM;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.partNames.LimbName;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.struct.calib.IntrinsicParameters;
+import georegression.struct.point.Point2D_F64;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.partNames.LimbName;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
  *

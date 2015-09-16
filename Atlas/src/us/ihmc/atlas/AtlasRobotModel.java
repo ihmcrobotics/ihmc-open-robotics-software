@@ -1,8 +1,23 @@
 package us.ihmc.atlas;
 
-import com.jme3.math.Transform;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.SdfLoader.*;
+
+import com.jme3.math.Transform;
+
+import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.SDFContactSensor;
+import us.ihmc.SdfLoader.SDFConversionsHelper;
+import us.ihmc.SdfLoader.SDFDescriptionMutator;
+import us.ihmc.SdfLoader.SDFForceSensor;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.SDFJointHolder;
+import us.ihmc.SdfLoader.SDFLinkHolder;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
@@ -10,7 +25,18 @@ import us.ihmc.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.*;
+import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
+import us.ihmc.atlas.parameters.AtlasCapturePointPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.atlas.parameters.AtlasDefaultArmConfigurations;
+import us.ihmc.atlas.parameters.AtlasDrivingControllerParameters;
+import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameterization;
+import us.ihmc.atlas.parameters.AtlasHeightCalculatorParameters;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
+import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
@@ -19,7 +45,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.HeightCalculatorParameters;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -31,6 +56,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPP
 import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
@@ -55,9 +81,6 @@ import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
-
-import java.util.LinkedHashMap;
-import java.util.List;
 
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {

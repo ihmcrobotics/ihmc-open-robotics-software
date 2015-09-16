@@ -1,13 +1,13 @@
 package us.ihmc.atlas.gazebo;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gazebo.GazeboControllerFactory;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 /**
  *

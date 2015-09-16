@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
+import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;

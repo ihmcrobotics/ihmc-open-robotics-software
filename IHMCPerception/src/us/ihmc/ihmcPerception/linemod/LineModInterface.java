@@ -4,9 +4,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
-import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
-
 import com.sun.jna.Native;
+
+import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 class LineModInterface
 {

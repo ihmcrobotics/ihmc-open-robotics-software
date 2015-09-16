@@ -6,7 +6,7 @@ import javax.vecmath.Point3d;
 
 import org.junit.Test;
 
-import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class PointCloudWorldPacketGeneratorTest

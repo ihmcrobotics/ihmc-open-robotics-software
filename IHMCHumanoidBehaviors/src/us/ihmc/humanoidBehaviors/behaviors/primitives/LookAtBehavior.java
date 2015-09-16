@@ -5,11 +5,11 @@ import javax.vecmath.Point3d;
 import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.packets.LookAtStatus;
-import us.ihmc.communication.packets.sensing.LookAtPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.communication.packets.LookAtStatus;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.LookAtPacket;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.FormattingTools;

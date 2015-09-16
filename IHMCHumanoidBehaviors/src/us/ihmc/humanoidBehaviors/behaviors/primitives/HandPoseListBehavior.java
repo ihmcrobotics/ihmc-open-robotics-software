@@ -3,12 +3,12 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
-import us.ihmc.communication.packets.manipulation.HandPoseStatus;
-import us.ihmc.communication.packets.manipulation.HandPoseStatus.Status;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseListPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatus;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatus.Status;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.FormattingTools;

@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.communication;
 
-import us.ihmc.communication.packets.StampedPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 
 public class BehaviorPacketPassthroughList
 {

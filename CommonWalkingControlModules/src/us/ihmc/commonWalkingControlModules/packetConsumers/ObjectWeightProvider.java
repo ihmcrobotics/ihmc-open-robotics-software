@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.manipulation.ObjectWeightPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ObjectWeightProvider implements PacketConsumer<ObjectWeightPacket>

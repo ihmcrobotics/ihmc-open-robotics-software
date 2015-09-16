@@ -3,8 +3,8 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

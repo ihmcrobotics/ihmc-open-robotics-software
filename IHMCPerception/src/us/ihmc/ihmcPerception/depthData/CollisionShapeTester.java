@@ -5,8 +5,8 @@ import java.util.List;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 

@@ -8,9 +8,9 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.manipulation.DesiredSteeringAnglePacket;
-import us.ihmc.communication.packets.manipulation.SteeringWheelInformationPacket;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

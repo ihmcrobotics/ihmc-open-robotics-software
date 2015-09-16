@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.manipulation.BatchedDesiredSteeringAngleAndSingleJointAnglePacket;
-import us.ihmc.communication.packets.manipulation.DesiredSteeringAnglePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.BatchedDesiredSteeringAngleAndSingleJointAnglePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 
 public class BatchedDesiredSteeringAngleAndSingleJointAngleProvider implements PacketConsumer<BatchedDesiredSteeringAngleAndSingleJointAnglePacket>
 {

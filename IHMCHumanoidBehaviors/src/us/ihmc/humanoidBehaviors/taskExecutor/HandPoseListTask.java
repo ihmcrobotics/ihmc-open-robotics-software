@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
-import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseListBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseListPacket;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class HandPoseListTask extends BehaviorTask

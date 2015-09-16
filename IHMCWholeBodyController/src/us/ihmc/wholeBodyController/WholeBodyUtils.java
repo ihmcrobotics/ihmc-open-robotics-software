@@ -4,7 +4,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
-import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class WholeBodyUtils

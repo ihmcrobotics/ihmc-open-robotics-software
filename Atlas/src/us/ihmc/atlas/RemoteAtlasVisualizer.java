@@ -1,5 +1,11 @@
 package us.ihmc.atlas;
 
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
+
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.GainControllerSliderBoard;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
@@ -9,12 +15,6 @@ import us.ihmc.robotDataCommunication.visualizer.SCSVisualizerStateListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
-import com.martiansoftware.jsap.Switch;
 
 public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 {

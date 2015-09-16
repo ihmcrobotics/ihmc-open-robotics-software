@@ -3,17 +3,16 @@ package us.ihmc.atlas.multisenseMocapExperiments;
 import java.io.IOException;
 import java.net.URI;
 
-import us.ihmc.atlas.AtlasRobotModel;
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+
 import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
-
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
 
 /**
  * Network Processor to run large scale multisense manual testing

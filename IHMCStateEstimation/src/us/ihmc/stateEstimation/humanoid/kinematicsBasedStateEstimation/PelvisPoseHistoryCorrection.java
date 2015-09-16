@@ -4,10 +4,10 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packets.StampedPosePacket;
-import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
-import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
+import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
