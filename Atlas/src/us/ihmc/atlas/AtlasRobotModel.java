@@ -103,7 +103,7 @@ public class AtlasRobotModel implements DRCRobotModel
 
    private boolean enableJointDamping = true;
 
-   private final AtlasRobotModelMutator modelMutator = new AtlasRobotModelMutator();
+   private final AtlasRobotModelMutator modelMutator;
 
    @Override
    public WholeBodyIkSolver createWholeBodyIkSolver()
@@ -130,6 +130,8 @@ public class AtlasRobotModel implements DRCRobotModel
       selectedVersion = atlasVersion;
       jointMap = new AtlasJointMap(selectedVersion);
       this.target = target;
+
+      modelMutator = new AtlasRobotModelMutator(selectedVersion.getModelName());
 
       if (!headless)
       {
