@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
-import us.ihmc.CapturePointCalculator.LinearInvertedPendulumCapturePointCalculator;
+import us.ihmc.commonWalkingControlModules.captureRegion.LinearInvertedPendulumCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
