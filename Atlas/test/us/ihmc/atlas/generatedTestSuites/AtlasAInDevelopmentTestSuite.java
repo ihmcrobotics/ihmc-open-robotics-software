@@ -7,8 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.AtlasGFERosPacketTest.class,
-   us.ihmc.atlas.AtlasPushRecoveryStandingTest.class
+   us.ihmc.atlas.AtlasGFERosPacketTest.class
 })
 
 public class AtlasAInDevelopmentTestSuite
