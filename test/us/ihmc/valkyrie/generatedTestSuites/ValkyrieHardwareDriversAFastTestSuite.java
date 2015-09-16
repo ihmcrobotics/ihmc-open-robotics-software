@@ -13,7 +13,6 @@ import org.junit.runners.Suite;
    us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobianTest.class,
    us.ihmc.valkyrie.kinematics.transmissions.InefficientPushRodTransmissionTest.class,
    us.ihmc.valkyrie.kinematics.util.ClosedFormJacobianTest.class,
-   us.ihmc.valkyrie.kinematics.will.WillsPushrodTransmissionTest.class,
    us.ihmc.valkyrie.simulation.ValkyrieFlatGroundWalkingWithIMUDriftTest.class,
    us.ihmc.valkyrie.simulation.ValkyrieObstacleCourseRampFootstepSnapperTest.class,
    us.ihmc.valkyrie.simulation.ValkyriePosePlaybackDemoTest.class
