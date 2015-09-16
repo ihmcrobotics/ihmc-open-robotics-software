@@ -7,9 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.hikSim.AtlasWholeBodyIkSolverTest.class,
-   us.ihmc.atlas.initialSetup.AtlasDrivingInitialSetupTest.class,
-   us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class
+   us.ihmc.atlas.hikSim.AtlasWholeBodyIkSolverTest.class
 })
 
 public class AtlasGFastTestSuite

@@ -17,7 +17,7 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyTrajectoryTest;
 import us.ihmc.wholeBodyController.WholeBodyTrajectoryTestHelper;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Fast})
 public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
 {
    @Override 
@@ -49,7 +49,7 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
    @Test(timeout = 30000)
    public void testPointToPointLeft() throws Exception
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
       super.testPointToPointLeft();
    }
    
@@ -58,7 +58,7 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
    @Test(timeout = 30000)
    public void testPointToPointRight() throws Exception
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
+      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
       super.testPointToPointRight();
    }
    
