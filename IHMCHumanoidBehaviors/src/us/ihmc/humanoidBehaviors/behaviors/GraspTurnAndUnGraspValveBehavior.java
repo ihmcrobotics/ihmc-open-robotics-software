@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveGraspLocation;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveTurnDirection;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior;
@@ -21,6 +20,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.RotateHandAboutAxisTask;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

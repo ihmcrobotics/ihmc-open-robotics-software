@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
-import us.ihmc.communication.packets.dataobjects.FingerState;
-import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 

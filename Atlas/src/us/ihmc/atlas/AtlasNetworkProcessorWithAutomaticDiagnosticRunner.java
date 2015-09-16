@@ -3,16 +3,16 @@ package us.ihmc.atlas;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
-
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
+
+import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 
 public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
 {

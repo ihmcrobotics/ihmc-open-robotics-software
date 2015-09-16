@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.packetProviders;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.HighLevelStatePacket;
-import us.ihmc.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 
 public class DesiredHighLevelStateProvider implements PacketConsumer<HighLevelStatePacket>
 {

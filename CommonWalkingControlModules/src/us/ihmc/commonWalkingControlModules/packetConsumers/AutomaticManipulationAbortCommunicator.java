@@ -4,9 +4,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.walking.AutomaticManipulationAbortPacket;
-import us.ihmc.communication.packets.walking.ManipulationAbortedStatus;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 
 public class AutomaticManipulationAbortCommunicator implements PacketConsumer<AutomaticManipulationAbortPacket>
 {

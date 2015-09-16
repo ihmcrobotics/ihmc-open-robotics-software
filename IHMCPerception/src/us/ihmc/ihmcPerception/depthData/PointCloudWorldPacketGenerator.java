@@ -11,9 +11,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import javax.vecmath.Point3d;
 
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
-import us.ihmc.userInterface.util.TimestampedPoint;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.userInterface.util.TimestampedPoint;
 
 public class PointCloudWorldPacketGenerator implements Runnable
 {

@@ -2,12 +2,12 @@ package us.ihmc.atlas;
 
 import java.io.IOException;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.posePlayback.VisualizePoseWorkspace;
-
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPResult;
+
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.posePlayback.VisualizePoseWorkspace;
 
 public class AtlasVisualPoseWorkspace
 {

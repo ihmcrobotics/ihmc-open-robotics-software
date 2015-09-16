@@ -6,9 +6,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.trajectories.WaypointOrientationTrajectoryData;

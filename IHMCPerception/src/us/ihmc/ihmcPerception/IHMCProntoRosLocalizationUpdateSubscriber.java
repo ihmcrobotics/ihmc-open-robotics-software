@@ -4,7 +4,7 @@ import org.ros.node.NodeConfiguration;
 
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.StampedPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.ros.RosMainNode;

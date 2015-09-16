@@ -14,8 +14,8 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

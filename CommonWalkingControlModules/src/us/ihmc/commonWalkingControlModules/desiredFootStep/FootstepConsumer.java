@@ -4,13 +4,13 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.streamingData.StreamingDataConsumer;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer, PacketConsumer<FootstepData>

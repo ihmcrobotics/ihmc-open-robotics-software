@@ -1,6 +1,5 @@
 package us.ihmc.ihmcPerception.linemod;
 
-import javax.vecmath.Point2d;
 import javax.vecmath.Point2i;
 
 public class LineModDetection implements Comparable<LineModDetection>

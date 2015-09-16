@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.SingleJointAnglePacket;
 
 public class SingleJointPositionProvider
 {

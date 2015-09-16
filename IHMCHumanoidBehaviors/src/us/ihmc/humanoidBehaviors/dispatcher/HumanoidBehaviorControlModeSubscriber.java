@@ -3,8 +3,8 @@ package us.ihmc.humanoidBehaviors.dispatcher;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
-import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
 
 public class HumanoidBehaviorControlModeSubscriber implements PacketConsumer<HumanoidBehaviorControlModePacket>
 {

@@ -7,9 +7,9 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.walking.ComHeightPacket;
-import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.WaypointPositionTrajectoryData;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

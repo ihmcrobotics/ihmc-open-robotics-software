@@ -1,8 +1,5 @@
 package us.ihmc.atlas.calib;
 
-import georegression.geometry.RotationMatrixGenerator;
-import georegression.struct.so.Rodrigues_F64;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +11,8 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import georegression.geometry.RotationMatrixGenerator;
+import georegression.struct.so.Rodrigues_F64;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

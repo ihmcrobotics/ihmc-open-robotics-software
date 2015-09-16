@@ -12,9 +12,9 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import us.ihmc.communication.packets.dataobjects.FingerState;
-import us.ihmc.communication.packets.manipulation.FingerStatePacket;
-import us.ihmc.communication.packets.manipulation.ManualHandControlPacket;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 

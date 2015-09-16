@@ -12,12 +12,12 @@ import java.util.Random;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 
-import us.ihmc.communication.packets.BumStatePacket;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.communication.packets.walking.FootPosePacket;
-import us.ihmc.communication.packets.walking.FootstepPlanRequestPacket;
-import us.ihmc.communication.packets.walking.HeadOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.BumStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 
 public class XStreamTest
 {

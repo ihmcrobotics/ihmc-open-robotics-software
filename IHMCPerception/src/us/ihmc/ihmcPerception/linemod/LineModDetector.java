@@ -20,12 +20,13 @@ import javax.vecmath.Point2i;
 import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.tools.UnitConversions;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import boofcv.gui.image.ImagePanel;
-import boofcv.gui.image.ShowImages;
 
 import com.jme3.math.FastMath;
+
+import boofcv.gui.image.ImagePanel;
+import boofcv.gui.image.ShowImages;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.UnitConversions;
 
 public class LineModDetector
 {

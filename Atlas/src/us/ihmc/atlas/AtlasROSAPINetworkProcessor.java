@@ -3,6 +3,11 @@ package us.ihmc.atlas;
 import java.io.IOException;
 import java.net.URI;
 
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+
 import us.ihmc.atlas.ros.RosAtlasAuxiliaryRobotDataPublisher;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -15,11 +20,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameter
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class AtlasROSAPINetworkProcessor

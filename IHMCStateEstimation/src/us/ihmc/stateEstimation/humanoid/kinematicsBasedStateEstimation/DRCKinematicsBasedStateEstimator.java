@@ -10,11 +10,11 @@ import javax.vecmath.Quat4d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
-import us.ihmc.communication.packets.sensing.StateEstimatorModePacket.StateEstimatorMode;
-import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
-import us.ihmc.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket.StateEstimatorMode;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
+import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;

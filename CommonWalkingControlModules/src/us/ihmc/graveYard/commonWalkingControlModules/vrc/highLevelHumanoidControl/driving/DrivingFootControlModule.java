@@ -9,9 +9,6 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.communication.packets.LowLevelDrivingAction;
-import us.ihmc.communication.packets.LowLevelDrivingStatus;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.controllers.EuclideanPositionController;
@@ -45,6 +42,9 @@ import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.LowLevelDrivingAction;
+import us.ihmc.humanoidRobotics.communication.packets.LowLevelDrivingStatus;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 
 
 /**

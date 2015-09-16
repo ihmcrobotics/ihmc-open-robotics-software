@@ -2,10 +2,10 @@ package us.ihmc.commonWalkingControlModules.packetProducers;
 
 import java.util.concurrent.TimeUnit;
 
-import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;

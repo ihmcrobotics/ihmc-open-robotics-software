@@ -11,11 +11,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.communication.packets.StampedPosePacket;
-import us.ihmc.communication.packets.sensing.LocalizationPacket;
-import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
-import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
+import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePose;

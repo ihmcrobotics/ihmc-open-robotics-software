@@ -1,8 +1,5 @@
 package us.ihmc.ihmcPerception;
 
-import georegression.metric.UtilAngle;
-import georegression.struct.se.Se3_F64;
-
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.net.URI;
@@ -14,11 +11,6 @@ import javax.vecmath.Vector3d;
 
 import org.ros.RosCore;
 
-import us.ihmc.robotics.geometry.Transform3d;
-import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.publisher.RosTf2Publisher;
-import us.ihmc.utilities.ros.subscriber.RosCameraInfoSubscriber;
-import us.ihmc.utilities.ros.subscriber.RosImageSubscriber;
 import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.fiducial.FiducialDetector;
 import boofcv.core.image.ConvertBufferedImage;
@@ -28,6 +20,13 @@ import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
+import georegression.metric.UtilAngle;
+import georegression.struct.se.Se3_F64;
+import us.ihmc.robotics.geometry.Transform3d;
+import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.publisher.RosTf2Publisher;
+import us.ihmc.utilities.ros.subscriber.RosCameraInfoSubscriber;
+import us.ihmc.utilities.ros.subscriber.RosImageSubscriber;
 
 public class RosFiducialDetector extends RosImageSubscriber
 {

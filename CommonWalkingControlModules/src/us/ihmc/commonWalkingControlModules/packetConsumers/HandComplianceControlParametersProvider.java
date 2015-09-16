@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 import com.google.common.util.concurrent.AtomicDouble;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.manipulation.HandComplianceControlParametersPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 

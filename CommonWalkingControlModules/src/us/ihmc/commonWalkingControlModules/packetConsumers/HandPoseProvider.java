@@ -5,9 +5,9 @@ import java.util.Map;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
-import us.ihmc.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;

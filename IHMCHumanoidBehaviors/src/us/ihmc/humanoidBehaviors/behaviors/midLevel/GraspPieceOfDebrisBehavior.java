@@ -8,8 +8,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.communication.packets.dataobjects.FingerState;
-import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
@@ -23,6 +21,8 @@ import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyInverseKinematicTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyPacketTask;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.util.PacketControllerTools;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;

@@ -36,11 +36,11 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.commonWalkingControlModules.trajectories.CirclePoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SteeringPoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
-import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
-import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
-import us.ihmc.communication.packets.wholebody.MultiJointAnglePacket;
-import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.DataType;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.SingleJointAnglePacket;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

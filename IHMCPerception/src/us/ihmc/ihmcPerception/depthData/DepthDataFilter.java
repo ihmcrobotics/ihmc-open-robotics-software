@@ -2,7 +2,7 @@ package us.ihmc.ihmcPerception.depthData;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class DepthDataFilter extends DepthDataStore

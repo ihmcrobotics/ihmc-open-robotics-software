@@ -8,10 +8,10 @@ import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 // This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
 @DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.VideoA})

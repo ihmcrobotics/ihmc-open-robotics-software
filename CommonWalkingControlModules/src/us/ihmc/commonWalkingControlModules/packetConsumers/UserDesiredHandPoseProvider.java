@@ -8,10 +8,10 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
-import us.ihmc.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
-import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;

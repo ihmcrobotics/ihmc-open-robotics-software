@@ -9,7 +9,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.Vector64F;
 import us.ihmc.robotics.geometry.FramePose;

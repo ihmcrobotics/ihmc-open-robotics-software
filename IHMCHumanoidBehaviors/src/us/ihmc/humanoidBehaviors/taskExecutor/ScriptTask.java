@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
-import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class ScriptTask extends BehaviorTask

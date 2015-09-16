@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
 import java.util.ArrayList;
 
-import us.ihmc.communication.TransformableDataObject;
+import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 /**

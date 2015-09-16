@@ -5,6 +5,7 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bky;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.neck_ry;
+
 import us.ihmc.atlas.AtlasJointMap;
 
 

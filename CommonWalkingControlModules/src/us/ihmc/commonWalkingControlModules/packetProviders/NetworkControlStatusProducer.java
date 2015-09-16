@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.packetProviders;
 
-import us.ihmc.communication.packets.manipulation.ControlStatusPacket;
-import us.ihmc.communication.packets.manipulation.ControlStatusPacket.ControlStatus;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket.ControlStatus;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class NetworkControlStatusProducer implements ControlStatusProducer

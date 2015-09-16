@@ -7,7 +7,7 @@ import net.wimpi.modbus.procimg.InputRegister;
 import net.wimpi.modbus.procimg.Register;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.communication.JamodTCPMaster;
 import us.ihmc.robotiq.communication.RobotiqReadResponseFactory;

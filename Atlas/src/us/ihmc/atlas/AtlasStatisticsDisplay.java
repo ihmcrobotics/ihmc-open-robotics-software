@@ -3,11 +3,11 @@ package us.ihmc.atlas;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPResult;
+
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 public class AtlasStatisticsDisplay
 {

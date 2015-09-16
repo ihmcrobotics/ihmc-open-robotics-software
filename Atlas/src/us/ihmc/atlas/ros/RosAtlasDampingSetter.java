@@ -3,16 +3,16 @@ package us.ihmc.atlas.ros;
 import org.ros.exception.RemoteException;
 import org.ros.node.service.ServiceResponseListener;
 
+import atlas_msgs.SetJointDamping;
+import atlas_msgs.SetJointDampingRequest;
+import atlas_msgs.SetJointDampingResponse;
+import cern.colt.Arrays;
 import us.ihmc.atlas.AtlasDampingParameters;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
 import us.ihmc.utilities.ros.publisher.RosStringPublisher;
-import atlas_msgs.SetJointDamping;
-import atlas_msgs.SetJointDampingRequest;
-import atlas_msgs.SetJointDampingResponse;
-import cern.colt.Arrays;
 
 public class RosAtlasDampingSetter
 {

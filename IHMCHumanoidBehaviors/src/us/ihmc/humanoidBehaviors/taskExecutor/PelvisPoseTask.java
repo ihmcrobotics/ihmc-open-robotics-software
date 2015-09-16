@@ -3,9 +3,9 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.communication.packets.walking.PelvisPosePacket;
-import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.humanoidRobotics.communication.util.PacketControllerTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;

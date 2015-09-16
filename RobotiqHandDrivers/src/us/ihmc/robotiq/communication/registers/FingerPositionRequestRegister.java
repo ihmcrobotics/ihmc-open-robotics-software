@@ -2,7 +2,7 @@ package us.ihmc.robotiq.communication.registers;
 
 import org.apache.commons.collections.map.MultiKeyMap;
 
-import us.ihmc.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
 import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.robotiq.communication.Finger;
 import us.ihmc.robotiq.communication.InvalidFingerException;

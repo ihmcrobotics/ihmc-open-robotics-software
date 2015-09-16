@@ -2,8 +2,8 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import javax.vecmath.Quat4d;
 
-import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 

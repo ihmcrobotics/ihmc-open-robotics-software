@@ -7,10 +7,10 @@ import java.util.Collections;
 
 import com.thoughtworks.xstream.io.StreamException;
 
-import us.ihmc.communication.packets.walking.EndOfScriptCommand;
-import us.ihmc.communication.packets.walking.FootPosePacket;
-import us.ihmc.communication.packets.walking.FootstepDataList;
-import us.ihmc.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
 import us.ihmc.tools.io.printing.PrintTools;
 
 /**

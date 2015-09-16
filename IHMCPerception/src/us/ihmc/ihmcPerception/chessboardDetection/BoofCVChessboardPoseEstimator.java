@@ -1,9 +1,5 @@
 package us.ihmc.ihmcPerception.chessboardDetection;
 
-import georegression.struct.point.Vector3D_F64;
-//import georegression.struct.se.Se3_F64;
-import georegression.struct.se.Se3_F64;
-
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -13,7 +9,6 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.fiducial.FiducialDetector;
 import boofcv.core.image.ConvertBufferedImage;
@@ -21,6 +16,10 @@ import boofcv.factory.fiducial.FactoryFiducial;
 import boofcv.gui.fiducial.VisualizeFiducial;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
+import georegression.struct.point.Vector3D_F64;
+//import georegression.struct.se.Se3_F64;
+import georegression.struct.se.Se3_F64;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class BoofCVChessboardPoseEstimator
 {

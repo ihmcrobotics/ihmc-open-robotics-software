@@ -9,11 +9,6 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
-import us.ihmc.communication.packets.dataobjects.BlindWalkingDirection;
-import us.ihmc.communication.packets.dataobjects.BlindWalkingSpeed;
-import us.ihmc.communication.packets.walking.BlindWalkingPacket;
-import us.ihmc.communication.packets.walking.FootstepStatus;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -21,6 +16,11 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingDirection;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingSpeed;
+import us.ihmc.humanoidRobotics.communication.packets.walking.BlindWalkingPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 public class FootstepPathCoordinator implements FootstepProvider

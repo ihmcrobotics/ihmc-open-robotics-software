@@ -7,11 +7,11 @@ import java.util.List;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
-import us.ihmc.communication.packets.dataobjects.FingerState;
-import us.ihmc.communication.packets.dataobjects.HandJointName;
-import us.ihmc.communication.packets.manipulation.FingerStatePacket;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;

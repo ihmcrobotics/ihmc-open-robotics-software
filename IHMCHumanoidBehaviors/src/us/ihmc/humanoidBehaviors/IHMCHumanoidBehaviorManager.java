@@ -5,13 +5,7 @@ import java.util.Arrays;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
-import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
-import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
-import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.behaviors.DrillPickUpBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
@@ -31,6 +25,12 @@ import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorControlModeSubscribe
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
+import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
+import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;

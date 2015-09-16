@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import net.wimpi.modbus.procimg.Register;
 import net.wimpi.modbus.procimg.SimpleRegister;
-import us.ihmc.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
 import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 
 public class DesiredJointsPositionProvider 
 {

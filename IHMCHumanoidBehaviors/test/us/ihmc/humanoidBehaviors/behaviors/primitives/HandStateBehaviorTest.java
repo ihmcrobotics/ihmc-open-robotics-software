@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.manipulation.HandStatePacket;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandStatePacket;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;

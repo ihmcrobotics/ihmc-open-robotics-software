@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.walking.BlindWalkingPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.BlindWalkingPacket;
 
 
 public class BlindWalkingPacketConsumer implements PacketConsumer<BlindWalkingPacket>

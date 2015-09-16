@@ -12,24 +12,24 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
-import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.robotiq.data.RobotiqHandSensorData;
-import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.robotiq.data.RobotiqHandSensorData;
+import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class AtlasNoSimPacketBlaster implements Runnable
 {

@@ -11,8 +11,8 @@ import javax.vecmath.Quat4d;
 
 import org.junit.Test;
 
-import us.ihmc.communication.packets.manipulation.TorusPosePacket;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.TorusPosePacket;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

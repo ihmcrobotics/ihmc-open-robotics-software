@@ -2,16 +2,15 @@ package us.ihmc.atlas;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.WholeBodyIKSimController;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 

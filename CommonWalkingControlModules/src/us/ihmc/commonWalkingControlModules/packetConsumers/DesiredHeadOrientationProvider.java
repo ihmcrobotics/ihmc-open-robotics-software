@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.sensing.LookAtPacket;
-import us.ihmc.communication.packets.walking.HeadOrientationPacket;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.LookAtPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

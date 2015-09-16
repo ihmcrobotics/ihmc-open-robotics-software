@@ -3,20 +3,20 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectValidityChecker.ObjectErrorType;
-import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
-import us.ihmc.communication.packets.manipulation.DesiredSteeringAnglePacket;
-import us.ihmc.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
-import us.ihmc.communication.packets.manipulation.JointTrajectoryPoint;
-import us.ihmc.communication.packets.manipulation.SteeringWheelInformationPacket;
-import us.ihmc.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.communication.packets.walking.ComHeightPacket;
-import us.ihmc.communication.packets.walking.FootPosePacket;
-import us.ihmc.communication.packets.walking.FootstepData;
-import us.ihmc.communication.packets.walking.FootstepDataList;
-import us.ihmc.communication.packets.walking.FootstepStatus;
-import us.ihmc.communication.packets.walking.HeadOrientationPacket;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.JointTrajectoryPoint;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.DataType;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public abstract class PacketValidityChecker
