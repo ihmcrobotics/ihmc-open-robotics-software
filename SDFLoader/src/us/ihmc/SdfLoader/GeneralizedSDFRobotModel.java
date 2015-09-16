@@ -49,9 +49,13 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
          {
             this.descriptionMutator.mutateLinkForModel(name, linkHolder);
 
-            for (SDFSensor sdfSensor : linkHolder.getSensors())
+            List<SDFSensor> sensors = linkHolder.getSensors();
+            if (sensors != null)
             {
-               this.descriptionMutator.mutateSensorForModel(name, sdfSensor);
+               for (SDFSensor sdfSensor : sensors)
+               {
+                  this.descriptionMutator.mutateSensorForModel(name, sdfSensor);
+               }
             }
          }
 
