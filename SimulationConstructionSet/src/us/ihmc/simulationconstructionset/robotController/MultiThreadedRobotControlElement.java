@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.robotController;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 
 public interface MultiThreadedRobotControlElement extends Runnable

@@ -1,4 +1,4 @@
-package us.ihmc.yoUtilities.graphics.plotting;
+package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -14,7 +14,7 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.yoUtilities.graphics.RemoteYoGraphic;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 
 public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
 {

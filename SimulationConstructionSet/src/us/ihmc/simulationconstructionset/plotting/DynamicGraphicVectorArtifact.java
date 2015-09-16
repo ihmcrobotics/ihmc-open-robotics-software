@@ -14,7 +14,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.PlotterGraphics;
-import us.ihmc.yoUtilities.graphics.YoGraphicVector;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 
 
 public class DynamicGraphicVectorArtifact extends Artifact

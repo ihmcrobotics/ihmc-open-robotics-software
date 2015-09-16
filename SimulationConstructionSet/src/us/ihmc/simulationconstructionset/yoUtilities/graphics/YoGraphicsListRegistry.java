@@ -1,4 +1,4 @@
-package us.ihmc.yoUtilities.graphics;
+package us.ihmc.simulationconstructionset.yoUtilities.graphics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,8 +6,8 @@ import java.util.List;
 import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.tools.gui.GraphicsUpdatable;
-import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 
 public class YoGraphicsListRegistry
 {
