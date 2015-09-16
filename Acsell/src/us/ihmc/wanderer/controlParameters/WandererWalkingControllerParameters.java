@@ -2,15 +2,14 @@ package us.ihmc.wanderer.controlParameters;
 
 import java.util.LinkedHashMap;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
@@ -19,6 +18,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.wanderer.parameters.WandererPhysicalProperties;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 

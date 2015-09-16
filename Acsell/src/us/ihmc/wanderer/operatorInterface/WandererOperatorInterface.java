@@ -3,13 +3,13 @@ package us.ihmc.wanderer.operatorInterface;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import us.ihmc.wanderer.parameters.WandererRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
+
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.wanderer.parameters.WandererRobotModel;
 
 public class WandererOperatorInterface
 {

@@ -6,12 +6,12 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.acsell.hardware.state.AcsellActuatorState;
 import us.ihmc.acsell.hardware.state.AcsellXSensState;
-import us.ihmc.steppr.hardware.configuration.StepprCalibrationOffset;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationFunctions;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.steppr.hardware.configuration.StepprCalibrationOffset;
 
 public class StepprUpperBodyOffsetCalculator
 {

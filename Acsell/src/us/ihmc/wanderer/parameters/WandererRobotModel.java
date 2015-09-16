@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import com.jme3.math.Transform;
+
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
@@ -18,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.HeightCalculatorParameters;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
@@ -29,6 +30,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPST
 import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
@@ -56,8 +58,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
-
-import com.jme3.math.Transform;
 
 public class WandererRobotModel implements DRCRobotModel
 {

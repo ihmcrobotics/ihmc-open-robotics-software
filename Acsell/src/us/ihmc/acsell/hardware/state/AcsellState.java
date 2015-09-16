@@ -8,16 +8,16 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.acsell.hardware.AcsellActuator;
 import us.ihmc.acsell.hardware.AcsellJoint;
-import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
 import us.ihmc.acsell.hardware.configuration.AcsellRobot;
 import us.ihmc.acsell.hardware.configuration.StrainGaugeInformation;
-import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
-import us.ihmc.steppr.hardware.state.StepprPowerDistributionADCState;
+import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
+import us.ihmc.steppr.hardware.state.StepprPowerDistributionADCState;
 import us.ihmc.wanderer.hardware.state.WandererPowerDistributionADCState;
 
 public abstract class AcsellState<ACTUATOR extends Enum<ACTUATOR> & AcsellActuator, JOINT extends Enum<JOINT> & AcsellJoint>

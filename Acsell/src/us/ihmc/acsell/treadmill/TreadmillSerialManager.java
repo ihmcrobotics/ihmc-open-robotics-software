@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import gnu.io.CommPort;
+import gnu.io.CommPortIdentifier;
+import gnu.io.SerialPort;
 import us.ihmc.simulationconstructionset.joystick.JoyStickNotFoundException;
 import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
-import gnu.io.*;
 
 
 

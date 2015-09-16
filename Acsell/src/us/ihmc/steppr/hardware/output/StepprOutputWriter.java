@@ -2,8 +2,8 @@ package us.ihmc.steppr.hardware.output;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.acsell.hardware.command.UDPAcsellOutputWriter;
 import us.ihmc.acsell.springs.HystereticSpringCalculator;
@@ -12,6 +12,13 @@ import us.ihmc.acsell.springs.LinearSpringCalculator;
 import us.ihmc.acsell.springs.SpringCalculator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
@@ -25,13 +32,6 @@ import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.configuration.StepprRightAnkleSpringProperties;
 import us.ihmc.steppr.hardware.configuration.StepprRightHipXSpringProperties;
 import us.ihmc.steppr.hardware.controllers.StepprStandPrep;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 
 public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChangedListener,  ControllerFailureListener

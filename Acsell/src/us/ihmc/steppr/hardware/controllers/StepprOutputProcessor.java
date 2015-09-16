@@ -6,17 +6,17 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.acsell.hardware.state.AcsellAnkleAngleCalculator;
 import us.ihmc.acsell.hardware.state.AcsellAnkleFullComputation;
 import us.ihmc.acsell.hardware.state.AcsellFourbarCalculator;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprUtil;
 import us.ihmc.steppr.hardware.configuration.StepprAnkleKinematicParameters;
 import us.ihmc.steppr.hardware.configuration.StepprFourbarProperties;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class StepprOutputProcessor implements OutputProcessor
 {

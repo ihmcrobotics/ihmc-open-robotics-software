@@ -6,17 +6,17 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.acsell.hardware.state.AcsellAnkleAngleCalculator;
 import us.ihmc.acsell.hardware.state.AcsellAnkleFullComputation;
 import us.ihmc.acsell.hardware.state.AcsellFourbarCalculator;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.wanderer.hardware.WandererActuator;
 import us.ihmc.wanderer.hardware.WandererJoint;
 import us.ihmc.wanderer.hardware.WandererUtil;
 import us.ihmc.wanderer.hardware.configuration.WandererAnkleKinematicParameters;
 import us.ihmc.wanderer.hardware.configuration.WandererFourbarProperties;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class WandererOutputProcessor implements OutputProcessor
 {

@@ -3,16 +3,16 @@ package us.ihmc.steppr.controlParameters;
 import java.util.HashMap;
 import java.util.Map;
 
-import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.steppr.hardware.StepprJoint;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
+import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.steppr.hardware.StepprJoint;
 
 public class BonoStateEstimatorParameters implements StateEstimatorParameters
 {

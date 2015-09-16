@@ -13,9 +13,9 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.steppr.controlParameters.BonoStateEstimatorParameters;
 import us.ihmc.steppr.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.steppr.parameters.BonoRobotModel;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = TestPlanTarget.InDevelopment)
 public class BonoFlatGroundWalkingKinematicFootSwitchTest extends DRCFlatGroundWalkingTest

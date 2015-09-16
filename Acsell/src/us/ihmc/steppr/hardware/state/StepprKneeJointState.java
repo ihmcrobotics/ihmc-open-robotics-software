@@ -3,10 +3,10 @@ package us.ihmc.steppr.hardware.state;
 import us.ihmc.acsell.hardware.state.AcsellActuatorState;
 import us.ihmc.acsell.hardware.state.AcsellJointState;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
-import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.steppr.hardware.StepprJoint;
 
 public class StepprKneeJointState implements AcsellJointState
 {
