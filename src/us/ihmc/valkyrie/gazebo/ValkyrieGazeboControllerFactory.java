@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.gazebo;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.gazebo.GazeboControllerFactory;
+import us.ihmc.darpaRoboticsChallenge.gazebo.GazeboControllerFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 import java.io.IOException;
