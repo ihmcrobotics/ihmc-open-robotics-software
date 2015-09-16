@@ -23,7 +23,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty', name: 'boofcv-sfm', version: '0.19-internal'
 	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.8-internal'
 	compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4.+'
-	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
+	  
 	compile group: 'org.ejml', name: 'all', version: '0.28'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 	compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: '0.7-internal'

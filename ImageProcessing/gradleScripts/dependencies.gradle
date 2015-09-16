@@ -12,7 +12,7 @@ dependencies
     compile group: 'us.ihmc.thirdparty', name: 'boofcv-sfm', version: '0.19-internal'
 	compile group: 'us.ihmc.thirdparty', name: 'boofcv-xuggler', version: '0.19-internal'
 	compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: '0.7-internal'
-	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
+	  
 	compile group: 'org.ejml', name: 'all', version: '0.28'
 	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.8-internal'
 	compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'

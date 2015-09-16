@@ -7,8 +7,7 @@ dependencies {
 	
 	//compile group: 'cz.advel.jbullet', name: 'jbullet', version: '20101010-1'	//Disabled jbullet because it depends on vecmath 1.3.1. Jesper
 	compile group: 'us.ihmc.thirdparty.com.centralnexus', name: 'joystick', version: '0.7'
-//	compile group: 'us.ihmc.thirdparty', name: 'vrpn', version: 'x'
-	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
+	  
 	compile group: 'org.ejml', name: 'all', version: '0.28'
 	compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
 	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.8-internal'
@@ -23,7 +22,6 @@ dependencies {
 	compile group: 'jgraph', name: 'jgraph', version: '5.13.0.0' //1.14.0.0
 	compile group: 'com.github.rwl', name: 'jtransforms', version: '2.4.0'
 	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.1.1'
-//	compile group: 'us.ihmc.thirdparty', name: 'filedrop', version: 'x'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 	compile group: 'com.badlogicgames.gdx', name: 'gdx-bullet-platform', version: '1.0.1', classifier: 'natives-desktop'
 	compile group: 'org.apache.pdfbox', name: 'pdfbox', version: '1.8.4'
