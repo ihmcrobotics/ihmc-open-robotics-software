@@ -8,8 +8,8 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.steppr.parameters.BonoRobotModel;
 
 
 public class BonoModelBundleGenerator

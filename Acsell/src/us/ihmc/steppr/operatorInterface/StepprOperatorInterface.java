@@ -3,13 +3,13 @@ package us.ihmc.steppr.operatorInterface;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import us.ihmc.steppr.parameters.BonoRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
+
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.steppr.parameters.BonoRobotModel;
 
 public class StepprOperatorInterface
 {

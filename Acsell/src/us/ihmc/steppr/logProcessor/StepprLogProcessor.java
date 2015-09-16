@@ -2,9 +2,9 @@ package us.ihmc.steppr.logProcessor;
 
 import java.io.IOException;
 
-import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.DRCLogProcessor;
+import us.ihmc.steppr.parameters.BonoRobotModel;
 
 public class StepprLogProcessor extends DRCLogProcessor
 {

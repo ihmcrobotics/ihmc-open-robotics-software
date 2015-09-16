@@ -2,12 +2,12 @@ package us.ihmc.steppr.network;
 
 import java.net.URISyntaxException;
 
-import us.ihmc.steppr.parameters.BonoRobotModel;
+import com.martiansoftware.jsap.JSAPException;
+
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
-
-import com.martiansoftware.jsap.JSAPException;
+import us.ihmc.steppr.parameters.BonoRobotModel;
 
 public class StepprNetworkProcessor
 {

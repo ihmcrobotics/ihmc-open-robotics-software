@@ -1,9 +1,9 @@
 package us.ihmc.wanderer.hardware.visualization;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.Font;
-import java.awt.Color;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -19,7 +19,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 
