@@ -82,7 +82,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
    private final Map<String, Double> standPrepAngles = (Map<String, Double>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "setpoints.yaml");
    private final DRCRobotModel.RobotTarget target;
-   private final ValkyrieRobotModelMutator modelMutator = new ValkyrieRobotModelMutator();
+   private final ValkyrieRobotModelMutator modelMutator;
 
    public WholeBodyIkSolver createWholeBodyIkSolver()  
    {
@@ -109,6 +109,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
       jointMap = new ValkyrieJointMap();
       physicalProperties = new ValkyriePhysicalProperties();
       sensorInformation = new ValkyrieSensorInformation(target);
+
+      modelMutator = new ValkyrieRobotModelMutator(jointMap.getModelName());
 
       if (headless)
       {
