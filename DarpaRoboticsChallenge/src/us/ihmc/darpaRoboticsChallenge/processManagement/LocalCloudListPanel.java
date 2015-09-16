@@ -22,8 +22,9 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 
 public class LocalCloudListPanel extends JPanel
 {

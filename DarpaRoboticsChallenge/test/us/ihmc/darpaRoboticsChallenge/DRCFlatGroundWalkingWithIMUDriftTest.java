@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
@@ -26,7 +27,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVe
 import us.ihmc.stateEstimation.humanoid.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 
 public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobotTestInterface
 {

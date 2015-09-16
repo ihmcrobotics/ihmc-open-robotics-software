@@ -5,14 +5,14 @@ import java.util.List;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
-import us.ihmc.simulationconstructionset.util.perturbance.GroundContactPointsSlipper;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
+import us.ihmc.simulationconstructionset.util.perturbance.GroundContactPointsSlipper;
 
 public class OscillateFeetPerturber extends ModularRobotController
 {

@@ -1,19 +1,19 @@
 package us.ihmc.darpaRoboticsChallenge.gazebo;
 
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
-import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.sensors.ContactSensorHolder;
-import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.sensors.ContactSensorHolder;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
+import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
 public class GazeboSensorReaderFactory implements SensorReaderFactory
 {

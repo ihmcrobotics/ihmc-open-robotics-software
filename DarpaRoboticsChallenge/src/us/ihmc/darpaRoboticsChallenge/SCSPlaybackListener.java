@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.communication.packets.SCSListenerPacket;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.packets.SCSListenerPacket;
+import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 
 

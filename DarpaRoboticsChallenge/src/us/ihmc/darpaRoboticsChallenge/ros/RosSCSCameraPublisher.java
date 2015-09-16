@@ -4,7 +4,7 @@ import org.ros.message.Time;
 
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
-import us.ihmc.communication.packets.LocalVideoPacket;
+import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;

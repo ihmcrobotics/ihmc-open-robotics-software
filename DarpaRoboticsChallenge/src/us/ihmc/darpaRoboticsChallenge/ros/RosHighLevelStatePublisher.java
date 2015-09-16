@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
 import ihmc_msgs.HighLevelStatePacketMessage;
-import us.ihmc.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 

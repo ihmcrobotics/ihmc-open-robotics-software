@@ -4,7 +4,6 @@ import org.ros.message.Time;
 
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosClockPublisher;
 

@@ -2,11 +2,11 @@ package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRobot>

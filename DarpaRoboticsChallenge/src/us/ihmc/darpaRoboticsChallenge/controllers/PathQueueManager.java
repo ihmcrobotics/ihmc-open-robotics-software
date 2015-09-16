@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.controllers;
 
 import java.util.ArrayList;
 
-import us.ihmc.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 public interface PathQueueManager

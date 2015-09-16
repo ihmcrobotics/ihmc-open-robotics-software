@@ -1,10 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
-import georegression.geometry.RotationMatrixGenerator;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
-import georegression.struct.so.Quaternion_F64;
-
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
@@ -16,15 +11,19 @@ import javax.vecmath.Vector3d;
 
 import org.ddogleg.struct.FastQueue;
 
+import com.thoughtworks.xstream.XStream;
+
+import georegression.geometry.RotationMatrixGenerator;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.se.Se3_F64;
+import georegression.struct.so.Quaternion_F64;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.sensing.TestbedClientPacket;
-import us.ihmc.communication.packets.sensing.TestbedServerPacket;
-import us.ihmc.sensorProcessing.pointClouds.testbed.TestbedAutomaticAlignment;
-import us.ihmc.robotics.lidar.LidarScan;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.TestbedClientPacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.TestbedServerPacket;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-
-import com.thoughtworks.xstream.XStream;
+import us.ihmc.robotics.lidar.LidarScan;
+import us.ihmc.sensorProcessing.pointClouds.testbed.TestbedAutomaticAlignment;
 
 /**
  * Collects data from network processing and computes location of testbed

@@ -5,26 +5,26 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import us.ihmc.communication.packets.HighLevelStatePacket;
-import us.ihmc.communication.packets.LegCompliancePacket;
-import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
-import us.ihmc.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
-import us.ihmc.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
-import us.ihmc.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
-import us.ihmc.communication.packets.manipulation.HandComplianceControlParametersPacket;
-import us.ihmc.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.communication.packets.manipulation.StopMotionPacket;
-import us.ihmc.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.communication.packets.walking.ComHeightPacket;
-import us.ihmc.communication.packets.walking.FootPosePacket;
-import us.ihmc.communication.packets.walking.FootstepData;
-import us.ihmc.communication.packets.walking.FootstepDataList;
-import us.ihmc.communication.packets.walking.FootstepStatus;
-import us.ihmc.communication.packets.walking.HeadOrientationPacket;
-import us.ihmc.communication.packets.walking.PauseCommand;
-import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
-import us.ihmc.communication.packets.wholebody.MultiJointAnglePacket;
-import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopMotionPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 
 /**
  * Created by agrabertilton on 10/10/14.

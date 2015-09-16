@@ -1,21 +1,29 @@
 package us.ihmc.darpaRoboticsChallenge.packetEndToEndTests;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
-import us.ihmc.communication.packets.manipulation.HandPoseStatus;
-import us.ihmc.communication.packets.manipulation.StopMotionPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.Frame;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatus;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopMotionPacket;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -23,14 +31,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.util.Random;
-
-import static org.junit.Assert.assertTrue;
 
 public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTestInterface
 {

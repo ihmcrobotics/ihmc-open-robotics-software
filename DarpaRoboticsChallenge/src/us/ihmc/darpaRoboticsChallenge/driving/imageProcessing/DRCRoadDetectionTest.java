@@ -3,10 +3,6 @@
 
 package us.ihmc.darpaRoboticsChallenge.driving.imageProcessing;
 
-import georegression.struct.line.LineParametric2D_F32;
-import georegression.struct.point.Point2D_F32;
-import georegression.struct.point.Point2D_I32;
-
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -27,16 +23,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.vecmath.Point2d;
 
-import jxl.format.RGB;
-import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
-import us.ihmc.imageProcessing.utilities.BoundsPainter;
-import us.ihmc.imageProcessing.utilities.LinePainter;
-import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
-import us.ihmc.imageProcessing.utilities.VideoListener;
-import us.ihmc.imageProcessing.utilities.VideoPlayer;
-import us.ihmc.robotics.geometry.BoundingBox2d;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.Line2d;
 import boofcv.abst.feature.detect.interest.ConfigFastHessian;
 import boofcv.abst.feature.detect.interest.InterestPointDetector;
 import boofcv.abst.feature.detect.line.DetectLineHoughPolar;
@@ -55,6 +41,19 @@ import boofcv.struct.image.ImageSInt16;
 import boofcv.struct.image.ImageSInt32;
 import boofcv.struct.image.ImageSingleBand;
 import boofcv.struct.image.ImageUInt8;
+import georegression.struct.line.LineParametric2D_F32;
+import georegression.struct.point.Point2D_F32;
+import georegression.struct.point.Point2D_I32;
+import jxl.format.RGB;
+import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
+import us.ihmc.imageProcessing.utilities.BoundsPainter;
+import us.ihmc.imageProcessing.utilities.LinePainter;
+import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
+import us.ihmc.imageProcessing.utilities.VideoListener;
+import us.ihmc.imageProcessing.utilities.VideoPlayer;
+import us.ihmc.robotics.geometry.BoundingBox2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.Line2d;
 
 public class DRCRoadDetectionTest implements VideoListener, KeyListener
 {

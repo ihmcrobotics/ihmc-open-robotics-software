@@ -1,12 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.microphone;
 
-import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
+import java.util.ArrayList;
+
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.linearDynamicSystems.BodeUnitsConverter;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-
-import java.util.ArrayList;
+import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 
 /**
  * <p>Description: Detects a distinct sound by searching for a characteristic peak in FFT magnitude data of sound data

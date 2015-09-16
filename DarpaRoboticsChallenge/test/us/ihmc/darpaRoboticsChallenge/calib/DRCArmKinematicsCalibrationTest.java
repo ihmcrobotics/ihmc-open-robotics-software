@@ -3,8 +3,6 @@ package us.ihmc.darpaRoboticsChallenge.calib;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import georegression.struct.se.Se3_F64;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.awt.image.BufferedImage;
 
@@ -12,6 +10,8 @@ import org.junit.Test;
 
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
+import georegression.struct.se.Se3_F64;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 /**
  * @author Peter Abeles

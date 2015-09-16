@@ -5,26 +5,27 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.ros.message.Time;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.robotics.sensors.IMUDefinition;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
-import us.ihmc.SdfLoader.models.FullRobotModelUtils;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosCachedRawIMUDataPublisher;
 import us.ihmc.utilities.ros.publisher.RosImuPublisher;
@@ -34,7 +35,6 @@ import us.ihmc.utilities.ros.publisher.RosLastReceivedMessagePublisher;
 import us.ihmc.utilities.ros.publisher.RosOdometryPublisher;
 import us.ihmc.utilities.ros.publisher.RosStringPublisher;
 import us.ihmc.utilities.ros.publisher.RosWrenchPublisher;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable

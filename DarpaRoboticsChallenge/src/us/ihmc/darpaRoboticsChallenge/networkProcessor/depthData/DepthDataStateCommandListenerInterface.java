@@ -1,8 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
 
-import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
-import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
-import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
 
 public interface DepthDataStateCommandListenerInterface
 {

@@ -13,8 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
-
-import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jcraft.jsch.ChannelExec;
@@ -22,6 +20,8 @@ import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+
+import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 
 public class GazeboRemoteSimulationAdapter extends Thread
 {

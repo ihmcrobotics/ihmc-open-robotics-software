@@ -9,7 +9,7 @@ import org.ros.node.NodeMainExecutor;
 
 import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.utilities.ros.RosTools;
 
 public class ROSiRobotCommandDispatcher implements Runnable

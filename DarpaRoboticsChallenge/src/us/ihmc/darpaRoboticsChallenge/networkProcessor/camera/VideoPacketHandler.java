@@ -3,12 +3,12 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.communication.producers.CompressedVideoHandler;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
-import boofcv.struct.calib.IntrinsicParameters;
 
 class VideoPacketHandler implements CompressedVideoHandler
 {

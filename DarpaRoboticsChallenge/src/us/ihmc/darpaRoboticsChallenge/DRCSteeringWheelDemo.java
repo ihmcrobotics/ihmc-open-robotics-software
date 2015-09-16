@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JointPositionControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.LockPelvisController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;

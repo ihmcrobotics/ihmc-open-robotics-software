@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
 import handle_msgs.HandleControl;
-import us.ihmc.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
 
 public class FingerStatePacketToHandleControlMessageConverter
 {

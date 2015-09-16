@@ -1,15 +1,15 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
+import java.util.concurrent.ArrayBlockingQueue;
+
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosBoolPublisher;
 import us.ihmc.utilities.ros.publisher.RosPoint2dPublisher;
 import us.ihmc.utilities.ros.publisher.RosPoint32Publisher;
-
-import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  *

@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.odometry;
 
-import georegression.struct.point.Point3D_F64;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,6 +14,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import georegression.struct.point.Point3D_F64;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.LidarDataRecorder;
 
 public class CarLocalizerFileWritingUtils

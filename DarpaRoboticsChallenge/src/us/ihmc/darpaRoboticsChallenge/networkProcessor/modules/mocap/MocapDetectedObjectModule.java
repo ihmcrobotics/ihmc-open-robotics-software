@@ -6,7 +6,7 @@ import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.DetectedObjectPacket;
+import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 

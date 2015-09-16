@@ -1,11 +1,18 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.microphone;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.vecmath.Point2d;
 
 import org.jfree.chart.ChartFactory;
@@ -16,21 +23,13 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.xy.XYDataset;
+
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.plotting.shapes.PointArtifact;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.DataBufferEntry;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntryHolder;
-import us.ihmc.simulationconstructionset.dataBuffer.TimeDataHolder;
 import us.ihmc.simulationconstructionset.gui.FFTPlotter;
-import us.ihmc.simulationconstructionset.gui.GraphIndicesHolder;
-import us.ihmc.simulationconstructionset.gui.YoGraph;
-import us.ihmc.simulationconstructionset.gui.YoGraphRemover;
 
 public class DrillDetectionUI
 {

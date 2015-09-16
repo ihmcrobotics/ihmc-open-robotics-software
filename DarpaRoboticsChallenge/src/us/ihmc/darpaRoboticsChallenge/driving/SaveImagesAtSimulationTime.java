@@ -10,10 +10,10 @@ import java.awt.image.DataBuffer;
 import org.ros.message.MessageListener;
 import org.ros.node.topic.Subscriber;
 
+import boofcv.io.image.UtilImageIO;
 import rosgraph_msgs.Clock;
 import sensor_msgs.CompressedImage;
 import us.ihmc.utilities.ros.RosTools;
-import boofcv.io.image.UtilImageIO;
 
 /**
  * Saves images at the specified rate in simulation time

@@ -8,14 +8,14 @@ import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.net.TimestampListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.walking.EndOfScriptCommand;
-import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngineSettings;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class CommandPlayer implements TimestampListener
 {
