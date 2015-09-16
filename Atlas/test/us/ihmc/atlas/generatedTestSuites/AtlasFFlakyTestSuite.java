@@ -8,7 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseWobblyFootTest.class,
-   us.ihmc.communication.producers.AtlasRobotConfigurationDataBufferTest.class
+   us.ihmc.atlas.communication.producers.AtlasRobotConfigurationDataBufferTest.class
 })
 
 public class AtlasFFlakyTestSuite
