@@ -1,30 +1,14 @@
 package us.ihmc.atlas;
 
-import java.util.LinkedHashMap;
-
+import com.jme3.math.Transform;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.*;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
-import us.ihmc.atlas.parameters.AtlasCapturePointPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasDefaultArmConfigurations;
-import us.ihmc.atlas.parameters.AtlasDrivingControllerParameters;
-import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameterization;
-import us.ihmc.atlas.parameters.AtlasHeightCalculatorParameters;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
-import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.atlas.parameters.*;
 import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
@@ -70,9 +54,9 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
-import com.jme3.math.Transform;
+import java.util.LinkedHashMap;
 
-public class AtlasRobotModel implements DRCRobotModel
+public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
    
@@ -103,8 +87,6 @@ public class AtlasRobotModel implements DRCRobotModel
 
    private boolean enableJointDamping = true;
 
-   private final AtlasRobotModelMutator modelMutator;
-
    @Override
    public WholeBodyIkSolver createWholeBodyIkSolver()
    {
@@ -131,17 +113,15 @@ public class AtlasRobotModel implements DRCRobotModel
       jointMap = new AtlasJointMap(selectedVersion);
       this.target = target;
 
-      modelMutator = new AtlasRobotModelMutator(selectedVersion.getModelName());
-
       if (!headless)
       {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), false, modelMutator);
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), false, this);
       }
       else
       {
          this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[]
          {
-         }, selectedVersion.getSdfFileAsStream(), headless, modelMutator);
+         }, selectedVersion.getSdfFileAsStream(), headless, this);
       }
 
       for (String forceSensorNames : AtlasSensorInformation.forceSensorNames)
@@ -545,5 +525,50 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       System.err.println("Need to add access to stand prep joint angles.");
       return 0;
+   }
+
+   @Override
+   public void mutateJointForModel(String modelName, SDFJointHolder jointHolder)
+   {
+      if(this.jointMap.getModelName().equals(modelName))
+      {
+
+      }
+   }
+
+   @Override
+   public void mutateLinkForModel(String modelName, SDFLinkHolder linkHolder)
+   {
+      if(this.jointMap.getModelName().equals(modelName))
+      {
+
+      }
+   }
+
+   @Override
+   public void mutateSensorForModel(String modelName, SDFSensor sensor)
+   {
+      if(this.jointMap.getModelName().equals(modelName))
+      {
+
+      }
+   }
+
+   @Override
+   public void mutateForceSensorForModel(String modelName, SDFForceSensor forceSensor)
+   {
+      if(this.jointMap.getModelName().equals(modelName))
+      {
+
+      }
+   }
+
+   @Override
+   public void mutateContactSensorForModel(String modelName, SDFContactSensor contactSensor)
+   {
+      if(this.jointMap.getModelName().equals(modelName))
+      {
+
+      }
    }
 }
