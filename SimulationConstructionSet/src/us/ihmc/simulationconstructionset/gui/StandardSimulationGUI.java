@@ -1,14 +1,6 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.GraphicsDevice;
-import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -482,15 +474,21 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    private void showGUI()
    {
-      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 
-      int width = (int) (screenSize.width * 7.0 / 8.0);
-      int height = (int) (screenSize.height * 7.0 / 8.0);
+      //   Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+      int screenWidth = gd.getDisplayMode().getWidth();
+      int screenHeight = gd.getDisplayMode().getHeight();
+
+      int width = (int) (screenWidth * 7.0 / 8.0);
+      int height = (int) (screenHeight * 7.0 / 8.0);
+
       parentContainer.setSize(width, height);
 
       // parentContainer.setSize(screenSize.width*1/8, screenSize.height*1/8);
-      int x = screenSize.width / 16;
-      int y = screenSize.height / 16;
+      int x = width / 16;
+      int y = height / 16;
       parentContainer.setLocation(x, y);
       parentContainer.validate();
 
