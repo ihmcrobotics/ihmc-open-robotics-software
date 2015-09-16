@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import javax.vecmath.Vector2d;
 
-import us.ihmc.CapturePointCalculator.LinearInvertedPendulumCapturePointCalculator;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.plotting.Artifact;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;

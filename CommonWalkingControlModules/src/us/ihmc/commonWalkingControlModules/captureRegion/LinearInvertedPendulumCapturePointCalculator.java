@@ -1,4 +1,4 @@
-package us.ihmc.CapturePointCalculator;
+package us.ihmc.commonWalkingControlModules.captureRegion;
 
 /**
  * <p>LinearInvertedPendulumStaticCapturePointCalculator</p>
