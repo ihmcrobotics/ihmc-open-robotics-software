@@ -15,7 +15,7 @@ dependencies {
    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.1.1'
    compile group: 'jgraph', name: 'jgraph', version: '5.13.0.0'
 
-	compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.20'
+	compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.22'
    compile group: 'us.ihmc', name: 'IHMCHierachicalKinematics', version: '1.0'
 
 	//compile project(':IHMCJavaToolkit')
