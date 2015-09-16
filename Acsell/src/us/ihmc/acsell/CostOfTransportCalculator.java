@@ -7,8 +7,8 @@ import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
  * Hacked to be outside the main DRC code, move after code freeze
