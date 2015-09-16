@@ -40,10 +40,20 @@ public enum RobotQuadrant
    {
       return end;
    }
+   
+   public RobotEnd getOppositeEnd()
+   {
+      return end.getOppositeEnd();
+   }
   
    public RobotSide getSide()
    {
       return side;
+   }
+   
+   public RobotSide getOppositeSide()
+   {
+      return side.getOppositeSide();
    }
    
    public static final RobotQuadrant getQuadrant(RobotEnd robotEnd, RobotSide robotSide)
