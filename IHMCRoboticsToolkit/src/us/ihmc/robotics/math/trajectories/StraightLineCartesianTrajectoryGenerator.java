@@ -86,4 +86,9 @@ public class StraightLineCartesianTrajectoryGenerator implements CartesianTrajec
    {
       return trajectory.getTFMax();
    }
+   
+   public void setMaxVelocity(double velocity)
+   {
+      maxVel.set(velocity);
+   }
 }
