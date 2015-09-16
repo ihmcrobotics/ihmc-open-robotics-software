@@ -1,11 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
@@ -32,20 +30,24 @@ import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+
    private DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack;
 
-   private final static boolean VISUALIZE_FORCE = false;
-   private final static double PUSH_DELAY = 0.5;
+   private static final boolean VISUALIZE_FORCE = false;
+
+   private static final double PUSH_DELAY = 0.5;
 
    protected DRCPushRobotController pushRobotController;
+
    protected BlockingSimulationRunner blockingSimulationRunner;
+
    protected double forceMagnitude;
+
    protected double forceDuration;
 
-   protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
-   StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.LEFT);
+   protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList();
 
+   StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.LEFT);
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -73,31 +75,23 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
          blockingSimulationRunner.destroySimulation();
          blockingSimulationRunner = null;
       }
-     
-         pushRobotController = null;
 
-         doubleSupportStartConditions = null;
-
-         pushCondition = null;
-
+      pushRobotController = null;
+      doubleSupportStartConditions = null;
+      pushCondition = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 69.7)
-	@Test(timeout = 350000)
+   @DeployableTestMethod(estimatedDuration = 67.1)
+   @Test(timeout = 340000)
    public void testMultiStepForwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
-
       setupTest(getRobotModel());
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-
       setForwardPushParameters();
-
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
-
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
 
       // disable walking
@@ -110,30 +104,23 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 6.0);
 
-      //re-enable walking
+      // re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
-
       createVideo(scs);
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 55.7)
-	@Test(timeout = 280000)
+   @DeployableTestMethod(estimatedDuration = 53.2)
+   @Test(timeout = 270000)
    public void testMultiStepBackwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
-
       setupTest(getRobotModel());
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-
       setBackwardPushParameters();
-
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
-
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
 
       // disable walking
@@ -146,12 +133,10 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 5.0);
 
-      //re-enable walking
+      // re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
-
       createVideo(scs);
-
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -168,7 +153,6 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       }
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
 
       // enable push recovery
@@ -177,10 +161,8 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       for (RobotSide robotSide : RobotSide.values)
       {
          String prefix = fullRobotModel.getFoot(robotSide).getName();
-         scs.getVariable(prefix + "FootControlModule", prefix
-               + "State");
+         scs.getVariable(prefix + "FootControlModule", prefix + "State");
          final EnumYoVariable<WalkingState> walkingState = (EnumYoVariable<WalkingState>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
-
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
    }
@@ -188,25 +170,21 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
    private void setupTrack(boolean runMultiThreaded, DRCRobotModel robotModel)
    {
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
-
       GroundProfile3D groundProfile = new FlatGroundProfile();
-
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
-      //      scsInitialSetup.setInitializeEstimatorToActual(true);
+
+      // scsInitialSetup.setInitializeEstimatorToActual(true);
       scsInitialSetup.setDrawGroundProfile(true);
       scsInitialSetup.setRunMultiThreaded(runMultiThreaded);
-      
       DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-
-      drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false,
-            robotModel);
-
+      drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false, robotModel);
       drcFlatGroundWalkingTrack.getDrcSimulation();
    }
 
    private class DoubleSupportStartCondition implements StateTransitionCondition
    {
       private final EnumYoVariable<WalkingState> walkingState;
+
       private final RobotSide side;
 
       public DoubleSupportStartCondition(EnumYoVariable<WalkingState> walkingState, RobotSide side)
@@ -220,14 +198,15 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       {
          if (side == RobotSide.LEFT)
          {
-            return walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT || walkingState.getEnumValue() == WalkingState.TRANSFER_TO_LEFT_SUPPORT;
+            return (walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT) || (walkingState.getEnumValue() == WalkingState.TRANSFER_TO_LEFT_SUPPORT);
          }
          else
          {
-            return walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT || walkingState.getEnumValue() == WalkingState.TRANSFER_TO_RIGHT_SUPPORT;
+            return (walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT) || (walkingState.getEnumValue() == WalkingState.TRANSFER_TO_RIGHT_SUPPORT);
          }
       }
    }
+
 
    private void createVideo(SimulationConstructionSet scs)
    {

@@ -1,18 +1,14 @@
 package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
 import static org.junit.Assert.assertTrue;
-
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-
 import javax.vecmath.Point3d;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
@@ -60,7 +56,6 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
       }
 
       GlobalTimer.clearTimers();
-
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -71,13 +66,14 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
    }
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
+
    private static final boolean DEBUG = false;
 
    @Before
    public void setUp()
    {
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(createTestEnvironment(), getSimpleRobotName(), null, DRCObstacleCourseStartingLocation.DEFAULT,
-            simulationTestingParameters, getRobotModel());
+              simulationTestingParameters, getRobotModel());
    }
 
    private static DRCGraspCylinderEnvironment createTestEnvironment()
@@ -108,114 +104,81 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
       return new DRCGraspCylinderEnvironment(cylinderOrigins, cylinderYawAngles_degrees, cylinderPitchAngles_degrees, cylinderRollAngles_degrees);
    }
 
-	@DeployableTestMethod(estimatedDuration = 57.4)
-   @Test(timeout = 290000)
+   @DeployableTestMethod(estimatedDuration = 79.9)
+   @Test(timeout = 400000)
    public void testGraspXAxisCylinder() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
       final GraspCylinderBehavior graspBehavior = new GraspCylinderBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            drcBehaviorTestHelper.getSDFFullRobotModel(), drcBehaviorTestHelper.getYoTime());
-
+                                                     drcBehaviorTestHelper.getSDFFullRobotModel(), drcBehaviorTestHelper.getYoTime());
       RobotSide robotSideOfGraspingHand = RobotSide.LEFT;
-      
       CommonAvatarEnvironmentInterface testEnvironment = drcBehaviorTestHelper.getTestEnviroment();
       ContactableStaticCylinderRobot cylinder = (ContactableStaticCylinderRobot) testEnvironment.getEnvironmentRobots().get(0);
       RigidBodyTransform cylinderTransformToWorld = new RigidBodyTransform();
-      cylinder.getBodyTransformToWorld(cylinderTransformToWorld);  
+      cylinder.getBodyTransformToWorld(cylinderTransformToWorld);
       TransformReferenceFrame cylinderFrame = new TransformReferenceFrame("cylinder", ReferenceFrame.getWorldFrame(), cylinderTransformToWorld);
-         
-      
       FramePoint graspPoint = new FramePoint(cylinderFrame, 0.0, 0.0, 0.0);
       FrameVector cylinderLongAxis = new FrameVector(cylinderFrame, 0.0, 0.0, 1.0);
-
       graspBehavior.initialize();
       graspBehavior.setGraspPose(robotSideOfGraspingHand, graspPoint, cylinderLongAxis, false);
-
       assertTrue(graspBehavior.hasInputBeenSet());
-
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(graspBehavior);
       assertTrue(success);
-
       assertTrue(graspBehavior.isDone());
-
       BambooTools.reportTestFinishedMessage();
    }
-   
-	@DeployableTestMethod(estimatedDuration = 61.2)
-   @Test(timeout = 310000)
+
+   @DeployableTestMethod(estimatedDuration = 81.0)
+   @Test(timeout = 400000)
    public void testGraspYAxisCylinder() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
       final GraspCylinderBehavior graspBehavior = new GraspCylinderBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            drcBehaviorTestHelper.getSDFFullRobotModel(), drcBehaviorTestHelper.getYoTime());
-
+                                                     drcBehaviorTestHelper.getSDFFullRobotModel(), drcBehaviorTestHelper.getYoTime());
       RobotSide robotSideOfGraspingHand = RobotSide.LEFT;
-      
       CommonAvatarEnvironmentInterface testEnvironment = drcBehaviorTestHelper.getTestEnviroment();
       ContactableStaticCylinderRobot cylinder = (ContactableStaticCylinderRobot) testEnvironment.getEnvironmentRobots().get(1);
       RigidBodyTransform cylinderTransformToWorld = new RigidBodyTransform();
-      cylinder.getBodyTransformToWorld(cylinderTransformToWorld);     
+      cylinder.getBodyTransformToWorld(cylinderTransformToWorld);
       TransformReferenceFrame cylinderFrame = new TransformReferenceFrame("cylinder", ReferenceFrame.getWorldFrame(), cylinderTransformToWorld);
-         
-      
       FramePoint graspPoint = new FramePoint(cylinderFrame, 0.0, 0.0, 0.0);
       FrameVector cylinderLongAxis = new FrameVector(cylinderFrame, 0.0, 0.0, 1.0);
-
       graspBehavior.initialize();
       graspBehavior.setGraspPose(robotSideOfGraspingHand, graspPoint, cylinderLongAxis, false);
-
       assertTrue(graspBehavior.hasInputBeenSet());
-
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(graspBehavior);
       assertTrue(success);
-
       assertTrue(graspBehavior.isDone());
-
       BambooTools.reportTestFinishedMessage();
    }
-   
-	@DeployableTestMethod(estimatedDuration = 59.8)
-   @Test(timeout = 300000)
+
+   @DeployableTestMethod(estimatedDuration = 114.9)
+   @Test(timeout = 570000)
    public void testGraspZAxisCylinder() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
       final GraspCylinderBehavior graspBehavior = new GraspCylinderBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            drcBehaviorTestHelper.getSDFFullRobotModel(), drcBehaviorTestHelper.getYoTime());
-
+                                                     drcBehaviorTestHelper.getSDFFullRobotModel(), drcBehaviorTestHelper.getYoTime());
       RobotSide robotSideOfGraspingHand = RobotSide.LEFT;
-      
       CommonAvatarEnvironmentInterface testEnvironment = drcBehaviorTestHelper.getTestEnviroment();
       ContactableStaticCylinderRobot cylinder = (ContactableStaticCylinderRobot) testEnvironment.getEnvironmentRobots().get(2);
       RigidBodyTransform cylinderTransformToWorld = new RigidBodyTransform();
-      cylinder.getBodyTransformToWorld(cylinderTransformToWorld);     
+      cylinder.getBodyTransformToWorld(cylinderTransformToWorld);
       TransformReferenceFrame cylinderFrame = new TransformReferenceFrame("cylinder", ReferenceFrame.getWorldFrame(), cylinderTransformToWorld);
-         
-      
       FramePoint graspPoint = new FramePoint(cylinderFrame, 0.0, 0.0, 0.0);
       FrameVector cylinderLongAxis = new FrameVector(cylinderFrame, 0.0, 0.0, 1.0);
-
       graspBehavior.initialize();
       graspBehavior.setGraspPose(robotSideOfGraspingHand, graspPoint, cylinderLongAxis, false);
-
       assertTrue(graspBehavior.hasInputBeenSet());
-
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(graspBehavior);
       assertTrue(success);
-
       assertTrue(graspBehavior.isDone());
-
       BambooTools.reportTestFinishedMessage();
    }
 }
