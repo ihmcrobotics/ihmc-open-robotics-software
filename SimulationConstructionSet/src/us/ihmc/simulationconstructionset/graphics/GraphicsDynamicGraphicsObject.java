@@ -3,8 +3,8 @@ package us.ihmc.simulationconstructionset.graphics;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
 import us.ihmc.tools.gui.GraphicsUpdatable;
-import us.ihmc.yoUtilities.graphics.YoGraphic;
 
 
 public class GraphicsDynamicGraphicsObject extends Graphics3DNode implements GraphicsUpdatable

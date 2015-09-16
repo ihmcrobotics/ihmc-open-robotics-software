@@ -100,11 +100,11 @@ import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.SimpleFileReader;
 import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.gui.GraphicsUpdatable;
-import us.ihmc.yoUtilities.graphics.YoGraphic;
-import us.ihmc.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class StandardSimulationGUI implements SelectGraphConfigurationCommandExecutor, GraphGroupSelector, EntryBoxGroupSelector, CameraSelector,
       ViewportSelectorCommandExecutor, CameraHolder, ActiveCameraHolder, ActiveCanvas3DHolder, ExtraPanelSelector, VarGroupSelector, ExitActionListenerNotifier

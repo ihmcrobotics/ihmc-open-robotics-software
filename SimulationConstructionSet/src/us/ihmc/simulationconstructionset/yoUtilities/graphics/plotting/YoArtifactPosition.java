@@ -1,4 +1,4 @@
-package us.ihmc.yoUtilities.graphics.plotting;
+package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -12,9 +12,9 @@ import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Drawing2DTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.graphics.RemoteYoGraphic;
-import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 
 
 public class YoArtifactPosition extends Artifact implements RemoteYoGraphic

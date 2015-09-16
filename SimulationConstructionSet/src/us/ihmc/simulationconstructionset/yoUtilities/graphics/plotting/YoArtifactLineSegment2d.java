@@ -1,4 +1,4 @@
-package us.ihmc.yoUtilities.graphics.plotting;
+package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -15,7 +15,7 @@ import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.PlotterGraphics;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
-import us.ihmc.yoUtilities.graphics.RemoteYoGraphic;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 
 public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
 {

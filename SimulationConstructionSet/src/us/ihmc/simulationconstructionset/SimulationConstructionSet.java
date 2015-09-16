@@ -96,13 +96,13 @@ import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFra
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.graphics.DynamicGraphicCheckBoxMenuItem;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.yoUtilities.graphics.YoGraphic;
-import us.ihmc.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
  * <p>Title: SimulationConstructionSet</p>

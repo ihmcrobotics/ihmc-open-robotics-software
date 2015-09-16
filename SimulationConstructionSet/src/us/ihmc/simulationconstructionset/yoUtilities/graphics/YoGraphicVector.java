@@ -1,4 +1,4 @@
-package us.ihmc.yoUtilities.graphics;
+package us.ihmc.simulationconstructionset.yoUtilities.graphics;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;

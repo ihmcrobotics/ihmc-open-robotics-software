@@ -1,4 +1,4 @@
-package us.ihmc.yoUtilities.graphics.plotting;
+package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.Color;
 import java.awt.Graphics;

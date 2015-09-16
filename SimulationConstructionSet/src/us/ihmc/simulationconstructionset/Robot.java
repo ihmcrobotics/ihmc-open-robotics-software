@@ -29,7 +29,7 @@ import us.ihmc.simulationconstructionset.robotdefinition.JointDefinitionFixedFra
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
  * <p>Title: Robot</p>

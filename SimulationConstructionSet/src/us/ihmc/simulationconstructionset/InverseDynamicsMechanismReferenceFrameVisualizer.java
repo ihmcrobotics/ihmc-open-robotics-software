@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
-import us.ihmc.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotController
 {

@@ -1,4 +1,4 @@
-package us.ihmc.yoUtilities.graphics;
+package us.ihmc.simulationconstructionset.yoUtilities.graphics;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -17,12 +17,12 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2dInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
 {

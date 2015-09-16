@@ -1,4 +1,4 @@
-package us.ihmc.yoUtilities.graphics;
+package us.ihmc.simulationconstructionset.yoUtilities.graphics;
 
 import java.util.ArrayList;
 
@@ -14,10 +14,10 @@ import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoUtilities.graphics.RemoteYoGraphic.RemoteGraphicType;
-import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
-import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
-import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic.RemoteGraphicType;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 /**
  * This class allows constructs RemoteDynamicGraphic objects from parsed

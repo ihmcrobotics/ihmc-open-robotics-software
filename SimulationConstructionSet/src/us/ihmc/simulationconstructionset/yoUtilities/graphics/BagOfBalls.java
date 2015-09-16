@@ -1,4 +1,4 @@
-package us.ihmc.yoUtilities.graphics;
+package us.ihmc.simulationconstructionset.yoUtilities.graphics;
 
 import java.util.ArrayList;
 

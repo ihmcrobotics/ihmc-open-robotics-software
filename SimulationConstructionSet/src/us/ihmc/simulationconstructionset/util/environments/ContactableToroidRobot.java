@@ -21,6 +21,8 @@ import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
@@ -28,8 +30,6 @@ import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;
-import us.ihmc.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class ContactableToroidRobot extends ContactablePinJointRobot implements SelectableObject, SelectedListener
 {

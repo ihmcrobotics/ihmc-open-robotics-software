@@ -2,14 +2,14 @@ package us.ihmc.simulationconstructionset.util.perturbance;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class TimeBasedPerturbance implements RobotController
 {
