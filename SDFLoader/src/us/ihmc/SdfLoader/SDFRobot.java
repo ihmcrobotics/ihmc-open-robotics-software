@@ -477,10 +477,6 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       {
          for (SDFSensor sensor : child.getSensors())
          {
-            if(this.descriptionMutator != null)
-            {
-               this.descriptionMutator.mutateSensorForModel(getName(), sensor);
-            }
             switch (sensor.getType())
             {
             case "camera":

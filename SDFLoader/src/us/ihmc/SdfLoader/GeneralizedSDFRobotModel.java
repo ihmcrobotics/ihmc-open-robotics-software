@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.simulationconstructionset.graphics.GraphicsObjectsHolder;
 import us.ihmc.robotics.sensors.ContactSensorType;
@@ -47,6 +48,11 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
          if(this.descriptionMutator != null)
          {
             this.descriptionMutator.mutateLinkForModel(name, linkHolder);
+
+            for (SDFSensor sdfSensor : linkHolder.getSensors())
+            {
+               this.descriptionMutator.mutateSensorForModel(name, sdfSensor);
+            }
          }
 
          links.put(SDFConversionsHelper.sanitizeJointName(sdfLink.getName()), linkHolder);
