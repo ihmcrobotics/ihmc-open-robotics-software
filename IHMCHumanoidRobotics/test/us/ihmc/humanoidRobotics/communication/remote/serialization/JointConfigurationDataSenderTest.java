@@ -1,4 +1,4 @@
-package us.ihmc.communication.remote.serialization;
+package us.ihmc.humanoidRobotics.communication.remote.serialization;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

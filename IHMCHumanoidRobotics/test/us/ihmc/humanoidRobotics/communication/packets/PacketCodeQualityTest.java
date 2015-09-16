@@ -1,4 +1,4 @@
-package us.ihmc.communication.packets;
+package us.ihmc.humanoidRobotics.communication.packets;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

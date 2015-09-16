@@ -1,4 +1,4 @@
-package us.ihmc.communication.packets.walking;
+package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import static org.junit.Assert.assertTrue;
 

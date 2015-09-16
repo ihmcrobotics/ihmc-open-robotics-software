@@ -1,4 +1,4 @@
-package us.ihmc.communication.packets.wholebody;
+package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
 import static org.junit.Assert.assertEquals;
 
