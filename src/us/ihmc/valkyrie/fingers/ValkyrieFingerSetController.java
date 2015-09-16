@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -20,6 +19,7 @@ import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class ValkyrieFingerSetController implements RobotController
 {

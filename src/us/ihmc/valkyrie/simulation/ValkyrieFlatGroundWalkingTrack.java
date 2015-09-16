@@ -1,5 +1,7 @@
 package us.ihmc.valkyrie.simulation;
 
+import java.net.URI;
+
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -17,7 +19,6 @@ import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
 import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard.MultisenseHeadingSubscriber;
-import java.net.URI;
 
 
 public class ValkyrieFlatGroundWalkingTrack

@@ -3,8 +3,8 @@ package us.ihmc.valkyrie;
 import java.util.logging.Logger;
 
 import us.ihmc.affinity.CPUTopology;
-import us.ihmc.affinity.Processor;
 import us.ihmc.affinity.Package;
+import us.ihmc.affinity.Processor;
 
 public class ValkyrieAffinity
 {

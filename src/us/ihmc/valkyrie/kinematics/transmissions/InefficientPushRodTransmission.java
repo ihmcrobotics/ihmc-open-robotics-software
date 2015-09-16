@@ -2,9 +2,9 @@ package us.ihmc.valkyrie.kinematics.transmissions;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 
 public class InefficientPushRodTransmission implements PushRodTransmissionInterface

@@ -3,12 +3,12 @@ package us.ihmc.valkyrie;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import com.martiansoftware.jsap.JSAPException;
+
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
-
-import com.martiansoftware.jsap.JSAPException;
 
 public class ValkyrieNetworkProcessor
 {

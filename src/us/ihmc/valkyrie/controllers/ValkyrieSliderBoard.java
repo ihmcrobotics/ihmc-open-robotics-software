@@ -1,17 +1,11 @@
 package us.ihmc.valkyrie.controllers;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-
-import us.ihmc.utilities.ros.RosMainNode;
-
-import us.ihmc.utilities.ros.subscriber.RosFloat32MultiArraySubscriber;
 
 import net.java.games.input.Component;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
@@ -34,6 +28,8 @@ import us.ihmc.simulationconstructionset.joystick.JoyStickNotFoundException;
 import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.subscriber.RosFloat32MultiArraySubscriber;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.kinematics.urdf.Interface;
 import us.ihmc.valkyrie.kinematics.urdf.Transmission;

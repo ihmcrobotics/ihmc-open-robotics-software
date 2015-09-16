@@ -3,7 +3,6 @@ package us.ihmc.valkyrie.treadmill;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
-import java.net.NoRouteToHostException;
 import java.net.Socket;
 
 import javax.swing.JFrame;

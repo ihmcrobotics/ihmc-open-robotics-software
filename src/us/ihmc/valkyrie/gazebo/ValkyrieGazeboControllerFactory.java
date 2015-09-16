@@ -1,11 +1,11 @@
 package us.ihmc.valkyrie.gazebo;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gazebo.GazeboControllerFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 /**
  *
