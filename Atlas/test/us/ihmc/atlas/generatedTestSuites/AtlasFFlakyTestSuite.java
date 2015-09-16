@@ -7,10 +7,11 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasHandPoseListBehaviorTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseWobblyFootTest.class,
+   us.ihmc.communication.producers.AtlasRobotConfigurationDataBufferTest.class
 })
 
-public class AtlasBFlakyTestSuite
+public class AtlasFFlakyTestSuite
 {
    public static void main(String[] args)
    {
