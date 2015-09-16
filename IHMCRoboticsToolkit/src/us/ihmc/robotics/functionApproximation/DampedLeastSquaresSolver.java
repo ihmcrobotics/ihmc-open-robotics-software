@@ -2,6 +2,7 @@ package us.ihmc.robotics.functionApproximation;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SpecializedOps;
@@ -93,5 +94,10 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
    public boolean modifiesB()
    {
       return false;
+   }
+   
+   @Override
+   public SingularValueDecomposition<DenseMatrix64F> getDecomposition() {
+       return null;
    }
 }

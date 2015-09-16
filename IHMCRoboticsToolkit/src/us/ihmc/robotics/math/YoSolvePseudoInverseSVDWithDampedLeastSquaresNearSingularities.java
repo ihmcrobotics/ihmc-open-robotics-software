@@ -180,7 +180,8 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
       return false;
    }
 
-   public SingularValueDecomposition<DenseMatrix64F> getDecomposer()
+   @Override
+   public SingularValueDecomposition<DenseMatrix64F> getDecomposition()
    {
       return svd;
    }
