@@ -476,45 +476,53 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public void mutateJointForModel(String modelName, SDFJointHolder jointHolder)
+   public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
    {
-      if(this.jointMap.getModelName().equals(modelName))
+      if(this.jointMap.getModelName().equals(model.getName()))
       {
 
       }
    }
 
    @Override
-   public void mutateLinkForModel(String modelName, SDFLinkHolder linkHolder)
+   public void mutateLinkForModel(GeneralizedSDFRobotModel model, SDFLinkHolder linkHolder)
    {
-      if(this.jointMap.getModelName().equals(modelName))
+      if(this.jointMap.getModelName().equals(model.getName()))
       {
 
       }
    }
 
    @Override
-   public void mutateSensorForModel(String modelName, SDFSensor sensor)
+   public void mutateSensorForModel(GeneralizedSDFRobotModel model, SDFSensor sensor)
    {
-      if(this.jointMap.getModelName().equals(modelName))
+      if(this.jointMap.getModelName().equals(model.getName()))
       {
 
       }
    }
 
    @Override
-   public void mutateForceSensorForModel(String modelName, SDFForceSensor forceSensor)
+   public void mutateForceSensorForModel(GeneralizedSDFRobotModel model, SDFForceSensor forceSensor)
    {
-      if(this.jointMap.getModelName().equals(modelName))
+      if(this.jointMap.getModelName().equals(model.getName()))
       {
 
       }
    }
 
    @Override
-   public void mutateContactSensorForModel(String modelName, SDFContactSensor contactSensor)
+   public void mutateContactSensorForModel(GeneralizedSDFRobotModel model, SDFContactSensor contactSensor)
    {
-      if(this.jointMap.getModelName().equals(modelName))
+      if(this.jointMap.getModelName().equals(model.getName()))
+      {
+
+      }
+   }
+
+   @Override public void mutateModelWithAdditions(GeneralizedSDFRobotModel model)
+   {
+      if(this.jointMap.getModelName().equals(model.getName()))
       {
 
       }
