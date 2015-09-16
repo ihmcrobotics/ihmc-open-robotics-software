@@ -10,12 +10,8 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFJointNameMap;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.*;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -66,7 +62,7 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
-public class ValkyrieRobotModel implements DRCRobotModel
+public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
    private static final boolean PRINT_MODEL = false;
    
@@ -82,7 +78,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
    private final Map<String, Double> standPrepAngles = (Map<String, Double>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "setpoints.yaml");
    private final DRCRobotModel.RobotTarget target;
-   private final ValkyrieRobotModelMutator modelMutator;
 
    public WholeBodyIkSolver createWholeBodyIkSolver()  
    {
@@ -110,15 +105,13 @@ public class ValkyrieRobotModel implements DRCRobotModel
       physicalProperties = new ValkyriePhysicalProperties();
       sensorInformation = new ValkyrieSensorInformation(target);
 
-      modelMutator = new ValkyrieRobotModelMutator(jointMap.getModelName());
-
       if (headless)
       {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[] {}, getSdfFileAsStream(), true, modelMutator);
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[] {}, getSdfFileAsStream(), true, this);
       }
       else
       {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false, modelMutator);
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false, this);
       }
 
       for (String forceSensorNames : ValkyrieSensorInformation.forceSensorNames)
@@ -480,5 +473,50 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public FootstepSnappingParameters getSnappingParameters()
    {
       return null;
+   }
+
+   @Override
+   public void mutateJointForModel(String modelName, SDFJointHolder jointHolder)
+   {
+      if(this.jointMap.getModelName().equals(modelName))
+      {
+
+      }
+   }
+
+   @Override
+   public void mutateLinkForModel(String modelName, SDFLinkHolder linkHolder)
+   {
+      if(this.jointMap.getModelName().equals(modelName))
+      {
+
+      }
+   }
+
+   @Override
+   public void mutateSensorForModel(String modelName, SDFSensor sensor)
+   {
+      if(this.jointMap.getModelName().equals(modelName))
+      {
+
+      }
+   }
+
+   @Override
+   public void mutateForceSensorForModel(String modelName, SDFForceSensor forceSensor)
+   {
+      if(this.jointMap.getModelName().equals(modelName))
+      {
+
+      }
+   }
+
+   @Override
+   public void mutateContactSensorForModel(String modelName, SDFContactSensor contactSensor)
+   {
+      if(this.jointMap.getModelName().equals(modelName))
+      {
+
+      }
    }
 }
