@@ -7,7 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.tools.test.JUnitToolsTest.class
+   us.ihmc.tools.testing.JUnitToolsTest.class
 })
 
 public class IHMCUnitTestingAFastTestSuite
