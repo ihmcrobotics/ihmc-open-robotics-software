@@ -2,17 +2,13 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.util.LinkedHashMap;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
@@ -58,9 +54,6 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
       }
 
       GlobalTimer.clearTimers();
-      
-      
-
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -73,6 +66,7 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
    private static final boolean DEBUG = false;
 
    private final double POSITION_THRESHOLD = 0.1;
+
    private final double ORIENTATION_THRESHOLD = 0.007;
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
@@ -81,89 +75,70 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
    public void setUp()
    {
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null, DRCObstacleCourseStartingLocation.DEFAULT,
+              simulationTestingParameters, getRobotModel());
    }
 
-	@DeployableTestMethod(estimatedDuration = 29.1)
-   @Test(timeout = 87234)
+   @DeployableTestMethod(estimatedDuration = 55.4)
+   @Test(timeout = 280000)
    public void testSimpleFootPoseBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
       double trajectoryTime = 3.0;
       RobotSide robotSide = RobotSide.LEFT;
       double deltaZ = 0.2;
-
       final FootPoseBehavior footPoseBehavior = new FootPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(),
-            drcBehaviorTestHelper.getCapturePointUpdatable().getYoDoubleSupport());
-
+                                                   drcBehaviorTestHelper.getCapturePointUpdatable().getYoDoubleSupport());
       FramePose desiredFootPose = getCurrentFootPose(robotSide);
       desiredFootPose.setZ(desiredFootPose.getZ() + deltaZ);
-
       FootPosePacket desiredFootPosePacket = createFootPosePacket(robotSide, desiredFootPose, trajectoryTime);
       footPoseBehavior.initialize();
       footPoseBehavior.setInput(desiredFootPosePacket);
       assertTrue(footPoseBehavior.hasInputBeenSet());
-
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(footPoseBehavior, trajectoryTime + 1.0);
       assertTrue(success);
-
       FramePose finalFootPose = getCurrentFootPose(robotSide);
       assertTrue(footPoseBehavior.isDone());
       assertPosesAreWithinThresholds(desiredFootPose, finalFootPose);
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 21.5)
-   @Test(timeout = 64598)
+   @DeployableTestMethod(estimatedDuration = 34.7)
+   @Test(timeout = 170000)
    public void testSimulataneousLeftAndRightFootPoses() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
       double trajectoryTime = 3.0;
       double deltaZ = 0.2;
-
       SideDependentList<FramePose> initialFootPoses = new SideDependentList<FramePose>();
       SideDependentList<BehaviorInterface> footPoseBehaviors = new SideDependentList<BehaviorInterface>();
       LinkedHashMap<BehaviorInterface, FramePose> desiredFootPoses = new LinkedHashMap<BehaviorInterface, FramePose>();
-
       RobotSide lastRobotSideSentToController = null;
-
       for (RobotSide robotSide : RobotSide.values)
       {
          final FootPoseBehavior footPoseBehavior = new FootPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-               drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getCapturePointUpdatable().getYoDoubleSupport());
-
+                                                      drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getCapturePointUpdatable().getYoDoubleSupport());
          FramePose initialFootPose = getCurrentFootPose(robotSide);
          initialFootPoses.put(robotSide, initialFootPose);
-
          FramePose desiredFootPose = new FramePose(initialFootPose);
          desiredFootPose.setZ(desiredFootPose.getZ() + deltaZ);
-
          FootPosePacket desiredFootPosePacket = createFootPosePacket(robotSide, desiredFootPose, trajectoryTime);
          footPoseBehavior.initialize();
          footPoseBehavior.setInput(desiredFootPosePacket);
          assertTrue(footPoseBehavior.hasInputBeenSet());
-
          footPoseBehaviors.put(robotSide, footPoseBehavior);
          desiredFootPoses.put(footPoseBehavior, desiredFootPose);
-
          lastRobotSideSentToController = robotSide;
       }
 
       success = drcBehaviorTestHelper.executeBehaviorsSimulateAndBlockAndCatchExceptions(footPoseBehaviors, trajectoryTime + 1.0);
       assertTrue(success);
-
       assertPosesAreWithinThresholds(getCurrentFootPose(lastRobotSideSentToController),
-            desiredFootPoses.get(footPoseBehaviors.get(lastRobotSideSentToController)));
+                                     desiredFootPoses.get(footPoseBehaviors.get(lastRobotSideSentToController)));
       assertFootPoseDidNotChange(lastRobotSideSentToController.getOppositeSide(), initialFootPoses);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -177,9 +152,7 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
    private void assertFootPoseDidNotChange(RobotSide robotSide, SideDependentList<FramePose> initialFootPoses)
    {
       FramePose finalFootPose = getCurrentFootPose(robotSide);
-
       FramePose initialFootPose = initialFootPoses.get(robotSide);
-
       assertPosesAreWithinThresholds(finalFootPose, initialFootPose);
    }
 
@@ -187,10 +160,8 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
    {
       Point3d desiredFootPosition = new Point3d();
       Quat4d desiredFootOrientation = new Quat4d();
-
       desiredFootPose.getPosition(desiredFootPosition);
       desiredFootPose.getOrientation(desiredFootOrientation);
-
       FootPosePacket ret = new FootPosePacket(robotSide, desiredFootPosition, desiredFootOrientation, trajectoryTime);
 
       return ret;
@@ -203,6 +174,7 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
       FramePose footPose = new FramePose();
       footPose.setToZero(footFrame);
       footPose.changeFrame(ReferenceFrame.getWorldFrame());
+
       return footPose;
    }
 
@@ -210,7 +182,6 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
    {
       double positionDistance = framePose1.getPositionDistance(framePose2);
       double orientationDistance = framePose1.getOrientationDistance(framePose2);
-
       if (DEBUG)
       {
          System.out.println("testSimpleHandPoseMove: positionDistance=" + positionDistance);
@@ -218,6 +189,7 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
       }
 
       assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + POSITION_THRESHOLD, 0.0, positionDistance, POSITION_THRESHOLD);
-      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance, ORIENTATION_THRESHOLD);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance,
+                   ORIENTATION_THRESHOLD);
    }
 }

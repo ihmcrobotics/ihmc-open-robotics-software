@@ -1,4 +1,4 @@
-package us.ihmc.atlas.generatedTestSuites;
+package us.ihmc.tools.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -7,10 +7,10 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.communication.producers.AtlasRobotConfigurationDataBufferTest.class
+   us.ihmc.tools.test.JUnitToolsTest.class
 })
 
-public class AtlasFFlakyTestSuite
+public class IHMCUnitTestingAFastTestSuite
 {
    public static void main(String[] args)
    {

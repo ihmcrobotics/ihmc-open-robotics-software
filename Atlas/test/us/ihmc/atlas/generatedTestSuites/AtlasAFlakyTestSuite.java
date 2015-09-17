@@ -10,8 +10,7 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.AtlasFlatGroundRewindabilityTest.class,
    us.ihmc.atlas.behaviorTests.AtlasChestOrientationBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasComHeightBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasDetectCollisionUsingWristSensorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasFootPoseBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasDetectCollisionUsingWristSensorTest.class
 })
 
 public class AtlasAFlakyTestSuite

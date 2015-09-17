@@ -1,7 +1,6 @@
 package us.ihmc.tools.processManagement;
 
 import static org.junit.Assert.fail;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,12 +9,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
 import org.junit.Test;
-
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.processManagement.ExitListener;
@@ -36,30 +33,28 @@ public class ProcessSpawnerTest
    private void validateFileContents(String expectedContent) throws Exception
    {
       byte[] binaryData = new byte[128];
-
       DataInputStream dis = FileTools.getFileDataInputStream(testFilePath);
       dis.readFully(binaryData, 0, dis.available());
       dis.close();
-
       String content = new String(binaryData).trim();
       Assert.assertEquals(expectedContent, content);
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 1.0)
+   @Test(timeout = 30000)
    public void testForkedShellProcessSpawner() throws Exception
    {
-	   TestPlanTarget.assumeRunningLocally();
-	   
+      TestPlanTarget.assumeRunningLocally();
       String randomString = Long.toString(System.nanoTime());
-      String[] arguments = { randomString };
-
+      String[] arguments = {randomString};
       System.out.println(testFilePath);
-
       ForkedShellProcessSpawner sps = new ForkedShellProcessSpawner(true);
       sps.spawn("echo", arguments, testFilePath.toFile(), testFilePath.toFile(), null);
 
-      while (sps.hasRunningProcesses()) { ThreadTools.sleep(500); }
+      while (sps.hasRunningProcesses())
+      {
+         ThreadTools.sleep(500);
+      }
 
       sps.shutdown();
       validateFileContents(randomString);
@@ -70,68 +65,74 @@ public class ProcessSpawnerTest
    public void testShelloutProcessSpawnerOnShellScript() throws Exception
    {
       TestPlanTarget.assumeRunningLocally();
-      
+
       if (SystemUtils.IS_OS_WINDOWS)
       {
          PrintTools.error("Not compatible with Windows");
          fail("Not compatible with Windows");
+
          return;
       }
-      
+
       Path testScriptPath = extractScriptFileToKnownDirectory();
       String randomString = Long.toString(System.nanoTime());
-      String[] arguments = { randomString };
-
+      String[] arguments = {randomString};
       ShellScriptProcessSpawner sps = new ShellScriptProcessSpawner(true);
       sps.spawn(testScriptPath.toAbsolutePath().toString(), arguments, testFilePath.toFile(), testFilePath.toFile(), null);
 
-      while (sps.hasRunningProcesses()) { ThreadTools.sleep(500); }
+      while (sps.hasRunningProcesses())
+      {
+         ThreadTools.sleep(500);
+      }
 
       sps.shutdown();
-
       validateFileContents(randomString);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.5)
+   @DeployableTestMethod(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testJavaProcessSpawner() throws Exception
    {
       TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
-      
       String randomString = Long.toString(System.nanoTime());
-      String[] arguments = { randomString };
-
+      String[] arguments = {randomString};
       JavaProcessSpawner jps = new JavaProcessSpawner(true);
       jps.spawn(getClass(), arguments);
 
-      while (jps.hasRunningProcesses()) { ThreadTools.sleep(500); }
+      while (jps.hasRunningProcesses())
+      {
+         ThreadTools.sleep(500);
+      }
 
       validateFileContents(randomString);
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @DeployableTestMethod(estimatedDuration = 2.6)
    @Test(timeout = 30000)
    public void testExitListeners() throws Exception
    {
       TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Flaky);
-      
+
       if (SystemUtils.IS_OS_WINDOWS)
       {
          PrintTools.error("Not compatible with Windows");
+
          return;
       }
-      
-      final List<Integer> exitValues = new ArrayList<>(2);
-      exitValues.clear();
 
-      String[] arguments = { "2" };
+      final List<Integer> exitValues = new ArrayList(2);
+      exitValues.clear();
+      String[] arguments = {"2"};
 
       // implicit exit listener
       ForkedShellProcessSpawner sps = new ForkedShellProcessSpawner(true);
       sps.spawn("sleep", arguments, null, null, new ExitListener()
       {
          @Override
-         public void exited(int statusValue) { exitValues.add(statusValue); }
+         public void exited(int statusValue)
+         {
+            exitValues.add(statusValue);
+         }
       });
 
       // explicit exit listener
@@ -139,10 +140,16 @@ public class ProcessSpawnerTest
       sps.setProcessExitListener(p, new ExitListener()
       {
          @Override
-         public void exited(int statusValue) { exitValues.add(statusValue); }
+         public void exited(int statusValue)
+         {
+            exitValues.add(statusValue);
+         }
       });
 
-      while (sps.hasRunningProcesses()) { ThreadTools.sleep(500); }
+      while (sps.hasRunningProcesses())
+      {
+         ThreadTools.sleep(500);
+      }
 
       Assert.assertEquals(exitValues.size(), 2);
       Assert.assertEquals(exitValues.get(0).intValue(), 0);
