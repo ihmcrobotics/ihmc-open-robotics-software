@@ -1,4 +1,4 @@
-package us.ihmc.tools.test;
+package us.ihmc.tools.testing;
 
 import static org.junit.Assert.assertTrue;
 
@@ -21,12 +21,13 @@ import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4d;
 import javax.vecmath.Vector4f;
 
+import org.apache.commons.math3.exception.NullArgumentException;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import Jama.Matrix;
-import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class JUnitToolsTest
 {
@@ -34,43 +35,43 @@ public class JUnitToolsTest
    @Test(timeout = 30000)
    public void testDeriveTestResourcePath()
    {
-      Path path = Paths.get("testResources", "us/ihmc/tools/test/jUnitToolsTest");
+      Path path = Paths.get("testResources", "us/ihmc/tools/testing/jUnitToolsTest");
       Path derivedPath = JUnitTools.deriveTestResourcesPath(this.getClass());
 
       assertTrue(path.compareTo(derivedPath) == 0);
    }
 
-//   @DeployableTestMethod(estimatedDuration = 0.0)
-//	@Test(timeout = 30000)
-//   public void testAssertExceptionThrown()
-//   {
-//      JUnitTools.assertExceptionThrown(Exception.class, new RunnableThatThrows()
-//      {
-//         public void run() throws Throwable
-//         {
-//            throw new Exception();
-//         }
-//      });
-//   }
-//
-//	@DeployableTestMethod(estimatedDuration = 0.0)
-//	@Test(timeout = 30000)
-//   public void testAssertExceptionNotThrown()
-//   {
-//      JUnitTools.assertExceptionThrown(AssertionError.class, new RunnableThatThrows()
-//      {
-//         public void run() throws Throwable
-//         {
-//            JUnitTools.assertExceptionThrown(IndexOutOfBoundsException.class, new RunnableThatThrows()
-//            {
-//               public void run() throws Throwable
-//               {
-//                  throw new NullArgumentException();
-//               }
-//            });
-//         }
-//      });
-//   }
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testAssertExceptionThrown()
+   {
+      JUnitTools.assertExceptionThrown(Exception.class, new RunnableThatThrows()
+      {
+         public void run() throws Throwable
+         {
+            throw new Exception();
+         }
+      });
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testAssertExceptionNotThrown()
+   {
+      JUnitTools.assertExceptionThrown(AssertionError.class, new RunnableThatThrows()
+      {
+         public void run() throws Throwable
+         {
+            JUnitTools.assertExceptionThrown(IndexOutOfBoundsException.class, new RunnableThatThrows()
+            {
+               public void run() throws Throwable
+               {
+                  throw new NullArgumentException();
+               }
+            });
+         }
+      });
+   }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 300000)
