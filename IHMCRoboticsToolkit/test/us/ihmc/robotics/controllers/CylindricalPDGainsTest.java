@@ -6,9 +6,12 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+
 public class CylindricalPDGainsTest
 {
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void test()
    {
       Random random = new Random();

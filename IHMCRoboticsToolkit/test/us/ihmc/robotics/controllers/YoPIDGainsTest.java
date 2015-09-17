@@ -1,17 +1,17 @@
 package us.ihmc.robotics.controllers;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.util.Random;
 
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class YoPIDGainsTest
 {
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void test()
    {
       YoPIDGains pidGains = new YoPIDGains("test", new YoVariableRegistry("PIDGainsRegistry"));
@@ -49,7 +49,8 @@ public class YoPIDGainsTest
       }
    }
    
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testParameters_2()
    {
       YoPIDGains pidGains = new YoPIDGains("test", new YoVariableRegistry("PIDGainsRegistry"));
@@ -86,7 +87,8 @@ public class YoPIDGainsTest
       }
    }
    
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testParameters_3()
    {
       YoPIDGains pidGains = new YoPIDGains("test", new YoVariableRegistry("PIDGainsRegistry"));
