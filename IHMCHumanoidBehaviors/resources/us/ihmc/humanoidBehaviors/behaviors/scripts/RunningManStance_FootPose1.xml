@@ -1,15 +1,15 @@
 <object-stream>
   <long>8536105358</long>
-  <us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
     <quaternion>
       <x>-6.275758703100774E-6</x>
       <y>0.2534523819183771</y>
       <z>2.543328411021386E-5</z>
       <w>0.9673478637045021</w>
     </quaternion>
-  </us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
   <long>18226637407</long>
-  <us.ihmc.communication.packets.walking.FootPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
     <robotSide>LEFT</robotSide>
     <position>
       <x>-0.0013761152128051683</x>
@@ -22,9 +22,9 @@
       <z>5.424911986873032E-4</z>
       <w>0.9999998528402846</w>
     </orientation>
-  </us.ihmc.communication.packets.walking.FootPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
   <long>31737665390</long>
-  <us.ihmc.communication.packets.walking.FootPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
     <robotSide>LEFT</robotSide>
     <position>
       <x>-0.4861862094932677</x>
@@ -37,9 +37,9 @@
       <z>4.8553631849713216E-4</z>
       <w>0.8987935652610323</w>
     </orientation>
-  </us.ihmc.communication.packets.walking.FootPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
   <long>10999084456</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <referenceFrame>CHEST</referenceFrame>
@@ -64,18 +64,18 @@
       <double>0.10102588283657626</double>
       <double>-0.151471531941984</double>
     </jointAngles>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>5822054723</long>
-  <us.ihmc.communication.packets.walking.HeadOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
     <quaternion>
       <x>0.0</x>
       <y>-0.2714153853317575</y>
       <z>0.0</z>
       <w>0.9624623050308067</w>
     </quaternion>
-  </us.ihmc.communication.packets.walking.HeadOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
   <long>12333501457</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <referenceFrame>CHEST</referenceFrame>
@@ -100,7 +100,7 @@
       <double>0.10691508075772502</double>
       <double>0.19525109403704635</double>
     </jointAngles>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>28246745142</long>
-  <us.ihmc.communication.packets.walking.EndOfScriptCommand/>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand/>
 </object-stream>

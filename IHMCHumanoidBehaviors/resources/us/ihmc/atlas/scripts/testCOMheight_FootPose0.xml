@@ -1,24 +1,24 @@
 <object-stream>
   <long>152671907666</long>
-  <us.ihmc.communication.packets.walking.ComHeightPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.12936</heightOffset>
-  </us.ihmc.communication.packets.walking.ComHeightPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
   <long>159186812341</long>
-  <us.ihmc.communication.packets.walking.ComHeightPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.030184000000000002</heightOffset>
-  </us.ihmc.communication.packets.walking.ComHeightPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
   <long>165475747977</long>
-  <us.ihmc.communication.packets.walking.ComHeightPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.25088</heightOffset>
-  </us.ihmc.communication.packets.walking.ComHeightPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
   <long>170988761787</long>
-  <us.ihmc.communication.packets.walking.ComHeightPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.0</heightOffset>
-  </us.ihmc.communication.packets.walking.ComHeightPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
   <long>175221717158</long>
-  <us.ihmc.communication.packets.walking.ComHeightPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.028126</heightOffset>
-  </us.ihmc.communication.packets.walking.ComHeightPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
   <long>179141589084</long>
-  <us.ihmc.communication.packets.walking.EndOfScriptCommand/>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand/>
 </object-stream>
