@@ -15,6 +15,5 @@ public class TestPlanAnnotations
    public @interface DeployableTestMethod
    {
       double estimatedDuration() default 1.0;
-      boolean quarantined() default false;
    }
 }
