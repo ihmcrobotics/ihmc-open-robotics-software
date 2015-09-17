@@ -1,15 +1,21 @@
 package us.ihmc.valkyrie;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import com.martiansoftware.jsap.JSAPException;
 
+import org.ros.internal.message.Message;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.ROSAPISimulator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
+import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
+import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 public class ValkyrieROSAPISimulator extends ROSAPISimulator
 {
@@ -26,7 +32,17 @@ public class ValkyrieROSAPISimulator extends ROSAPISimulator
    {
       return new DRCDemo01NavigationEnvironment();
    }
-   
+
+   @Override protected List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> createCustomSubscribers(PacketCommunicator communicator)
+   {
+      return null;
+   }
+
+   @Override protected List<Map.Entry<String, RosTopicPublisher<? extends Message>>> createCustomPublishers(PacketCommunicator communicator)
+   {
+      return null;
+   }
+
    public static void main(String[] args) throws JSAPException, IOException
    {
       Options opt = parseArguments(args);
