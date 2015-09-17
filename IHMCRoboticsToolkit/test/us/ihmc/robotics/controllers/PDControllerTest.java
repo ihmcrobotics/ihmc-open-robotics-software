@@ -57,8 +57,8 @@ public class PDControllerTest
       
       for(int i = 0; i < 1000; i++)
       {
-          double current = Math.PI - random.nextDouble()*Math.toRadians(10);
-          double desired = -(Math.PI - random.nextDouble()*Math.toRadians(10));
+          double current = Math.PI - random.nextDouble()*Math.toRadians(89);
+          double desired = -(Math.PI - random.nextDouble()*Math.toRadians(89));
           double value = pdController.computeForAngles(current, desired, 0, 0);
           double error = (Math.PI - current) + (Math.PI - Math.abs(desired));
           
