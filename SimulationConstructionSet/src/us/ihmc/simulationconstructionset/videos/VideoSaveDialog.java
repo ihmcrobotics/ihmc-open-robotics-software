@@ -10,14 +10,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 import us.ihmc.simulationconstructionset.commands.ExportVideoCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.ActiveCanvas3DHolder;
@@ -29,8 +22,8 @@ import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDis
 
 public class VideoSaveDialog implements TickUpdateListener
 {
-   private final Dimension[] dimensions = {new Dimension(640, 360), new Dimension(1280, 720), new Dimension(1920, 1080), new Dimension(640, 480),
-           new Dimension(800, 600)};
+   private final Resolution[] dimensions = {new Resolution(640, 360), new Resolution(1280, 720), new Resolution(1920, 1080), new Resolution(640, 480),
+           new Resolution(800, 600)};
 
    private final int frameWidth = 720;
    private final int frameHeight = 600;
@@ -95,7 +88,8 @@ public class VideoSaveDialog implements TickUpdateListener
       panel.add(toolbar);
 
       JPanel settings = new JPanel();
-      JComboBox resolutions = new JComboBox(dimensions);
+      JComboBox <Dimension> resolutions = new JComboBox<Dimension>(dimensions);
+
       resolutions.addActionListener(new ActionListener()
       {
          public void actionPerformed(ActionEvent e)
@@ -215,4 +209,22 @@ public class VideoSaveDialog implements TickUpdateListener
       }
    }
 
+   private class Resolution extends Dimension
+   {
+      public Resolution() {
+      }
+
+      public Resolution(Dimension d) {
+         super(d);
+      }
+
+      public Resolution(int width, int height) {
+         super(width, height);
+      }
+
+      @Override
+      public String toString() {
+         return width + " x " + height;
+      }
+   }
 }
