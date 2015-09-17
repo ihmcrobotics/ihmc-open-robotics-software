@@ -7,10 +7,12 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class YoPDGainsTest
 {
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testParameters()
    {
       YoPDGains gains = new YoPDGains("pdGains", new YoVariableRegistry("testRegistry"));
@@ -43,7 +45,8 @@ public class YoPDGainsTest
       }
    }
    
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testParameters_2()
    {
       YoPDGains gains = new YoPDGains("pdGains", new YoVariableRegistry("testRegistry"));

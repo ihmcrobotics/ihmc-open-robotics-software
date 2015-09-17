@@ -7,9 +7,12 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+
 public class GainCalculatorTest
 {
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testComputeDerivativeGain()
    {
       Random random = new Random();
@@ -23,7 +26,8 @@ public class GainCalculatorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testComputeDampingForSecondOrderSystem()
    {
       double dampingCoeff = GainCalculator.computeDampingForSecondOrderSystem(1, 1, 1);
