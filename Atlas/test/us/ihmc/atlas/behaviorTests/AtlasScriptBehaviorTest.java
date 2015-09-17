@@ -1,9 +1,7 @@
 package us.ihmc.atlas.behaviorTests;
 
 import java.io.FileNotFoundException;
-
 import org.junit.Test;
-
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCScriptBehaviorTest;
@@ -37,8 +35,8 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 39.3)
+   @Test(timeout = 200000)
    public void testPauseAndResumeScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Flaky);
@@ -46,8 +44,8 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 26.4)
+   @Test(timeout = 130000)
    public void testScriptWithOneHandPosePacket() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Flaky);
@@ -64,8 +62,8 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 36.1)
+   @Test(timeout = 180000)
    public void testScriptWithTwoHandPosePackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Flaky);

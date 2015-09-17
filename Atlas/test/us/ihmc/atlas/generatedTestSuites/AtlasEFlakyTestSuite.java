@@ -7,7 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.communication.producers.AtlasRobotConfigurationDataBufferTest.class
+   us.ihmc.atlas.behaviorTests.AtlasScriptBehaviorTest.class
 })
 
 public class AtlasEFlakyTestSuite

@@ -2,16 +2,12 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.util.Random;
-
 import javax.vecmath.Point3d;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
@@ -55,9 +51,6 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       }
 
       GlobalTimer.clearTimers();
-      
-      
-
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -72,56 +65,47 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
    public static final double POSITION_THRESHOLD = 0.05;
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
+
    private double nominalComHeightAboveGround;
 
    @Before
    public void setUp()
    {
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null, DRCObstacleCourseStartingLocation.DEFAULT,
+              simulationTestingParameters, getRobotModel());
    }
 
-   @DeployableTestMethod(estimatedDuration = 16.1)
-   @Test(timeout = 48271)
+   @DeployableTestMethod(estimatedDuration = 32.0)
+   @Test(timeout = 160000)
    public void testMoveToMinHeight() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       double trajectoryTime = RandomTools.generateRandomDouble(new Random(), 1.0, 3.0);
       double desiredHeightOffset = ComHeightPacket.MIN_COM_HEIGHT;
-
       testComHeightBehavior(desiredHeightOffset, trajectoryTime);
-
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(estimatedDuration = 21.9)
-   @Test(timeout = 65777)
+   @DeployableTestMethod(estimatedDuration = 29.8)
+   @Test(timeout = 150000)
    public void testMoveToMaxHeight() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       double trajectoryTime = RandomTools.generateRandomDouble(new Random(), 1.0, 3.0);
       double desiredHeightOffset = ComHeightPacket.MAX_COM_HEIGHT;
-
       testComHeightBehavior(desiredHeightOffset, trajectoryTime);
-
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(estimatedDuration = 16.4)
-   @Test(timeout = 49241)
+   @DeployableTestMethod(estimatedDuration = 35.8)
+   @Test(timeout = 180000)
    public void testRandomComHeight() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       double trajectoryTime = RandomTools.generateRandomDouble(new Random(), 1.0, 3.0);
       double desiredHeightOffset = createValidComHeightOffset(RandomTools.generateRandomDouble(new Random(), 0.0, 1.0));
-
       testComHeightBehavior(desiredHeightOffset, trajectoryTime);
-
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -137,15 +121,11 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
       final ComHeightBehavior comHeightBehavior = createAndSetBehavior(desiredHeightOffset, trajectoryTime);
-
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(comHeightBehavior, trajectoryTime + 1.0);
       assertTrue(success);
-
       Point3d finalComPoint = new Point3d();
       drcBehaviorTestHelper.getRobot().computeCenterOfMass(finalComPoint);
-
       assertProperComHeightOffsetFromGround(desiredHeightOffset, finalComPoint);
       assertTrue(comHeightBehavior.isDone());
    }
@@ -155,26 +135,24 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       Point3d nominalComPosition = new Point3d();
       drcBehaviorTestHelper.getRobot().computeCenterOfMass(nominalComPosition);
       nominalComHeightAboveGround = nominalComPosition.getZ();
-
       final ComHeightBehavior comHeightBehavior = new ComHeightBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            drcBehaviorTestHelper.getYoTime());
-
+                                                     drcBehaviorTestHelper.getYoTime());
       Point3d initialComPoint = new Point3d();
       drcBehaviorTestHelper.getRobot().computeCenterOfMass(initialComPoint);
-
       ComHeightPacket comHeightPacket = new ComHeightPacket(desiredHeightOffset, trajectoryTime);
       comHeightBehavior.setInput(comHeightPacket);
       assertTrue(comHeightBehavior.hasInputBeenSet());
+
       return comHeightBehavior;
    }
 
    private void assertProperComHeightOffsetFromGround(double desiredHeightOffset, Point3d finalComPoint)
    {
       double actualHeightOffset = finalComPoint.getZ() - nominalComHeightAboveGround;
-
       PrintTools.debug(this, "desiredHeightOffset: " + desiredHeightOffset);
       PrintTools.debug(this, "actualHeightOffset: " + actualHeightOffset);
-
-      assertEquals("Actual CoM Height Offset :" + actualHeightOffset + " does not match desired offset: " + desiredHeightOffset + " within threshold of " + POSITION_THRESHOLD, desiredHeightOffset, actualHeightOffset, POSITION_THRESHOLD);;
+      assertEquals("Actual CoM Height Offset :" + actualHeightOffset + " does not match desired offset: " + desiredHeightOffset + " within threshold of "
+                   + POSITION_THRESHOLD, desiredHeightOffset, actualHeightOffset, POSITION_THRESHOLD);
+      ;
    }
 }

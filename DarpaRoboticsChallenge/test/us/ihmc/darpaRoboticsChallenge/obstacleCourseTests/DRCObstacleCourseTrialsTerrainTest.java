@@ -1,15 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
 import static org.junit.Assert.assertTrue;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -29,7 +26,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -52,59 +49,44 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 44.2)
-	@Test(timeout = 1200000)
+   @DeployableTestMethod(estimatedDuration = 94.2)
+   @Test(timeout = 470000)
    public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsSlopeLeftFootPose.xml";
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlopeTest", scriptName, selectedLocation, simulationTestingParameters,
-              getRobotModel());
-
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlopeTest", scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOntoSlopes(simulationConstructionSet);
-
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
-
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
-
       assertTrue(success);
 
-      Point3d center = new Point3d(3.7337489920899674, 4.102901514571013, 0.7892401231988355); //Atlas
+      // Atlas
+      Point3d center = new Point3d(3.7337489920899674, 4.102901514571013, 0.7892401231988355);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 45.8)
-	@Test(timeout = 1200000)
+   @DeployableTestMethod(estimatedDuration = 75.1)
+   @Test(timeout = 380000)
    public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsSlopeLeftFootPose.xml";
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlopeTest", scriptName, selectedLocation, simulationTestingParameters,
-              getRobotModel());
-
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlopeTest", scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOntoSlopes(simulationConstructionSet);
-
       SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1201L);
       slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[] {0.02, 0.03, 0.0}, new double[] {0.025, 0.035, 0.005});
@@ -113,75 +95,54 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       slipRandomOnEachStepPerturber.setSlipPercentSlipPerTickRange(0.01, 0.03);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.0);
       robot.setController(slipRandomOnEachStepPerturber, 10);
-
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.6);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
-
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
-
       assertTrue(success);
-      
-      Point3d center = new Point3d(3.853111159859177, 4.117657981767957, 0.7897555650626801); //Atlas
+
+      // Atlas
+      Point3d center = new Point3d(3.853111159859177, 4.117657981767957, 0.7897555650626801);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 23.3)
-	@Test(timeout = 1200000)
+   @DeployableTestMethod(estimatedDuration = 36.4)
+   @Test(timeout = 180000)
    public void testTrialsTerrainZigzagHurdlesScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCZigzagHurdlesTest", scriptName, selectedLocation, simulationTestingParameters,
-              getRobotModel());
-
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCZigzagHurdlesTest", scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverHurdles(simulationConstructionSet);
-
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
-
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
-
       assertTrue(success);
-
       Point3d center = new Point3d(4.437597506324034, 5.699204748831417, 0.8376763465412774);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 30.0)
-	@Test(timeout = 1200000)
+   @DeployableTestMethod(estimatedDuration = 47.7)
+   @Test(timeout = 240000)
    public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCZigzagHurdlesTest", scriptName, selectedLocation, simulationTestingParameters,
-              getRobotModel());
-
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCZigzagHurdlesTest", scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverHurdles(simulationConstructionSet);
-
       SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1201L);
       slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[] {0.03, 0.03, 0.0}, new double[] {0.04, 0.06, 0.005});
@@ -190,194 +151,142 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       slipRandomOnEachStepPerturber.setSlipPercentSlipPerTickRange(0.01, 0.03);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.0);
       robot.setController(slipRandomOnEachStepPerturber, 10);
-
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(1.0);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
-
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
-
       assertTrue(success);
-
       Point3d center = new Point3d(4.433273741150176, 5.75375933959496, 0.8417057558698022);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 64.7)
-	@Test(timeout = 1200000)
+   @DeployableTestMethod(estimatedDuration = 118.1)
+   @Test(timeout = 590000)
    public void testTrialsTerrainCinderblockFieldPartOneScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsCinderblockFieldPartOneLeftFootPose.xml";
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCCinderblockFieldPartOneTest", scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
-
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCCinderblockFieldPartOneTest", scriptName, selectedLocation, simulationTestingParameters,
+              getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverFlatCinderblockField(simulationConstructionSet);
-
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(40.0);
-
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
-
       assertTrue(success);
-
       Point3d center = new Point3d(7.835560985582835, 7.532745552758279, 0.83581213602485);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 83.9)
-	@Test(timeout = 1200000)
+   @DeployableTestMethod(estimatedDuration = 123.0)
+   @Test(timeout = 610000)
    public void testTrialsTerrainCinderblockFieldPartTwoScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsCinderblockFieldPartTwoLeftFootPose.xml";
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_SLANTED_CINDERBLOCK_FIELD;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCCinderblockfieldPartTwoTest", scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
-
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCCinderblockfieldPartTwoTest", scriptName, selectedLocation, simulationTestingParameters,
+              getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverSlantedCinderblockField(simulationConstructionSet);
-
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(40.0);
-
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
-
       assertTrue(success);
-
       Point3d center = new Point3d(10.422663728493601, 10.38386343596939, 0.7902270941235433);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@Ignore
-	// "Need to rerecord")
-	@DeployableTestMethod
-   @Test(timeout=1200000)
+   @Ignore
+
+   // "Need to rerecord")
+   @DeployableTestMethod
+   @Test(timeout = 1200000)
    public void testTrialsTerrainUpFlatCinderblocksScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsUpFlatCinderblocks.xml";
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD;
-
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCFlatCinderblockTest", scriptName, selectedLocation, simulationTestingParameters,
               getRobotModel());
-
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverFlatCinderblockField(simulationConstructionSet);
-
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
-
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       // ThreadTools.sleepForever();
       assertTrue(success);
-
       Point3d center = new Point3d();
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	/**
-	 * Need to rerecord
-	 * 
-	 * @throws SimulationExceededMaximumTimeException
-	 */
+   /**
+    *     Need to rerecord
+    *
+    *     @throws SimulationExceededMaximumTimeException
+    */
    @Ignore
    @DeployableTestMethod
    @Test(timeout = 1200000)
    public void testTrialsTerrainUpSlantedCinderblocksScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsUpSlantedCinderblocks.xml";
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_SLANTED_CINDERBLOCK_FIELD;
-
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlantedCinderblockTest", scriptName, selectedLocation, simulationTestingParameters,
               getRobotModel());
-
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverSlantedCinderblockField(simulationConstructionSet);
-
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
-
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
-
       assertTrue(success);
-
       Point3d center = new Point3d();
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 90.6)
-	@Test(timeout = 1800000)
+   @DeployableTestMethod(estimatedDuration = 162.3)
+   @Test(timeout = 810000)
    public void testTrialsTerrainCinderblockEntireFieldScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsCinderblockFieldBoth.xml";
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD;
-
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlantedCinderblockTest", scriptName, selectedLocation, simulationTestingParameters,
               getRobotModel());
-
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
-
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(50.0);
-
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
-
       assertTrue(success);
-
       Point3d center = new Point3d(10.225031808342184, 10.216934963379252, 0.9057308036043942);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -424,59 +333,45 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
     * drcSimulationTestHelper.checkNothingChanged();
     *
     * assertTrue(success);
-    * 
+    *
     *  Point3d center = new Point3d();
     *  Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
     *  BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
     *  drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-    * 
+    *
     *
     * BambooTools.reportTestFinishedMessage(); }
     */
-
-	@DeployableTestMethod(estimatedDuration = 43.4)
-	@Test(timeout = 1200000)
+   @DeployableTestMethod(estimatedDuration = 66.9)
+   @Test(timeout = 330000)
    public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoSlopesTest", "", selectedLocation, simulationTestingParameters,
-              getRobotModel());
-
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoSlopesTest", "", selectedLocation, simulationTestingParameters, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
-
       setupCameraForWalkingOntoSlopes(simulationConstructionSet);
-
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-
       FootstepDataList footstepDataList = createFootstepsForWalkingToTheSlopesSideways(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
-
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
 
       if (success)
       {
          footstepDataList = createFootstepsForSteppingOverTheSlopesEdgeSideways(scriptedFootstepGenerator);
          drcSimulationTestHelper.send(footstepDataList);
-
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
       }
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
-
       assertTrue(success);
-      
       Point3d center = new Point3d(3.3267919256794363, 3.355608873842678, 0.9247970191596047);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -484,7 +379,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    {
       Point3d cameraFix = new Point3d(3.6214, 2.5418, 0.5);
       Point3d cameraPosition = new Point3d(6.6816, -0.5441, 1.5);
-
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
@@ -492,7 +386,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    {
       Point3d cameraFix = new Point3d(4.9246, 4.0338, 0.5);
       Point3d cameraPosition = new Point3d(8.1885, 1.1641, 1.5);
-
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
@@ -500,7 +393,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    {
       Point3d cameraFix = new Point3d(7.8655, 6.8947, 0.5);
       Point3d cameraPosition = new Point3d(10.2989, 18.7661, 3.2746);
-
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
@@ -508,7 +400,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    {
       Point3d cameraFix = new Point3d(9.7689, 9.0724, 0.5);
       Point3d cameraPosition = new Point3d(8.0254, 16.6036, 2.5378);
-
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
@@ -516,7 +407,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    {
       Point3d cameraFix = new Point3d(7.447, 7.0966, 0.5);
       Point3d cameraPosition = new Point3d(6.3809, 14.6839, 2.7821);
-
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
@@ -569,7 +459,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
     * scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations
     * (robotSides, footstepLocationsAndOrientations); }
     */
-
    private FootstepDataList createFootstepsForWalkingToTheSlopesSideways(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
@@ -635,9 +524,8 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
          },
          {
             {3.128623440850548, 3.133453453117145, 0.20285914961446738}, {0.12598064593469932, -0.06710112170905909, -0.35316275861517443, 0.9246093133008028}
-         },
+         }
       };
-
       RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
@@ -661,12 +549,10 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
          },
          {
             {3.2811041904535196, 3.3537632182460775, 0.22458026669614373}, {-0.11259311979747, 0.025105614756717354, -0.36036496334456175, 0.9256509010829258}
-         },
+         }
       };
-
       RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
-
 }
