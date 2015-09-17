@@ -157,7 +157,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    
    private void notifyRepaint(int rendersToPerform) {
       synchronized (repaintNotifier) {
-         lazyRendersToPerform = rendersToPerform;
+         // Multiply by 2 because of double buffering - we want to repaint both buffers
+         lazyRendersToPerform = Math.max(lazyRendersToPerform, rendersToPerform * 2);
          repaintNotifier.notifyAll();
       }
    }
@@ -545,7 +546,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
       // simple update and root node
       simpleUpdate(tpf);
-      boolean change = shouldRepaint();
+      if (shouldRepaint())
+         lazyRendersToPerform = Math.max(lazyRendersToPerform, 2); // Render to both front and back buffer
 
       if (prof!=null) prof.appStep(AppStep.SpatialUpdate);
       rootNode.updateLogicalState(tpf);
@@ -561,7 +563,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       if (prof!=null) prof.appStep(AppStep.RenderFrame);
 
       // Do not render anything unless necessary
-      if (change || !(lazyRendering && lazyRendersToPerform <= 0 && gpuLidars.isEmpty())) {
+      if (!lazyRendering || lazyRendersToPerform > 0) {
          renderManager.render(tpf, context.isRenderable());
          lazyRendersToPerform = Math.max(0, lazyRendersToPerform - 1);
       }
@@ -1249,5 +1251,4 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       this.lazyRendering = true;
    }
-	
 }
