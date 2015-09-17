@@ -12,26 +12,38 @@ import us.ihmc.tools.DocumentedEnum;
  */
 public class EnumDocumentationFactory
 {
-   public static Class<? extends DocumentedEnum> getDocumentation(Class<? extends Enum<?>> clazz)
+   public static DocumentedEnum getDocumentation(Class<? extends Enum<?>> clazz)
    {
-      if (DocumentedEnum.class.isAssignableFrom(clazz))
-      {
-         return (Class<? extends DocumentedEnum>) clazz;
-      }
       
       if(clazz == RobotSide.class)
       {
-         return RobotSideDocumentation.class;
+         return new RobotSideDocumentation();
       }
-      else if (clazz == RobotEnd.class)
+      if (clazz == RobotEnd.class)
       {
-         return RobotEndDocumentation.class;
+         return new RobotEndDocumentation();
       }
-      else if (clazz == TrajectoryType.class)
+      if (clazz == TrajectoryType.class)
       {
-         return TrajectoryTypeDocumentation.class;
+         return new TrajectoryTypeDocumentation();
       }
       
+      // Catch all clause
+      if (DocumentedEnum.class.isAssignableFrom(clazz))
+      {
+         Class<? extends DocumentedEnum> documentedEnum = (Class<? extends DocumentedEnum>) clazz;
+         DocumentedEnum[] values = documentedEnum.getEnumConstants();
+         if(values.length > 0)
+         {
+            return values[0];
+         }
+         else
+         {
+            return null;
+         }
+      }
+
+      // Nothing found, return null
       return null;
    }
 }

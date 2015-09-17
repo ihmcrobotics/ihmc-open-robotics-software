@@ -6,7 +6,6 @@ import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -21,6 +20,7 @@ import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.tools.DocumentedEnum;
+import us.ihmc.utilities.ros.documentation.enums.EnumDocumentationFactory;
 
 public class ROSMessageGenerator
 {
@@ -200,38 +200,35 @@ public class ROSMessageGenerator
       }
       else if (clazz.isEnum())
       {
-         
-         if (DocumentedEnum.class.isAssignableFrom(clazz))
+         DocumentedEnum documentedEnum = EnumDocumentationFactory.getDocumentation(clazz);
+         if(documentedEnum != null)
          {
-            DocumentedEnum[] enumList = (DocumentedEnum[]) clazz.getEnumConstants();
-            if (enumList.length > 0)
+            Object[] documentedValues = documentedEnum.getDocumentedValues();
+
+            buffer += "# Options for " + varName + "\n";
+
+            for (int i = 0; i < documentedValues.length; i++)
             {
-               List<Object> documentedValues = Arrays.asList(enumList[0].getDocumentedValues());
-
-               buffer += "# Options for " + varName + "\n";
-
-               for (int i = 0; i < documentedValues.size(); i++)
+               if (duplicateEnum)
                {
-                  if (duplicateEnum)
-                  {
-                     buffer += "# ";
-                  }else
-                  {
-                     buffer += "uint8 ";
-                  }
-                  buffer += documentedValues.get(i).toString() + "=" + i;
-                  DocumentedEnum<Object> documentedEnum = (DocumentedEnum<Object>) Enum.valueOf(clazz, documentedValues.get(i).toString());
-                  String documentation = documentedEnum.getDocumentation(documentedValues.get(i));
-                  buffer += " # " + documentation;
-                  buffer += "\n";
+                  buffer += "# ";
                }
+               else
+               {
+                  buffer += "uint8 ";
+               }
+               buffer += documentedValues[i].toString() + "=" + i;
 
-               buffer += "uint8";
+               String documentation = documentedEnum.getDocumentation(documentedValues[i]);
+               buffer += " # " + documentation;
+               buffer += "\n";
             }
+
+            buffer += "uint8";
          }
          else
          {
-            System.err.println(clazz.getSimpleName() + " is not a DocumentedEnum! Fix and rerun!");
+            System.err.println(clazz.getSimpleName() + " is not a DocumentedEnum and not defined EnumDocumentationFactory! Fix and rerun!");
          }
 
       }
