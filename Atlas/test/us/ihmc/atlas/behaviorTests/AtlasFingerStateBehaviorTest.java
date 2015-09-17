@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.Slow})
 public class AtlasFingerStateBehaviorTest extends DRCFingerStateBehaviorTest
 {
    private final AtlasRobotModel robotModel;
