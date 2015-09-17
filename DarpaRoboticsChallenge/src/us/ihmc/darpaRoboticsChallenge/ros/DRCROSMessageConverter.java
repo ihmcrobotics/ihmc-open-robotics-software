@@ -17,6 +17,7 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
+import ihmc_msgs.FingerStatePacketMessage;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
@@ -51,12 +52,14 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangePacket;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.JointTrajectoryPoint;
@@ -125,6 +128,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((WholeBodyTrajectoryPacket) packet);
       else if (packet instanceof StopMotionPacket)
          return convertToRosMessage((StopMotionPacket) packet);
+      else if (packet instanceof FingerStatePacket)
+         return convertToRosMessage((FingerStatePacket) packet);
       else
          return null;
    }
@@ -173,6 +178,8 @@ public class DRCROSMessageConverter
          return convertToPacket((WholeBodyTrajectoryPacketMessage) message);
       else if (message instanceof StopMotionPacketMessage)
          return convertToPacket((StopMotionPacketMessage) message);
+      else if (message instanceof FingerStatePacketMessage)
+         return convertToPacket((FingerStatePacketMessage) message);
       else
          return null;
    }
@@ -591,7 +598,8 @@ public class DRCROSMessageConverter
 
    public static HeadOrientationPacket convertToPacket(HeadOrientationPacketMessage message)
    {
-      HeadOrientationPacket ret = new HeadOrientationPacket(convertQuaternionToQuat4d(message.getOrientation()), message.getTrajectoryTime());ret.setUniqueId(message.getUniqueId());
+      HeadOrientationPacket ret = new HeadOrientationPacket(convertQuaternionToQuat4d(message.getOrientation()), message.getTrajectoryTime());ret.setUniqueId(
+         message.getUniqueId());
 
       return ret;
    }
@@ -623,7 +631,8 @@ public class DRCROSMessageConverter
 
    public static HighLevelStatePacket convertToPacket(HighLevelStatePacketMessage message)
    {
-      HighLevelStatePacket ret = new HighLevelStatePacket(convertByteToEnum(HighLevelState.class, message.getHighLevelState()));ret.setUniqueId(message.getUniqueId());
+      HighLevelStatePacket ret = new HighLevelStatePacket(convertByteToEnum(HighLevelState.class, message.getHighLevelState()));ret.setUniqueId(
+         message.getUniqueId());
 
       return ret;
    }
@@ -756,6 +765,25 @@ public class DRCROSMessageConverter
    {
       HighLevelStateChangePacket ret = new HighLevelStateChangePacket(convertByteToEnum(HighLevelState.class, message.getInitialState()),
             convertByteToEnum(HighLevelState.class, message.getEndState()));
+
+      return ret;
+   }
+
+   public static FingerStatePacketMessage convertToRosMessage(FingerStatePacket packet)
+   {
+      FingerStatePacketMessage ret = messageFactory.newFromType("ihmc_msgs/FingerStatePacketMessage");
+      ret.setUniqueId(packet.getUniqueId());
+      ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
+      ret.setFingerState(convertEnumToByte(packet.getFingerState()));
+
+      return ret;
+   }
+
+   public static FingerStatePacket convertToPacket(FingerStatePacketMessage message)
+   {
+      FingerStatePacket ret = new FingerStatePacket(convertByteToEnum(RobotSide.class, message.getRobotSide()),
+            convertByteToEnum(FingerState.class, message.getFingerState()));
+      ret.setUniqueId(message.getUniqueId());
 
       return ret;
    }
