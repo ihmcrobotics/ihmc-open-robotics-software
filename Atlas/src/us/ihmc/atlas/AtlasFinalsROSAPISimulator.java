@@ -1,15 +1,27 @@
 package us.ihmc.atlas;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import com.martiansoftware.jsap.JSAPException;
 
+import ihmc_msgs.FingerStatePacketMessage;
+import org.ros.internal.message.Message;
+import org.ros.message.MessageFactory;
+import org.ros.message.MessageFactoryProvider;
+import org.ros.node.NodeConfiguration;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.DRCSCStartingLocations;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.ROSAPISimulator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCFinalsEnvironment;
+import us.ihmc.darpaRoboticsChallenge.ros.subscriber.IHMCMsgToPacketSubscriber;
+import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
+import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 public class AtlasFinalsROSAPISimulator extends ROSAPISimulator
 {
@@ -33,7 +45,17 @@ public class AtlasFinalsROSAPISimulator extends ROSAPISimulator
    {
       return new DRCFinalsEnvironment(CREATE_DOOR, CREATE_DRILL, CREATE_VALVE, CREATE_WALKING, CREATE_STAIRS);
    }
-   
+
+   @Override protected List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> createCustomSubscribers(PacketCommunicator communicator)
+   {
+      return null;
+   }
+
+   @Override protected List<Map.Entry<String, RosTopicPublisher<? extends Message>>> createCustomPublishers(PacketCommunicator communicator)
+   {
+      return null;
+   }
+
    public static void main(String[] args) throws JSAPException, IOException
    {
       Options opt = parseArguments(args);
@@ -70,6 +92,7 @@ public class AtlasFinalsROSAPISimulator extends ROSAPISimulator
       }
       
       String nameSpace = opt.nameSpace + "/" + ROBOT_NAME;
+
       new AtlasFinalsROSAPISimulator(robotModel, startingLocation, nameSpace, opt.tfPrefix, opt.runAutomaticDiagnosticRoutine, opt.disableViz);
    }
 }

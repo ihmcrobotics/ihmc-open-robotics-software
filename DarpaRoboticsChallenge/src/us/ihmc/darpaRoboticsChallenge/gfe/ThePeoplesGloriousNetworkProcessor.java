@@ -76,7 +76,6 @@ public class ThePeoplesGloriousNetworkProcessor
          DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix,
          List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> customSubscribers,
          List<Map.Entry<String, RosTopicPublisher<? extends Message>>> customPublishers) throws IOException
-
    {
       this.rosMainNode = new RosMainNode(rosUri, namespace + nodeName);
       this.robotModel = robotModel;
