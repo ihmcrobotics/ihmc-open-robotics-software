@@ -9,6 +9,7 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.robotics.alphaToAlpha.StretchedSlowInMiddleAlphaToAlphaFunctionTest.class,
    us.ihmc.robotics.controllers.CylindricalPDGainsTest.class,
+   us.ihmc.robotics.controllers.PDControllerTest.class,
    us.ihmc.robotics.controllers.GainCalculatorTest.class,
    us.ihmc.robotics.controllers.PIDControllerTest.class,
    us.ihmc.robotics.controllers.YoPDGainsTest.class,
