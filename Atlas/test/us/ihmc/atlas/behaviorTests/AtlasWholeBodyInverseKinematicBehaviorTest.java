@@ -1,6 +1,5 @@
 package us.ihmc.atlas.behaviorTests;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -14,7 +13,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment})
+@DeployableTestClass(targets = {TestPlanTarget.Exclude})
 public class AtlasWholeBodyInverseKinematicBehaviorTest extends DRCWholeBodyInverseKinematicBehaviorTest
 {
 	private final AtlasRobotModel robotModel;
@@ -39,7 +38,6 @@ public class AtlasWholeBodyInverseKinematicBehaviorTest extends DRCWholeBodyInve
 	 * Memory hog. Crashing a lot.
 	 */
 	@Override
-	@Ignore
 	@DeployableTestMethod(estimatedDuration = 90.0)
    @Test(timeout = 300000)
 	public void testRandomRightHandPose() throws SimulationExceededMaximumTimeException
@@ -51,7 +49,6 @@ public class AtlasWholeBodyInverseKinematicBehaviorTest extends DRCWholeBodyInve
     * Memory hog. Crashing a lot.
     */
    @Override
-   @Ignore
    @DeployableTestMethod(estimatedDuration = 90.0)
    @Test(timeout = 300000)
 	public void testWholeBodyInverseKinematicsMoveToPoseAcheivedInJointSpace() throws SimulationExceededMaximumTimeException

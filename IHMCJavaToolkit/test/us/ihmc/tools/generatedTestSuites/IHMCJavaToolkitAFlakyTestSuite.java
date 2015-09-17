@@ -7,7 +7,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.tools.processManagement.ProcessSpawnerTest.class
+   us.ihmc.tools.processManagement.ProcessSpawnerTest.class,
+   us.ihmc.tools.thread.ExecutorToolsTest.class
 })
 
 public class IHMCJavaToolkitAFlakyTestSuite
