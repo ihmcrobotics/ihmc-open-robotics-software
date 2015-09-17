@@ -60,7 +60,7 @@ public class FingerStatePacket extends IHMCRosApiPacket<FingerStatePacket>
 
    public FingerStatePacket(Random random)
    {
-      this(random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT, FingerState.values()[random.nextInt(FingerState.values().length)]);
+      this(random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT, FingerState.values()[random.nextInt(FingerState.BASIC_GRIP.getDocumentedValues().length)]);
 
    }
 }
