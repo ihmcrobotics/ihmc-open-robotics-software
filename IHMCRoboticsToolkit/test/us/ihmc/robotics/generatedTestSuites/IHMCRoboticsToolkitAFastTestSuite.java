@@ -217,7 +217,9 @@ import org.junit.runners.Suite;
    us.ihmc.robotics.trajectories.providers.CurrentPositionProviderTest.class,
    us.ihmc.robotics.trajectories.TrapezoidalVelocityTrajectoryTest.class,
    us.ihmc.robotics.trajectories.WaypointMotionGeneratorTest.class,
-   us.ihmc.robotics.controllers.YoPDGainsTest.class
+   us.ihmc.robotics.controllers.YoPDGainsTest.class,
+   us.ihmc.robotics.controllers.YoPIDGainsTest.class,
+   us.ihmc.robotics.controllers.CylindricalPDGainsTest.class
 })
 
 public class IHMCRoboticsToolkitAFastTestSuite
