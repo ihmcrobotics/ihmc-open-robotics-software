@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Jo
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.LocalObjectCommunicator;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
@@ -39,15 +40,10 @@ abstract public class ROSAPISimulator
    
    protected static final String DEFAULT_STRING = "DEFAULT";
    protected abstract CommonAvatarEnvironmentInterface createEnvironment();
-   
-   public ROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix, boolean runAutomaticDiagnosticRoutine, boolean disableViz) throws IOException
-   {
-      this(robotModel, startingLocation, nameSpace, tfPrefix, runAutomaticDiagnosticRoutine, disableViz, null, null);
-   }
+   protected abstract List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> createCustomSubscribers(PacketCommunicator communicator);
+   protected abstract List<Map.Entry<String, RosTopicPublisher<? extends Message>>> createCustomPublishers(PacketCommunicator communicator);
 
-   public ROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix, boolean runAutomaticDiagnosticRoutine, boolean disableViz,
-         List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> customSubscribers,
-         List<Map.Entry<String, RosTopicPublisher<? extends Message>>> customPublishers) throws IOException
+   public ROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix, boolean runAutomaticDiagnosticRoutine, boolean disableViz) throws IOException
    {
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, createEnvironment());
       simulationStarter.setRunMultiThreaded(true);
@@ -92,7 +88,8 @@ abstract public class ROSAPISimulator
       
       LocalObjectCommunicator sensorCommunicator = simulationStarter.getSimulatedSensorsPacketCommunicator();
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
-      new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace, tfPrefix, customSubscribers, customPublishers);
+      new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace, tfPrefix,
+            createCustomSubscribers(gfe_communicator), createCustomPublishers(gfe_communicator));
    }
 
    protected static Options parseArguments(String[] args) throws JSAPException, IOException
