@@ -138,6 +138,10 @@ public class ExportVideo implements ExportVideoCommandExecutor
       {
       }
 
+      Graphics3DAdapter graphics3dAdapter = standardSimulationGUI.getGraphics3dAdapter();
+      graphics3dAdapter.play();
+
+
       //      BufferedImage buffer = canvas3D.getBufferedImage();
 
       if (isSequenceSelected)
@@ -156,6 +160,8 @@ public class ExportVideo implements ExportVideoCommandExecutor
 
          //         buffer = canvas3D.getBufferedImage();
       }
+
+      graphics3dAdapter.pause();
 
       runCommandsExecutor.setPlaybackRealTimeRate(realTimePlaybackRate);
       guiEnablerAndDisabler.enableGUIComponents();
