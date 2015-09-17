@@ -62,6 +62,7 @@ public interface Graphics3DAdapter
    
    public GPULidar createGPULidar(LidarScanParameters lidarScanParameters);
    
-   void play();
-   void pause();
+   public void play();
+
+   public void pause();
 }
