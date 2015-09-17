@@ -63,17 +63,15 @@ public enum FingerState implements DocumentedEnum<FingerState>
       case SCISSOR_GRIP:
          return "sets gripper to use a scissor grasp where the index and middle finger come together when closed";
       case RESET:
-         return "";
+         return "sets all fingers to their zero position (usually fully open)";
       case OPEN_FINGERS:
-         return "";
+         return "fully open all fingers except the thumb";
       case OPEN_THUMB:
-         return "";
+         return "fully open the thumb only";
       case CLOSE_FINGERS:
-         return "";
+         return "fully close all fingers except the thumb";
       case CLOSE_THUMB:
-         return "";
-      case CRUSH_THUMB:
-         return "";
+         return "fully close the thumb only";
       default:
          return "no documentation available";
       }
@@ -96,8 +94,7 @@ public enum FingerState implements DocumentedEnum<FingerState>
                   OPEN_FINGERS,
                   OPEN_THUMB,
                   CLOSE_FINGERS,
-                  CLOSE_THUMB,
-                  CRUSH_THUMB
+                  CLOSE_THUMB
             };
    }
 }
