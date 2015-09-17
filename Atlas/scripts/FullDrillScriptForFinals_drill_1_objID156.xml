@@ -1,6 +1,6 @@
 <object-stream>
   <long>35757258192</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -30,9 +30,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>48000572213</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -62,9 +62,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>57324470576</long>
-  <us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
     <destination>0</destination>
     <orientation>
       <x>-0.0013246703773007096</x>
@@ -80,15 +80,15 @@
       <z>0.23869450486208768</z>
       <w>0.9710943559195513</w>
     </orientationChestInPelvisFrame>
-  </us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
   <long>72369854139</long>
-  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <fingerState>OPEN</fingerState>
-  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket>
   <long>85113442448</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -118,21 +118,21 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>91084680414</long>
-  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <fingerState>CLOSE</fingerState>
-  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket>
   <long>105312776472</long>
-  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <fingerState>OPEN</fingerState>
-  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket>
   <long>128548203859</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -162,15 +162,15 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>134620132700</long>
-  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <fingerState>CLOSE</fingerState>
-  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket>
   <long>138055784136</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -200,9 +200,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>141708782982</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -232,9 +232,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>146296239368</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -264,9 +264,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>149931966104</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -296,9 +296,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>154318674886</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -328,9 +328,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>158822345305</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -360,9 +360,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>163509424212</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -392,9 +392,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>167979634461</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -424,15 +424,15 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>172850178350</long>
-  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <fingerState>OPEN</fingerState>
-  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket>
   <long>174968613690</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -462,9 +462,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>220688323592</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -494,9 +494,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>467302389594</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -526,9 +526,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>514173035427</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -558,15 +558,15 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>519727346722</long>
-  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <fingerState>CLOSE</fingerState>
-  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket>
   <long>522513089044</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -596,9 +596,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>525849110202</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -628,9 +628,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>533409130180</long>
-  <us.ihmc.communication.packets.walking.EndOfScriptCommand>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <destination>0</destination>
-  </us.ihmc.communication.packets.walking.EndOfScriptCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
 </object-stream>

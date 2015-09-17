@@ -1,6 +1,6 @@
 <object-stream>
   <long>50563636152</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -30,9 +30,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>89680191697</long>
-  <us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
     <destination>0</destination>
     <orientation>
       <x>0.010824913687090008</x>
@@ -48,9 +48,9 @@
       <z>0.10360555083654446</z>
       <w>0.9837673697990644</w>
     </orientationChestInPelvisFrame>
-  </us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
   <long>131627831550</long>
-  <us.ihmc.communication.packets.walking.PelvisPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket>
     <destination>0</destination>
     <orientation>
       <x>0.034019801934909645</x>
@@ -65,9 +65,9 @@
     </position>
     <trajectoryTime>3.0</trajectoryTime>
     <toHomePosition>false</toHomePosition>
-  </us.ihmc.communication.packets.walking.PelvisPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket>
   <long>191026124150</long>
-  <us.ihmc.communication.packets.walking.PelvisPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket>
     <destination>0</destination>
     <orientation>
       <x>0.040141650190346476</x>
@@ -82,9 +82,9 @@
     </position>
     <trajectoryTime>3.0</trajectoryTime>
     <toHomePosition>false</toHomePosition>
-  </us.ihmc.communication.packets.walking.PelvisPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket>
   <long>223434760037</long>
-  <us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
     <destination>0</destination>
     <orientation>
       <x>0.0039128369068557045</x>
@@ -100,9 +100,9 @@
       <z>-0.29096562554731875</z>
       <w>0.9547511619494273</w>
     </orientationChestInPelvisFrame>
-  </us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
   <long>311504952480</long>
-  <us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
     <destination>0</destination>
     <orientation>
       <x>-0.046212597605035634</x>
@@ -118,15 +118,15 @@
       <z>-0.2884491605110224</z>
       <w>0.9528889701289723</w>
     </orientationChestInPelvisFrame>
-  </us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
   <long>326767747770</long>
-  <us.ihmc.communication.packets.walking.ComHeightPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
     <destination>0</destination>
     <heightOffset>0.1008</heightOffset>
     <trajectoryTime>1.0</trajectoryTime>
-  </us.ihmc.communication.packets.walking.ComHeightPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
   <long>400092601330</long>
-  <us.ihmc.communication.packets.LegCompliancePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket>
     <destination>0</destination>
     <maxVelocityDeltas>
       <float>0.15</float>
@@ -137,9 +137,9 @@
       <float>1.0</float>
     </maxVelocityDeltas>
     <robotSide>LEFT</robotSide>
-  </us.ihmc.communication.packets.LegCompliancePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket>
   <long>408632654469</long>
-  <us.ihmc.communication.packets.walking.FootPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
     <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <position>
@@ -154,9 +154,9 @@
       <w>0.9999913432344388</w>
     </orientation>
     <trajectoryTime>1.2</trajectoryTime>
-  </us.ihmc.communication.packets.walking.FootPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
   <long>500556059029</long>
-  <us.ihmc.communication.packets.walking.FootPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
     <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <position>
@@ -171,9 +171,9 @@
       <w>0.9828831121350863</w>
     </orientation>
     <trajectoryTime>1.2</trajectoryTime>
-  </us.ihmc.communication.packets.walking.FootPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
   <long>529579543431</long>
-  <us.ihmc.communication.packets.walking.FootPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
     <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <position>
@@ -188,9 +188,9 @@
       <w>0.9828831121350863</w>
     </orientation>
     <trajectoryTime>1.2</trajectoryTime>
-  </us.ihmc.communication.packets.walking.FootPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
   <long>554215526691</long>
-  <us.ihmc.communication.packets.walking.FootPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
     <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <position>
@@ -205,9 +205,9 @@
       <w>0.9999358704010303</w>
     </orientation>
     <trajectoryTime>1.2</trajectoryTime>
-  </us.ihmc.communication.packets.walking.FootPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
   <long>573864693914</long>
-  <us.ihmc.communication.packets.walking.FootPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
     <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <position>
@@ -222,15 +222,15 @@
       <w>0.9999358704010303</w>
     </orientation>
     <trajectoryTime>1.2</trajectoryTime>
-  </us.ihmc.communication.packets.walking.FootPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
   <long>597143113385</long>
-  <us.ihmc.communication.packets.walking.ComHeightPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
     <destination>0</destination>
     <heightOffset>0.06300000000000001</heightOffset>
     <trajectoryTime>1.0</trajectoryTime>
-  </us.ihmc.communication.packets.walking.ComHeightPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
   <long>617349401340</long>
-  <us.ihmc.communication.packets.walking.FootPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
     <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <position>
@@ -245,15 +245,15 @@
       <w>0.9999913427914642</w>
     </orientation>
     <trajectoryTime>1.2</trajectoryTime>
-  </us.ihmc.communication.packets.walking.FootPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
   <long>622325180232</long>
-  <us.ihmc.communication.packets.walking.FootStatePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootStatePacket>
     <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <loadBearing>true</loadBearing>
-  </us.ihmc.communication.packets.walking.FootStatePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootStatePacket>
   <long>632494754112</long>
-  <us.ihmc.communication.packets.walking.PelvisPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket>
     <destination>0</destination>
     <orientation>
       <x>0.03172192535033252</x>
@@ -268,9 +268,9 @@
     </position>
     <trajectoryTime>3.0</trajectoryTime>
     <toHomePosition>false</toHomePosition>
-  </us.ihmc.communication.packets.walking.PelvisPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket>
   <long>672127046264</long>
-  <us.ihmc.communication.packets.walking.HeadOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
     <destination>0</destination>
     <orientation>
       <x>0.0</x>
@@ -279,19 +279,19 @@
       <w>0.892632244878451</w>
     </orientation>
     <trajectoryTime>3.0</trajectoryTime>
-  </us.ihmc.communication.packets.walking.HeadOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
   <long>678868371318</long>
-  <us.ihmc.communication.packets.sensing.DepthDataClearCommand>
+  <us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand>
     <destination>0</destination>
     <depthDataTree>QUADTREE</depthDataTree>
-  </us.ihmc.communication.packets.sensing.DepthDataClearCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand>
   <long>685164196829</long>
-  <us.ihmc.communication.packets.sensing.DepthDataClearCommand>
+  <us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand>
     <destination>0</destination>
     <depthDataTree>DECAY_POINT_CLOUD</depthDataTree>
-  </us.ihmc.communication.packets.sensing.DepthDataClearCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand>
   <long>701653341511</long>
-  <us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
     <destination>0</destination>
     <orientation>
       <x>-0.005009640426358303</x>
@@ -301,9 +301,9 @@
     </orientation>
     <trajectoryTime>0.0</trajectoryTime>
     <toHomeOrientation>false</toHomeOrientation>
-  </us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
   <long>708818290615</long>
-  <us.ihmc.communication.packets.walking.HeadOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
     <destination>0</destination>
     <orientation>
       <x>0.0</x>
@@ -312,17 +312,17 @@
       <w>0.8634166080074168</w>
     </orientation>
     <trajectoryTime>3.0</trajectoryTime>
-  </us.ihmc.communication.packets.walking.HeadOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
   <long>726087650376</long>
-  <us.ihmc.communication.packets.walking.PauseCommand>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
     <destination>0</destination>
     <pause>true</pause>
-  </us.ihmc.communication.packets.walking.PauseCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
   <long>789643519747</long>
-  <us.ihmc.communication.packets.walking.FootstepDataList>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <destination>0</destination>
     <footstepDataList>
-      <us.ihmc.communication.packets.walking.FootstepData>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
         <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
@@ -338,18 +338,18 @@
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
     </footstepDataList>
     <swingTime>1.2</swingTime>
     <transferTime>0.8</transferTime>
-  </us.ihmc.communication.packets.walking.FootstepDataList>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
   <long>793406880619</long>
-  <us.ihmc.communication.packets.walking.PauseCommand>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
     <destination>0</destination>
     <pause>true</pause>
-  </us.ihmc.communication.packets.walking.PauseCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
   <long>805951461663</long>
-  <us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
     <destination>0</destination>
     <orientation>
       <x>-0.033012272092056844</x>
@@ -359,12 +359,12 @@
     </orientation>
     <trajectoryTime>0.0</trajectoryTime>
     <toHomeOrientation>false</toHomeOrientation>
-  </us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
   <long>820150409885</long>
-  <us.ihmc.communication.packets.walking.FootstepDataList>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <destination>0</destination>
     <footstepDataList>
-      <us.ihmc.communication.packets.walking.FootstepData>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
         <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
@@ -380,21 +380,21 @@
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
     </footstepDataList>
     <swingTime>1.2</swingTime>
     <transferTime>0.8</transferTime>
-  </us.ihmc.communication.packets.walking.FootstepDataList>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
   <long>823997911599</long>
-  <us.ihmc.communication.packets.walking.PauseCommand>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
     <destination>0</destination>
     <pause>true</pause>
-  </us.ihmc.communication.packets.walking.PauseCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
   <long>869942430957</long>
-  <us.ihmc.communication.packets.walking.FootstepDataList>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <destination>0</destination>
     <footstepDataList>
-      <us.ihmc.communication.packets.walking.FootstepData>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
         <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
@@ -410,28 +410,28 @@
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
     </footstepDataList>
     <swingTime>1.2</swingTime>
     <transferTime>0.8</transferTime>
-  </us.ihmc.communication.packets.walking.FootstepDataList>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
   <long>873846359444</long>
-  <us.ihmc.communication.packets.walking.PauseCommand>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
     <destination>0</destination>
     <pause>true</pause>
-  </us.ihmc.communication.packets.walking.PauseCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
   <long>882265969851</long>
-  <us.ihmc.communication.packets.sensing.DepthDataClearCommand>
+  <us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand>
     <destination>0</destination>
     <depthDataTree>QUADTREE</depthDataTree>
-  </us.ihmc.communication.packets.sensing.DepthDataClearCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand>
   <long>883014909045</long>
-  <us.ihmc.communication.packets.sensing.DepthDataClearCommand>
+  <us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand>
     <destination>0</destination>
     <depthDataTree>DECAY_POINT_CLOUD</depthDataTree>
-  </us.ihmc.communication.packets.sensing.DepthDataClearCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand>
   <long>931637038635</long>
-  <us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
     <destination>0</destination>
     <orientation>
       <x>-0.022963524513244207</x>
@@ -447,18 +447,18 @@
       <z>-0.06552197886860055</z>
       <w>0.9968513432574894</w>
     </orientationChestInPelvisFrame>
-  </us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
   <long>965764677031</long>
-  <us.ihmc.communication.packets.walking.ComHeightPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
     <destination>0</destination>
     <heightOffset>0.0826</heightOffset>
     <trajectoryTime>1.0</trajectoryTime>
-  </us.ihmc.communication.packets.walking.ComHeightPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
   <long>974426356772</long>
-  <us.ihmc.communication.packets.walking.FootstepDataList>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <destination>0</destination>
     <footstepDataList>
-      <us.ihmc.communication.packets.walking.FootstepData>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
         <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
@@ -474,21 +474,21 @@
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
     </footstepDataList>
     <swingTime>1.2</swingTime>
     <transferTime>0.8</transferTime>
-  </us.ihmc.communication.packets.walking.FootstepDataList>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
   <long>978277993925</long>
-  <us.ihmc.communication.packets.walking.PauseCommand>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
     <destination>0</destination>
     <pause>true</pause>
-  </us.ihmc.communication.packets.walking.PauseCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
   <long>991789205719</long>
-  <us.ihmc.communication.packets.walking.FootstepDataList>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <destination>0</destination>
     <footstepDataList>
-      <us.ihmc.communication.packets.walking.FootstepData>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
         <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
@@ -504,8 +504,8 @@
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.communication.packets.walking.FootstepData>
-      <us.ihmc.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
         <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
@@ -521,18 +521,18 @@
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
     </footstepDataList>
     <swingTime>1.2</swingTime>
     <transferTime>0.8</transferTime>
-  </us.ihmc.communication.packets.walking.FootstepDataList>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
   <long>997805357906</long>
-  <us.ihmc.communication.packets.walking.PauseCommand>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
     <destination>0</destination>
     <pause>true</pause>
-  </us.ihmc.communication.packets.walking.PauseCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
   <long>1012532854419</long>
-  <us.ihmc.communication.packets.walking.HeadOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
     <destination>0</destination>
     <orientation>
       <x>0.0</x>
@@ -541,9 +541,9 @@
       <w>0.9379640981071059</w>
     </orientation>
     <trajectoryTime>3.0</trajectoryTime>
-  </us.ihmc.communication.packets.walking.HeadOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
   <long>1012533399941</long>
-  <us.ihmc.communication.packets.walking.HeadOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
     <destination>0</destination>
     <orientation>
       <x>0.0</x>
@@ -552,9 +552,9 @@
       <w>0.9379640981071059</w>
     </orientation>
     <trajectoryTime>3.0</trajectoryTime>
-  </us.ihmc.communication.packets.walking.HeadOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
   <long>1012533653152</long>
-  <us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
     <destination>0</destination>
     <orientation>
       <x>-0.022383052970232218</x>
@@ -564,9 +564,9 @@
     </orientation>
     <trajectoryTime>0.0</trajectoryTime>
     <toHomeOrientation>false</toHomeOrientation>
-  </us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
   <long>1013516071305</long>
-  <us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
     <destination>0</destination>
     <orientation>
       <x>-0.03466041694326493</x>
@@ -582,9 +582,9 @@
       <z>-7.04426759710932E-5</z>
       <w>0.9999988629956302</w>
     </orientationChestInPelvisFrame>
-  </us.ihmc.communication.packets.walking.ChestOrientationPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
   <long>1042490752843</long>
-  <us.ihmc.communication.packets.LegCompliancePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket>
     <destination>0</destination>
     <maxVelocityDeltas>
       <float>1.0</float>
@@ -595,9 +595,9 @@
       <float>1.0</float>
     </maxVelocityDeltas>
     <robotSide>LEFT</robotSide>
-  </us.ihmc.communication.packets.LegCompliancePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket>
   <long>1057561135561</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -627,9 +627,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>1057562277266</long>
-  <us.ihmc.communication.packets.manipulation.HandPosePacket>
+  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
     <destination>0</destination>
     <robotSide>RIGHT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
@@ -659,9 +659,9 @@
     <zeroUIWristForce>false</zeroUIWristForce>
     <percentOfTrajectoryWithHandOrientationBeingControlled>NaN</percentOfTrajectoryWithHandOrientationBeingControlled>
     <controlOrientation>false</controlOrientation>
-  </us.ihmc.communication.packets.manipulation.HandPosePacket>
+  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>1067487773851</long>
-  <us.ihmc.communication.packets.walking.EndOfScriptCommand>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <destination>0</destination>
-  </us.ihmc.communication.packets.walking.EndOfScriptCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
 </object-stream>
