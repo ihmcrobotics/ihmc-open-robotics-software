@@ -40,6 +40,9 @@ public class GainCalculatorTest
 
          dampingCoeff = GainCalculator.computeDampingForSecondOrderSystem(1, random.nextDouble() * 1000 * -1, 1);
          assertTrue(Double.isNaN(dampingCoeff));
+         
+         dampingCoeff = GainCalculator.computeDampingForSecondOrderSystem(0, random.nextDouble() * 1000 * -1, 1);
+         assertTrue(dampingCoeff == 0.0);
 
          dampingCoeff = GainCalculator.computeDampingForSecondOrderSystem(1, 1, random.nextDouble() * 1000 * -1);
          assertTrue(dampingCoeff < 0.0);
