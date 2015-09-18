@@ -11,7 +11,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.InDevelopment, TestPlanTarget.VideoB})
+@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.VideoB})
 public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrialsTerrainTest
 {
    @Override
@@ -27,11 +27,10 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
    
    @Override
-	@DeployableTestMethod(estimatedDuration = 46.0)
+	@DeployableTestMethod(estimatedDuration = 46.0, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.VideoB})
    @Test(timeout = 230000)
    public void testTrialsTerrainCinderblockEntireFieldScript() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment, TestPlanTarget.VideoB);
       super.testTrialsTerrainCinderblockEntireFieldScript();
    }
    
@@ -40,7 +39,6 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    @Test(timeout = 400000)
    public void testTrialsTerrainZigzagHurdlesScript() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testTrialsTerrainZigzagHurdlesScript();
    }
    
@@ -53,7 +51,6 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    @Test(timeout = 1200000)
    public void testTrialsTerrainUpSlantedCinderblocksScript() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testTrialsTerrainUpSlantedCinderblocksScript();
    }
    
@@ -62,7 +59,6 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    @Test(timeout = 740000)
    public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testWalkingOntoAndOverSlopesSideways();
    }
    
@@ -71,16 +67,14 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    @Test(timeout = 690000)
    public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testTrialsTerrainSlopeScriptRandomFootSlip();
    }
    
    @Override
-	@DeployableTestMethod(estimatedDuration = 32.3)
+	@DeployableTestMethod(estimatedDuration = 32.3, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.VideoB})
    @Test(timeout = 160000)
    public void testTrialsTerrainCinderblockFieldPartTwoScript() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment, TestPlanTarget.VideoB);
       super.testTrialsTerrainCinderblockFieldPartTwoScript();
    }
    
@@ -93,7 +87,6 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    @Test(timeout=1200000)
    public void testTrialsTerrainUpFlatCinderblocksScript() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testTrialsTerrainUpFlatCinderblocksScript();
    }
    
@@ -102,16 +95,14 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    @Test(timeout = 660000)
    public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testTrialsTerrainSlopeScript();
    }
    
    @Override
-	@DeployableTestMethod(estimatedDuration = 54.0)
+	@DeployableTestMethod(estimatedDuration = 54.0, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.VideoB})
    @Test(timeout = 270000)
    public void testTrialsTerrainCinderblockFieldPartOneScript() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment, TestPlanTarget.VideoB);
       super.testTrialsTerrainCinderblockFieldPartOneScript();
    }
    
@@ -120,7 +111,6 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    @Test(timeout = 340000)
    public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testTrialsTerrainZigzagHurdlesScriptRandomFootSlip();
    }
 }

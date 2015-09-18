@@ -15,7 +15,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.InDevelopment, TestPlanTarget.VideoB})
+@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.VideoB})
 public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
@@ -57,11 +57,10 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
     */
    @Ignore
    @Override
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 20.0)
    @Test(timeout = 300000)
    public void testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees();
    }
 
@@ -70,16 +69,14 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Test(timeout = 530000)
    public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testSimpleFlatGroundScriptWithOscillatingFeet();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 41.4)
+   @DeployableTestMethod(estimatedDuration = 41.4, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.VideoB})
    @Test(timeout = 210000)
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment, TestPlanTarget.VideoB);
       super.testRotatedStepInTheAir();
    }
 
@@ -88,7 +85,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Test(timeout = 460000)
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testSimpleFlatGroundScriptWithRandomFootSlip();
    }
 
@@ -97,7 +93,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Test(timeout = 300000)
    public void testWalkingUpToRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testWalkingUpToRampWithShortSteps();
    }
 
@@ -106,7 +101,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Test(timeout = 280000)
    public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testSideStepsWithSlipping();
    }
 
@@ -115,7 +109,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Test(timeout = 130000)
    public void testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly();
    }
 
@@ -124,7 +117,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Test(timeout = 160000)
    public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testStandingWithOscillatingFeet();
    }
 
@@ -133,7 +125,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Test(timeout = 110000)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testStandingForACoupleSeconds();
    }
 
@@ -142,7 +133,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Test(timeout = 290000)
    public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testSideStepsWithRandomSlipping();
    }
 
@@ -151,16 +141,14 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Test(timeout = 380000)
    public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testLongStepsMaxHeightPauseAndResume();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 26.5)
+   @DeployableTestMethod(estimatedDuration = 26.5, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.VideoB})
    @Test(timeout = 130000)
    public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testTurningInPlaceAndPassingPI();
    }
 
@@ -169,7 +157,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Test(timeout = 250000)
    public void testChestControlWithPackets() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testChestControlWithPackets();
    }
 
@@ -178,7 +165,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Test(timeout = 220000)
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testStandingOnUnevenTerrainForACoupleSeconds();
    }
 
@@ -187,7 +173,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Test(timeout = 1000000)
    public void testForMemoryLeaks() throws Exception
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow, TestPlanTarget.VideoB);
       super.testForMemoryLeaks();
    }
 }

@@ -44,7 +44,7 @@ import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.posePlayback.ValkyrieWarmupPoseSequencePacket;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Fast})
+@DeployableTestClass(targets = {TestPlanTarget.Fast})
 public class ValkyriePosePlaybackDemoTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
@@ -98,12 +98,10 @@ public class ValkyriePosePlaybackDemoTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 6.2)
+	@DeployableTestMethod(estimatedDuration = 6.2, targets = TestPlanTarget.InDevelopment)
 	@Test(timeout = 31000)
    public void testPosePlaybackControllerWithWarmupPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
-      
       int numberOfPoses = 5;
       double trajectoryTime = 1.0;
       ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
@@ -126,8 +124,6 @@ public class ValkyriePosePlaybackDemoTest
 	@Test(timeout = 128797)
    public void testPosePlaybackControllerWithRandomPoses() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
-      
       int numberOfPoses = 5;
       double delayTime = 0.25;
       double trajectoryTime = 1.0;
@@ -150,8 +146,6 @@ public class ValkyriePosePlaybackDemoTest
 	@Test(timeout = 118283)
    public void testPosePlaybackControllerWithRandomPosesWithSomeJointsUncontrolled() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
-      
       int numberOfPoses = 5;
       double delayTime = 0.25;
       double trajectoryTime = 1.0;
