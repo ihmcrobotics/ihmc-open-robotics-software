@@ -37,14 +37,18 @@ abstract public class ROSAPISimulator
    private static final String DEFAULT_PREFIX = "/ihmc_ros";
    private static final boolean START_UI = false;
    private static final boolean REDIRECT_UI_PACKETS_TO_ROS = false;
-   
+
+   protected final DRCRobotModel robotModel;
+
    protected static final String DEFAULT_STRING = "DEFAULT";
    protected abstract CommonAvatarEnvironmentInterface createEnvironment();
-   protected abstract List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> createCustomSubscribers(PacketCommunicator communicator);
-   protected abstract List<Map.Entry<String, RosTopicPublisher<? extends Message>>> createCustomPublishers(PacketCommunicator communicator);
+   protected abstract List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> createCustomSubscribers(String namespace, PacketCommunicator communicator);
+   protected abstract List<Map.Entry<String, RosTopicPublisher<? extends Message>>> createCustomPublishers(String namespace, PacketCommunicator communicator);
 
    public ROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix, boolean runAutomaticDiagnosticRoutine, boolean disableViz) throws IOException
    {
+      this.robotModel = robotModel;
+
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, createEnvironment());
       simulationStarter.setRunMultiThreaded(true);
 
@@ -89,7 +93,7 @@ abstract public class ROSAPISimulator
       LocalObjectCommunicator sensorCommunicator = simulationStarter.getSimulatedSensorsPacketCommunicator();
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
       new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace, tfPrefix,
-            createCustomSubscribers(gfe_communicator), createCustomPublishers(gfe_communicator));
+            createCustomSubscribers(nameSpace, gfe_communicator), createCustomPublishers(nameSpace, gfe_communicator));
    }
 
    protected static Options parseArguments(String[] args) throws JSAPException, IOException
