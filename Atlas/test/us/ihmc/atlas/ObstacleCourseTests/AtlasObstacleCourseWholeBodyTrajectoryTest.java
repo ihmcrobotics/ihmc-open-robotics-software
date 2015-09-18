@@ -20,7 +20,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.Slow})
 public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCourseWholeBodyTrajectoryTest
 {
    private final DRCRobotModel robotModel = AtlasRobotModelFactory.createDefaultRobotModel();
@@ -40,11 +40,10 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 18.8)
+   @DeployableTestMethod(estimatedDuration = 18.8, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 94000)
    public void testArmMovementsWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testArmMovementsWithTrajectoryPacket();
    }
 
@@ -53,16 +52,14 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
    @Test(timeout = 390000)
    public void testChestControlWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testChestControlWithTrajectoryPacket();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 50.0)
+   @DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 300000)
    public void testForMemoryLeaks() throws Exception
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testForMemoryLeaks();
    }
 
@@ -71,7 +68,6 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
    @Test(timeout = 120000)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testStandingForACoupleSeconds();
    }
 

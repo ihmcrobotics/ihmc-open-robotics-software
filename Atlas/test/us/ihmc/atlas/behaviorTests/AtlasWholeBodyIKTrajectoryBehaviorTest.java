@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.Slow})
 public class AtlasWholeBodyIKTrajectoryBehaviorTest extends DRCWholeBodyIKTrajectoryBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -39,7 +39,6 @@ public class AtlasWholeBodyIKTrajectoryBehaviorTest extends DRCWholeBodyIKTrajec
    @Test(timeout = 70000)
    public void testConstructorAndSetInput()
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testConstructorAndSetInput();
    }
    
@@ -48,16 +47,14 @@ public class AtlasWholeBodyIKTrajectoryBehaviorTest extends DRCWholeBodyIKTrajec
    @Test(timeout = 110000)
    public void testMoveBothHandsToPose() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testMoveBothHandsToPose();
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 31.6)
+   @DeployableTestMethod(estimatedDuration = 31.6, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 160000)
    public void testMoveOneHandToPosition() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testMoveOneHandToPosition();
    }
 }

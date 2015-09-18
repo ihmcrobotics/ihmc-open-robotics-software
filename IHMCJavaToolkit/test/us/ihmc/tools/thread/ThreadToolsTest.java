@@ -43,12 +43,10 @@ public class ThreadToolsTest
    /**
     * Tests capturing the output of an echo.
     */
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
    @Test(timeout = 30000)
    public void testRunCommandLineEchoOutput()
    {
-      TestPlanTarget.assumeRunningLocally();
-
       final StringBuilder commandLineOutput = new StringBuilder();
 
       PrintStream commandOutput = new PrintStream(new OutputStream()

@@ -25,7 +25,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.Flaky})
+@DeployableTestClass(targets = {TestPlanTarget.Fast})
 public class ProcessSpawnerTest
 {
    private static final Path testFilePath = Paths.get(System.getProperty("java.io.tmpdir"), "ProcessSpawnerTest.tmp");
@@ -40,11 +40,10 @@ public class ProcessSpawnerTest
       Assert.assertEquals(expectedContent, content);
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @DeployableTestMethod(estimatedDuration = 1.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 30000)
    public void testForkedShellProcessSpawner() throws Exception
    {
-      TestPlanTarget.assumeRunningLocally();
       String randomString = Long.toString(System.nanoTime());
       String[] arguments = {randomString};
       System.out.println(testFilePath);
@@ -60,12 +59,10 @@ public class ProcessSpawnerTest
       validateFileContents(randomString);
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @DeployableTestMethod(estimatedDuration = 1.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 30000)
    public void testShelloutProcessSpawnerOnShellScript() throws Exception
    {
-      TestPlanTarget.assumeRunningLocally();
-
       if (SystemUtils.IS_OS_WINDOWS)
       {
          PrintTools.error("Not compatible with Windows");
@@ -93,7 +90,6 @@ public class ProcessSpawnerTest
    @Test(timeout = 30000)
    public void testJavaProcessSpawner() throws Exception
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
       String randomString = Long.toString(System.nanoTime());
       String[] arguments = {randomString};
       JavaProcessSpawner jps = new JavaProcessSpawner(true);
@@ -107,12 +103,10 @@ public class ProcessSpawnerTest
       validateFileContents(randomString);
    }
 
-   @DeployableTestMethod(estimatedDuration = 2.6)
+   @DeployableTestMethod(estimatedDuration = 2.6, targets = TestPlanTarget.Flaky)
    @Test(timeout = 30000)
    public void testExitListeners() throws Exception
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Flaky);
-
       if (SystemUtils.IS_OS_WINDOWS)
       {
          PrintTools.error("Not compatible with Windows");

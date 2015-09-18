@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Flaky, TestPlanTarget.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.Slow})
 public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -35,20 +35,18 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 39.3)
+   @DeployableTestMethod(estimatedDuration = 39.3, targets = TestPlanTarget.Flaky)
    @Test(timeout = 200000)
    public void testPauseAndResumeScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Flaky);
       super.testPauseAndResumeScript();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 26.4)
+   @DeployableTestMethod(estimatedDuration = 26.4, targets = TestPlanTarget.Flaky)
    @Test(timeout = 130000)
    public void testScriptWithOneHandPosePacket() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Flaky);
       super.testScriptWithOneHandPosePacket();
    }
 
@@ -57,16 +55,14 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    @Test(timeout = 270000)
    public void testScriptWithTwoComHeightScriptPackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testScriptWithTwoComHeightScriptPackets();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 36.1)
+   @DeployableTestMethod(estimatedDuration = 36.1, targets = TestPlanTarget.Flaky)
    @Test(timeout = 180000)
    public void testScriptWithTwoHandPosePackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Flaky);
       super.testScriptWithTwoHandPosePackets();
    }
 
@@ -75,7 +71,6 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    @Test(timeout = 180000)
    public void testSimpleScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testSimpleScript();
    }
 
@@ -84,7 +79,6 @@ public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
    @Test(timeout = 270000)
    public void testStopScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testStopScript();
    }
 }

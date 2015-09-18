@@ -1,7 +1,5 @@
 package us.ihmc.tools.testing;
 
-import static org.junit.Assume.assumeTrue;
-
 import java.util.ArrayList;
 
 public enum TestPlanTarget
@@ -18,6 +16,7 @@ public enum TestPlanTarget
    InDevelopment(true, false);
    
    public static final TestPlanTarget[] values = values();
+   public static final TestPlanTarget defaultTarget = Fast;
    public static final TestPlanTarget[] includedTargets;
    public static final TestPlanTarget[] loadBalancedTargets;
    static
@@ -41,7 +40,7 @@ public enum TestPlanTarget
       loadBalancedTargets = balancedTargets.toArray(new TestPlanTarget[0]);
    }
    
-   private static final String bambooJobName = System.getenv("BAMBOO_JOB_NAME");
+//   private static final String bambooJobName = System.getenv("BAMBOO_JOB_NAME");
    
    private final boolean loadBalanced;
    private final boolean excluded;
@@ -52,33 +51,15 @@ public enum TestPlanTarget
       this.excluded = excluded;
    }
    
-   public static boolean isRunningOnBamboo()
-   {
-      return bambooJobName != null;
-   }
-   
-   public static boolean isRunningOnPlan(TestPlanTarget bambooPlanType)
-   {
-      return bambooPlanType != null && bambooJobName.endsWith(bambooPlanType.name());
-   }
-   
-   public static void assumeRunningLocally()
-   {
-      assumeTrue("Test only set to run locally.", !isRunningOnBamboo());
-   }
-   
-   public static void assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget... bambooPlanType)
-   {
-      if (!isRunningOnBamboo())
-         return;
-      
-      boolean isRunningOnPlan = false;
-      
-      for (TestPlanTarget planType : bambooPlanType)
-         isRunningOnPlan |= isRunningOnPlan(planType);
-         
-      assumeTrue("Test only set to run on " + bambooPlanType, isRunningOnPlan);
-   }
+//   public static boolean isRunningOnBamboo()
+//   {
+//      return bambooJobName != null;
+//   }
+//   
+//   public static boolean isRunningOnPlan(TestPlanTarget bambooPlanType)
+//   {
+//      return bambooPlanType != null && bambooJobName.endsWith(bambooPlanType.name());
+//   }
    
    public static TestPlanTarget fromString(String name)
    {

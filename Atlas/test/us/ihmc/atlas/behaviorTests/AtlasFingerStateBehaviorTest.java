@@ -39,7 +39,6 @@ public class AtlasFingerStateBehaviorTest extends DRCFingerStateBehaviorTest
    @Test(timeout = 490000)
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testCloseHand();
    }
 
@@ -48,7 +47,6 @@ public class AtlasFingerStateBehaviorTest extends DRCFingerStateBehaviorTest
    @Test(timeout = 270000)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testPauseAndResumeCloseHand();
    }
 
@@ -57,7 +55,6 @@ public class AtlasFingerStateBehaviorTest extends DRCFingerStateBehaviorTest
    @Test(timeout = 120000)
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testStopCloseHand();
    }
 }
