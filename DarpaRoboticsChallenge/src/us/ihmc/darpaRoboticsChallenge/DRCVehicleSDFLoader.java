@@ -66,6 +66,7 @@ public class DRCVehicleSDFLoader extends DRCWorld
       YoVariableRegistry registry = scs.getRootRegistry();
       VehicleModelObjectVisualizer vehicleModelObjectVisualizer = new VehicleModelObjectVisualizer(vehicleFrame, vehicleModelObjects, yoGraphicsListRegistry, registry);
       vehicleModelObjectVisualizer.setVisible(true);
+      vehicleModelObjectVisualizer.update();
 
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 

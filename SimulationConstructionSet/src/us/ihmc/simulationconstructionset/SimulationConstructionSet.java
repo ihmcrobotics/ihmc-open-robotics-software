@@ -4100,6 +4100,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       if (yoGraphicsListRegistry.areYoGraphicsRegistered())
          throw new RuntimeException("Already added this YoGraphicsListRegistry To SimulationConstructionSet: " + yoGraphicsListRegistry);
+
+      ArrayList<GraphicsUpdatable> graphicsUpdatablesToUpdateInAPlaybackListener = yoGraphicsListRegistry.getGraphicsUpdatablesToUpdateInAPlaybackListener();
+      if (graphicsUpdatablesToUpdateInAPlaybackListener != null)
+      {
+
+         GraphicsUpdatablePlaybackListener playbackListener = new GraphicsUpdatablePlaybackListener(graphicsUpdatablesToUpdateInAPlaybackListener);
+         this.attachPlaybackListener(playbackListener);
+      }
       
       if (myGUI != null)
          myGUI.addYoGraphicsListRegistry(yoGraphicsListRegistry, updateFromSimulationThread);

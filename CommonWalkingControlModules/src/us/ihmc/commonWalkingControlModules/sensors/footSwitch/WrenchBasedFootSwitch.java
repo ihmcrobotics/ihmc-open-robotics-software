@@ -318,8 +318,16 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       yoFootForceInWorld.set(footForce);
       yoFootTorqueInWorld.set(footTorque);
       
+      updateSensorVisualizer();
    }
    
+   private void updateSensorVisualizer()
+   {
+      if(dynamicGraphicForceSensorMeasurementFrame!=null)
+         dynamicGraphicForceSensorMeasurementFrame.update();
+      if(dynamicGraphicForceSensorFootFrame!=null)
+         dynamicGraphicForceSensorFootFrame.update();
+   }
    
 
    private boolean isForceMagnitudePastThreshold()

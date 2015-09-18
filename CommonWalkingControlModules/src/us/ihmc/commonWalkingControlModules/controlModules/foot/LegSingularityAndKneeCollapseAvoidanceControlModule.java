@@ -401,8 +401,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          yoCorrectedDesiredFootPositionGraphic.hideGraphicObject();
          if (moreVisualizers)
          {
-            
-            
+            virtualLegTangentialFrameHipCenteredGraphics.update();
+            virtualLegTangentialFrameAnkleCenteredGraphics.update();
             yoDesiredFootLinearVelocityGraphic.hideGraphicObject();
             yoCorrectedDesiredFootLinearVelocityGraphic.hideGraphicObject();
          }

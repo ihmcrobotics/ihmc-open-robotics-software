@@ -140,7 +140,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
          desiredPositionFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
          desiredPositionFrame.update();
 
-         
+         dynamicGraphicReferenceFrame.update();
       }
 
       if (poseTrajectoryGenerator.isDone())

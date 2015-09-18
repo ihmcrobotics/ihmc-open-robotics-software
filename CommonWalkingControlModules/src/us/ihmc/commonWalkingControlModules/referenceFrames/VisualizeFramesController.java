@@ -31,6 +31,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
       public void doControl()
       {
+         updateDynamicGraphicReferenceFrames();
       }
 
       public YoVariableRegistry getYoVariableRegistry()
@@ -52,4 +53,11 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
          return getName();
       }
 
+      private void updateDynamicGraphicReferenceFrames()
+      {
+         for (YoGraphicReferenceFrame frame : dynamicGraphicReferenceFrames)
+         {
+            frame.update();
+         }
+      }
    }

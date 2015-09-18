@@ -198,6 +198,7 @@ public class DebrisHandPoseGrasping
          public void variableChanged(YoVariable<?> v)
          {
             frameToUpdate.update();
+            yoGraphicToUpdate.update();
          }
       };
       pose.attachVariableChangedListener(variableChangedListener);
@@ -208,7 +209,7 @@ public class DebrisHandPoseGrasping
          Vector3d graspVector)
    {
       handFrameBeforeRotation.setPoseAndUpdate(debrisTransform);
-      
+      handFrameBeforeRotViz.update();
       
       FramePose handPoseSolution1 = new FramePose(handFrameBeforeRotation);
       handPoseSolution1.changeFrame(handFrame);

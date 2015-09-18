@@ -112,6 +112,10 @@ public class DynamicGraphicObjectEvaluation
       yoGraphicsList.add(dynamicGraphicBoxGhost);
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+      
+      yoGraphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(dynamicGraphicPolygon);
+      yoGraphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(dynamicGraphicYoFramePolygon);
+
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.addYoVariableRegistry(registry);
 
@@ -133,7 +137,7 @@ public class DynamicGraphicObjectEvaluation
          {
             int i = 0;
 
-            while (true)//i++ < 20)
+            while (i++ < 20)
             {
                quickPause();
 
@@ -142,6 +146,7 @@ public class DynamicGraphicObjectEvaluation
 
                ConvexPolygon2d newYoPolygon = new ConvexPolygon2d(pointList);
                yoFramePolygon.setConvexPolygon2d(newYoPolygon);
+               dynamicGraphicYoFramePolygon.update();
                
                Vector3d eulerAngles = new Vector3d();
                yoFramePolygonOrientation.getEulerAngles(eulerAngles);
@@ -149,17 +154,20 @@ public class DynamicGraphicObjectEvaluation
                yoFramePolygonOrientation.setEulerAngles(eulerAngles);
                
                dynamicGraphicText.setText("Hello");
+               dynamicGraphicText.update();
                
                scs.tickAndUpdate();
 
                quickPause();
                newPolygon = new ConvexPolygon2d(pointList);
                yoPolygon.setConvexPolygon2d(newPolygon);
+               dynamicGraphicYoFramePolygon.update();
 
                newYoPolygon = new ConvexPolygon2d(secondPointList);
                yoFramePolygon.setConvexPolygon2d(newYoPolygon);
 
                dynamicGraphicText.setText("GoodBye");
+               dynamicGraphicText.update();
                
                scs.tickAndUpdate();
 
@@ -177,7 +185,7 @@ public class DynamicGraphicObjectEvaluation
    {
       try
       {
-         Thread.sleep(2000L);
+         Thread.sleep(200L);
       }
       catch (InterruptedException e)
       {
