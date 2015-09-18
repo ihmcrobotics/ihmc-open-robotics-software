@@ -143,7 +143,6 @@ public class DRCHighLevelPositionControlDemo
 			for (int i = 0; i < efp_offsetFromRootJoint.size(); i++)
 			{
 				externalForcePoints.get(i).getYoPosition().get(initialPositions.get(i));
-				efp_positionViz.get(i).update();
 			}
 
 			doControl();
@@ -170,8 +169,6 @@ public class DRCHighLevelPositionControlDemo
 
 				pdControlOutput.setZ(pdControlOutput.getZ() + robotWeight / efp_offsetFromRootJoint.size());
 				efp.setForce(pdControlOutput);
-
-				efp_positionViz.get(i).update();
 			}
 		}
 

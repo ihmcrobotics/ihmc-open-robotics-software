@@ -86,14 +86,6 @@ public abstract class YoGraphic
       return transform;
    }
 
-   /**
-    * Overwrite the update method if an object needs special updating. But it is up to each user to update their objects. 
-    * The internals only update the position and orientation transform...
-    */
-   public void update()
-   {
-   }
-
    @Override
    public String toString()
    {

@@ -152,7 +152,6 @@ public class ManipulationControlModule
          hasBeenInitialized.set(true);
       }
 
-      updateGraphics();
 
       if (yoTime.getDoubleValue() - startTimeForIgnoringInputs.getDoubleValue() < durationForIgnoringInputs.getDoubleValue())
       {
@@ -399,13 +398,6 @@ public class ManipulationControlModule
       }
    }
 
-   private void updateGraphics()
-   {
-      for (int i = 0; i < dynamicGraphicReferenceFrames.size(); i++)
-      {
-         dynamicGraphicReferenceFrames.get(i).update();
-      }
-   }
 
    public boolean isAtLeastOneHandLoadBearing()
    {

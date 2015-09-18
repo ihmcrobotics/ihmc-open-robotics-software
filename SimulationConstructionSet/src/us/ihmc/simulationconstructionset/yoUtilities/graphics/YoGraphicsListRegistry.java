@@ -157,20 +157,7 @@ public class YoGraphicsListRegistry
       artifactLists.addAll(this.artifactLists);
    }
 
-   //TODO: Merge these graphics updatable things and get it to all work nicely.
-   
-   public void registerGraphicsUpdatableToUpdateInAPlaybackListener(GraphicsUpdatable graphicsUpdatable)
-   {
-      if (this.graphicsUpdatablesToUpdateInAPlaybackListener.contains(graphicsUpdatable))
-         throw new RuntimeException("Already registered graphics updateable!");
-      
-      this.graphicsUpdatablesToUpdateInAPlaybackListener.add(graphicsUpdatable);
-   }
-   
-   public ArrayList<GraphicsUpdatable> getGraphicsUpdatablesToUpdateInAPlaybackListener()
-   {
-      return graphicsUpdatablesToUpdateInAPlaybackListener;
-   }
+
    
    public void addGraphicsUpdatable(GraphicsUpdatable graphicsUpdatable)
    {

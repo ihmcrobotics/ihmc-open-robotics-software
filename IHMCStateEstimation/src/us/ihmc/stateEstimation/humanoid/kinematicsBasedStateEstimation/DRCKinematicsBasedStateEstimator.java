@@ -211,11 +211,6 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       if (copVisualizer != null)
          copVisualizer.update();
 
-      if (visualizeMeasurementFrames)
-      {
-         for (int i = 0; i < dynamicGraphicMeasurementFrames.size(); i++)
-            dynamicGraphicMeasurementFrames.get(i).update();
-      }
    }
 
    @Override

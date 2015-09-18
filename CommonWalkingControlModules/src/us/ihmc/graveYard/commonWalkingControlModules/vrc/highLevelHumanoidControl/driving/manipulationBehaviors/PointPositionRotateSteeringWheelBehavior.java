@@ -192,8 +192,6 @@ public class PointPositionRotateSteeringWheelBehavior
          transform.setRotationAndZeroTranslation(tempMatrix);
          xTangentialFrame.setTransformAndUpdate(transform);
 
-         if (xTangentialFrameViz != null)
-            xTangentialFrameViz.update();
       }
 
       public void doTransitionOutOfAction()
