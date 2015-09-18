@@ -126,8 +126,13 @@ public class YoFrameLineSegment2d extends ReferenceFrameHolder
    public FrameLineSegment2d getFrameLineSegment2d()
    {
       putYoValuesIntoFrameLineSegment();
-
       return new FrameLineSegment2d(frameLineSegment);
+   }
+   
+   public void getFrameLineSegment2d(FrameLineSegment2d lineSegmentToPack)
+   {
+      putYoValuesIntoFrameLineSegment();
+      lineSegmentToPack.setAndChangeFrame(frameLineSegment);
    }
 
    public FramePoint2d midpoint()
