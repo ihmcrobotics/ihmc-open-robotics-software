@@ -20,6 +20,13 @@ public class YoGraphicReferenceFrame extends YoGraphicCoordinateSystem
 
       this.referenceFrame = referenceFrame;
    }
+   
+   public YoGraphicReferenceFrame(String prefix, ReferenceFrame referenceFrame, YoVariableRegistry registry, double scale, AppearanceDefinition arrowColor)
+   {
+      super(prefix + referenceFrame.getName(), "", registry, scale, arrowColor);
+
+      this.referenceFrame = referenceFrame;
+   }
 
    public void update()
    {
