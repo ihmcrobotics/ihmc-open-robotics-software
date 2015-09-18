@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.Slow})
 public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -39,16 +39,14 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    @Test(timeout = 180000)
    public void testDoNothingBehavior() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testDoNothingBehavior();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 44.4)
+   @DeployableTestMethod(estimatedDuration = 44.4, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 220000)
    public void testRandomState() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testRandomState();
    }
 }

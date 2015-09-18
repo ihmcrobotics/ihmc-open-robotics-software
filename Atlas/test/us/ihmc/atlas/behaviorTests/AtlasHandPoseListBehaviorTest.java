@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.Flaky})
+@DeployableTestClass(targets = {TestPlanTarget.Slow})
 public class AtlasHandPoseListBehaviorTest extends DRCHandPoseListBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -39,7 +39,6 @@ public class AtlasHandPoseListBehaviorTest extends DRCHandPoseListBehaviorTest
    @Test(timeout = 210000)
    public void testMoveOneRandomJoint20Deg() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testMoveOneRandomJoint20Deg();
    }
 
@@ -48,16 +47,14 @@ public class AtlasHandPoseListBehaviorTest extends DRCHandPoseListBehaviorTest
    @Test(timeout = 320000)
    public void testMultipleArmPosesOnBothArms() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testMultipleArmPosesOnBothArms();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 75.3)
+   @DeployableTestMethod(estimatedDuration = 75.3, targets = TestPlanTarget.Flaky)
    @Test(timeout = 380000)
    public void testRandomJointSpaceMoveAndTaskSpaceMoveBackToHome() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Flaky);
       super.testRandomJointSpaceMoveAndTaskSpaceMoveBackToHome();
    }
 
@@ -66,7 +63,6 @@ public class AtlasHandPoseListBehaviorTest extends DRCHandPoseListBehaviorTest
    @Test(timeout = 210000)
    public void testWristRoll() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testWristRoll();
    }
 }

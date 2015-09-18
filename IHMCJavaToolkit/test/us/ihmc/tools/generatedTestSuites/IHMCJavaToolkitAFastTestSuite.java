@@ -1,11 +1,16 @@
 package us.ihmc.tools.generatedTestSuites;
 
 import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
+import us.ihmc.tools.testing.TestPlanSuite;
+import us.ihmc.tools.testing.TestPlanSuite.TestSuiteTarget;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
-@RunWith(Suite.class)
-@Suite.SuiteClasses
+@RunWith(TestPlanSuite.class)
+@TestSuiteTarget(TestPlanTarget.Fast)
+@SuiteClasses
 ({
    us.ihmc.tools.ArrayToolsTest.class,
    us.ihmc.tools.calibration.CalibrationPropertiesTest.class,
@@ -37,7 +42,6 @@ import org.junit.runners.Suite;
    us.ihmc.tools.taskExecutor.PipeLineTest.class,
    us.ihmc.tools.taskExecutor.TaskExecutorTest.class,
    us.ihmc.tools.thread.ExecutorToolsTest.class,
-   us.ihmc.tools.thread.ThreadToolsTest.class,
    us.ihmc.tools.time.DateToolsTest.class,
    us.ihmc.tools.UnitConversionsTest.class
 })

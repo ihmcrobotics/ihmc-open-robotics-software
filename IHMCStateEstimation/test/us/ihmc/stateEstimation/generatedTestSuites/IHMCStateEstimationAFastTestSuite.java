@@ -1,11 +1,16 @@
 package us.ihmc.stateEstimation.generatedTestSuites;
 
 import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
+import us.ihmc.tools.testing.TestPlanSuite;
+import us.ihmc.tools.testing.TestPlanSuite.TestSuiteTarget;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
-@RunWith(Suite.class)
-@Suite.SuiteClasses
+@RunWith(TestPlanSuite.class)
+@TestSuiteTarget(TestPlanTarget.Fast)
+@SuiteClasses
 ({
    us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ClippedSpeedOffsetErrorInterpolatorTest.class,
    us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdaterTest.class,

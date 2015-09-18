@@ -45,11 +45,10 @@ public class AtlasGraspPieceOfDebrisBehaviorTest extends DRCGraspPieceOfDebrisBe
 	}
 	
 	@Override
-	@DeployableTestMethod(estimatedDuration = 70.0)
+	@DeployableTestMethod(estimatedDuration = 70.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
 	public void testGraspingLeaningAgainstAWallDebrisWithRightHand() throws SimulationExceededMaximumTimeException
 	{
-	   TestPlanTarget.assumeRunningLocally();
 	   super.testGraspingLeaningAgainstAWallDebrisWithRightHand();
 	}
 	

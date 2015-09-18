@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Slow})
+@DeployableTestClass(targets = TestPlanTarget.Slow)
 public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
 {
    private final AtlasRobotModel robotModel;
@@ -39,16 +39,14 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    @Test(timeout = 250000)
    public void testDispatchPelvisPoseBehavior() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testDispatchPelvisPoseBehavior();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 315.0)
+   @DeployableTestMethod(estimatedDuration = 315.0, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 1600000)
    public void testDispatchWalkToLocationBehavior() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
       super.testDispatchWalkToLocationBehavior();
    }
 
@@ -57,7 +55,6 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    @Test(timeout = 230000)
    public void testDispatchWalkToLocationBehaviorAndStop() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testDispatchWalkToLocationBehaviorAndStop();
    }
 
@@ -66,7 +63,6 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    @Test(timeout = 1600000)
    public void testDispatchWalkToLocationBehaviorPauseAndResume() throws SimulationExceededMaximumTimeException
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Slow);
       super.testDispatchWalkToLocationBehaviorPauseAndResume();
    }
 }
