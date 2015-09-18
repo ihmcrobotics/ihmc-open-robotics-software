@@ -1,6 +1,8 @@
 package us.ihmc.atlas;
 
 import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import org.ros.message.MessageFactory;
 import org.ros.message.MessageFactoryProvider;
 import org.ros.node.NodeConfiguration;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.darpaRoboticsChallenge.DRCSCStartingLocations;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.ROSAPISimulator;
@@ -46,12 +49,23 @@ public class AtlasFinalsROSAPISimulator extends ROSAPISimulator
       return new DRCFinalsEnvironment(CREATE_DOOR, CREATE_DRILL, CREATE_VALVE, CREATE_WALKING, CREATE_STAIRS);
    }
 
-   @Override protected List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> createCustomSubscribers(PacketCommunicator communicator)
+   @Override protected List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> createCustomSubscribers(String nameSpace, PacketCommunicator communicator)
    {
-      return null;
+      List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> subscribers = new ArrayList<>();
+      MessageFactory messageFactory = NodeConfiguration.newPrivate().getTopicMessageFactory();
+
+      if(robotModel.getDRCHandType().isHandSimulated())
+      {
+         FingerStatePacketMessage message = messageFactory.newFromType("ihmc_msgs/FingerStatePacketMessage");
+         RosTopicSubscriberInterface<FingerStatePacketMessage> sub = IHMCMsgToPacketSubscriber.createIHMCMsgToPacketSubscriber(message, communicator, PacketDestination.CONTROLLER.ordinal());
+         Map.Entry<String, RosTopicSubscriberInterface<? extends Message>> pair = new AbstractMap.SimpleEntry<String, RosTopicSubscriberInterface<? extends Message>>(nameSpace + "/control/finger_state", sub);
+         subscribers.add(pair);
+      }
+
+      return subscribers;
    }
 
-   @Override protected List<Map.Entry<String, RosTopicPublisher<? extends Message>>> createCustomPublishers(PacketCommunicator communicator)
+   @Override protected List<Map.Entry<String, RosTopicPublisher<? extends Message>>> createCustomPublishers(String nameSpace, PacketCommunicator communicator)
    {
       return null;
    }
