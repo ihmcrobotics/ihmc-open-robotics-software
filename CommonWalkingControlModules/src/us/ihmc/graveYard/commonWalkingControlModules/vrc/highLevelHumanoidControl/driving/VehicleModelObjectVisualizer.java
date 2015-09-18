@@ -44,6 +44,14 @@ public class VehicleModelObjectVisualizer
       parentRegistry.addChild(registry);
    }
 
+   public void update()
+   {
+      for (YoGraphic yoGraphic : yoGraphicsList.getYoGraphics())
+      {
+         yoGraphic.update();
+      }
+   }
+
    public void setVisible(boolean visible)
    {
       yoGraphicsList.setVisible(visible);

@@ -297,7 +297,7 @@ public class HeadOrientationControlModule
          case POINT :
          {
             pointTrackingFrame.update();
-            
+            pointTrackingFrameFiz.update();
 
             orientationToPack.setToZero(pointTrackingFrame);
 

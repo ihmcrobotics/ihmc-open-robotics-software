@@ -260,12 +260,20 @@ public class DrivingFootControlModule
 
    public void doControl()
    {
+      updateVisualizers();
       taskExecutor.doControl();
       updateCurrentVelocity();
       doToePositionControl();
       doFootOrientationControl();
    }
 
+   private void updateVisualizers()
+   {
+      for (YoGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
+      {
+         dynamicGraphicReferenceFrame.update();
+      }
+   }
 
    private void moveToPosition(FramePoint target, FrameVector forceToCompensateFor, double averageVelocity, boolean notifyIfDone, LowLevelDrivingAction action)
    {

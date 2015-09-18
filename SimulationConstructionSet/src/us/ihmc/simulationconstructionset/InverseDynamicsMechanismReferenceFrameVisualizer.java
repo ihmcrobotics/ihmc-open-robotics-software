@@ -59,5 +59,9 @@ public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotCo
 
    public void doControl()
    {
+      for (YoGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
+      {
+         dynamicGraphicReferenceFrame.update();
+      }
    }
 }

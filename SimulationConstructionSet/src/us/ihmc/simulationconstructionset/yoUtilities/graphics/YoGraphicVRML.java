@@ -6,7 +6,6 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoGraphicVRML extends YoGraphicCoordinateSystem
@@ -41,11 +40,9 @@ public class YoGraphicVRML extends YoGraphicCoordinateSystem
       this.showCoordinateSystem = showCoordinateSystem;
    }
 
-   @Override
-   protected void computeRotationTranslation(Transform3d transform3D)
+   public void update()
    {
-      super.setToReferenceFrame(referenceFrame);
-      super.computeRotationTranslation(transform3D);
+      this.setToReferenceFrame(referenceFrame);
    }
 
    public Graphics3DObject getLinkGraphics()

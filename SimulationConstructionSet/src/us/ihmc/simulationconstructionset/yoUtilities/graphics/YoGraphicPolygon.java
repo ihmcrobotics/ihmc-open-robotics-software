@@ -9,7 +9,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -19,7 +18,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 
 
-public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYoGraphic
+public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYoGraphic, GraphicsUpdatable
 {
    private YoFrameConvexPolygon2d yoFrameConvexPolygon2d;
    private final Graphics3DObject graphics3dObject;
@@ -57,18 +56,18 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
    }
 
    @Override
-   protected void computeRotationTranslation(Transform3d transform3D)
+   public void update()
    {
       if (yoFrameConvexPolygon2d.getHasChangedAndReset())
       {
          instruction.setMesh(MeshDataGenerator.Polygon(yoFrameConvexPolygon2d.getConvexPolygon2d()));
       }
-      super.computeRotationTranslation(transform3D);
    }
 
    public void updateConvexPolygon2d(FrameConvexPolygon2d frameConvexPolygon2d)
    {
       yoFrameConvexPolygon2d.setFrameConvexPolygon2d(frameConvexPolygon2d);
+      update();
    }
 
    public Graphics3DObject getLinkGraphics()

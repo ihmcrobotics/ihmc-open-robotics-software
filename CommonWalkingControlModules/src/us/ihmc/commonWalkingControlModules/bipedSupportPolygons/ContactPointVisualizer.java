@@ -100,5 +100,7 @@ public class ContactPointVisualizer
          dynamicGraphicVectors.get(i).hideGraphicObject();
       }
 
+      dynamicGraphicPositions.get(i).update();
+      dynamicGraphicVectors.get(i).update();
    }
 }
