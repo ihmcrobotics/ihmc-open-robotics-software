@@ -33,12 +33,12 @@ public class ValkyrieROSAPISimulator extends ROSAPISimulator
       return new DRCDemo01NavigationEnvironment();
    }
 
-   @Override protected List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> createCustomSubscribers(PacketCommunicator communicator)
+   @Override protected List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> createCustomSubscribers(String nameSpace, PacketCommunicator communicator)
    {
       return null;
    }
 
-   @Override protected List<Map.Entry<String, RosTopicPublisher<? extends Message>>> createCustomPublishers(PacketCommunicator communicator)
+   @Override protected List<Map.Entry<String, RosTopicPublisher<? extends Message>>> createCustomPublishers(String nameSpace, PacketCommunicator communicator)
    {
       return null;
    }
