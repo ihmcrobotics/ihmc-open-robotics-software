@@ -88,8 +88,7 @@ public class YoCylindricalContactState implements CylindricalContactState, Modif
       if (gripWeaknessFactor > 1.0)
          throw new RuntimeException("gripWeaknessFactor is over 1, : " + gripWeaknessFactor);
       this.gripWeaknessFactor.set(gripWeaknessFactor);
-      
-      if (cylinderRefererenceFrameGraphic != null) cylinderRefererenceFrameGraphic.update();
+     
    }
 
    public boolean isInContact()

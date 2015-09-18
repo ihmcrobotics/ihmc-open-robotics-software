@@ -152,7 +152,6 @@ public class DRCPosePlaybackDemo
 			{
 				externalForcePoints.get(i).getYoPosition().get(initialPositions.get(i));
 				desiredHeight.add(initialPositions.get(i).z / initialPositions.size());
-				efp_positionViz.get(i).update();
 			}
 
 			for (int i = 0; i < efp_offsetFromRootJoint.size(); i++)
@@ -187,7 +186,6 @@ public class DRCPosePlaybackDemo
 
 				efp.setForce(pdControlOutput);
 
-				efp_positionViz.get(i).update();
 			}
 		}
 

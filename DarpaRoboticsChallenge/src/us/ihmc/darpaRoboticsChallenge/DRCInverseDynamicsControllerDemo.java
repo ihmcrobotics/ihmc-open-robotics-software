@@ -153,7 +153,6 @@ public class DRCInverseDynamicsControllerDemo
          {
             externalForcePoints.get(i).getYoPosition().get(initialPositions.get(i));
             desiredHeight.add(initialPositions.get(i).z / initialPositions.size());
-            efp_positionViz.get(i).update();
          }
 
          for (int i = 0; i < efp_offsetFromRootJoint.size(); i++)
@@ -187,7 +186,6 @@ public class DRCInverseDynamicsControllerDemo
             efp.setForce(pdControlOutput);
             //            efp.fz.add(robotWeight / efp_offsetFromRootJoint.size());
 
-            efp_positionViz.get(i).update();
          }
       }
 

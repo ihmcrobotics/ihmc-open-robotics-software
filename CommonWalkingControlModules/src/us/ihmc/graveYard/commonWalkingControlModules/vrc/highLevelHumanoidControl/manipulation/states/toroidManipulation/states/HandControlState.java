@@ -138,7 +138,6 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
          desiredPositionFrames.get(robotSide).update();
       }
 
-      updateVisualizers();
    }
 
    @Override
@@ -156,13 +155,6 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
    {
    }
 
-   private void updateVisualizers()
-   {
-      for (YoGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
-      {
-         dynamicGraphicReferenceFrame.update();
-      }
-   }
 
    @Override
    public boolean isDone()

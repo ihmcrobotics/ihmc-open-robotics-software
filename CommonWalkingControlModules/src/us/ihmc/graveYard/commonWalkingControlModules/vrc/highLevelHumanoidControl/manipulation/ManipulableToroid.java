@@ -98,7 +98,6 @@ public class ManipulableToroid
       toroidQ.set(angle);
       toroidJoint.setQ(angle);
       toroidJoint.getFrameAfterJoint().update();
-      updateVisualizers();
    }
 
    public void setQd(double velocity)
@@ -128,16 +127,9 @@ public class ManipulableToroid
       RotationFunctions.axisAngleFromMatrix(rotationMatrix, axisAngle);
       setQ(axisAngle.getAngle());
 
-      updateVisualizers();
    }
 
-   private void updateVisualizers()
-   {
-      for (YoGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
-      {
-         dynamicGraphicReferenceFrame.update();
-      }
-   }
+
 
    public double getQ()
    {

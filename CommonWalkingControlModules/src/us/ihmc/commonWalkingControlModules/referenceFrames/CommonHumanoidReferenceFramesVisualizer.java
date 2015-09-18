@@ -49,10 +49,7 @@ public class CommonHumanoidReferenceFramesVisualizer implements Updatable, Robot
    @Override
    public void doControl()
    {
-      for (int i = 0; i < referenceFramesVisualizers.size(); i++)
-      {
-         referenceFramesVisualizers.get(i).update();
-      }
+
    }
 
    @Override

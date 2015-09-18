@@ -163,7 +163,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
          if(footstepFrameGraphic != null)
          {
             footstepFrameGraphic.showGraphicObject();
-            footstepFrameGraphic.update();
+            
          }
       }
       else

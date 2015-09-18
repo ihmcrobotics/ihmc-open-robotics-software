@@ -65,11 +65,7 @@ public class JointAxisVisualizer implements RobotController
    }
 
    public void doControl()
-   {
-      for (int i = 0; i < dynamicGraphicReferenceFrames.size(); i++)
-      {
-         dynamicGraphicReferenceFrames.get(i).update();
-      } 
+   { 
    }
 
 }

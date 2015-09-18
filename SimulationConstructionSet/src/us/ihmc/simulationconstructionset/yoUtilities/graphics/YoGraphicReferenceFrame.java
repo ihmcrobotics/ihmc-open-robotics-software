@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoGraphicReferenceFrame extends YoGraphicCoordinateSystem
@@ -21,8 +22,10 @@ public class YoGraphicReferenceFrame extends YoGraphicCoordinateSystem
       this.referenceFrame = referenceFrame;
    }
 
-   public void update()
+   @Override
+   protected void computeRotationTranslation(Transform3d transform3D)
    {
-      this.setToReferenceFrame(referenceFrame);
+      super.setToReferenceFrame(referenceFrame);
+      super.computeRotationTranslation(transform3D);
    }
 }
