@@ -14,7 +14,7 @@ import us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJ
 import us.ihmc.valkyrie.kinematics.transmissions.InterpolatedPushRodTransmission;
 import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
 
-@DeployableTestClass(targets = { TestPlanTarget.InDevelopment, TestPlanTarget.Fast })
+@DeployableTestClass(targets = {TestPlanTarget.Fast})
 public class ClosedFormJacobianTest
 {
    private static final boolean DEBUG = false;
@@ -39,8 +39,6 @@ public class ClosedFormJacobianTest
    @Test(timeout = 30000)
    public void testJacobianMatchesMATLABAnkle()
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
-
       for (int i = 0; i < 7; i++)
       {
          double[][] efficientJacobian = closedFormJacobianAnkle.getUpdatedTransform(-roll[i], -pitch[i]);
@@ -55,12 +53,10 @@ public class ClosedFormJacobianTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 30000)
    public void testJacobianMatchesMATLABWaist()
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
-
       for (int i = 0; i < 7; i++)
       {
          double[][] efficientJacobian = closedFormJacobianWaist.getUpdatedTransform(roll[i], pitch[i]);
@@ -79,8 +75,6 @@ public class ClosedFormJacobianTest
    @Test(timeout = 30000)
    public void testEfficientMatchesInefficientJacobianAnkle()
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
-
       InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission = new InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint.ANKLE, null, null);
 
       for (int i = 0; i < 7; i++)
@@ -101,13 +95,10 @@ public class ClosedFormJacobianTest
    // The following test is just for achieving proper renishaw jacobian matrix signs/element indices. It should never be used in Bamboo.
    @Ignore
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 9000)
    public void testEfficientKindaMatchesInefficientJacobianAnkle()
    {
-
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
-
       closedFormJacobianAnkleRenishaws.useFuteks(false);
 
       InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission = new InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint.ANKLE, null, null);
@@ -127,12 +118,10 @@ public class ClosedFormJacobianTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 30000)
    public void testEfficientMatchesInefficientJacobianWaist()
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
-
       InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission = new InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint.WAIST, null, null);
       closedFormJacobianWaistRenishaws.useFuteks(true);
       for (int i = 0; i < 7; i++)
@@ -154,8 +143,6 @@ public class ClosedFormJacobianTest
    @Test(timeout = 30000)
    public void testEfficentMatchesInterpolatedJacobianAnkle()
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
-      
       closedFormJacobianAnkleRenishaws.useFuteks(false);
 
       for (int i = 0; i < 7; i++)
@@ -174,12 +161,10 @@ public class ClosedFormJacobianTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.2, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 30000)
    public void testEfficentMatchesInterpolatedJacobianWaist()
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
-      
       closedFormJacobianWaistRenishaws.useFuteks(false);
 
       for (int i = 0; i < 7; i++)
@@ -202,8 +187,6 @@ public class ClosedFormJacobianTest
    @Test(timeout = 30000)
    public void cosineTestAnkles()
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
-
       //      A Test to ensure Renishaw and Futek Jacobians are in agreement with each other
       double rollTorque = 25;
       double pitchTorque = 300;
@@ -241,8 +224,6 @@ public class ClosedFormJacobianTest
    @Test(timeout = 30000)
    public void consineTestWaist()
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
-      
       //      A Test to ensure Renishaw and Futek Jacobians are in agreement with each other
       double rollTorque = 25;
       double pitchTorque = 300;

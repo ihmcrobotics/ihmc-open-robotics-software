@@ -23,7 +23,7 @@ import us.ihmc.valkyrie.kinematics.YoValkyrieJointWriter;
 import us.ihmc.valkyrie.roboNet.DummyTurboDriver;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Fast})
+@DeployableTestClass(targets = {TestPlanTarget.Fast})
 public class ComparePushRodTransmissionsTest
 {
    private static final boolean DEBUG = false;
@@ -33,8 +33,6 @@ public class ComparePushRodTransmissionsTest
 	@Test(timeout = 30000)
    public void testCompareInefficientToEfficientAnkle()
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.Fast);
-      
       Random random = new Random(1255L);
       double epsilon = 1e-7;
 
@@ -54,12 +52,10 @@ public class ComparePushRodTransmissionsTest
    }
 
 	@Ignore
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testTiming()
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
-      
       Random random = new Random(1255L);
       double epsilon = 1e-7;
 
@@ -78,12 +74,10 @@ public class ComparePushRodTransmissionsTest
       testTimingTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
 	@Test(timeout = 30000)
    public void testCompareInefficientToEfficientWaist()
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
-      
       Random random = new Random(1255L);
       double epsilon = 1e-7;
 
@@ -104,12 +98,10 @@ public class ComparePushRodTransmissionsTest
    
    // Seems that the interpolated should be same as the pushrod when use futeks is false. Should try to get this to work
    // Or figure out if the interpolated is just plain wrong.
-	@DeployableTestMethod(estimatedDuration = 0.7)
+	@DeployableTestMethod(estimatedDuration = 0.7, targets = TestPlanTarget.InDevelopment)
 	@Test(timeout = 30000)
    public void testCompareInefficientToInterpolatedAnkles()
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
-      
       Random random = new Random(1255L);
 
       String ankleNamespace = "v1_ankle";
@@ -132,12 +124,10 @@ public class ComparePushRodTransmissionsTest
       compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, interpolatedPushRodTransmission, registry, yoGraphicsListRegistry);
    }
    
-	@DeployableTestMethod(estimatedDuration = 1.6)
+	@DeployableTestMethod(estimatedDuration = 1.6, targets = TestPlanTarget.InDevelopment)
 	@Test(timeout = 30000)
    public void testCompareInefficientToInterpolatedWaist()
    {
-      TestPlanTarget.assumeRunningOnPlanIfRunningOnBamboo(TestPlanTarget.InDevelopment);
-      
       Random random = new Random(1255L);
 
       String ankleNamespace = "v1_waist";
