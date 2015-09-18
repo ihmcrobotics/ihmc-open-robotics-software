@@ -393,13 +393,13 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
          b5Viz.setPosition(b5InWorld);
          b6Viz.setPosition(b6InWorld);
 
-         topFrameViz.update();
-         afterTopJointFrameViz.update();
-         beforeBottomJointFrameViz.update();
-         bottomFrameViz.update();
+         
+         
+         
+         
 
-         actuator5SlideFrameViz.update();
-         actuator6SlideFrameViz.update();
+         
+         
       }
 
    }
