@@ -212,9 +212,9 @@ public class CutForceControlHelper {
 	 */
 	static void addWhiteNoise(Wrench wrench, double linearAmp, Random randomNumberGenerator)
 	{
-		double x = wrench.getLinearPartX() + randomNumberGenerator.nextDouble() * linearAmp;
-		double y = wrench.getLinearPartY() + randomNumberGenerator.nextDouble() * linearAmp;
-		double z = wrench.getLinearPartZ() + randomNumberGenerator.nextDouble() * linearAmp;
+		double x = wrench.getLinearPartX() + (randomNumberGenerator.nextDouble() * 2.0 - 1.0) * linearAmp;
+		double y = wrench.getLinearPartY() + (randomNumberGenerator.nextDouble() * 2.0 - 1.0) * linearAmp;
+		double z = wrench.getLinearPartZ() + (randomNumberGenerator.nextDouble() * 2.0 - 1.0) * linearAmp;
 		
 		wrench.setLinearPartX(x);
 		wrench.setLinearPartY(y);
