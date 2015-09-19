@@ -115,6 +115,8 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	private final double v1_ramp = 0.005;
 	private final double w1_0 = 0.15;//old 0.15
 	private final double w2_0 = 50.0;//old 5.0
+	private final double c1_0 = 100.0;
+	private final double c2_0 = 1.0;
 
 	private final double referenceForce = -10.0;
 	private final double pressForce = -5.0;
@@ -233,7 +235,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		referenceError = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_reference_error", registry);
 
 		//TODO: find reasonable initial coeffs
-		setModelCoeffs(100.0, 0.1);//90.0, 1.0
+		setModelCoeffs(c1_0, c2_0);
 		epsilon.set(0.0);
 
 		w1 = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_w1", registry);
@@ -503,7 +505,8 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 
 		currentHandPos.setToZero(handControlFrame);
 		lastHandPos.setToZero(handControlFrame);
-
+		
+		setModelCoeffs(c1_0, c2_0);
 		if (jointControlMode == JointControlMode.POSITION_CONTROL)
 		{
 			enableJointPositionControl();
