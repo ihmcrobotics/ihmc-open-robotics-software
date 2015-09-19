@@ -41,6 +41,7 @@ public abstract class TaskspaceHandControlState extends State<HandControlState>
       this.momentumBasedController = momentumBasedController;
       this.jacobianId = jacobianId;
       this.base = base;
+      this.endEffector = endEffector;
 
       parentRegistry.addChild(registry);
    }
