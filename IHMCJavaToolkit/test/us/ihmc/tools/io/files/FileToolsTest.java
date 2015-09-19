@@ -132,7 +132,7 @@ public class FileToolsTest
    {
       PrintWriter writer = FileTools.newPrintWriter(JAVA_DIRECTORY_PATH.resolve("ExampleJavaFile1.java"));
       writer.println("// This is a comment");
-      writer.println("package us.ihmc.utilities.io.files.fileToolsTest.exampleJavaFiles;");
+      writer.println("package us.ihmc.tools.io.files.fileToolsTest.exampleJavaFiles;");
       writer.println("public class ExampleJavaFile1");
       writer.println("{");
       writer.println("public static void main(String[] args)");
@@ -148,7 +148,7 @@ public class FileToolsTest
    private static void createJavaFile2()
    {
       PrintWriter writer = FileTools.newPrintWriter(JAVA_DIRECTORY_PATH.resolve("ExampleJavaFile2.java"));
-      writer.println("package us.ihmc.utilities.io.files.fileToolsTest.exampleJavaFiles;");
+      writer.println("package us.ihmc.tools.io.files.fileToolsTest.exampleJavaFiles;");
       writer.println("public class ExampleJavaFile2");
       writer.println("{");
       writer.println("public static void main(String[] args)");
