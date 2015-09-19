@@ -62,6 +62,11 @@ public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3d>
       
       pointVelocityOutputPort.setData(pointVelocity);
    }
+   
+   public void packPointVelocity(FrameVector velocity)
+   {
+      yoFrameVectorPerfect.getFrameTupleIncludingFrame(velocity);
+   }
 
    public void waitUntilComputationIsDone()
    {
