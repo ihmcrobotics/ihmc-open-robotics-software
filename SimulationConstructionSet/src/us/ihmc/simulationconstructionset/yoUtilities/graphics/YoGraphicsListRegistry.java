@@ -18,7 +18,7 @@ public class YoGraphicsListRegistry
    private final ArrayList<GraphicsUpdatable> graphicsUpdatables = new ArrayList<GraphicsUpdatable>();
    private final ArrayList<GraphicsUpdatable> graphicsUpdatablesToUpdateInAPlaybackListener = new ArrayList<GraphicsUpdatable>();
    
-   private boolean updateInSimulationThread = true;
+   private boolean updateInSimulationThread = false;
    private boolean alreadyAddedToSimulationConstructionSet = false;
    private boolean alreadyAddedToPlotter = false;
    
