@@ -272,7 +272,21 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		poseTrajectoryGenerator.packLinearData(preScalingTrajectoryPosition, preScalingTrajectoryVelocity,
 				preScalingTrajectoryAcceleration);
 		preScalingTrajectoryVelocityDouble = preScalingTrajectoryVelocity.length();
-
+		
+		tangentTrajectoryVectorInWorld.set(preScalingTrajectoryPosition.getX(), preScalingTrajectoryPosition.getY(),preScalingTrajectoryPosition.getZ());
+		
+		
+		
+		/**
+		 * Calculate tangent vector from Trajectory Generator
+		 */
+		poseTrajectoryGenerator.compute(scaledTimeVariable.getDoubleValue() - dtControl);
+		poseTrajectoryGenerator.packLinearData(preScalingTrajectoryPosition, preScalingTrajectoryVelocity,preScalingTrajectoryAcceleration);
+		
+		tempVector.set(preScalingTrajectoryPosition.getX(), preScalingTrajectoryPosition.getY(),preScalingTrajectoryPosition.getZ());
+		tangentTrajectoryVectorInWorld.sub(tempVector);
+		tangentTrajectoryVectorInWorld.normalize();
+		
 		/**
 		 *  Calculate current velocity in desired trajectory plane by finite differences:
 		 */
@@ -282,7 +296,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		tempVector.set(currentHandPos.getPoint());
 		tempVector.sub(lastHandPos.getPoint());
 		tempVector.setX(0.0);
-		tangentTrajectoryVectorInWorld.set(tempVector);
+		//tangentTrajectoryVectorInWorld.set(tempVector);
 
 		lastHandPos.setIncludingFrame(currentHandPos);
 
