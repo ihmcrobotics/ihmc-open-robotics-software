@@ -41,7 +41,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 public class TaskspaceToJointspaceHandForcefeedbackControlState extends TrajectoryBasedTaskspaceHandControlState
 {
 	private final static boolean TRAJECTORY_FORCEFEEDBACK = true; //DO NOT SET TO TRUE! NOT ENTIRELY TESTED YET!! T.Meier If false: make sure trajectory time from behavior is set big enough
-	private final static boolean SENSOR_NOISE = true;
+	private final static boolean SENSOR_NOISE = false;
 	private boolean isDone = false;
 	private final BooleanYoVariable forcefeedback;
 	private final Boolean doPositionControlOnJoints;
@@ -96,7 +96,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	//MBC
 	private final DoubleYoVariable scaledTimeVariable;
 	private final DoubleYoVariable timeParameterScaleFactor;
-	private final static double MAX_TIME_SCALE = 0.5;
+	private final static double MAX_TIME_SCALE = 0.2;
 	private final DoubleYoVariable coeffC1, coeffC2;
 	private final DoubleYoVariable currentTangentialForce;
 	private final DoubleYoVariable currentTangentialForceModel;
@@ -157,7 +157,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		// TODO: Add mass of drill.
 		massHandandDrill = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_massHandAndDrill", parentRegistry);
 		massHandandDrill.set(TotalMassCalculator.computeSubTreeMass(
-				momentumBasedController.getFullRobotModel().getHand(robotSide))/*+ MASSDRILL*/);
+				momentumBasedController.getFullRobotModel().getHand(robotSide)) + MASSDRILL);
 
 		for (int i = 0; i < oneDoFJoints.length; i++)
 		{

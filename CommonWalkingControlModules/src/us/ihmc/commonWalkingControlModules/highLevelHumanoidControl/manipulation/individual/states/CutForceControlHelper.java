@@ -47,9 +47,9 @@ public class CutForceControlHelper {
 			addWhiteNoise(wristSensorWrench, 1.0, randomNumberGenerator);
 		}
 
-		fxRaw.set(wristSensorWrench.getLinearPartX() + generateDriftDisturbance(0.1, driftTime));
-		fyRaw.set(wristSensorWrench.getLinearPartY() + generateDriftDisturbance(0.1, driftTime));
-		fzRaw.set(wristSensorWrench.getLinearPartZ() + generateDriftDisturbance(0.1, driftTime));
+		fxRaw.set(wristSensorWrench.getLinearPartX()/* + generateDriftDisturbance(0.1, driftTime)*/);
+		fyRaw.set(wristSensorWrench.getLinearPartY()/* + generateDriftDisturbance(0.1, driftTime)*/);
+		fzRaw.set(wristSensorWrench.getLinearPartZ()/* + generateDriftDisturbance(0.1, driftTime)*/);
 		System.out.println(driftTime);
 		fzRaw.add(massHandAndDrill * GRAVITY);
 		
