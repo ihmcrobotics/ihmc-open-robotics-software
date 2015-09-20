@@ -209,7 +209,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		wristSensor = momentumBasedController.getWristForceSensor(robotSide);
 		sensorPrefix = robotSide.getShortLowerCaseName() + "_wristSensor";
 
-		alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(5.0, dtControl);
+		alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(15.0, dtControl);
 		fxRaw = new DoubleYoVariable(sensorPrefix + "_Fx_raw", registry);
 		fyRaw = new DoubleYoVariable(sensorPrefix + "_Fy_raw", registry);
 		fzRaw = new DoubleYoVariable(sensorPrefix + "_Fz_raw", registry);
