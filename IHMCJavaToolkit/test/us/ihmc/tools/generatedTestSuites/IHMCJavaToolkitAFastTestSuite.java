@@ -41,7 +41,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.tools.taskExecutor.ParallelTaskTest.class,
    us.ihmc.tools.taskExecutor.PipeLineTest.class,
    us.ihmc.tools.taskExecutor.TaskExecutorTest.class,
-   us.ihmc.tools.thread.ExecutorToolsTest.class,
    us.ihmc.tools.time.DateToolsTest.class,
    us.ihmc.tools.UnitConversionsTest.class
 })

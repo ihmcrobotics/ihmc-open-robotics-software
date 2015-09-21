@@ -13,7 +13,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.tools.processManagement.ProcessSpawnerTest.class,
-   us.ihmc.tools.thread.ExecutorToolsTest.class
+   us.ihmc.tools.thread.ThreadToolsTest.class
 })
 
 public class IHMCJavaToolkitAFlakyTestSuite
