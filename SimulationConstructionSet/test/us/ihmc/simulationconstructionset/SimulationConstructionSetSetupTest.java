@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.swing.JWindow;
+import javax.swing.*;
 
 import org.junit.Test;
 
@@ -9,6 +9,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
+import java.lang.reflect.InvocationTargetException;
+
 @DeployableTestClass(targets = {TestPlanTarget.UI})
 public class SimulationConstructionSetSetupTest
 {
@@ -16,13 +18,20 @@ public class SimulationConstructionSetSetupTest
 
 	@DeployableTestMethod(estimatedDuration = 5.0)
 	@Test(timeout = 30000)
-   public void testSplashScreen()
-   {
-      SplashPanel splashPanel = new SplashPanel();
-      JWindow window = splashPanel.showSplashScreen();
+   public void testSplashScreen() throws Exception
+    {
+      SwingUtilities.invokeAndWait(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            SplashPanel splashPanel = new SplashPanel();
+            JWindow window = splashPanel.showSplashScreen();
 
-      sleep(pauseTimeForGUIs);
-      window.dispose();
+            sleep(pauseTimeForGUIs);
+            window.dispose();
+         }
+      });
    }
 
 	@DeployableTestMethod(estimatedDuration = 5.2)
