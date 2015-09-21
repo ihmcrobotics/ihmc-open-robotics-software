@@ -16,6 +16,7 @@ public class CallFrequencyCalculatorTest
    public void testDetermineCallFrequency()
    {
       CallFrequencyCalculator callFrequencyCalculator = new CallFrequencyCalculator(new YoVariableRegistry("test"), "");
+      callFrequencyCalculator.setNumberOfSamples(12);
 
       int desiredFreq = 20;
       long delay = (long) (1000.0 / desiredFreq);
