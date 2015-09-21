@@ -109,6 +109,9 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       assertEquals(2, points.get(6).getZ(), eps);
       assertEquals(2, points.get(7).getZ(), eps);
       assertEquals(2, points.get(8).getZ(), eps);
+      
+      map.clear();
+      assertEquals(0, map.getAllPointsWithinArea(0.0, 0.0, 2, 2).size(), eps);
 
    }
 

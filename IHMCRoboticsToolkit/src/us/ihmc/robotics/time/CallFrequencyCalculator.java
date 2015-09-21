@@ -12,6 +12,7 @@ public class CallFrequencyCalculator
    private double lastTimeCalled = 0.0;
    private double currentTime = 0.0;
    private int numberOfSamples = 10;
+   private double frequencyAddition = 0;
 
    public CallFrequencyCalculator(YoVariableRegistry registry, String prefix)
    {
@@ -28,16 +29,16 @@ public class CallFrequencyCalculator
    {
       currentTime = System.nanoTime();
 
+      double frequency = 1.0 / ((currentTime - lastTimeCalled) / 1.0E9);
       yoRequestDeltaTInMilliseconds.set((currentTime - lastTimeCalled) / 1.0E6);
-
-      deltaTime = deltaTime + yoRequestDeltaTInMilliseconds.getDoubleValue();
+      frequencyAddition = frequencyAddition + frequency;
       lastTimeCalled = currentTime;
 
       if (counter > numberOfSamples)
       {
-         yoCallFrequency.set(1000.0 / ((deltaTime / numberOfSamples)));
-         deltaTime = 0;
-         counter = 0;
+         yoCallFrequency.set(frequencyAddition / counter);
+         counter = 1;
+         frequencyAddition = 0;
       }
       else
       {
