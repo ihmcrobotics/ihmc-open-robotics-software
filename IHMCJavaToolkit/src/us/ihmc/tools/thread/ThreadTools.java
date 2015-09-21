@@ -5,7 +5,11 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.IOUtils;
@@ -256,6 +260,55 @@ public class ThreadTools
             thread.interrupt();
          }
       }
+   }
+
+   public static ScheduledFuture<?> scheduleWithFixeDelayAndTimeLimit(String threadName, final Runnable runnable, long initialDelay, long delay, TimeUnit timeUnit, final long timeLimit)
+   {
+      ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(getNamedThreadFactory(threadName));
+      final ScheduledFuture<?> handle = scheduler.scheduleWithFixedDelay(runnable, initialDelay, delay, timeUnit);
+      ScheduledFuture<?> handleKiller = scheduler.schedule(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            handle.cancel(true);
+         }
+      }, timeLimit, timeUnit);
+      
+      return handleKiller;
+   }
+
+   public static ScheduledFuture<?> scheduleWithFixedDelayAndIterationLimit(String threadName, final Runnable runnable, long initialDelay, final long delay, final TimeUnit timeUnit, final int iterations)
+   {
+      final AtomicInteger counter = new AtomicInteger();
+      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2, getNamedThreadFactory(threadName));
+      final ScheduledFuture<?> handle = scheduler.scheduleWithFixedDelay(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            if(counter.get() < iterations)
+            {
+               runnable.run();
+               counter.incrementAndGet();
+            }
+         }
+      }, initialDelay, delay, timeUnit);
+      
+      ScheduledFuture<?> handleKiller = scheduler.schedule(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            while(counter.get() < iterations)
+            {
+               sleep(TimeUnit.MILLISECONDS.convert(delay, timeUnit));
+            }
+            handle.cancel(true);
+         }
+      }, 0, timeUnit);
+      
+      return handleKiller;
    }
 
 }
