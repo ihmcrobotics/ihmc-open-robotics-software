@@ -2,16 +2,15 @@ package us.ihmc.robotics.time;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Random;
-
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class CallFrequencyCalculatorTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 30000)
    public void testDetermineCallFrequency()
    {
@@ -37,7 +36,7 @@ public class CallFrequencyCalculatorTest
 
          if (freq != 0.0)
          {
-            assertEquals(desiredFreq, freq, 1e-2);
+            assertEquals(desiredFreq, freq, 1);
          }
       }
    }
