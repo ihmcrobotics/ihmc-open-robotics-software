@@ -28,21 +28,21 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final SideDependentList<String> feetForceSensorNames;
    static
    {
-      feetForceSensorNames = new SideDependentList<String>("LeftAnkleRoll", "RightAnkleRoll");
+      feetForceSensorNames = new SideDependentList<String>("leftAnkleRoll", "rightAnkleRoll");
       
       if (ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
       {
-         forceSensorNames = new String[] { "LeftAnkleRoll", "RightAnkleRoll", "LeftWristPitch", "RightWristPitch" };
+         forceSensorNames = new String[] { "leftAnkleRoll", "rightAnkleRoll", "leftWristPitch", "rightWristPitch" };
       }
       else
       {
-         forceSensorNames = new String[] { "LeftAnkleRoll", "RightAnkleRoll" };
+         forceSensorNames = new String[] { "leftAnkleRoll", "rightAnkleRoll" };
       }
    }
-   private static final SideDependentList<String> wristForceSensorNames = new SideDependentList<String>("LeftWristPitch", "RightWristPitch");
-   private static final SideDependentList<String> urdfTekscanSensorNames = new SideDependentList<String>("LeftCOP_Offset", "RightCOP_Offset");
-   private static final SideDependentList<String> footContactSensorNames = new SideDependentList<String>("LeftFootContactSensor","RightFootContactSensor");
-   private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("LeftFootSixAxis_Offset", "RightFootSixAxis_Offset");
+   private static final SideDependentList<String> wristForceSensorNames = new SideDependentList<String>("leftWristPitch", "rightWristPitch");
+   private static final SideDependentList<String> urdfTekscanSensorNames = new SideDependentList<String>("leftCOP_Offset", "rightCOP_Offset");
+   private static final SideDependentList<String> footContactSensorNames = new SideDependentList<String>("leftFootContactSensor","rightFootContactSensor");
+   private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("leftFootSixAxis_Offset", "rightFootSixAxis_Offset");
    public static final SideDependentList<LinkedHashMap<String, LinkedHashMap<String,ContactSensorType>>> contactSensors = new SideDependentList<LinkedHashMap<String,LinkedHashMap<String,ContactSensorType>>>();
 
    public static final boolean USE_JSC_FOOT_MASS_TARING = false;
@@ -76,15 +76,15 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    {
       contactSensors.put(RobotSide.LEFT, new LinkedHashMap<String, LinkedHashMap<String,ContactSensorType>>());
       
-      contactSensors.get(RobotSide.LEFT).put("LeftAnkleRoll",new LinkedHashMap<String,ContactSensorType>());
-      contactSensors.get(RobotSide.LEFT).get("LeftAnkleRoll").put(footContactSensorNames.get(RobotSide.LEFT), ContactSensorType.SOLE);
+      contactSensors.get(RobotSide.LEFT).put("leftAnkleRoll",new LinkedHashMap<String,ContactSensorType>());
+      contactSensors.get(RobotSide.LEFT).get("leftAnkleRoll").put(footContactSensorNames.get(RobotSide.LEFT), ContactSensorType.SOLE);
       
       //@TODO Need a bit more work before multiple contact sensors can be added to a single rigid body.
 //      contactSensors.get(RobotSide.LEFT).get("LeftAnkle").put("LeftToeContactSensor", ContactSensorType.TOE);
 //      contactSensors.get(RobotSide.LEFT).get("LeftAnkle").put("LeftHeelContactSensor", ContactSensorType.HEEL);
       contactSensors.put(RobotSide.RIGHT, new LinkedHashMap<String, LinkedHashMap<String,ContactSensorType>>());
-      contactSensors.get(RobotSide.RIGHT).put("RightAnkleRoll",new LinkedHashMap<String,ContactSensorType>());
-      contactSensors.get(RobotSide.RIGHT).get("RightAnkleRoll").put(footContactSensorNames.get(RobotSide.RIGHT), ContactSensorType.SOLE);
+      contactSensors.get(RobotSide.RIGHT).put("rightAnkleRoll",new LinkedHashMap<String,ContactSensorType>());
+      contactSensors.get(RobotSide.RIGHT).get("rightAnkleRoll").put(footContactSensorNames.get(RobotSide.RIGHT), ContactSensorType.SOLE);
       
       //@TODO Need a bit more work before multiple contact sensors can be added to a single rigid body.      
 //      contactSensors.get(RobotSide.RIGHT).get("RightAnkle").put("RightToeContactSensor", ContactSensorType.TOE);
@@ -123,10 +123,10 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String left_info_camera_topic = multisense_namespace +"/left/image_rect_color/camera_info";//left/image_rect_color/camera_info
    
    
-   private static final String leftStereoCameraName = "/v1/LeftHazardCamera___default__";
-   private static final String leftCameraTopic = "/v1/LeftHazardCamera/compressed";
+   private static final String leftStereoCameraName = "/v1/leftHazardCamera___default__";
+   private static final String leftCameraTopic = "/v1/leftHazardCamera/compressed";
    
-   private static final String rightStereoCameraName ="/v1/RightHazardCamera___default__";
+   private static final String rightStereoCameraName ="/v1/rightHazardCamera___default__";
    private static final String rightCameraTopic = "/v1/rightHazardCamera/compressed";
 
    /**
@@ -147,10 +147,10 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String multisense_height_map = multisense_namespace+"/height_map";
    private static final String multisenseHandoffFrame = "multisense_root_link";
    
-   private static final String rightTrunkIMUSensor = "Torso_RightTorsoIMU";
-   private static final String leftTrunkIMUSensor = "Torso_LeftTorsoIMU";
-   private static final String leftPelvisIMUSensor = "Pelvis_LeftPelvisIMU";
-   private static final String rightPelvisIMUSensor = "Pelvis_RightPelvisIMU";
+   private static final String rightTrunkIMUSensor = "torso_rightTorsoIMU";
+   private static final String leftTrunkIMUSensor = "torso_leftTorsoIMU";
+   private static final String leftPelvisIMUSensor = "pelvis_leftPelvisIMU";
+   private static final String rightPelvisIMUSensor = "pelvis_rightPelvisIMU";
    private static final RigidBodyTransform transformFromHeadToCamera = new RigidBodyTransform();
    static
    {

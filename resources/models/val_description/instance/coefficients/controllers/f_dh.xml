@@ -1,0 +1,46 @@
+<CoeffData>
+  <Properties>
+    <CalibrationDate/>
+    <FileGenDate date="2013-07-02" time="19:23:42.085597"/>
+  </Properties>
+  <Coeffs>
+    <!-- - - - - - - - - Filtering - - - - - - - - -->
+    <Coeff description="" value="1000" id="JointVelFilter_fc_Hz"/>
+    <Coeff description="" value="800" id="MotorVelFilter_fc_Hz"/>
+    <Coeff description="" value="50" id="MotorAccFilter_fc_Hz"/>
+
+    <!-- - - - - - - - - Controllers - - - - - - - - -->
+    <!-- Commutation -->
+    <Coeff description="-1=master,0=six,1=4quad,2=sv,3=dh" value="3.0" id="Commutation_Select"/>
+
+    <!-- Torque Controller -->
+        <!-- Model -->
+        <Coeff description="" value="0.4" id="TorqueControl_m"/>
+        <Coeff description="" value="15.0" id="TorqueControl_b"/>
+
+        <!-- FF -->
+        <Coeff description="" value="1" id="TorqueControl_enableFF"/>
+        <Coeff description="" value="0.0375" id="TorqueControl_Current2MotorTorque"/>
+
+        <!-- PID -->
+        <Coeff description="" value="1" id="TorqueControl_enablePID"/>
+        <Coeff description="" value="10.0" id="TorqueControl_Kp"/>
+        <Coeff description="" value="0.95" id="TorqueControl_PD_damp"/>
+        <Coeff description="" value="1" id="TorqueControl_autoKd"/>
+        <Coeff description="" value="0.001" id="TorqueControl_Kd"/>
+        <Coeff description="" value="200.0" id="TorqueControl_Kd_fc_Hz"/>
+
+        <!-- DOB -->
+        <Coeff description="" value="1" id="TorqueControl_enableDOB"/>
+        <Coeff description="" value="25.0" id="TorqueControl_TdobWindupLimit_Nm"/>
+        <Coeff description="" value="30.0" id="TorqueControl_Tdob_fc_Hz"/>
+
+        <!-- DynFF -->
+        <Coeff description="" value="1" id="TorqueControl_enableDynFF"/>
+        <Coeff description="" value="25.0" id="TorqueControl_FFd_fc_Hz"/>
+
+        <!-- Parallel Damping -->
+        <Coeff description="" value="0.0" id="TorqueControl_ParallelDamping"/>
+    <!-- end Torque Controller -->
+  </Coeffs>
+</CoeffData>

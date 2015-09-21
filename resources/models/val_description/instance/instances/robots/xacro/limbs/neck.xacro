@@ -1,0 +1,14 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="neck">
+
+    <xacro:include filename="xacro/mechanisms/mechanisms.xacro"/>
+    <xacro:include filename="../../../common/xacro/joint_names/valkyrie_joint_names.xacro"/>
+
+    <xacro:macro name="neck" params="j1_serial_number j2_serial_number j3_serial_number" >
+    	<xacro:simple_mechanism name="${LowerNeckPitchJointName}" serial_number="${j1_serial_number}" node="${LowerNeckPitchNode}"/>
+
+    	<xacro:simple_mechanism name="${NeckYawJointName}" serial_number="${j2_serial_number}" node="${NeckYawNode}"/>
+
+    	<xacro:simple_mechanism name="${UpperNeckPitchJointName}" serial_number="${j3_serial_number}" node="${UpperNeckPitchNode}"/>
+    </xacro:macro>
+
+</robot>

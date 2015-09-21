@@ -1,9 +1,0 @@
-<?xml version="1.0" ?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/head/link_names">
-
-  <xacro:property name="LowerNeckPitchParentLinkName" value="${head_root_link}" />
-  <xacro:property name="LowerNeckPitchLinkName" value="LowerNeckPitchLink" />
-  <xacro:property name="NeckYawLinkName" value="NeckYawLink" />
-  <xacro:property name="UpperNeckPitchLinkName" value="UpperNeckPitchLink" />
-
-</robot>

@@ -219,56 +219,56 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
 
    private void setInitialCorruptorArmMassValues(SimulationConstructionSet simulationConstructionSet)
    {
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightShoulderPitchMass")).set(2.65);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightShoulderRollMass")).set(2.87);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightShoulderYawMass")).set(2.575);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightElbowPitchMass")).set(2.367);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightForearmYawMass")).set(2.903);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightWristPitchMass")).set(0.1);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightWristRollMass")).set(0.928);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderPitchMass")).set(2.65);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderRollMass")).set(2.87);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderYawMass")).set(2.575);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightElbowPitchMass")).set(2.367);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightForearmYawMass")).set(2.903);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightWristPitchMass")).set(0.1);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightWristRollMass")).set(0.928);
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("LeftShoulderPitchMass")).set(2.65);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("LeftShoulderRollMass")).set(2.87); 
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("LeftShoulderYawMass")).set(2.575); 
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("LeftElbowPitchMass")).set(2.367);  
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("LeftForearmYawMass")).set(2.903);  
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("LeftWristPitchMass")).set(0.1);    
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("LeftWristRollMass")).set(0.928);   
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftShoulderPitchMass")).set(2.65);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftShoulderRollMass")).set(2.87);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftShoulderYawMass")).set(2.575);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftElbowPitchMass")).set(2.367);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftForearmYawMass")).set(2.903);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftWristPitchMass")).set(0.1);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftWristRollMass")).set(0.928);
    }
    
    private void setInitialCorruptorArmCoMOffsetValues(SimulationConstructionSet simulationConstructionSet)
    {
       // Start from Sylvain's Numbers:
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightShoulderRollCoMOffsetX")).set(-0.02);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightShoulderRollCoMOffsetY")).set(0.005);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightShoulderRollCoMOffsetZ")).set(-0.04);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightShoulderYawCoMOffsetX")).set(0.004);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightShoulderYawCoMOffsetY")).set(0.02);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightShoulderYawCoMOffsetZ")).set(-0.273);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderRollCoMOffsetX")).set(-0.02);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderRollCoMOffsetY")).set(0.005);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderRollCoMOffsetZ")).set(-0.04);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderYawCoMOffsetX")).set(0.004);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderYawCoMOffsetY")).set(0.02);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderYawCoMOffsetZ")).set(-0.273);
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightElbowPitchCoMOffsetX")).set(-0.027);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightElbowPitchCoMOffsetY")).set(0.0);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightElbowPitchCoMOffsetZ")).set(-0.08);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightElbowPitchCoMOffsetX")).set(-0.027);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightElbowPitchCoMOffsetY")).set(0.0);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightElbowPitchCoMOffsetZ")).set(-0.08);
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightForearmYawCoMOffsetX")).set(0.015);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightForearmYawCoMOffsetY")).set(-0.02);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("RightForearmYawCoMOffsetZ")).set(-0.11);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightForearmYawCoMOffsetX")).set(0.015);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightForearmYawCoMOffsetY")).set(-0.02);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightForearmYawCoMOffsetZ")).set(-0.11);
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_RightShoulderPitxh")).set(-1.0);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_RightShoulderRoll")).set(0.7);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_RightShoulderYaw")).set(0.3);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_RightElbowPitch")).set(-0.1);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightShoulderPitxh")).set(-1.0);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightShoulderRoll")).set(0.7);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightShoulderYaw")).set(0.3);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightElbowPitch")).set(-0.1);
    }
    
    private void setInitialCorruptorArmTorqueOffsetValues(SimulationConstructionSet simulationConstructionSet)
    {
       // Start from Sylvain's Numbers:
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_RightShoulderPitch")).set(-1.0);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_RightShoulderRoll")).set(0.7);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_RightShoulderYaw")).set(0.3);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_RightElbowPitch")).set(-0.1);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightShoulderPitch")).set(-1.0);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightShoulderRoll")).set(0.7);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightShoulderYaw")).set(0.3);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightElbowPitch")).set(-0.1);
    }
    
    private void setInitialCorruptorLegCoMOffsetValues(SimulationConstructionSet simulationConstructionSet)
@@ -314,7 +314,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       {
          SDFHumanoidRobot robot = super.createSdfRobot(createCollisionMeshes);
          
-         Joint joint = robot.getJoint("TorsoRoll");
+         Joint joint = robot.getJoint("torsoRoll");
          
          ArrayList<Vector3d> attachmentLocations = new ArrayList<Vector3d>();
              

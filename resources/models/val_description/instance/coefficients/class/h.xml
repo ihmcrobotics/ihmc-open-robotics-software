@@ -1,0 +1,56 @@
+<CoeffData>
+  <Properties>
+    <CalibrationDate/>
+    <FileGenDate date="2013-10-04" time="19:23:42.085597"/>
+  </Properties>
+  <Type id="hdlrsmp" />
+  <ScheduleFiles>
+    <!-- This is probably not the right way to do these, not real sure how the wrists work though -->
+    <ScheduleFile id="athena1.xml"/>
+    <ScheduleFile id="athena2.xml"/>
+  </ScheduleFiles />
+  <Coeffs>
+    <Coeff value="-3104" id="Pitch_offset"/>
+    <Coeff value="-1554" id="Yaw_offset"/>
+    <Coeff value="1500" id="Pitch_hilmt"/>
+    <Coeff value="-1500" id="Pitch_lolmt"/>
+    <Coeff value="0.000767" id="Pitch_cnvtrad"/>
+    <Coeff value="1000" id="Yaw_hilmt"/>
+    <Coeff value="-1000" id="Yaw_lolmt"/>
+    <Coeff value="-0.000767" id="Yaw_cnvtrad"/>
+    <Coeff value="1.75" id="thumb_hicmdlmt"/>
+    <Coeff value="-0.087266" id="thumb_locmdlmt"/>
+    <Coeff value="-300" id="thumb_posKP"/>
+    <Coeff value="-100" id="thumb_posKD"/>
+    <Coeff value="80" id="thumb_dutylmt"/>
+    <Coeff value="1" id="WL_Torq_KP"/>
+    <Coeff value="0" id="WL_Torq_KD"/>
+    <!--<Coeff value="1671" id="WL_hicmdlmt"/> -->
+    <!--<Coeff value="-1671" id="WL_locmdlmt"/> -->
+    <Coeff value="1671" id="WL_hiposcmdlmt"/>
+    <Coeff value="-1671" id="WL_loposcmdlmt"/>
+    <Coeff value="50.0" id="WL_hivelcmdlmt"/>
+    <Coeff value="-50.0" id="WL_lovelcmdlmt"/>
+    <Coeff value="1" id="WL_posKP"/>
+    <Coeff value="0" id="WL_posKD"/>
+    <Coeff value="30" id="WL_dutylmt"/>
+    <Coeff value="7" id="Fing3_elecoffset"/>
+    <Coeff value="100" id="Fing3_locmdlmt"/>
+    <Coeff value="2934" id="Fing3_hicmdlmt"/>
+    <Coeff value="1" id="Fing3_posKP"/>
+    <Coeff value="0" id="Fing3_posKD"/>
+    <Coeff value="30" id="Fing3_dutylmt"/>
+    <Coeff value="-5300" id="Fing3_APSoffset"/>
+    <Coeff value="1" id="WR_Torq_KP"/>
+    <Coeff value="0" id="WR_Torq_KD"/>
+    <!--<Coeff value="1671" id="WR_hicmdlmt"/> -->
+    <!--<Coeff value="-1671" id="WR_locmdlmt"/> -->
+    <Coeff value="1671" id="WR_hiposcmdlmt"/>
+    <Coeff value="-1671" id="WR_loposcmdlmt"/>
+    <Coeff value="50" id="WR_hivelcmdlmt"/>
+    <Coeff value="-50" id="WR_lovelcmdlmt"/>
+    <Coeff value="1" id="WR_posKP"/>
+    <Coeff value="0" id="WR_posKD"/>
+    <Coeff value="30" id="WR_dutylmt"/>
+  </Coeffs>
+</CoeffData>

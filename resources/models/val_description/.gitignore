@@ -1,6 +1,10 @@
 *~
 *.md~
 val*.urdf
-*.xml
 valkyrie*.sdf
+valkyrie*.xml
 *.bak
+*.pdf
+*.gv
+*.orig
+*.pyc

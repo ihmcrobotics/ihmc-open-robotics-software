@@ -69,7 +69,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
          sliderBoardControlledFingerJointNamesWithLimits.put(side, new LinkedHashMap<String, ImmutablePair<Double,Double>>());
          for(ValkyrieRealRobotFingerJoint fingerJoint : ValkyrieRealRobotFingerJoint.values())
          {
-            sliderBoardControlledFingerJointNamesWithLimits.get(side).put(side.getCamelCaseNameForMiddleOfExpression() + fingerJoint.toString(), 
+            sliderBoardControlledFingerJointNamesWithLimits.get(side).put(side.getCamelCaseNameForStartOfExpression() + fingerJoint.toString(),
                   new ImmutablePair<Double,Double>(ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(side, fingerJoint), ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(side, fingerJoint)));
          }
       }
@@ -493,7 +493,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
    {
-      YoPDGains gains = new YoPDGains("PelvisXY", registry);
+      YoPDGains gains = new YoPDGains("pelvisXY", registry);
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
@@ -506,7 +506,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
-      YoFootOrientationGains gains = new YoFootOrientationGains("PelvisOrientation", registry);
+      YoFootOrientationGains gains = new YoFootOrientationGains("pelvisOrientation", registry);
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
@@ -900,33 +900,33 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public String[] getJointsToIgnoreInController()
    {
       String[] jointsToIgnore = new String[] {
-            "RightIndexFingerPitch1",
-            "RightIndexFingerPitch2",
-            "RightIndexFingerPitch3",
-            "RightMiddleFingerPitch1",
-            "RightMiddleFingerPitch2",
-            "RightMiddleFingerPitch3",
-            "RightPinkyPitch1",  
-            "RightPinkyPitch2",  
-            "RightPinkyPitch3",  
-            "RightThumbRoll",    
-            "RightThumbPitch1",  
-            "RightThumbPitch2",  
-            "RightThumbPitch3",
-            "LeftIndexFingerPitch1", 
-            "LeftIndexFingerPitch2", 
-            "LeftIndexFingerPitch3", 
-            "LeftMiddleFingerPitch1",
-            "LeftMiddleFingerPitch2",
-            "LeftMiddleFingerPitch3",
-            "LeftPinkyPitch1",       
-            "LeftPinkyPitch2",       
-            "LeftPinkyPitch3",       
-            "LeftThumbRoll",         
-            "LeftThumbPitch1",       
-            "LeftThumbPitch2",       
-            "LeftThumbPitch3",
-//            "UpperNeckPitch",
+            "rightIndexFingerPitch1",
+            "rightIndexFingerPitch2",
+            "rightIndexFingerPitch3",
+            "rightMiddleFingerPitch1",
+            "rightMiddleFingerPitch2",
+            "rightMiddleFingerPitch3",
+            "rightPinkyPitch1",
+            "rightPinkyPitch2",
+            "rightPinkyPitch3",
+            "rightThumbRoll",
+            "rightThumbPitch1",
+            "rightThumbPitch2",
+            "rightThumbPitch3",
+            "leftIndexFingerPitch1",
+            "leftIndexFingerPitch2",
+            "leftIndexFingerPitch3",
+            "leftMiddleFingerPitch1",
+            "leftMiddleFingerPitch2",
+            "leftMiddleFingerPitch3",
+            "leftPinkyPitch1",
+            "leftPinkyPitch2",
+            "leftPinkyPitch3",
+            "leftThumbRoll",
+            "leftThumbPitch1",
+            "leftThumbPitch2",
+            "leftThumbPitch3",
+//            "upperNeckPitch",
 //            "LowerNeckPitch",
 //            "NeckYaw"
              };

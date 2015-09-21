@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="leg_mass_parameters">
+ 
+  <xacro:property name="HipYawLinkMass" value="2.39" />
+  <xacro:property name="HipYawLinkComPosition" value="0.02176 ${reflect*-0.00131} 0.03867" />
+  <xacro:property name="HipYawLinkInertia_IXX" value="0.017260978" />
+  <xacro:property name="HipYawLinkInertia_IXY" value="0.000000000" />
+  <xacro:property name="HipYawLinkInertia_IXZ" value="0.000000000" />
+  <xacro:property name="HipYawLinkInertia_IYY" value="0.014866198" />
+  <xacro:property name="HipYawLinkInertia_IYZ" value="0.000000000" />
+  <xacro:property name="HipYawLinkInertia_IZZ" value="0.011238178" />
+
+  <xacro:property name="HipRollLinkMass" value="3.665000" />
+  <xacro:property name="HipRollLinkComPosition" value="0.012959 ${reflect*0.007550} -0.015950" />
+  <xacro:property name="HipRollLinkInertia_IXX" value="0.005978962" />
+  <xacro:property name="HipRollLinkInertia_IXY" value="${reflect*-0.000234823}" />
+  <xacro:property name="HipRollLinkInertia_IXZ" value="0.000553962" />
+  <xacro:property name="HipRollLinkInertia_IYY" value="0.009372646" />
+  <xacro:property name="HipRollLinkInertia_IYZ" value="${reflect*0.000778956}" />
+  <xacro:property name="HipRollLinkInertia_IZZ" value="0.008193117" />
+
+  <xacro:property name="HipPitchLinkMass" value="10.20" />
+  <xacro:property name="HipPitchLinkComPosition" value="0.016691 ${reflect*0.091397} -0.207875" />
+  <xacro:property name="HipPitchLinkInertia_IXX" value="0.240834130" />
+  <xacro:property name="HipPitchLinkInertia_IXY" value="${reflect*0.000035915}" />
+  <xacro:property name="HipPitchLinkInertia_IXZ" value="0.003699383" />
+  <xacro:property name="HipPitchLinkInertia_IYY" value="0.256897050" />
+  <xacro:property name="HipPitchLinkInertia_IYZ" value="${reflect*-0.001333005}" />
+  <xacro:property name="HipPitchLinkInertia_IZZ" value="0.023276352" />
+
+  <xacro:property name="KneePitchLinkMass" value="6.600000" />
+  <xacro:property name="KneePitchLinkComPosition" value="0.002425 -0.001543 -0.189511" />
+  <xacro:property name="KneePitchLinkInertia_IXX" value="0.096117529" />
+  <xacro:property name="KneePitchLinkInertia_IXY" value="0.000107885" />
+  <xacro:property name="KneePitchLinkInertia_IXZ" value="0.006319047" />
+  <xacro:property name="KneePitchLinkInertia_IYY" value="0.097118447" />
+  <xacro:property name="KneePitchLinkInertia_IYZ" value="-0.000494739" />
+  <xacro:property name="KneePitchLinkInertia_IZZ" value="0.013722874" />
+
+  <xacro:property name="AnklePitchLinkMass" value="0.06" />
+  <xacro:property name="AnklePitchLinkComPosition" value="0.0 0.0 0.0" />
+  <xacro:property name="AnklePitchLinkInertia_IXX" value="0.000011226" />
+  <xacro:property name="AnklePitchLinkInertia_IXY" value="0.000000000" />
+  <xacro:property name="AnklePitchLinkInertia_IXZ" value="0.000002735" />
+  <xacro:property name="AnklePitchLinkInertia_IYY" value="0.000026700" />
+  <xacro:property name="AnklePitchLinkInertia_IYZ" value="0.0" />
+  <xacro:property name="AnklePitchLinkInertia_IZZ" value="0.000018792" />
+
+
+  <xacro:property name="FootMass" value="3.2550" />
+  <xacro:property name="FootComPosition" value="0.037702 0.005161 -0.047634" />
+  <xacro:property name="FootInertia_IXX" value="0.008966273" />
+  <xacro:property name="FootInertia_IXY" value="-0.000086029" />
+  <xacro:property name="FootInertia_IXZ" value="0.003944774" />
+  <xacro:property name="FootInertia_IYY" value="0.023943858" />
+  <xacro:property name="FootInertia_IYZ" value="0.000105218" />
+  <xacro:property name="FootInertia_IZZ" value="0.028128777" />
+
+
+
+
+</robot>
