@@ -1,0 +1,31 @@
+<CoeffData>
+  <Properties>
+    <CalibrationDate/>
+    <FileGenDate date="2013-11-14" time="16:10:35.854103"/>
+  </Properties>
+  <Coeffs>
+    <Coeff id="Commutation_Select" value="3.0"/>
+    <Coeff id="JointVelFilter_fc_Hz" value="50.0"/>
+    <Coeff id="MotorAccFilter_fc_Hz" value="50.0"/>
+    <Coeff id="MotorVelFilter_fc_Hz" value="800.0"/>
+    <Coeff id="PositionControl_Kd" value="0.0"/>
+    <Coeff id="PositionControl_Kp" value="300.0"/>
+    <Coeff id="PositionControl_SensorFeedback" value="4.0"/>
+    <Coeff id="TorqueControl_Current2MotorTorque" value="0.0375"/>
+    <Coeff id="TorqueControl_FFd_fc_Hz" value="25.0"/>
+    <Coeff id="TorqueControl_Kd" value="0.001"/>
+    <Coeff id="TorqueControl_Kd_fc_Hz" value="100.0"/>
+    <Coeff id="TorqueControl_Kp" value="0.0"/>
+    <Coeff id="TorqueControl_PD_damp" value="0.95"/>
+    <Coeff id="TorqueControl_ParallelDamping" value="0.0"/>
+    <Coeff id="TorqueControl_TdobWindupLimit_Nm" value="300.0"/>
+    <Coeff id="TorqueControl_Tdob_fc_Hz" value="50.0"/>
+    <Coeff id="TorqueControl_autoKd" value="1.0"/>
+    <Coeff id="TorqueControl_b" value="35.0"/>
+    <Coeff id="TorqueControl_enableDOB" value="1.0"/>
+    <Coeff id="TorqueControl_enableDynFF" value="0.0"/>
+    <Coeff id="TorqueControl_enableFF" value="1.0"/>
+    <Coeff id="TorqueControl_enablePID" value="1.0"/>
+    <Coeff id="TorqueControl_m" value="1.2"/>
+  </Coeffs>
+</CoeffData>

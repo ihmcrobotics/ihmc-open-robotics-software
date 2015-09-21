@@ -28,10 +28,10 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieJointMap implements DRCRobotJointMap
 {
-   private final String chestName = "Torso";
-   private final String pelvisName = "Pelvis";
+   private final String chestName = "torso";
+   private final String pelvisName = "pelvis";
    private final String fullPelvisNameInSdf = pelvisName;
-   private final String headName = "UpperNeckPitchLink";
+   private final String headName = "upperNeckPitchLink";
 
    private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
    private final ArmJointName[] armJoints;
@@ -145,7 +145,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 
    private String getRobotSidePrefix(RobotSide robotSide)
    {
-      return robotSide.getCamelCaseNameForMiddleOfExpression();// "Left" or "Right"
+      return robotSide.getCamelCaseNameForStartOfExpression();// "Left" or "Right"
    }
 
    @Override
@@ -362,32 +362,32 @@ public class ValkyrieJointMap implements DRCRobotJointMap
             getNeckJointName(NeckJointName.LOWER_NECK_PITCH),
             getNeckJointName(NeckJointName.NECK_YAW),
             
-            "RightIndexFingerPitch1",
-            "RightIndexFingerPitch2",
-            "RightIndexFingerPitch3",
-            "RightMiddleFingerPitch1",
-            "RightMiddleFingerPitch2",
-            "RightMiddleFingerPitch3",
-            "RightPinkyPitch1",  
-            "RightPinkyPitch2",  
-            "RightPinkyPitch3",  
-            "RightThumbRoll",    
-            "RightThumbPitch1",  
-            "RightThumbPitch2",  
-            "RightThumbPitch3",
-            "LeftIndexFingerPitch1", 
-            "LeftIndexFingerPitch2", 
-            "LeftIndexFingerPitch3", 
-            "LeftMiddleFingerPitch1",
-            "LeftMiddleFingerPitch2",
-            "LeftMiddleFingerPitch3",
-            "LeftPinkyPitch1",       
-            "LeftPinkyPitch2",       
-            "LeftPinkyPitch3",       
-            "LeftThumbRoll",         
-            "LeftThumbPitch1",       
-            "LeftThumbPitch2",       
-            "LeftThumbPitch3"    
+            "rightIndexFingerPitch1",
+            "rightIndexFingerPitch2",
+            "rightIndexFingerPitch3",
+            "rightMiddleFingerPitch1",
+            "rightMiddleFingerPitch2",
+            "rightMiddleFingerPitch3",
+            "rightPinkyPitch1",
+            "rightPinkyPitch2",
+            "rightPinkyPitch3",
+            "rightThumbRoll",
+            "rightThumbPitch1",
+            "rightThumbPitch2",
+            "rightThumbPitch3",
+            "leftIndexFingerPitch1",
+            "leftIndexFingerPitch2",
+            "leftIndexFingerPitch3",
+            "leftMiddleFingerPitch1",
+            "leftMiddleFingerPitch2",
+            "leftMiddleFingerPitch3",
+            "leftPinkyPitch1",
+            "leftPinkyPitch2",
+            "leftPinkyPitch3",
+            "leftThumbRoll",
+            "leftThumbPitch1",
+            "leftThumbPitch2",
+            "leftThumbPitch3"
       };
       
       return ret;

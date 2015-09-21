@@ -1,0 +1,9 @@
+<CoeffData>
+  <Properties>
+    <CalibrationDate/>
+    <FileGenDate date="2013-10-25" time="21:34:25.477992"/>
+  </Properties>
+  <Coeffs>
+    <Coeff id="Commutation_Select" value="3.0"/>
+  </Coeffs>
+</CoeffData>

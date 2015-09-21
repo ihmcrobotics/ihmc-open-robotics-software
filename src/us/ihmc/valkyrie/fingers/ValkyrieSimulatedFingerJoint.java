@@ -27,7 +27,7 @@ public enum ValkyrieSimulatedFingerJoint
    
    public String getJointName(RobotSide robotSide)
    {
-      return robotSide.getCamelCaseNameForMiddleOfExpression() + name();
+      return robotSide.getCamelCaseNameForStartOfExpression() + name();
    }
    
    public ValkyrieRealRobotFingerJoint getRelatedRealFingerJoint()

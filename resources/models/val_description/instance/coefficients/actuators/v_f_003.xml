@@ -1,0 +1,39 @@
+<CoeffData>
+    <Properties>
+        <CalibrationDate/>
+        <FileGenDate date="2014-12-19" time="11:13:39.495720"/>
+    </Properties>
+    <ClassFile id="f.xml"/>
+    <ControllerFile id="f_sv.xml"/>
+    <SensorsFile id="sensors.xml"/>
+    <SafetyFile id="safety.xml"/>
+    <ModeFile id="mode.xml"/>
+    <Coeffs>
+        <Coeff id="EncMountingDir" value="-1.0"/>
+        <Coeff id="EncoderIndexOffset" value="3.74890070429"/>
+        <Coeff id="JointKinematicDir" value="-1.0"/>
+        <Coeff id="JointMaxValue" value="3.14159265359"/>
+        <Coeff id="JointMinValue" value="-3.14159265359"/>
+        <Coeff id="JointOutputAPS_MountingGain" value="1.0"/>
+        <Coeff id="JointSafety_LimitZone_Rad" value="0.07"/>
+        <Coeff id="JointSafety_LowerLimit_Rad" value="-2.14"/>
+        <Coeff id="JointSafety_UpperLimit_Rad" value="0.19"/>
+        <Coeff id="JointSensors_MotorPosition" value="1.0"/>
+        <Coeff id="JointSensors_OutputForce" value="2.0"/>
+        <Coeff id="JointSensors_OutputPosition" value="2.0"/>
+        <Coeff id="JointSensors_OutputVelocity" value="1.0"/>
+        <Coeff id="JointTorqueLimit_Nm" value="65.0"/>
+        <Coeff id="PositionOffset_Rad" value="-3.0058">
+            <notes>Was -2.98973
+Was -3.25</notes>
+        </Coeff>
+        <Coeff id="ReadyPoseTorque" value="7.5"/>
+        <Coeff id="SpringAPS_BitOffset" value="297596992.0"/>
+        <Coeff id="SpringAPS_MountingGain" value="-1.0"/>
+        <Coeff id="TorqueControl_MotorTorqueDirection" value="1.0"/>
+        <Coeff id="TorqueOffset_Nm" value="-2.23">
+            <notes>Was -1.96
+Was -2.43</notes>
+        </Coeff>
+    </Coeffs>
+</CoeffData>

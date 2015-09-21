@@ -127,11 +127,11 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       for (String forceSensorNames : ValkyrieSensorInformation.forceSensorNames)
       {
          RigidBodyTransform transform = new RigidBodyTransform();
-         if (forceSensorNames.equals("LeftAnkleRoll") && target != RobotTarget.GAZEBO)
+         if (forceSensorNames.equals("leftAnkleRoll") && target != RobotTarget.GAZEBO)
          {
             transform.set(ValkyrieSensorInformation.transformFromSixAxisMeasurementToAnkleZUpFrames.get(RobotSide.LEFT));
          }
-         else if (forceSensorNames.equals("RightAnkleRoll") && target != RobotTarget.GAZEBO)
+         else if (forceSensorNames.equals("rightAnkleRoll") && target != RobotTarget.GAZEBO)
          {
             transform.set(ValkyrieSensorInformation.transformFromSixAxisMeasurementToAnkleZUpFrames.get(RobotSide.RIGHT));
          }
@@ -224,7 +224,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public RigidBodyTransform getTransform3dWristToHand(RobotSide side)
    {
-      return JMEGeometryUtils.transformFromJMECoordinatesToZup( getJmeTransformWristToHand(side));
+      return JMEGeometryUtils.transformFromJMECoordinatesToZup(getJmeTransformWristToHand(side));
    }
 
    private void createTransforms()
@@ -499,6 +499,14 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       if(this.jointMap.getModelName().equals(model.getName()))
       {
+         switch(linkHolder.getName())
+         {
+            case "hokuyo_link":
+               modifyHokuyoInertia(linkHolder);
+               break;
+            default:
+               break;
+         }
 
       }
    }
@@ -536,5 +544,15 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       {
 
       }
+   }
+
+   private void modifyHokuyoInertia(SDFLinkHolder linkHolder)
+   {
+      linkHolder.getInertia().m00 = 0.000401606; // i_xx
+      linkHolder.getInertia().m01 = 4.9927e-08; // i_xy
+      linkHolder.getInertia().m02 = 1.0997e-05; // i_xz
+      linkHolder.getInertia().m11 = 0.00208115; // i_yy
+      linkHolder.getInertia().m12 = -9.8165e-09; // i_yz
+      linkHolder.getInertia().m22 = 0.00178402; // i_zz
    }
 }

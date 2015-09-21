@@ -1,0 +1,65 @@
+<CoeffData>
+  <Properties>
+    <CalibrationDate/>
+    <FileGenDate date="2013-10-10" time="10:45:58.718048"/>
+  </Properties>
+  <Coeffs>
+    <!-- - - - - - - - - Filtering - - - - - - - - -->
+    <Coeff id="JointVelFilter_fc_Hz" value="1000.0"/>
+    <Coeff id="LinearVelFilter_fc_Hz" value="50.0"/>
+    <Coeff id="MotorAccFilter_fc_Hz" value="50.0"/>
+    <Coeff id="MotorVelFilter_fc_Hz" value="800.0"/>
+
+    <!-- - - - - - - - - Controllers - - - - - - - - -->
+    <!-- Commutation -->
+    <Coeff description="-1=master,0=six,1=4quad,2=sv,3=dh" value="3.0" id="Commutation_Select"/>
+
+    <!-- Torque Controller -->
+        <!-- Model -->
+        <Coeff id="ForceControl_m" value="275.0"/>
+        <Coeff id="ForceControl_b" value="10000.0"/>
+
+        <!-- FF -->
+        <Coeff id="ForceControl_Current2MotorTorque" value="0.0375"/>
+        <Coeff id="ForceControl_enableFF" value="1.0"/>
+
+        <!-- PID -->
+        <Coeff id="ForceControl_enablePID" value="1.0"/>
+        <Coeff id="ForceControl_Kp" value="0.001"/>
+        <Coeff id="ForceControl_PD_damp" value="0.95"/>
+        <Coeff id="ForceControl_autoKd" value="1.0"/>
+        <Coeff id="ForceControl_Kd_fc_Hz" value="50.0"/>
+
+        <!-- DOB -->
+        <Coeff id="ForceControl_dobWindupLimit_N" value="1000.0"/>
+        <Coeff id="ForceControl_dob_fc_Hz" value="50.0"/>
+        <Coeff id="ForceControl_enableDOB" value="1.0"/>
+
+        <!-- DynFF -->
+        <Coeff id="ForceControl_FFd_fc_Hz" value="20.0"/>
+        <Coeff id="ForceControl_enableDynFF" value="0.0"/>
+
+        <!-- Parallel Damping -->
+        <Coeff id="ForceControl_ParallelDamping" value="0.0"/>
+
+        <!-- Sensor Feedback -->
+        <Coeff id="ForceControl_SensorFeedback" value="0.0"/>
+    <!-- end Torque Controller -->
+
+    <!-- Position Controller -->
+    <Coeff description="" value="10000.0" id="PositionControl_Kp"/>
+    <Coeff description="" value="20.0" id="PositionControl_Kd"/>
+    <Coeff id="PositionControl_Kd_fc_Hz" value="200.0"/>
+    <Coeff description="2 - HarmAPS, 3 - JointAPS" value="4" id="PositionControl_SensorFeedback"/>
+    <!-- end Position Controller -->
+  </Coeffs>
+
+    <!-- Position -->
+    <Coeff description="" value="20" id="PositionControl_Kd"/>
+    <Coeff description="" value="200" id="PositionControl_Kd_fc_Hz"/>
+    <Coeff description="" value="0" id="PositionControl_Ki"/>
+    <Coeff description="" value="10000.0" id="PositionControl_Kp"/>
+    <Coeff description="" value="-1" id="PositionControl_MotorTorqueDirection"/>
+    <Coeff description="" value="4" id="PositionControl_SensorFeedback"/>
+
+</CoeffData>

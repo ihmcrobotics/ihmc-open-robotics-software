@@ -25,8 +25,9 @@ public class ValkyrieFlatGroundWalkingTrack
 {
    public static void main(String[] args)
    {
-      boolean USE_JOYSTICK_CONTROLLER = JoystickUpdater.isJoyStickConnected();
-      
+//      boolean USE_JOYSTICK_CONTROLLER = JoystickUpdater.isJoyStickConnected();
+      boolean USE_JOYSTICK_CONTROLLER = false;
+
       DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);      
 

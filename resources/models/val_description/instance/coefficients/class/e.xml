@@ -1,0 +1,28 @@
+<CoeffData>
+  <Type id="turbodriver" />
+  <Processor id="linear/turbo_bootloader.bin" />
+  <ScheduleFile id="turbo_linear.yaml" />
+  <Coeffs>
+    <Coeff id="CurrentSafeLimit" value="17.0"/>
+    <Coeff id="DisableSpringSafeLimit" value="1.0"/>
+    <Coeff id="EnLoadCellSafeLimit" value="0.0"/>
+    <Coeff id="EncoderCPR" value="442.0"/>
+    <Coeff id="FluxLinkage" value="0.0"/>
+    <Coeff id="Inductance_DAxis" value="0.0009"/>
+    <Coeff id="Inductance_QAxis" value="0.00139"/>
+    <Coeff id="JointForceLimit_N" value="600000.0"/>
+    <Coeff id="JointForceLowerLimit_N" value="-500000.0"/>
+    <Coeff id="JointForceUpperLimit_N" value="500000.0"/>
+    <Coeff id="JointForce_AsymLimits" value="0.0"/>
+    <Coeff id="JointOutputAPS_CountsToRad" value="0.00076699038"/>
+    <Coeff id="JointRadToLinear" value="3141.59"/>
+    <Coeff id="LoadCell_NPerCount" value="0.74"/>
+    <Coeff id="MotorWindingType" value="0.0"/>
+    <Coeff id="NumberOfPoles" value="8.0"/>
+    <Coeff id="PositionControl_Input_fc_Hz" value="10.0"/>
+    <Coeff id="PositionControl_enableInLPF" value="1.0"/>
+    <Coeff id="Renishaw_CountsToM" value="4e-09"/>
+    <Coeff id="SpringStiffness" value="603000.0"/>
+    <Coeff id="WindingResistance" value="1.7014"/>
+  </Coeffs>
+</CoeffData>

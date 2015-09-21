@@ -1,0 +1,91 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="middle_finger">
+
+  <xacro:include filename="../../common/xacro/joint_names/valkyrie_joint_names.xacro"/>
+  <xacro:include filename="common/xacro/middle_finger/joint_axes.xacro"/>
+  <xacro:include filename="common/xacro/middle_finger/link_names.xacro"/>
+  <xacro:include filename="common/xacro/middle_finger/joint_limits.xacro"/>
+  <xacro:include filename="common/xacro/middle_finger/frame_parameters.xacro"/>
+  <xacro:include filename="common/xacro/middle_finger/mass_parameters.xacro"/>
+
+  <xacro:macro name="make_middle_finger" params="prefix reflect middle_finger_root_link">
+
+    <xacro:standard_link name="${MiddleFingerPitch1LinkName}" 
+                    mass="${MiddleFingerPitch1LinkMass}" 
+                    origin_xyz="${MiddleFingerPitch1ComPosition}"
+                    ixx="${MiddleFingerPitch1LinkInertia_IXX}" ixy="${MiddleFingerPitch1LinkInertia_IXY}" ixz="${MiddleFingerPitch1LinkInertia_IXZ}"
+                    iyy="${MiddleFingerPitch1LinkInertia_IYY}" iyz="${MiddleFingerPitch1LinkInertia_IYZ}" izz="${MiddleFingerPitch1LinkInertia_IZZ}"
+                    origin_rpy="0 0 0" 
+                    visual_mesh="${mesh_root}/fingers/middlej1_${prefix}.dae"
+                    material="Gold"
+                    collision_mesh="${mesh_root}/fingers/middlej1_${prefix}.dae"/>
+
+    <xacro:standard_link name="${MiddleFingerPitch2LinkName}" 
+                    mass="${MiddleFingerPitch2LinkMass}" 
+                    origin_xyz="${MiddleFingerPitch2ComPosition}"
+                    ixx="${MiddleFingerPitch2LinkInertia_IXX}" ixy="${MiddleFingerPitch2LinkInertia_IXY}" ixz="${MiddleFingerPitch2LinkInertia_IXZ}"
+                    iyy="${MiddleFingerPitch2LinkInertia_IYY}" iyz="${MiddleFingerPitch2LinkInertia_IYZ}" izz="${MiddleFingerPitch2LinkInertia_IZZ}"
+                    origin_rpy="0 0 0" 
+                    visual_mesh="${mesh_root}/fingers/middlej2_${prefix}.dae"
+                    material="Gold"
+                    collision_mesh="${mesh_root}/fingers/middlej2_${prefix}.dae"/>
+
+    <xacro:standard_link name="${MiddleFingerPitch3LinkName}" 
+                    mass="${MiddleFingerPitch3LinkMass}" 
+                    origin_xyz="${MiddleFingerPitch3ComPosition}"
+                    ixx="${MiddleFingerPitch3LinkInertia_IXX}" ixy="${MiddleFingerPitch3LinkInertia_IXY}" ixz="${MiddleFingerPitch3LinkInertia_IXZ}"
+                    iyy="${MiddleFingerPitch3LinkInertia_IYY}" iyz="${MiddleFingerPitch3LinkInertia_IYZ}" izz="${MiddleFingerPitch3LinkInertia_IZZ}"
+                    origin_rpy="0 0 0" 
+                    visual_mesh="${mesh_root}/fingers/middlej3_${prefix}.dae"
+                    material="Gold"
+                    collision_mesh="${mesh_root}/fingers/middlej3_${prefix}.dae"/>
+
+    <xacro:revolute_joint jointName="${MiddleFingerPitch1JointName}" 
+                          parent="${MiddleFingerPitch1ParentLinkName}" child="${MiddleFingerPitch1LinkName}"
+                          origin_xyz="${MiddleFingerPitch1FrameOrigin_X} ${MiddleFingerPitch1FrameOrigin_Y} ${MiddleFingerPitch1FrameOrigin_Z}" 
+                          origin_rpy="${MiddleFingerPitch1FrameOrientation_Roll} ${MiddleFingerPitch1FrameOrientation_Pitch} ${MiddleFingerPitch1FrameOrientation_Yaw}"
+                          axis="${MiddleFingerPitch1RotationAxis}">
+        <xacro:if value="${(reflect+1)/2}">
+          <limit effort="${MiddleFingerPitch1TorqueLimit}" lower="${-reflect * MiddleFingerPitch1PositionLimit_Upper}" upper="${-reflect * MiddleFingerPitch1PositionLimit_Lower}" velocity="${MiddleFingerPitch1VelocityLimit}"/>
+        </xacro:if>
+        <xacro:if value="${(-reflect+1)/2}">
+          <limit effort="${MiddleFingerPitch1TorqueLimit}" lower="${MiddleFingerPitch1PositionLimit_Lower}" upper="${MiddleFingerPitch1PositionLimit_Upper}" velocity="${MiddleFingerPitch1VelocityLimit}"/>
+        </xacro:if>
+    </xacro:revolute_joint>
+
+    <xacro:revolute_joint jointName="${MiddleFingerPitch2JointName}" 
+                          parent="${MiddleFingerPitch1LinkName}" child="${MiddleFingerPitch2LinkName}"
+                          origin_xyz="${MiddleFingerPitch2FrameOrigin_X} ${MiddleFingerPitch2FrameOrigin_Y} ${MiddleFingerPitch2FrameOrigin_Z}" 
+                          origin_rpy="${MiddleFingerPitch2FrameOrientation_Roll} ${MiddleFingerPitch2FrameOrientation_Pitch} ${MiddleFingerPitch2FrameOrientation_Yaw}"
+                          axis="${MiddleFingerPitch2RotationAxis}">
+        <xacro:if value="${(reflect+1)/2}">
+          <limit effort="${MiddleFingerPitch2TorqueLimit}" lower="${-reflect * MiddleFingerPitch2PositionLimit_Upper}" upper="${-reflect * MiddleFingerPitch2PositionLimit_Lower}" velocity="${MiddleFingerPitch2VelocityLimit}"/>
+        </xacro:if>
+        <xacro:if value="${(-reflect+1)/2}">
+          <limit effort="${MiddleFingerPitch2TorqueLimit}" lower="${MiddleFingerPitch2PositionLimit_Lower}" upper="${MiddleFingerPitch2PositionLimit_Upper}" velocity="${MiddleFingerPitch2VelocityLimit}"/>
+        </xacro:if>
+    </xacro:revolute_joint>
+
+    <xacro:revolute_joint jointName="${MiddleFingerPitch3JointName}" 
+                          parent="${MiddleFingerPitch2LinkName}" child="${MiddleFingerPitch3LinkName}"
+                          origin_xyz="${MiddleFingerPitch3FrameOrigin_X} ${MiddleFingerPitch3FrameOrigin_Y} ${MiddleFingerPitch3FrameOrigin_Z}" 
+                          origin_rpy="${MiddleFingerPitch3FrameOrientation_Roll} ${MiddleFingerPitch3FrameOrientation_Pitch} ${MiddleFingerPitch3FrameOrientation_Yaw}"
+                          axis="${MiddleFingerPitch3RotationAxis}">
+        <xacro:if value="${(reflect+1)/2}">
+          <limit effort="${MiddleFingerPitch3TorqueLimit}" lower="${-reflect * MiddleFingerPitch3PositionLimit_Upper}" upper="${-reflect * MiddleFingerPitch3PositionLimit_Lower}" velocity="${MiddleFingerPitch3VelocityLimit}"/>
+        </xacro:if>
+        <xacro:if value="${(-reflect+1)/2}">
+          <limit effort="${MiddleFingerPitch3TorqueLimit}" lower="${MiddleFingerPitch3PositionLimit_Lower}" upper="${MiddleFingerPitch3PositionLimit_Upper}" velocity="${MiddleFingerPitch3VelocityLimit}"/>
+        </xacro:if>
+    </xacro:revolute_joint>
+  </xacro:macro>
+
+  <xacro:macro name="v1_right_middle_finger_actuators" params="prefix api">
+    <xacro:v1_actuator name="${RMFA_Actuator_Name}" api="${api}" />
+  </xacro:macro>
+
+  <xacro:macro name="v1_left_middle_finger_actuators" params="prefix api">
+    <xacro:v1_actuator name="${LMFA_Actuator_Name}" api="${api}" />
+  </xacro:macro>
+
+</robot>
