@@ -1,6 +1,6 @@
 package us.ihmc.tools.thread;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,8 +13,8 @@ import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class ThreadToolsTest
 {
@@ -126,5 +126,54 @@ public class ThreadToolsTest
       
       while(!future.isDone());
       assertEquals(iterations, counter.get());
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testExecuteWithTimeout()
+   {
+      final StateHolder holder = new StateHolder();
+      
+      ThreadTools.executeWithTimeout("timeoutTest1", new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            holder.state = State.TIMED_OUT;
+            
+            ThreadTools.sleep(200);
+
+            holder.state = State.RAN_WITHOUT_TIMING_OUT;
+         }
+      }, 100, TimeUnit.MILLISECONDS);
+      
+      assertTrue("Did not timeout.", holder.state.equals(State.TIMED_OUT));
+      
+      holder.state = State.DIDNT_RUN;
+      
+      ThreadTools.executeWithTimeout("timeoutTest2", new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            holder.state = State.TIMED_OUT;
+            
+            ThreadTools.sleep(100);
+
+            holder.state = State.RAN_WITHOUT_TIMING_OUT;
+         }
+      }, 200, TimeUnit.MILLISECONDS);
+      
+      assertTrue("Timed out early.", holder.state.equals(State.RAN_WITHOUT_TIMING_OUT));
+   }
+   
+   private enum State
+   {
+      DIDNT_RUN, TIMED_OUT, RAN_WITHOUT_TIMING_OUT;
+   }
+   
+   private class StateHolder
+   {
+      public State state = State.DIDNT_RUN;
    }
 }

@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -260,6 +261,23 @@ public class ThreadTools
             thread.interrupt();
          }
       }
+   }
+   
+   public static ExecutorService executeWithTimeout(String threadName, Runnable runnable, long timeout, TimeUnit timeUnit)
+   {
+      ExecutorService executor = Executors.newSingleThreadExecutor(getNamedThreadFactory(threadName));
+      executor.execute(runnable);
+      executor.shutdown();
+      try
+      {
+         executor.awaitTermination(timeout, timeUnit);
+      }
+      catch (InterruptedException e)
+      {
+         e.printStackTrace();
+      }
+      
+      return executor;
    }
 
    public static ScheduledFuture<?> scheduleWithFixeDelayAndTimeLimit(String threadName, final Runnable runnable, long initialDelay, long delay, TimeUnit timeUnit, final long timeLimit)
