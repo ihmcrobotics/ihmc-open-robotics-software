@@ -5,9 +5,13 @@ import java.awt.Container;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.State;
@@ -17,6 +21,7 @@ import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+
 
 /**
  * <p>Title: SpringFlamingoController</p>
@@ -33,8 +38,15 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
  */
 public class SpringFlamingoController implements RobotController
 {
+   /**
+    * Initialization
+    */
+   
    private final YoVariableRegistry registry = new YoVariableRegistry("SpringFlamingoController");
-
+   
+   private double comPosX, comPosZ, comVelX, icpPos; //TODO modified
+   private ICPVisualizer icpVisualizer;
+   
    // State Machine:
    private enum States {SUPPORT, TOE_OFF, SWING, STRAIGHTEN}
 
@@ -42,8 +54,7 @@ public class SpringFlamingoController implements RobotController
    private final SideDependentList<StateMachine<States>> stateMachines;
 
    // Control Parameters:
-   private final DoubleYoVariable stand_gain = new DoubleYoVariable("stand_gain", "Gain for torquing the support ankle based on an error in desired x",
-         registry);
+   private final DoubleYoVariable stand_gain = new DoubleYoVariable("stand_gain", "Gain for torquing the support ankle based on an error in desired x", registry);
    private final DoubleYoVariable x_d = new DoubleYoVariable("x_d", "Desired x location. Controlled with stand_gain", registry);
 
    private final DoubleYoVariable v_nom = new DoubleYoVariable("v_nom", "Nominal velocity", registry);
@@ -140,9 +151,13 @@ public class SpringFlamingoController implements RobotController
 
    private String name;
    
-   private final SimpleMovingAverageFilteredYoVariable average_qd_x ;
+   private final SimpleMovingAverageFilteredYoVariable average_qd_x ; //TODO what is this? 
 
-   public SpringFlamingoController(SpringFlamingoRobot robot, String name)
+   /**
+    * Constructor
+    */
+   
+   public SpringFlamingoController(SpringFlamingoRobot robot, String name) // TODO SpringFlamingoController(SpringFlamingoRobot robot, String name, ICPVisualizer icpVisualizer) 
    {
       this.name = name;
       this.robot = robot;
@@ -176,6 +191,8 @@ public class SpringFlamingoController implements RobotController
       
    }
    
+   
+   //////////////////////////////////////////////////////
    public void createStateMachineWindow()
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
@@ -212,7 +229,9 @@ public class SpringFlamingoController implements RobotController
       //    leftStateMachinePanel.createUpdaterThread(250);
       //    rightStateMachinePanel.createUpdaterThread(250);
    }
-
+   //////////////////////////////////////////////////////////
+   
+   
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
@@ -288,9 +307,7 @@ public class SpringFlamingoController implements RobotController
          return (ankle_limit_gain.getDoubleValue() * (ankle_limit_set.getDoubleValue() - pos));
        else
           return (0.0);
-    
-   }
-   
+   }   
    
    private double toe_off_ankle_torques(double pos, double vel)
    {
@@ -311,13 +328,13 @@ public class SpringFlamingoController implements RobotController
       State<States> rightStraightenState = new StraightenState(RobotSide.RIGHT, States.STRAIGHTEN);
 
       // Transition Conditions:
-      StateTransitionCondition leftHealUnloaded = new HealUnloadedCondition(RobotSide.LEFT);
-      StateTransitionCondition leftFootUnloaded = new FootUnloadedCondition(RobotSide.LEFT);
-      StateTransitionCondition leftFootTouchedDown = new FootTouchedDownCondition(RobotSide.LEFT);
+      StateTransitionCondition leftHealUnloaded = new HeelOffGroundCondition(RobotSide.LEFT);
+      StateTransitionCondition leftFootUnloaded = new ToeOffGroundCondition(RobotSide.LEFT);
+      StateTransitionCondition leftFootTouchedDown = new HeelOnGroundCondition(RobotSide.LEFT);
 
-      StateTransitionCondition rightHealUnloaded = new HealUnloadedCondition(RobotSide.RIGHT);
-      StateTransitionCondition rightFootUnloaded = new FootUnloadedCondition(RobotSide.RIGHT);
-      StateTransitionCondition rightFootTouchedDown = new FootTouchedDownCondition(RobotSide.RIGHT);
+      StateTransitionCondition rightHealUnloaded = new HeelOffGroundCondition(RobotSide.RIGHT);
+      StateTransitionCondition rightFootUnloaded = new ToeOffGroundCondition(RobotSide.RIGHT);
+      StateTransitionCondition rightFootTouchedDown = new HeelOnGroundCondition(RobotSide.RIGHT);
 
       // Left State Transitions:
       StateTransition<States> leftSupportToToeOff = new StateTransition<States>(States.TOE_OFF, leftHealUnloaded);
@@ -362,11 +379,11 @@ public class SpringFlamingoController implements RobotController
       rightStateMachine.addState(rightStraightenState);
 
       // Set the Initial States:
-
       leftStateMachine.setCurrentState(States.STRAIGHTEN);
       rightStateMachine.setCurrentState(States.SUPPORT);
    } 
    
+   //////////////////////////////////////////////  (1) Support
    private class SupportState extends State<States>
    {
       private final RobotSide robotSide;
@@ -404,6 +421,7 @@ public class SpringFlamingoController implements RobotController
       }
    }
 
+   //////////////////////////////////////////////  (2) Toe Off
    private class ToeOffState extends State<States>
    {
       private final RobotSide robotSide;
@@ -444,6 +462,7 @@ public class SpringFlamingoController implements RobotController
       }
    }
 
+   //////////////////////////////////////////////  (3) Swing
    private class SwingState extends State<States>
    {
       private final RobotSide robotSide;
@@ -492,6 +511,7 @@ public class SpringFlamingoController implements RobotController
       }
    }
 
+   //////////////////////////////////////////////  (4) Straighten
    private class StraightenState extends State<States>
    {
       private final RobotSide robotSide;
@@ -527,17 +547,16 @@ public class SpringFlamingoController implements RobotController
       }
    }
 
+   ////////////////////////////////////////////////////  STATE MACHINE
    private void balistic_walking_state_machine()
-   {
-    
-      // Robot happens to walk in negative x direction.  Set vel positive just
-      // so it makes intuitive sense.
-
+   {   
+      // Robot happens to walk in negative x direction.  Set vel positive just so it makes intuitive sense.
       vel.set(-robot.qd_x.getDoubleValue());
 
       // Calculate forces on the feet
       for (RobotSide robotSide : RobotSide.values())
       {
+         //System.out.println("gc heel force: " + gcHeel_fz.get(robotSide).getDoubleValue());
          force.get(robotSide).set(gcHeel_fz.get(robotSide).getDoubleValue() + gcToe_fz.get(robotSide).getDoubleValue());
          if (force.get(robotSide).getDoubleValue() > 5.0)
             cops.get(robotSide).set(gcToe_fz.get(robotSide).getDoubleValue() / force.get(robotSide).getDoubleValue());
@@ -572,16 +591,12 @@ public class SpringFlamingoController implements RobotController
          
    }
 
-   public YoVariableRegistry getRegistry()
-   {
-      return registry;
-   }
-
-   public class HealUnloadedCondition implements StateTransitionCondition
+   ////////////////////////////////////////////////////////////////////////
+   public class HeelOffGroundCondition implements StateTransitionCondition
    {
       private final RobotSide robotSide;
 
-      public HealUnloadedCondition(RobotSide robotSide)
+      public HeelOffGroundCondition(RobotSide robotSide)
       {
          this.robotSide = robotSide;
       }
@@ -593,11 +608,11 @@ public class SpringFlamingoController implements RobotController
       }
    }  
 
-   public class FootUnloadedCondition implements StateTransitionCondition
+   public class ToeOffGroundCondition implements StateTransitionCondition
    {
       private final RobotSide robotSide;
 
-      public FootUnloadedCondition(RobotSide robotSide)
+      public ToeOffGroundCondition(RobotSide robotSide)
       {
          this.robotSide = robotSide;
       }   
@@ -608,11 +623,11 @@ public class SpringFlamingoController implements RobotController
       }
    }
 
-   public class FootTouchedDownCondition implements StateTransitionCondition   
+   public class HeelOnGroundCondition implements StateTransitionCondition   
    {
       private final RobotSide robotSide;
 
-      public FootTouchedDownCondition(RobotSide robotSide)
+      public HeelOnGroundCondition(RobotSide robotSide)
       {
          this.robotSide = robotSide;
       }
@@ -622,7 +637,12 @@ public class SpringFlamingoController implements RobotController
          return (gcToe_fs.get(robotSide).getDoubleValue() == 1.0) || (gcHeel_fs.get(robotSide).getDoubleValue() == 1.0);
       }
    }
-
+   
+   //////////////////////////////////////////////////////////////////////////////
+   public YoVariableRegistry getRegistry()
+   {
+      return registry;
+   }
 
    public String getName()
    {
@@ -636,5 +656,25 @@ public class SpringFlamingoController implements RobotController
    public String getDescription()
    {
       return getName();
+   }
+   
+   ///////////////////////////////////////////////////////////////////////////////
+   private double getICP()
+   {
+      //Calculation
+      comVelX = robot.getBodyVelocityX();
+      comPosX = robot.getBodyPositionX();
+      double omega0 = Math.sqrt(9.81 / comPosZ);
+      
+      FramePoint2d capturePoint = new FramePoint2d();
+      FramePoint2d centerOfMassInWorld = new FramePoint2d(ReferenceFrame.getWorldFrame(), comPosX, 0.0);
+      FrameVector2d centerOfMassVelocityInWorld = new FrameVector2d(ReferenceFrame.getWorldFrame(), comVelX, 0.0);
+      CapturePointCalculator.computeCapturePoint(capturePoint, centerOfMassInWorld, centerOfMassVelocityInWorld, omega0);
+      icpPos = capturePoint.getX();
+      
+      //Visualization
+      icpVisualizer.setLocation(icpPos, 0.0, 0.0);
+      
+      return icpPos;
    }
 }

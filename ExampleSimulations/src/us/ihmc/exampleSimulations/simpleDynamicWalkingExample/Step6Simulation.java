@@ -2,31 +2,31 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-public class Step5Simulation
+public class Step6Simulation
 {
 
    //Variables 
    private SimulationConstructionSet sim;
-   private double deltaT = 1e-4;
+   private double deltaT = 0.0001;
    private int recordFrequency = 10;
    
-   public Step5Simulation()
+   public Step6Simulation()
    {
       //Robot
-      Step5IDandSCSRobot_pinKnee v5Robot = new Step5IDandSCSRobot_pinKnee();
+      Step6IDandSCSRobot walkingRobot = new Step6IDandSCSRobot();
       
       //Controller 
-      Step5WalkingController v5Controller = new Step5WalkingController(v5Robot, "v5Robot", deltaT);
-      v5Robot.setController(v5Controller);
+      Step6WalkingController_SpringFlamInspired walkingController = new Step6WalkingController_SpringFlamInspired(walkingRobot, "v5Robot", deltaT);
+      walkingRobot.setController(walkingController);
       
       //Simulation Object  
-      sim = new SimulationConstructionSet(v5Robot);
+      sim = new SimulationConstructionSet(walkingRobot);
       sim.setGroundVisible(true);
       sim.setDT(deltaT, recordFrequency);
       sim.setCameraFix(0.0, 0.025, 1.05);
-      sim.setCameraPosition(0.8643, -17.188, 2.72);
+      sim.setCameraPosition(12.6, -15.4, 2.3);
       sim.changeBufferSize(32000);
-      sim.selectConfiguration("step5Config.guiConf");
+      sim.selectConfiguration("Step5GUI.guiConf");
 
       Thread myThread = new Thread(sim);
       myThread.start();
@@ -34,7 +34,7 @@ public class Step5Simulation
 
    public static void main(String[] args)
    {
-      new Step5Simulation();
+      new Step6Simulation();
    }
 
 }

@@ -7,6 +7,7 @@ import javax.swing.JOptionPane;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.DynamicIntegrationMethod;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -20,9 +21,12 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.simulationconstructionset.util.visualizers.RobotFreezeFramer;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SpringFlamingoSimulation
 {
+   YoVariableRegistry registry; //TODO
+   
    private static final SupportedGraphics3DAdapter graphics3DAdapterToUse = SupportedGraphics3DAdapter.JAVA_MONKEY_ENGINE;
 //   private static final SupportedGraphics3DAdapter graphics3DAdapterToUse = SupportedGraphics3DAdapter.JAVA3D;
 
@@ -63,6 +67,8 @@ public class SpringFlamingoSimulation
 
    public SpringFlamingoSimulation() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
+      
+      
       double baseGravity = EARTH_GRAVITY;    // MOON_GRAVITY; //1.5 * EARTH_GRAVITY; //4.0; //9.81;
       double minGravity = MOON_GRAVITY;    // 1.64; //4.0;
 
@@ -88,11 +94,18 @@ public class SpringFlamingoSimulation
          if (numberOfFlamingos > 1)
             gravity = -(baseGravity - (((double) i) / ((double) (numberOfFlamingos - 1))) * (baseGravity - minGravity));
 
+        
+         YoVariableRegistry registry = springFlamingo.getRobotsYoVariableRegistry(); //TODO
+        
+         
+         
          // System.out.println(springFlamingo);
          RobotController controller = null;
          if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
          {
             controller = new SpringFlamingoController(springFlamingo, "springFlamingoController");
+//            controller = new SpringFlamingoController(springFlamingo, "springFlamingoController", icpVisualizer); //TODO
+//            System.out.println("I am using your controller");
          }
          else if (controllerToUse == FAST_WALKING_CONTROLLER)
          {
@@ -118,8 +131,13 @@ public class SpringFlamingoSimulation
          System.out.println("xStart = " + xStart + ", gravity = " + gravity);
          springFlamingo.q_x.set(xStart);
          springFlamingo.setGravity(gravity);
+         
+         
+         
       }
 
+      
+      
       if (!SHOW_GUI)
       {
          SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
@@ -209,10 +227,13 @@ public class SpringFlamingoSimulation
       sim.setPlaybackRealTimeRate(1.0);
       sim.setPlaybackDesiredFrameRate(0.033);
       sim.setGraphsUpdatedDuringPlayback(true);
-
+      
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();//TODO
+      ICPVisualizer icpVisualizer = new ICPVisualizer(registry, yoGraphicsListRegistry);
+      sim.addYoGraphicsListRegistry(yoGraphicsListRegistry); //TODO
 
       // Set up VarGroups, GraphGroups, EntryBoxGroups, and Configs.
-      sim.setupVarGroup("kinematics", new String[] {"t"}, new String[] {"q_.*", "qd_.*"});
+      sim.setupVarGroup("kinematics", new String[] {"t"}, new String[] {"q_.*", "qd_.*"});  //TODO: elena, what is all this stuff?
 
       sim.setupVarGroup("torques", null, new String[] {"t", "tau_.*"});
 

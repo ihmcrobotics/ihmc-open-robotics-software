@@ -21,6 +21,11 @@ import us.ihmc.simulationconstructionset.JointWrenchSensor;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  *
@@ -193,7 +198,7 @@ public class SpringFlamingoRobot extends Robot
 
       gcPoints.add(gc_lheel);
       gcPoints.add(gc_ltoe);
-
+      
       leftAnkle.addGroundContactPoint(gc_lheel);
       leftAnkle.addGroundContactPoint(gc_ltoe);
 
@@ -721,5 +726,19 @@ public class SpringFlamingoRobot extends Robot
 	   tau_lh.set(u[3]);
 	   tau_lk.set(u[4]);
 	   tau_la.set(u[5]);
+   }
+   
+   //////////////////////////////////////
+   
+   public double getBodyVelocityX()
+   {
+      double vel = this.qd_x.getDoubleValue();
+      return vel;
+   }
+   
+   public double getBodyPositionX()
+   {
+      double vel = this.q_x.getDoubleValue();
+      return vel;
    }
 }
