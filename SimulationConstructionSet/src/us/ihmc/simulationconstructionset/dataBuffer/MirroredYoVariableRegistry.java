@@ -68,19 +68,16 @@ public class MirroredYoVariableRegistry extends YoVariableRegistry
    @SuppressWarnings("unchecked")
    public void updateValuesFromOriginal()
    {
-      for (int i = 0; i < variablePairs.size(); i++)
+      for (ImmutablePair<YoVariable, YoVariable> pair : variablePairs)
       {
-         ImmutablePair<YoVariable, YoVariable> pair = variablePairs.get(i);
-
          YoVariable target = pair.getRight();
-         boolean changed = target.setValue(pair.getLeft(), false);
+         final boolean changed = target.setValue(pair.getLeft(), false);
 
          if (changed)
          {
             ArrayList<VariableChangedListener> variableChangedListeners = target.getVariableChangedListeners();
-            for (int v = 0; v < variableChangedListeners.size(); v++)
+            for (VariableChangedListener variableChangedListener : variableChangedListeners)
             {
-               VariableChangedListener variableChangedListener = variableChangedListeners.get(v);
                if (variableChangedListener.getClass() != MirroredYoVariableRegistryChangedListener.class)
                {
                   variableChangedListener.variableChanged(target);
