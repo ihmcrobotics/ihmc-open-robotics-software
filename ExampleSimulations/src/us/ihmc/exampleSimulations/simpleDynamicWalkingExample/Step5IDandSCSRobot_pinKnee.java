@@ -82,11 +82,11 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
    private double gcRadius = 0.03;
 
    Vector3d comOffsetBody = new Vector3d(0.0, 0.0, cubeZ / 2.0);
-   Vector3d comOffsetFoot = new Vector3d(footX/2.0 - 0.075 , 0.0, -footZ / 2.0); //TODO should it be footOffsetX?
+   Vector3d comOffsetFoot = new Vector3d(footX/2.0 - 0.075 , 0.0, -footZ / 2.0); 
 
-   private double bodyZ; //global so that it is created only once (avoid generating garbage)
+   private double bodyZ, bodyX; //global so that it is created only once (avoid generating garbage)
    public DoubleYoVariable qd_x;
-   private double initialBodyHeight = RobotParameters.LENGTHS.get(LinkNames.UPPER_LINK) + RobotParameters.LENGTHS.get(LinkNames.LOWER_LINK) - 0.1 + footZ - 0.029 ;
+   private double initialBodyHeight = RobotParameters.LENGTHS.get(LinkNames.UPPER_LINK) + RobotParameters.LENGTHS.get(LinkNames.LOWER_LINK) - 0.1 + footZ - 0.029 + 0.024;
 
    /**
     * Joints
@@ -118,7 +118,7 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
 
          // ANKLE ID (location, joint, and rigidBody) 
          Vector3d ankleOffset = new Vector3d(0.0, 0.0, ankleOffsetZ);
-         RevoluteJoint ankleJointID = ScrewTools.addRevoluteJoint(JointNames.ANKLE.getName(), kneeJointID.getSuccessor(), ankleOffset, jointAxesPinJoints); //The parent rigid body of the hip joint is: bodyJointID.getSuccessor()
+         RevoluteJoint ankleJointID = ScrewTools.addRevoluteJoint(JointNames.ANKLE.getName(), kneeJointID.getSuccessor(), ankleOffset, jointAxesPinJoints); 
          allLegJoints.get(robotSide).put(JointNames.ANKLE, ankleJointID);
          createAndAttachFootRB(LinkNames.FOOT_LINK, JointNames.ANKLE, robotSide);
       }
@@ -135,16 +135,17 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
          // HIP SCS
          PinJoint hipJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.HIP.getName(), new Vector3d(0.0,
                robotSide.negateIfRightSide(hipOffsetY), 0.0), this, jointAxesPinJoints);
-         hipJointSCS.setLimitStops(-0.7, 0.7, 1e3, 1e1); //It is NOT necessary to set limits in the ID description because if the SCS description doesn't let the robot move passed a point the ID robot won't be able to pass it either
+         hipJointSCS.setLimitStops(-0.75, 0.75, 1e3, 1e1); 
+         //It is NOT necessary to set limits in the ID description because if the SCS description doesn't let the robot move passed a point the ID robot won't be able to pass it either
 
          if (robotSide == RobotSide.LEFT)
          {
-            hipJointSCS.setQ(-0.4);
+            hipJointSCS.setQ(-0.6); 
          }
 
          else
          {
-            hipJointSCS.setQ(0.2);
+            hipJointSCS.setQ(0.1); 
          }
 
          bodyJointSCS.addJoint(hipJointSCS);
@@ -153,7 +154,7 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
 
          // KNEE SCS
          PinJoint kneeJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.KNEE.getName(), new Vector3d(0.0, 0.0, kneeOffsetZ), this, jointAxesPinJoints);
-         kneeJointSCS.setLimitStops(-0.01, 1.6, 1e5, 1e3); 
+         kneeJointSCS.setLimitStops(-0.01, 1.8, 1e5, 1e3); 
          hipJointSCS.addJoint(kneeJointSCS);
          idToSCSLegJointMap.put(allLegJoints.get(robotSide).get(JointNames.KNEE), kneeJointSCS);
          createAndAttachCylinderLink(LinkNames.LOWER_LINK, JointNames.KNEE, robotSide);
@@ -161,11 +162,11 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
          // ANKLE SCS
          PinJoint ankleJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.ANKLE.getName(), new Vector3d(0.0, 0.0, ankleOffsetZ), this,
                jointAxesPinJoints);
-         ankleJointSCS.setLimitStops(-0.5, 0.7, 1e3, 1e2); 
+         ankleJointSCS.setLimitStops(-0.7, 0.7, 1e3, 1e2); 
          
          if (robotSide == RobotSide.RIGHT)
          {
-            ankleJointSCS.setQ(-0.18);
+            ankleJointSCS.setQ(-0.1);
          }
        
          kneeJointSCS.addJoint(ankleJointSCS);
@@ -196,14 +197,11 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       }
 
       /**************** SCS Ground Model *************************/
-//      GroundContactModel groundModel = new LinearStickSlipGroundContactModel(this, 0, 15e4, 15e4, 5e3, 1e3, this.getRobotsYoVariableRegistry());
-//      GroundContactModel groundModel = new LinearStickSlipGroundContactModel(this, this.getRobotsYoVariableRegistry());
       GroundContactModel groundModel = new LinearGroundContactModel(this, 1e3, 1e3, 5e3, 1e3, this.getRobotsYoVariableRegistry());
       GroundProfile3D profile = new FlatGroundProfile();
       groundModel.setGroundProfile3D(profile);
       this.setGroundContactModel(groundModel);
-      
-      
+          
    }
 
    /**
@@ -280,7 +278,7 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCube(cubeX, cubeY, cubeZ, RobotParameters.APPEARANCE.get(LinkNames.BODY_LINK));
       link.setLinkGraphics(linkGraphics);
-//      link.addEllipsoidFromMassProperties(YoAppearance.Green());
+      //      link.addEllipsoidFromMassProperties(YoAppearance.Green());
       link.addCoordinateSystemToCOM(0.7);
       bodyJointSCS.setLink(link);
    }
@@ -296,7 +294,7 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCylinder(-RobotParameters.LENGTHS.get(linkName), RobotParameters.RADII.get(linkName), RobotParameters.APPEARANCE.get(linkName));
       link.setLinkGraphics(linkGraphics);
-//      link.addEllipsoidFromMassProperties(YoAppearance.Green());
+      //      link.addEllipsoidFromMassProperties(YoAppearance.Green());
       link.addCoordinateSystemToCOM(0.3);
       idToSCSLegJointMap.get(allLegJoints.get(robotSide).get(jointName)).setLink(link);
    }
@@ -320,7 +318,7 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
          linkGraphics.addCube(footX, footY, -footZ, YoAppearance.Tomato());
       }
       link.setLinkGraphics(linkGraphics);
-//      link.addEllipsoidFromMassProperties(YoAppearance.Green());
+      //      link.addEllipsoidFromMassProperties(YoAppearance.Green());
       link.addCoordinateSystemToCOM(0.3);
       idToSCSLegJointMap.get(allLegJoints.get(robotSide).get(jointName)).setLink(link);
    }
@@ -336,12 +334,12 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       bodyJointID.setRotation(0.0, bodyJointSCS.getQ_rot().getDoubleValue(), 0.0);
 
       double[] velocityArray = new double[6];
-      velocityArray[0] = 0.0; // yaw
-      velocityArray[1] = bodyJointSCS.getQd_rot().getDoubleValue(); // pitch
-      velocityArray[2] = 0.0; // roll
-      velocityArray[3] = bodyJointSCS.getQd_t1().getDoubleValue(); // x
-      velocityArray[4] = 0.0; // y
-      velocityArray[5] = bodyJointSCS.getQd_t2().getDoubleValue(); // z
+      velocityArray[0] = 0.0;                                        // yaw
+      velocityArray[1] = bodyJointSCS.getQd_rot().getDoubleValue();  // pitch
+      velocityArray[2] = 0.0;                                        // roll
+      velocityArray[3] = bodyJointSCS.getQd_t1().getDoubleValue();   // x
+      velocityArray[4] = 0.0;                                        // y
+      velocityArray[5] = bodyJointSCS.getQd_t2().getDoubleValue();   // z
       DenseMatrix64F velocities = new DenseMatrix64F(6, 1, true, velocityArray);
       bodyJointID.setVelocity(velocities, 0);
 
@@ -375,7 +373,7 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       }
    }
 
-   public RigidBody getElevator() // TODO In the IDMP this is used in the robot  
+   public RigidBody getElevator()  
    {
       return elevator;
    }
@@ -406,8 +404,14 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       bodyZ = bodyPosition.getZ();
       return bodyZ;
    }
+   
+   public double getBodyPositionX()
+   {
+      bodyX = bodyPosition.getX();
+      return bodyX;
+   }
 
-   //   public void getBodyPoint(Point3d bodyPointToPack) // TODO Example of GET TO PACK method
+   //   public void getBodyPoint(Point3d bodyPointToPack) // Example of GET TO PACK method
    //   {
    //      Point3d bodyPoint = this.bodyPosition.getPoint();
    //      bodyPointToPack.set(bodyPoint);
@@ -518,5 +522,10 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
    public double getHeelX(RobotSide robotSide)
    {
       return GCpointsHeel.get(robotSide).getX();
+   }
+   
+   public double getHeelZ(RobotSide robotSide)
+   {
+      return GCpointsHeel.get(robotSide).getZ();
    }
 }
