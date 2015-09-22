@@ -40,7 +40,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class TaskspaceToJointspaceHandForcefeedbackControlState extends TrajectoryBasedTaskspaceHandControlState
 {
-	private final static boolean TRAJECTORY_FORCEFEEDBACK = true; //DO NOT SET TO TRUE! NOT ENTIRELY TESTED YET!! T.Meier If false: make sure trajectory time from behavior is set big enough
+	private final static boolean TRAJECTORY_FORCEFEEDBACK = false;
 	private final static boolean SENSOR_NOISE = false;
 	private boolean isDone = false;
 	private final BooleanYoVariable forcefeedback;
@@ -86,7 +86,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	private final double alpha;
 	private DoubleYoVariable massHandandDrill;
 	private static final double GRAVITY = 9.81;
-	private static final double MASSDRILL = 1.442;
+	private static final double MASSDRILL = 0.0;//1.442;
 	private final BooleanYoVariable compensateRadialForce;
 	private Vector3d circularTrajectoryOmega;
 	private Vector3d circularTrajectoryRadius;
@@ -379,7 +379,26 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 
 	private void trajectoryPositionControl()
 	{
-		scaledTimeVariable.set(currentTimeInState.getDoubleValue());
+	
+		/**
+		 * Calculate tangent vector from Trajectory Generator
+		 */
+		poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue() + dtControl);
+		poseTrajectoryGenerator.packLinearData(preScalingTrajectoryPosition, preScalingTrajectoryVelocity,
+				preScalingTrajectoryAcceleration);
+		
+		
+		tangentTrajectoryVectorInWorld.set(preScalingTrajectoryPosition.getX(), preScalingTrajectoryPosition.getY(),preScalingTrajectoryPosition.getZ());
+		
+		poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue() - dtControl);
+		poseTrajectoryGenerator.packLinearData(preScalingTrajectoryPosition, preScalingTrajectoryVelocity,preScalingTrajectoryAcceleration);
+		
+		tempVector.set(preScalingTrajectoryPosition.getX(), preScalingTrajectoryPosition.getY(),preScalingTrajectoryPosition.getZ());
+		tangentTrajectoryVectorInWorld.sub(tempVector);
+		tangentTrajectoryVectorInWorld.normalize();
+		
+		
+		
 
 		wristSensor.packWrench(wristSensorWrench);
 		CutForceControlHelper.wristSensorUpdate(wristSensorWrench, worldFrame, fxRaw, fyRaw, fzRaw, fxFiltered, fyFiltered,
@@ -388,6 +407,9 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 				lastTangentTrajectoryVectorInWorld, fxFiltered.getDoubleValue(), fyFiltered.getDoubleValue(),
 				fzFiltered.getDoubleValue(), false, currentTimeInState.getDoubleValue());
 
+		
+		
+		
 		poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue());
 		poseTrajectoryGenerator.get(desiredPose);
 		poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
