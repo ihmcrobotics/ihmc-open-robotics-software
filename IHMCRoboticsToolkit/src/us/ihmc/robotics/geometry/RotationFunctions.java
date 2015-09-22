@@ -200,16 +200,16 @@ public class RotationFunctions
 
       double pitchArgument = -2.0 * x * z + 2.0 * w * y;
 
-      yawPitchRollToPack[1] = Math.asin(pitchArgument);
+      yawPitchRollToPack[1] = FastMath.asin(pitchArgument);
 
       if (Math.abs(yawPitchRollToPack[1]) < 0.49 * Math.PI)
       {
-         yawPitchRollToPack[0] = Math.atan2(2.0 * x * y + 2.0 * z * w, 1.0 - 2.0 * qyqy - 2.0 * qzqz);    // Math.asin(q_qs.val * q_qz.val * 2.0);
-         yawPitchRollToPack[2] = Math.atan2(2.0 * y * z + 2.0 * x * w, 1.0 - 2.0 * qxqx - 2.0 * qyqy);    // Math.asin(q_qs.val * q_qx.val * 2.0);
+         yawPitchRollToPack[0] = FastMath.atan2(2.0 * x * y + 2.0 * z * w, 1.0 - 2.0 * qyqy - 2.0 * qzqz);    // Math.asin(q_qs.val * q_qz.val * 2.0);
+         yawPitchRollToPack[2] = FastMath.atan2(2.0 * y * z + 2.0 * x * w, 1.0 - 2.0 * qxqx - 2.0 * qyqy);    // Math.asin(q_qs.val * q_qx.val * 2.0);
       }
       else
       {
-         yawPitchRollToPack[0] = 2.0 * Math.atan2(z, w);
+         yawPitchRollToPack[0] = 2.0 * FastMath.atan2(z, w);
          yawPitchRollToPack[2] = 0.0;
       }
    }
