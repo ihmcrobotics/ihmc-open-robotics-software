@@ -8,7 +8,7 @@ public class Step5Simulation
    //Variables 
    private SimulationConstructionSet sim;
    private double deltaT = 1e-4;
-   private int recordFrequency = 80;
+   private int recordFrequency = 100;
    
    public Step5Simulation()
    {

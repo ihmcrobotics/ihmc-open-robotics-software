@@ -45,7 +45,7 @@ public class SpringFlamingoController implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry("SpringFlamingoController");
    
    private double comPosX, comPosZ, comVelX, icpPos; //TODO modified
-   private ICPVisualizer icpVisualizer;
+//   private ICPVisualizer icpVisualizer;
    
    // State Machine:
    private enum States {SUPPORT, TOE_OFF, SWING, STRAIGHTEN}
@@ -659,22 +659,22 @@ public class SpringFlamingoController implements RobotController
    }
    
    ///////////////////////////////////////////////////////////////////////////////
-   private double getICP()
-   {
-      //Calculation
-      comVelX = robot.getBodyVelocityX();
-      comPosX = robot.getBodyPositionX();
-      double omega0 = Math.sqrt(9.81 / comPosZ);
-      
-      FramePoint2d capturePoint = new FramePoint2d();
-      FramePoint2d centerOfMassInWorld = new FramePoint2d(ReferenceFrame.getWorldFrame(), comPosX, 0.0);
-      FrameVector2d centerOfMassVelocityInWorld = new FrameVector2d(ReferenceFrame.getWorldFrame(), comVelX, 0.0);
-      CapturePointCalculator.computeCapturePoint(capturePoint, centerOfMassInWorld, centerOfMassVelocityInWorld, omega0);
-      icpPos = capturePoint.getX();
-      
-      //Visualization
-      icpVisualizer.setLocation(icpPos, 0.0, 0.0);
-      
-      return icpPos;
-   }
+//   private double getICP()
+//   {
+//      //Calculation
+//      comVelX = robot.getBodyVelocityX();
+//      comPosX = robot.getBodyPositionX();
+//      double omega0 = Math.sqrt(9.81 / comPosZ);
+//      
+//      FramePoint2d capturePoint = new FramePoint2d();
+//      FramePoint2d centerOfMassInWorld = new FramePoint2d(ReferenceFrame.getWorldFrame(), comPosX, 0.0);
+//      FrameVector2d centerOfMassVelocityInWorld = new FrameVector2d(ReferenceFrame.getWorldFrame(), comVelX, 0.0);
+//      CapturePointCalculator.computeCapturePoint(capturePoint, centerOfMassInWorld, centerOfMassVelocityInWorld, omega0);
+//      icpPos = capturePoint.getX();
+//      
+//      //Visualization
+//      icpVisualizer.setLocation(icpPos, 0.0, 0.0);
+//      
+//      return icpPos;
+//   }
 }

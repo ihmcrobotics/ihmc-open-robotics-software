@@ -205,15 +205,6 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
    }
 
    /**
-    * Initialization for walking
-    */
-   public void setInitialVelocity()
-   {
-      qd_x = (DoubleYoVariable) getVariable("qd_x");
-      qd_x.set(0.8); //initial velocity
-   }
-
-   /**
     * Inertias
     */
 
