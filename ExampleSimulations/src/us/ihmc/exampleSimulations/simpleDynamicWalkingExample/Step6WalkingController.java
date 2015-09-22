@@ -15,7 +15,7 @@ import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 
-public class Step5WalkingController implements RobotController
+public class Step6WalkingController implements RobotController
 {
 
    /**
@@ -44,7 +44,7 @@ public class Step5WalkingController implements RobotController
 
    private Quat4d rotationToPack = new Quat4d();
    private Vector3d velocityToPack = new Vector3d();
-      
+
    private boolean heelOnTheFloor, toeOnTheFloor;
    private final DoubleYoVariable minSupportTime = new DoubleYoVariable("minSupportTime", controllerRegistry);
    private final DoubleYoVariable swingTime = new DoubleYoVariable("swingTime", controllerRegistry);
@@ -63,7 +63,7 @@ public class Step5WalkingController implements RobotController
     * Constructor
     */
 
-   public Step5WalkingController(Step5IDandSCSRobot_pinKnee rob, String name, double deltaT)
+   public Step6WalkingController(Step5IDandSCSRobot_pinKnee rob, String name, double deltaT)
    {
       this.rob = rob;
       this.name = name;
@@ -137,27 +137,7 @@ public class Step5WalkingController implements RobotController
       initConditions();
       setupStateMachines();
       
-//      jacobianStuff();
    }
-   
-//   private GeometricJacobianHolder jacobianRight;
-//   
-//   private void jacobianStuff()
-//   {
-//      jacobianRight = new GeometricJacobianHolder();
-//      
-//      InverseDynamicsJoint[] joints;
-//      joints = new InverseDynamicsJoint[4];
-//      joints[0]= rob.getBodyJoint();
-//      joints[1] = rob.getLegJoint(JointNames.HIP, RobotSide.RIGHT);
-//      joints[2] = rob.getLegJoint(JointNames.KNEE, RobotSide.RIGHT);
-//      joints[3] = rob.getLegJoint(JointNames.ANKLE, RobotSide.RIGHT);
-//      
-//      ReferenceFrame jacobianFrame = ReferenceFrame.getWorldFrame();
-//      
-//      jacobianRight.getOrCreateGeometricJacobian(joints, jacobianFrame);
-//   }
-//   
 
    /**
     * State Machine Related Methods
@@ -167,6 +147,7 @@ public class Step5WalkingController implements RobotController
    {
       minSupportTime.set(0.3); 
       swingTime.set(0.4); 
+//      rob.setInitialVelocity();
    }
 
    private void setupStateMachines()  

@@ -229,11 +229,11 @@ public class SpringFlamingoSimulation
       sim.setGraphsUpdatedDuringPlayback(true);
       
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();//TODO
-      ICPVisualizer icpVisualizer = new ICPVisualizer(registry, yoGraphicsListRegistry);
+//      ICPVisualizer icpVisualizer = new ICPVisualizer(registry, yoGraphicsListRegistry);
       sim.addYoGraphicsListRegistry(yoGraphicsListRegistry); //TODO
 
       // Set up VarGroups, GraphGroups, EntryBoxGroups, and Configs.
-      sim.setupVarGroup("kinematics", new String[] {"t"}, new String[] {"q_.*", "qd_.*"});  //TODO: elena, what is all this stuff?
+      sim.setupVarGroup("kinematics", new String[] {"t"}, new String[] {"q_.*", "qd_.*"});  
 
       sim.setupVarGroup("torques", null, new String[] {"t", "tau_.*"});
 
