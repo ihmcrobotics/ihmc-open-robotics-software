@@ -5,6 +5,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
+import net.jafama.FastMath;
 import us.ihmc.simulationconstructionset.physics.engine.jerry.FloatJointPhysics;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -455,20 +456,21 @@ public class FloatingJoint extends Joint
 
    public void getYawPitchRoll(DoubleYoVariable yaw, DoubleYoVariable pitch, DoubleYoVariable roll)
    {
+
       double pitchArgument = -2.0 * q_qx.getDoubleValue() * q_qz.getDoubleValue() + 2.0 * q_qs.getDoubleValue() * q_qy.getDoubleValue();
 
-      pitch.set(Math.asin(pitchArgument));
+      pitch.set(FastMath.asin(pitchArgument));
 
       if (Math.abs(pitch.getDoubleValue()) < 0.49 * Math.PI)
       {
-         yaw.set(Math.atan2(2.0 * q_qx.getDoubleValue() * q_qy.getDoubleValue() + 2.0 * q_qz.getDoubleValue() * q_qs.getDoubleValue(),
+         yaw.set(FastMath.atan2(2.0 * q_qx.getDoubleValue() * q_qy.getDoubleValue() + 2.0 * q_qz.getDoubleValue() * q_qs.getDoubleValue(),
                             1.0 - 2.0 * q_qy.getDoubleValue() * q_qy.getDoubleValue() - 2.0 * q_qz.getDoubleValue() * q_qz.getDoubleValue()));    // Math.asin(q_qs.val * q_qz.val * 2.0);
-         roll.set(Math.atan2(2.0 * q_qy.getDoubleValue() * q_qz.getDoubleValue() + 2.0 * q_qx.getDoubleValue() * q_qs.getDoubleValue(),
+         roll.set(FastMath.atan2(2.0 * q_qy.getDoubleValue() * q_qz.getDoubleValue() + 2.0 * q_qx.getDoubleValue() * q_qs.getDoubleValue(),
                              1.0 - 2.0 * q_qx.getDoubleValue() * q_qx.getDoubleValue() - 2.0 * q_qy.getDoubleValue() * q_qy.getDoubleValue()));    // Math.asin(q_qs.val * q_qx.val * 2.0);
       }
       else
       {
-         yaw.set(2.0 * Math.atan2(q_qz.getDoubleValue(), q_qs.getDoubleValue()));
+         yaw.set(2.0 * FastMath.atan2(q_qz.getDoubleValue(), q_qs.getDoubleValue()));
          roll.set(0.0);
       }
    }
@@ -481,18 +483,18 @@ public class FloatingJoint extends Joint
 
       double pitch = 0.0, roll = 0.0, yaw = 0.0;
       
-      pitch = Math.asin(pitchArgument);
+      pitch = FastMath.asin(pitchArgument);
 
       if (Math.abs(pitch) < 0.49 * Math.PI)
       {
-         yaw = Math.atan2(2.0 * q_qx.getDoubleValue() * q_qy.getDoubleValue() + 2.0 * q_qz.getDoubleValue() * q_qs.getDoubleValue(),
+         yaw = FastMath.atan2(2.0 * q_qx.getDoubleValue() * q_qy.getDoubleValue() + 2.0 * q_qz.getDoubleValue() * q_qs.getDoubleValue(),
                             1.0 - 2.0 * q_qy.getDoubleValue() * q_qy.getDoubleValue() - 2.0 * q_qz.getDoubleValue() * q_qz.getDoubleValue());    // Math.asin(q_qs.val * q_qz.val * 2.0);
-         roll = Math.atan2(2.0 * q_qy.getDoubleValue() * q_qz.getDoubleValue() + 2.0 * q_qx.getDoubleValue() * q_qs.getDoubleValue(),
+         roll = FastMath.atan2(2.0 * q_qy.getDoubleValue() * q_qz.getDoubleValue() + 2.0 * q_qx.getDoubleValue() * q_qs.getDoubleValue(),
                              1.0 - 2.0 * q_qx.getDoubleValue() * q_qx.getDoubleValue() - 2.0 * q_qy.getDoubleValue() * q_qy.getDoubleValue());    // Math.asin(q_qs.val * q_qx.val * 2.0);
       }
       else
       {
-         yaw = 2.0 * Math.atan2(q_qz.getDoubleValue(), q_qs.getDoubleValue());
+         yaw = 2.0 * FastMath.atan2(q_qz.getDoubleValue(), q_qs.getDoubleValue());
          roll = 0.0;
       }
       
