@@ -409,36 +409,60 @@ public class GeometryToolsTest
    {
       boolean intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(0.0, -1.0), new Point2d(0.0, 1.0));
       assertTrue(intersect);
-      
+
       intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(0.0, 1.0), new Point2d(0.0, -1.0));
       assertTrue(intersect);
-      
+
       intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 1.0), new Point2d(1.0, -1.0));
       assertTrue(intersect);
-      
+
       intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, -1.0), new Point2d(1.0, 1.0));
       assertTrue(intersect);
-      
+
       intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, -1.0), new Point2d(1.0, -1.0));
       assertFalse(intersect);
-      
+
       intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 1.0), new Point2d(1.0, 1.0));
       assertFalse(intersect);
-      
+
       intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0));
       assertTrue(intersect);
-      
+
       intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.1, 1.0), new Point2d(-1.1, -1.0));
       assertFalse(intersect);
-      
+
       intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 1.0), new Point2d(-1.0, -1.0));
       assertTrue(intersect);
-      
+
       intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0));
       assertTrue(intersect);
-      
+
       intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0));
       assertTrue(intersect);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetLineSegmentPercentagesIfIntersecting()
+   {
+      double[] percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 1.0),
+                                new Point2d(1.0, 1.0));
+      assertNull(percentages);
+
+      percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(0.0, 1.0),
+              new Point2d(0.0, -1.0));
+      assertEquals(0.5, percentages[0], 1e-7);
+      assertEquals(0.5, percentages[1], 1e-7);
+
+      percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(0.0, -1.0),
+              new Point2d(0.0, 1.0));
+      System.out.println(percentages[0] + "   " + percentages[1]);
+      assertEquals(0.5, percentages[0], 1e-7);
+      assertEquals(0.5, percentages[1], 1e-7);
+
+      percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 0.0),
+              new Point2d(1.0, 0.0));
+      assertNull(percentages);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
