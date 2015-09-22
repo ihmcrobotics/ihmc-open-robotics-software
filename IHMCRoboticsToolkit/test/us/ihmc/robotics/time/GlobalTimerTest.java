@@ -2,6 +2,7 @@ package us.ihmc.robotics.time;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.junit.Test;
@@ -43,10 +44,13 @@ public class GlobalTimerTest
    @Test(timeout = 30000)
    public void testgetElapsedTime2()
    {
+      GlobalTimer globalTimer = null;
+      String timerName = "timer";
+      
       Random random = new Random();
       for (int i = 0; i < 5; i++)
       {
-         GlobalTimer globalTimer = new GlobalTimer("timer", new YoVariableRegistry("testRegistry"));
+         globalTimer = new GlobalTimer(timerName + i, new YoVariableRegistry("testRegistry"));
 
          long delay = (long) (random.nextDouble() * 50.0 + 1000.0);
 
@@ -64,7 +68,13 @@ public class GlobalTimerTest
 
          globalTimer.stopTimer();
          assertEquals(delay, globalTimer.getElapsedTime(), 1);
+         assertTrue(globalTimer.getTimerName().contentEquals("timer" + i));
       }
+
+      ArrayList<GlobalTimer> listOfTimers = new ArrayList<>();
+      globalTimer.getAlltimers(listOfTimers);
+      assertEquals(6, listOfTimers.size());
+      
    }
 
 }
