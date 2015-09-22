@@ -63,7 +63,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 	private final DoubleYoVariable circleTrajectorytime;
 	private FramePoint rotationAxisOrigin = new FramePoint();
 	private FrameVector rotationAxis = new FrameVector();
-	private Vector3d startToCenter = new Vector3d(0.0, 0.0, 0.20);
+	private Vector3d startToCenter = new Vector3d(0.0, 0.0, 0.1);
 	private int circlecounter = 0;
 	// Straight lines
 	private FramePose handPose = new FramePose();
@@ -117,7 +117,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		straightTrajectoryTime = new DoubleYoVariable("straightTrajectoryTime", registry);
 		circleTrajectorytime = new DoubleYoVariable("circularTrajectoryTime", registry);
 		//WARNING: INCREASE IF POSITION CONTROLLED IS APPLIED
-		circleTrajectorytime.set(1.0);
+		circleTrajectorytime.set(2.0);
 		PrintTools.warn(this, "Circular trajectory time set to " + circleTrajectorytime.getDoubleValue() + "s");
 		
 		distanceToGoal = new DoubleYoVariable(getName()+ "distanceToGoal", registry);
