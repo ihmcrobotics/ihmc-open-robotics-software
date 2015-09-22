@@ -433,6 +433,12 @@ public class GeometryToolsTest
       
       intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 1.0), new Point2d(-1.0, -1.0));
       assertTrue(intersect);
+      
+      intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0));
+      assertTrue(intersect);
+      
+      intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0));
+      assertTrue(intersect);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
