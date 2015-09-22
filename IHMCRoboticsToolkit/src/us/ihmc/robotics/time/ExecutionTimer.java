@@ -44,7 +44,6 @@ public class ExecutionTimer
 
    public void stopMeasurement()
    {
-
       final long currentNanoTime = System.nanoTime();
       if ((currentNanoTime - timeOfFirstMeasurement) > measurementDelay)
       {
@@ -69,6 +68,31 @@ public class ExecutionTimer
          }
       }
 
+   }
+
+   public DoubleYoVariable getCurrentTime()
+   {
+      return current;
+   }
+
+   public DoubleYoVariable getAverageTime()
+   {
+      return average;
+   }
+
+   public DoubleYoVariable getMovingAverage()
+   {
+      return movingAverage;
+   }
+
+   public DoubleYoVariable getStandardDeviation()
+   {
+      return standardDeviation;
+   }
+
+   public DoubleYoVariable getMaxTime()
+   {
+      return maximum;
    }
 
 }
