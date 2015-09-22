@@ -78,7 +78,7 @@
 <Title>
 Tab0
 </Title>
-<Entry Boxes>kp_bodyZ,kp_bodyPitch,kd_bodyZ,kd_bodyPitch,kp_ankleStraighten,kd_ankleStraighten,kp_ankleToeOff,kd_ankleToeOff</Entry Boxes>
+<Entry Boxes>kp_bodyZ,kp_bodyPitch,kd_bodyZ,kd_bodyPitch,kp_ankleStraighten,kd_ankleStraighten,kp_ankleToeOff,kd_ankleToeOff,kp_kneePitchStraighten,kd_kneePitchStraighten,kp_kneePitchSwing,kd_kneePitchSwing,kp_hipPitch,kd_hipPitch</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -381,6 +381,54 @@ Tab0
 		<Variables>root.Robot.controllerRegistry.rightState</Variables>
 		<GraphConfiguration>
 			<Name>config30</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.Robot.q_x</Variables>
+		<GraphConfiguration>
+			<Name>config31</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.Robot.RgcHeel_x</Variables>
+		<GraphConfiguration>
+			<Name>config32</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.Robot.q_RhipJoint</Variables>
+		<GraphConfiguration>
+			<Name>config33</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.Robot.q_RkneeJoint</Variables>
+		<GraphConfiguration>
+			<Name>config34</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>

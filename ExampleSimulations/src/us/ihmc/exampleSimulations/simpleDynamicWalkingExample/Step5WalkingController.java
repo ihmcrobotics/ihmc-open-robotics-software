@@ -1,6 +1,5 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -30,11 +29,11 @@ public class Step5WalkingController implements RobotController
    private double deltaT;
 
    private PIDController controllerBodyZ;
-   private PIDController controllerBodyPitch, controllerHipPitch;
-   private PIDController controllerKneePitch;
+   private PIDController controllerBodyPitch, controllerHipPitch, controllerBodyPitchSingleSupport;
+   private PIDController controllerKneePitchSwing, controllerKneePitchStraighten;
    private PIDController controllerAnkleStraighten, controllerAnkleToeOff, controllerAnkleSwing;
 
-   private DoubleYoVariable desiredBodyZ, desiredKneePitchSwing, desiredKneePitchStraighten, desiredKneePitchToeOff;
+   private DoubleYoVariable desiredBodyZ, desiredKneePitchSwing, desiredKneePitchStraighten;
    private DoubleYoVariable desiredHipPitch, desiredBodyPitch;
    private DoubleYoVariable desiredAnklePitchSwing , desiredAnklePitchToeOff, desiredAnklePitchStraighten;
 
@@ -43,11 +42,10 @@ public class Step5WalkingController implements RobotController
    private DoubleYoVariable hipTau;
    private DoubleYoVariable ankleTau;
 
-   private Point3d bodyPositionToPack = new Point3d(); //global so that it is created only once to avoid generating garbage
    private Quat4d rotationToPack = new Quat4d();
    private Vector3d velocityToPack = new Vector3d();
 
-   private boolean onTheFloor, stopSwing;
+   private boolean heelOnTheFloor, toeOnTheFloor;
    private final DoubleYoVariable minSupportTime = new DoubleYoVariable("minSupportTime", controllerRegistry);
    private final DoubleYoVariable minToeOffTime = new DoubleYoVariable("minToeOffTime", controllerRegistry);
    private final DoubleYoVariable swingTime = new DoubleYoVariable("swingTime", controllerRegistry);
@@ -85,21 +83,27 @@ public class Step5WalkingController implements RobotController
       desiredBodyPitch = new DoubleYoVariable("desiredBodyPitch", controllerRegistry);
       desiredBodyPitch.set(0.0);
       
-      controllerHipPitch = new PIDController("hipPitch", controllerRegistry);
-      controllerHipPitch.setProportionalGain(2500.0);
-      controllerHipPitch.setDerivativeGain(200.0);
-      desiredHipPitch = new DoubleYoVariable("desiredHipPitch", controllerRegistry);
-      desiredHipPitch.set(-0.55);
+      controllerBodyPitchSingleSupport = new PIDController("bodyPitchSingleSupport", controllerRegistry);
+      controllerBodyPitchSingleSupport.setProportionalGain(5000.0);
+      controllerBodyPitchSingleSupport.setDerivativeGain(500.0);
       
-      controllerKneePitch = new PIDController("kneePitch", controllerRegistry);
-      controllerKneePitch.setProportionalGain(250.0);
-      controllerKneePitch.setDerivativeGain(20.0);
+      controllerHipPitch = new PIDController("hipPitch", controllerRegistry);
+      controllerHipPitch.setProportionalGain(700.0);
+      controllerHipPitch.setDerivativeGain(70.0);
+      desiredHipPitch = new DoubleYoVariable("desiredHipPitch", controllerRegistry);
+      desiredHipPitch.set(-0.6);
+      
+      controllerKneePitchSwing = new PIDController("kneePitchSwing", controllerRegistry); 
+      controllerKneePitchSwing.setProportionalGain(25000.0);
+      controllerKneePitchSwing.setDerivativeGain(2000.0);
       desiredKneePitchSwing = new DoubleYoVariable("desiredKneePitchSwing", controllerRegistry);
       desiredKneePitchSwing.set(1.3); 
+      
+      controllerKneePitchStraighten = new PIDController("kneePitchStraighten", controllerRegistry);
+      controllerKneePitchStraighten.setProportionalGain(10000.0);
+      controllerKneePitchStraighten.setDerivativeGain(1000.0);
       desiredKneePitchStraighten = new DoubleYoVariable("desiredKneePitchStraighten", controllerRegistry);
       desiredKneePitchStraighten.set(0.0);  
-      desiredKneePitchToeOff = new DoubleYoVariable("desiredKneePitchToeOff", controllerRegistry);
-      desiredKneePitchToeOff.set(1.0); 
       
       controllerAnkleStraighten = new PIDController("ankleStraighten", controllerRegistry);
       controllerAnkleStraighten.setProportionalGain(50.0);
@@ -117,7 +121,7 @@ public class Step5WalkingController implements RobotController
       controllerAnkleSwing.setProportionalGain(100.0);
       controllerAnkleSwing.setDerivativeGain(10.0);
       desiredAnklePitchSwing = new DoubleYoVariable("desiredAnklePitchSwing", controllerRegistry);
-      desiredAnklePitchSwing.set(-0.2);
+      desiredAnklePitchSwing.set(-0.65);
       
       hipTau = new DoubleYoVariable("hipTau", controllerRegistry);
       kneeTau = new DoubleYoVariable("kneeTau", controllerRegistry);
@@ -163,12 +167,11 @@ public class Step5WalkingController implements RobotController
    public void initConditions()
    {
       minSupportTime.set(0.3); 
-      minToeOffTime.set(0.25); 
-      swingTime.set(0.814); 
+      swingTime.set(0.4); 
       rob.setInitialVelocity();
    }
 
-   private void setupStateMachines()  //TODO less code repetition?
+   private void setupStateMachines()  
    {
       // States and Actions:
       State<States> leftSupportState = new SupportState(RobotSide.LEFT, States.SUPPORT);
@@ -195,7 +198,6 @@ public class Step5WalkingController implements RobotController
       leftSupportState.addStateTransition(leftSupportToToeOff);
 
       StateTransition<States> leftToeOffToSwing = new StateTransition<States>(States.SWING, leftToeUnloaded);
-//      leftToeOffToSwing.addTimePassedCondition(minToeOffTime);
       leftToeOffState.addStateTransition(leftToeOffToSwing);
 
       StateTransition<States> leftSwingToStraighten = new StateTransition<States>(States.STRAIGHTEN, swingTime);
@@ -210,7 +212,6 @@ public class Step5WalkingController implements RobotController
       rightSupportState.addStateTransition(rightSupportToToeOff);
 
       StateTransition<States> rightToeOffToSwing = new StateTransition<States>(States.SWING, rightToeUnloaded);
-//      rightToeOffToSwing.addTimePassedCondition(minToeOffTime);
       rightToeOffState.addStateTransition(rightToeOffToSwing);
 
       StateTransition<States> rightSwingToStraighten = new StateTransition<States>(States.STRAIGHTEN, swingTime);
@@ -262,6 +263,18 @@ public class Step5WalkingController implements RobotController
       hipTau.set(controllerBodyPitch.compute(pitchFromQuaternion, desiredBodyPitch.getDoubleValue(), bodyAngularVel, 0.0, deltaT));
       return hipTau;
    }
+   
+   private DoubleYoVariable controlBodyPitchSingleSupport()
+   {
+      rob.getBodyPitch(rotationToPack);
+      double pitchFromQuaternion = RotationFunctions.getPitchFromQuaternion(rotationToPack);
+      
+      rob.getBodyAngularVel(velocityToPack);
+      double bodyAngularVel = velocityToPack.getY();
+      
+      hipTau.set(controllerBodyPitchSingleSupport.compute(pitchFromQuaternion, desiredBodyPitch.getDoubleValue(), bodyAngularVel, 0.0, deltaT));
+      return hipTau;
+   }
 
    /**
     * State Classes
@@ -280,18 +293,15 @@ public class Step5WalkingController implements RobotController
 
       public void doAction()
       {
-         //Hip --> Body pitch
-         hipTau = controlBodyPitch();
+         // Hip --> Body pitch (single support)
+         hipTau = controlBodyPitchSingleSupport();
          rob.setHipTau(robotSide, -hipTau.getDoubleValue());
 
-         //Knee --> Body height
+         // Knee --> Body height
          kneeTau.set(controllerBodyZ.compute(rob.getBodyPositionZ(), desiredBodyZ.getDoubleValue(), -rob.getKneeVelocity(robotSide), 0.0, deltaT));
-         rob.setKneeTau(robotSide, -kneeTau.getDoubleValue()); //+ ffComponent); //TODO how to create something like a feed forward?
+         rob.setKneeTau(robotSide, -kneeTau.getDoubleValue()); 
 
-         //Ankle --> Keep foot on the ground
-         //         ankleTau.set(controllerAnkle.compute(rob.getAnklePitch(robotSide), desiredAnklePitchSwing.getDoubleValue(), -rob.getAnkleVelocity(robotSide), 0.0, deltaT));
-         //         rob.setAnkleTau(robotSide, ankleTau.getDoubleValue());
-//         rob.setAnkleTau(robotSide, 1.0);
+         // Ankle --> No action
       }
 
       public void doTransitionIntoAction()
@@ -316,33 +326,20 @@ public class Step5WalkingController implements RobotController
 
       public void doAction()
       {
-         //Hip --> Body pitch
+         // Hip --> Body pitch (double support)
          hipTau = controlBodyPitch();
          rob.setHipTau(robotSide, -hipTau.getDoubleValue());
 
-         //Knee --> Body height
+         // Knee --> Body height
          kneeTau.set(controllerBodyZ.compute(rob.getBodyPositionZ(), desiredBodyZ.getDoubleValue(), -rob.getKneeVelocity(robotSide), 0.0, deltaT));
          rob.setKneeTau(robotSide, -kneeTau.getDoubleValue() ); //+ ffComponent); //TODO feed forward?
-//         kneeTau.set(controllerKneePitch.compute(rob.getKneePosition(robotSide), desiredKneePitchToeOff.getDoubleValue(), rob.getKneeVelocity(robotSide), 0.0, deltaT));
-//         rob.setKneeTau(robotSide, kneeTau.getDoubleValue());
          
-         //Ankle --> Ankle pitch
-//                  ankleTau.set(controllerAnkleToeOff.compute(rob.getAnklePitch(robotSide), desiredAnklePitchToeOff.getDoubleValue(), -rob.getAnkleVelocity(robotSide), 0.0, deltaT));
-//                  rob.setAnkleTau(robotSide, ankleTau.getDoubleValue());
-         
-//         onTheFloor = rob.toeOnTheFloor(robotSide);
-//         if (onTheFloor)
-//         {
-//            rob.setAnkleTau(robotSide, 170.0); //Only exert fixed torque if toe is in contact with the floor  
-//         }
-//         else
-//         {
-//            ankleTau.set(controllerAnkleToeOff.compute(rob.getAnklePitch(robotSide), desiredAnklePitchToeOff.getDoubleValue(), rob.getAnkleVelocity(robotSide), 0.0, deltaT));
-//            rob.setAnkleTau(robotSide, ankleTau.getDoubleValue());
-//         }
-         
+         // Ankle --> Ankle pitch
+         if (rob.getBodyPositionX() > rob.getToeX(robotSide))
+         {
          ankleTau.set(controllerAnkleToeOff.compute(rob.getAnklePitch(robotSide), desiredAnklePitchToeOff.getDoubleValue(), rob.getBodyVelX(velocityToPack), 0.7, deltaT));
          rob.setAnkleTau(robotSide, ankleTau.getDoubleValue());
+         }
          
       }
 
@@ -360,39 +357,33 @@ public class Step5WalkingController implements RobotController
    {
       
       private final RobotSide robotSide;
-//      private final DoubleYoVariable startTime;
+      //      private final DoubleYoVariable startTime;
       
       public SwingState(RobotSide robotSide, States stateEnum)
       {
          super(States.SWING);
          this.robotSide = robotSide;    
-         
-//         startTime = new DoubleYoVariable("startTime", controllerRegistry); //TODO timer =)
+         //         startTime = new DoubleYoVariable("startTime", controllerRegistry); //TODO timer =)
       }
 
       public void doAction()
-      {
-         
-         //Hip --> Body pitch
-         hipTau = controlBodyPitch();
-//         hipTau.set(controllerHipPitch.compute(rob.getHipPitch(robotSide), desiredHipPitch.getDoubleValue(), rob.getHipVelocity(robotSide), 0.0, deltaT));
-//         rob.setHipTau(robotSide, hipTau.getDoubleValue()); //TODO minus sign?
+      {       
+         // Hip --> Hip pitch
+         hipTau.set(controllerHipPitch.compute(rob.getHipPitch(robotSide), desiredHipPitch.getDoubleValue(), rob.getHipVelocity(robotSide), 0.0, deltaT));
+         rob.setHipTau(robotSide, hipTau.getDoubleValue()); 
 
-         //Knee --> Leg contracted
-         kneeTau.set(controllerKneePitch.compute(rob.getKneePosition(robotSide), desiredKneePitchSwing.getDoubleValue(), rob.getKneeVelocity(robotSide), 0.0, deltaT));
+         // Knee --> Leg contracted
+         kneeTau.set(controllerKneePitchSwing.compute(rob.getKneePosition(robotSide), desiredKneePitchSwing.getDoubleValue(), rob.getKneeVelocity(robotSide), 0.0, deltaT));
          rob.setKneeTau(robotSide, kneeTau.getDoubleValue());
          
-//         kneeTau.set(controllerBodyZ.compute(rob.getBodyPositionZ(), desiredBodyZ.getDoubleValue(), -rob.getKneeVelocity(robotSide), 0.0, deltaT));
-//         rob.setKneeTau(robotSide, -kneeTau.getDoubleValue() + ffComponent);
-         
-         //Ankle --> Keep foot parallel to ground
+         // Ankle --> Keep foot parallel to ground
          ankleTau.set(controllerAnkleSwing.compute(rob.getAnklePitch(robotSide), desiredAnklePitchSwing.getDoubleValue(), rob.getAnkleVelocity(robotSide), 0.0, deltaT));
          rob.setAnkleTau(robotSide, ankleTau.getDoubleValue());
       }
 
       public void doTransitionIntoAction()
       {
-//         startTime.set(rob.getYoTime().getDoubleValue());
+         //         startTime.set(rob.getYoTime().getDoubleValue());
       }
 
       public void doTransitionOutOfAction()
@@ -413,18 +404,15 @@ public class Step5WalkingController implements RobotController
 
       public void doAction()
       {
-         //Hip --> Body pitch
-         hipTau = controlBodyPitch();
-         rob.setHipTau(robotSide, -hipTau.getDoubleValue());
+         //Hip --> Hip pitch      
+         hipTau.set(controllerHipPitch.compute(rob.getHipPitch(robotSide), desiredHipPitch.getDoubleValue(), rob.getHipVelocity(robotSide), 0.0, deltaT));
+         rob.setHipTau(robotSide, hipTau.getDoubleValue()); 
 
          //Knee --> Leg straight
-         kneeTau.set(controllerKneePitch.compute(rob.getKneePosition(robotSide), desiredKneePitchStraighten.getDoubleValue(), rob.getKneeVelocity(robotSide), 0.0, deltaT));
+         kneeTau.set(controllerKneePitchStraighten.compute(rob.getKneePosition(robotSide), desiredKneePitchStraighten.getDoubleValue(), rob.getKneeVelocity(robotSide), 0.0, deltaT));
          rob.setKneeTau(robotSide, kneeTau.getDoubleValue());
-         
-//         kneeTau.set(controllerBodyZ.compute(rob.getBodyPositionZ(), desiredBodyZ.getDoubleValue(), -rob.getKneeVelocity(robotSide), 0.0, deltaT));
-//         rob.setKneeTau(robotSide, -kneeTau.getDoubleValue()); //+ ffComponent);
 
-         //Ankle --> Foot pointing upwards
+         //Ankle --> Ankle pitch
          ankleTau.set(controllerAnkleStraighten.compute(rob.getAnklePitch(robotSide), desiredAnklePitchStraighten.getDoubleValue(), rob.getAnkleVelocity(robotSide), 0.0, deltaT));
          rob.setAnkleTau(robotSide, ankleTau.getDoubleValue());
       }
@@ -454,17 +442,13 @@ public class Step5WalkingController implements RobotController
 
       public boolean checkCondition()
       {
-         onTheFloor = rob.heelOnTheFloor(robotSide); //onTheFloor will be true if the heel is on the floor, but we want the opposite
+         heelOnTheFloor = rob.heelOnTheFloor(robotSide); //onTheFloor will be true if the heel is on the floor, but we want the opposite
          boolean oppositeHeelOnTheFloor = rob.heelOnTheFloor(robotSide.getOppositeSide());
-//         heelAhead = rob.heelToeOffAhead(robotSide);
-//         currentBodyZ = rob.getBodyPositionZ() <= 1.4;        
-//         double toeX = rob.getToeX(robotSide);
-//         double oppositeHeelX = rob.getHeelX(robotSide.getOppositeSide());
-         return (!onTheFloor) && oppositeHeelOnTheFloor; //(oppositeHeelX > toeX); //&& currentBodyZ; // && heelAhead;
+         return (!heelOnTheFloor) && oppositeHeelOnTheFloor; 
       }
    }
 
-   //ToeOff To Swing
+   // ToeOff To Swing
    public class ToeOffGroundCondition implements StateTransitionCondition
    {
       private final RobotSide robotSide;
@@ -476,29 +460,28 @@ public class Step5WalkingController implements RobotController
 
       public boolean checkCondition()
       {
-         onTheFloor = rob.toeOnTheFloor(robotSide);
+         toeOnTheFloor = rob.toeOnTheFloor(robotSide);
          boolean oppositeHeelOnTheFloor = rob.heelOnTheFloor(robotSide.getOppositeSide());
-      
-         return !onTheFloor && oppositeHeelOnTheFloor;
-//         return oppositeHeelOnTheFloor;
+         boolean heelZ = rob.getHeelZ(robotSide) > 0.31;  
+         return !toeOnTheFloor && oppositeHeelOnTheFloor && heelZ;
       }
    }
    
-   //Swing To Straighten (TIMER)  -- not actually needed, but timers seem like a useful thing
-//   public class SwingToStraightenCondition implements StateTransitionCondition
-//   {
-//      public SwingToStraightenCondition(DoubleYoVariable startTime)
-//      {
-//      }
-//      
-//      public boolean checkCondition()
-//      {
-//         stopSwing = (rob.getYoTime().getDoubleValue() - startTime.getDoubleValue()) > 0.15;
-//         return stopSwing;
-//      }
-//   }
+   // Swing To Straighten (TIMER)  -- not actually needed, but timers seem like a useful thing
+   //   public class SwingToStraightenCondition implements StateTransitionCondition
+   //   {
+   //      public SwingToStraightenCondition(DoubleYoVariable startTime)
+   //      {
+   //      }
+   //      
+   //      public boolean checkCondition()
+   //      {
+   //         stopSwing = (rob.getYoTime().getDoubleValue() - startTime.getDoubleValue()) > 0.15;
+   //         return stopSwing;
+   //      }
+   //   }
 
-   //Straighten To Support
+   // Straighten To Support
    public class HeelOnGroundCondition implements StateTransitionCondition
    {
       private final RobotSide robotSide;
@@ -510,8 +493,8 @@ public class Step5WalkingController implements RobotController
 
       public boolean checkCondition()
       {
-         onTheFloor = rob.heelOnTheFloor(robotSide);
-         return onTheFloor;
+         heelOnTheFloor = rob.heelOnTheFloor(robotSide);
+         return heelOnTheFloor;
       }
    }
 
@@ -519,19 +502,6 @@ public class Step5WalkingController implements RobotController
    public void doControl()
    {
       walkingStateMachine();
-     
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//      kneeTau.set(controllerBodyZ.compute(rob.getBodyPositionZ(), desiredBodyZ.getDoubleValue(), -rob.getKneeVelocity(robotSide), 0.0, deltaT));
-//      rob.setKneeTau(robotSide, -kneeTau.getDoubleValue());
-//      
-//      hipTau = controlBodyPitch();
-//      rob.setHipTau(robotSide, -hipTau.getDoubleValue());
-//      
-//      // ID and SCS cross talk
-//      rob.updatePositionsIDrobot();
-//      rob.updateTorquesSCSrobot(); 
-//      }
    }
 
    public void initialize()
