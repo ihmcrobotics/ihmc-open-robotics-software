@@ -96,7 +96,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	//MBC
 	private final DoubleYoVariable scaledTimeVariable;
 	private final DoubleYoVariable timeParameterScaleFactor;
-	private final static double MAX_TIME_SCALE = 0.2;
+	private final static double MAX_TIME_SCALE = 0.4;
 	private final DoubleYoVariable coeffC1, coeffC2;
 	private final DoubleYoVariable currentTangentialForce;
 	private final DoubleYoVariable currentTangentialForceModel;
@@ -119,7 +119,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	private DoubleYoVariable c1_0;
 	private DoubleYoVariable c2_0;
 
-	private final double referenceForce = -10.0;
+	private final double referenceForce = -25.0;
 	private final double pressForce = -5.0;
 
 	private final FramePoint preScalingTrajectoryPosition = new FramePoint(worldFrame);
@@ -237,8 +237,8 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		
 		c1_0 = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_c1_0", parentRegistry);
 		c2_0 = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_c2_0", parentRegistry);
-		c1_0.set(2000.0);
-		c2_0.set(1.0);
+		c1_0.set(3000.0);
+		c2_0.set(0.1);
 		
 		coeffC1 = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_C1", registry);
 		coeffC2 = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_C2", registry);
@@ -254,8 +254,8 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		w2 = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_w2", registry);
 		w1_0 = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_w1_0", registry);
 		w2_0 = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_w2_0", registry);
-		w1_0.set(1.0);//0.15
-		w2_0.set(50.0);
+		w1_0.set(0.6);//0.15
+		w2_0.set(7.5);
 		w1.set(w1_0.getDoubleValue());
 		w2.set(w2_0.getDoubleValue());
 
@@ -346,18 +346,11 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		double scaleFactor = (preScalingTrajectoryVelocityDouble == 0.0) ? 
 				0.0 : mpcVelocity.getDoubleValue() / preScalingTrajectoryVelocityDouble;
 
-		// P-term
-		scaleFactor += Math.abs(referenceError.getDoubleValue()) < 0.5 ?
-				referenceError.getDoubleValue() * pCutControl.getDoubleValue() : 0.0;
+		// P-term for simulations
+//		scaleFactor += Math.abs(referenceError.getDoubleValue()) < 0.5 ?
+//				referenceError.getDoubleValue() * pCutControl.getDoubleValue() : 0.0;
 		scaleFactor = (scaleFactor > MAX_TIME_SCALE) ? MAX_TIME_SCALE : scaleFactor;
 		timeParameterScaleFactor.set(scaleFactor);
-
-		if (timeParameterScaleFactor.getDoubleValue() == MAX_TIME_SCALE)
-		{
-//			PrintTools.warn(this, "Scale factor saturation.");
-		}
-		// DEBUG: SET TO 1 anyway
-		//    timeParameterScaleFactor.set(1.0);
 
 		/**
 		 *  Evaluate the trajectory at new parameter value
@@ -366,18 +359,6 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		poseTrajectoryGenerator.compute(scaledTimeVariable.getDoubleValue());
 		poseTrajectoryGenerator.get(desiredPose);
 		poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
-
-		// TODO:
-		/**
-		 * PID Control in direction of wall
-		 */
-		//				desiredPosition.checkReferenceFrameMatch(worldFrame);
-		//				
-		//				forceVectorInWorld.scale(1.0);
-		//				forceVectorInWorld.dot(normalVectorInWorld);
-		//				
-		//				tempVector.set(-0.01*(forceVectorInWorld.length() - Math.abs(pressForce)), 0.0, 0.0);
-		//				desiredPosition.add(tempVector);
 
 		desiredVelocity.scale(timeParameterScaleFactor.getDoubleValue());
 		desiredAcceleration.scale(timeParameterScaleFactor.getDoubleValue() * timeParameterScaleFactor.getDoubleValue());
@@ -407,25 +388,25 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 				lastTangentTrajectoryVectorInWorld, fxFiltered.getDoubleValue(), fyFiltered.getDoubleValue(),
 				fzFiltered.getDoubleValue(), false, currentTimeInState.getDoubleValue());
 
-//		poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue());
-//		poseTrajectoryGenerator.get(desiredPose);
-//		poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
-//		poseTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-//
-//		ReferenceFrame controlFrame = taskspaceToJointspaceCalculator.getControlFrame();
-//
-//		desiredVelocity.changeFrame(controlFrame);
-//		desiredAngularVelocity.changeFrame(controlFrame);
-//
-//		desiredPosition.changeFrame(controlFrame);
-//		desiredAcceleration.changeFrame(controlFrame);
-//		desiredOrientation.changeFrame(controlFrame);
-//		desiredAngularAcceleration.changeFrame(controlFrame);
-//
-//		taskspaceToJointspaceCalculator.compute(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity);
-//		taskspaceToJointspaceCalculator.packDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
-//		taskspaceToJointspaceCalculator.packDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
-//		taskspaceToJointspaceCalculator.packDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
+		poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue());
+		poseTrajectoryGenerator.get(desiredPose);
+		poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
+		poseTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+
+		ReferenceFrame controlFrame = taskspaceToJointspaceCalculator.getControlFrame();
+
+		desiredVelocity.changeFrame(controlFrame);
+		desiredAngularVelocity.changeFrame(controlFrame);
+
+		desiredPosition.changeFrame(controlFrame);
+		desiredAcceleration.changeFrame(controlFrame);
+		desiredOrientation.changeFrame(controlFrame);
+		desiredAngularAcceleration.changeFrame(controlFrame);
+
+		taskspaceToJointspaceCalculator.compute(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity);
+		taskspaceToJointspaceCalculator.packDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
+		taskspaceToJointspaceCalculator.packDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
+		taskspaceToJointspaceCalculator.packDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
 	}
 
 
