@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 /**
@@ -29,7 +30,7 @@ import java.util.StringTokenizer;
  */
 public class CalibrationProperties
 {
-   private final OrderedProperties orderedProperties;
+   private final Properties properties;
 
    private final String defaultDirectory;
    private final String propertiesFile;
@@ -50,12 +51,12 @@ public class CalibrationProperties
       this.defaultDirectory = directory;
       this.propertiesFile = defaultDirectory + "/" + currentPropertiesFile;
 
-      orderedProperties = new OrderedProperties();
+      properties = new Properties();
 
       try
       {
          FileInputStream inStream = new FileInputStream(propertiesFile);
-         orderedProperties.load(inStream);
+         properties.load(inStream);
          inStream.close();
       }
       catch (IOException e)
@@ -69,12 +70,12 @@ public class CalibrationProperties
     */
    public double getDoubleProperty(String key)
    {
-      String stringProperty = orderedProperties.getProperty(key);
+      String stringProperty = properties.getProperty(key);
       if (stringProperty == null)
       {
          double defaultValue = 0.0;
          System.out.println("Property " + key + " not found. Creating it and defaulting to " + defaultValue);
-         orderedProperties.setProperty(key, Double.toString(defaultValue));
+         properties.setProperty(key, Double.toString(defaultValue));
          return defaultValue;
       }
       else
@@ -89,12 +90,12 @@ public class CalibrationProperties
     */
    public int getIntegerProperty(String key)
    {
-      String stringProperty = orderedProperties.getProperty(key);
+      String stringProperty = properties.getProperty(key);
       if (stringProperty == null)
       {
          int defaultValue = 0;
          System.out.println("Property " + key + " not found. Creating it and defaulting to " + defaultValue);
-         orderedProperties.setProperty(key, Integer.toString(defaultValue));
+         properties.setProperty(key, Integer.toString(defaultValue));
          return defaultValue;
       }
       else
@@ -109,7 +110,7 @@ public class CalibrationProperties
     */
    public void setProperty(String key, String value)
    {
-      orderedProperties.setProperty(key, value);
+      properties.setProperty(key, value);
    }
    
    /**
@@ -142,7 +143,7 @@ public class CalibrationProperties
       try
       {
          FileOutputStream outStream = new FileOutputStream(propertiesFile);
-         orderedProperties.store(outStream, null);
+         properties.store(outStream, null);
          outStream.close();
       }
       catch (FileNotFoundException e)
@@ -161,10 +162,10 @@ public class CalibrationProperties
    public void replaceExpressionsByValuesAndSave()
    {
       for (@SuppressWarnings("unchecked")
-      Enumeration<String> propertyNameEnumeration = (Enumeration<String>) orderedProperties.propertyNames(); propertyNameEnumeration.hasMoreElements();)
+      Enumeration<String> propertyNameEnumeration = (Enumeration<String>) properties.propertyNames(); propertyNameEnumeration.hasMoreElements();)
       {
          String propertyName = propertyNameEnumeration.nextElement();
-         String expression = orderedProperties.getProperty(propertyName);
+         String expression = properties.getProperty(propertyName);
          double value = expressionToValue(expression);
          setProperty(propertyName, value);
       }
