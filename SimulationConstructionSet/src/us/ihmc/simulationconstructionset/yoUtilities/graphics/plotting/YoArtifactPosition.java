@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
@@ -11,6 +12,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Drawing2DTools;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
@@ -23,11 +25,16 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
    
    private final ArrayList<double[]> historicalPositions = new ArrayList<double[]>();
 
-   private DoubleYoVariable x;
-   private DoubleYoVariable y;
-   private GraphicType graphicType;
-   private double scale;
+   private final DoubleYoVariable x;
+   private final DoubleYoVariable y;
+   private final GraphicType graphicType;
+   private final double scale;
 
+   public YoArtifactPosition(String namePrefix, String nameSuffix, YoGraphicPosition.GraphicType type, Color color, double scale, YoVariableRegistry registry)
+   {
+      this(namePrefix+nameSuffix, new DoubleYoVariable(namePrefix + "X" + nameSuffix, registry), new DoubleYoVariable(namePrefix + "Y" + nameSuffix, registry), type, color, scale);
+   }
+   
    public YoArtifactPosition(String name, DoubleYoVariable x, DoubleYoVariable y, YoGraphicPosition.GraphicType type, Color color, double scale)
    {
       super(name);
@@ -70,6 +77,12 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
    public void getPosition(Point3d point3d)
    {
       point3d.set(x.getDoubleValue(), y.getDoubleValue(), 0.0);
+   }
+   
+   public void setPosition(Point2d point2d)
+   {
+      x.set(point2d.getX());
+      y.set(point2d.getY());
    }
 
    
@@ -159,15 +172,18 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
       }
    }
 
-   public RemoteGraphicType getRemoteGraphicType() {
+   public RemoteGraphicType getRemoteGraphicType() 
+   {
       return RemoteGraphicType.POSITION_ARTIFACT;
    }
    
-   public DoubleYoVariable[] getVariables() {
+   public DoubleYoVariable[] getVariables() 
+   {
       return new DoubleYoVariable[]{x, y};
    }
 
-   public double[] getConstants() {
+   public double[] getConstants() 
+   {
       return new double[]{scale, graphicType.ordinal()};
    }
    
