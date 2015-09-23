@@ -16,7 +16,7 @@ public class FlatGroundProfile extends GroundProfileFromHeightMap
 
    public FlatGroundProfile(double zHeight)
    {
-      this(-100.0, 100.0, -100.0, 100.0, zHeight);
+      this(-500.0, 500.0, -500.0, 500.0, zHeight);
    }
 
    public FlatGroundProfile(double xMin, double xMax, double yMin, double yMax)
