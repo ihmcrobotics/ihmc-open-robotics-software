@@ -65,14 +65,6 @@ public class CalibrationProperties
    }
 
    /**
-    * return the specified property's value as a String
-    */
-   public String getStringProperty(String key)
-   {
-      return orderedProperties.getProperty(key);
-   }
-
-   /**
     * return the specified property's value as a Double
     */
    public double getDoubleProperty(String key)
@@ -102,14 +94,15 @@ public class CalibrationProperties
       {
          int defaultValue = 0;
          System.out.println("Property " + key + " not found. Creating it and defaulting to " + defaultValue);
-         orderedProperties.setProperty(key, Double.toString(defaultValue));
+         orderedProperties.setProperty(key, Integer.toString(defaultValue));
          return defaultValue;
       }
       else
       {
          int property = (int) expressionToValue(stringProperty);
          return property;
-      }   }
+      }
+   }
 
    /**
     * Sets the specified property(key) with the specified string value
@@ -125,6 +118,14 @@ public class CalibrationProperties
    public void setProperty(String key, double value)
    {
       setProperty(key, Double.toString(value));
+   }
+
+   /**
+    * Sets the specifed property(key) with the specified integer value
+    */
+   public void setProperty(String key, int value)
+   {
+      setProperty(key, Integer.toString(value));
    }
 
    /**
