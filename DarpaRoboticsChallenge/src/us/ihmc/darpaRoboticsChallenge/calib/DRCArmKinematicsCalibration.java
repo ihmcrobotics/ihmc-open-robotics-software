@@ -7,11 +7,10 @@ import org.ejml.data.DenseMatrix64F;
 import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.alg.geo.PerspectiveOps;
-import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.alg.geo.calibration.Zhang99ComputeTargetHomography;
 import boofcv.alg.geo.calibration.Zhang99DecomposeHomography;
-import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
+import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
 import georegression.struct.se.Se3_F64;
@@ -26,10 +25,9 @@ public class DRCArmKinematicsCalibration
 {
    FullRobotModel robotModel;
 
-   PlanarCalibrationDetector detector = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(5, 6));
-   PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(5, 6, 0.01);
+   PlanarCalibrationDetector target = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(5, 6, 0.01));
 
-   Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target.points);
+   Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target.getLayout());
    Zhang99DecomposeHomography decomposeH = new Zhang99DecomposeHomography();
 
    ImageFloat32 gray = new ImageFloat32(1, 1);
@@ -58,10 +56,10 @@ public class DRCArmKinematicsCalibration
       gray.reshape(leftEye.getWidth(), leftEye.getHeight());
       ConvertBufferedImage.convertFrom(leftEye, gray);
 
-      if (!detector.process(gray))
+      if (!target.process(gray))
          return false;
 
-      if (!computeH.computeHomography(detector.getPoints()))
+      if (!computeH.computeHomography(target.getDetectedPoints()))
          return false;
 
       DenseMatrix64F H = computeH.getHomography();

@@ -29,8 +29,8 @@ import javax.swing.SpinnerNumberModel;
 
 import boofcv.alg.color.ColorHsv;
 import boofcv.alg.misc.ImageMiscOps;
-import boofcv.core.image.ConvertBufferedImage;
 import boofcv.gui.image.ShowImages;
+import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.UtilImageIO;
 import boofcv.misc.BoofMiscOps;
 import boofcv.struct.ImageRectangle;

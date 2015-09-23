@@ -1,14 +1,5 @@
 package us.ihmc.sensorProcessing.calibration;
 
-import georegression.geometry.GeometryMath_F64;
-import georegression.metric.Intersection2D_F64;
-import georegression.struct.plane.PlaneNormal3D_F64;
-import georegression.struct.point.Point2D_F64;
-import georegression.struct.point.Point2D_I32;
-import georegression.struct.se.Se3_F64;
-import georegression.struct.shapes.Polygon2D_F64;
-import georegression.transform.se.SePointOps_F64;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -23,18 +14,26 @@ import javax.swing.JPanel;
 import org.ejml.data.DenseMatrix64F;
 
 import boofcv.abst.calib.ConfigChessboard;
-import boofcv.alg.feature.detect.chess.DetectChessCalibrationPoints;
+import boofcv.abst.calib.PlanarCalibrationDetector;
+import boofcv.abst.calib.PlanarDetectorChessboard;
 import boofcv.alg.geo.PerspectiveOps;
-import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.alg.geo.calibration.Zhang99ComputeTargetHomography;
 import boofcv.alg.geo.calibration.Zhang99DecomposeHomography;
-import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.gui.image.ShowImages;
 import boofcv.io.UtilIO;
+import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
+import georegression.geometry.GeometryMath_F64;
+import georegression.metric.Intersection2D_F64;
+import georegression.struct.plane.PlaneNormal3D_F64;
+import georegression.struct.point.Point2D_F64;
+import georegression.struct.point.Point2D_I32;
+import georegression.struct.se.Se3_F64;
+import georegression.struct.shapes.Polygon2D_F64;
+import georegression.transform.se.SePointOps_F64;
 
 /**
  * @author Peter Abeles
@@ -111,22 +110,25 @@ public class ManualDetectCameraCalibrationBox
       ImageFloat32 gray = ConvertBufferedImage.convertFrom(image, (ImageFloat32) null);
 
       // Detects the target and calibration point inside the target
-      ConfigChessboard config = new ConfigChessboard(5, 7);
+//      ConfigChessboard config = new ConfigChessboard(5, 7, 0.03);
 //      config.binaryAdaptiveBias = -20;
 //      PlanarCalibrationDetector detector = FactoryPlanarCalibrationTarget.detectorChessboard(config);
 
-      DetectChessCalibrationPoints detector = new DetectChessCalibrationPoints(5,7,4,1,ImageFloat32.class);
+      ConfigChessboard config = new ConfigChessboard(5, 7, 0.03);
+      PlanarDetectorChessboard detector = FactoryPlanarCalibrationTarget.detectorChessboard(config);
 
-      detector.setUserBinaryThreshold(config.binaryGlobalThreshold);
-      detector.setUserAdaptiveBias(config.binaryAdaptiveBias);
-      detector.setUserAdaptiveRadius(config.binaryAdaptiveRadius);
+      
+//      DetectChessboardFiducial detector = new DetectChessCalibrationPoints(5,7,4,1,ImageFloat32.class);
+//      detector.setUserBinaryThreshold(config.binaryGlobalThreshold);
+//      detector.setUserAdaptiveBias(config.binaryAdaptiveBias);
+//      detector.setUserAdaptiveRadius(config.binaryAdaptiveRadius);
 
       // specify target's shape.  This also specifies where the center of the target's coordinate system is.
       // Look at source code to be sure, but it is probably the target's center.  You can change this by
       // creating your own target.. Note z=0 is assumed
-      PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(5, 7, 0.03);
+      PlanarCalibrationDetector target = FactoryPlanarCalibrationTarget.detectorChessboard(config);
       // Computes the homography
-      Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target.points);
+      Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target.getLayout());
       // decomposes the homography
       Zhang99DecomposeHomography decomposeH = new Zhang99DecomposeHomography();
 
@@ -137,10 +139,10 @@ public class ManualDetectCameraCalibrationBox
       if( !detector.process(gray) )
          return null;
 
-      gui.addCalibPoints( detector.getPoints() );
+      gui.addCalibPoints( detector.getDetectedPoints() );
 
       // Compute the homography
-      if( !computeH.computeHomography(detector.getPoints()) )
+      if( !computeH.computeHomography(detector.getDetectedPoints()) )
          throw new RuntimeException("Can't compute homography");
 
       DenseMatrix64F H = computeH.getHomography();

@@ -4,14 +4,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
     compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
     
-    compile group: 'us.ihmc.thirdparty', name: 'boofcv-calibration', version: '0.19-internal'
-	compile group: 'us.ihmc.thirdparty', name: 'boofcv-recognition', version: '0.19-internal'
-	compile group: 'us.ihmc.thirdparty', name: 'boofcv-feature', version: '0.19-internal'
-    compile group: 'us.ihmc.thirdparty', name: 'boofcv-geo', version: '0.19-internal'
-    compile group: 'us.ihmc.thirdparty', name: 'boofcv-io', version: '0.19-internal'
-    compile group: 'us.ihmc.thirdparty', name: 'boofcv-ip', version: '0.19-internal'
-    compile group: 'us.ihmc.thirdparty', name: 'boofcv-visualize', version: '0.19-internal'
-    compile group: 'us.ihmc.thirdparty', name: 'boofcv-sfm', version: '0.19-internal'
+    compile group: 'org.boofcv', name: 'all', version: '0.19'
     compile group: 'us.ihmc.thirdparty', name: 'opencv', version: '2.4.11'
     //ejml core, complex, and equation
     

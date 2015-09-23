@@ -1,8 +1,5 @@
 package us.ihmc.imageProcessing.tracking;
 
-import georegression.struct.point.Point2D_F64;
-import georegression.struct.se.Se3_F64;
-
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -11,14 +8,15 @@ import org.ejml.data.DenseMatrix64F;
 
 import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.calib.PlanarCalibrationDetector;
-import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.alg.geo.calibration.Zhang99ComputeTargetHomography;
 import boofcv.alg.geo.calibration.Zhang99DecomposeHomography;
-import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.gui.image.ShowImages;
+import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.image.ImageFloat32;
+import georegression.struct.point.Point2D_F64;
+import georegression.struct.se.Se3_F64;
 
 /**
  * @author Peter Abeles
@@ -31,17 +29,16 @@ public class TrackCalibrationGrid
 
 
       // Detects the target and calibration point inside the target
-      PlanarCalibrationDetector detector = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(5, 6));
 
-      if( !detector.process(gray) )
+      PlanarCalibrationDetector target = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(5, 6, 10));
+      if( !target.process(gray) )
          throw new RuntimeException("Failed to detect target");
 
-      PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(5, 6, 10);
 
-      Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target.points);
+      Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target.getLayout());
       Zhang99DecomposeHomography decomposeH = new Zhang99DecomposeHomography();
 
-      if( !computeH.computeHomography(detector.getPoints()) )
+      if( !computeH.computeHomography(target.getDetectedPoints()) )
          throw new RuntimeException("Can't compute homography");
 
       DenseMatrix64F H = computeH.getHomography();
@@ -51,7 +48,7 @@ public class TrackCalibrationGrid
 
       System.out.println("Translation: "+motion.getT());
 
-      List<Point2D_F64> points = detector.getPoints();
+      List<Point2D_F64> points = target.getDetectedPoints();
 
       Graphics2D g2 = image.createGraphics();
 

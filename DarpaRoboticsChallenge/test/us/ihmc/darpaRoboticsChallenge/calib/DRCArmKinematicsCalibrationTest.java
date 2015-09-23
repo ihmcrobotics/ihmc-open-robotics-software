@@ -36,7 +36,7 @@ public class DRCArmKinematicsCalibrationTest
       // just make up some parameters
       int w = image.getWidth();
       int h = image.getHeight();
-      IntrinsicParameters param = new IntrinsicParameters(500, 500, 0, w / 2, h / 2, w, h, false, null);
+      IntrinsicParameters param = new IntrinsicParameters(500, 500, 0, w / 2, h / 2, w, h);
       alg.setIntrinsic(param);
 
       assertTrue(alg.estimateCameraPose(image));

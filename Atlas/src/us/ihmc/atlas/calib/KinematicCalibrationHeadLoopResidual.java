@@ -13,8 +13,8 @@ import javax.vecmath.Vector3d;
 
 import org.ddogleg.optimization.functions.FunctionNtoM;
 
+import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.alg.geo.PerspectiveOps;
-import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.point.Point2D_F64;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
@@ -43,7 +43,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    Map<String, Double> qoffset = new HashMap<>(), qbuffer = new HashMap<>();
 
    IntrinsicParameters intrinsic;
-   PlanarCalibrationTarget calibGrid;
+   PlanarCalibrationDetector calibGrid;
 
    // normial orientation of the target.  only rotation around y is optimized
    public static final Matrix3d TARGET_LEFT_ROT = new Matrix3d(
@@ -61,7 +61,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    public KinematicCalibrationHeadLoopResidual(SDFFullHumanoidRobotModel fullRobotModel,
                                                boolean isLeft,
                                                IntrinsicParameters intrinsic,
-                                               PlanarCalibrationTarget calibGrid,
+                                               PlanarCalibrationDetector calibGrid,
                                                ArrayList<Map<String, Object>> qdata,
                                                ArrayList<Map<String, Double>> q)
    {
@@ -167,9 +167,9 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       Point2D_F64 norm = new Point2D_F64();
       Point2D_F64 expectedPixel = new Point2D_F64();
 
-      for (int i = 0; i < calibGrid.points.size(); i++)
+      for (int i = 0; i < calibGrid.getLayout().size(); i++)
       {
-         Point2D_F64 p = calibGrid.points.get(i);
+         Point2D_F64 p = calibGrid.getLayout().get(i);
 
          // convert to camera frame
          Point3d p3 = new Point3d(p.x, p.y, 0);
@@ -202,6 +202,6 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    @Override
    public int getNumOfOutputsM()
    {
-      return qdata.size() * calibGrid.points.size() * 2;
+      return qdata.size() * calibGrid.getLayout().size() * 2;
    }
 }

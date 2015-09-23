@@ -13,11 +13,11 @@ import org.ros.RosCore;
 
 import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.fiducial.FiducialDetector;
-import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.fiducial.FactoryFiducial;
 import boofcv.gui.fiducial.VisualizeFiducial;
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
+import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
 import georegression.metric.UtilAngle;
@@ -41,7 +41,7 @@ public class RosFiducialDetector extends RosImageSubscriber
 
    FiducialDetector<ImageFloat32> detector = FactoryFiducial.
    //       squareBinaryRobust(new ConfigFiducialBinary(0.1), 6, ImageFloat32.class);
-         calibChessboard(new ConfigChessboard(5, 6), 0.09, ImageFloat32.class);
+         calibChessboard(new ConfigChessboard(5, 6, 0.09), ImageFloat32.class);
 
    //       calibSquareGrid(new ConfigSquareGrid(5,7), 0.03, ImageFloat32.class);
 
@@ -73,7 +73,6 @@ public class RosFiducialDetector extends RosImageSubscriber
          intrinsicParameters.cy = height / 2;
          intrinsicParameters.fx = intrinsicParameters.cx / Math.tan(UtilAngle.degreeToRadian(30)); // assume 60 degree FOV
          intrinsicParameters.fy = intrinsicParameters.cx / Math.tan(UtilAngle.degreeToRadian(30));
-         intrinsicParameters.flipY = false;
       }
       detector.setIntrinsic(intrinsicParameters);
    }
@@ -94,9 +93,9 @@ public class RosFiducialDetector extends RosImageSubscriber
          Se3_F64 targetToSensor = new Se3_F64();
          for (int i = 0; i < detector.totalFound(); i++)
          {
-            detector.getFiducialToWorld(i, targetToSensor);
+            detector.getFiducialToCamera(i, targetToSensor);
 
-            VisualizeFiducial.drawCube(targetToSensor, intrinsicParameters, 0.1, g2);
+            VisualizeFiducial.drawCube(targetToSensor, intrinsicParameters, 0.1, 2, g2);
          }
          
          Matrix3d rotation = new Matrix3d(targetToSensor.getRotation().getData());

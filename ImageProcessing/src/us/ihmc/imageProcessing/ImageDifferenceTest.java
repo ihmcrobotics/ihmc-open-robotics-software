@@ -5,10 +5,10 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 import boofcv.alg.misc.PixelMath;
-import boofcv.core.image.ConvertBufferedImage;
 import boofcv.gui.binary.VisualizeBinaryData;
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
+import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.SimpleImageSequence;
 import boofcv.io.wrapper.xuggler.XugglerSimplified;
 import boofcv.struct.image.ImageFloat32;
@@ -59,7 +59,7 @@ public class ImageDifferenceTest implements MouseListener {
 
          ConvertBufferedImage.convertTo(difference,output);
          gui.repaint();
-         VisualizeBinaryData.renderBinary(change,outputChange);
+         VisualizeBinaryData.renderBinary(change,false,outputChange);
          guiChange.repaint();
 
 
