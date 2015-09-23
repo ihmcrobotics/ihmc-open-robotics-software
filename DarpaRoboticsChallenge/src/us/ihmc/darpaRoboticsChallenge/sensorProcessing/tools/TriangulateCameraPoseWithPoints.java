@@ -10,8 +10,8 @@ import boofcv.abst.geo.Estimate1ofPnP;
 import boofcv.alg.geo.DistanceModelMonoPixels;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.geo.pose.PnPDistanceReprojectionSq;
-import boofcv.alg.sfm.robust.EstimatorToGenerator;
 import boofcv.factory.geo.EnumPNP;
+import boofcv.factory.geo.EstimatorToGenerator;
 import boofcv.factory.geo.FactoryMultiView;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.geo.Point2D3D;
@@ -100,7 +100,7 @@ public class TriangulateCameraPoseWithPoints
    {
       double inlierPixelTol = 1.5;
 
-      IntrinsicParameters intrinsic = new IntrinsicParameters(476,476,0,400.5,400.5,800,800,false,null);
+      IntrinsicParameters intrinsic = new IntrinsicParameters(476,476,0,400.5,400.5,800,800);
       PerspectiveOps.scaleIntrinsic(intrinsic,600.0/800.0);
 
       List<Point2D3D> obs = createObservations();

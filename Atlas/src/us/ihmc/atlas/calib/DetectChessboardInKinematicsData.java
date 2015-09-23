@@ -17,13 +17,12 @@ import org.ejml.data.DenseMatrix64F;
 import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.alg.geo.PerspectiveOps;
-import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.alg.geo.calibration.Zhang99ComputeTargetHomography;
 import boofcv.alg.geo.calibration.Zhang99DecomposeHomography;
-import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.gui.feature.VisualizeFeatures;
 import boofcv.io.UtilIO;
+import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
@@ -117,15 +116,13 @@ public class DetectChessboardInKinematicsData
       IntrinsicParameters intrinsic = UtilIO.loadXML("../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml");
       DenseMatrix64F K = PerspectiveOps.calibrationMatrix(intrinsic, null);
 
-      PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(boardWidth, boardHeight, 0.03);
+      PlanarCalibrationDetector target = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(boardWidth, boardHeight, 0.03));
 
       // Computes the homography
-      Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target.points);
+      Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target.getLayout());
       // decomposes the homography
       Zhang99DecomposeHomography decomposeH = new Zhang99DecomposeHomography();
 
-      // To select different types of detectors add or remove comments below
-      PlanarCalibrationDetector detector = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(boardWidth, boardHeight));
 
       File files[] = directory.listFiles();
       if (files == null)
@@ -158,7 +155,7 @@ public class DetectChessboardInKinematicsData
          outputTarget.createNewFile();
 
          // process the image and check for failure condition
-         if (!detector.process(input))
+         if (!target.process(input))
          {
             System.out.println("  Failed to detect target!");
             deleteDirectory(f);
@@ -166,7 +163,7 @@ public class DetectChessboardInKinematicsData
          }
 
          // Ordered observations of calibration points on the target
-         List<Point2D_F64> observations = detector.getPoints();
+         List<Point2D_F64> observations = target.getDetectedPoints();
 
          // Compute the homography
          if (!computeH.computeHomography(observations))
@@ -183,9 +180,9 @@ public class DetectChessboardInKinematicsData
          // compute pixel error
          double totalError = 0;
 
-         for (int i = 0; i < target.points.size(); i++)
+         for (int i = 0; i < target.getLayout().size(); i++)
          {
-            Point2D_F64 p = target.points.get(i);
+            Point2D_F64 p = target.getLayout().get(i);
             Point3D_F64 p3 = new Point3D_F64(p.x, p.y, 0);
             Point2D_F64 obsPixel = observations.get(i);
 
@@ -195,7 +192,7 @@ public class DetectChessboardInKinematicsData
             totalError += expected.distance(obsPixel);
          }
 
-         double averageError = totalError / target.points.size();
+         double averageError = totalError / target.getLayout().size();
          System.out.println(" Average pixel error = " + averageError);
 
          if (averageError > 0.8)

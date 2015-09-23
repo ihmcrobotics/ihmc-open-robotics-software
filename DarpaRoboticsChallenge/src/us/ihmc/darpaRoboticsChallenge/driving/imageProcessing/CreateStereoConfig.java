@@ -27,7 +27,6 @@ public class CreateStereoConfig {
 		param.fy =  (float)((height/2)/ Math.tan(vfov / 2.0));
 		param.skew = 0;
 		param.radial = new double[0];
-		param.flipY = false;
 		return param;
 	}
 

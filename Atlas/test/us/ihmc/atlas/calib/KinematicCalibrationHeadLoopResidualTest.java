@@ -22,8 +22,9 @@ import org.ddogleg.optimization.UtilOptimize;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import boofcv.abst.calib.ConfigChessboard;
+import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.alg.geo.PerspectiveOps;
-import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.point.Point2D_F64;
@@ -47,8 +48,8 @@ public class KinematicCalibrationHeadLoopResidualTest
    Random random = new Random(23234);
 
    IntrinsicParameters intrinsic;
-   PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(
-         DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
+   PlanarCalibrationDetector calibGrid = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(
+         DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03));
 
    private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
    DRCRobotJointMap jointMap = robotModel.getJointMap();
@@ -112,7 +113,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       KinematicCalibrationHeadLoopResidual alg = new KinematicCalibrationHeadLoopResidual(fullRobotModel, isleft, intrinsic, calibGrid, qdata, q);
 
       assertEquals(qoffset.size() + 4, alg.getNumOfInputsN());
-      assertEquals(numPoses * calibGrid.points.size() * 2, alg.getNumOfOutputsM());
+      assertEquals(numPoses * calibGrid.getLayout().size() * 2, alg.getNumOfOutputsM());
 
       double input[] = new double[alg.getNumOfInputsN()];
       double output[] = new double[alg.getNumOfOutputsM()];
@@ -163,7 +164,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       KinematicCalibrationHeadLoopResidual alg = new KinematicCalibrationHeadLoopResidual(fullRobotModel, isleft, intrinsic, calibGrid, qdata, q);
 
       assertEquals(qoffset.size() + 4, alg.getNumOfInputsN());
-      assertEquals(numPoses * calibGrid.points.size() * 2, alg.getNumOfOutputsM());
+      assertEquals(numPoses * calibGrid.getLayout().size() * 2, alg.getNumOfOutputsM());
 
       double input[] = new double[alg.getNumOfInputsN()];
       double output[] = new double[alg.getNumOfOutputsM()];
@@ -297,9 +298,9 @@ public class KinematicCalibrationHeadLoopResidualTest
       // Points in chessboard frame
       Point2D_F64 norm = new Point2D_F64();
 
-      for (int i = 0; i < calibGrid.points.size(); i++)
+      for (int i = 0; i < calibGrid.getLayout().size(); i++)
       {
-         Point2D_F64 p = calibGrid.points.get(i);
+         Point2D_F64 p = calibGrid.getLayout().get(i);
          // convert to camera frame
          Point3d p3 = new Point3d(p.x, p.y, 0);
          targetToCamera.transform(p3);

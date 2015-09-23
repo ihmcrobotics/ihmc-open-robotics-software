@@ -31,8 +31,9 @@ import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
 
+import boofcv.abst.calib.ConfigChessboard;
+import boofcv.abst.calib.PlanarDetectorChessboard;
 import boofcv.alg.geo.PerspectiveOps;
-import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
@@ -83,8 +84,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private boolean alignCamera = true;
 
    private IntrinsicParameters intrinsic;
-   private PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(
-         DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
+   private PlanarDetectorChessboard calibGrid = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(
+         DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03));
 
    public AtlasHeadLoopKinematicCalibrator(DRCRobotModel robotModel)
    {
@@ -294,7 +295,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       Point2D_F64 pixel = new Point2D_F64();
 
       int index = 0;
-      for (Point2D_F64 p : calibGrid.points)
+      for (Point2D_F64 p : calibGrid.getLayout())
       {
          // convert to camera frame
          Point3d p3 = new Point3d(p.x, p.y, 0);

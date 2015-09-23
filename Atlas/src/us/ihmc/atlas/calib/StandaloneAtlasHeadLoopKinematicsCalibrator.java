@@ -12,7 +12,8 @@ import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
 
-import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
+import boofcv.abst.calib.ConfigChessboard;
+import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
@@ -44,8 +45,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
 
 
    private IntrinsicParameters intrinsic;
-   private PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(
-         DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
+   private PlanarCalibrationDetector calibGrid = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03));
 
    public StandaloneAtlasHeadLoopKinematicsCalibrator(AtlasRobotVersion atlasVersion)
    {
@@ -60,14 +60,14 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
 
    private void computePerImageError(double output[])
    {
-      int numImages = output.length / (2 * calibGrid.points.size());
+      int numImages = output.length / (2 * calibGrid.getLayout().size());
 
 
       int index = 0;
       for (int i = 0; i < numImages; i++)
       {
          double averageError = 0;
-         for (int j = 0; j < calibGrid.points.size(); j++)
+         for (int j = 0; j < calibGrid.getLayout().size(); j++)
          {
             double x = output[index++];
             double y = output[index++];
@@ -77,7 +77,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
             averageError += r;
          }
 
-         averageError /= calibGrid.points.size();
+         averageError /= calibGrid.getLayout().size();
 
          String dataName = (String) metaData.get(i).get(DATA_NAME);
 

@@ -11,9 +11,9 @@ import org.ejml.data.DenseMatrix64F;
 
 import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.fiducial.FiducialDetector;
-import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.fiducial.FactoryFiducial;
 import boofcv.gui.fiducial.VisualizeFiducial;
+import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
 import georegression.struct.point.Vector3D_F64;
@@ -33,8 +33,8 @@ public class BoofCVChessboardPoseEstimator
    {
       ConfigChessboard config;
       this.gridWidth=gridWidth;
-      config = new ConfigChessboard(cols, rows);
-      detector = FactoryFiducial.calibChessboard(config, gridWidth, ImageFloat32.class);
+      config = new ConfigChessboard(cols, rows, gridWidth);
+      detector = FactoryFiducial.calibChessboard(config, ImageFloat32.class);
    }
    
    public void setIntrinsicParameter(IntrinsicParameters parameter)
@@ -52,7 +52,6 @@ public class BoofCVChessboardPoseEstimator
       intrinsicParameters.cy = height / 2;
       intrinsicParameters.fx = f;
       intrinsicParameters.fy = f;
-      intrinsicParameters.flipY = false;
    }
    public RigidBodyTransform detect(BufferedImage image)
    {
@@ -76,7 +75,7 @@ public class BoofCVChessboardPoseEstimator
          Se3_F64 targetToSensor = new Se3_F64();
          for (int i = 0; i < detector.totalFound(); i++)
          {
-            detector.getFiducialToWorld(i, targetToSensor);
+            detector.getFiducialToCamera(i, targetToSensor);
             double dist = targetToSensor.getT().norm();
             if (dist < closestDistance)
             {
@@ -84,7 +83,7 @@ public class BoofCVChessboardPoseEstimator
                closestDistance = dist;
             }
          }
-         detector.getFiducialToWorld(closestIndex, targetToSensor);
+         detector.getFiducialToCamera(closestIndex, targetToSensor);
          Vector3D_F64 translation = targetToSensor.getT();
          Matrix3d rotation = new Matrix3d(targetToSensor.getR().data);
          
@@ -106,7 +105,7 @@ public class BoofCVChessboardPoseEstimator
       Graphics2D g2 = image.createGraphics();
       g2.setStroke(new BasicStroke(4));
       g2.setColor(java.awt.Color.RED);
-      VisualizeFiducial.drawCube(targetToSensor, this.intrinsicParameters, scale, g2);
+      VisualizeFiducial.drawCube(targetToSensor, this.intrinsicParameters, scale, 2, g2);
       g2.finalize();
 
       

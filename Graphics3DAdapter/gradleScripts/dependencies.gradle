@@ -6,8 +6,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 	compile group: 'xerces', name: 'xercesImpl', version: '2.9.1'
 	
-	compile group: 'us.ihmc.thirdparty', name: 'boofcv-geo', version: '0.19-internal'
-	//compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-geo', version: '0.18'
+	compile group: 'org.boofcv', name: 'all', version: '0.19'
       
     compile group: 'org.ejml', name: 'all', version: '0.28'
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0' //force svnkit dependency jna-3.5.2 to use jna-4.1.0

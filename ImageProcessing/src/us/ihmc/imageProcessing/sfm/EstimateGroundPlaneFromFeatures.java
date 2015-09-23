@@ -1,12 +1,5 @@
 package us.ihmc.imageProcessing.sfm;
 
-import georegression.fitting.homography.ModelManagerHomography2D_F64;
-import georegression.struct.homography.Homography2D_F64;
-import georegression.struct.homography.UtilHomography;
-import georegression.struct.point.Point2D_F64;
-import georegression.struct.point.Vector3D_F64;
-import georegression.struct.se.Se3_F64;
-
 import java.util.List;
 
 import org.ddogleg.fitting.modelset.ModelGenerator;
@@ -18,9 +11,15 @@ import org.ejml.data.DenseMatrix64F;
 import boofcv.alg.geo.MultiViewOps;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.geo.h.HomographyInducedStereo3Pts;
-import boofcv.alg.sfm.robust.DistanceHomographySq;
+import boofcv.alg.geo.robust.DistanceHomographySq;
 import boofcv.struct.calib.StereoParameters;
 import boofcv.struct.geo.AssociatedPair;
+import georegression.fitting.homography.ModelManagerHomography2D_F64;
+import georegression.struct.homography.Homography2D_F64;
+import georegression.struct.homography.UtilHomography;
+import georegression.struct.point.Point2D_F64;
+import georegression.struct.point.Vector3D_F64;
+import georegression.struct.se.Se3_F64;
 
 /**
  * <p>
