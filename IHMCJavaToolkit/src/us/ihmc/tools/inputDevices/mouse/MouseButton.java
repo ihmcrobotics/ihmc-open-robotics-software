@@ -6,6 +6,8 @@ public enum MouseButton
 {
    LEFT, RIGHT, MIDDLE, LEFTRIGHT;
    
+   public static final MouseButton[] values = values();
+   
    public int getInputEventMask()
    {
       if (equals(LEFT))
