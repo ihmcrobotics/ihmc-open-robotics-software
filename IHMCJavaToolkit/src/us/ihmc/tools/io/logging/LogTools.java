@@ -1,6 +1,7 @@
 package us.ihmc.tools.io.logging;
 
 import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,5 +13,10 @@ public class LogTools
       ConsoleHandler handler = new ConsoleHandler();
       handler.setLevel(level);
       Logger.getLogger("").addHandler(handler);
+   }
+
+   public static Level getGlobalLogLevel()
+   {
+      return Logger.getLogger("").getLevel();
    }
 }
