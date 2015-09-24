@@ -26,6 +26,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.tools.inputDevices.joystick.JoystickTest.class,
    us.ihmc.tools.inputDevices.JoystickDirectionTest.class,
    us.ihmc.tools.inputDevices.keyboard.linux.RepeatingReleasedEventsFixerTest.class,
+   us.ihmc.tools.inputDevices.mouse.MouseListenerHolderTest.class,
    us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystickPollDataTest.class,
    us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystickTest.class,
    us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListenerHolderTest.class,
