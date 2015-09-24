@@ -9,17 +9,15 @@ import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
 import us.ihmc.tools.inputDevices.JInputLibraryLoader;
 
-
 public class Joystick
 {
    private boolean DEBUG = false;
    private final int pollIntervalMillis = 20;
    private float deadband = 0.2f;
-   boolean connected = false;
+   private boolean connected = false;
 
    private final ArrayList<JoystickEventListener> listeners = new ArrayList<JoystickEventListener>();
    private final ArrayList<JoystickGeneralListener> generalListenersList = new ArrayList<JoystickGeneralListener>();
-
 
    public Joystick() throws Exception
    {
@@ -30,7 +28,6 @@ public class Joystick
          connected = false;
 
          throw new Exception("joystick not found");
-
       }
       else
       {
@@ -190,7 +187,6 @@ public class Joystick
       {
          return (event.getValue() < deadband) && (event.getValue() > -deadband);
       }
-
 
       private boolean isJoystickAxisEvent(Event event)
       {
