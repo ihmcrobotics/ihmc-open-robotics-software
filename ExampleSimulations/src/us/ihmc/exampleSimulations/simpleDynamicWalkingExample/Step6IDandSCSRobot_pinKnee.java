@@ -205,6 +205,15 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
    }
    
    /**
+    * Initialization for walking
+    */
+   public void setInitialVelocity()
+   {
+      qd_x = (DoubleYoVariable) getVariable("qd_x");
+      qd_x.set(0.8); 
+   }
+   
+   /**
     * Inertias
     */
 
@@ -247,8 +256,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
    {
       Matrix3d inertiaCylinder = createInertiaMatrixCylinder(linkName);
       Vector3d comOffsetCylinder = new Vector3d(0.0, 0.0, -RobotParameters.LENGTHS.get(linkName) / 2.0);
-      allLegRigidBodies.get(robotSide).put(linkName,
-            ScrewTools.addRigidBody(linkName.getName(), allLegJoints.get(robotSide).get(jointName), inertiaCylinder, bodyMass, comOffsetCylinder));
+      allLegRigidBodies.get(robotSide).put(linkName, ScrewTools.addRigidBody(linkName.getName(), allLegJoints.get(robotSide).get(jointName), inertiaCylinder, bodyMass, comOffsetCylinder));
    }
 
    private void createAndAttachFootRB(LinkNames linkName, JointNames jointName, RobotSide robotSide)
@@ -300,14 +308,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(footOffsetX, 0.0, 0.0);
-      if (robotSide == RobotSide.LEFT)
-      {
-         linkGraphics.addCube(footX, footY, -footZ, RobotParameters.APPEARANCE.get(LinkNames.FOOT_LINK));
-      }
-      if (robotSide == RobotSide.RIGHT)
-      {
-         linkGraphics.addCube(footX, footY, -footZ, YoAppearance.Tomato());
-      }
+      linkGraphics.addCube(footX, footY, -footZ, RobotParameters.APPEARANCE.get(LinkNames.FOOT_LINK));
       link.setLinkGraphics(linkGraphics);
       //      link.addEllipsoidFromMassProperties(YoAppearance.Green());
       link.addCoordinateSystemToCOM(0.3);
