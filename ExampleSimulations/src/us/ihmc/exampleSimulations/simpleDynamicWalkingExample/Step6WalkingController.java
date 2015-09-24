@@ -3,10 +3,15 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.State;
@@ -14,6 +19,8 @@ import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class Step6WalkingController implements RobotController
 {
@@ -23,7 +30,7 @@ public class Step6WalkingController implements RobotController
     */
 
    //Variables
-   private Step5IDandSCSRobot_pinKnee rob;
+   private Step6IDandSCSRobot_pinKnee rob;
    private String name;
    private YoVariableRegistry controllerRegistry = new YoVariableRegistry("controllerRegistry");
    private double deltaT;
@@ -48,8 +55,7 @@ public class Step6WalkingController implements RobotController
    private boolean heelOnTheFloor, toeOnTheFloor;
    private final DoubleYoVariable minSupportTime = new DoubleYoVariable("minSupportTime", controllerRegistry);
    private final DoubleYoVariable swingTime = new DoubleYoVariable("swingTime", controllerRegistry);
-   
-
+    
    // State Machine
    private enum States
    {
@@ -59,16 +65,25 @@ public class Step6WalkingController implements RobotController
    private final StateMachine<States> leftStateMachine, rightStateMachine;
    private final SideDependentList<StateMachine<States>> stateMachines;
 
+   //ICP calculation and graphics
+   private double comPosX, comPosZ, comVelX, icpPosX;
+   private YoGraphicPosition icpGraphics;
+   private DoubleYoVariable icpYoPosX, icpYoPosY, icpYoPosZ;
+   private FramePoint2d capturePoint, centerOfMassInWorld; 
+   private FrameVector2d centerOfMassVelocityInWorld;
+   
+   
    /**
     * Constructor
     */
 
-   public Step6WalkingController(Step5IDandSCSRobot_pinKnee rob, String name, double deltaT)
+   public Step6WalkingController(Step6IDandSCSRobot_pinKnee rob, String name, double deltaT, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.rob = rob;
       this.name = name;
       this.deltaT = deltaT;
 
+      
       // Controllers and Gains
       controllerBodyZ = new PIDController("bodyZ", controllerRegistry);
       controllerBodyZ.setProportionalGain(1000.0);
@@ -137,6 +152,16 @@ public class Step6WalkingController implements RobotController
       initConditions();
       setupStateMachines();
       
+      //ICP calculation and graphics
+      icpYoPosX = new DoubleYoVariable("icpYoPosX", controllerRegistry);
+      icpYoPosX.set(icpPosX);
+      icpYoPosY = new DoubleYoVariable("icpYoPosY", controllerRegistry);
+      icpYoPosY.set(0.0); 
+      icpYoPosZ = new DoubleYoVariable("icpYoPosZ", controllerRegistry);
+      icpYoPosZ.set(0.0);
+      icpGraphics = new YoGraphicPosition("icpGraph", icpYoPosX, icpYoPosY, icpYoPosZ, 0.1, YoAppearance.Tomato());
+      yoGraphicsListRegistry.registerYoGraphic("icp", icpGraphics);
+      
    }
 
    /**
@@ -147,7 +172,7 @@ public class Step6WalkingController implements RobotController
    {
       minSupportTime.set(0.3); 
       swingTime.set(0.4); 
-//      rob.setInitialVelocity();
+      rob.setInitialVelocity();
    }
 
    private void setupStateMachines()  
@@ -477,10 +502,34 @@ public class Step6WalkingController implements RobotController
       }
    }
 
+   /**
+    * Foot placement --> ICP
+    */
+ private void calculateAndPlotICP()
+ {
+    // Calculation
+    comVelX = rob.getBodyVelX(velocityToPack);
+    comPosX = rob.getBodyPositionX();
+    comPosZ = rob.getBodyPositionZ();
+    double omega0 = Math.sqrt(9.81 / comPosZ);
+    
+    capturePoint = new FramePoint2d();
+    centerOfMassInWorld = new FramePoint2d(ReferenceFrame.getWorldFrame(), comPosX, 0.0);
+    centerOfMassVelocityInWorld = new FrameVector2d(ReferenceFrame.getWorldFrame(), comVelX, 0.0);
+    CapturePointCalculator.computeCapturePoint(capturePoint, centerOfMassInWorld, centerOfMassVelocityInWorld, omega0);
+    icpPosX = capturePoint.getX();
+    System.out.println("comPos" + centerOfMassInWorld + "\ncomVel" + centerOfMassVelocityInWorld + "\nicp" + capturePoint + "\nicpPosX" + icpPosX ); 
+
+    // Visualization
+    icpGraphics.setPosition(icpPosX, 0.0, 0.0);
+   
+ }
+   
    /////////////////////////////////////////////////////////////////////////////////////////////
    public void doControl()
    {
       walkingStateMachine();
+      calculateAndPlotICP();
    }
 
    public void initialize()
