@@ -29,6 +29,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.tools.inputDevices.keyboard.KeyTest.class,
    us.ihmc.tools.inputDevices.keyboard.linux.RepeatingReleasedEventsFixerTest.class,
    us.ihmc.tools.inputDevices.keyboard.ModifierKeyHolderTest.class,
+   us.ihmc.tools.inputDevices.koFightingStick.AbstractKOFightingStickListenerTest.class,
    us.ihmc.tools.inputDevices.mouse.MouseButtonTest.class,
    us.ihmc.tools.inputDevices.mouse.MouseListenerHolderTest.class,
    us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystickPollDataTest.class,
