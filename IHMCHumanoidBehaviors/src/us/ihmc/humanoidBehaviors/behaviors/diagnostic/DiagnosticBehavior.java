@@ -409,6 +409,62 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       pelvisOrientationScaleFactor.set(0.1);
 
+      setupArmsInverseKinematics(fullRobotModel);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+
+         YoFrameOrientation currentUpperArmOrientation = new YoFrameOrientation(sidePrefix + "CurrentUpperArm", chestFrame, registry);
+         currentUpperArmOrientations.put(robotSide, currentUpperArmOrientation);
+
+         YoFrameOrientation currentHandOrientation = new YoFrameOrientation(sidePrefix + "CurrentHand", lowerArmsFrames.get(robotSide), registry);
+         currentHandOrientations.put(robotSide, currentHandOrientation);
+      }
+
+      this.attachControllerListeningQueue(inputListeningQueue, CapturabilityBasedStatus.class);
+
+      steeringWheelCenter = new YoFramePoint(behaviorNameFirstLowerCase + "SteeringWheelCenter", worldFrame, registry);
+      steeringWheelOrientation = new YoFrameOrientation(behaviorNameFirstLowerCase + "SteeringWheelOrientation", worldFrame, registry);
+      steeringWheelPose = new YoFramePose(steeringWheelCenter, steeringWheelOrientation);
+      steeringWheelRadius = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelRadius", registry);
+      steeringWheelResetPose = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelResetPose", registry);
+      steeringWheelControlRotationAxis = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelControlRotationAxis", registry);
+      steeringWheelExecuteGraspingFirst = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelExecuteGraspingFirst", registry);
+      steeringWheelExecuteGraspingFirst.set(true);
+
+      steeringWheelFrame = new ReferenceFrame("steeringWheelFrame", worldFrame)
+      {
+         private static final long serialVersionUID = 4561076900680410565L;
+         private final Vector3d localTranslation = new Vector3d();
+         private final Quat4d localQuaternion = new Quat4d();
+
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            steeringWheelCenter.get(localTranslation);
+            steeringWheelOrientation.getQuaternion(localQuaternion);
+            transformToParent.set(localQuaternion, localTranslation);
+         }
+      };
+
+      steeringWheelInitialAngle = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelInitialAngle", registry);
+      steeringWheelFinalAngle = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelFinalAngle", registry);
+
+      showSteeringWheel = new BooleanYoVariable(behaviorNameFirstLowerCase + "ShowSteeringWheel", registry);
+      steeringWheelInitialPosition = new YoFramePoint(behaviorNameFirstLowerCase + "SteeringWheelInitialPosition", worldFrame, registry);
+      steeringWheelFinalPosition = new YoFramePoint(behaviorNameFirstLowerCase + "SteeringWheelFinalPosition", worldFrame, registry);
+      steeringWheelVisualization = new BagOfBalls(numberOfBalls, 0.03, behaviorNameFirstLowerCase + "SteeringWheelVizualization", YoAppearance.Black(), registry, yoGraphicsListRegistry);
+      steeringWheelVisualization.hideAll();
+      yoGraphicsListRegistry.registerYoGraphic("Steering Wheel", new YoGraphicPosition(behaviorNameFirstLowerCase + "SteeringWheelInitialPosition", steeringWheelInitialPosition, 0.035, YoAppearance.BlueViolet()));
+      yoGraphicsListRegistry.registerYoGraphic("Steering Wheel", new YoGraphicPosition(behaviorNameFirstLowerCase + "SteeringWheelFinalPosition", steeringWheelFinalPosition, 0.035, YoAppearance.Red()));
+
+      updateSteeringWheelParameters();
+   }
+
+   private void setupArmsInverseKinematics(FullHumanoidRobotModel fullRobotModel)
+   {
       // These values were tuned by Jerry Pratt on February 24, 2015 to match Atlas the best.
       int maxIterations = 1000; // 60 Seems to be a bit too low, 100 seems to be enough, just set it to 200 to make sure (Sylvain)
       double lambdaLeastSquares = 0.0009;
@@ -487,57 +543,6 @@ public class DiagnosticBehavior extends BehaviorInterface
          inverseKinematicsForLowerArm.setSelectionMatrix(angularSelectionMatrix);
          inverseKinematicsForLowerArms.put(robotSide, inverseKinematicsForLowerArm);
       }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-
-         YoFrameOrientation currentUpperArmOrientation = new YoFrameOrientation(sidePrefix + "CurrentUpperArm", chestFrame, registry);
-         currentUpperArmOrientations.put(robotSide, currentUpperArmOrientation);
-
-         YoFrameOrientation currentHandOrientation = new YoFrameOrientation(sidePrefix + "CurrentHand", lowerArmsFrames.get(robotSide), registry);
-         currentHandOrientations.put(robotSide, currentHandOrientation);
-      }
-
-      this.attachControllerListeningQueue(inputListeningQueue, CapturabilityBasedStatus.class);
-
-      steeringWheelCenter = new YoFramePoint(behaviorNameFirstLowerCase + "SteeringWheelCenter", worldFrame, registry);
-      steeringWheelOrientation = new YoFrameOrientation(behaviorNameFirstLowerCase + "SteeringWheelOrientation", worldFrame, registry);
-      steeringWheelPose = new YoFramePose(steeringWheelCenter, steeringWheelOrientation);
-      steeringWheelRadius = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelRadius", registry);
-      steeringWheelResetPose = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelResetPose", registry);
-      steeringWheelControlRotationAxis = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelControlRotationAxis", registry);
-      steeringWheelExecuteGraspingFirst = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelExecuteGraspingFirst", registry);
-      steeringWheelExecuteGraspingFirst.set(true);
-
-      steeringWheelFrame = new ReferenceFrame("steeringWheelFrame", worldFrame)
-      {
-         private static final long serialVersionUID = 4561076900680410565L;
-         private final Vector3d localTranslation = new Vector3d();
-         private final Quat4d localQuaternion = new Quat4d();
-
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            steeringWheelCenter.get(localTranslation);
-            steeringWheelOrientation.getQuaternion(localQuaternion);
-            transformToParent.set(localQuaternion, localTranslation);
-         }
-      };
-
-      steeringWheelInitialAngle = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelInitialAngle", registry);
-      steeringWheelFinalAngle = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelFinalAngle", registry);
-
-      showSteeringWheel = new BooleanYoVariable(behaviorNameFirstLowerCase + "ShowSteeringWheel", registry);
-      steeringWheelInitialPosition = new YoFramePoint(behaviorNameFirstLowerCase + "SteeringWheelInitialPosition", worldFrame, registry);
-      steeringWheelFinalPosition = new YoFramePoint(behaviorNameFirstLowerCase + "SteeringWheelFinalPosition", worldFrame, registry);
-      steeringWheelVisualization = new BagOfBalls(numberOfBalls, 0.03, behaviorNameFirstLowerCase + "SteeringWheelVizualization", YoAppearance.Black(), registry, yoGraphicsListRegistry);
-      steeringWheelVisualization.hideAll();
-      yoGraphicsListRegistry.registerYoGraphic("Steering Wheel", new YoGraphicPosition(behaviorNameFirstLowerCase + "SteeringWheelInitialPosition", steeringWheelInitialPosition, 0.035, YoAppearance.BlueViolet()));
-      yoGraphicsListRegistry.registerYoGraphic("Steering Wheel", new YoGraphicPosition(behaviorNameFirstLowerCase + "SteeringWheelFinalPosition", steeringWheelFinalPosition, 0.035, YoAppearance.Red()));
-
-      updateSteeringWheelParameters();
    }
 
    private void resetSteeringWheelToDefault()
