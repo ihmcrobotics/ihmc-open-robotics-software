@@ -23,6 +23,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.tools.gui.GUIMessagePanelTest.class,
    us.ihmc.tools.inputDevices.ghostMouse.GhostMousePlaybackTest.class,
    us.ihmc.tools.inputDevices.ghostMouse.GhostMouseStringToCharTest.class,
+   us.ihmc.tools.inputDevices.joystick.JoystickTest.class,
    us.ihmc.tools.inputDevices.JoystickDirectionTest.class,
    us.ihmc.tools.inputDevices.keyboard.linux.RepeatingReleasedEventsFixerTest.class,
    us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystickPollDataTest.class,
