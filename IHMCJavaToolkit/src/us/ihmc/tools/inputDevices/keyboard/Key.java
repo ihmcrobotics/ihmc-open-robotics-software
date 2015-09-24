@@ -41,6 +41,7 @@ public enum Key
    
    UNDEFINED;
    
+   public static final Key[] values = values();
    
    /**
     * 

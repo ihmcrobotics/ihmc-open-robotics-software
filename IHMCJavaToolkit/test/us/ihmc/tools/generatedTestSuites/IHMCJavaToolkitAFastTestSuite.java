@@ -26,6 +26,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.tools.inputDevices.joystick.JoystickTest.class,
    us.ihmc.tools.inputDevices.JoystickDirectionTest.class,
    us.ihmc.tools.inputDevices.keyboard.KeyListenerHolderTest.class,
+   us.ihmc.tools.inputDevices.keyboard.KeyTest.class,
    us.ihmc.tools.inputDevices.keyboard.linux.RepeatingReleasedEventsFixerTest.class,
    us.ihmc.tools.inputDevices.keyboard.ModifierKeyHolderTest.class,
    us.ihmc.tools.inputDevices.mouse.MouseButtonTest.class,
