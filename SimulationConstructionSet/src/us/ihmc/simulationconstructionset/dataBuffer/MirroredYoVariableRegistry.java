@@ -50,12 +50,18 @@ public class MirroredYoVariableRegistry extends YoVariableRegistry
       newVar.addVariableChangedListener(new MirroredYoVariableRegistryChangedListener());
    }
 
+   /**
+    * Updates changes from the mirror to the original registry and then from the original to the mirror registry
+    */
    public void updateMirror()
    {
       updateChangedValues();
       updateValuesFromOriginal();
    }
 
+   /**
+    * Mirrors changes from the mirror registry to the original registry
+    */
    @SuppressWarnings("unchecked")
    public void updateChangedValues()
    {
@@ -65,19 +71,27 @@ public class MirroredYoVariableRegistry extends YoVariableRegistry
       }
    }
 
+   /**
+    * Mirrors changes from the original registry to the mirror registry
+    */
    @SuppressWarnings("unchecked")
    public void updateValuesFromOriginal()
    {
-      for (ImmutablePair<YoVariable, YoVariable> pair : variablePairs)
+      //noinspection ForLoopReplaceableByForEach (runs in tight loop, foreach allocates memory)
+      for (int i = 0; i < variablePairs.size(); i++)
       {
+         ImmutablePair<YoVariable, YoVariable> pair = variablePairs.get(i);
+
          YoVariable target = pair.getRight();
-         final boolean changed = target.setValue(pair.getLeft(), false);
+         boolean changed = target.setValue(pair.getLeft(), false);
 
          if (changed)
          {
             ArrayList<VariableChangedListener> variableChangedListeners = target.getVariableChangedListeners();
-            for (VariableChangedListener variableChangedListener : variableChangedListeners)
+            //noinspection ForLoopReplaceableByForEach (runs in tight loop, foreach allocates memory)
+            for (int v = 0; v < variableChangedListeners.size(); v++)
             {
+               VariableChangedListener variableChangedListener = variableChangedListeners.get(v);
                if (variableChangedListener.getClass() != MirroredYoVariableRegistryChangedListener.class)
                {
                   variableChangedListener.variableChanged(target);
