@@ -253,6 +253,7 @@ public class SimulationConstructionSetFestTest
       try
       {
          FallingBrickRobot robot = new FallingBrickRobot();
+         robot.initialize();
 
          SimulationConstructionSet scs = new SimulationConstructionSet(robot);
          scs.setDT(0.0001, 100);
