@@ -785,16 +785,20 @@ public class DataBuffer extends YoVariableHolderImplementation
 
    private void setYoVariableValuesToDataAtIndex()
    {
-      for (DataBufferEntry entry : entries)
+      //noinspection ForLoopReplaceableByForEach (iterators use memory, runs in tight loop)
+      for (int j = 0; j < entries.size(); j++)
       {
+         DataBufferEntry entry = entries.get(j);
          entry.setYoVariableValueToDataAtIndex(this.index);
       }
    }
 
    public void setDataAtIndexToYoVariableValues()
    {
-      for (DataBufferEntry entry : entries)
+      //noinspection ForLoopReplaceableByForEach (iterators use memory, runs in tight loop)
+      for (int j = 0; j < entries.size(); j++)
       {
+         DataBufferEntry entry = entries.get(j);
          entry.setDataAtIndexToYoVariableValue(this.index);
       }
    }
