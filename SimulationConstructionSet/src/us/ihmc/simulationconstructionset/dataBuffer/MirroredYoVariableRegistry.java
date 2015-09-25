@@ -1,22 +1,22 @@
 package us.ihmc.simulationconstructionset.dataBuffer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
+import com.google.common.collect.*;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 @SuppressWarnings("rawtypes")
 public class MirroredYoVariableRegistry extends YoVariableRegistry
 {
-   private final ArrayList<ImmutablePair<YoVariable, YoVariable>> variablePairs = new ArrayList<ImmutablePair<YoVariable, YoVariable>>();
-   private final HashMap<YoVariable, YoVariable> copyToMirroredVariables = new HashMap<YoVariable, YoVariable>();
+   private final BiMap<YoVariable, YoVariable> variableMap = HashBiMap.create();
+   private final ConcurrentLinkedQueue<YoVariable> changedVariablesInMirror = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<YoVariable> changedVariablesInOriginal = new ConcurrentLinkedQueue<>();
 
-   private final ConcurrentLinkedQueue<YoVariable> changedVariables = new ConcurrentLinkedQueue<YoVariable>();
+   private final YoVariableRegistryChangedListener mirroredChangeListener = new YoVariableRegistryChangedListener(changedVariablesInMirror);
+   private final YoVariableRegistryChangedListener originalChangeListener = new YoVariableRegistryChangedListener(changedVariablesInOriginal);
 
    public MirroredYoVariableRegistry(YoVariableRegistry original)
    {
@@ -32,8 +32,7 @@ public class MirroredYoVariableRegistry extends YoVariableRegistry
       for (YoVariable<?> var : vars)
       {
          YoVariable<?> newVar = var.duplicate(target);
-         variablePairs.add(new ImmutablePair<YoVariable, YoVariable>(var, newVar));
-         copyToMirroredVariables.put(newVar, var);
+         variableMap.put(var, newVar);
          addVariableListener(newVar, var);
       }
 
@@ -47,7 +46,8 @@ public class MirroredYoVariableRegistry extends YoVariableRegistry
 
    private void addVariableListener(YoVariable<?> newVar, YoVariable<?> var)
    {
-      newVar.addVariableChangedListener(new MirroredYoVariableRegistryChangedListener());
+      newVar.addVariableChangedListener(mirroredChangeListener);
+      var.addVariableChangedListener(originalChangeListener);
    }
 
    /**
@@ -65,9 +65,11 @@ public class MirroredYoVariableRegistry extends YoVariableRegistry
    @SuppressWarnings("unchecked")
    public void updateChangedValues()
    {
-      for (YoVariable<?> changed = changedVariables.poll(); changed != null; changed = changedVariables.poll())
+      for (YoVariable<?> changed = changedVariablesInMirror.poll(); changed != null; changed = changedVariablesInMirror.poll())
       {
-         copyToMirroredVariables.get(changed).setValue(changed, true);
+         YoVariable originalVar = variableMap.inverse().get(changed);
+         originalVar.setValue(changed, false);
+         callListenersForVariable(originalVar);
       }
    }
 
@@ -77,35 +79,40 @@ public class MirroredYoVariableRegistry extends YoVariableRegistry
    @SuppressWarnings("unchecked")
    public void updateValuesFromOriginal()
    {
-      //noinspection ForLoopReplaceableByForEach (runs in tight loop, foreach allocates memory)
-      for (int i = 0; i < variablePairs.size(); i++)
+
+      for (YoVariable<?> changed = changedVariablesInOriginal.poll(); changed != null; changed = changedVariablesInOriginal.poll())
       {
-         ImmutablePair<YoVariable, YoVariable> pair = variablePairs.get(i);
+         YoVariable mirroredVar = variableMap.get(changed);
+         mirroredVar.setValue(changed, false);
+         callListenersForVariable(mirroredVar);
+      }
+   }
 
-         YoVariable target = pair.getRight();
-         boolean changed = target.setValue(pair.getLeft(), false);
-
-         if (changed)
+   private void callListenersForVariable(YoVariable<?> variable) {
+      ArrayList<VariableChangedListener> variableChangedListeners = variable.getVariableChangedListeners();
+      //noinspection ForLoopReplaceableByForEach (runs in tight loop, foreach allocates memory)
+      for (int i = 0; i < variableChangedListeners.size(); i++)
+      {
+         VariableChangedListener variableChangedListener = variableChangedListeners.get(i);
+         if (variableChangedListener.getClass() != YoVariableRegistryChangedListener.class)
          {
-            ArrayList<VariableChangedListener> variableChangedListeners = target.getVariableChangedListeners();
-            //noinspection ForLoopReplaceableByForEach (runs in tight loop, foreach allocates memory)
-            for (int v = 0; v < variableChangedListeners.size(); v++)
-            {
-               VariableChangedListener variableChangedListener = variableChangedListeners.get(v);
-               if (variableChangedListener.getClass() != MirroredYoVariableRegistryChangedListener.class)
-               {
-                  variableChangedListener.variableChanged(target);
-               }
-            }
+            variableChangedListener.variableChanged(variable);
          }
       }
    }
 
-   private class MirroredYoVariableRegistryChangedListener implements VariableChangedListener
+   private static class YoVariableRegistryChangedListener implements VariableChangedListener
    {
+      final ConcurrentLinkedQueue<YoVariable> queue;
+
+      private YoVariableRegistryChangedListener(ConcurrentLinkedQueue<YoVariable> queue)
+      {
+         this.queue = queue;
+      }
+
       public void variableChanged(YoVariable<?> v)
       {
-         changedVariables.add(v);
+         queue.add(v);
       }
    }
 }
