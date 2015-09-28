@@ -74,15 +74,14 @@ public class ThreadToolsTest
    {
       final int ITERATIONS = 100;
       final double EPSILON = 5;
-      
+
       TimeUnit timeUnit = TimeUnit.MILLISECONDS;
       long initialDelay = 0;
       long delay = 3;
       long timeLimit = 30;
-      
-      
+
       final Runnable runnable = new Runnable()
-      
+
       {
          @Override
          public void run()
@@ -91,8 +90,8 @@ public class ThreadToolsTest
             Math.sqrt(Math.PI);
          }
       };
-      
-      for(int i = 0; i < ITERATIONS; i++)
+
+      for (int i = 0; i < ITERATIONS; i++)
       {
          long startTime = System.currentTimeMillis();
          ScheduledFuture<?> future = ThreadTools.scheduleWithFixeDelayAndTimeLimit(getClass().getSimpleName(), runnable, initialDelay, delay, timeUnit, timeLimit);
@@ -101,7 +100,7 @@ public class ThreadToolsTest
          assertEquals(timeLimit, endTime - startTime, EPSILON);
       }
    }
-   
+
    @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testIterationLimitScheduler()
@@ -110,9 +109,9 @@ public class ThreadToolsTest
       long initialDelay = 0;
       long delay = 10;
       final int iterations = 10;
-      
+
       final AtomicInteger counter = new AtomicInteger();
-      
+
       final Runnable runnable = new Runnable()
       {
          @Override
@@ -121,57 +120,60 @@ public class ThreadToolsTest
             counter.incrementAndGet();
          }
       };
-      
+
       ScheduledFuture<?> future = ThreadTools.scheduleWithFixedDelayAndIterationLimit(getClass().getSimpleName(), runnable, initialDelay, delay, timeUnit, iterations);
       
       while(!future.isDone());
       assertEquals(iterations, counter.get());
    }
-   
-   @DeployableTestMethod(estimatedDuration = 0.1)
+
+   @DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testExecuteWithTimeout()
    {
       final StateHolder holder = new StateHolder();
-      
-      ThreadTools.executeWithTimeout("timeoutTest1", new Runnable()
+      for (int i = 0; i < 10; i++)
       {
-         @Override
-         public void run()
+         System.out.println("i = " + i);
+         holder.state = State.DIDNT_RUN;
+         ThreadTools.executeWithTimeout("timeoutTest1", new Runnable()
          {
-            holder.state = State.TIMED_OUT;
-            
-            ThreadTools.sleep(200);
+            @Override
+            public void run()
+            {
+               holder.state = State.TIMED_OUT;
 
-            holder.state = State.RAN_WITHOUT_TIMING_OUT;
-         }
-      }, 100, TimeUnit.MILLISECONDS);
-      
-      assertTrue("Did not timeout.", holder.state.equals(State.TIMED_OUT));
-      
-      holder.state = State.DIDNT_RUN;
-      
-      ThreadTools.executeWithTimeout("timeoutTest2", new Runnable()
-      {
-         @Override
-         public void run()
+               ThreadTools.sleep(10);
+
+               holder.state = State.RAN_WITHOUT_TIMING_OUT;
+            }
+         }, 5, TimeUnit.MILLISECONDS);
+         assertFalse("Didn't run. Should timeout.", holder.state.equals(State.DIDNT_RUN));
+         assertTrue("Did not timeout.", holder.state.equals(State.TIMED_OUT));
+
+         holder.state = State.DIDNT_RUN;
+         ThreadTools.executeWithTimeout("timeoutTest2", new Runnable()
          {
-            holder.state = State.TIMED_OUT;
-            
-            ThreadTools.sleep(100);
+            @Override
+            public void run()
+            {
+               holder.state = State.TIMED_OUT;
 
-            holder.state = State.RAN_WITHOUT_TIMING_OUT;
-         }
-      }, 200, TimeUnit.MILLISECONDS);
-      
-      assertTrue("Timed out early.", holder.state.equals(State.RAN_WITHOUT_TIMING_OUT));
+               ThreadTools.sleep(5);
+
+               holder.state = State.RAN_WITHOUT_TIMING_OUT;
+            }
+         }, 10, TimeUnit.MILLISECONDS);
+         assertFalse("Didn't run. Shouldn't timeout.", holder.state.equals(State.DIDNT_RUN));
+         assertTrue("Timed out early.", holder.state.equals(State.RAN_WITHOUT_TIMING_OUT));
+      }
    }
-   
+
    private enum State
    {
       DIDNT_RUN, TIMED_OUT, RAN_WITHOUT_TIMING_OUT;
    }
-   
+
    private class StateHolder
    {
       public State state = State.DIDNT_RUN;
