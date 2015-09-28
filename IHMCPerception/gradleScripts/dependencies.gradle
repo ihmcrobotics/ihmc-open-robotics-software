@@ -17,7 +17,6 @@ dependencies {
     testCompile project(':Planning').sourceSets.test.output
     compile project(':ROSJavaMessages')
     compile project(':SensorProcessing')
-    compile project(':UserInterface')
     compile project(':SDFLoader')
     compile project(':IHMCJavaToolkit')
     compile project(':IHMCRoboticsToolkit')

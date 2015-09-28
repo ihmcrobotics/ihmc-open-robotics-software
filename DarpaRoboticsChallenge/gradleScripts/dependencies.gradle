@@ -47,7 +47,6 @@ dependencies {
 	compile project(':SDFLoader')
 	compile project(':SensorProcessing')
 	compile project(':SimulationConstructionSet')
-	compile project(':UserInterface')
 	compile project(':ROSJavaGeometry')
 	compile project(':IHMCCommunication')
 	compile project(':IHMCHumanoidBehaviors')

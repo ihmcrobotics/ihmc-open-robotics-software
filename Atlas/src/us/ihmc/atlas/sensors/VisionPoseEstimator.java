@@ -32,7 +32,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
-import us.ihmc.humanoidOperatorInterface.sensors.DetectedObjectManager.DetectedObjectId;
+import us.ihmc.darpaRoboticsChallenge.sensors.DetectedObjectId;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.ihmcPerception.OpenCVFaceDetector;
 import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;

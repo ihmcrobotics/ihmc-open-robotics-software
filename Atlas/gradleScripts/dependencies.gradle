@@ -1,7 +1,6 @@
 evaluationDependsOn(':DarpaRoboticsChallenge')
 evaluationDependsOn(':CommonWalkingControlModules')
 evaluationDependsOn(':Graphics3DAdapter')
-evaluationDependsOn(':IHMCHumanoidOperatorInterface')
 evaluationDependsOn(':IHMCWholeBodyController')
 evaluationDependsOn(':PathGeneration')
 evaluationDependsOn(':SensorProcessing')
@@ -28,7 +27,6 @@ dependencies {
     compile project(':CommonWalkingControlModules')
     compile project(':DarpaRoboticsChallenge')
     compile project(':Graphics3DAdapter')
-    compile project(':IHMCHumanoidOperatorInterface')
     compile project(':IHMCHumanoidRobotics')
     compile project(':IHMCCommunication')
     compile project(':IHMCControlFlow')
@@ -48,7 +46,6 @@ dependencies {
     compile project(':SDFLoader')
     compile project(':SensorProcessing')
     compile project(':SimulationConstructionSet')
-    compile project(':UserInterface')
 	
 	testCompile project(':IHMCUnitTesting')
     testCompile project(':CommonWalkingControlModules').sourceSets.test.output

@@ -15,6 +15,6 @@
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="us.ihmc.atlas.AtlasOperatorUserInterface"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-m ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Atlas"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="AtlasUserInterface"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-DnetworkParameterFile=IHMCNetworkParameters.ini"/>
 </launchConfiguration>
