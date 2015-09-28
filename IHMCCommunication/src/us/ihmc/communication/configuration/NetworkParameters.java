@@ -30,8 +30,9 @@ public class NetworkParameters
 
    private NetworkParameters()
    {
-      File file = new File(System.getProperty("networkParameterFile", defaultParameterFile));
+      File file = new File(System.getProperty("networkParameterFile", defaultParameterFile)).getAbsoluteFile();
       PrintTools.info("Loading network parameters from " + file.getAbsolutePath());
+      
       if (file.exists() && file.isFile())
       {
          try
