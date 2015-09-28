@@ -9,9 +9,8 @@ dependencies {
 	compile group: 'org.ejml', name: 'all', version: '0.28'
 	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.10'
 	
-   testCompile project(':IHMCUnitTesting')
+	testCompile project(':IHMCUnitTesting')
 	
 	compile project(':IHMCJavaToolkit')
 	compile project(':IHMCRoboticsToolkit')
-	
 }
