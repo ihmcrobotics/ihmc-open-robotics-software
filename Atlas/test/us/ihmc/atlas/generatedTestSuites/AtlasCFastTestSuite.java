@@ -13,7 +13,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.atlas.AtlasPushRecoveryMultiStepTest.class,
-   us.ihmc.atlas.AtlasScriptingTest.class,
    us.ihmc.atlas.behaviorTests.AtlasFootstepListBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasHandLoadBearingBehaviorTest.class
 })

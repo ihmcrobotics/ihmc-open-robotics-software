@@ -16,7 +16,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
    us.ihmc.atlas.controllers.responses.AtlasHandPoseStatusTest.class,
    us.ihmc.atlas.drcRobot.AtlasSDFVerificationTest.class,
-   us.ihmc.atlas.driving.AtlasDrivingTest.class
 })
 
 public class AtlasEFastTestSuite
