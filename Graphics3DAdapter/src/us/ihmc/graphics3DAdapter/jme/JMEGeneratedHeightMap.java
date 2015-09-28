@@ -8,16 +8,16 @@ import java.util.logging.Logger;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.HeightMap;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.robotics.geometry.Ray3d;
-import us.ihmc.tools.maps.SimpleLRUCache;
-import us.ihmc.robotics.geometry.BoundingBox3d;
-
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
 import com.jme3.system.JmeSystem;
+
+import us.ihmc.graphics3DAdapter.HeightMap;
+import us.ihmc.graphics3DAdapter.jme.util.SimpleLRUCache;
+import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.Ray3d;
 
 public class JMEGeneratedHeightMap implements HeightMap
 {
