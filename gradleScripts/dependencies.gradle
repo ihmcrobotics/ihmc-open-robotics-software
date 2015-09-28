@@ -32,11 +32,9 @@ dependencies {
 	compile project(':SDFLoader')
 	compile project(':SensorProcessing')
 	compile project(':SimulationConstructionSet')
-	compile project(':UserInterface')
     compile project(':IHMCPerception')
     compile project(':IHMCWholeBodyController')
 	compile project(':IHMCJavaToolkit')
-	runtime project(':IHMCHumanoidOperatorInterface')
 	compile project(':IHMCRoboticsToolkit')
 	
 	testCompile project(':IHMCUnitTesting')
