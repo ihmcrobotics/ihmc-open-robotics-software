@@ -13,9 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.io.files.BasicPathVisitor;
-import us.ihmc.tools.io.files.FileTools;
-import us.ihmc.tools.io.files.PathTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
@@ -43,11 +40,11 @@ public class PathToolsTest
       assertTrue("Didn't match exactly one file.", matchingPaths.size() == 1);
       
       String path0 = matchingPaths.get(0).toString();
-      String clazz = path0.substring(path0.lastIndexOf('/') + 1, path0.lastIndexOf('.'));
-      PrintTools.info(this, "Matching class name: " + clazz);
+      String clazzSlashes = path0.substring(path0.indexOf("src") + 4, path0.lastIndexOf('.'));
+      String className = clazzSlashes.replaceAll("\\\\|/", ".");
+      PrintTools.info(this, "Matching class name: " + className);
       
-      
-      assertEquals("Matching path not correct.", PathTools.class.getSimpleName(), clazz);
+      assertEquals("Matching path not correct.", PathTools.class.getName(), className);
    }
    
 	@DeployableTestMethod(estimatedDuration = 0.0)

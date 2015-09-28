@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,8 +36,8 @@ public class FileToolsTest
    private static final String EXAMPLE_FILE_1_TEXT_LINE_1 = "This is example File 1 !!&&#))(";
    private static final String EXAMPLE_FILE_2_TEXT_LINE_1 = "This is example File 2 *@&&%*@";
    private static final String EXAMPLE_FILE_2_TEXT_LINE_2 = "It has two lines";
-   private static final String EXAMPLE_JAVA_FILE2_JAVA = "ExampleJavaFile2.java";
-   private static final String EXAMPLE_JAVA_FILE1_JAVA = "ExampleJavaFile1.java";
+   private static final String EXAMPLE_JAVA_FILE2_JAVA = "ExampleJavaFile2.java.txt";
+   private static final String EXAMPLE_JAVA_FILE1_JAVA = "ExampleJavaFile1.java.txt";
    private static final String TEST_FILE_BAD_TXT = "testFileBad.txt";
    private static final String FILE_TOOLS_EXAMPLE_FILE_CAT_TXT = "FileToolsExampleFileCat.txt";
    private static final String FILE_TOOLS_EXAMPLE_FILE2_TXT = "FileToolsExampleFile2.txt";
@@ -55,6 +56,22 @@ public class FileToolsTest
       createJavaFile2();
       createTestFile1();
       createTestFile2();
+   }
+   
+   @After
+   public void tearDown()
+   {
+      try
+      {
+         Files.delete(JAVA_DIRECTORY_PATH.resolve(EXAMPLE_JAVA_FILE1_JAVA));
+         Files.delete(JAVA_DIRECTORY_PATH.resolve(EXAMPLE_JAVA_FILE2_JAVA));
+         Files.delete(TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE1_TXT));
+         Files.delete(TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE2_TXT));
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
    }
    
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -363,7 +380,7 @@ public class FileToolsTest
       File notADirectoryExceptionTestFile = JAVA_DIRECTORY_PATH.resolve(EXAMPLE_JAVA_FILE1_JAVA).toFile();
       File javaFileDirectory = JAVA_DIRECTORY_PATH.toFile();
       ArrayList<File> textFiles = FileTools.getAllFilesInDirectoryWithSuffix("txt", textFileDirectory);
-      ArrayList<File> javaFiles = FileTools.getAllFilesInDirectoryWithSuffix("java", javaFileDirectory);
+      ArrayList<File> javaFiles = FileTools.getAllFilesInDirectoryWithSuffix("java.txt", javaFileDirectory);
    
       ArrayList<String> listOfTextFileNames = new ArrayList<String>();
       String errorMessage = "listOfTextFileNames that were found: ";
