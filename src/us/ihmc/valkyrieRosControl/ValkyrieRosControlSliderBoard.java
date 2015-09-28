@@ -7,10 +7,13 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.rosControl.JointHandle;
 import us.ihmc.rosControl.valkyrie.IHMCValkyrieControlJavaBridge;
@@ -19,14 +22,13 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 {
-   
+
    private static final String[] controlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
          "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
          "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch", "lowerNeckPitch",
          "neckYaw", "upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll",
          "rightWristPitch" };
 
-   
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
    private final SDFFullHumanoidRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
 
@@ -39,6 +41,9 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
    private EnumYoVariable<?> selectedJoint;
    private final DoubleYoVariable qDesiredSelected = new DoubleYoVariable("qDesiredSelected", registry);
    private final DoubleYoVariable qdDesiredSelected = new DoubleYoVariable("qdDesiredSelected", registry);
+
+   private final DoubleYoVariable kpSelected = new DoubleYoVariable("kpSelected", registry);
+   private final DoubleYoVariable kdSelected = new DoubleYoVariable("kdSelected", registry);
 
    private final DoubleYoVariable qSelected = new DoubleYoVariable("qSelected", registry);
    private final DoubleYoVariable qdSelected = new DoubleYoVariable("qdSelected", registry);
@@ -58,6 +63,22 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
       selectedJoint = new EnumYoVariable("selectedJoint", "", registry, false, jointNames.toArray(new String[jointNames.size()]));
       System.out.println(Arrays.toString(selectedJoint.getEnumValuesAsString()));
 
+      selectedJoint.addVariableChangedListener(new VariableChangedListener()
+      {
+
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            JointHolder selected = jointHolders.get(selectedJoint.getOrdinal());
+            qDesiredSelected.set(selected.q_d.getDoubleValue());
+            qdDesiredSelected.set(selected.qd_d.getDoubleValue());
+
+            kpSelected.set(selected.pdController.getProportionalGain());
+            kdSelected.set(selected.pdController.getDerivativeGain());
+
+         }
+      });
+
       yoVariableServer.setMainRegistry(registry, sdfFullRobotModel, null);
       yoVariableServer.start();
    }
@@ -66,8 +87,10 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
    protected void doControl(long time, long duration)
    {
       JointHolder selected = jointHolders.get(selectedJoint.getOrdinal());
-      selected.q_d.set(qDesiredSelected.getDoubleValue());
+      selected.q_d.set(MathTools.clipToMinMax(qDesiredSelected.getDoubleValue(), selected.joint.getJointLimitLower(), selected.joint.getJointLimitUpper()));
       selected.qd_d.set(qdDesiredSelected.getDoubleValue());
+      selected.pdController.setProportionalGain(kpSelected.getDoubleValue());
+      selected.pdController.setDerivativeGain(kdSelected.getDoubleValue());
 
       for (int i = 0; i < jointHolders.size(); i++)
       {
@@ -103,8 +126,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 
          this.registry = new YoVariableRegistry(joint.getName());
          this.pdController = new PDController(joint.getName(), registry);
-                  
-         
+
          q = new DoubleYoVariable(joint.getName() + "_q", registry);
          qd = new DoubleYoVariable(joint.getName() + "_qd", registry);
          tau = new DoubleYoVariable(joint.getName() + "_tau", registry);
