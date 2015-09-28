@@ -107,10 +107,38 @@ jar {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.1'
+    gradleVersion = '2.6'
 }
 
-task deploy(dependsOn: assemble) {
+task deployLocal(dependsOn: jar) {
+	def directory = 'valkyrie'
+	doLast{
+		def dest = new File(System.properties['user.home'], directory)
+		def lib = new File(dest, 'lib')
+		lib.mkdirs();
+		
+		configurations.runtime.each 
+		{
+			if(!it.name.contains("IHMCHumanoidOperatorInterface"))
+			{
+				def src = file(it)
+				copy{
+					from src
+					into lib
+				}
+			}
+		}
+		
+		copy{
+			from jar.archivePath
+			into dest
+			rename { fileName -> "ValkyrieController.jar" }
+		}
+		
+	}
+}
+
+task deploy(dependsOn: jar) {
 	
 	def directory = 'valkyrie'
 
