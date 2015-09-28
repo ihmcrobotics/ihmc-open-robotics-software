@@ -9,13 +9,14 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
 
 import org.apache.commons.lang3.SystemUtils;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.gui.GUIMessageFrame;
+import us.ihmc.simulationconstructionset.util.gui.GUIMessageFrame;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.time.DateTools;
@@ -165,28 +166,28 @@ public class BambooTools
       return determineBambooDataAndVideosRootDirectoryToUse();
    }
 
-   public static File getSVNDirectoryWithMostRecentBambooDataAndVideos()
+   public static Path getSVNDirectoryWithMostRecentBambooDataAndVideos()
    {
       String rootDirectory = determineBambooDataAndVideosRootDirectoryToUse();
 
-      return getDirectoryWithMostRecentBambooDataAndVideos(rootDirectory);
+      return getDirectoryWithMostRecentBambooDataAndVideos(Paths.get(rootDirectory));
    }
 
-   public static File getEraseableDirectoryWithMostRecentBambooDataAndVideos()
+   public static Path getEraseableDirectoryWithMostRecentBambooDataAndVideos()
    {
       String rootDirectory = determineEraseableBambooDataAndVideosRootDirectoryToUse();
       
       PrintTools.info(rootDirectory);
 
-      return getDirectoryWithMostRecentBambooDataAndVideos(rootDirectory);
+      return getDirectoryWithMostRecentBambooDataAndVideos(Paths.get(rootDirectory));
    }
 
-   public static File getDirectoryWithMostRecentBambooDataAndVideos(String rootDirectory)
+   public static Path getDirectoryWithMostRecentBambooDataAndVideos(Path rootDirectory)
    {
       if (rootDirectory == null)
          return null;
 
-      File file = new File(rootDirectory);
+      File file = rootDirectory.toFile();
 
       FileFilter fileFilter = new FileFilter()
       {
@@ -214,7 +215,7 @@ public class BambooTools
       Comparator<File> fileAlphabeticalComparator = createFileAlphabeticalComparator();
       Arrays.sort(timeStampedDirectories, fileAlphabeticalComparator);
 
-      return timeStampedDirectories[0];
+      return timeStampedDirectories[0].toPath();
    }
 
    public static Comparator<File> createFileAlphabeticalComparator()

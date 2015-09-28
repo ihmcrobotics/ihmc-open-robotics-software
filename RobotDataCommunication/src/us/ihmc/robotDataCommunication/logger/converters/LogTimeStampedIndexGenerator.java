@@ -12,8 +12,8 @@ import java.nio.channels.FileChannel;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.logger.LogProperties;
 import us.ihmc.robotDataCommunication.logger.YoVariableLoggerListener;
+import us.ihmc.robotDataCommunication.logger.util.CustomProgressMonitor;
 import us.ihmc.tools.compression.SnappyUtils;
-import us.ihmc.tools.gui.CustomProgressMonitor;
 
 public class LogTimeStampedIndexGenerator
 {

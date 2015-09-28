@@ -1,4 +1,4 @@
-package us.ihmc.tools.gui;
+package us.ihmc.simulationconstructionset.util.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -16,6 +16,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
+
+import us.ihmc.tools.gui.GUIMessagePanel;
 
 public class GUIMessageFrame
 {
@@ -254,73 +256,4 @@ public class GUIMessageFrame
       printWriter.flush();
       printWriter.close();
    }
-
-   
-   public static void main(String[] args)
-   {
-      int sleepTime = 1000;
-
-      GUIMessageFrame guiMessageFrame = GUIMessageFrame.getInstance();
-
-      guiMessageFrame.appendErrorMessage("This is an error message");
-      guiMessageFrame.appendOutMessage("This is an out message.");
-      guiMessageFrame.appendParameterMessage("01 This is a parameter message.");
-
-      int testPanelIndex = guiMessageFrame.createGUIMessagePanel("Test Panel");
-
-      sleep(sleepTime);
-
-    
-      for (int i = 0; i < 10; i++)
-      {
-         guiMessageFrame.appendMessageToPanel(testPanelIndex, i + " new message", Color.red);
-         
-         sleep(sleepTime);
-      }
-
-      //    GlobalParameter globalParameterDouble = new GlobalParameter("testParametwerwer wer werer wer werweerDouble", -10.0, gUIMessageFrame);
-      //    GlobalParameter globalParameterBoolean = new GlobalParameter("testParameterBoolean", YoVariableType.BOOLEAN, true, gUIMessageFrame);
-      //    GlobalParameter globalParameterInteger = new GlobalParameter("testParameterInteger", YoVariableType.INT, 2, gUIMessageFrame);
-      //    GlobalParameter globalParameterEnum = new GlobalParameter("testParameterEnum", YoVariableType.ENUM, TestEnum.askdjaskdjasdjadajsdajsdjkasdlkj, gUIMessageFrame);
-
-      //    System.out.println("testParameterDouble" + " max number for display = " + globalParameterDouble.getMaximumNumberOfCharactersInValue());
-      //    System.out.println("testParameterBoolean" + " max number for display = " + globalParameterBoolean.getMaximumNumberOfCharactersInValue());
-      //    System.out.println("testParameterInteger" + " max number for display = " + globalParameterInteger.getMaximumNumberOfCharactersInValue());
-      //    System.out.println("testParameterEnum" + " max number for display = " + globalParameterEnum.getMaximumNumberOfCharactersInValue());
-
-      //    System.out.println(Double.MIN_VALUE);
-
-      //    for(int i=0; i<10; i++)
-      //    {
-      //       globalParameterDouble.setDoubleValue((double) i, " changing, i=" + i + " a whole bunch of stuff to print here so that we go over the edge of the window.");
-      //    }
-
-      //    globalParameterBoolean.setBooleanValue(false, "hi");
-
-      //    try
-      //    {
-      //       Thread.sleep(10000);
-      //    }
-      //    catch (InterruptedException ex1)
-      //    {
-      //    }
-      //
-      //    System.out.println("Clearing");
-      //
-      //
-      //    GUIMessageFrame.reset();
-
-   }
-
-   private static void sleep(long sleepMillis)
-   {
-      try
-      {
-         Thread.sleep(sleepMillis);
-      } 
-      catch (InterruptedException e)
-      {
-      }
-   }
-
 }

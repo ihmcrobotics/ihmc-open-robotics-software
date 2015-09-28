@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.util.globalParameters;
 
-import us.ihmc.tools.gui.GUIMessageFrame;
+import us.ihmc.simulationconstructionset.util.gui.GUIMessageFrame;
 
 public class GlobalParameterGUIMessageFrame extends GUIMessageFrame
 {

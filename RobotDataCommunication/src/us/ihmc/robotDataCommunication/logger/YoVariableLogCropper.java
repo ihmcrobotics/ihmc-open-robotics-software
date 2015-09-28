@@ -8,7 +8,7 @@ import java.nio.channels.FileChannel;
 
 import com.google.common.io.Files;
 
-import us.ihmc.tools.gui.CustomProgressMonitor;
+import us.ihmc.robotDataCommunication.logger.util.CustomProgressMonitor;
 
 public class YoVariableLogCropper extends YoVariableLogReader
 {

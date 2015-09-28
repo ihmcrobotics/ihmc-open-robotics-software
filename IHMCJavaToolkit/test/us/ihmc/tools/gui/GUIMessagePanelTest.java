@@ -9,7 +9,6 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class GUIMessagePanelTest
 {
-
 	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testGetText()
@@ -23,5 +22,4 @@ public class GUIMessagePanelTest
             
       assertEquals("message1\nmessage0\n", text);
    }
-
 }
