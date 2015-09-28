@@ -3,8 +3,8 @@ package us.ihmc.simulationconstructionset.gui;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
+import us.ihmc.simulationconstructionset.gui.tools.MultiButtonSelectionDeselectionAction;
 import us.ihmc.simulationconstructionset.util.graphics.DynamicGraphicCheckBoxMenuItem;
-import us.ihmc.tools.gui.MultiButtonSelectionDeselectionAction;
 
 public class DynamicGraphicMenuManager
 {

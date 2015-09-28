@@ -1,4 +1,4 @@
-package us.ihmc.tools.gui;
+package us.ihmc.simulationconstructionset.gui.tools;
 
 import java.awt.event.ActionEvent;
 
