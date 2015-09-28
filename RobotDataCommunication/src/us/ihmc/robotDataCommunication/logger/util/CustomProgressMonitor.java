@@ -1,4 +1,4 @@
-package us.ihmc.tools.gui;
+package us.ihmc.robotDataCommunication.logger.util;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -18,6 +18,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import us.ihmc.tools.gui.TextAreaOutputStream;
 import us.ihmc.tools.thread.ThreadTools;
 
 

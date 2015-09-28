@@ -1,45 +1,77 @@
 package us.ihmc.simulationconstructionset.bambooTools.videoWall;
 
-import java.io.File;
-import java.io.FileFilter;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Collections;
+import java.util.List;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 
 import org.apache.commons.lang3.SystemUtils;
 
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.io.files.BasicPathVisitor;
+import us.ihmc.tools.io.files.PathTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class BambooVideoWall
 {
-   public static void startVideoWallSourcedFromErasableDirectory()
+   private static final double PLAYBACKER_HEIGHT = 1100;
+   private static final int NUMBER_OF_ROWS_OF_VIDEO = 5;
+   private static final int NUMBER_OF_COLUMNS_OF_VIDEO = 5;
+   private static final int NUMBER_OF_SCREENS = NUMBER_OF_ROWS_OF_VIDEO * NUMBER_OF_COLUMNS_OF_VIDEO;
+   private static final int VIDEO_WIDTH = 1280;
+   private static final int VIDEO_HEIGHT = 720;
+
+   private JFrame jFrame;
+   private VideoPlayerGrid videoPlayerGrid;
+
+   public BambooVideoWall()
+   {
+      jFrame = new JFrame(BambooVideoWall.class.getSimpleName());
+
+      double adjustedVideoHeight = PLAYBACKER_HEIGHT / (double) NUMBER_OF_ROWS_OF_VIDEO;
+      double adjustedVideoWidth = adjustedVideoHeight * VIDEO_WIDTH / VIDEO_HEIGHT;
+      double width = adjustedVideoWidth * NUMBER_OF_COLUMNS_OF_VIDEO;
+      
+      videoPlayerGrid = new VideoPlayerGrid(NUMBER_OF_ROWS_OF_VIDEO, NUMBER_OF_COLUMNS_OF_VIDEO);
+      jFrame.getContentPane().add(videoPlayerGrid);
+
+      jFrame.setSize((int) width, (int) PLAYBACKER_HEIGHT + jFrame.getInsets().top);
+      jFrame.setIconImage(new ImageIcon(ClassLoader.getSystemResource("us/ihmc/tools/icons/running-man-32x32.png").getPath()).getImage());
+      jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      jFrame.setVisible(true);
+   }
+
+   public void startVideoWallSourcedFromErasableDirectory()
    {
       startVideoWall(new LatestDirectoryProvider()
       {
          @Override
-         public File checkForLatestDirectory()
+         public Path checkForLatestDirectory()
          {
             return BambooTools.getEraseableDirectoryWithMostRecentBambooDataAndVideos();
          }
       });
    }
 
-   public static void startVideoWallSourcedFromSamson()
+   public void startVideoWallSourcedFromSamson()
    {
       startVideoWall(new LatestDirectoryProvider()
       {
          @Override
-         public File checkForLatestDirectory()
+         public Path checkForLatestDirectory()
          {
             if (SystemUtils.IS_OS_WINDOWS)
             {
-               return BambooTools.getDirectoryWithMostRecentBambooDataAndVideos("//samson/BambooVideos");
+               return BambooTools.getDirectoryWithMostRecentBambooDataAndVideos(Paths.get("//samson/BambooVideos"));
             }
             else if (SystemUtils.IS_OS_MAC)
             {
-               return BambooTools.getDirectoryWithMostRecentBambooDataAndVideos("/Users/unknownid/BambooVideos");
+               return BambooTools.getDirectoryWithMostRecentBambooDataAndVideos(Paths.get("/Users/unknownid/BambooVideos"));
             }
             else
             {
@@ -48,109 +80,79 @@ public class BambooVideoWall
          }
       });
    }
-   
-   private static void startVideoWall(LatestDirectoryProvider latestDirectoryProvider)
+
+   private void startVideoWall(LatestDirectoryProvider latestDirectoryProvider)
    {
-      int numberOfRowsOfVideo = 2;
-      int numberOfColumnsOfVideo = 3;
-      MultipleVideoDecoderAndPlaybacker multipleVideoDecoderAndPlaybacker = new MultipleVideoDecoderAndPlaybacker(numberOfRowsOfVideo, numberOfColumnsOfVideo);
+      Path latestDirectory = null;
+      List<Path> videoList = null;
 
-      while (true)
-      {
-         File latestDirectory = latestDirectoryProvider.checkForLatestDirectory();
-         PrintTools.info("Latest directory = " + latestDirectory);
-         showLatestVideos(latestDirectory, multipleVideoDecoderAndPlaybacker);
+//      while (true)
+//      {
+         Path checkDirectory = latestDirectoryProvider.checkForLatestDirectory();
 
-         ThreadTools.sleepSeconds(1.0);
-      }
+         if (latestDirectory == null || !latestDirectory.equals(checkDirectory))
+         {
+            latestDirectory = checkDirectory;
+            videoList = getVideoPathListFromDirectory(latestDirectory);
+         }
+         
+         showVideosOnce(videoList);
+
+         ThreadTools.sleep(200);
+//      }
    }
-   
+
    private interface LatestDirectoryProvider
    {
-      File checkForLatestDirectory();
+      Path checkForLatestDirectory();
    }
 
-   private static void showLatestVideos(File videoDirectory, MultipleVideoDecoderAndPlaybacker multipleVideoDecoderAndPlaybacker)
+   private List<Path> getVideoPathListFromDirectory(Path videoDirectory)
    {
-      BambooTools.reportOutMessage("Showing Most Recent Video in " + videoDirectory);
+      final List<Path> videoPaths = new ArrayList<>();
 
-      FileFilter filter = new FileFilter()
+      PathTools.walkFlat(videoDirectory, new BasicPathVisitor()
       {
-         public boolean accept(File file)
+         @Override
+         public FileVisitResult visitPath(Path path, PathType pathType)
          {
-            if (file.isDirectory())
-               return false;
-            if (file.getName().endsWith(".mpg"))
-               return true;
-            if (file.getName().endsWith(".mov"))
-               return true;
-            if (file.getName().endsWith(".mp4"))
-               return true;
-
-            return false;
-         }
-      };
-
-      File[] potentialVideos = videoDirectory.listFiles(filter);
-
-      if ((potentialVideos == null) || (potentialVideos.length == 0))
-         return;
-
-      ArrayList<File> videosToPlay = new ArrayList<File>();
-
-      Comparator<File> fileAlphabeticalComparator = BambooTools.createFileAlphabeticalComparator();
-      Arrays.sort(potentialVideos, fileAlphabeticalComparator);
-
-      int maxNumberOfVideosToShow = multipleVideoDecoderAndPlaybacker.getTotalNumberOfScreens();
-
-      ArrayList<String> videoNames = new ArrayList<String>();
-
-      for (int i = 0; i < potentialVideos.length; i++)
-      {
-         if (videosToPlay.size() < maxNumberOfVideosToShow)
-         {
-            String videoName = potentialVideos[i].getName();
-
-            String shortName = videoName.substring(14, videoName.length());
-            PrintTools.info(shortName);
-
-            if (!videoNames.contains(shortName))
+            if (pathType == PathType.FILE)
             {
-               videosToPlay.add(potentialVideos[i]);
-
-               videoNames.add(shortName);
+               if (PathTools.getExtension(path).matches("mpg|mov|mp4"))
+               {
+                  videoPaths.add(path);
+               }
             }
 
+            return FileVisitResult.CONTINUE;
          }
-      }
+      });
 
-      for (int i = 0; i < videosToPlay.size(); i++)
+      Collections.sort(videoPaths);
+
+      return videoPaths;
+   }
+
+   private void showVideosOnce(List<Path> videoPaths)
+   {
+      for (int videoIndex = 0, playerSlotIndex = 0; videoIndex < videoPaths.size(); videoIndex++, playerSlotIndex++)
       {
-         File videoToPlay = videosToPlay.get(i);
-         BambooTools.reportOutMessage("Playing " + videoToPlay);
-
-         try
+         if (playerSlotIndex == NUMBER_OF_SCREENS)
          {
-            multipleVideoDecoderAndPlaybacker.playVideo(i, videoToPlay.getAbsolutePath());
-         }
-         catch (Exception e)
-         {
-            System.err.println("Could not play video " + videoToPlay.getAbsolutePath());
+            playerSlotIndex = 0;
          }
 
-         BambooTools.reportOutMessage("Done playing video " + videoToPlay);
+         while (!videoPlayerGrid.getVideoPlayers().get(playerSlotIndex).readyToUpdateVideoPath())
+         {
+            ThreadTools.sleep(200);
+         }
 
-      }
-
-      while (!multipleVideoDecoderAndPlaybacker.areAllVideosDonePlaying())
-      {
-         ThreadTools.sleepSeconds(1.0);
+         videoPlayerGrid.updateVideoPath(playerSlotIndex, videoPaths.get(videoIndex));
       }
    }
 
    public static void main(String[] args)
    {
-      // startVideoWallSourcedFromErasableDirectory();
-      startVideoWallSourcedFromSamson();
+      new BambooVideoWall().startVideoWallSourcedFromSamson();
    }
 }

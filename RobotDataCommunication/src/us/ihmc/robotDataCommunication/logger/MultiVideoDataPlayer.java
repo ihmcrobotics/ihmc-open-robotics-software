@@ -8,10 +8,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import us.ihmc.robotDataCommunication.logger.util.CustomProgressMonitor;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.simulationconstructionset.PlaybackListener;
-import us.ihmc.tools.gui.CustomProgressMonitor;
 
 public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
 {

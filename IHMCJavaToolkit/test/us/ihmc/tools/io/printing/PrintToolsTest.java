@@ -9,12 +9,13 @@ import org.junit.Test;
 
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import static us.ihmc.tools.testing.TestPlanTarget.*;
 
 public class PrintToolsTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = Exclude)
    @Test(timeout = 30000)
-   public void testLogTools() throws Exception
+   public void testPrintTools() throws Exception
    {
       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
       
