@@ -8,6 +8,5 @@ dependencies
 	compile project(':IHMCCommunication')
 	compile project(':Plotting')
 	compile project(':Graphics3DAdapter')
-//	compile project(':UserInterface')
 	compile project(':IHMCRoboticsToolkit')
 }
