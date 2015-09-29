@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.PathActivationLevel;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.userInterface.modifiableObjects.PathActivationLevel;
 
 public interface Path
 {

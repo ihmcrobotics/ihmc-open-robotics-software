@@ -12,8 +12,8 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
+import us.ihmc.robotics.dataStructures.TimestampedPoint;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.userInterface.util.TimestampedPoint;
 
 public class PointCloudWorldPacketGenerator implements Runnable
 {

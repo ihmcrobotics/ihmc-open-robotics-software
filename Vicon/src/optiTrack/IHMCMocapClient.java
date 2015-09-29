@@ -6,7 +6,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.userInterface.ThirdPersonPerspective;
+//import us.ihmc.userInterface.ThirdPersonPerspective;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 public class IHMCMocapClient extends MocapDataClient
 {
    private static IHMCMocapClient ihmcMocapClientSingleton;
-   protected ThirdPersonPerspective thirdPersonPerspective;
+//   protected ThirdPersonPerspective thirdPersonPerspective;
    ReferenceFrame mocapOrigin;
    ReferenceFrame mocapRB;
    ReferenceFrame mocapRBZUp;
