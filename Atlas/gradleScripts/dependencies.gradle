@@ -51,7 +51,6 @@ dependencies {
     testCompile project(':CommonWalkingControlModules').sourceSets.test.output
     testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
     testCompile project(':IHMCCommunication').sourceSets.test.output
-    testCompile project(':IHMCHumanoidOperatorInterface').sourceSets.test.output
     testCompile project(':IHMCHumanoidRobotics').sourceSets.test.output
 	testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
     testCompile project(':IHMCWholeBodyController').sourceSets.test.output
