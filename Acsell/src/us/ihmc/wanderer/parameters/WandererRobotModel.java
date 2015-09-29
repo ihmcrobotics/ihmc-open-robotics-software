@@ -52,7 +52,6 @@ import us.ihmc.wanderer.controlParameters.WandererStateEstimatorParameters;
 import us.ihmc.wanderer.controlParameters.WandererWalkingControllerParameters;
 import us.ihmc.wanderer.hardware.controllers.WandererOutputProcessor;
 import us.ihmc.wanderer.initialSetup.WandererInitialSetup;
-import us.ihmc.wanderer.operatorInterface.WandererOperatorInterface;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
@@ -349,20 +348,6 @@ public class WandererRobotModel implements DRCRobotModel
       return null;
    }
 
-   @Override
-   public ImmutablePair<Class<?>, String[]> getOperatorInterfaceStarter()
-   {
-      String[] args = runningOnRealRobot ? new String[]{"--realRobot"} : null;
-      return new ImmutablePair<Class<?>, String[]>(WandererOperatorInterface.class, args);
-   }
-
-   @Override
-   public Class<?> getSpectatorInterfaceClass()
-   {
-      
-      
-      return null;
-   }
 
    @Override
    public HeightCalculatorParameters getHeightCalculatorParameters()
