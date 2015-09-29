@@ -2,11 +2,11 @@ package us.ihmc.ihmcPerception.depthData;
 
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
+import us.ihmc.robotics.dataStructures.DecayingResolutionFilter;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapInterface;
-import us.ihmc.userInterface.util.DecayingResolutionFilter;
 
 public class DepthDataStore
 {

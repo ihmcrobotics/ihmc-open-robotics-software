@@ -16,7 +16,6 @@ dependencies {
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'com.jroller.santhosh', name: 'JResizable', version: '1.0'
 	compile group: 'org.boofcv', name: 'all', version: '0.19'
-	compile group: 'org.boofcv', name: 'xuggler', version: '0.19'
 	compile group: 'org.georegression' , name: 'georegression', version: '0.8'
 	compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4.+'
 	  
