@@ -82,7 +82,7 @@ public class ValkyrieIPABSimulator
 		  if (START_UI)
 		  {
 		     networkProcessorParameters.enableUiModule(true);
-		     simulationStarter.startOpertorInterfaceUsingProcessSpawner();
+		     System.err.println("Cannot start UI automatically from open source projects. Start UI Manually");
 		  }
 		
 		  if(disableViz)

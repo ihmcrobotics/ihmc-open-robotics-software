@@ -450,19 +450,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public ImmutablePair<Class<?>, String[]> getOperatorInterfaceStarter()
-   {
-      String[] args = (target == RobotTarget.REAL_ROBOT) ? new String[]{"--realRobot"} : null;
-      return new ImmutablePair<Class<?>, String[]>(ValkyrieOperatorUserInterface.class, args);
-   }
-
-   @Override
-   public Class<?> getSpectatorInterfaceClass()
-   {
-      return null;
-   }
-
-   @Override
    public HeightCalculatorParameters getHeightCalculatorParameters()
    {
       return null;
