@@ -8,7 +8,7 @@ dependencies {
 
 	compile group: 'org.boofcv', name: 'calibration', version: '0.19'
 
-    compile group: 'org.ejml', name: 'all', version: '0.28'
+//    compile group: 'org.ejml', name: 'all', version: '0.28'
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0' //force svnkit dependency jna-3.5.2 to use jna-4.1.0
     
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
