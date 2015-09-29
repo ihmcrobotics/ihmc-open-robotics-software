@@ -2,8 +2,6 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 
-   compile group: 'org.ejml', name: 'all', version: '0.28'
-
 	compile group: 'net.jafama', name: 'jafama', version: '2.1.0'
 	compile group: 'us.ihmc.thirdparty.com.esotericsoftware', name: 'kryonet', version: '2.21'
 	compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
@@ -19,6 +17,5 @@ dependencies {
 	compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.22'
    compile group: 'us.ihmc', name: 'IHMCHierachicalKinematics', version: '1.0'
 
-	//compile project(':IHMCJavaToolkit')
    testCompile project(':IHMCUnitTesting')
 }

@@ -4,9 +4,8 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 	compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
 	compile group: 'us.ihmc.thirdparty.com.esotericsoftware', name: 'kryonet', version: '2.21'
-    compile group: 'org.boofcv', name: 'all', version: '0.19'
-	  
-	compile group: 'org.ejml', name: 'all', version: '0.28'
+    compile group: 'org.boofcv', name: 'calibration', version: '0.19'
+
 	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.10'
 	
 	testCompile project(':IHMCUnitTesting')
