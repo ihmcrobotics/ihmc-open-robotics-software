@@ -51,7 +51,6 @@ import us.ihmc.steppr.controlParameters.BonoCapturePointPlannerParameters;
 import us.ihmc.steppr.controlParameters.BonoStateEstimatorParameters;
 import us.ihmc.steppr.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.steppr.hardware.controllers.StepprOutputProcessor;
-import us.ihmc.steppr.operatorInterface.StepprOperatorInterface;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -346,21 +345,6 @@ public class BonoRobotModel implements DRCRobotModel
    public DefaultArmConfigurations getDefaultArmConfigurations()
    {
       // TODO Auto-generated method stub
-      return null;
-   }
-
-   @Override
-   public ImmutablePair<Class<?>, String[]> getOperatorInterfaceStarter()
-   {
-      String[] args = runningOnRealRobot ? new String[]{"--realRobot"} : null;
-      return new ImmutablePair<Class<?>, String[]>(StepprOperatorInterface.class, args);
-   }
-
-   @Override
-   public Class<?> getSpectatorInterfaceClass()
-   {
-      
-      
       return null;
    }
 
