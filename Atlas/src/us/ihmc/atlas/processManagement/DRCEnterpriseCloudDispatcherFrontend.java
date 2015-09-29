@@ -40,7 +40,6 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
-import us.ihmc.atlas.AtlasOperatorUserInterface;
 import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.tcpServer.DisconnectedException;
@@ -429,14 +428,15 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
                String[] javaArgs = new String[] {"-Xms4096m", "-Xmx4096m"};
                String[] programArgs = new String[] {"-m", selectRobotModelRadioButtonGroup.getSelection().getActionCommand(), "--realRobot"};
 
-               localSpawner.spawn(AtlasOperatorUserInterface.class, javaArgs, programArgs, new ExitListener()
-               {
-                  @Override
-                  public void exited(int statusValue)
-                  {
-                     spawnUIButton.setEnabled(true);
-                  }
-               });
+//               localSpawner.spawn(AtlasOperatorUserInterface.class, javaArgs, programArgs, new ExitListener()
+//               {
+//                  @Override
+//                  public void exited(int statusValue)
+//                  {
+//                     spawnUIButton.setEnabled(true);
+//                  }
+//               });
+               System.err.println("NOT SPAWNING UI");
                spawnUIButton.setEnabled(false);
             }
          }

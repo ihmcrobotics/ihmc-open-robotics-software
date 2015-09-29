@@ -495,21 +495,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       return defaultArmConfigurations;
    }
-
-   @Override
-   public ImmutablePair<Class<?>, String[]> getOperatorInterfaceStarter()
-   {
-      String[] args = {"-m " + getAtlasVersion().name()};
-
-      return new ImmutablePair<Class<?>, String[]>(AtlasOperatorUserInterface.class, args);
-   }
-
-   @Override
-   public Class<?> getSpectatorInterfaceClass()
-   {
-      return AtlasSpectatorInterface.class;
-   }
-
    @Override
    public HeightCalculatorParameters getHeightCalculatorParameters()
    {

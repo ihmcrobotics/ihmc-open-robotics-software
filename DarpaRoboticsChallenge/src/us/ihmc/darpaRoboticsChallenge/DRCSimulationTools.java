@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -26,8 +28,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.tools.FormattingTools;
+import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCSimulationTools
@@ -35,7 +39,7 @@ public abstract class DRCSimulationTools
 
    @SuppressWarnings({ "hiding", "unchecked" })
    public static <T extends DRCStartingLocation, Enum> void startSimulationWithGraphicSelector(DRCSimulationStarter simulationStarter,
-         T... possibleStartingLocations)
+         Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs, T... possibleStartingLocations)
    {
       List<Modules> modulesToStart = new ArrayList<Modules>();
       DRCStartingLocation startingLocation = null;
@@ -76,14 +80,15 @@ public abstract class DRCSimulationTools
       {
          simulationStarter.setSpawnOperatorInterfaceInDifferentProcess(modulesToStart.contains(Modules.SIMULATION));
 
-         simulationStarter.startOpertorInterfaceUsingProcessSpawner();
+         if(simulationStarter.isSpawnOperatorInterfaceInDifferentProcess())
+         {
+            startOpertorInterfaceUsingProcessSpawner(operatorInterfaceClass, operatorInterfaceArgs);            
+         }
       }
 
       if (modulesToStart.contains(Modules.BEHAVIOR_VISUALIZER))
          simulationStarter.startBehaviorVisualizer();
 
-      if (modulesToStart.contains(Modules.SPECTATOR_INTERFACE))
-         simulationStarter.startSpectatorInterface();
    }
 
    @SuppressWarnings({ "hiding", "unchecked", "rawtypes", "serial" })
@@ -256,9 +261,41 @@ public abstract class DRCSimulationTools
          return (DRCStartingLocation) obstacleCourseStartingLocationComboBox.getSelectedItem();
    }
 
+   /**
+    * Creates and starts the operator interface.
+    * The operator interface needs the simulation and network processor to work properly, if started before any of these it will simply hang and wait for these two to start.
+    * Use {@link #spawnOperatorInterfaceInDifferentProcess} to either start the operator interface in the same process or a different one.
+    * Note that if started in a different process the debug mode will not work.
+    */
+   public static void startOpertorInterfaceUsingProcessSpawner(Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs)
+   {
+      JavaProcessSpawner spawner = new JavaProcessSpawner(true);
+      if (operatorInterfaceClass == null)
+         return;
+      spawner.spawn(operatorInterfaceClass, operatorInterfaceArgs);
+      
+   }      
+   public static void startOpertorInterfaceUsingProcessSpawner(DRCRobotModel robotModel)
+   {
+      try
+      {
+            Class<?> clazz = Class.forName("us.ihmc.humanoidOperatorInterface.DRCOperatorInterface");
+            Method method = clazz.getDeclaredMethod("startUserInterface", us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.class);
+            method.invoke(null, robotModel);
+      }
+      catch (ClassNotFoundException e)
+      {
+         e.printStackTrace();
+      }
+      catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+      {
+         e.printStackTrace();
+      }
+   }
+   
    public enum Modules
    {
-      SIMULATION, OPERATOR_INTERFACE, SPECTATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE, ZERO_POSE_PRODUCER;
+      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE, ZERO_POSE_PRODUCER;
 
       public String getPropertyNameForEnable()
       {
@@ -272,7 +309,7 @@ public abstract class DRCSimulationTools
 
       public boolean isAlwaysEnabled()
       {
-         if (this == SIMULATION || this == OPERATOR_INTERFACE || this == BEHAVIOR_VISUALIZER || this == SPECTATOR_INTERFACE)
+         if (this == SIMULATION || this == OPERATOR_INTERFACE || this == BEHAVIOR_VISUALIZER)
             return true;
          else
             return false;

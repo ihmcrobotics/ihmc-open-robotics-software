@@ -14,7 +14,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-desktop', version: '3.1.0-internal2'
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-lwjgl', version: '3.1.0-internal2'
-    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-testdata', version: '3.1.0-internal2'
+//    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-testdata', version: '3.1.0-internal2'
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-terrain', version: '3.1.0-internal2'
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-effects', version: '3.1.0-internal2'
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-plugins', version: '3.1.0-internal2'
