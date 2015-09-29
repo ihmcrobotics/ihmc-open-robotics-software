@@ -52,7 +52,6 @@ import javax.swing.tree.DefaultTreeModel;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.atlas.AtlasObstacleCourseDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCPluginTasks;
@@ -1246,7 +1245,8 @@ public class DRCDashboard
 
       if (gazeboMachine == null)
       {
-         scsSpawner.spawn(AtlasObstacleCourseDemo.class, javaArgs, null);
+           throw new RuntimeException("TODO");
+//         scsSpawner.spawn(AtlasObstacleCourseDemo.class, javaArgs, null);
       }
       else
       {
@@ -1270,19 +1270,21 @@ public class DRCDashboard
             if (estimatorCheckBox.isEnabled() && estimatorCheckBox.isSelected())
             {
                ThreadTools.sleep(8000);
-               scsSpawner.spawn(AtlasObstacleCourseDemo.class, javaArgs, new String[]
-               {
-                  "--sim", "--env", newTask, "--gazebo", "--gazeboHost", gazeboMachine.getIp(), "--initialize-estimator", "--start",
-                  startingLocationsList.getSelectedValue().toString()
-               });
+               throw new RuntimeException("TODO");
+//               scsSpawner.spawn(AtlasObstacleCourseDemo.class, javaArgs, new String[]
+//               {
+//                  "--sim", "--env", newTask, "--gazebo", "--gazeboHost", gazeboMachine.getIp(), "--initialize-estimator", "--start",
+//                  startingLocationsList.getSelectedValue().toString()
+//               });
             }
             else
             {
                ThreadTools.sleep(8000);
-               scsSpawner.spawn(AtlasObstacleCourseDemo.class, javaArgs, new String[]
-               {
-                  "--sim", "--env", newTask, "--gazebo", "--gazeboHost", gazeboMachine.getIp(), "--start", startingLocationsList.getSelectedValue().toString()
-               });
+               throw new RuntimeException("TODO");
+//               scsSpawner.spawn(AtlasObstacleCourseDemo.class, javaArgs, new String[]
+//               {
+//                  "--sim", "--env", newTask, "--gazebo", "--gazeboHost", gazeboMachine.getIp(), "--start", startingLocationsList.getSelectedValue().toString()
+//               });
             }
          }
          else

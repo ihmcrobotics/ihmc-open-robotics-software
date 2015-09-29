@@ -96,10 +96,6 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
 
    public abstract LogModelProvider getLogModelProvider();
 
-   public abstract ImmutablePair<Class<?>, String[]> getOperatorInterfaceStarter();
-
-   public abstract Class<?> getSpectatorInterfaceClass();
-
    public abstract HeightCalculatorParameters getHeightCalculatorParameters();
 
    public abstract String getSimpleRobotName();
