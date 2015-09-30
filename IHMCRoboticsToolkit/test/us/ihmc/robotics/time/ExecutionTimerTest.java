@@ -7,10 +7,12 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.tools.testing.TestPlanAnnotations;
 
 public class ExecutionTimerTest
 {
-   @Test
+   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.2)
+   @Test(timeout = 30000)
    public void test()
    {
       ExecutionTimer executionTimer = new ExecutionTimer("executionTimer", 0.0, new YoVariableRegistry("testRegistry"));
