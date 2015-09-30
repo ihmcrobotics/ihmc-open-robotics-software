@@ -10,7 +10,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 public class CallFrequencyCalculatorTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
+   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Fast)
    @Test(timeout = 30000)
    public void testDetermineCallFrequency()
    {
