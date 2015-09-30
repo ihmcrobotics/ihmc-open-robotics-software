@@ -323,12 +323,6 @@ public class SpringFlamingoRobot extends Robot
 
       AppearanceDefinition bodyAppearance = YoAppearance.Red();
 
-      if (SHOW_MASS_PROPERTIES_GRAPHICS)
-      {
-         ret.addEllipsoidFromMassProperties(YoAppearance.DarkRed());
-         ret.addCoordinateSystemToCOM(0.2);
-      }
-
       Graphics3DObject linkGraphics = new Graphics3DObject();
       if (SHOW_CARTOON_GRAPHICS)
       {
@@ -416,6 +410,12 @@ public class SpringFlamingoRobot extends Robot
 
       ret.setLinkGraphics(linkGraphics);
 
+      if (SHOW_MASS_PROPERTIES_GRAPHICS)
+      {
+    	  ret.addEllipsoidFromMassProperties(YoAppearance.DarkRed());
+    	  ret.addCoordinateSystemToCOM(0.2);
+      }
+      
       return ret;
    }
 
@@ -428,12 +428,6 @@ public class SpringFlamingoRobot extends Robot
       ret.setMass(UPPER_LEG_MASS);
       ret.setMomentOfInertia(UPPER_LEG_Ixx, UPPER_LEG_Iyy, UPPER_LEG_Izz);
       ret.setComOffset(0.0, 0.0, -0.3029);
-
-      if (SHOW_MASS_PROPERTIES_GRAPHICS)
-      {
-         ret.addEllipsoidFromMassProperties(YoAppearance.Fuchsia());
-         ret.addCoordinateSystemToCOM(0.2);
-      }
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       if (SHOW_CARTOON_GRAPHICS)
@@ -462,6 +456,12 @@ public class SpringFlamingoRobot extends Robot
 
       ret.setLinkGraphics(linkGraphics);
 
+      if (SHOW_MASS_PROPERTIES_GRAPHICS)
+      {
+         ret.addEllipsoidFromMassProperties(YoAppearance.Fuchsia());
+         ret.addCoordinateSystemToCOM(0.2);
+      }
+      
       return ret;
    }
 
@@ -472,12 +472,6 @@ public class SpringFlamingoRobot extends Robot
       ret.setMass(LOWER_LEG_MASS);
       ret.setMomentOfInertia(LOWER_LEG_Ixx, LOWER_LEG_Iyy, LOWER_LEG_Izz);
       ret.setComOffset(0.0, 0.0, -0.1818);
-
-      if (SHOW_MASS_PROPERTIES_GRAPHICS)
-      {
-         ret.addEllipsoidFromMassProperties(YoAppearance.Yellow());
-         ret.addCoordinateSystemToCOM(0.2);
-      }
 
       if (SHOW_CARTOON_GRAPHICS)
       {
@@ -493,6 +487,11 @@ public class SpringFlamingoRobot extends Robot
     	 ret.setLinkGraphics(linkGraphics);
       }
 
+      if (SHOW_MASS_PROPERTIES_GRAPHICS)
+      {
+         ret.addEllipsoidFromMassProperties(YoAppearance.Yellow());
+         ret.addCoordinateSystemToCOM(0.2);
+      }
       return ret;
    }
 
@@ -503,12 +502,6 @@ public class SpringFlamingoRobot extends Robot
       ret.setMass(FOOT_MASS);
       ret.setMomentOfInertia(FOOT_Ixx, FOOT_Iyy, FOOT_Izz);
       ret.setComOffset(-0.0458, 0.0, -0.0309);
-
-      if (SHOW_MASS_PROPERTIES_GRAPHICS)
-      {
-         ret.addEllipsoidFromMassProperties(YoAppearance.Aqua());
-         ret.addCoordinateSystemToCOM(0.2);
-      }
 
       if (SHOW_CARTOON_GRAPHICS)
       {
@@ -521,6 +514,13 @@ public class SpringFlamingoRobot extends Robot
      	 linkGraphics.addCube(0.028, 0.028, -FOOT_ZMAX);
     	 ret.setLinkGraphics(linkGraphics);
       }
+      
+      if (SHOW_MASS_PROPERTIES_GRAPHICS)
+      {
+         ret.addEllipsoidFromMassProperties(YoAppearance.Aqua());
+         ret.addCoordinateSystemToCOM(0.2);
+      }
+
 
       return ret;
    }
