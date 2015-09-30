@@ -21,8 +21,8 @@ import static org.junit.Assert.assertTrue;
 public class DataExporterGraphCreatorTest
 {
 
-    @Test
-    @TestPlanAnnotations.DeployableTestMethod
+    @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 1.0)
+    @Test(timeout = 30000)
     public void testDataExporterGraphCreator() throws IOException
     {
         SimulationConstructionSet sim = createSimulation();

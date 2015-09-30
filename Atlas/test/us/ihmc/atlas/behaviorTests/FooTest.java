@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations;
 
 public class FooTest
 {
@@ -13,13 +14,14 @@ public class FooTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-   
-@Test
-public void fooTest() throws InterruptedException
-{
-   while(true)
+
+   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 5000)
+   public void fooTest() throws InterruptedException
    {
-      Thread.sleep(1000L);
+      while(true)
+      {
+         Thread.sleep(1000L);
+      }
    }
-}
 }
