@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset;
+package us.ihmc.simulationconstructionset.dataBuffer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
