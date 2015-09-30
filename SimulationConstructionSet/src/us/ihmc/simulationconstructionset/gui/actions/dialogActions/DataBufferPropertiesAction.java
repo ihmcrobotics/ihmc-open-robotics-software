@@ -25,7 +25,7 @@ public class DataBufferPropertiesAction extends AbstractAction
 
    public void actionPerformed(ActionEvent e)
    {
-      constructor.constructDataBufferPropertiesDialog();
+      constructor.constructDialog();
    }
 
    public void closeAndDispose()

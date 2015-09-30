@@ -34,6 +34,6 @@ public class SaveConfigurationAction extends AbstractAction
 
    public void actionPerformed(ActionEvent e)
    {
-      constructor.constructSaveConfigurationDialog();
+      constructor.constructDialog();
    }
 }

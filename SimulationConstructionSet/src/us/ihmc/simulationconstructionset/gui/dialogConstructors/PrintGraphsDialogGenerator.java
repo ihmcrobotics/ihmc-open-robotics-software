@@ -21,7 +21,7 @@ public class PrintGraphsDialogGenerator implements PrintGraphsDialogConstructor
       myGraphArrayPanel = null;
    }
    
-   public void constructPrintGraphsDialog()
+   public void constructDialog()
    {
       // System.out.println("Printing..");
       // Paper paper = new Paper();

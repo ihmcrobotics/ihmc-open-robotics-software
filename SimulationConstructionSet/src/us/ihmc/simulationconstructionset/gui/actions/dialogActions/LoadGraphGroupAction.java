@@ -34,7 +34,7 @@ public class LoadGraphGroupAction extends AbstractAction
 
    public void actionPerformed(ActionEvent e)
    {
-      constructor.constructLoadConfigurationDialog();
+      constructor.constructDialog();
    }
 
    public void loadGUIConfigurationFile(File file)

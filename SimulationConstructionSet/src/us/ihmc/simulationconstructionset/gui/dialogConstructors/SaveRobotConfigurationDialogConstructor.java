@@ -1,11 +1,5 @@
 package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
-import java.io.File;
-
-public interface SaveRobotConfigurationDialogConstructor
+public interface SaveRobotConfigurationDialogConstructor extends DialogConstructor, DialogConstructorWithDirectory
 {
-   public abstract void constructRobotConfigurationDialog();
-   public abstract void setCurrentDirectory(String directory);
-   public abstract void setCurrentDirectory(File directory);
-   
 }

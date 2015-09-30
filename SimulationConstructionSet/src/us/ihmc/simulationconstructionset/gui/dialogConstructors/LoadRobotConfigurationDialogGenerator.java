@@ -77,7 +77,7 @@ public class LoadRobotConfigurationDialogGenerator implements LoadRobotConfigura
       dataFileChooser.setCurrentDirectory(new File(dir));
    }
 
-   public void constructLoadRobotConfigurationDialog()
+   public void constructDialog()
    {
       sim.disableGUIComponents();
 

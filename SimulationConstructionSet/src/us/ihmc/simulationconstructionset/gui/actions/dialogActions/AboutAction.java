@@ -26,7 +26,7 @@ public class AboutAction extends AbstractAction
 
    public void actionPerformed(ActionEvent actionEventb)
    {
-      constructor.constructAboutDialog();
+      constructor.constructDialog();
    }
 
 }

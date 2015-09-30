@@ -34,6 +34,6 @@ public class SaveRobotConfigurationAction extends AbstractAction
 
    public void actionPerformed(ActionEvent e)
    {
-      constructor.constructRobotConfigurationDialog();
+      constructor.constructDialog();
    }
 }

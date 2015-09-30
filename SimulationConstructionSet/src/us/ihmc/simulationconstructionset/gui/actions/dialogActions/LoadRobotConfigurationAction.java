@@ -35,7 +35,7 @@ public class LoadRobotConfigurationAction extends AbstractAction
 
    public void actionPerformed(ActionEvent e)
    {
-      constructor.constructLoadRobotConfigurationDialog();
+      constructor.constructDialog();
    }
 
 }

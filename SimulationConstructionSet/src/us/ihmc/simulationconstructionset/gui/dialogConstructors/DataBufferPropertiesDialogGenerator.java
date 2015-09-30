@@ -23,7 +23,7 @@ public class DataBufferPropertiesDialogGenerator implements DataBufferProperties
       this.listener = listener;
    }
 
-   public void constructDataBufferPropertiesDialog()
+   public void constructDialog()
    {
       new DataBufferPropertiesDialog(parentContainer, frame, dataBuffer, listener);
    }

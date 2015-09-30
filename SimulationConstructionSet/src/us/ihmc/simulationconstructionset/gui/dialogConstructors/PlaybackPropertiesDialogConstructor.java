@@ -1,6 +1,5 @@
 package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
-public interface PlaybackPropertiesDialogConstructor
+public interface PlaybackPropertiesDialogConstructor extends DialogConstructor
 {
-   public abstract void constructPlaybackPropertiesDialog();
 }

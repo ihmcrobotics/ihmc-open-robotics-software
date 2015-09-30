@@ -1,6 +1,5 @@
 package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
-public interface AboutDialogConstructor
+public interface AboutDialogConstructor extends DialogConstructor
 {
-   public abstract void constructAboutDialog();
 }

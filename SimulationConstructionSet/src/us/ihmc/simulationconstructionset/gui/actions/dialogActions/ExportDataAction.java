@@ -2,6 +2,7 @@ package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 import javax.swing.AbstractAction;
 
@@ -28,7 +29,7 @@ public class ExportDataAction extends AbstractAction
 
    public void actionPerformed(ActionEvent e)
    {
-      constructor.constructExportDataDialog();
+      constructor.constructDialog();
    }
 
    public void closeAndDispose()
@@ -41,6 +42,11 @@ public class ExportDataAction extends AbstractAction
    }
 
    public void setCurrentDirectory(String directory)
+   {
+      constructor.setCurrentDirectory(directory);
+   }
+
+   public void setCurrentDirectory(File directory)
    {
       constructor.setCurrentDirectory(directory);
    }

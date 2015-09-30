@@ -20,6 +20,6 @@ public class ExportSimulationTo3DMaxAction extends AbstractAction
 
    public void actionPerformed(ActionEvent actionEvent)
    {
-      constructor.constructExportSimulationTo3DMaxDialog();
+      constructor.constructDialog();
    }
 }

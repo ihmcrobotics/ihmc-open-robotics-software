@@ -1,6 +1,5 @@
 package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
-public interface ResizeViewportDialogConstructor
+public interface ResizeViewportDialogConstructor extends DialogConstructor
 {
-   public abstract void constructResizeViewportDialog();
 }

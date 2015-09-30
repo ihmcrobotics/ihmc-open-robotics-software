@@ -2,10 +2,7 @@ package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
 import java.io.File;
 
-public interface LoadConfigurationDialogConstructor
+public interface LoadConfigurationDialogConstructor extends DialogConstructorWithDirectory, DialogConstructor
 {
-   public abstract void setCurrentDirectory(File directory);
-   public abstract void setCurrentDirectory(String directory);
-   public abstract void constructLoadConfigurationDialog();
-   public abstract void loadGUIConfigurationFile(File file);
+   void loadGUIConfigurationFile(File file);
 }

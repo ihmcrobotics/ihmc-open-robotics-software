@@ -30,6 +30,6 @@ public class SaveGraphConfigurationAction extends AbstractAction
 
    public void actionPerformed(ActionEvent e)
    {
-      constructor.constructSaveGraphConfigurationDialog();
+      constructor.constructDialog();
    }
 }
