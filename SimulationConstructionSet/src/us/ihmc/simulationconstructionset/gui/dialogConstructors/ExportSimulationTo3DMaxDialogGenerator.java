@@ -38,7 +38,7 @@ public class ExportSimulationTo3DMaxDialogGenerator implements ExportSimulationT
       this.sim = sim;
    }
 
-   public void constructExportSimulationTo3DMaxDialog()
+   public void constructDialog()
    {
 //    for (Robot robot : sim.getRobots())
 //    {

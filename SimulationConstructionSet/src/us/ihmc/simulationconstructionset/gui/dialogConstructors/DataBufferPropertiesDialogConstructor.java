@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
-public interface DataBufferPropertiesDialogConstructor
+public interface DataBufferPropertiesDialogConstructor extends DialogConstructor, DialogDestructor
 {
-   public abstract void constructDataBufferPropertiesDialog();
-   public abstract void closeAndDispose();
+
 }

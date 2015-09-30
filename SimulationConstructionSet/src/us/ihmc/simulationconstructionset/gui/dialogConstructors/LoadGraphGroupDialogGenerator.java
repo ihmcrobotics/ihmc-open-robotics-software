@@ -63,7 +63,7 @@ public class LoadGraphGroupDialogGenerator implements LoadGraphGroupDialogConstr
       dataFileChooser.setCurrentDirectory(new File(dir));
    }
 
-   public void constructLoadConfigurationDialog()
+   public void constructDialog()
    {
       guiEnablerAndDisabler.disableGUIComponents();
 

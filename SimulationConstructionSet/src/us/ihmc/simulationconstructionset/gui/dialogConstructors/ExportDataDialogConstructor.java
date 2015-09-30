@@ -1,8 +1,6 @@
 package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
-public interface ExportDataDialogConstructor
+public interface ExportDataDialogConstructor extends DialogConstructor, DialogDestructor, DialogConstructorWithDirectory
 {
-   public abstract void constructExportDataDialog();
-   public abstract void setCurrentDirectory(String directory);      
-   public abstract void closeAndDispose();
+
 }

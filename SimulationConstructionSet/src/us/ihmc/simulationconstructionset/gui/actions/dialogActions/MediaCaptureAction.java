@@ -33,6 +33,6 @@ public class MediaCaptureAction extends AbstractAction
 
    public void actionPerformed(ActionEvent event)
    {
-      constructor.constructMediaCaptureDialog();
+      constructor.constructDialog();
    }
 }

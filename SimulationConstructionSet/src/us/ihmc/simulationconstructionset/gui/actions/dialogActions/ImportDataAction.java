@@ -40,7 +40,7 @@ public class ImportDataAction extends AbstractAction
 
    public void actionPerformed(ActionEvent e)
    {
-      constructor.constructImportDataDialog();
+      constructor.constructDialog();
    }
 
    public void closeAndDispose()

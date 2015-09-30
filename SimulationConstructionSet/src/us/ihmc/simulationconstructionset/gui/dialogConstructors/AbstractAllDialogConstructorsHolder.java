@@ -1,9 +1,9 @@
 package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
-import java.io.File;
-
 import us.ihmc.simulationconstructionset.gui.DollyCheckBox;
 import us.ihmc.simulationconstructionset.gui.TrackCheckBox;
+
+import java.io.File;
 
 public class AbstractAllDialogConstructorsHolder implements AllDialogConstructorsHolder
 {
@@ -11,7 +11,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
    {
       return new AboutDialogConstructor()
       {
-         public void constructAboutDialog()
+         public void constructDialog()
          {
          }
       };
@@ -33,7 +33,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
    {
       return new DataBufferPropertiesDialogConstructor()
       {
-         public void constructDataBufferPropertiesDialog()
+         public void constructDialog()
          {
          }
 
@@ -48,11 +48,16 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
    {
       return new ExportDataDialogConstructor()
       {
+         @Override
+         public void setCurrentDirectory(File directory)
+         {
+         }
+
          public void setCurrentDirectory(String directory)
          {
          }
 
-         public void constructExportDataDialog()
+         public void constructDialog()
          {
          }
 
@@ -75,7 +80,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
          {
          }
 
-         public void constructExportSnapshotDialog()
+         public void constructDialog()
          {
          }
       };
@@ -96,7 +101,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
          }
 
 
-         public void constructImportDataDialog()
+         public void constructDialog()
          {
          }
 
@@ -127,7 +132,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
          }
 
 
-         public void constructLoadConfigurationDialog()
+         public void constructDialog()
          {
          }
       };
@@ -143,7 +148,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
          }
 
 
-         public void constructMediaCaptureDialog()
+         public void constructDialog()
          {
          }
       };
@@ -154,7 +159,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
    {
       return new PlaybackPropertiesDialogConstructor()
       {
-         public void constructPlaybackPropertiesDialog()
+         public void constructDialog()
          {
          }
       };
@@ -165,7 +170,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
    {
       return new PrintGraphsDialogConstructor()
       {
-         public void constructPrintGraphsDialog()
+         public void constructDialog()
          {
          }
 
@@ -181,7 +186,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
    {
       return new ResizeViewportDialogConstructor()
       {
-         public void constructResizeViewportDialog()
+         public void constructDialog()
          {
          }
       };
@@ -202,7 +207,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
          }
 
 
-         public void constructSaveConfigurationDialog()
+         public void constructDialog()
          {
          }
       };
@@ -223,7 +228,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
          }
 
 
-         public void constructSaveGraphConfigurationDialog()
+         public void constructDialog()
          {
          }
       };
@@ -243,7 +248,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
          }
 
 
-         public void constructLoadConfigurationDialog()
+         public void constructDialog()
          {
          }
 
@@ -274,7 +279,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
          }
 
 
-         public void constructRobotConfigurationDialog()
+         public void constructDialog()
          {
          }
       };
@@ -285,7 +290,7 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
    {
       return new ExportSimulationTo3DMaxDialogConstructor()
       {
-         public void constructExportSimulationTo3DMaxDialog()
+         public void constructDialog()
          {
          }
       };

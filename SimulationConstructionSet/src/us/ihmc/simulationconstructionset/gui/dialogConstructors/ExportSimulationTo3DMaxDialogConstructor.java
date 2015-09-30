@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
-public interface ExportSimulationTo3DMaxDialogConstructor
+public interface ExportSimulationTo3DMaxDialogConstructor extends DialogConstructor
 {
-   public abstract void constructExportSimulationTo3DMaxDialog();
 }
 
 

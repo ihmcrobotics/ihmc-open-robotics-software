@@ -17,7 +17,7 @@ public class AboutDialogGenerator implements AboutDialogConstructor
       this.parentJFrame = parentJFrame;
    }
 
-   public void constructAboutDialog()
+   public void constructDialog()
    {
       String scsVersionNumber = SimulationConstructionSet.getVersion();
 

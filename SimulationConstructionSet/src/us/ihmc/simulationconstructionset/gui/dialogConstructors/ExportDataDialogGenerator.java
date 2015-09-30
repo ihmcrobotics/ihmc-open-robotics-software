@@ -94,7 +94,7 @@ public class ExportDataDialogGenerator implements ExportDataDialogConstructor, E
    }
 
 
-   public void constructExportDataDialog()
+   public void constructDialog()
    {
       new ExportDataDialog(frame, varGroupList, this);
    }

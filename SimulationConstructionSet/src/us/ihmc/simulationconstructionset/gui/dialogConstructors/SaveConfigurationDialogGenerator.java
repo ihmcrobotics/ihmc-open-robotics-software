@@ -57,7 +57,7 @@ public class SaveConfigurationDialogGenerator implements SaveConfigurationDialog
       dataFileChooser.setCurrentDirectory(new File(dir));
    }
 
-   public void constructSaveConfigurationDialog()
+   public void constructDialog()
    {
       sim.disableGUIComponents();
 

@@ -27,6 +27,6 @@ public class PlaybackPropertiesAction extends AbstractAction
 
    public void actionPerformed(ActionEvent actionEvent)
    {
-      constructor.constructPlaybackPropertiesDialog();
+      constructor.constructDialog();
    }
 }

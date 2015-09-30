@@ -55,7 +55,7 @@ public class SaveGraphConfigurationDialogGenerator implements SaveGraphConfigura
       dataFileChooser.setCurrentDirectory(new File(dir));
    }
 
-   public void constructSaveGraphConfigurationDialog()
+   public void constructDialog()
    {
       guiEnablerAndDisabler.disableGUIComponents();
 

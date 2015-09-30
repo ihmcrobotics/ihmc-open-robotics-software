@@ -39,6 +39,6 @@ public class ExportSnapshotAction extends AbstractAction
 
    public void actionPerformed(ActionEvent actionEvent)
    {
-     constructor.constructExportSnapshotDialog();
+     constructor.constructDialog();
    }
 }

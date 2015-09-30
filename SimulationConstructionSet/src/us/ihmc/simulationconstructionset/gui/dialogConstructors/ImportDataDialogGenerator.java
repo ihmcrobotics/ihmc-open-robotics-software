@@ -77,7 +77,7 @@ public class ImportDataDialogGenerator implements ImportDataDialogConstructor
    }
 
 
-   public void constructImportDataDialog()
+   public void constructDialog()
    {
       sim.disableGUIComponents();
 

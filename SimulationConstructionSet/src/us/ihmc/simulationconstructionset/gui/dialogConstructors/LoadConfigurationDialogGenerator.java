@@ -153,7 +153,7 @@ public class LoadConfigurationDialogGenerator implements LoadConfigurationDialog
       dataFileChooser.setCurrentDirectory(new File(dir));
    }
 
-   public void constructLoadConfigurationDialog()
+   public void constructDialog()
    {
       load();
    }

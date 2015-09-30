@@ -33,7 +33,7 @@ public class PrintGraphsAction extends AbstractAction
 
    public void actionPerformed(ActionEvent e)
    {
-      constructor.constructPrintGraphsDialog();
+      constructor.constructDialog();
    }
    
 }

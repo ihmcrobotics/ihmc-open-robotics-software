@@ -2,8 +2,7 @@ package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
 import java.io.File;
 
-public interface MediaCaptureDialogConstructor
+public interface MediaCaptureDialogConstructor extends DialogConstructor
 {
-   public abstract void constructMediaCaptureDialog();
-   public abstract void createVideo(File file);
+   void createVideo(File file);
 }

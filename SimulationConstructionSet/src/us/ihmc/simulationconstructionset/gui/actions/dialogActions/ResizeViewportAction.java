@@ -25,6 +25,6 @@ public class ResizeViewportAction extends AbstractAction
 
    public void actionPerformed(ActionEvent e)
    {
-     constructor.constructResizeViewportDialog();
+     constructor.constructDialog();
    }
 }

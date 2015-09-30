@@ -76,7 +76,7 @@ public class ExportSnapshotDialogGenerator implements ExportSnapshotDialogConstr
    }
 
 
-   public void constructExportSnapshotDialog()
+   public void constructDialog()
    {
       guiEnablerAndDisabler.disableGUIComponents();
 
