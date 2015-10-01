@@ -36,13 +36,19 @@ public class FileToolsTest
    private static final String EXAMPLE_FILE_1_TEXT_LINE_1 = "This is example File 1 !!&&#))(";
    private static final String EXAMPLE_FILE_2_TEXT_LINE_1 = "This is example File 2 *@&&%*@";
    private static final String EXAMPLE_FILE_2_TEXT_LINE_2 = "It has two lines";
-   private static final String EXAMPLE_JAVA_FILE2_JAVA = "ExampleJavaFile2.java.txt";
    private static final String EXAMPLE_JAVA_FILE1_JAVA = "ExampleJavaFile1.java.txt";
+   private static final String EXAMPLE_JAVA_FILE2_JAVA = "ExampleJavaFile2.java.txt";
    private static final String TEST_FILE_BAD_TXT = "testFileBad.txt";
    private static final String FILE_TOOLS_EXAMPLE_FILE_CAT_TXT = "FileToolsExampleFileCat.txt";
-   private static final String FILE_TOOLS_EXAMPLE_FILE2_TXT = "FileToolsExampleFile2.txt";
    private static final String FILE_TOOLS_EXAMPLE_FILE1_TXT = "FileToolsExampleFile1.txt";
+   private static final String FILE_TOOLS_EXAMPLE_FILE2_TXT = "FileToolsExampleFile2.txt";
    private static final String TEST_READ_ALL_LINES_TXT = "testReadAllLines.txt";
+   
+   private static final Path EXAMPLE_JAVA_FILE1_PATH = JAVA_DIRECTORY_PATH.resolve(EXAMPLE_JAVA_FILE1_JAVA);
+   private static final Path EXAMPLE_JAVA_FILE2_PATH = JAVA_DIRECTORY_PATH.resolve(EXAMPLE_JAVA_FILE2_JAVA);
+   private static final Path FILE_TOOLS_EXAMPLE_FILE1_PATH = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE1_TXT);
+   private static final Path FILE_TOOLS_EXAMPLE_FILE2_PATH = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE2_TXT);
+   private static final Path READ_ALL_LINES_PATH = FILE_TOOLS_TEST_PATH.resolve(TEST_READ_ALL_LINES_TXT);
 
    @Before
    public void setUp()
@@ -56,6 +62,7 @@ public class FileToolsTest
       createJavaFile2();
       createTestFile1();
       createTestFile2();
+      createReadAllLinesFile();
    }
    
    @After
@@ -63,10 +70,11 @@ public class FileToolsTest
    {
       try
       {
-         Files.delete(JAVA_DIRECTORY_PATH.resolve(EXAMPLE_JAVA_FILE1_JAVA));
-         Files.delete(JAVA_DIRECTORY_PATH.resolve(EXAMPLE_JAVA_FILE2_JAVA));
-         Files.delete(TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE1_TXT));
-         Files.delete(TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE2_TXT));
+         Files.delete(EXAMPLE_JAVA_FILE1_PATH);
+         Files.delete(EXAMPLE_JAVA_FILE2_PATH);
+         Files.delete(FILE_TOOLS_EXAMPLE_FILE1_PATH);
+         Files.delete(FILE_TOOLS_EXAMPLE_FILE2_PATH);
+         Files.delete(READ_ALL_LINES_PATH);
       }
       catch (IOException e)
       {
@@ -78,22 +86,33 @@ public class FileToolsTest
    @Test(timeout = 30000)
    public void testReadAllLines()
    {
-      String exampleFile = "line1\nline2\nline3\n";
-      
-      Path testReadAllLinesPath = FILE_TOOLS_TEST_PATH.resolve(TEST_READ_ALL_LINES_TXT);
-      
-      PrintWriter writer = FileTools.newPrintWriter(testReadAllLinesPath);
-      writer.print(exampleFile);
-      writer.close();
-      
-      List<String> lines = FileTools.readAllLines(testReadAllLinesPath);
+      List<String> lines = FileTools.readAllLines(READ_ALL_LINES_PATH);
       
       assertTrue(lines.get(0).equals("line1"));
       assertTrue(lines.get(1).equals("line2"));
       assertTrue(lines.get(2).equals("line3"));
    }
 	
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testReadAllBytesAndReadLinesFromBytesAndReplaceLine()
+   {
+      byte[] bytes = FileTools.readAllBytes(READ_ALL_LINES_PATH);
+      List<String> lines = FileTools.readLinesFromBytes(bytes);
+      
+      assertTrue(lines.get(0).equals("line1"));
+      assertTrue(lines.get(1).equals("line2"));
+      assertTrue(lines.get(2).equals("line3"));
+      
+      bytes = FileTools.replaceLineInFile(1, "line2Mod", bytes, lines);
+      lines = FileTools.readLinesFromBytes(bytes);
+
+      assertTrue(lines.get(0).equals("line1"));
+      assertTrue(lines.get(1).equals("line2Mod"));
+      assertTrue(lines.get(2).equals("line3"));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTemporaryDirectoryPath()
    {
@@ -106,8 +125,8 @@ public class FileToolsTest
    @Test(timeout = 30000)
    public void testConcatenateFilesTogether()
    {      
-      Path concatFile1 = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE1_TXT);
-      Path concatFile2 = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE2_TXT);
+      Path concatFile1 = FILE_TOOLS_EXAMPLE_FILE1_PATH;
+      Path concatFile2 = FILE_TOOLS_EXAMPLE_FILE2_PATH;
       Path concatedFile = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE_CAT_TXT);
 
       List<Path> filesToConcat = new ArrayList<Path>();
@@ -133,10 +152,10 @@ public class FileToolsTest
          fail();
       }
    }
-
-   private static void createTestFile1()
+	
+	private static void createTestFile1()
    {
-      PrintWriter writer = FileTools.newPrintWriter(TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE1_TXT));
+      PrintWriter writer = FileTools.newPrintWriter(FILE_TOOLS_EXAMPLE_FILE1_PATH);
       writer.println(EXAMPLE_FILE_1_TEXT_LINE_1);
       writer.flush();
       writer.close();
@@ -144,7 +163,7 @@ public class FileToolsTest
 
    private static void createTestFile2()
    {
-      PrintWriter writer = FileTools.newPrintWriter(TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE2_TXT));
+      PrintWriter writer = FileTools.newPrintWriter(FILE_TOOLS_EXAMPLE_FILE2_PATH);
       writer.println(EXAMPLE_FILE_2_TEXT_LINE_1);
       writer.println(EXAMPLE_FILE_2_TEXT_LINE_2);
       writer.flush();
@@ -153,7 +172,7 @@ public class FileToolsTest
 
    private static void createJavaFile1()
    {
-      PrintWriter writer = FileTools.newPrintWriter(JAVA_DIRECTORY_PATH.resolve(EXAMPLE_JAVA_FILE1_JAVA));
+      PrintWriter writer = FileTools.newPrintWriter(EXAMPLE_JAVA_FILE1_PATH);
       writer.println("// This is a comment");
       writer.println("package us.ihmc.tools.io.files.fileToolsTest.exampleJavaFiles;");
       writer.println("public class ExampleJavaFile1");
@@ -170,7 +189,7 @@ public class FileToolsTest
 
    private static void createJavaFile2()
    {
-      PrintWriter writer = FileTools.newPrintWriter(JAVA_DIRECTORY_PATH.resolve(EXAMPLE_JAVA_FILE2_JAVA));
+      PrintWriter writer = FileTools.newPrintWriter(EXAMPLE_JAVA_FILE2_PATH);
       writer.println("package us.ihmc.tools.io.files.fileToolsTest.exampleJavaFiles;");
       writer.println("public class ExampleJavaFile2");
       writer.println("{");
@@ -182,6 +201,13 @@ public class FileToolsTest
       writer.flush();
       writer.close();
    }
+   
+   private static void createReadAllLinesFile()
+   {
+      PrintWriter writer = FileTools.newPrintWriter(READ_ALL_LINES_PATH);
+      writer.print("line1\r\nline2\nline3\r");
+      writer.close();
+   }
 
    // START DEPRECATED TESTS HERE
    
@@ -189,7 +215,7 @@ public class FileToolsTest
    @Test(timeout = 30000)
    public void testGetBufferedReader()
    {
-      File testFile1 = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE1_TXT).toFile();
+      File testFile1 = FILE_TOOLS_EXAMPLE_FILE1_PATH.toFile();
       if (!testFile1.exists())
          createTestFile1();
    
@@ -222,7 +248,7 @@ public class FileToolsTest
    @Test(timeout = 30000)
    public void testGetFileWriter()
    {
-      File testFile1 = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE1_TXT).toFile();
+      File testFile1 = FILE_TOOLS_EXAMPLE_FILE1_PATH.toFile();
       if (!testFile1.exists())
          createTestFile1();
    
@@ -251,7 +277,7 @@ public class FileToolsTest
    @Test(timeout = 30000)
    public void testGetFileWriterWithAppend()
    {
-      File testFile1 = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE1_TXT).toFile();
+      File testFile1 = FILE_TOOLS_EXAMPLE_FILE1_PATH.toFile();
       if (!testFile1.exists())
          createTestFile1();
    
@@ -280,7 +306,7 @@ public class FileToolsTest
    @Test(timeout = 30000)
    public void testGetFileDataOutputStream()
    {
-      File testFile1 = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE1_TXT).toFile();
+      File testFile1 = FILE_TOOLS_EXAMPLE_FILE1_PATH.toFile();
       if (!testFile1.exists())
          createTestFile1();
    
@@ -309,7 +335,7 @@ public class FileToolsTest
    @Test(timeout = 30000)
    public void testGetFileDataInputStream()
    {
-      File testFile1 = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE1_TXT).toFile();
+      File testFile1 = FILE_TOOLS_EXAMPLE_FILE1_PATH.toFile();
       if (!testFile1.exists())
          createTestFile1();
    
@@ -358,7 +384,7 @@ public class FileToolsTest
       assertTrue(listOfFileNames.contains(EXAMPLE_JAVA_FILE2_JAVA));
    
       boolean thrown = false;
-      File notADirectoryExceptionTestFile = JAVA_DIRECTORY_PATH.resolve(EXAMPLE_JAVA_FILE1_JAVA).toFile();
+      File notADirectoryExceptionTestFile = EXAMPLE_JAVA_FILE1_PATH.toFile();
    
       try
       {
@@ -377,7 +403,7 @@ public class FileToolsTest
    public void testGetAllFilesInDirectoryWithSuffix()
    {
       File textFileDirectory = TEXT_DIRECTORY_PATH.toFile();
-      File notADirectoryExceptionTestFile = JAVA_DIRECTORY_PATH.resolve(EXAMPLE_JAVA_FILE1_JAVA).toFile();
+      File notADirectoryExceptionTestFile = EXAMPLE_JAVA_FILE1_PATH.toFile();
       File javaFileDirectory = JAVA_DIRECTORY_PATH.toFile();
       ArrayList<File> textFiles = FileTools.getAllFilesInDirectoryWithSuffix("txt", textFileDirectory);
       ArrayList<File> javaFiles = FileTools.getAllFilesInDirectoryWithSuffix("java.txt", javaFileDirectory);
