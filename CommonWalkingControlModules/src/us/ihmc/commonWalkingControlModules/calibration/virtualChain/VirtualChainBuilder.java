@@ -135,7 +135,7 @@ public class VirtualChainBuilder
    {
       File currentDirectory = new File(".");
       String filePath = currentDirectory.getCanonicalPath()
-                        + "/../CommonWalkingControlModules/src/us/ihmc/commonWalkingControlModules/calibration/virtualCoMChain/";
+                        + "/../CommonWalkingControlModules/resources/us/ihmc/commonWalkingControlModules/calibration/virtualCoMChain/";
 
       File file = new File(filePath + fileName + ".vcp");
 
