@@ -36,7 +36,6 @@ import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.imageProcessing.configuration.ConfigurationLoader;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -74,7 +73,7 @@ public class KinematicCalibrationHeadLoopResidualTest
 
    public static <T> T loadXML(String filename)
    {
-      InputStream inputStream = ConfigurationLoader.class.getResourceAsStream(filename);
+      InputStream inputStream = KinematicCalibrationHeadLoopResidualTest.class.getResourceAsStream(filename);
       if (inputStream == null)
          throw new IllegalArgumentException("Can't find resource.");
 
