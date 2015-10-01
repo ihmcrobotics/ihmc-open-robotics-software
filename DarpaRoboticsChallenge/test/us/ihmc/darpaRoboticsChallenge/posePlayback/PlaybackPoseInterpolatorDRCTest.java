@@ -25,7 +25,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
 {
    private static final boolean SHOW_GUI = false;
 
-	@DeployableTestMethod(estimatedDuration = 1.3)
+	@DeployableTestMethod(estimatedDuration = 4.0)
 	@Test(timeout = 30000)
    public void testMoveElbowExample()
    {
@@ -41,7 +41,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       playASequence(sdfRobot, sequence);
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.6)
+	@DeployableTestMethod(estimatedDuration = 1.2)
 	@Test(timeout = 30000)
    public void testRandomExample()
    {
@@ -75,7 +75,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
 //      playASequence(sdfRobot, sequence);
 //   }
 
-	@DeployableTestMethod(estimatedDuration = 1.6)
+	@DeployableTestMethod(estimatedDuration = 3.8)
 	@Test(timeout = 30000)
    public void testLoadingAndPlayingASequence()
    {
@@ -88,7 +88,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       playASequence(sdfRobot, sequence);
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.0)
+	@DeployableTestMethod(estimatedDuration = 4.6)
 	@Test(timeout = 30000)
    public void testLoadingAndPlayingAnotherSequence()
    {

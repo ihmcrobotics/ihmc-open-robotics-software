@@ -263,7 +263,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       simpleWrenchContactPoint = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 3.2)
+	@DeployableTestMethod(estimatedDuration = 2.8)
 	@Test(timeout = 30000)
    public void testSimulationConstructionSetMiscellaneous() throws AWTException
    {
@@ -338,7 +338,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertArrayOfObjectsContainsTheObject(forceSensorsFromSCS, simpleWrenchContactPoint);
    }
 
-	@DeployableTestMethod(estimatedDuration = 3.1)
+	@DeployableTestMethod(estimatedDuration = 2.6)
 	@Test(timeout = 30000)
    public void testSimulationManagement()
    {
@@ -454,8 +454,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(Frame.MAXIMIZED_BOTH, frameStateFromSCS2, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 13.5)
-	@Test(timeout = 67000)
+	@DeployableTestMethod(estimatedDuration = 12.7)
+	@Test(timeout = 64000)
    public void testFrameMethods()
    {
       ThreadTools.sleep(THREAD_SLEEP_TIME);
@@ -509,7 +509,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(component, componentFromSCS);
    }
 
-	@DeployableTestMethod(estimatedDuration = 3.1)
+	@DeployableTestMethod(estimatedDuration = 2.5)
 	@Test(timeout = 30000)
    public void testCameraMethods()
    {
@@ -676,7 +676,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertBooleansAreOpposite(initialCameraKeyModeStatus, finalCameraKeyModeStatus);
    }
 
-	@DeployableTestMethod(estimatedDuration = 2.8)
+	@DeployableTestMethod(estimatedDuration = 2.6)
 	@Test(timeout = 30000)
    public void test3DGraphicsMethods()
    {
@@ -732,7 +732,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertIfGUIComponentsAreDisableOrEnabled(scs, true);
    }
 
-	@DeployableTestMethod(estimatedDuration = 2.6)
+	@DeployableTestMethod(estimatedDuration = 2.5)
 	@Test(timeout = 30000)
    public void testGetVariableMethods() throws AWTException
    {
@@ -790,7 +790,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(arrayOfVariablesRegExprRobot, arrayOfVariablesRegExprSCS);
    }
 
-	@DeployableTestMethod(estimatedDuration = 2.7)
+	@DeployableTestMethod(estimatedDuration = 2.5)
 	@Test(timeout = 30000)
    public void testTimingMethods() throws AWTException
    {
@@ -819,7 +819,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(Math.PI, timeFromSCS, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 3.2)
+	@DeployableTestMethod(estimatedDuration = 3.0)
 	@Test(timeout = 30000)
    public void testSimulationTickControl()
    {
@@ -963,8 +963,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(keyPoint - 1, currentIndexFromSCS6, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 8.8)
-	@Test(timeout = 44000)
+	@DeployableTestMethod(estimatedDuration = 8.7)
+	@Test(timeout = 43000)
    public void testVariablesMethods()
    {
       addDoubleYoVariablesInSCSRegistry(cameraDollyXYZVarNames, cameraDollyXYZVarValues, scs);
@@ -1018,7 +1018,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertYoVariableListContainsArrayListOfVariables(yoVariableListFromSCS3, yoVariableArrayLists);
    }
 
-	@DeployableTestMethod(estimatedDuration = 2.6)
+	@DeployableTestMethod(estimatedDuration = 2.5)
 	@Test(timeout = 30000)
    public void testGroupMethods()
    {
@@ -1066,7 +1066,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertNotNull(extraPanelConfigurationPanelFromSCS);
    }
 
-	@DeployableTestMethod(estimatedDuration = 8.7)
+	@DeployableTestMethod(estimatedDuration = 8.5)
 	@Test(timeout = 43000)
    public void testSimulationListeners()
    {
@@ -1121,8 +1121,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertTrue(toggleKeyPointModeCommandListenerHasBeenCalled.getBooleanValue());
    }
 
-	@DeployableTestMethod(estimatedDuration = 11.1)
-	@Test(timeout = 56000)
+	@DeployableTestMethod(estimatedDuration = 9.5)
+	@Test(timeout = 48000)
    public void testDataExporting()
    {
       simulateForTime(scs, simulateTime);

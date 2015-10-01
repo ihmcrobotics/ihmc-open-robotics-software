@@ -45,7 +45,7 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.2)
+	@DeployableTestMethod(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void addASphere()
    {

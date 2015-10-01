@@ -18,7 +18,7 @@ public class Graphics3DTextTest implements Graphics3DFrameListener
    int counter = 0;
    Graphics3DAddExtrusionInstruction instruction;
 
-	@DeployableTestMethod(estimatedDuration = 4.1)
+	@DeployableTestMethod(estimatedDuration = 4.0)
 	@Test(timeout = 30000)
    public void testTextDisplay()
    {

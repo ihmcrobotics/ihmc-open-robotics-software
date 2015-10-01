@@ -45,8 +45,8 @@ public class SpringFlamingoSimulationTest
       testFixture = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 11.6)
-	@Test(timeout = 58000)
+	@DeployableTestMethod(estimatedDuration = 8.5)
+	@Test(timeout = 42000)
    public void testSpringFlamingoSimulationAndGUI() throws SimulationExceededMaximumTimeException
    {
       testFixture.showWindow();
@@ -116,7 +116,7 @@ public class SpringFlamingoSimulationTest
    }
 	
 
-	@DeployableTestMethod(estimatedDuration = 4.8)
+	@DeployableTestMethod(estimatedDuration = 3.6)
 	@Test(timeout = 30000)
 	public void testRewindability() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
 	{
