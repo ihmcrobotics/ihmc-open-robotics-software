@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -32,6 +33,8 @@ import us.ihmc.tools.UnitConversions;
 
 public class FileTools
 {
+   public static final byte CARRIAGE_RETURN = '\r';
+   public static final byte LINE_FEED = '\n';
    private static final String RESOURCES_FOLDER_NAME = "resources";
    
    public static Path deriveResourcesPath(Class<?> clazz)
@@ -46,11 +49,88 @@ public class FileTools
       return Paths.get(RESOURCES_FOLDER_NAME, pathNames.toArray(new String[0]));
    }
    
+   public static List<String> readLinesFromBytes(byte[] bytes)
+   {
+      try
+      {
+         BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes), Charset.forName("UTF-8").newDecoder()));
+         List<String> lines = new ArrayList<>();
+         String line;
+         line = reader.readLine();
+         while (line != null)
+         {
+            lines.add(line);
+            line = reader.readLine();
+         }
+         return lines;
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return null;
+      }
+   }
+   
+   public static byte[] replaceLineInFile(int lineIndex, String newLine, byte[] fileBytes, List<String> fileLines)
+   {
+      byte[] newBytes = new byte[fileBytes.length - fileLines.get(lineIndex).length() + newLine.length()];
+      
+      int newBytesIndex = 0;
+      int fileBytesIndex = 0;
+      for (int fileLineIndex = 0; fileLineIndex < fileLines.size(); fileLineIndex++)
+      {
+         if (fileLineIndex == lineIndex)
+         {
+            for (byte b : newLine.getBytes())
+            {
+               newBytes[newBytesIndex++] = b;
+            }
+            
+            fileBytesIndex += fileLines.get(fileLineIndex).length();
+            fileLines.set(fileLineIndex, newLine);
+         }
+         else
+         {
+            for (byte b : fileLines.get(fileLineIndex).getBytes())
+            {
+               newBytes[newBytesIndex++] = b;
+               ++fileBytesIndex;
+            }
+         }
+         
+         if (fileBytes.length > fileBytesIndex + 1 &&
+             fileBytes[fileBytesIndex] == CARRIAGE_RETURN && fileBytes[fileBytesIndex + 1] == LINE_FEED)
+         {
+            newBytes[newBytesIndex++] = fileBytes[fileBytesIndex++];
+            newBytes[newBytesIndex++] = fileBytes[fileBytesIndex++];
+         }
+         else if (fileBytes[fileBytesIndex] == CARRIAGE_RETURN || fileBytes[fileBytesIndex] == LINE_FEED)
+         {
+            newBytes[newBytesIndex++] = fileBytes[fileBytesIndex++];
+         }
+      }
+      
+      return newBytes;
+   }
+   
    public static List<String> readAllLines(Path path)
    {
       try
       {
          return Files.readAllLines(path, Charset.forName("UTF-8"));
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return null;
+      }
+   }
+   
+   public static byte[] readAllBytes(Path path)
+   {
+      try
+      {
+         return Files.readAllBytes(path);
       }
       catch (IOException e)
       {
