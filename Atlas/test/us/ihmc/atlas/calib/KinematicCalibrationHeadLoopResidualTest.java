@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +28,7 @@ import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
+import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.point.Point2D_F64;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
@@ -69,9 +72,20 @@ public class KinematicCalibrationHeadLoopResidualTest
 
    double targetToEE_param[] = new double[]{0.1, -0.1, 0.05, 0.05};
 
+   public static <T> T loadXML(String filename)
+   {
+      InputStream inputStream = ConfigurationLoader.class.getResourceAsStream(filename);
+      if (inputStream == null)
+         throw new IllegalArgumentException("Can't find resource.");
+
+      return UtilIO.loadXML(new InputStreamReader(inputStream));
+
+   }
+   
+   
    public KinematicCalibrationHeadLoopResidualTest()
    {
-      intrinsic = ConfigurationLoader.loadXML("/us/ihmc/atlas/calib/intrinsic_ros.xml");
+      intrinsic = loadXML("/us/ihmc/atlas/calib/intrinsic_ros.xml");
 
       Vector3d tran = new Vector3d(targetToEE_param[0], targetToEE_param[1], targetToEE_param[2]);
       AxisAngle4d axisY = new AxisAngle4d(new Vector3d(0, 1, 0), targetToEE_param[3]);
