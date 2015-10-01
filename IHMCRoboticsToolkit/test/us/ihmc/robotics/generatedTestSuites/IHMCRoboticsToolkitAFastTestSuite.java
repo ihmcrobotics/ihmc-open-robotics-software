@@ -216,6 +216,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.statistics.CovarianceDerivationTest.class,
    us.ihmc.robotics.statistics.OnePassMeanAndStandardDeviationTest.class,
    us.ihmc.robotics.statistics.PermutationTest.class,
+   us.ihmc.robotics.time.CallFrequencyCalculatorTest.class,
    us.ihmc.robotics.time.ExecutionTimerTest.class,
    us.ihmc.robotics.time.GlobalTimerTest.class,
    us.ihmc.robotics.time.TimeToolsTest.class,

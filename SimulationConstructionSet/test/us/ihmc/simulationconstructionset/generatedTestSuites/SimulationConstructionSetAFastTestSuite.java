@@ -13,8 +13,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.simulationconstructionset.bambooTools.BambooToolsTest.class,
+   us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistryTest.class,
    us.ihmc.simulationconstructionset.DataBufferEntryTest.class,
    us.ihmc.simulationconstructionset.DataBufferTest.class,
+   us.ihmc.simulationconstructionset.dataExporter.DataExporterGraphCreatorTest.class,
    us.ihmc.simulationconstructionset.DataFileWriterTest.class,
    us.ihmc.simulationconstructionset.DataProcessingFunctionTest.class,
    us.ihmc.simulationconstructionset.gui.actions.ActionsTest.class,
