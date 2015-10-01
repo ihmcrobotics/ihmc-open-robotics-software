@@ -32,7 +32,7 @@ import us.ihmc.tools.thread.ThreadTools;
  */
 public class AtlasFootstepSnapperTest extends FootstepSnapperTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 1.4)
    @Test(timeout = 30000)
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {

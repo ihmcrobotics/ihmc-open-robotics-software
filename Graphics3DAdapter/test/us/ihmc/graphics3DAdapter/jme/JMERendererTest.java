@@ -40,7 +40,7 @@ public class JMERendererTest
     * Ground should flash on and off a few times.
     */
 
-	@DeployableTestMethod(estimatedDuration = 2.2)
+	@DeployableTestMethod(estimatedDuration = 2.1)
 	@Test(timeout = 30000)
    public void testSetGroundVisible()
    {

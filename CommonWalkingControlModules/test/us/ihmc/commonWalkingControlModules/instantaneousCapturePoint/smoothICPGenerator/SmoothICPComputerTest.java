@@ -105,7 +105,7 @@ public class SmoothICPComputerTest
       icpVelocityLineSegment = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.8)
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testTypicalFourStepExample()
    {
@@ -264,7 +264,7 @@ public class SmoothICPComputerTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.7)
+	@DeployableTestMethod(estimatedDuration = 0.5)
 	@Test(timeout = 30000)
    public void testTypicalFourStepExampleWithSuddenStop()
    {

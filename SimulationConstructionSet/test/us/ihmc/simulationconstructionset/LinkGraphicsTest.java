@@ -46,7 +46,7 @@ public class LinkGraphicsTest
    private static final double
       WEDGE_X = 0.4, WEDGE_Y = 0.3, WEDGE_Z = 0.2;
 
-	@DeployableTestMethod(estimatedDuration = 3.4)
+	@DeployableTestMethod(estimatedDuration = 3.3)
 	@Test(timeout = 30000)
    public void testLinkGraphicsWithALargeNumberOfExampleShapes()
    {
@@ -54,7 +54,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@DeployableTestMethod(estimatedDuration = 3.2)
+	@DeployableTestMethod(estimatedDuration = 3.4)
 	@Test(timeout = 30000)
    public void testLinkGraphicsWithASmallNumberOfExampleShapes()
    {
@@ -62,7 +62,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@DeployableTestMethod(estimatedDuration = 3.3)
+	@DeployableTestMethod(estimatedDuration = 3.4)
 	@Test(timeout = 30000)
    public void testLinkGraphicsWithArcTorus()
    {
@@ -70,7 +70,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@DeployableTestMethod(estimatedDuration = 3.2)
+	@DeployableTestMethod(estimatedDuration = 3.3)
 	@Test(timeout = 30000)
    public void testLinkGrapicsWithMeshData()
    {
@@ -78,7 +78,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@DeployableTestMethod(estimatedDuration = 3.2)
+	@DeployableTestMethod(estimatedDuration = 3.3)
 	@Test(timeout = 30000)
    public void testLinkGrapicsWithCone()
    {
@@ -86,7 +86,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@DeployableTestMethod(estimatedDuration = 3.2)
+	@DeployableTestMethod(estimatedDuration = 3.3)
 	@Test(timeout = 30000)
    public void testLinkGrapicsWithExtrudedPolygon()
    {

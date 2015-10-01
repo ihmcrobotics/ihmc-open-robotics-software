@@ -34,7 +34,7 @@ public class SimulationConstructionSetSetupTest
       });
    }
 
-	@DeployableTestMethod(estimatedDuration = 5.2)
+	@DeployableTestMethod(estimatedDuration = 5.3)
 	@Test(timeout = 30000)
    public void testSimulationConstructionSetWithoutARobot()
    {

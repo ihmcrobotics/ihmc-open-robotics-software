@@ -151,8 +151,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
    
-	@DeployableTestMethod(estimatedDuration = 30.4)
-	@Test(timeout = 151825)
+	@DeployableTestMethod(estimatedDuration = 26.4)
+	@Test(timeout = 130000)
    public void testWalkingOverSmallPlatformQuickly() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -188,8 +188,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 48.8)
-   @Test(timeout = 243954)
+	@DeployableTestMethod(estimatedDuration = 36.4)
+   @Test(timeout = 180000)
    public void testSidestepOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -223,8 +223,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 49.2)
-   @Test(timeout = 246010)
+	@DeployableTestMethod(estimatedDuration = 40.4)
+   @Test(timeout = 200000)
    public void testSidestepOverSmallWall() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -258,8 +258,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-	@DeployableTestMethod(estimatedDuration = 43.5)
-   @Test(timeout = 217348)
+	@DeployableTestMethod(estimatedDuration = 40.9)
+   @Test(timeout = 200000)
    public void testWalkingOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -305,8 +305,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
 
 
-	@DeployableTestMethod(estimatedDuration = 29.9)
-	@Test(timeout = 149558)
+	@DeployableTestMethod(estimatedDuration = 27.4)
+	@Test(timeout = 140000)
    public void testWalkingOntoMediumPlatformToesTouching() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -342,8 +342,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 30.0)
-	@Test(timeout = 149768)
+	@DeployableTestMethod(estimatedDuration = 23.6)
+	@Test(timeout = 120000)
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -379,8 +379,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 30.0)
-	@Test(timeout = 149768)
+	@DeployableTestMethod(estimatedDuration = 37.2)
+	@Test(timeout = 190000)
 	public void testWalkingOffOfMediumPlatformSlowSteps() throws SimulationExceededMaximumTimeException
 	{
 	   BambooTools.reportTestStartedMessage();

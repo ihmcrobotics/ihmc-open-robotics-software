@@ -35,7 +35,7 @@ public class CapturabilityBasedStatusTest
       FileTools.ensureDirectoryExists(TEST_ROOT_PATH);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.6)
+	@DeployableTestMethod(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testSerializeAndDeserialize() throws IOException
    {
@@ -56,7 +56,7 @@ public class CapturabilityBasedStatusTest
       assertPacketsEqual(cbs, cbsOut);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSerializeToFileAndDeserialize() throws IOException
    {

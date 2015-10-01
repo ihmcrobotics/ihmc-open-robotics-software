@@ -164,7 +164,7 @@ public class TimeStampedTransformBufferTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.9)
+	@DeployableTestMethod(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testInterpolationBetweenPosesAfterFillingBuffer()
    {

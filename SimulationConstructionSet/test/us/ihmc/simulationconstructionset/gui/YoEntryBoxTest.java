@@ -141,8 +141,8 @@ public class YoEntryBoxTest
       scs.closeAndDispose();
    }
 
-	@DeployableTestMethod(estimatedDuration = 8.5)
-	@Test(timeout = 43000)
+	@DeployableTestMethod(estimatedDuration = 7.4)
+	@Test(timeout = 37000)
    public void testSwitchToEnumEntry() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       SimpleController controller = new SimpleController();

@@ -337,7 +337,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 		icpVelocityLineSegment = null;
 	}
 
-	@DeployableTestMethod(estimatedDuration = 1.6)
+	@DeployableTestMethod(estimatedDuration = 0.5)
 	@Test(timeout = 30000)
 	public void visualizePlanner()
 	{

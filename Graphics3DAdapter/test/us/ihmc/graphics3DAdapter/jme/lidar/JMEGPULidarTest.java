@@ -54,7 +54,7 @@ public class JMEGPULidarTest implements LidarTestListener
       lidarTest.getWorld().stop();
    }
 
-	@DeployableTestMethod(estimatedDuration = 5.3)
+	@DeployableTestMethod(estimatedDuration = 5.5)
 	@Test(timeout = 30000)
    public void test60DegreeFieldOfView()
    {
@@ -62,7 +62,7 @@ public class JMEGPULidarTest implements LidarTestListener
       doATest(parameters);
    }
 
-	@DeployableTestMethod(estimatedDuration = 4.4)
+	@DeployableTestMethod(estimatedDuration = 4.7)
 	@Test(timeout = 30000)
    public void test120DegreeFieldOfView()
    {
@@ -70,7 +70,7 @@ public class JMEGPULidarTest implements LidarTestListener
       doATest(parameters);
    }
 
-	@DeployableTestMethod(estimatedDuration = 4.0)
+	@DeployableTestMethod(estimatedDuration = 4.2)
 	@Test(timeout = 30000)
    public void test360DegreeFieldOfView()
    {
@@ -78,7 +78,7 @@ public class JMEGPULidarTest implements LidarTestListener
       doATest(parameters);
    }
 
-	@DeployableTestMethod(estimatedDuration = 4.7)
+	@DeployableTestMethod(estimatedDuration = 4.5)
 	@Test(timeout = 30000)
    public void test270DegreeFieldOfView()
    {
