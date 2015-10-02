@@ -14,12 +14,10 @@ dependencies {
 	compile project(':CommonWalkingControlModules')
 	compile project(':SimulationConstructionSet')
 	compile project(':RobotDataCommunication')
-    compile project(':PathGeneration')
-	compile project(':Planning')
 	compile project(':SensorProcessing')
 	compile project(':IHMCWholeBodyController')
 	compile project(':IHMCPerception')
 	compile project(':IHMCJavaToolkit')
 	compile project(':IHMCRoboticsToolkit')
-   testCompile project(':IHMCUnitTesting')
+    testCompile project(':IHMCUnitTesting')
 }

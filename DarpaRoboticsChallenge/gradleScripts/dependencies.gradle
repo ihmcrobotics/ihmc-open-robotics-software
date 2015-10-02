@@ -50,16 +50,13 @@ dependencies {
 	compile project(':IHMCCommunication')
 	compile project(':IHMCHumanoidBehaviors')
 	compile project(':IHMCHumanoidRobotics')
-	compile project(':Planning')
     compile project(':IHMCPerception')
     compile project(':IHMCWholeBodyController')
 	compile project(':IHMCStateEstimation')
-	compile project(':PathGeneration')
 	compile project(':IHMCJavaToolkit')
 	compile project(':IHMCRoboticsToolkit')
-	//testCompile project(':PathGeneration').sourceSets.test.output
 
-   testCompile project(':IHMCUnitTesting')
+    testCompile project(':IHMCUnitTesting')
 	testCompile project(':CommonWalkingControlModules').sourceSets.test.output
 	testCompile project(':IHMCJavaToolkit').sourceSets.test.output
 	testCompile project(':IHMCHumanoidRobotics').sourceSets.test.output

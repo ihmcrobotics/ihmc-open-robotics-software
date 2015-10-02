@@ -44,7 +44,6 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.posePlayback.AtlasPlaybackPoseInterpolatorTest.class,
    us.ihmc.atlas.posePlayback.AtlasPlaybackPoseSequenceTest.class,
    us.ihmc.atlas.roughTerrainWalking.AtlasFootExplorationTest.class,
-   us.ihmc.atlas.roughTerrainWalking.AtlasPlanSimpleTest.class,
    us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class,
    us.ihmc.atlas.utilities.kinematics.AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class,
    us.ihmc.atlas.XStreamTest.class

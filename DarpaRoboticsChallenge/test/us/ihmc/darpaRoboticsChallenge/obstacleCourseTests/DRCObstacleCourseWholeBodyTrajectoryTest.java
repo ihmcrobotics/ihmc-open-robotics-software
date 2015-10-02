@@ -26,7 +26,7 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTraject
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footsepGenerator.PathTypeStepParameters;
-import us.ihmc.pathGeneration.footstepGenerator.TurnInPlaceFootstepGenerator;
+import us.ihmc.humanoidRobotics.footstep.footsepGenerator.TurnInPlaceFootstepGenerator;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
