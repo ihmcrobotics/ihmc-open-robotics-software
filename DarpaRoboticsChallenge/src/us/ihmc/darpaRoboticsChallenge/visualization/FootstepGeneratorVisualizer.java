@@ -18,7 +18,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
 import us.ihmc.humanoidRobotics.footstep.footsepGenerator.SimplePathParameters;
-import us.ihmc.pathGeneration.footstepGenerator.TurningThenStraightFootstepGenerator;
+import us.ihmc.humanoidRobotics.footstep.footsepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;

@@ -21,7 +21,6 @@ import us.ihmc.darpaRoboticsChallenge.sensors.blackfly.BlackFlyParameterSetter;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
@@ -47,7 +46,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    public AtlasSensorSuiteManager(SDFFullRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
          DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation, DRCRobotJointMap jointMap,
-         AtlasPhysicalProperties physicalProperties, FootstepPlanningParameterization footstepParameters, DRCRobotModel.RobotTarget targetDeployment)
+         AtlasPhysicalProperties physicalProperties, DRCRobotModel.RobotTarget targetDeployment)
    {
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorInformation = sensorInformation;

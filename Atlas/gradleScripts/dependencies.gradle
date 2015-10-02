@@ -2,7 +2,7 @@ evaluationDependsOn(':DarpaRoboticsChallenge')
 evaluationDependsOn(':CommonWalkingControlModules')
 evaluationDependsOn(':Graphics3DAdapter')
 evaluationDependsOn(':IHMCWholeBodyController')
-evaluationDependsOn(':PathGeneration')
+evaluationDependsOn(':IHMCHumanoidRobotics')
 evaluationDependsOn(':SensorProcessing')
 
 dependencies {
@@ -41,8 +41,6 @@ dependencies {
     compile project(':RobotDataCommunication')
     compile project(':RobotiqHandDrivers')
     compile project(':ROSJava')
-	compile project(':PathGeneration')
-    compile project(':Planning')
     compile project(':SDFLoader')
     compile project(':SensorProcessing')
     compile project(':SimulationConstructionSet')
@@ -54,6 +52,5 @@ dependencies {
     testCompile project(':IHMCHumanoidRobotics').sourceSets.test.output
 	testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
     testCompile project(':IHMCWholeBodyController').sourceSets.test.output
-	testCompile project(':PathGeneration').sourceSets.test.output
     testCompile project(':SensorProcessing').sourceSets.test.output
   }
