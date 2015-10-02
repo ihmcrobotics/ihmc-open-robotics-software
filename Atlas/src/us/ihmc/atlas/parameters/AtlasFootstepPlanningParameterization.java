@@ -4,9 +4,9 @@ package us.ihmc.atlas.parameters;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.humanoidRobotics.footstep.footsepGenerator.FootstepPlanState;
-import us.ihmc.humanoidRobotics.footstep.footsepGenerator.FootstepPlanningParameterization;
-import us.ihmc.humanoidRobotics.footstep.footsepGenerator.FootstepPlanningParameterization.FootstepOffset;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanState;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization.FootstepOffset;
 
 public class AtlasFootstepPlanningParameterization extends FootstepPlanningParameterization
 {

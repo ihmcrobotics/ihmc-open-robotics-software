@@ -12,8 +12,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.footsepGenerator.SimplePathParameters;
-import us.ihmc.humanoidRobotics.footstep.footsepGenerator.TurnStraightTurnFootstepGenerator;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
