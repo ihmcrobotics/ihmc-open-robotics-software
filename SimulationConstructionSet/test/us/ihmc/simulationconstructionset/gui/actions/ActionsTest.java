@@ -270,7 +270,7 @@ public class ActionsTest
                  }
               })
               .assertMethodCalled("zoomIn")
-              .assertMethodNotCalled("zoomOUt");
+              .assertMethodNotCalled("zoomOut");
    }
 
    @DeployableTestMethod
