@@ -11,6 +11,7 @@ import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizeDrillBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.ReceiveImageBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.TalkAndMoveHandsBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
@@ -202,6 +203,9 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.RECEIVE_IMAGE, new ReceiveImageBehavior(outgoingCommunicationBridge));
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.LOCALIZE_DRILL, new LocalizeDrillBehavior(outgoingCommunicationBridge, referenceFrames));
 
+      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.TALK_AND_MOVE_HANDS, new TalkAndMoveHandsBehavior(outgoingCommunicationBridge, referenceFrames, yoTime));
+      
+      
       // TODO: Fix or remove this behavior
 //      PushButtonBehavior pushButtonBehavior = new PushButtonBehavior(outgoingCommunicationBridge, referenceFrames, yoTime, wristSensors);
 //      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.PUSH_BUTTON, pushButtonBehavior);
