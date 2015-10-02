@@ -11,12 +11,12 @@ import javax.vecmath.Vector3f;
 
 import org.ejml.data.DenseMatrix64F;
 
-import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidRobotics.communication.packets.BumStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
@@ -148,6 +148,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import boofcv.struct.calib.IntrinsicParameters;
 
 public class IHMCCommunicationKryoNetClassList extends NetClassList
 {   
@@ -436,5 +437,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(DrillDetectionPacket.class);
       
       registerPacketClass(BatchedDesiredSteeringAngleAndSingleJointAnglePacket.class);
+      registerPacketClass(TextToSpeechPacket.class);
    }
 }

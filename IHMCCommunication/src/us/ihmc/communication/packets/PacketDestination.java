@@ -20,6 +20,7 @@ public enum PacketDestination
    GFE, 
    AUXILIARY_ROBOT_DATA_PUBLISHER, 
    ZERO_POSE_PRODUCER,
+   SPEECH_TO_TEXT,
    DRILL_DETECTOR;
 
    public static final PacketDestination[] values = values();

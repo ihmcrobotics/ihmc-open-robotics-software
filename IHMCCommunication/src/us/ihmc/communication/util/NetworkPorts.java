@@ -34,6 +34,7 @@ public class NetworkPorts
    public static final NetworkPorts ROS_AUXILIARY_ROBOT_DATA_PUBLISHER = new NetworkPorts(6010);
    public static final NetworkPorts ZERO_POSE_PRODUCER = new NetworkPorts(6011);
    public static final NetworkPorts DRILL_DETECTOR = new NetworkPorts(6012);
+   public static final NetworkPorts TEXT_TO_SPEECH = new NetworkPorts(6013);
 
    // Mission control ports
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(2046);
