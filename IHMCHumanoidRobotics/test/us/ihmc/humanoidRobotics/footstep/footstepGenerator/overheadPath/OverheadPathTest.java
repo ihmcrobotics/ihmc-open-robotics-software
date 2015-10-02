@@ -10,10 +10,10 @@ import org.junit.Test;
 
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.humanoidRobotics.footstep.footsepGenerator.overheadPath.StraightLineOverheadPath;
-import us.ihmc.humanoidRobotics.footstep.footsepGenerator.overheadPath.TurnStraightTurnOverheadPath;
-import us.ihmc.humanoidRobotics.footstep.footsepGenerator.overheadPath.TurnThenStraightOverheadPath;
-import us.ihmc.humanoidRobotics.footstep.footsepGenerator.overheadPath.TurningOverheadPath;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.StraightLineOverheadPath;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.TurnStraightTurnOverheadPath;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.TurnThenStraightOverheadPath;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.TurningOverheadPath;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint2d;

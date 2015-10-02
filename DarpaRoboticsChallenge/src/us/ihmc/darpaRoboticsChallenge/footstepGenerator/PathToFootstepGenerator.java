@@ -13,8 +13,8 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingTrajectoryHeightCal
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.footsepGenerator.FootstepOverheadPath;
-import us.ihmc.humanoidRobotics.footstep.footsepGenerator.FootstepValidityMetric;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepOverheadPath;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepValidityMetric;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapper;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.AngleTools;

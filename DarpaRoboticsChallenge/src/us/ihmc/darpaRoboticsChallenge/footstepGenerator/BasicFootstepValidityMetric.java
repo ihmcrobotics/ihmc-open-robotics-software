@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.footstepGenerator;
 
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
-import us.ihmc.humanoidRobotics.footstep.footsepGenerator.FootstepValidityMetric;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepValidityMetric;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.RotationFunctions;
