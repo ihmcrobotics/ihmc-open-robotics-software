@@ -33,7 +33,7 @@ public class AlphaFilteredYoVariable extends DoubleYoVariable implements Process
    private final DoubleYoVariable alphaVariable;
 
    private final DoubleYoVariable position;
-   private final BooleanYoVariable hasBeenCalled;
+   protected final BooleanYoVariable hasBeenCalled;
 
    public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha)
    {
