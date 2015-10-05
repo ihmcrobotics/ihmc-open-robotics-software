@@ -3,8 +3,8 @@ package us.ihmc.atlas.initialSetup;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import org.junit.Test;
@@ -44,11 +44,10 @@ public class AtlasDrivingInitialSetupTest
       boolean containsAllJoints = true;
       
       DRCRobotJointMap jointMap = new AtlasJointMap(version);
-      File file = new File("initialDrivingSetup");
       try
       {
          Properties properties = new Properties();
-         FileInputStream stream = new FileInputStream(file);
+         InputStream stream = getClass().getClassLoader().getResourceAsStream("initialDrivingSetup");
          properties.load(stream);
          
          for (RobotSide robotSide : RobotSide.values())
@@ -62,7 +61,7 @@ public class AtlasDrivingInitialSetupTest
                }
                if (!properties.containsKey(key))
                {
-                  System.out.println(file.getAbsolutePath() + " did not contain joint " + key);
+                  System.out.println("File did not contain joint " + key);
                   containsAllJoints = false;
                }
             }
@@ -76,7 +75,7 @@ public class AtlasDrivingInitialSetupTest
                }
                if (!properties.containsKey(key))
                {
-                  System.out.println(file.getAbsolutePath() + " did not contain joint " + key);
+                  System.out.println("File did not contain joint " + key);
                   containsAllJoints = false;
                }
             }
@@ -91,7 +90,7 @@ public class AtlasDrivingInitialSetupTest
             }
             if (!properties.containsKey(key))
             {
-               System.out.println(file.getAbsolutePath() + " did not contain joint " + key);
+               System.out.println("File did not contain joint " + key);
                containsAllJoints = false;
             }
          }
@@ -100,7 +99,7 @@ public class AtlasDrivingInitialSetupTest
       }
       catch (IOException e)
       {
-         throw new RuntimeException("Atlas joint parameter file " + file.getAbsolutePath() + " cannot be loaded. ", e);
+         throw new RuntimeException("Atlas joint parameter file cannot be loaded. ", e);
       }
       
       assertTrue(containsAllJoints);
