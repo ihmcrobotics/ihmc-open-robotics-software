@@ -9,7 +9,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-public class ControlFlowNode implements ControlFlowElement
+@Deprecated
+class ControlFlowNode implements ControlFlowElement
 {
    private final ControlFlowElement controlFlowElement;
 

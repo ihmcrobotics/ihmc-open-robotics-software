@@ -1,7 +1,7 @@
 package us.ihmc.controlFlow;
 
 import java.util.List;
-
+@Deprecated
 public class NullControlFlowElement implements ControlFlowElement
 {
    public void startComputation()

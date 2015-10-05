@@ -1,7 +1,7 @@
 package us.ihmc.controlFlow;
 
-
-public class ControlFlowOutputToOutputPortConnector<DataType>
+@Deprecated
+class ControlFlowOutputToOutputPortConnector<DataType>
 {
    private final ControlFlowOutputPort<DataType> fromOutputPort;
    private final ControlFlowOutputPort<DataType> toOutputPort;

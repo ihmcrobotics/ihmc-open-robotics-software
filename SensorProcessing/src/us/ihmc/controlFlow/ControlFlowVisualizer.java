@@ -16,7 +16,7 @@ import org.jgrapht.ListenableGraph;
 import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
-
+@Deprecated
 public class ControlFlowVisualizer extends JPanel
 {
    private static final long serialVersionUID = -8937004613741097094L;
