@@ -9,6 +9,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
@@ -16,14 +17,13 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ChessboardPoseEstimatorTest
 {
    static final boolean DEBUG = false;
 
-	@DeployableTestMethod(estimatedDuration = 2.6)
+   @DeployableTestMethod(estimatedDuration = 2.6)
    @Test(timeout = 30000)
    public void testOpenCVRegression4x7() throws IOException
    {
@@ -31,18 +31,17 @@ public class ChessboardPoseEstimatorTest
       final double gridWidth = 0.05;
       final int squareNumCol = 4;
       final int squareNumRow = 7;
-      File pathToImages = new File("testImages/regression4x7");
+
+      InputStream is99Failed = getClass().getClassLoader().getResourceAsStream("regression4x7/99_failed.png");
+
       OpenCVChessboardPoseEstimator openCVDetector = new OpenCVChessboardPoseEstimator(squareNumRow, squareNumCol, gridWidth);
-      for (File f : pathToImages.listFiles())
-      {
-         PrintTools.debug(DEBUG, this, f.getAbsolutePath());
-         BufferedImage image = ImageIO.read(f);
-         RigidBodyTransform transform = openCVDetector.detect(image);
-         assertTrue(transform != null);
-      }
+      BufferedImage image = ImageIO.read(is99Failed);
+      RigidBodyTransform transform = openCVDetector.detect(image);
+      assertTrue(transform != null);
+
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.6)
+   @DeployableTestMethod(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testOpenCVRegression4x5() throws IOException
    {
@@ -50,18 +49,20 @@ public class ChessboardPoseEstimatorTest
       final double gridWidth = 0.05;
       final int squareNumCol = 4;
       final int squareNumRow = 5;
-      File pathToImages = new File("testImages/regression4x5");
+
+      InputStream is20Failed = getClass().getClassLoader().getResourceAsStream("regression4x5/20_failed.png");
+      InputStream is7Failed = getClass().getClassLoader().getResourceAsStream("regression4x5/7_failed.png");
+
       OpenCVChessboardPoseEstimator openCVDetector = new OpenCVChessboardPoseEstimator(squareNumRow, squareNumCol, gridWidth);
-      for (File f : pathToImages.listFiles())
+      for (InputStream f : new InputStream[] { is20Failed, is7Failed })
       {
-         PrintTools.debug(DEBUG, this, f.getAbsolutePath());
          BufferedImage image = ImageIO.read(f);
          RigidBodyTransform transform = openCVDetector.detect(image);
          assertTrue(transform != null);
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.6)
+   @DeployableTestMethod(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testSimpleAlmostFrontChessboard() throws IOException
    {
@@ -69,11 +70,11 @@ public class ChessboardPoseEstimatorTest
       final double gridWidth = 0.05;
       final int squareNumCol = 6;
       final int squareNumRow = 5;
-      BufferedImage image = ImageIO.read(new File("testImages/simple5x6Chessboard.jpg"));
+      BufferedImage image = ImageIO.read(getClass().getClassLoader().getResourceAsStream("simple5x6Chessboard.jpg"));
       testSingleImage(image, squareNumRow, squareNumCol, gridWidth, 1e-2);
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.2)
+   @DeployableTestMethod(estimatedDuration = 1.2)
    @Test(timeout = 30000)
    public void testDrivingSimCheckerBoard() throws IOException
    {
@@ -81,7 +82,7 @@ public class ChessboardPoseEstimatorTest
       final double gridWidth = 0.0335;
       final int squareNumCol = 6;
       final int squareNumRow = 5;
-      BufferedImage image = ImageIO.read(new File("testImages/drivingSim2.png"));
+      BufferedImage image = ImageIO.read(getClass().getClassLoader().getResourceAsStream("drivingSim2.png"));
       testSingleImage(image, squareNumRow, squareNumCol, gridWidth, 1e-1);
    }
 
@@ -95,12 +96,12 @@ public class ChessboardPoseEstimatorTest
       final double gridWidth = 0.049;
       final int squareNumCol = 9;
       final int squareNumRow = 6;
-      BufferedImage image = ImageIO.read(new File("testImages/polarisHood7x4.jpg"));
+      BufferedImage image = ImageIO.read(getClass().getClassLoader().getResourceAsStream("polarisHood7x4.jpg"));
       testSingleImage(image, squareNumRow, squareNumCol, gridWidth, 1e-1);
    }
 
    //boofcv found checkerboard but pose estimated poorly
-	@DeployableTestMethod(estimatedDuration = 1.6)
+   @DeployableTestMethod(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testImage1() throws IOException
    {
@@ -108,7 +109,7 @@ public class ChessboardPoseEstimatorTest
       final double gridWidth = 0.049;
       final int squareNumCol = 9;
       final int squareNumRow = 6;
-      BufferedImage image = ImageIO.read(new File("testImages/polarisHood9x6.jpg"));
+      BufferedImage image = ImageIO.read(getClass().getClassLoader().getResourceAsStream("polarisHood9x6.jpg"));
       testSingleImage(image, squareNumRow, squareNumCol, gridWidth, 1e-1);
    }
 
