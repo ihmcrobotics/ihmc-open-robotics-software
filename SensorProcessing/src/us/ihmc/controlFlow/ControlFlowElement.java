@@ -1,7 +1,7 @@
 package us.ihmc.controlFlow;
 
 import java.util.List;
-
+@Deprecated
 public interface ControlFlowElement
 {   
    public abstract void initialize();

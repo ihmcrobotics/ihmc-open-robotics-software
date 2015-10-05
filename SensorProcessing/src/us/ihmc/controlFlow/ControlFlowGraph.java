@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-
+@Deprecated
 public class ControlFlowGraph implements ControlFlowElement
 {
    private final LinkedHashMap<ControlFlowElement, ControlFlowNode> elementsToNodes = new LinkedHashMap<ControlFlowElement, ControlFlowNode>();

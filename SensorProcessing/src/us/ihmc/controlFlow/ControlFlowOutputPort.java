@@ -1,5 +1,5 @@
 package us.ihmc.controlFlow;
-
+@Deprecated
 public class ControlFlowOutputPort<DataType> implements ControlFlowPort<DataType>
 {
    private final String name;

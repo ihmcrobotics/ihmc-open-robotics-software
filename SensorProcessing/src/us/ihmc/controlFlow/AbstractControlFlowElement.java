@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Deprecated
 public abstract class AbstractControlFlowElement implements ControlFlowElement
 {
    private List<ControlFlowInputPort<?>> inputPorts = new ArrayList<ControlFlowInputPort<?>>();
