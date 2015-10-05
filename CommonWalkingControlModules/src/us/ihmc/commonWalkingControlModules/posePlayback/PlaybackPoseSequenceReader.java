@@ -24,6 +24,13 @@ public class PlaybackPoseSequenceReader
       appendFromFile(posePlaybackRobotPoseSequence, file);
    }
 
+   
+   
+   public static void appendFromFile(PlaybackPoseSequence posePlaybackRobotPoseSequence, InputStream selectedFile)
+   {
+      appendFromFile(posePlaybackRobotPoseSequence, new InputStreamReader(selectedFile));
+   }
+   
    public static void appendFromFile(PlaybackPoseSequence posePlaybackRobotPoseSequence, File selectedFile)
    {
       try
