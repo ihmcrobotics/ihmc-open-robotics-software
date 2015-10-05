@@ -154,7 +154,7 @@ public class EstimateMotionFromBoxTest
    {
       EstimateMotionFromBox boxMotion = new EstimateMotionFromBox();
       
-      List<Point3D_F64> cloud = PointCloudTools.boundSphere(PointCloudTools.readPointCloud("../SensorProcessing/box_5s.txt", 1000000), new Point3D_F64(4.1, -0.55, -0.75), 1);
+      List<Point3D_F64> cloud = PointCloudTools.boundSphere(PointCloudTools.readPointCloud("box_1s.txt", 1000000), new Point3D_F64(4.1, -0.55, -0.75), 1);
       List<PlaneNormal3D_F64> cube = emFitCube(cloud);
 
       boxMotion.setSrc(cube.get(0), cube.get(1), cube.get(2));
