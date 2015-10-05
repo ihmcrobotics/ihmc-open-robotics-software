@@ -19,13 +19,13 @@ dependencies {
     compile group: 'com.vividsolutions', name: 'jts', version: '1.13' 
     compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17' 
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3' 
-//    compile group: 'org.jgrapht', name: 'jgrapht-jdk1.5', version: '0.7.3' 
     compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
     compile group: 'pl.edu.icm', name: 'JLargeArrays', version: '1.2'
+    compile group: 'org.jgrapht', name: 'jgrapht-core', version: '0.9.0'
+	compile group: 'org.jgrapht', name: 'jgrapht-ext', version: '0.9.0'
     
     compile group: 'us.ihmc.thirdparty', name: 'JTransforms', version: '3.0'
       
-    compile project(':IHMCControlFlow')
     compile project(':IHMCCommunication')
     compile project(':Graphics3DAdapter')
     compile project(':SimulationConstructionSet')

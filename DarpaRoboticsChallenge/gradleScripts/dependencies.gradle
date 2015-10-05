@@ -36,7 +36,7 @@ dependencies {
 	compile project(':IHMCROSTools')
 	compile project(':CommonWalkingControlModules')
 	compile project(':Graphics3DAdapter')
-	compile project(':IHMCControlFlow')
+	
 	compile project(':IHMCSystemIdentification')
 	
 	compile project(':ImageProcessing')
