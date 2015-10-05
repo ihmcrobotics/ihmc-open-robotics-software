@@ -1,19 +1,8 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import georegression.geometry.UtilPlane3D_F64;
-import georegression.geometry.UtilPoint3D_F64;
-import georegression.metric.Distance3D_F64;
-import georegression.struct.plane.PlaneGeneral3D_F64;
-import georegression.struct.plane.PlaneNormal3D_F64;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.point.Vector3D_F64;
-import georegression.struct.se.Se3_F64;
-import georegression.struct.shapes.Box3D_F64;
-import georegression.transform.se.SePointOps_F64;
-
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -26,7 +15,8 @@ import org.ddogleg.optimization.UtilOptimize;
 import org.ddogleg.optimization.functions.FunctionNtoM;
 import org.ddogleg.struct.FastQueue;
 
-import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
+import com.jme3.math.Vector3f;
+
 import bubo.clouds.detect.CloudShapeTypes;
 import bubo.clouds.detect.PointCloudShapeFinder.Shape;
 import bubo.clouds.detect.alg.ApproximateSurfaceNormals;
@@ -38,8 +28,17 @@ import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import bubo.io.serialization.DataDefinition;
 import bubo.io.serialization.SerializationDefinitionManager;
 import bubo.io.text.ReadCsvObjectSmart;
-
-import com.jme3.math.Vector3f;
+import georegression.geometry.UtilPlane3D_F64;
+import georegression.geometry.UtilPoint3D_F64;
+import georegression.metric.Distance3D_F64;
+import georegression.struct.plane.PlaneGeneral3D_F64;
+import georegression.struct.plane.PlaneNormal3D_F64;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.point.Vector3D_F64;
+import georegression.struct.se.Se3_F64;
+import georegression.struct.shapes.Box3D_F64;
+import georegression.transform.se.SePointOps_F64;
+import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
 
 public class PointCloudTools
 {
@@ -58,7 +57,7 @@ public class PointCloudTools
 
       try
       {
-         FileInputStream in = new FileInputStream(fileName);
+         InputStream in = PointCloudTools.class.getClassLoader().getResourceAsStream(fileName);
          ReadCsvObjectSmart<Point3D_F64> reader = new ReadCsvObjectSmart<Point3D_F64>(in, manager, "point3d");
 
          Point3D_F64 pt = new Point3D_F64();
