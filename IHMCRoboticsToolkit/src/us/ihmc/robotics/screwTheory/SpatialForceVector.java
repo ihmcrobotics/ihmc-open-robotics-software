@@ -285,6 +285,12 @@ public class SpatialForceVector
       this.linearPart.add(linearPart);
    }
 
+   public void addLinearPart(FrameVector linearPart)
+   {
+      expressedInFrame.checkReferenceFrameMatch(linearPart);
+      this.linearPart.add(linearPart.getVector());
+   }
+
    public void subLinearPart(Vector3d linearPart)
    {
       this.linearPart.sub(linearPart);
