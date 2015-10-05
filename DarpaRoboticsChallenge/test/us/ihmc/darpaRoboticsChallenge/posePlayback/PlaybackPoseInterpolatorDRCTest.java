@@ -84,7 +84,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
-      PlaybackPoseSequenceReader.appendFromFile(sequence, "testSequence2.poseSequence");
+      PlaybackPoseSequenceReader.appendFromFile(sequence, getClass().getClassLoader().getResourceAsStream("testSequence2.poseSequence"));
       playASequence(sdfRobot, sequence);
    }
 
@@ -97,7 +97,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
-      PlaybackPoseSequenceReader.appendFromFile(sequence, "tenPoses.poseSequence");
+      PlaybackPoseSequenceReader.appendFromFile(sequence, getClass().getClassLoader().getResourceAsStream("tenPoses.poseSequence"));
 
       System.out.println(sequence);
       playASequence(sdfRobot, sequence);
