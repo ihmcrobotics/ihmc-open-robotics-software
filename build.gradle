@@ -75,9 +75,9 @@ remotes
 {
 	valkyrieRealtimeComputer
 	{
-		host = '192.168.2.45'
-		user = 'root'
-		password = 'unknownpw'
+		host = '10.2.0.10'
+		user = 'val'
+		password = '***REMOVED***'
 		knownHosts = allowAnyHosts
 	}
 }
