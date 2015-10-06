@@ -37,8 +37,8 @@ public class ValkyrieRosControlSliderBoardGUI extends SCSVisualizer
       sliderBoard.setKnob(1, selectedJoint, 0, selectedJoint.getEnumSize());
       sliderBoard.setSlider(1, q_d, -Math.PI, Math.PI);
       sliderBoard.setSlider(2, qd_d, -Math.PI, Math.PI);
-      sliderBoard.setSlider(3, kp, 0, 10000);
-      sliderBoard.setSlider(4, kd, 0, 100);
+      sliderBoard.setSlider(3, kp, 0, 100);
+      sliderBoard.setSlider(4, kd, 0, 10);
       
    }
    
