@@ -937,6 +937,20 @@ public class GeometryTools
 
       return dist;
    }
+   
+   /**
+    * Calculates distance between two Point2ds, a and b.
+    *
+    * @param a Point2d
+    * @param b Point2d
+    * @return double
+    */
+   public static double distanceBetweenPoints(Point2d a, Point2d b)
+   {
+      double deltaX = b.x - a.x;
+      double deltaY = b.y - a.y;
+      return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+   }
 
    /**
     * Let the test point be C (Cx,Cy) and the line be AB (Ax,Ay) to (Bx,By).
