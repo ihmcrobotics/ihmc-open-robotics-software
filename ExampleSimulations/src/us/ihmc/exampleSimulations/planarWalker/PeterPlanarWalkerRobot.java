@@ -15,11 +15,10 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SliderJoint;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 
-
 public class PeterPlanarWalkerRobot extends Robot
 {
    private final double initalHipAngle = 0.0;
-   private final double initalBodyVelocity = 0.2;
+   private final double initalBodyVelocity = 0.0;
    private double GRAVITY = -9.81;
    private FloatingPlanarJoint bodyJoint;
    private SideDependentList<PinJoint> hipJoints = new SideDependentList<PinJoint>();
@@ -34,84 +33,88 @@ public class PeterPlanarWalkerRobot extends Robot
    private double bodyLength = 0.3, bodyWidth = 0.1, bodyHeight = 0.1;
    private double hipOffsetY = bodyWidth / 2.0;
    private double maxLegExtension = lowerLinkLength;
-   
-   public final double nominalHeight =  upperLinkLength + lowerLinkLength/2.0;
 
-   
+   public final double nominalHeight = upperLinkLength + lowerLinkLength / 2.0;
+
    public PeterPlanarWalkerRobot()
    {
-     super("Walker");
-     this.setGravity(GRAVITY);
-     
-     bodyJoint = new FloatingPlanarJoint("body", this, FloatingPlanarJoint.XZ);
-     
-     Link bodyLink = getBodyLink();
-     
-     bodyJoint.setLink(bodyLink);
-     this.addRootJoint(bodyJoint);
-     
-     for (RobotSide robotSide : RobotSide.values())
-     {
+      super("Walker");
+      this.setGravity(GRAVITY);
 
-        PinJoint hipJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "Hip", new Vector3d(0.0, robotSide.negateIfRightSide(hipOffsetY), 0.0), this,
-              Axis.Y);
-        hipJoints.put(robotSide, hipJoint);
-        hipJoint.setDynamic(true);
-        hipJoint.setLimitStops(-Math.PI, Math.PI, 1e6, 1e3);
-        Link upperLink = upperLink(robotSide);
-        hipJoint.setLink(upperLink);
-        bodyJoint.addJoint(hipJoint);
+      bodyJoint = new FloatingPlanarJoint("body", this, FloatingPlanarJoint.XZ);
 
-        /************************************************************/
+      Link bodyLink = getBodyLink();
 
-        SliderJoint kneeJoint = new SliderJoint(robotSide.getSideNameFirstLetter() + "Knee", new Vector3d(0.0, 0.0, -upperLinkLength), this, new Vector3d(0.0, 0.0, -1.0)); //TODO change offset depending on height
-        kneeJoints.put(robotSide, kneeJoint);
-        kneeJoint.setDynamic(true);
-        kneeJoint.setLimitStops(0.0, maxLegExtension, 1e5, 1e4); //TODO change limits depending on initial position. Eg: (0.0, 0.6)
-        Link lowerLink = lowerLink(robotSide);
-        kneeJoint.setLink(lowerLink);
-        hipJoint.addJoint(kneeJoint);
+      bodyJoint.setLink(bodyLink);
+      this.addRootJoint(bodyJoint);
 
-        /*************************************************************/
+      for (RobotSide robotSide : RobotSide.values())
+      {
 
-        GroundContactPoint contactPoint = new GroundContactPoint(robotSide.getSideNameFirstLetter() + "Foot", new Vector3d(0.0, 0.0, 0.0), this);
-        gCpoints.set(robotSide, contactPoint);
-        kneeJoints.get(robotSide).addGroundContactPoint(contactPoint);
-        Graphics3DObject graphics = kneeJoints.get(robotSide).getLink().getLinkGraphics();
-        graphics.identity();
-        graphics.translate(0.0, 0.0, 0.0);
-        double radius = 1.5 * lowerLinkRadius;
-        graphics.addSphere(radius, YoAppearance.Orange());
-     }
-     
-     
-     LinearGroundContactModel ground = new LinearGroundContactModel(this, this.getRobotsYoVariableRegistry());
-     this.setGroundContactModel(ground);
-     
-     initialize();
+         PinJoint hipJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "Hip", new Vector3d(0.0, robotSide.negateIfRightSide(hipOffsetY), 0.0), this,
+               Axis.Y);
+         hipJoints.put(robotSide, hipJoint);
+         hipJoint.setDynamic(true);
+         hipJoint.setLimitStops(-Math.PI, Math.PI, 1e6, 1e3);
+         Link upperLink = upperLink(robotSide);
+         hipJoint.setLink(upperLink);
+         bodyJoint.addJoint(hipJoint);
+
+         /************************************************************/
+
+         SliderJoint kneeJoint = new SliderJoint(robotSide.getSideNameFirstLetter() + "Knee", new Vector3d(0.0, 0.0, -upperLinkLength), this, new Vector3d(0.0,
+               0.0, -1.0)); //TODO change offset depending on height
+         kneeJoints.put(robotSide, kneeJoint);
+         kneeJoint.setDynamic(true);
+         kneeJoint.setLimitStops(0.0, maxLegExtension, 1e5, 1e4); //TODO change limits depending on initial position. Eg: (0.0, 0.6)
+         Link lowerLink = lowerLink(robotSide);
+         kneeJoint.setLink(lowerLink);
+         hipJoint.addJoint(kneeJoint);
+
+         /*************************************************************/
+
+         GroundContactPoint contactPoint = new GroundContactPoint(robotSide.getSideNameFirstLetter() + "Foot", new Vector3d(0.0, 0.0, 0.0), this);
+         gCpoints.set(robotSide, contactPoint);
+         kneeJoints.get(robotSide).addGroundContactPoint(contactPoint);
+         Graphics3DObject graphics = kneeJoints.get(robotSide).getLink().getLinkGraphics();
+         graphics.identity();
+         graphics.translate(0.0, 0.0, 0.0);
+         double radius = 1.5 * lowerLinkRadius;
+         graphics.addSphere(radius, YoAppearance.Orange());
+      }
+
+      double groundKxy = 1e4;
+      double groundBxy = 1e2;
+      double groundKz = 125.0;
+      double groundBz = 300.0;
+      LinearGroundContactModel ground = new LinearGroundContactModel(this, groundKxy, groundBxy, groundKz, groundBz, this.getRobotsYoVariableRegistry());
+
+      this.setGroundContactModel(ground);
+
+      initialize();
    }
-   
+
    private void initialize()
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         kneeJoints.get(robotSide).getQ().set(maxLegExtension/2.0);
-         
+         kneeJoints.get(robotSide).getQ().set(maxLegExtension / 2.0);
+
          double sign = robotSide.negateIfLeftSide(1.0);
          hipJoints.get(robotSide).getQ().set(initalHipAngle * sign);
       }
-      
+
       bodyJoint.getQd_t1().set(initalBodyVelocity);
       this.setRobotXZ(0.0, nominalHeight);
 
    }
-   
+
    public void setRobotXZ(double x, double z)
    {
       bodyJoint.getQ_t1().set(x);
       bodyJoint.getQ_t2().set(z);
    }
-   
+
    private Link upperLink(RobotSide robotSide)
    {
 
@@ -162,79 +165,82 @@ public class PeterPlanarWalkerRobot extends Robot
       {
          linkGraphics.addCylinder(lowerLinkLength, lowerLinkRadius, YoAppearance.Blue());
       }
-      
-      
+
       ret.setLinkGraphics(linkGraphics);
       //ret.addCoordinateSystemToCOM(0.4);
       return ret;
    }
-   
+
    public double getKneePosition(RobotSide robotSide)
    {
       return kneeJoints.get(robotSide).getQ().getDoubleValue();
    }
-   
+
    public double getKneeVelocity(RobotSide robotSide)
    {
       return kneeJoints.get(robotSide).getQD().getDoubleValue();
    }
-   
+
    public double getHipPosition(RobotSide robotSide)
    {
       return hipJoints.get(robotSide).getQ().getDoubleValue();
    }
-   
+
    public double getHipVelocity(RobotSide robotSide)
    {
       return hipJoints.get(robotSide).getQD().getDoubleValue();
    }
-   
+
    public void setKneeTorque(RobotSide robotSide, double torque)
    {
       kneeJoints.get(robotSide).getTau().set(torque);
    }
-   
+
    public void setHipTorque(RobotSide robotSide, double torque)
    {
       hipJoints.get(robotSide).getTau().set(torque);
    }
    
+   public double getHipTorque(RobotSide robotSide)
+   {
+      return hipJoints.get(robotSide).getTau().getDoubleValue();
+   }
+
    public boolean isFootOnGround(RobotSide robotSide)
    {
       return gCpoints.get(robotSide).isInContact();
    }
-   
+
    public double getBodyPitch()
    {
       return bodyJoint.getQ_rot().getDoubleValue();
    }
-   
+
    public double getBodyPitchVelocity()
    {
       return bodyJoint.getQd_rot().getDoubleValue();
    }
-   
+
    public double getBodyHeight()
    {
       return bodyJoint.getQ_t2().getDoubleValue();
    }
-   
+
    public double getBodyHeightVelocity()
    {
       return bodyJoint.getQd_t2().getDoubleValue();
    }
-   
+
    public double getBodyVelocity()
    {
       return bodyJoint.getQd_t1().getDoubleValue();
    }
-   
-   
+
    private Link getBodyLink()
    {
       Link body = new Link("body");
       body.setMassAndRadiiOfGyration(bodyMass, bodyLength, bodyWidth, bodyHeight);
-      
+
       body.setComOffset(new Vector3d(0.0, 0.0, 0.0));
       Graphics3DObject graphics = new Graphics3DObject();
       graphics.addCube(0.4, 0.2, 0.1, YoAppearance.AliceBlue());
