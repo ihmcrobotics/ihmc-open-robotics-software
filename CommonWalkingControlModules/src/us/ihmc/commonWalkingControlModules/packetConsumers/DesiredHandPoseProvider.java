@@ -26,6 +26,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, HandPoseProvider
 {
@@ -35,7 +36,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    private final AtomicReference<WholeBodyTrajectoryPacket> wholeBodyTrajectoryHandPoseListPackets = new AtomicReference<WholeBodyTrajectoryPacket>();
    private final SideDependentList<AtomicReference<StopMotionPacket>> pausePackets = new SideDependentList<AtomicReference<StopMotionPacket>>();
    private final SideDependentList<AtomicReference<ArmJointTrajectoryPacket>> armJointTrajectoryPackets = new SideDependentList<AtomicReference<ArmJointTrajectoryPacket>>();
-   
+
    private final SideDependentList<FramePose> homePositions = new SideDependentList<FramePose>();
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
    private final SideDependentList<FramePose[]> desiredHandPosesList = new SideDependentList<FramePose[]>();
@@ -70,12 +71,12 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    private final PacketConsumer<ArmJointTrajectoryPacket> armJointTrajectoryPacketConsumer;
    private final GlobalDataProducer globalDataProducer;
 
-   public DesiredHandPoseProvider(FullHumanoidRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame,
-         GlobalDataProducer globalDataProducer)
+   public DesiredHandPoseProvider(CommonHumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel,
+         SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame, GlobalDataProducer globalDataProducer)
    {
       this.fullRobotModel = fullRobotModel;
       this.globalDataProducer = globalDataProducer;
-      chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+      chestFrame = referenceFrames.getMidFeetUnderPelvisFrame();
       packetReferenceFrames = new SideDependentList<ReferenceFrame>(chestFrame, chestFrame);
       numberOfArmJoints = ScrewTools.computeDegreesOfFreedom(ScrewTools.createJointPath(fullRobotModel.getChest(), fullRobotModel.getHand(RobotSide.LEFT)));
 
@@ -95,7 +96,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
          rotationAxisOriginsInWorld.put(robotSide, new Point3d());
          rotationAxesInWorld.put(robotSide, new Vector3d());
          forceConstraintsInWorld.put(robotSide, new Vector3d());
-         
+
          controlledAxes.put(robotSide, new AtomicReference<boolean[]>(null));
       }
 
@@ -135,7 +136,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
             wholeBodyTrajectoryHandPoseListPackets.set(packet);
          }
       };
-      
+
       armJointTrajectoryPacketConsumer = new PacketConsumer<ArmJointTrajectoryPacket>()
       {
          @Override
@@ -254,7 +255,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    private void updateFromNewestHandRotateAboutAxisPacket(RobotSide robotSide)
    {
       HandRotateAboutAxisPacket object = handRotateAboutAxisPackets.get(robotSide).getAndSet(null);
-      
+
       if (object != null)
       {
          trajectoryTime = object.getTrajectoryTime();
@@ -264,8 +265,8 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
          controlHandAngleAboutAxis.put(robotSide, object.controlHandAngleAboutAxis());
          graspOffsetsFromControlFrame.put(robotSide, object.getGraspOffsetFromControlFrame());
          handRotateAboutAxisDataType.put(robotSide, object.getDataType());
-         
-         if(object.dataType == HandRotateAboutAxisPacket.DataType.ROTATE_ABOUT_AXIS_FORCE_CONTROLLED)
+
+         if (object.dataType == HandRotateAboutAxisPacket.DataType.ROTATE_ABOUT_AXIS_FORCE_CONTROLLED)
          {
             tangentialForce.put(robotSide, object.desiredTangentialForce);
             forceConstraintsInWorld.put(robotSide, object.forceConstraint);
@@ -308,23 +309,23 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    {
       return handRotateAboutAxisPackets.get(robotSide).get() != null;
    }
-   
+
    @Override
    public boolean checkForNewArmJointTrajectory(RobotSide robotSide)
    {
       return armJointTrajectoryPackets.get(robotSide).get() != null || wholeBodyTrajectoryHandPoseListPackets.get() != null;
    }
-   
+
    @Override
    public ArmJointTrajectoryPacket getArmJointTrajectoryPacket(RobotSide robotSide)
    {
       ArmJointTrajectoryPacket packet = null;
-      
+
       if (armJointTrajectoryPackets.get(robotSide).get() != null)
       {
          packet = armJointTrajectoryPackets.get(robotSide).getAndSet(null);
       }
-      
+
       if (wholeBodyTrajectoryHandPoseListPackets.get() != null)
       {
          if (robotSide.equals(RobotSide.LEFT))
@@ -338,7 +339,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
             packet = wholeBodyPacket.rightArmTrajectory;
          }
       }
-      
+
       if (globalDataProducer != null && packet != null)
       {
          String errorMessage = PacketValidityChecker.validateArmJointTrajectoryPacket(packet);
@@ -349,10 +350,9 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
             return null;
          }
       }
-      
+
       return packet;
    }
-   
 
    @Override
    public HandPosePacket.DataType checkHandPosePacketDataType(RobotSide robotSide)
@@ -430,14 +430,14 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
       updateFromNewestHandRotateAboutAxisPacket(robotSide);
       return rotationAnglesRightHandRules.get(robotSide);
    }
-   
+
    @Override
    public double getGraspOffsetFromControlFrame(RobotSide robotSide)
    {
       updateFromNewestHandRotateAboutAxisPacket(robotSide);
       return graspOffsetsFromControlFrame.get(robotSide);
    }
-   
+
    @Override
    public boolean controlHandAngleAboutAxis(RobotSide robotSide)
    {
@@ -498,7 +498,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    {
       return handRotateAboutAxisConsumer;
    }
-   
+
    public PacketConsumer<ArmJointTrajectoryPacket> getArmJointTrajectoryConsumer()
    {
       return armJointTrajectoryPacketConsumer;
@@ -524,17 +524,17 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    @Override
    public Vector3d getForceConstraint(RobotSide robotSide)
    {
-	   updateFromNewestHandRotateAboutAxisPacket(robotSide);
-	   return forceConstraintsInWorld.get(robotSide);
+      updateFromNewestHandRotateAboutAxisPacket(robotSide);
+      return forceConstraintsInWorld.get(robotSide);
    }
 
    @Override
    public double getTangentialForce(RobotSide robotSide)
    {
-	   updateFromNewestHandRotateAboutAxisPacket(robotSide);
-	   return tangentialForce.get(robotSide);
+      updateFromNewestHandRotateAboutAxisPacket(robotSide);
+      return tangentialForce.get(robotSide);
    }
-   
+
    @Override
    public HandRotateAboutAxisPacket.DataType checkHandRotateAboutAxisDataType(RobotSide robotSide)
    {

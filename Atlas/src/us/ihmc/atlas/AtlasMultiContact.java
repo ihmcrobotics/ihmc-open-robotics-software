@@ -166,7 +166,7 @@ public class AtlasMultiContact
                YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
          {
             PelvisPoseProvider desiredPelvisPoseProvider = new UserDesiredPelvisPoseProvider(registry);
-            HandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), null);
+            HandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(referenceFrames,fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), null);
             HandLoadBearingProvider desiredHandLoadBearingProvider = new DesiredHandLoadBearingProvider();
             return new VariousWalkingProviders(null, null, null, null, null, desiredPelvisPoseProvider, desiredHandPoseProvider, null, null,
                   desiredHandLoadBearingProvider, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);

@@ -727,7 +727,8 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public boolean doPrepareManipulationForLocomotion()
    {
-      return true;
+      //this allows me to walk with hand poses locked in a reference frame
+      return false;
    }
 
    @Override

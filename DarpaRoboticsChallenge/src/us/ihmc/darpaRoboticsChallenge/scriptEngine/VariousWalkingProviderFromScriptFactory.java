@@ -84,7 +84,7 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
          ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables, 
          YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
    {
-      ScriptBasedFootstepProvider footstepProvider = new ScriptBasedFootstepProvider(scriptFileLoader, time, feet, fullRobotModel, walkingControllerParameters, registry);
+      ScriptBasedFootstepProvider footstepProvider = new ScriptBasedFootstepProvider(referenceFrames, scriptFileLoader, time, feet, fullRobotModel, walkingControllerParameters, registry);
 
       updatables.add(footstepProvider);
       
