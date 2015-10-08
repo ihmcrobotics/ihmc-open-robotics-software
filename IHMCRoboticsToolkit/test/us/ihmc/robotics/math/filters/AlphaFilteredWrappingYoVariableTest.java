@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -8,14 +9,17 @@ import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class AlphaFilteredWrappingYoVariableTest
 {
    private final Random random = new Random();
 
-	@DeployableTestMethod
-	@Test(timeout=300000)
+   //TODO: Test the modulo of the input
+   
+	@DeployableTestMethod(estimatedDuration = 0.1)
+	@Test(timeout=60000)
    public void testNoisyFixedPosition()
    {
       // Use a reasonably large alpha for a reasonably large amount of noise
@@ -24,7 +28,7 @@ public class AlphaFilteredWrappingYoVariableTest
       alpha.set(0.8);
       
       DoubleYoVariable positionVariable = new DoubleYoVariable("positionVariable", registry);
-      AlphaFilteredWrappingYoVariable AlphaFilteredWrappingYoVariable = new AlphaFilteredWrappingYoVariable("AlphaFilteredWrappingYoVariable", "", registry, alpha, positionVariable, 0.0, 20.0);
+      AlphaFilteredWrappingYoVariable AlphaFilteredWrappingYoVariable = new AlphaFilteredWrappingYoVariable("AlphaFilteredWrappingYoVariable", "", registry, positionVariable, alpha, 0.0, 20.0);
 
       double pseudoNoise = 0;
 
@@ -43,32 +47,38 @@ public class AlphaFilteredWrappingYoVariableTest
       assertEquals(10, AlphaFilteredWrappingYoVariable.getDoubleValue(), 1);
    }
 	
-	@DeployableTestMethod
-	@Test(timeout=300000)
+	@DeployableTestMethod(estimatedDuration = 0.1)
+	@Test(timeout=60000)
 	public void testErrorAlwaysDecreases()
 	{
 	   // Use a reasonably large alpha for a reasonably large amount of noise
 	   YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
 	   DoubleYoVariable alpha = new DoubleYoVariable("alpha", registry);
 	   alpha.set(0.999999);
-	   
+
 	   DoubleYoVariable positionVariable = new DoubleYoVariable("positionVariable", registry);
-	   double lowerLimit = random.nextDouble() - 0.5 * random.nextInt();
-      double upperLimit = lowerLimit + random.nextDouble() - 0.5 * random.nextInt();
-      AlphaFilteredWrappingYoVariable alphaFilteredWrappingYoVariable = new AlphaFilteredWrappingYoVariable("AlphaFilteredWrappingYoVariable", "", registry, alpha, positionVariable, lowerLimit, upperLimit);
-	   positionVariable.set(random.nextDouble() - 0.5 * random.nextInt());
+	   double lowerLimit = RandomTools.generateRandomDouble(random, -100.0, 100.0);
+      double upperLimit = RandomTools.generateRandomDouble(random, -100.0, 100.0);
+      if(upperLimit < lowerLimit)
+      {
+         double temp = lowerLimit;
+         lowerLimit = upperLimit;
+         upperLimit = temp;
+      }
+      
+      AlphaFilteredWrappingYoVariable alphaFilteredWrappingYoVariable = new AlphaFilteredWrappingYoVariable("AlphaFilteredWrappingYoVariable", "", registry, positionVariable, alpha, lowerLimit, upperLimit);
+	   positionVariable.set(RandomTools.generateRandomDouble(random, lowerLimit, upperLimit));
 	   alphaFilteredWrappingYoVariable.update();
 	   
 	   for(int iteration = 0; iteration < 10000; iteration++)
 	   {
-	      positionVariable.set(random.nextDouble());
+	      positionVariable.set(RandomTools.generateRandomDouble(random, lowerLimit, upperLimit));
 	      double lastError = getErrorConsideringWrap(alphaFilteredWrappingYoVariable.getDoubleValue(), positionVariable.getDoubleValue(),lowerLimit, upperLimit);
-	      
 	      for (int convergeAlphaCount = 0; convergeAlphaCount < 100; convergeAlphaCount++)
 	      {
 	         alphaFilteredWrappingYoVariable.update();
 	         double currentError = getErrorConsideringWrap(alphaFilteredWrappingYoVariable.getDoubleValue(), positionVariable.getDoubleValue(),lowerLimit, upperLimit);
-	         assertTrue(currentError < lastError);
+	         assertTrue(Math.abs(currentError) < Math.abs(lastError));
 	      }
 	   }
 	}
@@ -105,8 +115,8 @@ public class AlphaFilteredWrappingYoVariableTest
 	   return wrappingError;
 	}
 	
-	@DeployableTestMethod
-   @Test(timeout=300000)
+	@DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout=60000)
    public void testWrappingError()
    {
 	   double e = getErrorConsideringWrap(0.2,0.8,0.0,1.0);
@@ -138,10 +148,17 @@ public class AlphaFilteredWrappingYoVariableTest
 	   
 	   e = getErrorConsideringWrap(0.2, 0.2,-1.0,1.0);
 	   assertEquals(0.0, e, 0.001);
+	   
+	   e = getErrorConsideringWrap(-3.2, -4.0,-5.0,-1.0);
+	   assertEquals(-0.8, e, 0.001);
+	   
+	   e = getErrorConsideringWrap(0.0, 0.0, -1.0, 1.0);
+	   System.out.println(e);
+	   
    }
 
-	@DeployableTestMethod
-	@Test(timeout=300000)
+	@DeployableTestMethod(estimatedDuration = 0.1)
+	@Test(timeout=60000)
    public void testAlphaAndBreakFrequencyComputations()
    {
       double DT = 0.1;
