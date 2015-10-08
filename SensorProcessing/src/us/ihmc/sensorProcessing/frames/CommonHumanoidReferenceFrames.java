@@ -12,6 +12,8 @@ public interface CommonHumanoidReferenceFrames
    public abstract ReferenceFrame getABodyAttachedZUpFrame();
 
    public abstract ReferenceFrame getMidFeetZUpFrame();
+   public abstract ReferenceFrame getMidFeetUnderPelvisFrame();
+
 
    public abstract SideDependentList<ReferenceFrame> getAnkleZUpReferenceFrames();
 

@@ -9,6 +9,8 @@ import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -48,6 +50,9 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
    private final MidFrameZUpFrame midFeetZUpFrame;
+   private final ReferenceFrame midFeetZUpWalkDirectionFrame;
+   private final ReferenceFrame midFeetUnderPelvisWalkDirectionFrame;
+
    private final ReferenceFrame centerOfMassFrame;
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel)
@@ -95,6 +100,55 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       }
 
       midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUp", pelvisZUpFrame, getFootFrame(RobotSide.LEFT), getFootFrame(RobotSide.RIGHT));
+
+      //this is a frame that is directly between the 2 feet but faces forward instead of perpendicular to the line between the feet
+      midFeetZUpWalkDirectionFrame = new ReferenceFrame("midFeetZUpWalkDirectionFrame", ReferenceFrame.getWorldFrame())
+      {
+         private static final long serialVersionUID = 8156971218482020008L;
+         private final FramePose midFootZUpPose = new FramePose();
+         private final FramePose leftFootPose = new FramePose();
+         private final FramePose rightFootPose = new FramePose();
+         private final SideDependentList<FramePose> footPoses = new SideDependentList<>(leftFootPose, rightFootPose);
+
+         private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+         private final double[] tempYawPitchRoll = new double[3];
+
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               ReferenceFrame footFrame = getFootFrame(robotSide);
+               footFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
+               FramePose footPose = footPoses.get(robotSide);
+               footPose.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), tempTransform);
+               footPose.getOrientation(tempYawPitchRoll);
+               tempYawPitchRoll[1] = 0.0;
+               tempYawPitchRoll[2] = 0.0;
+               footPose.setOrientation(tempYawPitchRoll);
+            }
+
+            midFootZUpPose.interpolate(leftFootPose, rightFootPose, 0.5);
+            midFootZUpPose.setZ(Math.min(leftFootPose.getZ(), rightFootPose.getZ()));
+            midFootZUpPose.getPose(transformToParent);
+         }
+      };
+      // this is a
+      midFeetUnderPelvisWalkDirectionFrame = new ReferenceFrame("midFeetUnderPelvisWalkDirectionFrame", ReferenceFrame.getWorldFrame())
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            FramePose midFeetPose = new FramePose(midFeetZUpWalkDirectionFrame);
+            FramePose pelvisPose = new FramePose(getPelvisFrame());
+
+            pelvisPose.changeFrame(midFeetZUpWalkDirectionFrame);
+            midFeetPose.setX(pelvisPose.getX());
+            midFeetPose.changeFrame(ReferenceFrame.getWorldFrame());
+            midFeetPose.getPose(transformToParent);
+            //            System.out.println(transformToParent);
+         }
+      };
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, fullRobotModel.getElevator());
    }
@@ -215,12 +269,21 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    {
       return midFeetZUpFrame;
    }
+   /**
+    * Return the ReferenceFrame located between the feet (to remove robot swaying left to right) 
+    * but under the pelvis (to remove forward and backwards swaying)
+    */
+   @Override
+   public ReferenceFrame getMidFeetUnderPelvisFrame()
+   {
+      return midFeetUnderPelvisWalkDirectionFrame;
+   }
 
    public ReferenceFrame getHandFrame(RobotSide robotSide)
    {
       return fullRobotModel.getHandControlFrame(robotSide);
    }
-   
+
    @Override
    public void updateFrames()
    {
@@ -229,6 +292,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       pelvisZUpFrame.update();
 
       midFeetZUpFrame.update();
+      midFeetZUpWalkDirectionFrame.update();
+      midFeetUnderPelvisWalkDirectionFrame.update();
 
       for (RobotSide robotSide : RobotSide.values)
       {

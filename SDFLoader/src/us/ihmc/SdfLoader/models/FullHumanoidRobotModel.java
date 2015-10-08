@@ -85,6 +85,6 @@ public interface FullHumanoidRobotModel extends FullRobotModel
     * @return
     */
    public abstract ReferenceFrame getSoleFrame(RobotSide robotSide);
-
+   
    
 }
