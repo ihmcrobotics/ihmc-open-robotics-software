@@ -57,18 +57,32 @@ public class AlphaFilteredWrappingYoVariable extends AlphaFilteredYoVariable
             unfilteredVariableModulo();
             
             //calculate the error
-            double tempError = unfilteredInRangeVariable.getDoubleValue() - getDoubleValue();
-            tempError = tempError % range;
-            tempError = shiftErrorToStartOfRange(tempError, lowerLimit);
-            error.set(tempError);
-
+            double standardError = unfilteredInRangeVariable.getDoubleValue() - getDoubleValue();
+            double wrappingError;
+            if(unfilteredInRangeVariable.getDoubleValue() > getDoubleValue())
+            {
+               wrappingError = lowerLimit - getDoubleValue() + unfilteredInRangeVariable.getDoubleValue() - upperLimit;
+            }
+            else
+            {
+               wrappingError = upperLimit - getDoubleValue() + unfilteredInRangeVariable.getDoubleValue() - lowerLimit;
+            }
+            if(Math.abs(standardError) < Math.abs(wrappingError))
+            {
+               error.set(standardError);
+            }
+            else
+            {
+               error.set(wrappingError);
+            }
+            
             //determine if wrapping and move the input if necessary
             temporaryOutputVariable.set(getDoubleValue());
-            if ((getDoubleValue() + tempError) >= upperLimit)
+            if ((getDoubleValue() + error.getDoubleValue()) >= upperLimit)
             {
                temporaryOutputVariable.set(getDoubleValue() - range);
             }
-            if ((getDoubleValue() + tempError) < lowerLimit)
+            if ((getDoubleValue() + error.getDoubleValue()) < lowerLimit)
             {
                temporaryOutputVariable.set(getDoubleValue() + range);
             }
@@ -112,23 +126,5 @@ public class AlphaFilteredWrappingYoVariable extends AlphaFilteredYoVariable
             rangeNeedsToBeChecked = true;
          }
       }
-   }
-   
-   private double shiftErrorToStartOfRange(double error, double startOfRange)
-   {
-      double ret = error;
-      startOfRange = startOfRange - EPSILON;
-
-      if (error < startOfRange)
-      {
-         ret = error + Math.ceil((startOfRange - error) / range) * range;
-      }
-
-      if (error >= (startOfRange + range))
-      {
-         ret = error - Math.floor((error - startOfRange) / range) * range;
-      }
-
-      return ret;
    }
 }
