@@ -206,6 +206,23 @@ public class GeometryToolsTest
       double actualReturn2 = GeometryTools.distanceBetweenPoints(a2, b2);
       assertEquals("return value", expectedReturn2, actualReturn2, Double.MIN_VALUE);
 
+      Point2d a3 = new Point2d(2.0, 2.0);
+      Point2d b3 = new Point2d(6.0, -1.0);
+      double expectedReturn3 = 5.0;
+      double actualReturn3 = GeometryTools.distanceBetweenPoints(a3, b3);
+      assertEquals("return value", expectedReturn3, actualReturn3, Double.MIN_VALUE);
+
+      Point2d a4 = new Point2d(2.5, 5.1);
+      Point2d b4 = new Point2d(9.3, 10.7);
+      double expectedReturn4 = 8.80908621822;
+      double actualReturn4 = GeometryTools.distanceBetweenPoints(a4, b4);
+      assertEquals("return value", expectedReturn4, actualReturn4, EPSILON);
+
+      Point2d a5 = new Point2d(5.0, 2.0);
+      Point2d b5 = new Point2d(5.0, 2.0);
+      double expectedReturn5 = 0.0;
+      double actualReturn5 = GeometryTools.distanceBetweenPoints(a5, b5);
+      assertEquals("return value", expectedReturn5, actualReturn5, Double.MIN_VALUE);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
