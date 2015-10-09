@@ -39,22 +39,30 @@ public class AlphaFilteredWrappingYoVariable extends AlphaFilteredYoVariable
    @Override
    public void update()
    {
+      update(unfilteredVariable.getDoubleValue());
+   }
+
+   
+   @Override
+   public void update(double currentPosition)
+   {
       if(!hasBeenCalled.getBooleanValue())
       {
          hasBeenCalled.set(true);
-         temporaryOutputVariable.set(unfilteredVariable.getDoubleValue());
          previousUnfilteredVariable = unfilteredVariable.getDoubleValue();
          
-         unfilteredVariableModulo();
+         unfilteredVariableModulo(currentPosition);
+         
+         temporaryOutputVariable.set(unfilteredInRangeVariable.getDoubleValue());
          set(unfilteredInRangeVariable.getDoubleValue());
       }
       else
       {
-         if (!MathTools.epsilonEquals(unfilteredVariable.getDoubleValue(), previousUnfilteredVariable, EPSILON))
+         if (!MathTools.epsilonEquals(currentPosition, previousUnfilteredVariable, EPSILON))
          {
-            previousUnfilteredVariable = unfilteredVariable.getDoubleValue();
+            previousUnfilteredVariable = currentPosition;
             
-            unfilteredVariableModulo();
+            unfilteredVariableModulo(currentPosition);
             
             //calculate the error
             double standardError = unfilteredInRangeVariable.getDoubleValue() - getDoubleValue();
@@ -105,12 +113,12 @@ public class AlphaFilteredWrappingYoVariable extends AlphaFilteredYoVariable
          }
       }
    }
-
-   private void unfilteredVariableModulo()
+   
+   private void unfilteredVariableModulo(double currentPosition)
    {
       //handle if the input is out of range
       boolean rangeNeedsToBeChecked = true;
-      unfilteredInRangeVariable.set(unfilteredVariable.getDoubleValue());
+      unfilteredInRangeVariable.set(currentPosition);
       
       while(rangeNeedsToBeChecked)
       {
