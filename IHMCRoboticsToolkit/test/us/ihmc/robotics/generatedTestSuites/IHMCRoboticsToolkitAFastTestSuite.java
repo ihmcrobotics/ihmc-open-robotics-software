@@ -124,6 +124,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.math.corruptors.NoisyDoubleYoVariableTest.class,
    us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrixTest.class,
    us.ihmc.robotics.math.filters.AlphaBetaFilteredYoVariableTest.class,
+   us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariableTest.class,
+   us.ihmc.robotics.math.filters.AlphaFilteredYoFrameOrientationTest.class,
    us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternionTest.class,
    us.ihmc.robotics.math.filters.AlphaFilteredYoVariableTest.class,
    us.ihmc.robotics.math.filters.AlphaFusedYoVariableTest.class,

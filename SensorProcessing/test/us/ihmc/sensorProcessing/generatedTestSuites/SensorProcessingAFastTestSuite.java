@@ -12,6 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
+   us.ihmc.controlFlow.ControlFlowTest.class,
    us.ihmc.sensorProcessing.controlFlowPorts.YoFramePointControlFlowOutputPortTest.class,
    us.ihmc.sensorProcessing.controlFlowPorts.YoFrameQuaternionControlFlowOutputPortTest.class,
    us.ihmc.sensorProcessing.controlFlowPorts.YoFrameVectorControlFlowOutputPortTest.class,
