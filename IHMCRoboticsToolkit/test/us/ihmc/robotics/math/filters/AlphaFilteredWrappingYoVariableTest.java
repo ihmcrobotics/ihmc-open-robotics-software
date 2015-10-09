@@ -28,11 +28,11 @@ public class AlphaFilteredWrappingYoVariableTest
       alpha.set(0.8);
       
       DoubleYoVariable positionVariable = new DoubleYoVariable("positionVariable", registry);
-      AlphaFilteredWrappingYoVariable AlphaFilteredWrappingYoVariable = new AlphaFilteredWrappingYoVariable("AlphaFilteredWrappingYoVariable", "", registry, positionVariable, alpha, 0.0, 20.0);
+      AlphaFilteredWrappingYoVariable alphaFilteredWrappingYoVariable = new AlphaFilteredWrappingYoVariable("alphaFilteredWrappingYoVariable", "", registry, positionVariable, alpha, 0.0, 20.0);
 
       double pseudoNoise = 0;
 
-      positionVariable.set(10);
+      positionVariable.set(10.0);
       for (int i = 0; i < 10000; i++)
       {
          // Oscillate the position about some uniformly distributed fixed point slightly larger than 10
@@ -41,10 +41,10 @@ public class AlphaFilteredWrappingYoVariableTest
             pseudoNoise = random.nextDouble();
          }
          positionVariable.add(Math.pow(-1, i) * pseudoNoise);
-         AlphaFilteredWrappingYoVariable.update();
+         alphaFilteredWrappingYoVariable.update();
       }
 
-      assertEquals(10, AlphaFilteredWrappingYoVariable.getDoubleValue(), 1);
+      assertEquals(10, alphaFilteredWrappingYoVariable.getDoubleValue(), 1);
    }
 	
 	@DeployableTestMethod(estimatedDuration = 0.1)
@@ -66,7 +66,7 @@ public class AlphaFilteredWrappingYoVariableTest
          upperLimit = temp;
       }
       
-      AlphaFilteredWrappingYoVariable alphaFilteredWrappingYoVariable = new AlphaFilteredWrappingYoVariable("AlphaFilteredWrappingYoVariable", "", registry, positionVariable, alpha, lowerLimit, upperLimit);
+      AlphaFilteredWrappingYoVariable alphaFilteredWrappingYoVariable = new AlphaFilteredWrappingYoVariable("alphaFilteredWrappingYoVariable", "", registry, positionVariable, alpha, lowerLimit, upperLimit);
 	   positionVariable.set(RandomTools.generateRandomDouble(random, lowerLimit, upperLimit));
 	   alphaFilteredWrappingYoVariable.update();
 	   
