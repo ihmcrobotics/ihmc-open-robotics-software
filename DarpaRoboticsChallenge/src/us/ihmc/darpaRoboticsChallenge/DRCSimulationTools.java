@@ -280,7 +280,8 @@ public abstract class DRCSimulationTools
       try
       {
          Method mainMethod = operatorInterfaceClass.getDeclaredMethod("main", String[].class);
-         mainMethod.invoke(String[].class, (Object[]) operatorInterfaceArgs);
+         Object args[] = { operatorInterfaceArgs };
+         mainMethod.invoke(null, args);
       }
       catch (NoSuchMethodException | SecurityException e)
       {
