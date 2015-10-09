@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.random.RandomTools;
@@ -14,9 +15,56 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class AlphaFilteredWrappingYoVariableTest
 {
+   private static final boolean DEBUG = false;
    private final Random random = new Random();
 
-   //TODO: Test the modulo of the input
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout=60000)
+   public void testInputModulo()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      DoubleYoVariable alpha = new DoubleYoVariable("alpha", registry);
+      alpha.set(0.0); //sets the alpha to 0.0 so that the correction is instantaneous to check the result which is in fact the input with modulo
+      
+      DoubleYoVariable positionVariable = new DoubleYoVariable("positionVariable", registry);
+      AlphaFilteredWrappingYoVariable alphaFilteredWrappingYoVariable = new AlphaFilteredWrappingYoVariable("alphaFilteredWrappingYoVariable", "", registry, positionVariable, alpha, -2.0, 8.0);
+
+      //test at the boundaries
+      positionVariable.set(8.0);
+      alphaFilteredWrappingYoVariable.update();
+      assertTrue(MathTools.epsilonEquals(alphaFilteredWrappingYoVariable.getDoubleValue(), -2.0, 1e-10));
+      
+      positionVariable.set(-2.0);
+      alphaFilteredWrappingYoVariable.update();
+      assertTrue(MathTools.epsilonEquals(alphaFilteredWrappingYoVariable.getDoubleValue(), -2.0, 1e-10));
+
+      //test when the input is over the upperLimit
+      positionVariable.set(33.0);
+      alphaFilteredWrappingYoVariable.update();
+      assertTrue(MathTools.epsilonEquals(alphaFilteredWrappingYoVariable.getDoubleValue(), 3.0, 1e-10));
+      
+      positionVariable.set(38.0);
+      alphaFilteredWrappingYoVariable.update();
+      assertTrue(MathTools.epsilonEquals(alphaFilteredWrappingYoVariable.getDoubleValue(), -2.0, 1e-10));
+      
+      positionVariable.set(42.0);
+      alphaFilteredWrappingYoVariable.update();
+      assertTrue(MathTools.epsilonEquals(alphaFilteredWrappingYoVariable.getDoubleValue(), 2.0, 1e-10));
+      
+      //test when the input is under the lowerLimit
+      positionVariable.set(-22.0);
+      alphaFilteredWrappingYoVariable.update();
+      assertTrue(MathTools.epsilonEquals(alphaFilteredWrappingYoVariable.getDoubleValue(), -2.0, 1e-10));
+      
+      positionVariable.set(-23.5);
+      alphaFilteredWrappingYoVariable.update();
+      assertTrue(MathTools.epsilonEquals(alphaFilteredWrappingYoVariable.getDoubleValue(), 6.5, 1e-10));
+
+      positionVariable.set(-42.0);
+      alphaFilteredWrappingYoVariable.update();
+      assertTrue(MathTools.epsilonEquals(alphaFilteredWrappingYoVariable.getDoubleValue(), -2.0, 1e-10));
+   }
+   
    
 	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=60000)
@@ -44,7 +92,7 @@ public class AlphaFilteredWrappingYoVariableTest
          alphaFilteredWrappingYoVariable.update();
       }
 
-      assertEquals(10, alphaFilteredWrappingYoVariable.getDoubleValue(), 1);
+      assertEquals(10.0, alphaFilteredWrappingYoVariable.getDoubleValue(), 1.0);
    }
 	
 	@DeployableTestMethod(estimatedDuration = 0.1)
@@ -153,7 +201,6 @@ public class AlphaFilteredWrappingYoVariableTest
 	   assertEquals(-0.8, e, 0.001);
 	   
 	   e = getErrorConsideringWrap(0.0, 0.0, -1.0, 1.0);
-	   System.out.println(e);
 	   
    }
 
@@ -168,9 +215,11 @@ public class AlphaFilteredWrappingYoVariableTest
 
       assertEquals(randomAlpha, computedAlpha, 1e-7);
       assertEquals(computedBreakFrequency, AlphaFilteredWrappingYoVariable.computeBreakFrequencyGivenAlpha(computedAlpha, DT), 1e-7);
-
-      System.out.println("Random Alpha: " + randomAlpha);
-      System.out.println("Computed Alpha: " + AlphaFilteredWrappingYoVariable.computeAlphaGivenBreakFrequencyProperly(computedBreakFrequency, DT));
-
+      
+      if(DEBUG)
+      {
+         System.out.println("Random Alpha: " + randomAlpha);
+         System.out.println("Computed Alpha: " + AlphaFilteredWrappingYoVariable.computeAlphaGivenBreakFrequencyProperly(computedBreakFrequency, DT));
+      }
    }
 }
