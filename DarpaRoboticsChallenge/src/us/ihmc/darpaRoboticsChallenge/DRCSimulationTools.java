@@ -28,7 +28,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
@@ -51,8 +50,6 @@ public abstract class DRCSimulationTools
 
       if (modulesToStart.isEmpty())
          return;
-      else if (modulesToStart.size() == 1)
-         simulationStarter.setSpawnOperatorInterfaceInDifferentProcess(false);
 
       boolean automaticallyStartSimulation = true;
       DRCNetworkModuleParameters networkProcessorParameters;
@@ -78,12 +75,10 @@ public abstract class DRCSimulationTools
 
       if (modulesToStart.contains(Modules.OPERATOR_INTERFACE))
       {
-         simulationStarter.setSpawnOperatorInterfaceInDifferentProcess(modulesToStart.contains(Modules.SIMULATION));
-
-         if(simulationStarter.isSpawnOperatorInterfaceInDifferentProcess())
-         {
-            startOpertorInterfaceUsingProcessSpawner(operatorInterfaceClass, operatorInterfaceArgs);            
-         }
+         if (modulesToStart.contains(Modules.SIMULATION))
+            startOpertorInterfaceUsingProcessSpawner(operatorInterfaceClass, operatorInterfaceArgs);
+         else
+            startOpertorInterface(operatorInterfaceClass, operatorInterfaceArgs);
       }
 
       if (modulesToStart.contains(Modules.BEHAVIOR_VISUALIZER))
@@ -121,7 +116,8 @@ public abstract class DRCSimulationTools
             enabled = true;
          else
             enabled = Boolean.parseBoolean(properties.getProperty(module.getPropertyNameForEnable(), Boolean.toString(module.getDefaultValueForEnable())));
-         boolean selected = Boolean.parseBoolean(properties.getProperty(module.getPropertyNameForSelected(), Boolean.toString(module.getDefaultValueForSelected())));
+         boolean selected = Boolean
+               .parseBoolean(properties.getProperty(module.getPropertyNameForSelected(), Boolean.toString(module.getDefaultValueForSelected())));
          JCheckBox checkBox = new JCheckBox(module.getName());
          checkBox.setSelected(selected);
          checkBox.setEnabled(enabled);
@@ -221,16 +217,16 @@ public abstract class DRCSimulationTools
             frame.setVisible(true);
          }
       });
-      
+
       while (frame.isEnabled())
          ThreadTools.sleep(50);
-      
-//      int selectedOption = JOptionPane.showOptionDialog(null, userPromptPanel, "Select", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-//            null, null);
-//      if (selectedOption != JOptionPane.OK_OPTION)
-//      {
-//         System.exit(-1);
-//      }
+
+      //      int selectedOption = JOptionPane.showOptionDialog(null, userPromptPanel, "Select", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+      //            null, null);
+      //      if (selectedOption != JOptionPane.OK_OPTION)
+      //      {
+      //         System.exit(-1);
+      //      }
 
       properties = new Properties();
       for (Modules module : Modules.values())
@@ -273,26 +269,29 @@ public abstract class DRCSimulationTools
       if (operatorInterfaceClass == null)
          return;
       spawner.spawn(operatorInterfaceClass, operatorInterfaceArgs);
-      
-   }      
-   public static void startOpertorInterfaceUsingProcessSpawner(DRCRobotModel robotModel)
+
+   }
+
+   public static void startOpertorInterface(Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs)
    {
+      if (operatorInterfaceClass == null)
+         return;
+
       try
       {
-            Class<?> clazz = Class.forName("us.ihmc.humanoidOperatorInterface.DRCOperatorInterface");
-            Method method = clazz.getDeclaredMethod("startUserInterface", us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.class);
-            method.invoke(null, robotModel);
+         Method mainMethod = operatorInterfaceClass.getDeclaredMethod("main", String[].class);
+         mainMethod.invoke(String[].class, (Object[]) operatorInterfaceArgs);
       }
-      catch (ClassNotFoundException e)
+      catch (NoSuchMethodException | SecurityException e)
       {
          e.printStackTrace();
       }
-      catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+      catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
       {
          e.printStackTrace();
       }
    }
-   
+
    public enum Modules
    {
       SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE, ZERO_POSE_PRODUCER;
