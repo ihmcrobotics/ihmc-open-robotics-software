@@ -185,11 +185,12 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       initialICPFinalFrame.changeFrame(finalFrame);
       finalICPFinalFrame.changeFrame(finalFrame);
 
-      double startOfSplineTime = timeSpentOnInitialCMP.getDoubleValue() - 0.5 * maximumSplineDuration.getDoubleValue();
+      double alpha = 0.50;
+      double startOfSplineTime = timeSpentOnInitialCMP.getDoubleValue() - alpha * maximumSplineDuration.getDoubleValue();
       startOfSplineTime = Math.max(startOfSplineTime, 0.0);
       this.startOfSplineTime.set(startOfSplineTime);
 
-      double endOfSplineTime = timeSpentOnInitialCMP.getDoubleValue() + 0.5 * maximumSplineDuration.getDoubleValue();
+      double endOfSplineTime = timeSpentOnInitialCMP.getDoubleValue() + (1.0 - alpha) * maximumSplineDuration.getDoubleValue();
       endOfSplineTime = Math.min(endOfSplineTime, totalTrajectoryTime.getDoubleValue());
       this.endOfSplineTime.set(endOfSplineTime);
 
@@ -319,6 +320,10 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       positionToPack.setIncludingFrame(desiredICPOutput);
    }
 
+   public boolean isOnExitCMP()
+   {
+      return progressionInPercent.getDoubleValue() * totalTrajectoryTime.getDoubleValue() > endOfSplineTime.getDoubleValue();
+   }
 
    public void get(YoFramePoint positionToPack)
    {
