@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Dialog.ModalExclusionType;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -188,7 +190,7 @@ public abstract class DRCSimulationTools
       frame.setLayout(new BorderLayout());
       frame.add(userPromptPanel, BorderLayout.CENTER);
       JPanel optionPanel = new JPanel();
-      optionPanel.add(new JButton(new AbstractAction("Okay")
+      final JButton okayButton = new JButton(new AbstractAction("Okay")
       {
          @Override
          public void actionPerformed(ActionEvent arg0)
@@ -196,15 +198,44 @@ public abstract class DRCSimulationTools
             frame.dispose();
             frame.setEnabled(false);
          }
-      }));
-      optionPanel.add(new JButton(new AbstractAction("Cancel")
+      });
+      optionPanel.add(okayButton);
+      final JButton cancelButton = new JButton(new AbstractAction("Cancel")
       {
          @Override
          public void actionPerformed(ActionEvent e)
          {
             System.exit(-1);
          }
-      }));
+      });
+      optionPanel.add(cancelButton);
+
+      KeyListener keyListener = new KeyListener()
+      {
+         @Override
+         public void keyTyped(KeyEvent e)
+         {
+         }
+
+         @Override
+         public void keyReleased(KeyEvent e)
+         {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER)
+               okayButton.doClick();
+            if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+               cancelButton.doClick();
+         }
+
+         @Override
+         public void keyPressed(KeyEvent e)
+         {
+         }
+      };
+
+      frame.addKeyListener(keyListener);
+      for (Modules module : Modules.values())
+         moduleCheckBoxes.get(module).addKeyListener(keyListener);
+
       frame.add(optionPanel, BorderLayout.SOUTH);
       frame.pack();
       frame.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
