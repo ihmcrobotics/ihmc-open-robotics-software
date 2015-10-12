@@ -641,12 +641,6 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public YoSE3PIDGains createSupportFootControlGains(YoVariableRegistry registry)
-   {
-      return null;
-   }
-
-   @Override
    public double getSupportSingularityEscapeMultiplier()
    {
       return 30;
