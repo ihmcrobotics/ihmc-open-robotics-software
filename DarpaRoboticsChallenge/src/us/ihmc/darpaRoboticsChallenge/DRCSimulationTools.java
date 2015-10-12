@@ -209,48 +209,20 @@ public abstract class DRCSimulationTools
       });
       optionPanel.add(cancelButton);
 
-      final KeyListener keyListener = new KeyListener()
-      {
-         @Override
-         public void keyTyped(KeyEvent e)
-         {
-         }
-
-         @Override
-         public void keyReleased(KeyEvent e)
-         {
-            if (e.getKeyCode() == KeyEvent.VK_ENTER)
-               okayButton.doClick();
-            if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-               cancelButton.doClick();
-         }
-
-         @Override
-         public void keyPressed(KeyEvent e)
-         {
-         }
-      };
-
       KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher()
       {
          @Override
          public boolean dispatchKeyEvent(KeyEvent e)
          {
-            int id = e.getID();
-            switch (id)
+            if (e.getID() == KeyEvent.KEY_TYPED)
             {
-            case KeyEvent.KEY_TYPED:
-               keyListener.keyTyped(e);
+               if (e.getKeyChar() == KeyEvent.VK_ENTER)
+                  okayButton.doClick();
+               else if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
+                  cancelButton.doClick();
                return true;
-            case KeyEvent.KEY_PRESSED:
-               keyListener.keyPressed(e);
-               return true;
-            case KeyEvent.KEY_RELEASED:
-               keyListener.keyReleased(e);
-               return true;
-            default:
-               return false;
             }
+            return false;
          }
       });
 
