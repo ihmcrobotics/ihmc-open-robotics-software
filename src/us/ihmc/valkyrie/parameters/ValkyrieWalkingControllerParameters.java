@@ -724,12 +724,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public YoSE3PIDGains createSupportFootControlGains(YoVariableRegistry registry)
-   {
-      return null;
-   }
-
-   @Override
    public double getSupportSingularityEscapeMultiplier()
    {
       return -30; // negative as knee axis are -y direction
