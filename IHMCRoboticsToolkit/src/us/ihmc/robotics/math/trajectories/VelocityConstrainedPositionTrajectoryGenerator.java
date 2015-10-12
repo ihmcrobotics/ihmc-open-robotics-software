@@ -153,7 +153,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator implements PositionT
    @Override
    public boolean isDone()
    {
-      return false;
+      return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
    }
 
    @Override
