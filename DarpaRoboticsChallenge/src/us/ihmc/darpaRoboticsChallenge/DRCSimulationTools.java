@@ -3,6 +3,8 @@ package us.ihmc.darpaRoboticsChallenge;
 import java.awt.BorderLayout;
 import java.awt.Dialog.ModalExclusionType;
 import java.awt.GridLayout;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -39,8 +41,7 @@ public abstract class DRCSimulationTools
 {
 
    @SuppressWarnings({ "hiding", "unchecked" })
-   public static <T extends DRCStartingLocation, Enum> void startSimulationWithGraphicSelector(DRCSimulationStarter simulationStarter,
-         Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs, T... possibleStartingLocations)
+   public static <T extends DRCStartingLocation, Enum> void startSimulationWithGraphicSelector(DRCSimulationStarter simulationStarter, Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs, T... possibleStartingLocations)
    {
       List<Modules> modulesToStart = new ArrayList<Modules>();
       DRCStartingLocation startingLocation = null;
@@ -89,8 +90,7 @@ public abstract class DRCSimulationTools
    }
 
    @SuppressWarnings({ "hiding", "unchecked", "rawtypes", "serial" })
-   private static <T extends DRCStartingLocation, Enum> DRCStartingLocation showSelectorWithStartingLocation(List<Modules> modulesToStartListToPack,
-         T... possibleStartingLocations)
+   private static <T extends DRCStartingLocation, Enum> DRCStartingLocation showSelectorWithStartingLocation(List<Modules> modulesToStartListToPack, T... possibleStartingLocations)
    {
       JPanel userPromptPanel = new JPanel(new BorderLayout());
       JPanel checkBoxesPanel = new JPanel(new GridLayout(2, 4));
@@ -118,8 +118,7 @@ public abstract class DRCSimulationTools
             enabled = true;
          else
             enabled = Boolean.parseBoolean(properties.getProperty(module.getPropertyNameForEnable(), Boolean.toString(module.getDefaultValueForEnable())));
-         boolean selected = Boolean
-               .parseBoolean(properties.getProperty(module.getPropertyNameForSelected(), Boolean.toString(module.getDefaultValueForSelected())));
+         boolean selected = Boolean.parseBoolean(properties.getProperty(module.getPropertyNameForSelected(), Boolean.toString(module.getDefaultValueForSelected())));
          JCheckBox checkBox = new JCheckBox(module.getName());
          checkBox.setSelected(selected);
          checkBox.setEnabled(enabled);
@@ -210,7 +209,7 @@ public abstract class DRCSimulationTools
       });
       optionPanel.add(cancelButton);
 
-      KeyListener keyListener = new KeyListener()
+      final KeyListener keyListener = new KeyListener()
       {
          @Override
          public void keyTyped(KeyEvent e)
@@ -232,9 +231,28 @@ public abstract class DRCSimulationTools
          }
       };
 
-      frame.addKeyListener(keyListener);
-      for (Modules module : Modules.values())
-         moduleCheckBoxes.get(module).addKeyListener(keyListener);
+      KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher()
+      {
+         @Override
+         public boolean dispatchKeyEvent(KeyEvent e)
+         {
+            int id = e.getID();
+            switch (id)
+            {
+            case KeyEvent.KEY_TYPED:
+               keyListener.keyTyped(e);
+               return true;
+            case KeyEvent.KEY_PRESSED:
+               keyListener.keyPressed(e);
+               return true;
+            case KeyEvent.KEY_RELEASED:
+               keyListener.keyReleased(e);
+               return true;
+            default:
+               return false;
+            }
+         }
+      });
 
       frame.add(optionPanel, BorderLayout.SOUTH);
       frame.pack();
