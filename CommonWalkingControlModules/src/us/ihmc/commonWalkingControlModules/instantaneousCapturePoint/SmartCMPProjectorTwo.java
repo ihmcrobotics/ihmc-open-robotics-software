@@ -63,6 +63,12 @@ public class SmartCMPProjectorTwo
       cmpProjectedToPushTowardFinalDesiredICP.set(false);
       cmpProjectedToVertex.set(false);
 
+      if (supportPolygon.getArea() < 1.0e-3)
+      {
+         supportPolygon.getCentroid(desiredCMP);
+         return;
+      }
+
       if (supportPolygon.isPointInside(desiredCMP))
          return;
 
