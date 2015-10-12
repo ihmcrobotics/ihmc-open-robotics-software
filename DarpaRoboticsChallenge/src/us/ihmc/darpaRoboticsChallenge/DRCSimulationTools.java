@@ -213,7 +213,7 @@ public abstract class DRCSimulationTools
          @Override
          public boolean dispatchKeyEvent(KeyEvent e)
          {
-            if (e.getID() == KeyEvent.KEY_TYPED)
+            if (frame.isVisible() && e.getID() == KeyEvent.KEY_TYPED)
             {
                if (e.getKeyChar() == KeyEvent.VK_ENTER)
                   okayButton.doClick();
