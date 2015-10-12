@@ -109,7 +109,7 @@ public class FootstepSnapperTest
       }
    }
 
-
+	@Ignore
    @DeployableTestMethod
    @Test(timeout = 300000)
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
