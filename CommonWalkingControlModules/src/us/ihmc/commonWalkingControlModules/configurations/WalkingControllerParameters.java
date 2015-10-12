@@ -102,8 +102,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract YoSE3PIDGains createEdgeTouchdownFootControlGains(YoVariableRegistry registry);
 
-   public abstract YoSE3PIDGains createSupportFootControlGains(YoVariableRegistry registry);
-
    public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
 
    public abstract double getSupportSingularityEscapeMultiplier();

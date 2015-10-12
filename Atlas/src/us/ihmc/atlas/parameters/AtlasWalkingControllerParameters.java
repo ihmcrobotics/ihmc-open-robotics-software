@@ -696,12 +696,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public YoSE3PIDGains createSupportFootControlGains(YoVariableRegistry registry)
-   {
-      return null;
-   }
-
-   @Override
    public double getSwingHeightMaxForPushRecoveryTrajectory()
    {
       return 0.12;

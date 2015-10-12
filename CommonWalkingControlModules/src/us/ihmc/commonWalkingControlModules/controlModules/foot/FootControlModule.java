@@ -74,7 +74,7 @@ public class FootControlModule
 
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGains swingFootControlGains,
          YoSE3PIDGains holdPositionFootControlGains, YoSE3PIDGains toeOffFootControlGains, YoSE3PIDGains edgeTouchdownFootControlGains,
-         YoSE3PIDGains supportFootControlGains, DoubleProvider swingTimeProvider, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
+         DoubleProvider swingTimeProvider, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
@@ -120,7 +120,7 @@ public class FootControlModule
       onToesState = new OnToesState(footControlHelper, toeOffFootControlGains, registry);
       states.add(onToesState);
 
-      supportState = new FullyConstrainedState(footControlHelper, supportFootControlGains, registry);
+      supportState = new FullyConstrainedState(footControlHelper, registry);
       states.add(supportState);
 
       holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
