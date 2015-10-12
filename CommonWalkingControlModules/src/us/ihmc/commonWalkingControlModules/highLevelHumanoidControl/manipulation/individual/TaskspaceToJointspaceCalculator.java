@@ -342,6 +342,12 @@ public class TaskspaceToJointspaceCalculator
          yoPrivilegedJointPositions[i].set(jointAnglesAtMidRangeOfMotion.get(i, 0));
    }
 
+   public void setPrivilegedJointPositionsToZero()
+   {
+      for (int i = 0; i < numberOfDoF; i++)
+         yoPrivilegedJointPositions[i].set(0.0);
+   }
+
    public void setPrivilegedJointPosition(int jointIndex, double qPrivileged)
    {
       yoPrivilegedJointPositions[jointIndex].set(qPrivileged);
