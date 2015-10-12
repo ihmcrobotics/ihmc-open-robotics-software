@@ -66,13 +66,11 @@ public class FeetManager
       YoSE3PIDGains holdPositionFootControlGains = walkingControllerParameters.createHoldPositionFootControlGains(registry);
       YoSE3PIDGains toeOffFootControlGains = walkingControllerParameters.createToeOffFootControlGains(registry);
       YoSE3PIDGains edgeTouchdownFootControlGains = walkingControllerParameters.createEdgeTouchdownFootControlGains(registry);
-      YoSE3PIDGains supportFootControlGains = walkingControllerParameters.createSupportFootControlGains(registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingFootControlGains,
-               holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, supportFootControlGains, swingTimeProvider,
-               momentumBasedController, registry);
+               holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, swingTimeProvider, momentumBasedController, registry);
          footControlModule.setNullspaceMultiplier(singularityEscapeMultiplierForSwing);
 
          footControlModules.put(robotSide, footControlModule);

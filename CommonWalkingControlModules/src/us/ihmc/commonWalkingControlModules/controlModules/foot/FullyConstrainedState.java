@@ -1,10 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -13,18 +11,16 @@ public class FullyConstrainedState extends AbstractFootControlState
 {
    private final FrameVector fullyConstrainedNormalContactVector;
 
-   private final YoSE3PIDGains gains;
    private final FramePoint2d cop = new FramePoint2d();
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    private final FootSwitchInterface footSwitch;
 
-   public FullyConstrainedState(FootControlHelper footControlHelper, YoSE3PIDGains gains, YoVariableRegistry registry)
+   public FullyConstrainedState(FootControlHelper footControlHelper, YoVariableRegistry registry)
    {
       super(ConstraintType.FULL, footControlHelper, registry);
 
       fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
-      this.gains = gains;
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
    }
@@ -57,31 +53,7 @@ public class FullyConstrainedState extends AbstractFootControlState
 
       footControlHelper.shrinkSupportFootContactPointsToToesIfNecessary();
 
-      if (gains == null)
-      {
-         footAcceleration.setToZero(contactableFoot.getFrameAfterParentJoint(), rootBody.getBodyFixedFrame(), contactableFoot.getFrameAfterParentJoint());
-      }
-      else
-      {
-         footControlHelper.setGains(gains);
-
-         desiredPosition.setToZero(contactableFoot.getFrameAfterParentJoint());
-         desiredPosition.changeFrame(worldFrame);
-
-         desiredOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
-         desiredOrientation.changeFrame(worldFrame);
-
-         desiredLinearVelocity.setToZero(worldFrame);
-         desiredAngularVelocity.setToZero(worldFrame);
-
-         desiredLinearAcceleration.setToZero(worldFrame);
-         desiredAngularAcceleration.setToZero(worldFrame);
-
-         RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
-         accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-               desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
-         accelerationControlModule.packAcceleration(footAcceleration);
-      }
+      footAcceleration.setToZero(contactableFoot.getFrameAfterParentJoint(), rootBody.getBodyFixedFrame(), contactableFoot.getFrameAfterParentJoint());
 
       footControlHelper.submitTaskspaceConstraint(footAcceleration);
    }
