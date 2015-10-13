@@ -239,6 +239,11 @@ public class LogVisualizer
       new Thread(scs).start();
    }
    
+   public void addLogPlaybackListener(YoVariableLogPlaybackListener listener)
+   {
+      robot.addLogPlaybackListener(listener);
+   }
+   
    public static void main(String[] args) throws IOException
    {
       LogVisualizer visualizer = new LogVisualizer();

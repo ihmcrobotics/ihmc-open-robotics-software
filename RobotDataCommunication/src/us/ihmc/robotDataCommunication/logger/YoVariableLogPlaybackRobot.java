@@ -42,6 +42,8 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
 
    private final List<JointState<? extends Joint>> jointStates;
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<JointUpdater>();
+   
+   private final ArrayList<YoVariableLogPlaybackListener> listeners = new ArrayList<>();
 
    private final ByteBuffer logLine;
    private final LongBuffer logLongArray;
@@ -220,6 +222,12 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
          {
             jointUpdaters.get(i).update();
          }
+         
+         for (int i = 0; i < listeners.size(); i++)
+         {
+            listeners.get(i).updated(timestamp.getLongValue());
+         }
+         
       }
       catch (IOException e)
       {
@@ -319,6 +327,14 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
       {
          throw new RuntimeException("Cannot skip to position " + position);
       }
+   }
+
+
+
+   public void addLogPlaybackListener(YoVariableLogPlaybackListener listener)
+   {
+      listener.setRobot(this);
+      listeners.add(listener);
    }
 
    
