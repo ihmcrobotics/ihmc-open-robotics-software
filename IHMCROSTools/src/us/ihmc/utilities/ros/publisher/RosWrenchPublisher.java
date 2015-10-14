@@ -2,14 +2,18 @@ package us.ihmc.utilities.ros.publisher;
 
 import geometry_msgs.Vector3;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ros.message.Time;
+
+import std_msgs.Header;
 
 
-public class RosWrenchPublisher extends RosTopicPublisher<geometry_msgs.Wrench>
+public class RosWrenchPublisher extends RosTopicPublisher<geometry_msgs.WrenchStamped>
 {
+   int counter = 0;
+   
    public RosWrenchPublisher(boolean latched)
    {
-      super(geometry_msgs.Wrench._TYPE,latched);
+      super(geometry_msgs.WrenchStamped._TYPE,latched);
    }
 
    public void publish(long timeStamp, float[] footSensorWrench)
@@ -23,7 +27,16 @@ public class RosWrenchPublisher extends RosTopicPublisher<geometry_msgs.Wrench>
       temporaryWrench.set(5, wrist_sensor.getF().getZ() - offset.get(5));
        */
       
-      geometry_msgs.Wrench message = getMessage();
+      geometry_msgs.WrenchStamped stampedWrench = getMessage();
+      
+      Header header = newMessageFromType(Header._TYPE);
+      header.setStamp(Time.fromNano(timeStamp));
+      header.setSeq(counter);
+      counter++;
+      
+      stampedWrench.setHeader(header);
+      
+      geometry_msgs.Wrench wrench = newMessageFromType(geometry_msgs.Wrench._TYPE);
       Vector3  force = newMessageFromType(Vector3._TYPE);
       Vector3  torque = newMessageFromType(Vector3._TYPE);
       
@@ -35,8 +48,11 @@ public class RosWrenchPublisher extends RosTopicPublisher<geometry_msgs.Wrench>
       force.setY(footSensorWrench[4]);
       force.setZ(footSensorWrench[5]);
       
-      message.setTorque(torque);
-      message.setForce(force);
-      publish(message);
+      wrench.setTorque(torque);
+      wrench.setForce(force);
+      
+      stampedWrench.setWrench(wrench);
+      
+      publish(stampedWrench);
    }
 }
