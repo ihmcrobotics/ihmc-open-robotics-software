@@ -51,24 +51,23 @@ public class FileTools
    
    public static List<String> readLinesFromBytes(byte[] bytes)
    {
-      try
+      List<String> lines = new ArrayList<>();
+      try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes), Charset.forName("UTF-8").newDecoder())))
       {
-         BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes), Charset.forName("UTF-8").newDecoder()));
-         List<String> lines = new ArrayList<>();
-         String line;
-         line = reader.readLine();
-         while (line != null)
+         while(true)
          {
-            lines.add(line);
-            line = reader.readLine();
+            String line = reader.readLine();
+            if (line != null)
+               lines.add(line);
+            else
+               break;
          }
-         return lines;
       }
       catch (IOException e)
       {
          e.printStackTrace();
-         return null;
       }
+      return lines;
    }
    
    public static byte[] replaceLineInFile(int lineIndex, String newLine, byte[] fileBytes, List<String> fileLines)
@@ -194,10 +193,8 @@ public class FileTools
    
    public static boolean checkIfSerializable(Object objectToTest)
    {
-      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-      try
+      try(ObjectOutputStream testStream = new ObjectOutputStream(new ByteArrayOutputStream()))
       {
-         ObjectOutputStream testStream = new ObjectOutputStream(byteArrayOutputStream);
          testStream.writeObject(objectToTest);
          testStream.flush();
          return true;
@@ -211,24 +208,24 @@ public class FileTools
    
    public static void concatenateFilesTogether(List<Path> filesToConcatenate, Path concatenatedFile)
    {
-      DataOutputStream dataOutputStream = getFileDataOutputStream(concatenatedFile);
-
-      try
+      try(DataOutputStream dataOutputStream = getFileDataOutputStream(concatenatedFile))
       {
          for (Path fileToConcatenate : filesToConcatenate)
          {
-            DataInputStream dataInputStream = getFileDataInputStream(fileToConcatenate);
-
-            while (dataInputStream.available() > 0)
+            try(DataInputStream dataInputStream = getFileDataInputStream(fileToConcatenate))
             {
-               dataOutputStream.write(dataInputStream.read());
+               while (dataInputStream.available() > 0)
+               {
+                  dataOutputStream.write(dataInputStream.read());
+               }
             }
-
-            dataInputStream.close();
+            catch (IOException e)
+            {
+               e.printStackTrace();
+            }
          }
 
          dataOutputStream.flush();
-         dataOutputStream.close();
       }
       catch (IOException e)
       {
