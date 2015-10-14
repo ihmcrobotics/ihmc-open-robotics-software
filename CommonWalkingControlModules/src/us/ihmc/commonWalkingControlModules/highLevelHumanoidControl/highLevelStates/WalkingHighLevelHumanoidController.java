@@ -806,14 +806,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             
             double predictedToeOffDuration = capturePointPlannerAdapter.getEstimatedTimeRemainingForState(yoTime.getDoubleValue());
             desiredICP.getFrameTuple2dIncludingFrame(desiredICPLocal);
-            feetManager.requestToeOff(trailingLeg, desiredCMP, desiredICPLocal, capturePoint2d, predictedToeOffDuration);
             
             // If trailing leg is doing toe off, then use front leg for reference frames for com height trajectory.
             centerOfMassHeightTrajectoryGenerator.setSupportLeg(trailingLeg.getOppositeSide());
 
+            boolean doToeOff = feetManager.checkIfToeOffSafe(trailingLeg, desiredCMP, desiredICPLocal, capturePoint2d);
 
-            if (feetManager.doToeOff())
+            if (doToeOff)
             {
+               feetManager.requestToeOff(trailingLeg, predictedToeOffDuration);
                icpAndMomentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
                ecmpBasedToeOffHasBeenInitialized.set(true);
             }
