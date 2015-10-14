@@ -289,6 +289,13 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       {
          return 0.0;
       }
+
+      /** {@inheritDoc} */
+      @Override
+      public double getMinTimeToSpendOnExitCMPInSingleSupport()
+      {
+         return 0.0;
+      }
    };
 
    private final double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();
