@@ -216,4 +216,10 @@ public interface CapturePointPlannerParameters
     * If set to zero, the exit CMP will be on the toes' edge when stepping, a positive value will pull back the exit CMP towards the foot center.
     */
    public abstract double getCMPSafeDistanceAwayFromToesWhenSteppingDown();
+
+   /**
+    * For doing toe off in single support. Set it to 0.0 if not using this feature.
+    * @return
+    */
+   public abstract double getMinTimeToSpendOnExitCMPInSingleSupport();
 }

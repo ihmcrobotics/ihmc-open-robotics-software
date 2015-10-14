@@ -286,6 +286,13 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       {
          return 0.0;
       }
+
+      /** {@inheritDoc} */
+      @Override
+      public double getMinTimeToSpendOnExitCMPInSingleSupport()
+      {
+         return 0.0;
+      }
 	};
 
 	private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();

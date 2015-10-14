@@ -254,4 +254,11 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    {
       return 0.0;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinTimeToSpendOnExitCMPInSingleSupport()
+   {
+      return 0.0;
+   }
 }
