@@ -95,8 +95,14 @@ public class SimulationRunsSameWayTwiceVerifier
 
    {
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
-      walk.set(false);
+      if(walk != null)
+      {
+         walk.set(false);
+      }
       runner.simulateAndBlock(standingTimeDuration);
-      walk.set(true);
+      if(walk != null)
+      {
+         walk.set(true);
+      }
    }
 }
