@@ -252,4 +252,11 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    {
       return 0.0;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinTimeToSpendOnExitCMPInSingleSupport()
+   {
+      return 0.0;
+   }
 }
