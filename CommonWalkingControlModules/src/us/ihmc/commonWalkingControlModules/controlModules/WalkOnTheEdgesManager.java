@@ -437,11 +437,15 @@ public class WalkOnTheEdgesManager
 
    public boolean willDoToeOff(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
+      return willDoToeOff(transferToAndNextFootstepsData.getNextFootstep(), transferToAndNextFootstepsData.getTransferToSide());
+   }
+
+   public boolean willDoToeOff(Footstep nextFootstep, RobotSide transferToSide)
+   {
       if (!doToeOffIfPossible.getBooleanValue())
          return false;
 
-      RobotSide nextTrailingLeg = transferToAndNextFootstepsData.getTransferToSide().getOppositeSide();
-      Footstep nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
+      RobotSide nextTrailingLeg = transferToSide.getOppositeSide();
       ReferenceFrame nextFrontFootFrame;
       if (nextFootstep != null)
          nextFrontFootFrame = nextFootstep.getPoseReferenceFrame();
