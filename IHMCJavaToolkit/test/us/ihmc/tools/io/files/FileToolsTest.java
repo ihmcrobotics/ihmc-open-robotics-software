@@ -211,7 +211,8 @@ public class FileToolsTest
 
    // START DEPRECATED TESTS HERE
    
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@SuppressWarnings("deprecation")
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetBufferedReader()
    {
@@ -237,14 +238,16 @@ public class FileToolsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@SuppressWarnings("deprecation")
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = FileNotFoundException.class)
    public void testGetBufferedReaderWithFileNotFoundException() throws FileNotFoundException
    {
-      BufferedReader reader = FileTools.getFileReader(TEST_FILE_BAD_TXT);
+      FileTools.getFileReader(TEST_FILE_BAD_TXT);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@SuppressWarnings("deprecation")
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFileWriter()
    {
@@ -273,7 +276,8 @@ public class FileToolsTest
       createTestFile1();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@SuppressWarnings("deprecation")
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFileWriterWithAppend()
    {
@@ -302,7 +306,8 @@ public class FileToolsTest
       createTestFile1();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@SuppressWarnings("deprecation")
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFileDataOutputStream()
    {
@@ -331,7 +336,8 @@ public class FileToolsTest
       createTestFile1();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@SuppressWarnings("deprecation")
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFileDataInputStream()
    {
@@ -357,14 +363,17 @@ public class FileToolsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@SuppressWarnings("deprecation")
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = FileNotFoundException.class)
    public void testGetFileDataInputStreamWithFileNotFoundException() throws FileNotFoundException, IOException
    {
       DataInputStream inStream = FileTools.getFileDataInputStream(TEST_FILE_BAD_TXT);
+      inStream.close();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@SuppressWarnings("deprecation")
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAllFilesInDirectoryRecursive()
    {
@@ -398,7 +407,8 @@ public class FileToolsTest
       assertTrue(thrown);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@SuppressWarnings("deprecation")
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAllFilesInDirectoryWithSuffix()
    {
@@ -448,11 +458,7 @@ public class FileToolsTest
    
       assertTrue(thrown);
    
-      // test empty directory search
-      ArrayList<File> testFile = FileTools.getAllFilesInDirectoryWithSuffix("txt", new File(""));
-   
       // test searching empty directory
-      File textDirectory = TEXT_DIRECTORY_PATH.toFile();
       File emptyDirectory = EMPTY_DIRECTORY_PATH.toFile();
    
       ArrayList<File> testEmptyDir = FileTools.getAllFilesInDirectoryWithSuffix("*", emptyDirectory);
