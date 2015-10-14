@@ -42,6 +42,7 @@ public class WalkOnTheEdgesManager
    private static final boolean ENABLE_TOE_OFF_FOR_STEP_DOWN = true;
 
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
+   private final BooleanYoVariable doToeOffIfPossibleInSingleSupport = new BooleanYoVariable("doToeOffIfPossibleInSingleSupport", registry);
    private final BooleanYoVariable doToeOffWhenHittingAnkleLimit = new BooleanYoVariable("doToeOffWhenHittingAnkleLimit", registry);
    private final BooleanYoVariable doToeOff = new BooleanYoVariable("doToeOff", registry);
    private final DoubleYoVariable jacobianDeterminantThresholdForToeOff = new DoubleYoVariable("jacobianDeterminantThresholdForToeOff", registry);
@@ -104,6 +105,7 @@ public class WalkOnTheEdgesManager
          SideDependentList<FootControlModule> footEndEffectorControlModules, YoVariableRegistry parentRegistry)
    {
       this.doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
+      this.doToeOffIfPossibleInSingleSupport.set(walkingControllerParameters.doToeOffIfPossibleInSingleSupport());
       this.doToeOffWhenHittingAnkleLimit.set(walkingControllerParameters.doToeOffWhenHittingAnkleLimit());
       this.doToeTouchdownIfPossible.set(walkingControllerParameters.doToeTouchdownIfPossible());
       this.doHeelTouchdownIfPossible.set(walkingControllerParameters.doHeelTouchdownIfPossible());
@@ -465,6 +467,11 @@ public class WalkOnTheEdgesManager
    public boolean doToeOffIfPossible()
    {
       return doToeOffIfPossible.getBooleanValue();
+   }
+   
+   public boolean doToeOffIfPossibleInSingleSupport()
+   {
+      return doToeOffIfPossibleInSingleSupport.getBooleanValue();
    }
    
    public void setDoToeOffIfPossible(boolean value)

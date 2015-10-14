@@ -366,6 +366,11 @@ public class FeetManager
       return walkOnTheEdgesManager.doToeOffIfPossible();
    }
 
+   public boolean doToeOffIfPossibleInSingleSupport()
+   {
+      return walkOnTheEdgesManager.doToeOffIfPossibleInSingleSupport();
+   }
+
    public void lockKnee(RobotSide robotSide)
    {
       footControlModules.get(robotSide).doSingularityEscape(singularityEscapeNullspaceMultiplierSupportLegLocking.getDoubleValue());
