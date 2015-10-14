@@ -1195,7 +1195,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             double swingSpeedUpFactor = remainingSwingTimeAccordingToPlan.getDoubleValue() / estimatedRemainingSwingTimeUnderDisturbance.getDoubleValue();
             feetManager.requestSwingSpeedUp(swingSide, swingSpeedUpFactor);
          }
-         else
+         else if (remainingSwingTimeAccordingToPlan.getDoubleValue() > 1.0e-3)
          {
             feetManager.requestSwingSpeedUp(swingSide, Double.POSITIVE_INFINITY);
          }
