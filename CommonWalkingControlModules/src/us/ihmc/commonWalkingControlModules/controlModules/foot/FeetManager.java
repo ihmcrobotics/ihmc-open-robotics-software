@@ -306,6 +306,11 @@ public class FeetManager
       return walkOnTheEdgesManager.isEdgeTouchDownDone(robotSide);
    }
 
+   public boolean willDoToeOff(Footstep nextFootstep, RobotSide transferToSide)
+   {
+      return walkOnTheEdgesManager.willDoToeOff(nextFootstep, transferToSide);
+   }
+
    public boolean checkIfToeOffSafe(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
       walkOnTheEdgesManager.updateToeOffStatus(trailingLeg, desiredECMP, desiredICP, currentICP);
