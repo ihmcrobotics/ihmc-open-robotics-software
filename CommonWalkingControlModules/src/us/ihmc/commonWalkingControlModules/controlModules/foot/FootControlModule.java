@@ -20,6 +20,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -424,5 +425,10 @@ public class FootControlModule
    public void requestSwingSpeedUp(double speedUpFactor)
    {
       swingState.requestSwingSpeedUp(speedUpFactor);
+   }
+
+   public void registerDesiredContactPointForToeOff(FramePoint2d desiredContactPoint)
+   {
+      onToesState.setDesiredToeOffContactPoint(desiredContactPoint);
    }
 }
