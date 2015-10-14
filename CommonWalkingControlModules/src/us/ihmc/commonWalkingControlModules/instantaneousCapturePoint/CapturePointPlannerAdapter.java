@@ -371,4 +371,20 @@ public class CapturePointPlannerAdapter
       else
          PrintTools.error(this.getClass(), "Old planner cannot hold current ICP");
    }
+
+   public void getNextExitCMP(FramePoint entryCMPToPack)
+   {
+      if (useNewICPPlanner)
+         icpPlanner.getNextExitCMP(entryCMPToPack);
+      else
+         throw new RuntimeException("Not implemented in the old planner");
+   }
+
+   public boolean isOnExitCMP()
+   {
+      if (useNewICPPlanner)
+         return icpPlanner.isOnExitCMP();
+      else
+         throw new RuntimeException("Not implemented in the old planner");
+   }
 }
