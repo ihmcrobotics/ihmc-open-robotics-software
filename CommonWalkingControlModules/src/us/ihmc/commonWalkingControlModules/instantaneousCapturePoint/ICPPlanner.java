@@ -28,9 +28,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
 
 public class ICPPlanner
@@ -667,6 +667,11 @@ public class ICPPlanner
       initializeDoubleSupport(time, null);
    }
 
+   public void getNextExitCMP(FramePoint entryCMPToPack)
+   {
+      referenceCMPsCalculator.getNextExitCMP(entryCMPToPack);
+   }
+
    public boolean getHasBeenWokenUp()
    {
       return hasBeenWokenUp.getBooleanValue();
@@ -680,5 +685,13 @@ public class ICPPlanner
    public boolean isDone(double time)
    {
       return computeAndReturnTimeRemaining(time) <= 0.0;
+   }
+
+   public boolean isOnExitCMP()
+   {
+      if (isDoubleSupport.getBooleanValue())
+         return false;
+      else
+         return icpSingleSupportTrajectoryGenerator.isOnExitCMP();
    }
 }
