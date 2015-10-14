@@ -25,7 +25,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -33,6 +32,7 @@ import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class FootControlModule
 {
@@ -309,6 +309,11 @@ public class FootControlModule
    public boolean isInFlatSupportState()
    {
       return getCurrentConstraintType() == ConstraintType.FULL || getCurrentConstraintType() == ConstraintType.HOLD_POSITION;
+   }
+
+   public boolean isInToeOff()
+   {
+      return getCurrentConstraintType() == ConstraintType.TOES;
    }
 
    public boolean isInEdgeTouchdownState()
