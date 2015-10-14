@@ -1182,7 +1182,25 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             feetManager.doSingularityEscape(swingSide);
          }
+
+         if (feetManager.doToeOffIfPossibleInSingleSupport())
+         {
+            boolean willDoToeOff = feetManager.willDoToeOff(nextFootstep, swingSide);
+
+            if (feetManager.isInFlatSupportState(supportSide) && willDoToeOff && capturePointPlannerAdapter.isOnExitCMP())
+            {
+               capturePointPlannerAdapter.getNextExitCMP(nextExitCMP);
+               nextExitCMP.changeFrame(feet.get(supportSide).getSoleFrame());
+               toeOffContactPoint.setByProjectionOntoXYPlaneIncludingFrame(nextExitCMP);
+               feetManager.registerDesiredContactPointForToeOff(supportSide, toeOffContactPoint);
+               double predictedToeOffDuration = capturePointPlannerAdapter.getEstimatedTimeRemainingForState(yoTime.getDoubleValue()) + transferTimeCalculationProvider.getValue();
+               feetManager.requestToeOff(supportSide, predictedToeOffDuration);
+            }
+         }
       }
+
+      private final FramePoint nextExitCMP = new FramePoint();
+      private final FramePoint2d toeOffContactPoint = new FramePoint2d();
 
       private void requestSwingSpeedUpIfNeeded()
       {
