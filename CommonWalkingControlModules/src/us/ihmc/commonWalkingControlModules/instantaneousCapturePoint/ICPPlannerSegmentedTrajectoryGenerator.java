@@ -26,6 +26,8 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    private final DoubleYoVariable omega0;
 
    private final DoubleYoVariable maximumSplineDuration;
+   private final DoubleYoVariable minimumSplineDuration;
+   private final DoubleYoVariable minimumTimeToSpendOnExitCMP;
    private final DoubleYoVariable totalTrajectoryTime;
    private final DoubleYoVariable currentTime;
    private final DoubleYoVariable timeSpentOnInitialCMP;
@@ -93,6 +95,9 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       maximumSplineDuration = new DoubleYoVariable(namePrefix + "MaximumSplineDuration", registry);
+      minimumSplineDuration = new DoubleYoVariable(namePrefix + "MinimumSplineDuration", registry);
+      minimumSplineDuration.set(0.1);
+      minimumTimeToSpendOnExitCMP = new DoubleYoVariable(namePrefix + "MinimumTimeToSpendOnExitCMP", registry);
       totalTrajectoryTime = new DoubleYoVariable(namePrefix + "TotalTrajectoryTime", registry);
       currentTime = new DoubleYoVariable(namePrefix + "CurrentTime", registry);
       timeSpentOnInitialCMP = new DoubleYoVariable(namePrefix + "TimeSpentOnInitialCMP", registry);
@@ -126,6 +131,11 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    public void setMaximumSplineDuration(double maximumSplineDuration)
    {
       this.maximumSplineDuration.set(maximumSplineDuration);
+   }
+
+   public void setMinimumTimeToSpendOnExitCMP(double duration)
+   {
+      minimumTimeToSpendOnExitCMP.set(duration);
    }
 
    public void setReferenceFrames(ReferenceFrame initialFrame, ReferenceFrame finalFrame)
@@ -186,12 +196,21 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       finalICPFinalFrame.changeFrame(finalFrame);
 
       double alpha = 0.50;
+      double minTimeOnExitCMP = minimumTimeToSpendOnExitCMP.getDoubleValue();
+      minTimeOnExitCMP = Math.min(minTimeOnExitCMP, timeSpentOnFinalCMP.getDoubleValue() - alpha * minimumSplineDuration.getDoubleValue());
+
       double startOfSplineTime = timeSpentOnInitialCMP.getDoubleValue() - alpha * maximumSplineDuration.getDoubleValue();
       startOfSplineTime = Math.max(startOfSplineTime, 0.0);
       this.startOfSplineTime.set(startOfSplineTime);
 
       double endOfSplineTime = timeSpentOnInitialCMP.getDoubleValue() + (1.0 - alpha) * maximumSplineDuration.getDoubleValue();
-      endOfSplineTime = Math.min(endOfSplineTime, totalTrajectoryTime.getDoubleValue());
+      endOfSplineTime = Math.min(endOfSplineTime, totalTrajectoryTime.getDoubleValue() - minTimeOnExitCMP);
+      if (endOfSplineTime > totalTrajectoryTime.getDoubleValue() - minTimeOnExitCMP)
+      {
+         endOfSplineTime = totalTrajectoryTime.getDoubleValue() - minTimeOnExitCMP;
+         startOfSplineTime = timeSpentOnInitialCMP.getDoubleValue() - (endOfSplineTime - timeSpentOnInitialCMP.getDoubleValue());
+      }
+      this.startOfSplineTime.set(startOfSplineTime);
       this.endOfSplineTime.set(endOfSplineTime);
 
       spline.setTrajectoryTime(endOfSplineTime - startOfSplineTime);
