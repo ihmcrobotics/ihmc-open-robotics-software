@@ -241,6 +241,7 @@ public class LogVisualizer
    
    public void addLogPlaybackListener(YoVariableLogPlaybackListener listener)
    {
+      listener.setYoVariableRegistry(scs.getRootRegistry());
       robot.addLogPlaybackListener(listener);
    }
    
