@@ -102,6 +102,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public boolean doToeOffIfPossibleInSingleSupport()
+   {
+      return false;
+   }
+
+   @Override
    public boolean checkTrailingLegJacobianDeterminantToTriggerToeOff()
    {
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
