@@ -52,6 +52,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract boolean doToeOffIfPossible();
 
+   public abstract boolean doToeOffIfPossibleInSingleSupport();
+
    public abstract boolean checkTrailingLegJacobianDeterminantToTriggerToeOff();
 
    public abstract boolean checkECMPLocationToTriggerToeOff();
