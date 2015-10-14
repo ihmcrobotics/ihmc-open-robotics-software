@@ -516,20 +516,17 @@ public class ICPPlanner
       update();
       referenceCMPsCalculator.update();
 
-      if (isDoubleSupport.getBooleanValue() || useTwoConstantCMPsPerSupport.getBooleanValue())
+      if (isDoubleSupport.getBooleanValue())
       {
-         if (isDoubleSupport.getBooleanValue())
-         {
-            icpDoubleSupportTrajectoryGenerator.compute(timeInCurrentState);
-            icpDoubleSupportTrajectoryGenerator.get(desiredCapturePointPosition);
-            icpDoubleSupportTrajectoryGenerator.packVelocity(desiredCapturePointVelocity);
-         }
-         else
-         {
-            icpSingleSupportTrajectoryGenerator.compute(timeInCurrentState);
-            icpSingleSupportTrajectoryGenerator.get(desiredCapturePointPosition);
-            icpSingleSupportTrajectoryGenerator.packVelocity(desiredCapturePointVelocity);
-         }
+         icpDoubleSupportTrajectoryGenerator.compute(timeInCurrentState);
+         icpDoubleSupportTrajectoryGenerator.get(desiredCapturePointPosition);
+         icpDoubleSupportTrajectoryGenerator.packVelocity(desiredCapturePointVelocity);
+      }
+      else if (useTwoConstantCMPsPerSupport.getBooleanValue())
+      {
+         icpSingleSupportTrajectoryGenerator.compute(timeInCurrentState);
+         icpSingleSupportTrajectoryGenerator.get(desiredCapturePointPosition);
+         icpSingleSupportTrajectoryGenerator.packVelocity(desiredCapturePointVelocity);
       }
       else
       {
