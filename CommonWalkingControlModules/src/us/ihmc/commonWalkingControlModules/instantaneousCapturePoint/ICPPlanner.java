@@ -14,6 +14,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -482,6 +483,7 @@ public class ICPPlanner
 
    private final FramePoint2d desiredICP2d = new FramePoint2d();
    private final FramePoint2d finalICP2d = new FramePoint2d();
+   private final FrameLine2d desiredICPToFinalICPLine = new FrameLine2d();
    private final FrameLineSegment2d desiredICPToFinalICPLineSegment = new FrameLineSegment2d();
    private final FramePoint2d actualICP2d = new FramePoint2d();
 
@@ -497,7 +499,16 @@ public class ICPPlanner
 
       desiredICPToFinalICPLineSegment.set(desiredICP2d, finalICP2d);
       actualICP2d.setByProjectionOntoXYPlaneIncludingFrame(actualCapturePointPosition);
-      desiredICPToFinalICPLineSegment.orthogonalProjection(actualICP2d);
+      double percentAlongLineSegmentICP = desiredICPToFinalICPLineSegment.percentageAlongLineSegment(actualICP2d);
+      if (percentAlongLineSegmentICP < 0.0)
+      {
+         desiredICPToFinalICPLine.set(desiredICP2d, finalICP2d);
+         desiredICPToFinalICPLine.orthogonalProjection(actualICP2d);
+      }
+      else
+      {
+         desiredICPToFinalICPLineSegment.orthogonalProjection(actualICP2d);
+      }
 
       double actualDistanceDueToDisturbance = desiredCentroidalMomentumPivotPosition.getXYPlaneDistance(actualICP2d);
       double expectedDistanceAccordingToPlan = desiredCentroidalMomentumPivotPosition.getXYPlaneDistance(desiredCapturePointPosition);
@@ -505,7 +516,7 @@ public class ICPPlanner
       computeTimeInCurrentState(time);
       double distanceRatio = actualDistanceDueToDisturbance / expectedDistanceAccordingToPlan;
 
-      if (distanceRatio < 1.0)
+      if (distanceRatio < 1.0e-3)
          return 0.0;
       else
          return Math.log(distanceRatio) / omega0.getDoubleValue();
