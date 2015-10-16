@@ -1,5 +1,7 @@
 package us.ihmc.valkyrieRosControl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -8,8 +10,8 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
+import org.yaml.snakeyaml.Yaml;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -71,11 +73,25 @@ public class ValkyrieRosControlSensorReader implements SensorReader
       startStandPrep = new BooleanYoVariable("startStandPrep", registry);
       masterGain.set(0.3);
 
-      Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep",
-            "gains.yaml");
-      Map<String, Map<String, Double>> offsetMap = (Map<String, Map<String, Double>>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep",
-            "offsets.yaml");
-      Map<String, Double> setPointMap = (Map<String, Double>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "setpoints.yaml");
+      Yaml yaml = new Yaml();
+      
+      InputStream gainStream = getClass().getClassLoader().getResourceAsStream("configuration/standPrep/gains.yaml");
+      InputStream offsetsStream = getClass().getClassLoader().getResourceAsStream("configuration/standPrep/offsets.yaml");
+      InputStream setpointsStream = getClass().getClassLoader().getResourceAsStream("configuration/standPrep/setpoints.yaml");
+      
+      Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) yaml.load(gainStream);
+      Map<String, Map<String, Double>> offsetMap = (Map<String, Map<String, Double>>) yaml.load(offsetsStream);
+      Map<String, Double> setPointMap = (Map<String, Double>) yaml.load(setpointsStream);
+      
+      try
+      {
+         gainStream.close();
+         offsetsStream.close();
+         setpointsStream.close();
+      }
+      catch (IOException e)
+      {
+      }
 
       for (YoJointHandleHolder oneDoFJoint : yoJointHandleHolders)
       {
