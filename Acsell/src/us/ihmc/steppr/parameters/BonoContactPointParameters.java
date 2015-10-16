@@ -16,7 +16,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
@@ -58,7 +58,7 @@ public class BonoContactPointParameters extends RobotContactPointParameters
       pelvisContactPoints.add(new Point2d(-pelvisBoxSizeX / 2.0, -pelvisBoxSizeY / 2.0));
 
       Matrix3d r0 = new Matrix3d();
-      RotationFunctions.setYawPitchRoll(r0, 0.0, Math.PI / 2.0, 0.0);
+      RotationTools.setYawPitchRoll(r0, 0.0, Math.PI / 2.0, 0.0);
       pelvisBackContactPointTransform.setRotationAndZeroTranslation(r0);
 
       Vector3d t1 = new Vector3d(-pelvisBoxSizeX / 2.0, 0.0, 0.0);
@@ -70,7 +70,7 @@ public class BonoContactPointParameters extends RobotContactPointParameters
       pelvisBackContactPoints.add(new Point2d(pelvisBoxSizeZ / 2.0, -pelvisBoxSizeY / 2.0));
 
       Matrix3d r1 = new Matrix3d();
-      RotationFunctions.setYawPitchRoll(r1, 0.0, Math.PI / 2.0, 0.0);
+      RotationTools.setYawPitchRoll(r1, 0.0, Math.PI / 2.0, 0.0);
       chestBackContactPointTransform.setRotationAndZeroTranslation(r1);
 
       Vector3d t2 = new Vector3d(-chestBoxSizeX / 2.0, 0.0, 0.0);
