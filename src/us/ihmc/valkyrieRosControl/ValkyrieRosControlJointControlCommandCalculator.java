@@ -7,9 +7,6 @@ import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.rosControl.JointHandle;
-import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.valkyrieRosControl.dataHolders.YoJointHandleHolder;
@@ -37,19 +34,19 @@ public class ValkyrieRosControlJointControlCommandCalculator
 
       this.controlDT = controlDT;
 
-      String pdControllerBaseName = yoJointHandleHolder.getName() + "Command";
-      YoVariableRegistry registry = new YoVariableRegistry(pdControllerBaseName);
-      trajectory = new YoPolynomial("StandPrepTrajectory", 4, registry);
+      String pdControllerBaseName = yoJointHandleHolder.getName();
+      YoVariableRegistry registry = new YoVariableRegistry(pdControllerBaseName + "Command");
+      trajectory = new YoPolynomial(pdControllerBaseName + "StandPrepTrajectory", 4, registry);
 
-      this.standPrepAngle = new DoubleYoVariable("StandPrepAngle", registry);
-      this.trajectoryTime = new DoubleYoVariable("StandPrepTrajectoryTime", registry);
+      this.standPrepAngle = new DoubleYoVariable(pdControllerBaseName + "StandPrepAngle", registry);
+      this.trajectoryTime = new DoubleYoVariable(pdControllerBaseName + "StandPrepTrajectoryTime", registry);
 
-      pidController = new PIDController("StandPrep", registry);
-      this.tauOff = new DoubleYoVariable("StandPrep_tauOff", registry);
-      this.functionGenerator = new YoFunctionGenerator("StandPrep_", registry);
+      pidController = new PIDController(pdControllerBaseName + "StandPrep", registry);
+      this.tauOff = new DoubleYoVariable(pdControllerBaseName + "StandPrep_tauOff", registry);
+      this.functionGenerator = new YoFunctionGenerator(pdControllerBaseName + "StandPrep_", registry);
 
-      this.desiredPosition = new DoubleYoVariable("StandPrep_q_d", registry);
-      this.desiredVelocity = new DoubleYoVariable("StandPrep_qd_d", registry);
+      this.desiredPosition = new DoubleYoVariable(pdControllerBaseName + "StandPrep_q_d", registry);
+      this.desiredVelocity = new DoubleYoVariable(pdControllerBaseName + "StandPrep_qd_d", registry);
 
       pidController.setProportionalGain(gains.get("kp"));
       pidController.setDerivativeGain(gains.get("kd"));

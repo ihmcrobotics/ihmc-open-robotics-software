@@ -24,8 +24,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
-import us.ihmc.valkyrie.roboNet.schedule.YamlWithIncludesLoader;
 import us.ihmc.valkyrieRosControl.dataHolders.YoForceTorqueSensorHandle;
 import us.ihmc.valkyrieRosControl.dataHolders.YoIMUHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoJointHandleHolder;
