@@ -9,24 +9,40 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.JointNames;
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.LinkNames;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -36,18 +52,29 @@ import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
-public class Step5IDandSCSRobot_pinKnee extends Robot
+public class Step7IDandSCSRobot_pinKnee extends Robot
 {
 
    /**
     * Variables
     */
 
+   // Registries
+   private final YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
+   private final ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
    // ID
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
    private FramePoint bodyPosition = new FramePoint();
+   private FramePoint footPosition = new FramePoint();
 
    private final Vector3d jointAxesPinJoints = new Vector3d(0.0, 1.0, 0.0); // rotate around Y-axis (for revolute joints)
    private final RigidBody elevator;
@@ -70,7 +97,7 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
    private double footY = RobotParameters.FOOT_DIMENSIONS.get(Axis.Y);
    private double footZ = RobotParameters.FOOT_DIMENSIONS.get(Axis.Z);
 
-   // GENERAL
+   // General
    private double bodyMass = RobotParameters.MASSES.get(LinkNames.BODY_LINK);
    private double footMass = RobotParameters.MASSES.get(LinkNames.FOOT_LINK);
 
@@ -82,17 +109,56 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
    private double gcRadius = 0.03;
 
    Vector3d comOffsetBody = new Vector3d(0.0, 0.0, cubeZ / 2.0);
-   Vector3d comOffsetFoot = new Vector3d(footX/2.0 - 0.075 , 0.0, -footZ / 2.0); 
+   Vector3d comOffsetFoot = new Vector3d(footX / 2.0 - 0.075, 0.0, -footZ / 2.0);
 
    private double bodyZ, bodyX; //global so that it is created only once (avoid generating garbage)
-   public DoubleYoVariable qd_x;
-   private double initialBodyHeight = RobotParameters.LENGTHS.get(LinkNames.UPPER_LINK) + RobotParameters.LENGTHS.get(LinkNames.LOWER_LINK) - 0.1 + footZ - 0.029 + 0.024;
+   private double initialBodyHeight = RobotParameters.LENGTHS.get(LinkNames.UPPER_LINK) + RobotParameters.LENGTHS.get(LinkNames.LOWER_LINK) - 0.1 + footZ
+         - 0.029 + 0.024;
+
+   // Frames
+   private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+   private final SideDependentList<ZUpFrame> soleZUpFrames = new SideDependentList<>();
+   private final SideDependentList<YoGraphicReferenceFrame> soleFramesViz = new SideDependentList<>();
+   private final MidFrameZUpFrame midSoleZUpFrame;
+   private YoGraphicReferenceFrame bodyFrameViz;
+
+   // Jacobians
+   private final SideDependentList<GeometricJacobian> legJacobians = new SideDependentList<>();
+   private RigidBody bodyRigidBody, footRigidBody;
+
+   // CoM, CoP and ICP calculations and plots
+   private final CenterOfMassReferenceFrame centerOfMassFrame;
+   private final CenterOfMassJacobian centerOfMassJacobian;
+   private final TwistCalculator twistCalculator;
+
+   private double gravity;
+   private final double totalRobotMass;
+   private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
+
+   private final YoFramePoint yoCoM = new YoFramePoint("centerOfMass", worldFrame, registry);
+   private final YoFrameVector yoCoMVelocity = new YoFrameVector("centerOfMassVelocity", worldFrame, registry);
+   private final YoFramePoint2d yoICP = new YoFramePoint2d("capturePoint", worldFrame, registry);
+   private final YoFramePoint yoCoP = new YoFramePoint("centerOfPressure", worldFrame, registry);
+   private final SideDependentList<YoFramePoint> yoFootPositions = new SideDependentList<>();
+   private final YoFrameVector measuredGroundReactionForce = new YoFrameVector("measuredGroundReactionForce", worldFrame, registry);
+
+   private final Twist bodyJointTwist = new Twist();
+   private final double qd_x, qd_z, qd_wy;
+   private final FrameVector bodyJointLinearVelocity = new FrameVector();
+   private final FrameVector bodyJointAngularVelocity = new FrameVector();
+
+   private final FramePoint centerOfMass = new FramePoint();
+   private final FrameVector centerOfMassVelocity = new FrameVector();
+   private final FramePoint2d centerOfMass2d = new FramePoint2d();
+   private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
+   private final FramePoint2d capturePoint = new FramePoint2d();
+   private double totalFz;
 
    /**
-    * Joints
+    * Constructor - ID robot + SCS robot + visualizers
     */
 
-   public Step5IDandSCSRobot_pinKnee()
+   public Step7IDandSCSRobot_pinKnee()
    {
       super("Robot");
 
@@ -100,10 +166,12 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       elevator = new RigidBody("elevator", elevatorFrame);
 
       bodyJointID = new SixDoFJoint(JointNames.BODY.getName(), elevator, elevatorFrame);
-      createAndAttachBodyRB(LinkNames.BODY_LINK, bodyJointID);
+      bodyRigidBody = createBodyRB(LinkNames.BODY_LINK, bodyJointID);
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+
          // HIP ID (location, joint, and rigidBody) 
          Vector3d hipOffset = new Vector3d(0.0, robotSide.negateIfRightSide(hipOffsetY), 0.0);
          RevoluteJoint hipJointID = ScrewTools.addRevoluteJoint(JointNames.HIP.getName(), bodyJointID.getSuccessor(), hipOffset, jointAxesPinJoints); //The parent rigid body of the hip joint is: bodyJointID.getSuccessor()
@@ -118,9 +186,26 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
 
          // ANKLE ID (location, joint, and rigidBody) 
          Vector3d ankleOffset = new Vector3d(0.0, 0.0, ankleOffsetZ);
-         RevoluteJoint ankleJointID = ScrewTools.addRevoluteJoint(JointNames.ANKLE.getName(), kneeJointID.getSuccessor(), ankleOffset, jointAxesPinJoints); 
+         RevoluteJoint ankleJointID = ScrewTools.addRevoluteJoint(JointNames.ANKLE.getName(), kneeJointID.getSuccessor(), ankleOffset, jointAxesPinJoints);
          allLegJoints.get(robotSide).put(JointNames.ANKLE, ankleJointID);
-         createAndAttachFootRB(LinkNames.FOOT_LINK, JointNames.ANKLE, robotSide);
+         footRigidBody = createFootRB(LinkNames.FOOT_LINK, JointNames.ANKLE, robotSide);
+
+         // Jacobian
+         RigidBodyTransform transformToParent = new RigidBodyTransform();
+         transformToParent.setTranslation(0.0, 0.0, -footZ);
+         ReferenceFrame soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sidePrefix + "SoleFrame", ankleJointID.getFrameAfterJoint(),
+               transformToParent);
+         soleFrames.put(robotSide, soleFrame);
+
+         ZUpFrame soleZUpFrame = new ZUpFrame(worldFrame, soleFrame, sidePrefix + "SoleZUpFrame");
+         soleZUpFrames.put(robotSide, soleZUpFrame);
+
+//         GeometricJacobian jacobian = new GeometricJacobian(bodyRigidBody, footRigidBody, soleFrame); //rigid body before the first joint in the chain and R.B. after the last joint in the chain
+         GeometricJacobian jacobian = new GeometricJacobian(bodyRigidBody, allLegRigidBodies.get(robotSide).get(LinkNames.LOWER_LINK), soleFrame); 
+         //TODO does it make a difference if I put footRB or lowerRB? Both jacobians are 6x2!
+         legJacobians.put(robotSide, jacobian);
+//         System.out.println(legJacobians);
+
       }
 
       /****************** SCS ROBOT ***********************/
@@ -135,17 +220,17 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
          // HIP SCS
          PinJoint hipJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.HIP.getName(), new Vector3d(0.0,
                robotSide.negateIfRightSide(hipOffsetY), 0.0), this, jointAxesPinJoints);
-         hipJointSCS.setLimitStops(-0.75, 0.75, 1e3, 1e1); 
+         hipJointSCS.setLimitStops(-0.75, 0.75, 1e3, 1e1);
          //It is NOT necessary to set limits in the ID description because if the SCS description doesn't let the robot move passed a point the ID robot won't be able to pass it either
 
          if (robotSide == RobotSide.LEFT)
          {
-            hipJointSCS.setQ(-0.6); 
+            hipJointSCS.setQ(-0.6);
          }
 
          else
          {
-            hipJointSCS.setQ(0.1); 
+            hipJointSCS.setQ(0.1);
          }
 
          bodyJointSCS.addJoint(hipJointSCS);
@@ -153,8 +238,9 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
          createAndAttachCylinderLink(LinkNames.UPPER_LINK, JointNames.HIP, robotSide);
 
          // KNEE SCS
-         PinJoint kneeJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.KNEE.getName(), new Vector3d(0.0, 0.0, kneeOffsetZ), this, jointAxesPinJoints);
-         kneeJointSCS.setLimitStops(-0.01, 1.8, 1e5, 1e3); 
+         PinJoint kneeJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.KNEE.getName(), new Vector3d(0.0, 0.0, kneeOffsetZ), this,
+               jointAxesPinJoints);
+         kneeJointSCS.setLimitStops(-0.01, 1.8, 1e5, 1e3);
          hipJointSCS.addJoint(kneeJointSCS);
          idToSCSLegJointMap.put(allLegJoints.get(robotSide).get(JointNames.KNEE), kneeJointSCS);
          createAndAttachCylinderLink(LinkNames.LOWER_LINK, JointNames.KNEE, robotSide);
@@ -162,13 +248,13 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
          // ANKLE SCS
          PinJoint ankleJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.ANKLE.getName(), new Vector3d(0.0, 0.0, ankleOffsetZ), this,
                jointAxesPinJoints);
-         ankleJointSCS.setLimitStops(-0.7, 0.7, 1e3, 1e2); 
-         
+         ankleJointSCS.setLimitStops(-0.7, 0.7, 1e3, 1e2);
+
          if (robotSide == RobotSide.RIGHT)
          {
             ankleJointSCS.setQ(-0.1);
          }
-       
+
          kneeJointSCS.addJoint(ankleJointSCS);
          idToSCSLegJointMap.put(allLegJoints.get(robotSide).get(JointNames.ANKLE), ankleJointSCS);
 
@@ -193,7 +279,7 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
          Graphics3DObject graphics = ankleJointSCS.getLink().getLinkGraphics();
          graphics.identity();
          graphics.translate(0.4, 0.0, gcOffset);
-         graphics.addSphere(gcRadius, YoAppearance.DarkOliveGreen());
+         graphics.addSphere(gcRadius, YoAppearance.Orange());
       }
 
       /**************** SCS Ground Model *************************/
@@ -201,7 +287,53 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       GroundProfile3D profile = new FlatGroundProfile();
       groundModel.setGroundProfile3D(profile);
       this.setGroundContactModel(groundModel);
-          
+
+      // Some useful parameters 
+      qd_x = bodyJointSCS.getQd_t1().getDoubleValue();
+      qd_z = bodyJointSCS.getQd_t2().getDoubleValue();
+      qd_wy = bodyJointSCS.getQd_rot().getDoubleValue();
+
+      
+      /****************** Visualization ***********************/
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+
+         // Visualize feet location on plotter panel
+         YoFramePoint yoFootPosition = new YoFramePoint(sidePrefix + "FootPosition", worldFrame, registry);
+         yoFootPositions.put(robotSide, yoFootPosition);
+         YoArtifactPosition footPositionArtifact = new YoArtifactPosition(sidePrefix + " Foot", yoFootPosition.getYoX(), yoFootPosition.getYoY(), GraphicType.SOLID_BALL, YoAppearance.Green().getColor().get(), 0.009);
+         artifactList.add(footPositionArtifact);
+
+         // Visualize sole frames on SCS
+         soleFramesViz.put(robotSide, new YoGraphicReferenceFrame(soleFrames.get(robotSide), registry, 0.3));
+         yoGraphicsList.add(soleFramesViz.get(robotSide));
+      }
+
+      // Visualize body frame in SCS
+      bodyFrameViz = new YoGraphicReferenceFrame(bodyJointID.getFrameAfterJoint(), registry, 0.7);
+      yoGraphicsList.add(bodyFrameViz);
+
+      // Visualize CoM, CP and CoP on plotter panel
+      YoArtifactPosition centerOfMassArtifact = new YoArtifactPosition("Center of Mass", yoCoM.getYoX(), yoCoM.getYoY(), GraphicType.SOLID_BALL, YoAppearance
+            .Black().getColor().get(), 0.009);
+      YoArtifactPosition capturePointArtifact = new YoArtifactPosition("Capture Point", yoICP.getYoX(), yoICP.getYoY(), GraphicType.SOLID_BALL, YoAppearance
+            .Blue().getColor().get(), 0.009);
+      YoArtifactPosition centerOfPressureArtifact = new YoArtifactPosition("Center of Pressure", yoCoP.getYoX(), yoCoP.getYoY(), GraphicType.SOLID_BALL,
+            YoAppearance.Red().getColor().get(), 0.009);
+      artifactList.add(centerOfMassArtifact);
+      artifactList.add(capturePointArtifact);
+      artifactList.add(centerOfPressureArtifact);
+
+      // Initialize parameters for CoM, CoP and ICP calculations
+      midSoleZUpFrame = new MidFrameZUpFrame("midSoleZUpFrame", worldFrame, soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
+      twistCalculator = new TwistCalculator(worldFrame, elevator);
+      centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
+      centerOfMassJacobian = new CenterOfMassJacobian(elevator);
+      totalRobotMass = TotalMassCalculator.computeSubTreeMass(elevator);
+
+      gravity = 9.81;
+      omega0.set(Math.sqrt(gravity / bodyPosition.getZ()));
    }
 
    /**
@@ -237,24 +369,24 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
     */
 
    /************************* ID ROBOT - Rigid bodies ********************************/
-   private void createAndAttachBodyRB(LinkNames linkName, SixDoFJoint bodyJointID)
+   private RigidBody createBodyRB(LinkNames linkName, SixDoFJoint bodyJointID)
    {
       Matrix3d inertiaBody = createInertiaMatrixBox(linkName);
-      ScrewTools.addRigidBody(linkName.getName(), bodyJointID, inertiaBody, bodyMass, comOffsetBody);
+      return ScrewTools.addRigidBody(linkName.getName(), bodyJointID, inertiaBody, bodyMass, comOffsetBody);
    }
 
    private void createAndAttachCylinderRB(LinkNames linkName, JointNames jointName, RobotSide robotSide)
    {
       Matrix3d inertiaCylinder = createInertiaMatrixCylinder(linkName);
       Vector3d comOffsetCylinder = new Vector3d(0.0, 0.0, -RobotParameters.LENGTHS.get(linkName) / 2.0);
-      allLegRigidBodies.get(robotSide).put(linkName,
-            ScrewTools.addRigidBody(linkName.getName(), allLegJoints.get(robotSide).get(jointName), inertiaCylinder, bodyMass, comOffsetCylinder));
+      RigidBody cyl = ScrewTools.addRigidBody(linkName.getName(), allLegJoints.get(robotSide).get(jointName), inertiaCylinder, bodyMass, comOffsetCylinder);
+      allLegRigidBodies.get(robotSide).put(linkName, cyl);
    }
 
-   private void createAndAttachFootRB(LinkNames linkName, JointNames jointName, RobotSide robotSide)
+   private RigidBody createFootRB(LinkNames linkName, JointNames jointName, RobotSide robotSide)
    {
       Matrix3d inertiaBody = createInertiaMatrixBox(linkName);
-      ScrewTools.addRigidBody(linkName.getName(), allLegJoints.get(robotSide).get(JointNames.KNEE), inertiaBody, footMass, comOffsetFoot); 
+      return ScrewTools.addRigidBody(linkName.getName(), allLegJoints.get(robotSide).get(JointNames.KNEE), inertiaBody, footMass, comOffsetFoot);
    }
 
    /************************* SCS ROBOT - Links ********************************/
@@ -265,12 +397,11 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       link.setMomentOfInertia(inertiaBody);
       link.setMass(RobotParameters.MASSES.get(LinkNames.BODY_LINK));
       link.setComOffset(comOffsetBody);
-      
+
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCube(cubeX, cubeY, cubeZ, RobotParameters.APPEARANCE.get(LinkNames.BODY_LINK));
       link.setLinkGraphics(linkGraphics);
-      //      link.addEllipsoidFromMassProperties(YoAppearance.Green());
-      link.addCoordinateSystemToCOM(0.7);
+      //      link.addCoordinateSystemToCOM(0.7);
       bodyJointSCS.setLink(link);
    }
 
@@ -285,8 +416,7 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCylinder(-RobotParameters.LENGTHS.get(linkName), RobotParameters.RADII.get(linkName), RobotParameters.APPEARANCE.get(linkName));
       link.setLinkGraphics(linkGraphics);
-      //      link.addEllipsoidFromMassProperties(YoAppearance.Green());
-      link.addCoordinateSystemToCOM(0.3);
+      //      link.addCoordinateSystemToCOM(0.3);
       idToSCSLegJointMap.get(allLegJoints.get(robotSide).get(jointName)).setLink(link);
    }
 
@@ -296,45 +426,46 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       Matrix3d inertiaFoot = createInertiaMatrixBox(linkName);
       link.setMomentOfInertia(inertiaFoot);
       link.setMass(RobotParameters.MASSES.get(LinkNames.FOOT_LINK));
-      link.setComOffset(comOffsetFoot); 
+      link.setComOffset(comOffsetFoot);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(footOffsetX, 0.0, 0.0);
-      if (robotSide == RobotSide.LEFT)
-      {
-         linkGraphics.addCube(footX, footY, -footZ, RobotParameters.APPEARANCE.get(LinkNames.FOOT_LINK));
-      }
-      if (robotSide == RobotSide.RIGHT)
-      {
-         linkGraphics.addCube(footX, footY, -footZ, YoAppearance.Tomato());
-      }
+      linkGraphics.addCube(footX, footY, -footZ, RobotParameters.APPEARANCE.get(LinkNames.FOOT_LINK));
       link.setLinkGraphics(linkGraphics);
-      //      link.addEllipsoidFromMassProperties(YoAppearance.Green());
-      link.addCoordinateSystemToCOM(0.3);
+      //      link.addCoordinateSystemToCOM(0.3);
       idToSCSLegJointMap.get(allLegJoints.get(robotSide).get(jointName)).setLink(link);
    }
 
    /**
     * SCS Robot --> ID Robot 
-    * Send positions and velocities.
+    * Send positions and velocities + CoM, CoP and ICP + Frames
     */
    public void updatePositionsIDrobot()
    {
-      //Body info
+      // Body positions
       bodyJointID.setPosition(bodyJointSCS.getQ_t1().getDoubleValue(), 0.0, bodyJointSCS.getQ_t2().getDoubleValue());
       bodyJointID.setRotation(0.0, bodyJointSCS.getQ_rot().getDoubleValue(), 0.0);
 
+      // Body twist   
+      ReferenceFrame bodyFrame = bodyJointID.getFrameAfterJoint();
+      bodyJointLinearVelocity.setIncludingFrame(worldFrame, qd_x, 0.0, qd_z);
+      bodyJointLinearVelocity.changeFrame(bodyFrame);
+      bodyJointAngularVelocity.setIncludingFrame(bodyFrame, 0.0, qd_wy, 0.0);
+      bodyJointTwist.set(bodyFrame, elevatorFrame, bodyFrame, bodyJointLinearVelocity, bodyJointAngularVelocity);
+      bodyJointID.setJointTwist(bodyJointTwist);
+
+      // Body velocities
       double[] velocityArray = new double[6];
-      velocityArray[0] = 0.0;                                        // yaw
-      velocityArray[1] = bodyJointSCS.getQd_rot().getDoubleValue();  // pitch
-      velocityArray[2] = 0.0;                                        // roll
-      velocityArray[3] = bodyJointSCS.getQd_t1().getDoubleValue();   // x
-      velocityArray[4] = 0.0;                                        // y
-      velocityArray[5] = bodyJointSCS.getQd_t2().getDoubleValue();   // z
+      velocityArray[0] = 0.0; // yaw
+      velocityArray[1] = bodyJointSCS.getQd_rot().getDoubleValue(); // pitch
+      velocityArray[2] = 0.0; // roll
+      velocityArray[3] = bodyJointSCS.getQd_t1().getDoubleValue(); // x
+      velocityArray[4] = 0.0; // y
+      velocityArray[5] = bodyJointSCS.getQd_t2().getDoubleValue(); // z
       DenseMatrix64F velocities = new DenseMatrix64F(6, 1, true, velocityArray);
       bodyJointID.setVelocity(velocities, 0);
 
-      //Leg  and foot info (hip, knee and ankle)
+      // Leg  and foot info (hip, knee and ankle)
       for (OneDoFJoint idJoint : idToSCSLegJointMap.keySet())
       {
          OneDegreeOfFreedomJoint scsJoint = idToSCSLegJointMap.get(idJoint);
@@ -342,10 +473,60 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
          idJoint.setQd(scsJoint.getQD().getDoubleValue());
       }
 
-      elevator.updateFramesRecursively();
+      // Update frames
+      elevator.updateFramesRecursively(); //REALLY important line!!
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         soleZUpFrames.get(robotSide).update();
+         legJacobians.get(robotSide).compute();
+      }
+
+      midSoleZUpFrame.update();
+      twistCalculator.compute();
+
+      // CoM
+      centerOfMassFrame.update();
+      centerOfMassJacobian.compute();
+      centerOfMass.setToZero(centerOfMassFrame);
+      centerOfMass.changeFrame(worldFrame);
+      centerOfMassJacobian.packCenterOfMassVelocity(centerOfMassVelocity);
+      centerOfMassVelocity.changeFrame(worldFrame); //to make sure that we are actually in world frame
+      centerOfMass2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMass);
+      centerOfMassVelocity2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassVelocity);
+
+      yoCoM.set(centerOfMass);
+      yoCoMVelocity.set(centerOfMassVelocity);
+
+      // ICP
+      CapturePointCalculator.computeCapturePoint(capturePoint, centerOfMass2d, centerOfMassVelocity2d, omega0.getDoubleValue());
+      yoICP.set(capturePoint);
+
+      // CoP
+      measuredGroundReactionForce.setToZero();
+      bodyFrameViz.update();
+      for (RobotSide robotside : RobotSide.values)
+      {
+         footPosition.setToZero(soleFrames.get(robotside));
+         yoFootPositions.get(robotside).setAndMatchFrame(footPosition);
+         soleFramesViz.get(robotside).update();
+         measuredGroundReactionForce.add(GCpointsHeel.get(robotside).getYoForce());
+         measuredGroundReactionForce.add(GCpointsToe.get(robotside).getYoForce());
+      }
+
+      totalFz = measuredGroundReactionForce.getZ();
+
+      if (totalFz < 1.0e-3)
+      {
+         yoCoP.setToNaN();
+      }
+      else
+      {
+         double alpha = (GCpointsHeel.get(RobotSide.RIGHT).getYoForce().getZ() + GCpointsToe.get(RobotSide.RIGHT).getYoForce().getZ()) / totalFz; //fraction of the total Fz represented by the FzRightFoot
+         yoCoP.interpolate(yoFootPositions.get(RobotSide.LEFT), yoFootPositions.get(RobotSide.RIGHT), alpha);
+      }
 
       // Get the body coordinates
-      bodyPosition = new FramePoint();
       bodyPosition.setToZero(bodyJointID.getFrameAfterJoint());
       bodyPosition.changeFrame(worldFrame);
 
@@ -364,16 +545,16 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       }
    }
 
-   public RigidBody getElevator()  
-   {
-      return elevator;
-   }
-
    /**
     * Getters and Setters for the controller
     */
 
    // ID joints and rigid bodies
+   public RigidBody getElevator()
+   {
+      return elevator;
+   }
+
    public OneDoFJoint getLegJoint(JointNames jointName, RobotSide robotSide)
    {
       return allLegJoints.get(robotSide).get(jointName);
@@ -395,18 +576,12 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       bodyZ = bodyPosition.getZ();
       return bodyZ;
    }
-   
+
    public double getBodyPositionX()
    {
       bodyX = bodyPosition.getX();
       return bodyX;
    }
-
-   //   public void getBodyPoint(Point3d bodyPointToPack) // Example of GET TO PACK method
-   //   {
-   //      Point3d bodyPoint = this.bodyPosition.getPoint();
-   //      bodyPointToPack.set(bodyPoint);
-   //   }
 
    public void getBodyPitch(Quat4d rotationToPack)
    {
@@ -422,30 +597,12 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
    {
       bodyJointID.getAngularVelocity(angularVelocityToPack);
    }
-   
+
    public double getBodyVelX(Vector3d linearVelocityToPack)
    {
-     bodyJointID.getLinearVelocity(linearVelocityToPack);
-     double velX = linearVelocityToPack.getX();
-     return velX;
-   }
-
-   // Knee
-   public double getKneeVelocity(RobotSide robotSide)
-   {
-      double kneeVelocity = allLegJoints.get(robotSide).get(JointNames.KNEE).getQd();
-      return kneeVelocity;
-   }
-
-   public void setKneeTau(RobotSide robotSide, double desiredKneeTau)
-   {
-      allLegJoints.get(robotSide).get(JointNames.KNEE).setTau(desiredKneeTau);
-   }
-
-   public double getKneePosition(RobotSide robotSide)
-   {
-      double kneeHeight = allLegJoints.get(robotSide).get(JointNames.KNEE).getQ();
-      return kneeHeight;
+      bodyJointID.getLinearVelocity(linearVelocityToPack);
+      double velX = linearVelocityToPack.getX();
+      return velX;
    }
 
    // Hip
@@ -466,6 +623,46 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       return hipPitch;
    }
 
+   public double getHipTau(RobotSide robotSide)
+   {
+      double hipTau = allLegJoints.get(robotSide).get(JointNames.HIP).getTau();
+      return hipTau;
+   }
+
+   public OneDoFJoint getHipJointID(RobotSide robotSide)
+   {
+      return allLegJoints.get(robotSide).get(JointNames.HIP);
+   }
+
+   // Knee
+   public double getKneeVelocity(RobotSide robotSide)
+   {
+      double kneeVelocity = allLegJoints.get(robotSide).get(JointNames.KNEE).getQd();
+      return kneeVelocity;
+   }
+
+   public void setKneeTau(RobotSide robotSide, double desiredKneeTau)
+   {
+      allLegJoints.get(robotSide).get(JointNames.KNEE).setTau(desiredKneeTau);
+   }
+
+   public double getKneePitch(RobotSide robotSide)
+   {
+      double kneePitch = allLegJoints.get(robotSide).get(JointNames.KNEE).getQ();
+      return kneePitch;
+   }
+
+   public double getKneeTau(RobotSide robotSide)
+   {
+      double kneeTau = allLegJoints.get(robotSide).get(JointNames.KNEE).getTau();
+      return kneeTau;
+   }
+
+   public OneDoFJoint getKneeJointID(RobotSide robotSide)
+   {
+      return allLegJoints.get(robotSide).get(JointNames.KNEE);
+   }
+
    //Ankle
    public void setAnkleTau(RobotSide robotSide, double desiredAnkleTau)
    {
@@ -482,6 +679,14 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
    {
       double anklePitch = allLegJoints.get(robotSide).get(JointNames.ANKLE).getQ();
       return anklePitch;
+   }
+
+   public double getAnkleHeight(RobotSide robotSide)
+   {
+      footPosition.setToZero(allLegJoints.get(robotSide).get(JointNames.ANKLE).getFrameAfterJoint());
+      footPosition.changeFrame(worldFrame);
+      double ankleZ = footPosition.getZ();
+      return ankleZ;
    }
 
    // Feet
@@ -514,9 +719,76 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
    {
       return GCpointsHeel.get(robotSide).getX();
    }
-   
+
    public double getHeelZ(RobotSide robotSide)
    {
       return GCpointsHeel.get(robotSide).getZ();
+   }
+
+   public void getFootLinearVelocity(RobotSide robotSide, FrameVector linearVelocityToPack)
+   {
+      GCpointsHeel.get(robotSide).getYoVelocity().getFrameTupleIncludingFrame(linearVelocityToPack);
+   }
+   
+   // Others
+   public double getTotalRobotMass()
+   {
+      return totalRobotMass;
+   }
+
+   public SideDependentList<YoFramePoint> getYoFootPositions()
+   {
+      return yoFootPositions;
+   }
+
+   public ReferenceFrame getSoleFrame(RobotSide robotSide)
+   {
+      return soleFrames.get(robotSide);
+   }
+
+   public ArtifactList getArtifactList()
+   {
+      return artifactList;
+   }
+
+   public YoGraphicsList getYoGraphicsList()
+   {
+      return yoGraphicsList;
+   }
+
+   public MidFrameZUpFrame getMidSoleZUpFrame()
+   {
+      return midSoleZUpFrame;
+   }
+
+   public GeometricJacobian getLegJacobian(RobotSide robotSide)
+   {
+      return legJacobians.get(robotSide);
+   }
+
+   public double getOmega0()
+   {
+      return omega0.getDoubleValue();
+   }
+
+   public double getGravity()
+   {
+      return gravity;
+   }
+   
+   //CoM and ICP
+   public void getCoM(FramePoint2d comToPack)
+   {
+      yoCoM.getFrameTuple2dIncludingFrame(comToPack);
+   }
+
+   public void getCoM(FramePoint centerOfMassToPack)
+   {
+      yoCoM.getFrameTupleIncludingFrame(centerOfMassToPack);
+   }
+
+   public void getCapturePoint(FramePoint2d capturePoinToPack)
+   {
+      yoICP.getFrameTuple2dIncludingFrame(capturePoinToPack);
    }
 }
