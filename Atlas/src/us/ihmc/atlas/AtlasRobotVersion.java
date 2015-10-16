@@ -54,10 +54,6 @@ public enum AtlasRobotVersion
       return getHandModel() == DRCHandType.ROBOTIQ || getHandModel() == DRCHandType.ROBOTIQ_AND_SRI;
    }
    
-   public boolean hasSRIHand()
-   {
-      return getHandModel() == DRCHandType.ROBOTIQ_AND_SRI;
-   }
 
    public String getSdfFile()
    {

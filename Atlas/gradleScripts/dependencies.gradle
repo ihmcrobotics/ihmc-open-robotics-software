@@ -37,7 +37,6 @@ dependencies {
     
     compile project(':IHMCWholeBodyController')
     compile project(':ImageProcessing')
-    compile project(':iRobotHardwareDrivers')
     compile project(':RobotDataCommunication')
     compile project(':RobotiqHandDrivers')
     compile project(':ROSJava')
