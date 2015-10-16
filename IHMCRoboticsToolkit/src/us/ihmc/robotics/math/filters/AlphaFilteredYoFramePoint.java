@@ -76,6 +76,32 @@ public class AlphaFilteredYoFramePoint extends YoFramePoint
 
       return ret;
    }
+   
+   public static AlphaFilteredYoFramePoint createAlphaFilteredYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry,
+         double alphaX, double alphaY, double alphaZ, YoFramePoint unfilteredPoint)
+   {
+      // alpha is a double
+      AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alphaX, unfilteredPoint.getYoX());
+      AlphaFilteredYoVariable y = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, alphaY, unfilteredPoint.getYoY());
+      AlphaFilteredYoVariable z = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry, alphaZ, unfilteredPoint.getYoZ());
+      
+      AlphaFilteredYoFramePoint ret = new AlphaFilteredYoFramePoint(x, y, z, unfilteredPoint.getReferenceFrame());
+      
+      return ret;
+   }
+   
+   public static AlphaFilteredYoFramePoint createAlphaFilteredYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry,
+         DoubleYoVariable alphaX, DoubleYoVariable alphaY, DoubleYoVariable alphaZ, YoFramePoint unfilteredPoint)
+   {
+      // alpha is a YoVariable
+      AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alphaX, unfilteredPoint.getYoX());
+      AlphaFilteredYoVariable y = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, alphaY, unfilteredPoint.getYoY());
+      AlphaFilteredYoVariable z = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry, alphaZ, unfilteredPoint.getYoZ());
+      
+      AlphaFilteredYoFramePoint ret = new AlphaFilteredYoFramePoint(x, y, z, unfilteredPoint.getReferenceFrame());
+      
+      return ret;
+   }
 
    public void update()
    {
