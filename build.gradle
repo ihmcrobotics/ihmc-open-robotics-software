@@ -75,7 +75,7 @@ remotes
 {
 	valkyrieRealtimeComputer
 	{
-		host = '10.2.0.10'
+		host = '10.7.4.200'
 		user = 'val'
 		password = '***REMOVED***'
 		knownHosts = allowAnyHosts
@@ -151,10 +151,7 @@ task deploy(dependsOn: jar) {
 				
 				configurations.runtime.each 
 				{
-					if(!it.name.contains("IHMCHumanoidOperatorInterface"))
-					{
-						put it, directory + '/lib'
-					}
+					put it, directory + '/lib'
 				}
 				
 				put jar.archivePath, directory + '/ValkyrieController.jar'

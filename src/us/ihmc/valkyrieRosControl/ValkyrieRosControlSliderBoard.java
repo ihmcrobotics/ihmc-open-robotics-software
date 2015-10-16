@@ -23,7 +23,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 {
 
-   private static final String[] controlledJoints = { "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll" };
+   private static final String[] controlledJoints = {"torsoYaw", "torsoPitch", "torsoRoll"};
 
 //   private static final String[] controlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
 //       "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",

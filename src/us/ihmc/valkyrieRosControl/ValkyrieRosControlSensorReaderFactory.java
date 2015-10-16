@@ -66,10 +66,10 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
       {
          if (joint instanceof OneDoFJoint)
          {
+       	    OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
+        	stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
             if(jointHandles.containsKey(joint.getName()))
             {
-               OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
-               stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
                YoJointHandleHolder holder = new YoJointHandleHolder(jointHandles.get(joint.getName()), oneDoFJoint, estimatorDesiredJointDataHolder.get(oneDoFJoint), sensorReaderRegistry);
                yoJointHandleHolders.add(holder);
             }
@@ -78,7 +78,10 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
 
       for (IMUDefinition imuDefinition : imuDefinitions)
       {
-         if(imuHandles.containsKey(imuDefinition.getName()))
+     	 // TODO: Remove me: 
+    	 stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinition);
+         
+    	 if(imuHandles.containsKey(imuDefinition.getName()))
          {
             stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinition);
             YoIMUHandleHolder holder = new YoIMUHandleHolder(imuHandles.get(imuDefinition.getName()), imuDefinition, sensorReaderRegistry);
@@ -89,6 +92,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
 
       for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
       {
+    	 System.out.println("Looking for forceSensorDefinition " + forceSensorDefinition.getSensorName());
          if(forceTorqueSensorHandles.containsKey(forceSensorDefinition.getSensorName()))
          {
             stateEstimatorSensorDefinitions.addForceSensorDefinition(forceSensorDefinition);

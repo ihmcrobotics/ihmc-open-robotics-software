@@ -48,15 +48,24 @@ import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
 
 public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
 {   
-   private static final String[] controlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
-         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
-         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch", "lowerNeckPitch",
-         "neckYaw", "upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll",
-         "rightWristPitch" };
+//   private static final String[] controlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
+//         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
+//         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch", "lowerNeckPitch",
+//         "neckYaw", "upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll",
+//         "rightWristPitch" };
+	private static final String[] controlledJoints = { "leftHipYaw",
+			"leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch",
+			"leftAnkleRoll", "rightHipYaw", "rightHipRoll", "rightHipPitch",
+			"rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw",
+			"torsoPitch", "torsoRoll", "leftShoulderPitch", "leftShoulderRoll",
+			"leftShoulderYaw", "leftElbowPitch", "lowerNeckPitch", "neckYaw",
+			"upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll",
+			"rightShoulderYaw", "rightElbowPitch" };
    
-   private static final String[] readIMUs = { "leftPelvisIMU", "rightPelvisIMU" };
+   private static final String[] readIMUs = { };//"leftPelvisIMU", "rightPelvisIMU" };
    
-   private static final String[] readForceTorqueSensors = { };
+   private static final String[] readForceTorqueSensors = { "leftFootSixAxis", "rightFootSixAxis" };
+   private static final String[] forceTorqueSensorModelNames = { "leftAnkleRoll", "rightAnkleRoll" };
    
    private static final double gravity = -9.792; //Tuned on Valkyrie 9.785; // Measured with IMUs on real robot
    
@@ -142,9 +151,12 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
       }
       
       HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles = new HashMap<>();
-      for(String forceTorqueSensor : readForceTorqueSensors)
+      for(int i = 0; i < readForceTorqueSensors.length; i++)
       {
-         forceTorqueSensorHandles.put(forceTorqueSensor, createForceTorqueSensorHandle(forceTorqueSensor));
+    	  
+    	 String forceTorqueSensor = readForceTorqueSensors[i];
+    	 String modelName = forceTorqueSensorModelNames[i];
+         forceTorqueSensorHandles.put(modelName, createForceTorqueSensorHandle(forceTorqueSensor));
       }
       
       /*
