@@ -73,9 +73,33 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.qdSelected</Variables>
+		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.torsoPitch.torsoPitch_tau_d</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.qdSelected</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.torsoRoll.torsoRoll_tau_d</Variables>
+		<GraphConfiguration>
+			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -90,7 +114,7 @@
 <Title>
 Tab0
 </Title>
-<Entry Boxes>qSelected,kpSelected</Entry Boxes>
+<Entry Boxes>qSelected,kpSelected,kdSelected,qDesiredSelected</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -109,9 +133,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>12.30513752119502</Camera X>
- <Camera Y>-4.53657601560532</Camera Y>
- <Camera Z>2.117614279071547</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -135,8 +159,8 @@ Tab0
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.8123981971247769</Fix X>
-<Fix Y>1.8369242656794675</Fix Y>
-<Fix Z>0.07146358001564468</Fix Z>
+<Fix X>0.0</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.6</Fix Z>
 </Fix Position>
 </Canvas 1>
