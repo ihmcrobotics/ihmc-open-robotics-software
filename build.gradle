@@ -100,7 +100,7 @@ jar {
       
       "Bundle-Name": project.name,
       "Bundle-Version": project.version,
-      "Bundle-License": "http://gnu.org/licenses/gpl-3.0.txt",
+      "Bundle-License": "IHMC Proprietary",
       "Bundle-Vendor": "IHMC",
       'Class-Path': depend.join(' '))
    }
