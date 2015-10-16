@@ -20,7 +20,7 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -115,7 +115,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       FramePoint footstepPosition = getDesiredFootstepPositionCopy(futureSupportAnkleZUpFrame, futureSupportAnkleFrame, futureSwingLegSide, desiredDestination.getFramePoint2dCopy(), footToWorldRotation);
       FrameOrientation footstepOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
       double[] yawPitchRoll = new double[3];
-      RotationFunctions.getYawPitchRoll(yawPitchRoll, footToWorldRotation);
+      RotationTools.getYawPitchRoll(yawPitchRoll, footToWorldRotation);
       footstepOrientation.setYawPitchRoll(yawPitchRoll);
 
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);

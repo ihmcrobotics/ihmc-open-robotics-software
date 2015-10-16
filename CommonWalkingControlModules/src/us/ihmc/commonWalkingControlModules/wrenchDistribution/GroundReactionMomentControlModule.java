@@ -7,7 +7,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.screwTheory.Momentum;
 
 
@@ -34,7 +34,7 @@ public class GroundReactionMomentControlModule
 
       Matrix3d pelvisToWorld = new Matrix3d();
       pelvisFrame.getTransformToDesiredFrame(worldFrame).get(pelvisToWorld);
-      double pelvisYaw = RotationFunctions.getYaw(pelvisToWorld);
+      double pelvisYaw = RotationTools.getYaw(pelvisToWorld);
 
       double error = AngleTools.computeAngleDifferenceMinusPiToPi(desiredPelvisYaw, pelvisYaw);
       ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() + kPelvisYaw.getDoubleValue() * error);
