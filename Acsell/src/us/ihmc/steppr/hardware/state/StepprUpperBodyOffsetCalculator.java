@@ -9,7 +9,7 @@ import us.ihmc.acsell.hardware.state.AcsellXSensState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.steppr.hardware.configuration.StepprCalibrationOffset;
 
@@ -124,7 +124,7 @@ public class StepprUpperBodyOffsetCalculator
       xsens.getQuaternion(xsensQuat);
       xsensMatrix.set(xsensQuat);
 
-      RotationFunctions.setYawPitchRollBasedOnQuaternion(yawPitchRoll, xsensQuat);
+      RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, xsensQuat);
       xsens_yaw.update(yawPitchRoll[0]);
       xsens_pitch.update(yawPitchRoll[1]);
       xsens_roll.update(yawPitchRoll[2]);
