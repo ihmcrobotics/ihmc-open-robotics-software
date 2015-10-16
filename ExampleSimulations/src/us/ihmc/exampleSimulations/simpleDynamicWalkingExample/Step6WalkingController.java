@@ -518,7 +518,7 @@ public class Step6WalkingController implements RobotController
     centerOfMassVelocityInWorld = new FrameVector2d(ReferenceFrame.getWorldFrame(), comVelX, 0.0);
     CapturePointCalculator.computeCapturePoint(capturePoint, centerOfMassInWorld, centerOfMassVelocityInWorld, omega0);
     icpPosX = capturePoint.getX();
-    System.out.println("comPos" + centerOfMassInWorld + "\ncomVel" + centerOfMassVelocityInWorld + "\nicp" + capturePoint + "\nicpPosX" + icpPosX ); 
+    //    System.out.println("comPos" + centerOfMassInWorld + "\ncomVel" + centerOfMassVelocityInWorld + "\nicp" + capturePoint + "\nicpPosX" + icpPosX ); 
 
     // Visualization
     icpGraphics.setPosition(icpPosX, 0.0, 0.0);

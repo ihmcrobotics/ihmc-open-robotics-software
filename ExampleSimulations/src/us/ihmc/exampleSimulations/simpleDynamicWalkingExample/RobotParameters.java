@@ -29,7 +29,7 @@ public class RobotParameters
          }
       }
 
-      public static JointNames[] values = new JointNames[] { HIP, KNEE, BODY };
+      public static JointNames[] values = new JointNames[] { HIP, KNEE, BODY, ANKLE };
    };
 
    public enum LinkNames
@@ -53,7 +53,7 @@ public class RobotParameters
          }
       }
 
-      public static LinkNames[] values = new LinkNames[] { BODY_LINK, UPPER_LINK, LOWER_LINK };
+      public static LinkNames[] values = new LinkNames[] { BODY_LINK, UPPER_LINK, LOWER_LINK, FOOT_LINK };
    };
 
    public final static EnumMap<LinkNames, Double> MASSES = new EnumMap<LinkNames, Double>(LinkNames.class); //MASSES is the name of the enumMap object 

@@ -262,7 +262,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
    private void createAndAttachFootRB(LinkNames linkName, JointNames jointName, RobotSide robotSide)
    {
       Matrix3d inertiaBody = createInertiaMatrixBox(linkName);
-      ScrewTools.addRigidBody(linkName.getName(), bodyJointID, inertiaBody, bodyMass, comOffsetBody);
+      ScrewTools.addRigidBody(linkName.getName(), allLegJoints.get(robotSide).get(JointNames.KNEE), inertiaBody, footMass, comOffsetFoot); 
    }
 
    /************************* SCS ROBOT - Links ********************************/
