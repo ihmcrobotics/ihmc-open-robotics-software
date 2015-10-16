@@ -133,4 +133,9 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
       timeIntoStep.set(time);
       minimumJerkTrajectory.computeTrajectory(time);
    }
+
+   public DoubleYoVariable getTimeIntoStep()
+   {
+      return timeIntoStep;
+   }
 }
