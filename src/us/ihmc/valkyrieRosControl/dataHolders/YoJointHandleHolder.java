@@ -54,7 +54,7 @@ public class YoJointHandleHolder
    public void setDesiredEffort(double effort)
    {
       this.tauDesired.set(effort);      
-      handle.setDesiredEffort(getControllerTauDesired());
+      handle.setDesiredEffort(effort);
    }
    
 
