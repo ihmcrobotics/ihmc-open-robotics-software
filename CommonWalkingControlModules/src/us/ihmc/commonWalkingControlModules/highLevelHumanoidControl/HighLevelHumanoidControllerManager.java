@@ -45,6 +45,8 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private final AtomicReference<HighLevelState> fallbackControllerForFailureReference = new AtomicReference<>();
    
+   public static final AtomicReference<HighLevelState> currentStateForOpenSource = new AtomicReference<HighLevelState>(HighLevelState.DO_NOTHING_BEHAVIOR);
+   
    public HighLevelHumanoidControllerManager(HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
          MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders,
          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, GlobalDataProducer dataProducer)
@@ -118,6 +120,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
          @Override
          public void stateChanged(State<HighLevelState> oldState, State<HighLevelState> newState, double time)
          {
+            currentStateForOpenSource.set(newState.getStateEnum());
             if (dataProducer != null)
                dataProducer.queueDataToSend(new HighLevelStateChangePacket(oldState.getStateEnum(), newState.getStateEnum()));
          }
