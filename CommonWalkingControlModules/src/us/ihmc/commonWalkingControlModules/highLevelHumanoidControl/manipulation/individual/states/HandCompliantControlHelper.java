@@ -12,7 +12,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.DeadzoneYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -277,7 +277,7 @@ public class HandCompliantControlHelper
       desiredPosition.sub(totalLinearCorrection);
 
       totalAngularCorrection.negate();
-      RotationFunctions.setAxisAngleBasedOnRotationVector(angularDisplacementAsAxisAngle, totalAngularCorrection.getVector());
+      RotationTools.setAxisAngleBasedOnRotationVector(angularDisplacementAsAxisAngle, totalAngularCorrection.getVector());
       angularDisplacementAsMatrix.set(angularDisplacementAsAxisAngle);
       desiredOrientation.getMatrix3d(correctedRotationMatrix);
       correctedRotationMatrix.mul(angularDisplacementAsMatrix, correctedRotationMatrix);

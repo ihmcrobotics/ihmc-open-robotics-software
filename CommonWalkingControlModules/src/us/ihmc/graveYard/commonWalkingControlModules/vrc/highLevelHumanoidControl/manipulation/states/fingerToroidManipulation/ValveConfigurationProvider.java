@@ -9,7 +9,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.trajectories.providers.SE3ConfigurationProvider;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -78,7 +78,7 @@ public class ValveConfigurationProvider implements SE3ConfigurationProvider
       rotation.setColumn(2, 0.0, 1.0, 0.0);
 
       Matrix3d postRotation = new Matrix3d();
-      RotationFunctions.setYawPitchRoll(postRotation, robotSide.negateIfRightSide(outwardRotation.getDoubleValue()), 0.0, 0.0);
+      RotationTools.setYawPitchRoll(postRotation, robotSide.negateIfRightSide(outwardRotation.getDoubleValue()), 0.0, 0.0);
 
       rotation.mul(postRotation);
 

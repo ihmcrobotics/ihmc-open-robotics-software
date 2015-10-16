@@ -21,7 +21,7 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -118,7 +118,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
             footToWorldRotation);
       FrameOrientation footstepOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
       double[] yawPitchRoll = new double[3];
-      RotationFunctions.getYawPitchRoll(yawPitchRoll, footToWorldRotation);
+      RotationTools.getYawPitchRoll(yawPitchRoll, footToWorldRotation);
       footstepOrientation.setYawPitchRoll(yawPitchRoll);
 
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
@@ -206,10 +206,10 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       RigidBodyTransform footToSupportTransform = desiredHeadingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       Matrix3d footToSupportRotation = new Matrix3d();
       footToSupportTransform.get(footToSupportRotation);
-      double yaw = RotationFunctions.getYaw(footToSupportRotation);
+      double yaw = RotationTools.getYaw(footToSupportRotation);
       double pitch = stepPitch.getDoubleValue();
       double roll = 0.0;
-      RotationFunctions.setYawPitchRoll(footToSupportRotation, yaw, pitch, roll);
+      RotationTools.setYawPitchRoll(footToSupportRotation, yaw, pitch, roll);
 
       return footToSupportRotation;
    }

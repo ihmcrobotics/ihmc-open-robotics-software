@@ -7,7 +7,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -39,12 +39,12 @@ public class BodyOrientationEstimatorThroughStanceLeg implements SensorProcessor
    public void estimateBodyOrientation()
    {
       RigidBodyTransform footToBody = referenceFrames.getIMUFrame().getTransformToDesiredFrame(referenceFrames.getFootFrame(robotSide));
-      RotationFunctions.getYawPitchRoll(tempYawPitchRoll, footToBody);
+      RotationTools.getYawPitchRoll(tempYawPitchRoll, footToBody);
       
       RigidBodyTransform bodyToWorld = referenceFrames.getIMUFrame().getTransformToDesiredFrame(worldFrame);
       Matrix3d bodyToWorldRotation = new Matrix3d();
       bodyToWorld.get(bodyToWorldRotation);
-      double bodyYaw = RotationFunctions.getYaw(bodyToWorldRotation);
+      double bodyYaw = RotationTools.getYaw(bodyToWorldRotation);
       tempYawPitchRoll[0] = bodyYaw;
       orientation.setYawPitchRoll(tempYawPitchRoll[0], tempYawPitchRoll[1], tempYawPitchRoll[2]);
    }

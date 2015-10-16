@@ -30,7 +30,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
@@ -152,7 +152,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
 
       Matrix3d footToPelvisOrientation = new Matrix3d();
       footToPelvis.get(footToPelvisOrientation);
-      double desiredHipYaw = RotationFunctions.getYaw(footToPelvisOrientation);    // TODO: wrong and not necessary for R2, but ok for now.
+      double desiredHipYaw = RotationTools.getYaw(footToPelvisOrientation);    // TODO: wrong and not necessary for R2, but ok for now.
       try
       {
          inverseKinematicsCalculator.solve(desiredLegJointPositions.get(swingSide), footToPelvis, swingSide, desiredHipYaw);

@@ -12,9 +12,9 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -125,7 +125,7 @@ public class ManipulableToroid
       copy.getOrientation(rotationMatrix);
       AxisAngle4d axisAngle = new AxisAngle4d();
 //      axisAngle.set(rotationMatrix);
-      RotationFunctions.axisAngleFromMatrix(rotationMatrix, axisAngle);
+      RotationTools.axisAngleFromMatrix(rotationMatrix, axisAngle);
       setQ(axisAngle.getAngle());
 
       updateVisualizers();
@@ -176,7 +176,7 @@ public class ManipulableToroid
          rotationMatrix.setColumn(1, yAxis);
          rotationMatrix.setColumn(2, zAxis);
 
-         if (!RotationFunctions.isRotationProper(rotationMatrix))
+         if (!RotationTools.isRotationProper(rotationMatrix))
             throw new RuntimeException("rotation not proper");
 
          transformToParent.setRotationAndZeroTranslation(rotationMatrix);
