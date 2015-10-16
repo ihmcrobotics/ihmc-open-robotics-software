@@ -9,6 +9,8 @@ import us.ihmc.sensorProcessing.model.DesiredJointDataHolder.DesiredJointData;
 
 public class YoJointHandleHolder
 {
+   
+   private final String name;
    private final JointHandle handle;
    private final OneDoFJoint joint;
    private final DesiredJointDataHolder.DesiredJointData desiredJointData;
@@ -18,11 +20,12 @@ public class YoJointHandleHolder
    private final DoubleYoVariable qd;
    
    
+   private final DoubleYoVariable controllerTauDesired;
    private final DoubleYoVariable tauDesired;
    
    public YoJointHandleHolder(JointHandle handle, OneDoFJoint joint, DesiredJointData desiredJointData, YoVariableRegistry parentRegistry)
    {
-      String name = handle.getName();
+      this.name = handle.getName();
       YoVariableRegistry registry = new YoVariableRegistry(name);
       
       this.handle = handle;
@@ -32,7 +35,8 @@ public class YoJointHandleHolder
       this.tauMeasured = new DoubleYoVariable(name + "TauMeasured", registry);
       this.q = new DoubleYoVariable(name + "_q", registry);
       this.qd = new DoubleYoVariable(name + "_qd", registry);
-      this.tauDesired = new DoubleYoVariable("TauDesired", registry);
+      this.controllerTauDesired = new DoubleYoVariable(name + "ControllerTauDesired", registry);
+      this.tauDesired = new DoubleYoVariable(name + "TauDesired", registry);
       
       
       parentRegistry.addChild(registry);
@@ -43,11 +47,16 @@ public class YoJointHandleHolder
       this.q.set(handle.getPosition());
       this.qd.set(handle.getVelocity());
       this.tauMeasured.set(handle.getEffort());
+      this.controllerTauDesired.set(desiredJointData.getTauDesired());
       
-      this.tauDesired.set(desiredJointData.getTauDesired());
-      
-      handle.setDesiredEffort(getTauDesired());
    }
+   
+   public void setDesiredEffort(double effort)
+   {
+      this.tauDesired.set(effort);      
+      handle.setDesiredEffort(getControllerTauDesired());
+   }
+   
 
    public OneDoFJoint getOneDoFJoint()
    {
@@ -69,9 +78,14 @@ public class YoJointHandleHolder
       return qd.getDoubleValue();
    }
 
-   public double getTauDesired()
+   public double getControllerTauDesired()
    {
-      return tauDesired.getDoubleValue();
+      return controllerTauDesired.getDoubleValue();
+   }
+
+   public String getName()
+   {
+      return name;
    }
    
    
