@@ -34,8 +34,8 @@ public class MultiThreadedRealTimeRobotController
       sensorReader.run();
       
       // Magic jitter fix
-      monotonicTime.set(0, timestamp + 500000);
-      RealtimeThread.getCurrentRealtimeThread().waitUntil(monotonicTime);
+//      monotonicTime.set(0, timestamp + 500000);
+//      RealtimeThread.getCurrentRealtimeThread().waitUntil(monotonicTime);
       sensorReader.write(RealtimeThread.getCurrentMonotonicClockTime());
    }
    
