@@ -29,7 +29,7 @@ import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.geometry.PlaneFitter;
 import us.ihmc.robotics.geometry.QuickHull3dWrapper;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -218,7 +218,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
    {
       FootstepData originalFootstepFound = new FootstepData(footstep);
       Point3d position = originalFootstepFound.getLocation();
-      double yaw = RotationFunctions.getYawFromQuaternion(originalFootstepFound.getOrientation());
+      double yaw = RotationTools.getYawFromQuaternion(originalFootstepFound.getOrientation());
 
       if (!useMask)
       {
@@ -382,7 +382,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       // add in lower boundary points
       Point3d position = footstep.getLocation();
       Quat4d orientation = footstep.getOrientation();
-      double yaw = RotationFunctions.getYawFromQuaternion(orientation);
+      double yaw = RotationTools.getYawFromQuaternion(orientation);
       addLowerBoundaryPointsToHullPointList(convexHullPointsList, position.x, position.y, yaw);
 
 
@@ -425,7 +425,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
 
          face.getPlane(facePlane);
          Quat4d newOrientation = new Quat4d();
-         RotationFunctions.getQuaternionFromYawAndZNormal(yaw, facePlane.getNormalCopy(), newOrientation);
+         RotationTools.getQuaternionFromYawAndZNormal(yaw, facePlane.getNormalCopy(), newOrientation);
          FootstepData currentFaceFootstep = new FootstepData(footstep.getRobotSide(), new Point3d(x, y, facePlane.getZOnPlane(x, y)), newOrientation);
          currentPredictedContactPoints = getPredictedContactPointsForFootstep(currentFaceFootstep, points, distanceTolerance);
 

@@ -40,7 +40,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -540,7 +540,7 @@ public class PathToFootstepGeneratorTest
          //sign * horizontalDistance
          position.x = centerPoint.getX() + -1.0 * Math.sin(yaw) * sign * horizontalDistance;
          position.y = centerPoint.getY() + 1.0 * Math.cos(yaw) * sign * horizontalDistance;
-         RotationFunctions.getQuaternionFromYawAndZNormal(yaw, verticalVector, orientation);
+         RotationTools.getQuaternionFromYawAndZNormal(yaw, verticalVector, orientation);
          FootstepData footstep = new FootstepData(side, position, orientation);
          snapper.snapFootstep(footstep, heightMap);
          originalFeet.put(side, footstep);
@@ -558,7 +558,7 @@ public class PathToFootstepGeneratorTest
       Point3d footstepPosition = endFootstep.getLocation();
       assertEquals(endXToCheckAgainst, footstepPosition.getX(), 1e-10);
       assertEquals(endYToCheckAgainst, footstepPosition.getY(), 1e-10);
-      double angleError = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(yaw, RotationFunctions.getYawFromQuaternion(endFootstep.getOrientation())));
+      double angleError = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(yaw, RotationTools.getYawFromQuaternion(endFootstep.getOrientation())));
       assertTrue(angleError < 1e-10);
    }
 

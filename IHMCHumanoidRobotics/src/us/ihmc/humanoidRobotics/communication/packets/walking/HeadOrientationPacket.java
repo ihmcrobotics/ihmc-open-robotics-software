@@ -9,7 +9,7 @@ import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomTools;
 
 @ClassDocumentation("This message gives the desired head orientation of the robot in world coordinates.")
@@ -47,7 +47,7 @@ public class HeadOrientationPacket extends IHMCRosApiPacket<HeadOrientationPacke
 
    public boolean epsilonEquals(HeadOrientationPacket other, double epsilon)
    {
-      boolean ret = RotationFunctions.quaternionEpsilonEquals(this.getOrientation(), other.getOrientation(), epsilon);
+      boolean ret = RotationTools.quaternionEpsilonEquals(this.getOrientation(), other.getOrientation(), epsilon);
       ret &= MathTools.epsilonEquals(this.trajectoryTime, other.trajectoryTime, epsilon);
       return ret;
    }

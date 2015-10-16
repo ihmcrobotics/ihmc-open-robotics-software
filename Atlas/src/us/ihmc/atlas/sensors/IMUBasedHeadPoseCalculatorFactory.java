@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket.MeasurementStatus;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -151,7 +151,7 @@ class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_r
 		Quat4d qRotation = new Quat4d();
 		qRotation.set(aRotation);
 		double[] eulerAngles =new double[3];
-		RotationFunctions.setYawPitchRollBasedOnQuaternion(eulerAngles, qRotation);
+		RotationTools.setYawPitchRollBasedOnQuaternion(eulerAngles, qRotation);
 		return eulerAngles;
 	}
 	

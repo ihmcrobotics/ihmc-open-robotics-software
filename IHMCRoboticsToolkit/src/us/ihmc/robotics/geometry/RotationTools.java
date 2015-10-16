@@ -15,7 +15,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3d;
 
-public class RotationFunctions
+public class RotationTools
 {
    public static final int QUATERNION_SIZE = 4;
    public static final double MATRIX_TO_QUATERNION_THRESHOLD = 1e-10;
@@ -240,7 +240,7 @@ public class RotationFunctions
       Matrix3d rotationMatrix = new Matrix3d(xAxis.x, yAxis.x, zAxis.x, xAxis.y, yAxis.y, zAxis.y, xAxis.z, yAxis.z, zAxis.z);
       try
       {
-         RotationFunctions.setQuaternionBasedOnMatrix3d(quaternionToPack, rotationMatrix);
+         RotationTools.setQuaternionBasedOnMatrix3d(quaternionToPack, rotationMatrix);
       }
       catch(Exception e)
       {
@@ -320,7 +320,7 @@ public class RotationFunctions
 //      {
 //         throw new RuntimeException("Rotation is not proper.");
 //      }
-      assert RotationFunctions.isRotationProper(matrix3d) : "Matrix3d: " + matrix3d + " is not proper";
+      assert RotationTools.isRotationProper(matrix3d) : "Matrix3d: " + matrix3d + " is not proper";
    }
 
    public static boolean isRotationProper(Matrix3d mat)

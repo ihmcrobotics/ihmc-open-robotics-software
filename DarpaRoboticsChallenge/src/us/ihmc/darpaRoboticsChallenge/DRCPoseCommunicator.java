@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.streamingData.AtomicLastPacketHold
 import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -196,7 +196,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
          
          imuSensor.getLinearAccelerationMeasurement(imuLinearAccelerations[sensorNumber]);
          imuSensor.getOrientationMeasurement(imuOrientationsAsMatrix[sensorNumber]);
-         RotationFunctions.setQuaternionBasedOnMatrix3d(imuOrientations[sensorNumber], imuOrientationsAsMatrix[sensorNumber]);
+         RotationTools.setQuaternionBasedOnMatrix3d(imuOrientations[sensorNumber], imuOrientationsAsMatrix[sensorNumber]);
          imuSensor.getAngularVelocityMeasurement(rawImuAngularVelocities[sensorNumber]);
          
          imuPacketToPack.set(imuLinearAccelerations[sensorNumber], imuOrientations[sensorNumber], rawImuAngularVelocities[sensorNumber]);

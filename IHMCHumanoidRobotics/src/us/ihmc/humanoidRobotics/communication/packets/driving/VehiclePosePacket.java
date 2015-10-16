@@ -10,7 +10,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.FormattingTools;
@@ -38,7 +38,7 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
       Matrix3d rotationMatrix = new Matrix3d();
       transformFromVehicleToWorld.get(rotationMatrix);
       orientation = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnMatrix3d(orientation, rotationMatrix);
+      RotationTools.setQuaternionBasedOnMatrix3d(orientation, rotationMatrix);
 
       Vector3d translation = new Vector3d();
       transformFromVehicleToWorld.get(translation);
@@ -70,7 +70,7 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
 
    public boolean epsilonEquals(VehiclePosePacket other, double epsilon)
    {
-      boolean ret = RotationFunctions.quaternionEpsilonEquals(this.getOrientation(), other.getOrientation(), epsilon);
+      boolean ret = RotationTools.quaternionEpsilonEquals(this.getOrientation(), other.getOrientation(), epsilon);
       ret &= this.getPosition().epsilonEquals(other.getPosition(), epsilon);
 
       return ret;
@@ -79,7 +79,7 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
    public String toString()
    {
       double[] ypr = new double[3];
-      RotationFunctions.setYawPitchRollBasedOnQuaternion(ypr, orientation);
+      RotationTools.setYawPitchRollBasedOnQuaternion(ypr, orientation);
       String ret = ("Car= (" + FormattingTools.getFormattedDecimal3D(position.getX()) + "," + FormattingTools.getFormattedDecimal3D(position.getY()) + ","
                     + FormattingTools.getFormattedDecimal3D(position.getZ()) + ")," + " (" + FormattingTools.getFormattedDecimal3D(ypr[0]) + ","
                     + FormattingTools.getFormattedDecimal3D(ypr[1]) + "," + FormattingTools.getFormattedDecimal3D(ypr[2]) + ")");

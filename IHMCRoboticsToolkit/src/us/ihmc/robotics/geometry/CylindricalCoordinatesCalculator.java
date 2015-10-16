@@ -27,7 +27,7 @@ public class CylindricalCoordinatesCalculator
       getPosition(position, frame, radiansFromYAxis, radius, z);
 
 
-      RotationFunctions.setYawPitchRoll(preRotation, 0.0, Math.PI / 2.0, -Math.PI / 2.0);
+      RotationTools.setYawPitchRoll(preRotation, 0.0, Math.PI / 2.0, -Math.PI / 2.0);
 
       rotX.rotX(robotSide.negateIfRightSide(Math.PI / 2.0) - radiansFromYAxis);
       rotZ.rotZ(robotSide.negateIfRightSide(outwardRotation));

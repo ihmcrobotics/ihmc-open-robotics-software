@@ -11,7 +11,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
@@ -173,12 +173,12 @@ public class YoFrameOrientation extends ReferenceFrameHolder
 
    public void getQuaternion(Quat4d quaternionToPack)
    {
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(quaternionToPack, yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue());
+      RotationTools.setQuaternionBasedOnYawPitchRoll(quaternionToPack, yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue());
    }
 
    public void getMatrix3d(Matrix3d rotationMatrixToPack)
    {
-      RotationFunctions.setYawPitchRoll(rotationMatrixToPack, yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue());
+      RotationTools.setYawPitchRoll(rotationMatrixToPack, yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue());
    }
 
    public void getFrameOrientationIncludingFrame(FrameOrientation orientationToPack)

@@ -28,7 +28,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -991,7 +991,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       Quat4d q = new Quat4d();
 
       //This code has a singularity when yaw and roll line up (e.g. pitch is 90, can't rotate in one direction any more).
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(q, q_yaw.getDoubleValue(), q_pitch.getDoubleValue(), q_roll.getDoubleValue());
+      RotationTools.setQuaternionBasedOnYawPitchRoll(q, q_yaw.getDoubleValue(), q_pitch.getDoubleValue(), q_roll.getDoubleValue());
 
       //This code compounds the rotations so that on subsequent frames the ability to rotate in lost rotation directions is regained
       //This affectively uses global yaw pitch and roll each time.

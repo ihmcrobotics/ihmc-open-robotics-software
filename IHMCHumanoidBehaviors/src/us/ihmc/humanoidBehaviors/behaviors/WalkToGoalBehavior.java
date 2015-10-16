@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 /**
@@ -254,7 +254,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		double yDiff = currentLocation.location.y - checkAgainst.location.y;
 		if (currentLocation.robotSide != checkAgainst.robotSide) return false;
 		if (Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff,2)) > 0.05) return false;
-		if (Math.abs(RotationFunctions.getYawFromQuaternion(currentLocation.orientation) - RotationFunctions.getYawFromQuaternion(checkAgainst.orientation)) > Math.PI/16) return false;
+		if (Math.abs(RotationTools.getYawFromQuaternion(currentLocation.orientation) - RotationTools.getYawFromQuaternion(checkAgainst.orientation)) > Math.PI/16) return false;
 		return true;
 	}
 
@@ -273,7 +273,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	
 	private void sendUpdateStart(FootstepData updatedLocation){
 		if (updatedLocation.orientation.epsilonEquals(new Quat4d(), .003)) return;
-		FootstepPlanRequestPacket updateStartPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.UPDATE_START, updatedLocation, RotationFunctions.getYawFromQuaternion(updatedLocation.orientation), null, 10);
+		FootstepPlanRequestPacket updateStartPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.UPDATE_START, updatedLocation, RotationTools.getYawFromQuaternion(updatedLocation.orientation), null, 10);
 		outgoingCommunicationBridge.sendPacketToNetworkProcessor(updateStartPacket);
 	}
 	
@@ -351,9 +351,9 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		Matrix3d startRotation = new Matrix3d();
 		fullRobotModel.getFoot(startSide).getBodyFixedFrame().getTransformToDesiredFrame(worldFrame).getTranslation(startTranslation);
 		fullRobotModel.getFoot(startSide).getBodyFixedFrame().getTransformToDesiredFrame(worldFrame).getRotation(startRotation);
-		startYaw = RotationFunctions.getYaw(startRotation);
+		startYaw = RotationTools.getYaw(startRotation);
 		Quat4d startOrientation = new Quat4d();
-		RotationFunctions.setQuaternionBasedOnMatrix3d(startOrientation, startRotation);
+		RotationTools.setQuaternionBasedOnMatrix3d(startOrientation, startRotation);
 		startFootstep = new FootstepData(startSide, new Point3d(startTranslation), startOrientation);
 		currentLocation = new FootstepData(startFootstep);
 		predictedLocation = currentLocation;
@@ -372,7 +372,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
       */
 
 		Quat4d rightGoalOrientation = new Quat4d();
-		RotationFunctions.setQuaternionBasedOnYawPitchRoll(rightGoalOrientation, thetaGoal, 0,0);
+		RotationTools.setQuaternionBasedOnYawPitchRoll(rightGoalOrientation, thetaGoal, 0,0);
 		goalFootsteps.add(new FootstepData(RobotSide.RIGHT, new Point3d(xGoal - xOffset, yGoal - yOffset, 0), rightGoalOrientation));
 
 		hasInputBeenSet.set(true);

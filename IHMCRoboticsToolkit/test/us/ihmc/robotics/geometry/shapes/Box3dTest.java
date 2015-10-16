@@ -6,7 +6,7 @@ import org.junit.Test;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.shapes.Box3d.FaceName;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
@@ -556,9 +556,9 @@ public class Box3dTest
          box.getRotation(rotation);
          
          double epsilon = 1e-14;
-         Assert.assertEquals(yaw, RotationFunctions.getYaw(rotation), epsilon);
-         Assert.assertEquals(pitch, RotationFunctions.getPitch(rotation), epsilon);
-         Assert.assertEquals(roll, RotationFunctions.getRoll(rotation), epsilon);
+         Assert.assertEquals(yaw, RotationTools.getYaw(rotation), epsilon);
+         Assert.assertEquals(pitch, RotationTools.getPitch(rotation), epsilon);
+         Assert.assertEquals(roll, RotationTools.getRoll(rotation), epsilon);
       }
    }
 

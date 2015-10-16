@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 
@@ -86,7 +86,7 @@ public class OrientationInterpolationCalculator
 
       // convert to axis-angle
 //      axisAngle.set(relativeRotationMatrix);
-      RotationFunctions.axisAngleFromMatrix(relativeRotationMatrix, axisAngle);
+      RotationTools.axisAngleFromMatrix(relativeRotationMatrix, axisAngle);
       
 
       // compute angular rate

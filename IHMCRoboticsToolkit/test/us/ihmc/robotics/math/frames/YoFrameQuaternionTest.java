@@ -18,7 +18,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.random.RandomTools;
 
@@ -80,13 +80,13 @@ public class YoFrameQuaternionTest
       yoFrameQuaternion.set(quat4dExpected);
       Quat4d quat4dActual = new Quat4d();
       yoFrameQuaternion.get(quat4dActual);
-      assertTrue(RotationFunctions.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
+      assertTrue(RotationTools.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
 
       AxisAngle4d axisAngle4dExpected = RandomTools.generateRandomRotation(random);
       yoFrameQuaternion.set(axisAngle4dExpected);
       AxisAngle4d axisAngle4dActual = new AxisAngle4d();
       yoFrameQuaternion.get(axisAngle4dActual);
-      assertTrue(RotationFunctions.axisAngleEpsilonEqualsIgnoreFlippedAxes(axisAngle4dExpected, axisAngle4dActual, EPS));
+      assertTrue(RotationTools.axisAngleEpsilonEqualsIgnoreFlippedAxes(axisAngle4dExpected, axisAngle4dActual, EPS));
 
       matrix3dExpected.set(RandomTools.generateRandomRotation(random));
       yoFrameQuaternion.set(matrix3dExpected);
@@ -105,8 +105,8 @@ public class YoFrameQuaternionTest
       double[] yawPitchRollActual = new double[3];
       yoFrameQuaternion.getYawPitchRoll(yawPitchRollActual);
 
-      RotationFunctions.setYawPitchRoll(matrix3dActual, yawPitchRollActual[0], yawPitchRollActual[1], yawPitchRollActual[2]);
-      RotationFunctions.setYawPitchRoll(matrix3dExpected, yawPitchRollExpected[0], yawPitchRollExpected[1], yawPitchRollExpected[2]);
+      RotationTools.setYawPitchRoll(matrix3dActual, yawPitchRollActual[0], yawPitchRollActual[1], yawPitchRollActual[2]);
+      RotationTools.setYawPitchRoll(matrix3dExpected, yawPitchRollExpected[0], yawPitchRollExpected[1], yawPitchRollExpected[2]);
 
       assertTrue(matrix3dActual.epsilonEquals(matrix3dExpected, EPS));
    }
@@ -170,13 +170,13 @@ public class YoFrameQuaternionTest
          yoFrameQuaternion.set(quat4dA);
          yoFrameQuaternion.mul(quat4dB);
          yoFrameQuaternion.get(quat4dActual);
-         assertTrue(RotationFunctions.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
+         assertTrue(RotationTools.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
 
          yoFrameQuaternion.set(quat4dA);
          frameOrientation.set(quat4dB);
          yoFrameQuaternion.mul(frameOrientation);
          yoFrameQuaternion.get(quat4dActual);
-         assertTrue(RotationFunctions.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
+         assertTrue(RotationTools.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
 
       }
    }

@@ -10,7 +10,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -259,7 +259,7 @@ public class Step6WalkingController implements RobotController
    private DoubleYoVariable controlBodyPitch()
    {
       rob.getBodyPitch(rotationToPack);
-      double pitchFromQuaternion = RotationFunctions.getPitchFromQuaternion(rotationToPack);
+      double pitchFromQuaternion = RotationTools.getPitchFromQuaternion(rotationToPack);
 
       rob.getBodyAngularVel(velocityToPack);
       double bodyAngularVel = velocityToPack.getY();
@@ -271,7 +271,7 @@ public class Step6WalkingController implements RobotController
    private DoubleYoVariable controlBodyPitchSingleSupport()
    {
       rob.getBodyPitch(rotationToPack);
-      double pitchFromQuaternion = RotationFunctions.getPitchFromQuaternion(rotationToPack);
+      double pitchFromQuaternion = RotationTools.getPitchFromQuaternion(rotationToPack);
       
       rob.getBodyAngularVel(velocityToPack);
       double bodyAngularVel = velocityToPack.getY();

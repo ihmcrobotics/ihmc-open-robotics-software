@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RotationFunctions.ComparisonMode;
+import us.ihmc.robotics.geometry.RotationTools.ComparisonMode;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
@@ -61,7 +61,7 @@ public class RigidBodyTransformTest
          transform.setRotationAndZeroTranslation(axisAngle);
          transform.getRotation(axisAngleToCheck);
 
-         RotationFunctionsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
+         RotationToolsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
       }
 
       for (double theta : thetaTest)
@@ -74,7 +74,7 @@ public class RigidBodyTransformTest
          transform.setRotation(axisAngle);
          transform.getRotation(axisAngleToCheck);
 
-         RotationFunctionsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
+         RotationToolsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
       }
 
       for (double theta : thetaTest)
@@ -87,7 +87,7 @@ public class RigidBodyTransformTest
          transform.setRotation(axisAngle);
          transform.getRotation(axisAngleToCheck);
 
-         RotationFunctionsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
+         RotationToolsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
       }
    }
 
@@ -117,7 +117,7 @@ public class RigidBodyTransformTest
          RigidBodyTransform transform = new RigidBodyTransform(axisAngle, vector);
          transform.getRotation(axisAngleToCheck);
 
-         RotationFunctionsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
+         RotationToolsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
       }
 
       for (double theta : thetaTest)
@@ -132,7 +132,7 @@ public class RigidBodyTransformTest
          RigidBodyTransform transform = new RigidBodyTransform(axisAngle, vector);
          transform.getRotation(axisAngleToCheck);
 
-         RotationFunctionsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
+         RotationToolsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
       }
 
       for (double theta : thetaTest)
@@ -147,7 +147,7 @@ public class RigidBodyTransformTest
          RigidBodyTransform transform = new RigidBodyTransform(axisAngle, vector);
          transform.getRotation(axisAngleToCheck);
 
-         RotationFunctionsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
+         RotationToolsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
       }
    }
 
@@ -174,7 +174,7 @@ public class RigidBodyTransformTest
 
          transform.getRotation(axisAngleToCheck);
 
-         RotationFunctionsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
+         RotationToolsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
       }
 
       for (double theta : thetaTest)
@@ -188,7 +188,7 @@ public class RigidBodyTransformTest
 
          transform1.getRotation(axisAngleToCheck);
 
-         RotationFunctionsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
+         RotationToolsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
       }
 
       for (double theta : thetaTest)
@@ -201,7 +201,7 @@ public class RigidBodyTransformTest
          RigidBodyTransform transform2 = new RigidBodyTransform(axisAngle, new Vector3d(0, 0, 0));
          transform2.getRotation(axisAngleToCheck);
 
-         RotationFunctionsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
+         RotationToolsTest.assertAxisAngleEquivalent("theta = " + theta, axisAngle, axisAngleToCheck, comparisonMode, epsilonAssert);
       }
 
    }
@@ -1696,7 +1696,7 @@ public class RigidBodyTransformTest
 
          Matrix3d mat = new Matrix3d();
          transform.getRotation(mat);
-         RotationFunctions.isRotationProper(mat);
+         RotationTools.isRotationProper(mat);
          assertTrue(checkOrthogonality(transform));
       }
    }
@@ -1771,7 +1771,7 @@ public class RigidBodyTransformTest
          }
          transform3d.get(checkMatrix);
          transform3d.getRotation(mat);
-         RotationFunctions.isRotationProper(mat);
+         RotationTools.isRotationProper(mat);
 
          JUnitTools.assertMatrix4dEquals("", matrix, checkMatrix, 1e-10);
       }

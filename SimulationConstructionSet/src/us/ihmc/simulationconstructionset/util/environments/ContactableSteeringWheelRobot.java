@@ -25,7 +25,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 
 public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
 {
@@ -216,7 +216,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       //spokes
       for (int i = 0; i < 3; i++)
       {
-         RotationFunctions.setQuaternionBasedOnYawPitchRoll(quat, 0.0, Math.PI / 2.0, i * 2.0 * Math.PI / 4.0 + Math.PI / 2.0);
+         RotationTools.setQuaternionBasedOnYawPitchRoll(quat, 0.0, Math.PI / 2.0, i * 2.0 * Math.PI / 4.0 + Math.PI / 2.0);
          transform.setRotation(quat);
          invertTransform.set(transform);
          invertTransform.invert();

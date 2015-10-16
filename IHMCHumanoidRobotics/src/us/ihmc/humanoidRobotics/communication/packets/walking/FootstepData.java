@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -87,7 +87,7 @@ public class FootstepData extends IHMCRosApiPacket<FootstepData> implements Tran
       this.robotSide = footstepData.robotSide;
       this.location = new Point3d(footstepData.location);
       this.orientation = new Quat4d(footstepData.orientation);
-      RotationFunctions.checkUnitLength(this.orientation);
+      RotationTools.checkUnitLength(this.orientation);
       if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty()){
          this.predictedContactPoints = null;
       }else{
@@ -169,7 +169,7 @@ public class FootstepData extends IHMCRosApiPacket<FootstepData> implements Tran
    public void setOrientation(Quat4d orientation)
    {
       this.orientation.set(orientation);
-      RotationFunctions.checkUnitLength(this.orientation);
+      RotationTools.checkUnitLength(this.orientation);
    }
 
    public RobotSide getRobotSide()

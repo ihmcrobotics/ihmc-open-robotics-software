@@ -31,7 +31,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -391,7 +391,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       double yaw = footPose2d.getYaw();
       Point3d position = new Point3d(footPose2d.getX(), footPose2d.getY(), height);
       Quat4d orientation = new Quat4d();
-      RotationFunctions.getQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
+      RotationTools.getQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
 
       Footstep footstep = new Footstep(foot, robotSide, soleFrame);
       footstep.setSolePose(new FramePose(ReferenceFrame.getWorldFrame(), position, orientation));

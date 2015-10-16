@@ -6,7 +6,7 @@ import us.ihmc.robotics.dataStructures.Pose;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.HullFace;
 import us.ihmc.robotics.geometry.QuickHull3dWrapper;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point2d;
@@ -227,6 +227,6 @@ public class QuickHull3DWrapperTest
       assertTrue(currentPolygon.getVertex(3).epsilonEquals(new Point2d(0.0, sideLength), tolerance));
 
       assertTrue(polygonPose.getPoint().epsilonEquals(new Point3d(), tolerance));
-      Assert.assertEquals(RotationFunctions.getYawFromQuaternion(polygonPose.getOrientation()), -Math.PI / 4, tolerance);
+      Assert.assertEquals(RotationTools.getYawFromQuaternion(polygonPose.getOrientation()), -Math.PI / 4, tolerance);
    }
 }

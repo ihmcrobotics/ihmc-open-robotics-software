@@ -2216,7 +2216,7 @@ public class RigidBodyTransform implements Serializable
       
       AxisAngle4d axis_angle = new AxisAngle4d();
 
-      RotationFunctions.axisAngleFromMatrix(Rtemp, axis_angle);
+      RotationTools.axisAngleFromMatrix(Rtemp, axis_angle);
       
       axis.set( axis_angle.getX(), axis_angle.getY(), axis_angle.getZ() );
       axis.scale( - axis_angle.getAngle());

@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapper;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -195,7 +195,7 @@ public class PathToFootstepGenerator
          // set to the prospective position
          double defaultHeight = stanceFoot.getLocation().getZ();
          currentFootstep.getLocation().set(currentPosition.x, currentPosition.y, defaultHeight);
-         RotationFunctions.getQuaternionFromYawAndZNormal(footYaw, verticalUnitVector, currentFootstep.getOrientation());
+         RotationTools.getQuaternionFromYawAndZNormal(footYaw, verticalUnitVector, currentFootstep.getOrientation());
 
          if (heightMap != null)
          {
@@ -252,7 +252,7 @@ public class PathToFootstepGenerator
          // set to the prospective position
          double defaultHeight = stanceFoot.getLocation().getZ();
          currentFootstep.getLocation().set(currentPosition.x, currentPosition.y, defaultHeight);
-         RotationFunctions.getQuaternionFromYawAndZNormal(footYaw, verticalUnitVector, currentFootstep.getOrientation());
+         RotationTools.getQuaternionFromYawAndZNormal(footYaw, verticalUnitVector, currentFootstep.getOrientation());
 
          if (heightMap != null)
          {
@@ -282,7 +282,7 @@ public class PathToFootstepGenerator
    protected boolean isGoalFootstep(FootstepData footstep, FramePose2d goalPose, double horizontalDistance)
    {
       RobotSide currentSide = footstep.getRobotSide();
-      double currentYaw = RotationFunctions.getYawFromQuaternion(footstep.getOrientation());
+      double currentYaw = RotationTools.getYawFromQuaternion(footstep.getOrientation());
       double finalYaw = goalPose.getYaw();
       Point2d finalPosition = getOffsetPosition(goalPose, currentSide, horizontalDistance, finalYaw);
       if (Math.abs(finalYaw - currentYaw) > 1e-10)
@@ -338,7 +338,7 @@ public class PathToFootstepGenerator
 
    private double getYawForFoot(FootstepData stanceFoot, FramePose2d currentPose, FramePose2d nextPose, double maxYaw)
    {
-      double stanceYaw = RotationFunctions.getYawFromQuaternion(stanceFoot.getOrientation());
+      double stanceYaw = RotationTools.getYawFromQuaternion(stanceFoot.getOrientation());
       double prospectiveYaw = currentPose.getYaw();
       double dYaw = AngleTools.trimAngleMinusPiToPi(prospectiveYaw - stanceYaw);
       double sign = stanceFoot.getRobotSide().negateIfLeftSide(1.0);

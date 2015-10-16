@@ -44,7 +44,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -644,7 +644,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
          targets[i].get(targetTranslation);
          targets[i].get(targetQuat);
 
-         RotationFunctions.setYawPitchRollBasedOnQuaternion(yawPitchRoll, targetQuat);
+         RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, targetQuat);
          target.setYawPitchRoll(yawPitchRoll);
          target.setXYZ(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ());
 
@@ -716,7 +716,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
          targets[i].get(targetTranslation);
          targets[i].get(targetQuat);
          
-         RotationFunctions.setYawPitchRollBasedOnQuaternion(yawPitchRoll, targetQuat);
+         RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, targetQuat);
          target.setYawPitchRoll(yawPitchRoll);
          target.setXYZ(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ());
          

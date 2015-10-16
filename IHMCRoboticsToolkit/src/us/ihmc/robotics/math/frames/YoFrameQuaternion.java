@@ -9,7 +9,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 
 public class YoFrameQuaternion extends ReferenceFrameHolder
 {
@@ -51,7 +51,7 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
 
    public void set(Matrix3d matrix)
    {
-      RotationFunctions.setQuaternionBasedOnMatrix3d(quaternion, matrix);
+      RotationTools.setQuaternionBasedOnMatrix3d(quaternion, matrix);
       getYoValuesFromQuat4d();
    }
 
@@ -63,13 +63,13 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
 
    public void set(double[] yawPitchRoll)
    {
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(quaternion, yawPitchRoll);
+      RotationTools.setQuaternionBasedOnYawPitchRoll(quaternion, yawPitchRoll);
       getYoValuesFromQuat4d();
    }
 
    public void set(double yaw, double pitch, double roll)
    {
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(quaternion, yaw, pitch, roll);
+      RotationTools.setQuaternionBasedOnYawPitchRoll(quaternion, yaw, pitch, roll);
       getYoValuesFromQuat4d();
    }
 
@@ -120,7 +120,7 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
    public void getYawPitchRoll(double[] yawPitchRoll)
    {
       putYoValuesIntoQuat4d();
-      RotationFunctions.setYawPitchRollBasedOnQuaternion(yawPitchRoll, quaternion);
+      RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, quaternion);
    }
 
    public void getFrameOrientationIncludingFrame(FrameOrientation frameOrientation)

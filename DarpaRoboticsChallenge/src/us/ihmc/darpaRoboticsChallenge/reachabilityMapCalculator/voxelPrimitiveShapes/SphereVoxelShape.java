@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -83,7 +83,7 @@ public class SphereVoxelShape
             finalRotationMatrix.mul(rotationMatrixAroundRay, rotationMatrixForXAxisAlignedWithRay);
 
             Quat4d rotation = new Quat4d();
-            RotationFunctions.setQuaternionBasedOnMatrix3d(rotation, finalRotationMatrix);
+            RotationTools.setQuaternionBasedOnMatrix3d(rotation, finalRotationMatrix);
             rotations[rayIndex][rotationAroundRayIndex] = rotation;
          }
       }

@@ -18,7 +18,7 @@ import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.geometry.PlaneFitter;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -97,7 +97,7 @@ public class SimpleFootstepSnapper implements FootstepSnapper
    {
       Quat4d orientation = footstep.getOrientation();
       Point3d position = footstep.getLocation();
-      double yaw = RotationFunctions.getYawFromQuaternion(orientation);
+      double yaw = RotationTools.getYawFromQuaternion(orientation);
 
       if (!useMask)
       {
@@ -176,9 +176,9 @@ public class SimpleFootstepSnapper implements FootstepSnapper
       Point3d position = footstep.getLocation();
       Quat4d orientation = footstep.getOrientation();
       RigidBodyTransform solePose = new RigidBodyTransform();
-      double yaw = RotationFunctions.getYawFromQuaternion(orientation);
+      double yaw = RotationTools.getYawFromQuaternion(orientation);
 
-      RotationFunctions.getQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
+      RotationTools.getQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
       position.setZ(height);
    }
 
@@ -190,9 +190,9 @@ public class SimpleFootstepSnapper implements FootstepSnapper
       RigidBodyTransform solePose = new RigidBodyTransform();
       footstep.getSolePose(solePose);
       solePose.get(orientation, position);
-      double yaw = RotationFunctions.getYawFromQuaternion(orientation);
+      double yaw = RotationTools.getYawFromQuaternion(orientation);
 
-      RotationFunctions.getQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
+      RotationTools.getQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
       position.setZ(height);
 
       footstep.setSolePose(new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(position), orientation));
@@ -205,7 +205,7 @@ public class SimpleFootstepSnapper implements FootstepSnapper
       double yaw = footPose2d.getYaw();
       Point3d position = new Point3d(footPose2d.getX(), footPose2d.getY(), height);
       Quat4d orientation = new Quat4d();
-      RotationFunctions.getQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
+      RotationTools.getQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
 
       Footstep footstep = new Footstep(foot, robotSide, soleFrame);
       footstep.setSolePose(new FramePose(ReferenceFrame.getWorldFrame(), position, orientation));

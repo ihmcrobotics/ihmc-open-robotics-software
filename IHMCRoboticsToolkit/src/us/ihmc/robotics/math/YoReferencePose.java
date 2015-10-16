@@ -9,7 +9,7 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 
 public class YoReferencePose extends ReferenceFrame
 {
@@ -70,7 +70,7 @@ public class YoReferencePose extends ReferenceFrame
 
    private void set(Quat4d newRotation)
    {
-      RotationFunctions.setYawPitchRollBasedOnQuaternion(yawPitchRoll, newRotation);
+      RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, newRotation);
       yoFramePose.setYawPitchRoll(yawPitchRoll);
    }
 

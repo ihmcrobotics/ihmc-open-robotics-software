@@ -32,7 +32,7 @@ import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -101,7 +101,7 @@ public class FootstepSnapperTest
       {
          listOfPoints = dataReader.getNextSetPointsAndFootstep(footstepData);
          desiredPose.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), footstepData.getLocation().x, footstepData.getLocation().y,
-                                           RotationFunctions.getYawFromQuaternion(footstepData.getOrientation()));
+                                           RotationTools.getYawFromQuaternion(footstepData.getOrientation()));
          Footstep footstep = footstepSnapper.generateFootstepUsingHeightMap(desiredPose, spoof.getRigidBody(), spoof.getSoleFrame(),
                                 footstepData.getRobotSide(), listOfPoints, 0.0);
 
@@ -594,7 +594,7 @@ public class FootstepSnapperTest
                {
                   tokenizer.nextToken();
                   yaw = Double.parseDouble(tokenizer.nextToken());
-                  RotationFunctions.getQuaternionFromYawAndZNormal(yaw, new Vector3d(0.0, 0.0, 1.0), orientation);
+                  RotationTools.getQuaternionFromYawAndZNormal(yaw, new Vector3d(0.0, 0.0, 1.0), orientation);
                   footstepData.orientation = (orientation);
                }
             }
@@ -834,7 +834,7 @@ public class FootstepSnapperTest
          planePose.setPosition(planePosition);
 
          Quat4d planeOrientation = new Quat4d();
-         RotationFunctions.getQuaternionFromYawAndZNormal(soleYaw.getDoubleValue(), planeNormal, planeOrientation);
+         RotationTools.getQuaternionFromYawAndZNormal(soleYaw.getDoubleValue(), planeNormal, planeOrientation);
          planePose.setOrientation(planeOrientation);
 
 //       planePosition.set(planePosition.x, planePosition.y, planePosition.z - 0.01); adversary code, move foot plane down a little
