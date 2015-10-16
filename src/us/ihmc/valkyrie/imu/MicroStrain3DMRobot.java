@@ -11,7 +11,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -101,9 +101,9 @@ public class MicroStrain3DMRobot extends Robot
       rotation.mul(MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD, temporaryMatrix);
       
       ms3DM.setRotation(rotation);
-      yaw.set(RotationFunctions.getYaw(rotation));
-      pitch.set(RotationFunctions.getPitch(rotation));
-      roll.set(RotationFunctions.getRoll(rotation));
+      yaw.set(RotationTools.getYaw(rotation));
+      pitch.set(RotationTools.getPitch(rotation));
+      roll.set(RotationTools.getRoll(rotation));
       
       xdd.set(accel.getX() * MicroStrainData.MICROSTRAIN_GRAVITY);
       ydd.set(accel.getY() * MicroStrainData.MICROSTRAIN_GRAVITY);
