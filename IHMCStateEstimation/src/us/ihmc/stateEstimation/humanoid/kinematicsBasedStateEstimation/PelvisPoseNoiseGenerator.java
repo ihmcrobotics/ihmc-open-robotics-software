@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -155,9 +155,9 @@ public class PelvisPoseNoiseGenerator
    
    private void updateAfterYoVariables()
    {
-      error_pitch.set(RotationFunctions.getPitch(rotationError));
-      error_roll.set(RotationFunctions.getRoll(rotationError));
-      error_yaw.set(RotationFunctions.getYaw(rotationError));
+      error_pitch.set(RotationTools.getPitch(rotationError));
+      error_roll.set(RotationTools.getRoll(rotationError));
+      error_yaw.set(RotationTools.getYaw(rotationError));
       error_x.set(translationError.getX()); 
       error_y.set(translationError.getY());  
       error_z.set(translationError.getZ()); 
@@ -179,7 +179,7 @@ public class PelvisPoseNoiseGenerator
       double pitchNoise = (random.nextDouble() - 0.5) * Math.PI * noiseScalar_pitch.getDoubleValue() + noiseBias_pitch.getDoubleValue();
       double rollNoise = (random.nextDouble() - 0.5) * Math.PI * noiseScalar_roll.getDoubleValue() + noiseBias_roll.getDoubleValue();
       
-      RotationFunctions.setYawPitchRoll(rotationNoise, yawNoise, pitchNoise, rollNoise);
+      RotationTools.setYawPitchRoll(rotationNoise, yawNoise, pitchNoise, rollNoise);
       rotationError.mul(rotationNoise);
       
       double xNoise = (random.nextDouble() - 0.5) * noiseScalar_x.getDoubleValue() + noiseBias_x.getDoubleValue(); 

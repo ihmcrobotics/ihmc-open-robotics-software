@@ -4,7 +4,7 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -330,13 +330,13 @@ public class TransformInterpolationCalculatorTest
       Matrix3d maxtrixt1 = new Matrix3d();
       t1.get(maxtrixt1);
 //      axist1.set(maxtrixt1);
-      RotationFunctions.axisAngleFromMatrix(maxtrixt1, axist1);
+      RotationTools.axisAngleFromMatrix(maxtrixt1, axist1);
 
       AxisAngle4d axist2 = new AxisAngle4d();
       Matrix3d maxtrixt2 = new Matrix3d();
       t2.get(maxtrixt2);
 //      axist2.set(maxtrixt2);
-      RotationFunctions.axisAngleFromMatrix(maxtrixt2, axist2);
+      RotationTools.axisAngleFromMatrix(maxtrixt2, axist2);
       
 
 

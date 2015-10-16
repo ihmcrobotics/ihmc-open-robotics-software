@@ -14,7 +14,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.DeadzoneYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -386,7 +386,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       offsetBetweenStartAndGoal_Rotation.getYawPitchRoll(temporaryYawPitchRoll);
       goalYawRaw.set(temporaryYawPitchRoll[0]);
       goalYawWithDeadZone.update();
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(updatedGoalOffsetWithDeadZone_Rotation_quat, goalYawWithDeadZone.getDoubleValue(), temporaryYawPitchRoll[1], temporaryYawPitchRoll[2]);
+      RotationTools.setQuaternionBasedOnYawPitchRoll(updatedGoalOffsetWithDeadZone_Rotation_quat, goalYawWithDeadZone.getDoubleValue(), temporaryYawPitchRoll[1], temporaryYawPitchRoll[2]);
       updatedGoalOffsetWithDeadZone_Rotation.set(updatedGoalOffsetWithDeadZone_Rotation_quat);
       
       goalOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedGoalOffsetWithDeadZone_Rotation_quat);
@@ -486,16 +486,16 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       if (isRotationCorrectionEnabled.getBooleanValue())
       {
-         RotationFunctions.getYawPitchRoll(stateEstimatorYawPitchRoll, stateEstimatorTransform_Rotation);
+         RotationTools.getYawPitchRoll(stateEstimatorYawPitchRoll, stateEstimatorTransform_Rotation);
          
-         RotationFunctions.setYawPitchRollBasedOnQuaternion(temporaryYawPitchRoll , updatedStartOffset_Rotation_quat);
+         RotationTools.setYawPitchRollBasedOnQuaternion(temporaryYawPitchRoll , updatedStartOffset_Rotation_quat);
          startYaw.set(temporaryYawPitchRoll[0]);
          
-         RotationFunctions.setYawPitchRollBasedOnQuaternion(temporaryYawPitchRoll , updatedGoalOffset_Rotation_quat);
+         RotationTools.setYawPitchRollBasedOnQuaternion(temporaryYawPitchRoll , updatedGoalOffset_Rotation_quat);
          goalYaw.set(temporaryYawPitchRoll[0]);
          
          interpolatedYaw.set((1 - cLippedAlphaFilterValue.getDoubleValue()) * startYaw.getDoubleValue() + cLippedAlphaFilterValue.getDoubleValue() * goalYaw.getDoubleValue());
-         RotationFunctions.setQuaternionBasedOnYawPitchRoll(interpolatedRotation, interpolatedYaw.getDoubleValue(), stateEstimatorYawPitchRoll[1], stateEstimatorYawPitchRoll[2]);
+         RotationTools.setQuaternionBasedOnYawPitchRoll(interpolatedRotation, interpolatedYaw.getDoubleValue(), stateEstimatorYawPitchRoll[1], stateEstimatorYawPitchRoll[2]);
       }
       else
       {

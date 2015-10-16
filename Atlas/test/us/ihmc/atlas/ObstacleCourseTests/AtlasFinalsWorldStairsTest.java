@@ -26,7 +26,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -195,7 +195,7 @@ public class AtlasFinalsWorldStairsTest
 
       Point3d startingLocation = new Point3d(1.0, -13.5, 0);
       double directionYaw = -90.0;
-      RotationFunctions.getQuaternionFromYawAndZNormal(directionYaw / 180.0 * Math.PI, verticalVector, orientation);
+      RotationTools.getQuaternionFromYawAndZNormal(directionYaw / 180.0 * Math.PI, verticalVector, orientation);
 
       ArrayList<Point2d> leftFootPoint2ds = createPartialSupportPolygonForFoot(walkingControllerParameters);
       ArrayList<Point2d> rightFootPoint2ds = null;
@@ -276,7 +276,7 @@ public class AtlasFinalsWorldStairsTest
 
       Point3d startingLocation = new Point3d(1.0, -13.5, 0);
       double directionYaw = -90.0;
-      RotationFunctions.getQuaternionFromYawAndZNormal(directionYaw / 180.0 * Math.PI, verticalVector, orientation);
+      RotationTools.getQuaternionFromYawAndZNormal(directionYaw / 180.0 * Math.PI, verticalVector, orientation);
 
       ArrayList<Point2d> leftFootPoint2ds = createPartialSupportPolygonForFoot(walkingControllerParameters);
       ArrayList<Point2d> rightFootPoint2ds = createPartialSupportPolygonForFoot(walkingControllerParameters);

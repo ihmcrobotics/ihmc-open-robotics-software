@@ -16,7 +16,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.YoReferencePose;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -437,7 +437,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
 
       Quat4d rotation = new Quat4d();
       pelvisPose.getRotation(rotation);
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rotation, manualRotationOffsetInRadZ.getDoubleValue(), manualRotationOffsetInRadY.getDoubleValue(),
+      RotationTools.setQuaternionBasedOnYawPitchRoll(rotation, manualRotationOffsetInRadZ.getDoubleValue(), manualRotationOffsetInRadY.getDoubleValue(),
             manualRotationOffsetInRadX.getDoubleValue());
       pelvisPose.setRotation(rotation);
 

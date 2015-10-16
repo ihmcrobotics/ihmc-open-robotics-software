@@ -35,7 +35,7 @@ import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class GenericRosMessageConverter
@@ -726,7 +726,7 @@ public class GenericRosMessageConverter
       Point point = msg.getPosition();
       Quat4d quat = convertQuaternionToQuat4d(msg.getOrientation());
       double[] yawPitchRoll = new double[3];
-      RotationFunctions.setYawPitchRollBasedOnQuaternion(yawPitchRoll, quat);
+      RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, quat);
 
       FramePoint position = new FramePoint(referenceFrame, point.getX(), point.getY(), point.getZ());
       FrameOrientation orientation = new FrameOrientation(referenceFrame, yawPitchRoll);

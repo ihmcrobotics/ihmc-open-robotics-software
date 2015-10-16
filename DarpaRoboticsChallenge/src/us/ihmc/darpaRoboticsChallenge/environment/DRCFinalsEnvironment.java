@@ -13,7 +13,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -153,7 +153,7 @@ public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
       Point3d position = new Point3d(x, y, z);
       Quat4d orientation = new Quat4d();
 
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
       valvePose.setPose(position, orientation);
 
       ContactableValveRobot valve = new ContactableValveRobot(valveRobotName, valveType, 0.5, valvePose);

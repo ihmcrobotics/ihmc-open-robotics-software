@@ -5,7 +5,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepValidityMetric;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.vecmath.Vector3d;
@@ -27,8 +27,8 @@ public class BasicFootstepValidityMetric implements FootstepValidityMetric
    public boolean footstepValid(FootstepData stanceFootstep, FootstepData prospectiveFootstep)
    {
       if (stanceFootstep.getRobotSide() == prospectiveFootstep.getRobotSide()) return false;
-      double stanceYaw = RotationFunctions.getYawFromQuaternion(stanceFootstep.getOrientation());
-      double yawDiff = RotationFunctions.getYawFromQuaternion(prospectiveFootstep.getOrientation()) - stanceYaw;
+      double stanceYaw = RotationTools.getYawFromQuaternion(stanceFootstep.getOrientation());
+      double yawDiff = RotationTools.getYawFromQuaternion(prospectiveFootstep.getOrientation()) - stanceYaw;
 
       yawDiff = AngleTools.trimAngleMinusPiToPi(yawDiff);
       double sign = (prospectiveFootstep.getRobotSide() == RobotSide.LEFT) ? 1.0 : -1.0;
@@ -100,7 +100,7 @@ public class BasicFootstepValidityMetric implements FootstepValidityMetric
          return false;
       }
       //TODO @Agraber make this more comprehensive
-      double stanceYaw = RotationFunctions.getYawFromQuaternion(stanceFootstep.getOrientation());
+      double stanceYaw = RotationTools.getYawFromQuaternion(stanceFootstep.getOrientation());
       double sign = (prospectiveFootstep.getRobotSide() == RobotSide.LEFT) ? 1.0 : -1.0;
 
       Vector3d stepVector = new Vector3d(prospectiveFootstep.getLocation());

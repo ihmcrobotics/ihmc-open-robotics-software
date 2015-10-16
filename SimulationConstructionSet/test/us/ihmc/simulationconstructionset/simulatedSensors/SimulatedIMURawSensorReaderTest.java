@@ -14,7 +14,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;
@@ -193,7 +193,7 @@ public class SimulatedIMURawSensorReaderTest
       
       AxisAngle4d differenceAxisAngle = new AxisAngle4d();
 //      differenceAxisAngle.set(differenceMatrix);
-      RotationFunctions.axisAngleFromMatrix(differenceMatrix, differenceAxisAngle);
+      RotationTools.axisAngleFromMatrix(differenceMatrix, differenceAxisAngle);
       
       double differenceAngle = differenceAxisAngle.getAngle();
       

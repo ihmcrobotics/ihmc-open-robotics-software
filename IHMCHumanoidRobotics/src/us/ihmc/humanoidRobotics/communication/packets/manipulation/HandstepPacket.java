@@ -11,7 +11,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -38,7 +38,7 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       this.orientation = orientation;
       this.surfaceNormal = surfaceNormal;
       this.swingTrajectoryTime = swingTrajectoryTime;
-      RotationFunctions.checkUnitLength(this.orientation);
+      RotationTools.checkUnitLength(this.orientation);
    }
 
    public HandstepPacket(HandstepPacket handstepPacket)
@@ -47,7 +47,7 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       this.location = new Point3d(handstepPacket.location);
       this.orientation = new Quat4d(handstepPacket.orientation);
       this.surfaceNormal = new Vector3d(handstepPacket.surfaceNormal);
-      RotationFunctions.checkUnitLength(this.orientation);
+      RotationTools.checkUnitLength(this.orientation);
    }
 
    public Point3d getLocation()
@@ -88,7 +88,7 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
    public void setOrientation(Quat4d orientation)
    {
       this.orientation.set(orientation);
-      RotationFunctions.checkUnitLength(this.orientation);
+      RotationTools.checkUnitLength(this.orientation);
    }
 
    public void setSurfaceNormal(Vector3d surfaceNormal)

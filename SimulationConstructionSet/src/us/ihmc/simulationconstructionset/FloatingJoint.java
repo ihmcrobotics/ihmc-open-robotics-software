@@ -12,7 +12,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 
 /**
  * Title:        Yobotics! Simulation Construction Set<p>
@@ -176,8 +176,8 @@ public class FloatingJoint extends Joint
    public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
       Quat4d q = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(q, yaw, pitch, roll);
-      RotationFunctions.assertQuaternionNormalized(q, "FloatingJoint "+name+" as set by setYawPitchRoll ");
+      RotationTools.setQuaternionBasedOnYawPitchRoll(q, yaw, pitch, roll);
+      RotationTools.assertQuaternionNormalized(q, "FloatingJoint "+name+" as set by setYawPitchRoll ");
       q_qs.set(q.w);
       q_qx.set(q.x);
       q_qy.set(q.y);

@@ -32,7 +32,7 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DTran
 import us.ihmc.graphics3DAdapter.jme.terrain.JMEHeightMapTerrain;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.graphics3DAdapter.utils.ShapeUtilities;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 
 import com.jme3.app.Application;
 import com.jme3.asset.AssetManager;
@@ -215,7 +215,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
    protected void doRotateInstruction(Graphics3DRotateInstruction graphics3dObjectRotateMatrix)
    {
       Quat4d quat4d = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnMatrix3d(quat4d, graphics3dObjectRotateMatrix.getRotationMatrix());
+      RotationTools.setQuaternionBasedOnMatrix3d(quat4d, graphics3dObjectRotateMatrix.getRotationMatrix());
 
       // DON'T USE THIS: the method in Quat4d is flawed and doesn't work for some rotation matrices!
       //      quat4d.set(graphics3dObjectRotateMatrix.getRotationMatrix());

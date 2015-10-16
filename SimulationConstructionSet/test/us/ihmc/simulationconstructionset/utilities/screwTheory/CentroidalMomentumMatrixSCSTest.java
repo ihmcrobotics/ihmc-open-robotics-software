@@ -19,7 +19,7 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Momentum;
@@ -100,7 +100,7 @@ public class CentroidalMomentumMatrixSCSTest
       {
          Vector3d position = RandomTools.generateRandomVector(random);
          Matrix3d rotation = new Matrix3d();
-         RotationFunctions.setYawPitchRoll(rotation, random.nextDouble(), random.nextDouble(), random.nextDouble());
+         RotationTools.setYawPitchRoll(rotation, random.nextDouble(), random.nextDouble(), random.nextDouble());
          Vector3d linearVelocityInBody = RandomTools.generateRandomVector(random);
          Vector3d linearVelocityInWorld = new Vector3d(linearVelocityInBody);
          rotation.transform(linearVelocityInWorld);

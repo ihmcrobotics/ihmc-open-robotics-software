@@ -2,7 +2,7 @@ package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -58,7 +58,7 @@ public class OriginAndPointFrame extends ReferenceFrame
       rotationMatrix.setColumn(1, yAxis);
       rotationMatrix.setColumn(2, zAxis);
 
-      RotationFunctions.assertProper(rotationMatrix);
+      RotationTools.assertProper(rotationMatrix);
 
       transformToParent.setRotationAndZeroTranslation(rotationMatrix);
       transformToParent.setTranslation(originVector);

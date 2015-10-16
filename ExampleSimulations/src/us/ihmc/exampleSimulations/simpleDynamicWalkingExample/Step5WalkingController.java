@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.State;
@@ -253,7 +253,7 @@ public class Step5WalkingController implements RobotController
    private DoubleYoVariable controlBodyPitch()
    {
       rob.getBodyPitch(rotationToPack);
-      double pitchFromQuaternion = RotationFunctions.getPitchFromQuaternion(rotationToPack);
+      double pitchFromQuaternion = RotationTools.getPitchFromQuaternion(rotationToPack);
 
       rob.getBodyAngularVel(velocityToPack);
       double bodyAngularVel = velocityToPack.getY();
@@ -265,7 +265,7 @@ public class Step5WalkingController implements RobotController
    private DoubleYoVariable controlBodyPitchSingleSupport()
    {
       rob.getBodyPitch(rotationToPack);
-      double pitchFromQuaternion = RotationFunctions.getPitchFromQuaternion(rotationToPack);
+      double pitchFromQuaternion = RotationTools.getPitchFromQuaternion(rotationToPack);
       
       rob.getBodyAngularVel(velocityToPack);
       double bodyAngularVel = velocityToPack.getY();

@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -477,7 +477,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       Quat4d orientation = new Quat4d();
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
       FootstepDataList footstepDataList = new FootstepDataList();
-      RotationFunctions.getQuaternionFromYawAndZNormal(3.0/4.0*Math.PI, verticalVector, orientation);
+      RotationTools.getQuaternionFromYawAndZNormal(3.0/4.0*Math.PI, verticalVector, orientation);
       footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(-3.40, -5.03, .24), new Quat4d(orientation)));
       footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(-3.22, -4.85, 0.0), new Quat4d(orientation)));
       footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(-3.50, -5.13, .24), new Quat4d(orientation)));
@@ -494,7 +494,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       Quat4d orientation = new Quat4d();
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
       FootstepDataList footstepDataList = new FootstepDataList();
-      RotationFunctions.getQuaternionFromYawAndZNormal(3.0/4.0*Math.PI, verticalVector, orientation);
+      RotationTools.getQuaternionFromYawAndZNormal(3.0/4.0*Math.PI, verticalVector, orientation);
       footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(-4.30, -3.93, 0.0), new Quat4d(orientation)));
       footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(-4.18, -3.81, 0.0), new Quat4d(orientation)));
       footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(-4.58, -4.21, 0.0), new Quat4d(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));

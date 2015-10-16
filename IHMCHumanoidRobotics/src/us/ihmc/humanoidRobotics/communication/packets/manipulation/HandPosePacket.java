@@ -16,7 +16,7 @@ import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -370,7 +370,7 @@ public class HandPosePacket extends IHMCRosApiPacket<HandPosePacket> implements 
       } 
       else
       {
-         ret &= RotationFunctions.quaternionEpsilonEquals(this.getOrientation(), other.getOrientation(), epsilon);
+         ret &= RotationTools.quaternionEpsilonEquals(this.getOrientation(), other.getOrientation(), epsilon);
       }
       
       if (getControlledOrientationAxes() == null || other.getControlledOrientationAxes() == null)

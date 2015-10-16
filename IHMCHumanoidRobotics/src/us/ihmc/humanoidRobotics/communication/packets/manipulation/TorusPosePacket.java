@@ -8,7 +8,7 @@ import javax.vecmath.Quat4d;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
 
@@ -77,7 +77,7 @@ public class TorusPosePacket extends Packet<TorusPosePacket> implements Transfor
       {
          ret = (delta / (thisRadius + otherRadius) < epsilon);
       }
-      ret &= RotationFunctions.quaternionEpsilonEquals(this.getOrientation(), other.getOrientation(), epsilon);
+      ret &= RotationTools.quaternionEpsilonEquals(this.getOrientation(), other.getOrientation(), epsilon);
       ret &= this.getPosition().epsilonEquals(other.getPosition(), epsilon);
 
       return ret;

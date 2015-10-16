@@ -11,7 +11,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -73,7 +73,7 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
          return false;
       }
 
-      if (!RotationFunctions.quaternionEpsilonEquals(getOrientation(), other.getOrientation(), epsilon))
+      if (!RotationTools.quaternionEpsilonEquals(getOrientation(), other.getOrientation(), epsilon))
       {
          System.out.println(getOrientation());
          System.out.println(other.getOrientation());

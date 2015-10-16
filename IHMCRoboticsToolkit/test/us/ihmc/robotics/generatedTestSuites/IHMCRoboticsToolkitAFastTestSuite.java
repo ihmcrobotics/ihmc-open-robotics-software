@@ -70,7 +70,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.geometry.QuaternionToolsTest.class,
    us.ihmc.robotics.geometry.RigidBodyTransformTest.class,
    us.ihmc.robotics.geometry.RotationalInertiaCalculatorTest.class,
-   us.ihmc.robotics.geometry.RotationFunctionsTest.class,
+   us.ihmc.robotics.geometry.RotationToolsTest.class,
    us.ihmc.robotics.geometry.shapes.BestFitPlaneCalculatorTest.class,
    us.ihmc.robotics.geometry.shapes.Box3dTest.class,
    us.ihmc.robotics.geometry.shapes.Cylinder3dTest.class,

@@ -7,7 +7,7 @@ import javax.vecmath.Matrix3d;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.corruptors.NoiseType;
 import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
 import us.ihmc.tools.testing.JUnitTools;
@@ -33,7 +33,7 @@ public class NoisyYoRotationMatrixTest
       double yaw = random.nextDouble();
       double pitch = random.nextDouble();
       double roll = random.nextDouble();
-      RotationFunctions.setYawPitchRoll(in, yaw, pitch, roll);
+      RotationTools.setYawPitchRoll(in, yaw, pitch, roll);
       
       mat.update(in);
       Matrix3d out = mat.getMatrix3d();

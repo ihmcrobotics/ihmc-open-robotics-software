@@ -10,7 +10,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class ProcessedSensorsReadWrite implements ProcessedIMUSensorsReadOnlyInterface, ProcessedIMUSensorsWriteOnlyInterface
@@ -49,8 +49,8 @@ public class ProcessedSensorsReadWrite implements ProcessedIMUSensorsReadOnlyInt
    public void setRotation(Matrix3d rotationMatrix, int imuIndex)
    {
       Quat4d q = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnMatrix3d(q, rotationMatrix);
-      RotationFunctions.assertQuaternionNormalized(q, "ProcessedSensors rotation as set by rotation matrix ");
+      RotationTools.setQuaternionBasedOnMatrix3d(q, rotationMatrix);
+      RotationTools.assertQuaternionNormalized(q, "ProcessedSensors rotation as set by rotation matrix ");
 
       // DON'T USE THIS: the method in Quat4d is flawed and doesn't work for some rotation matrices!
 //      q.set(rotationMatrix);
@@ -60,9 +60,9 @@ public class ProcessedSensorsReadWrite implements ProcessedIMUSensorsReadOnlyInt
       p_qy.set(q.getY());
       p_qz.set(q.getZ());
 
-      p_yaw.set(RotationFunctions.getYaw(rotationMatrix));
-      p_pitch.set(RotationFunctions.getPitch(rotationMatrix));
-      p_roll.set(RotationFunctions.getRoll(rotationMatrix));
+      p_yaw.set(RotationTools.getYaw(rotationMatrix));
+      p_pitch.set(RotationTools.getPitch(rotationMatrix));
+      p_roll.set(RotationTools.getRoll(rotationMatrix));
    }
 
    public void setAcceleration(FrameVector accelerationInWorld, int imuIndex)

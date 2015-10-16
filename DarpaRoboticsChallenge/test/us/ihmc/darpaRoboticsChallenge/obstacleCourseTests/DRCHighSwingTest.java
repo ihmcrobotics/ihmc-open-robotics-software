@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -129,7 +129,7 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
       Quat4d orientation = new Quat4d();
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
       FootstepDataList footstepDataList = new FootstepDataList(swingTime, transferTime);
-      RotationFunctions.getQuaternionFromYawAndZNormal(0.0 / 4.0 * Math.PI, verticalVector, orientation);
+      RotationTools.getQuaternionFromYawAndZNormal(0.0 / 4.0 * Math.PI, verticalVector, orientation);
       footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(0.0, .15, 0.08), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
       footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(0.0, -.15, 0.08), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
       footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(0.4, .15, 0.08), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));

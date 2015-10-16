@@ -3,7 +3,7 @@ package us.ihmc.robotics.geometry.shapes;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -225,7 +225,7 @@ public class Box3d implements Shape3d
 
    public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
-      RotationFunctions.setYawPitchRoll(temporaryMatrix, yaw, pitch, roll);
+      RotationTools.setYawPitchRoll(temporaryMatrix, yaw, pitch, roll);
       setRotation(temporaryMatrix);
    }
 

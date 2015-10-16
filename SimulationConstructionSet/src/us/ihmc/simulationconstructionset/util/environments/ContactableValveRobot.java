@@ -26,7 +26,7 @@ import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 
 public class ContactableValveRobot extends ContactablePinJointRobot implements SelectableObject, SelectedListener
 {
@@ -145,7 +145,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       RigidBodyTransform invertTransform = new RigidBodyTransform();
       Quat4d quat = new Quat4d();
 
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(quat, 0.0, Math.PI / 2.0, 0.0);
+      RotationTools.setQuaternionBasedOnYawPitchRoll(quat, 0.0, Math.PI / 2.0, 0.0);
       transform.setRotation(quat);
       invertTransform.set(transform);
       invertTransform.invert();
@@ -159,7 +159,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       //spokes
       for (int i = 0; i < numberOfSpokes; i++)
       {
-         RotationFunctions.setQuaternionBasedOnYawPitchRoll(quat, 0.0, 0.0, i * 2.0 * Math.PI / numberOfSpokes);
+         RotationTools.setQuaternionBasedOnYawPitchRoll(quat, 0.0, 0.0, i * 2.0 * Math.PI / numberOfSpokes);
          transform.setRotation(quat);
          invertTransform.set(transform);
          invertTransform.invert();

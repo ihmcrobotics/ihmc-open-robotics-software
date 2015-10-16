@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 
 public class MeasurementModelTestTools
 {
@@ -102,7 +102,7 @@ public class MeasurementModelTestTools
 
          Quat4d perturbedQuaternion = new Quat4d();
          AxisAngle4d perturbationAxisAngle = new AxisAngle4d();
-         RotationFunctions.setAxisAngleBasedOnRotationVector(perturbationAxisAngle, perturbationRotationVector);
+         RotationTools.setAxisAngleBasedOnRotationVector(perturbationAxisAngle, perturbationRotationVector);
          Quat4d perturbationQuaternion = new Quat4d();
          perturbationQuaternion.set(perturbationAxisAngle);
          perturbedQuaternion.mul(nominalState.getQuaternionCopy(), perturbationQuaternion);

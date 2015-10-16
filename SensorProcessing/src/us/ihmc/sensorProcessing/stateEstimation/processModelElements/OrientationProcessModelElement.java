@@ -16,7 +16,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 
 public class OrientationProcessModelElement extends AbstractProcessModelElement
 {
@@ -72,7 +72,7 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
       tempRotationVector.set(angularVelocity);
       tempRotationVector.scale(dt);
 
-      RotationFunctions.setAxisAngleBasedOnRotationVector(tempAxisAngle, tempRotationVector);
+      RotationTools.setAxisAngleBasedOnRotationVector(tempAxisAngle, tempRotationVector);
 
       quaternionDelta.set(tempAxisAngle);
       quaternion.mul(quaternionDelta);
@@ -85,7 +85,7 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
    {
       orientationPort.getData().getQuaternion(quaternion);
       MatrixTools.extractTuple3dFromEJMLVector(tempRotationVector, correction, 0);
-      RotationFunctions.setAxisAngleBasedOnRotationVector(tempAxisAngle, tempRotationVector);
+      RotationTools.setAxisAngleBasedOnRotationVector(tempAxisAngle, tempRotationVector);
       quaternionDelta.set(tempAxisAngle);
       quaternion.mul(quaternionDelta);
       orientation.set(quaternion);

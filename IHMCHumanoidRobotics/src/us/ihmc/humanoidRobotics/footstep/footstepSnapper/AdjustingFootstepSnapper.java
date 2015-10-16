@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -161,7 +161,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
       position.set(originalFootstepFound.getLocation());
       orientation.set(originalFootstepFound.getOrientation());
       orientation.getColumn(2, zOrientation);
-      double originalYaw = RotationFunctions.getYawFromQuaternion(originalFootstepFound.getOrientation());
+      double originalYaw = RotationTools.getYawFromQuaternion(originalFootstepFound.getOrientation());
 
       double[] angleOffsets;
       if (angleAdjustment > 0)

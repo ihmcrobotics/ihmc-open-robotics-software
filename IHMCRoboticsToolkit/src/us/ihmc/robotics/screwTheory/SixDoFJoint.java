@@ -10,7 +10,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SixDoFJoint extends AbstractInverseDynamicsJoint
@@ -123,9 +123,9 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
 
    public void setPositionAndRotation(RigidBodyTransform transform)
    {
-      RotationFunctions.setQuaternionBasedOnTransform(jointRotation, transform);
+      RotationTools.setQuaternionBasedOnTransform(jointRotation, transform);
       
-      if (!RotationFunctions.isQuaternionNormalized(jointRotation))
+      if (!RotationTools.isQuaternionNormalized(jointRotation))
       {
          throw new AssertionError("quaternion is not normalized.  " + jointRotation);
       }
@@ -137,7 +137,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
 
    public void setRotation(double yaw, double pitch, double roll)
    {
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(jointRotation, yaw, pitch, roll);
+      RotationTools.setQuaternionBasedOnYawPitchRoll(jointRotation, yaw, pitch, roll);
       this.afterJointFrame.setRotation(jointRotation);
    }
 
@@ -154,7 +154,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
 
    public void setRotation(Matrix3d jointRotation)
    {
-      RotationFunctions.setQuaternionBasedOnMatrix3d(this.jointRotation, jointRotation);
+      RotationTools.setQuaternionBasedOnMatrix3d(this.jointRotation, jointRotation);
 
       // DON'T USE THIS: the method in Quat4d is flawed and doesn't work for some rotation matrices!
       //      this.jointRotation.set(jointRotation);
@@ -206,7 +206,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
 
    public void packRotation(double[] yawPitchRoll)
    {
-      RotationFunctions.setYawPitchRollBasedOnQuaternion(yawPitchRoll, jointRotation);
+      RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, jointRotation);
    }
 
    public void packTranslation(Vector3d vectorToPack)
@@ -272,9 +272,9 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
    public void packConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
-      RotationFunctions.quaternionToMatrix(matrix, jointRotation, rowStart);
+      RotationTools.quaternionToMatrix(matrix, jointRotation, rowStart);
       //      RotationFunctions.assertQuaternionNormalized(jointRotation, "SixDoFJoint "+name+":");
-      index += RotationFunctions.QUATERNION_SIZE;
+      index += RotationTools.QUATERNION_SIZE;
       matrix.set(index++, 0, jointTranslation.getX());
       matrix.set(index++, 0, jointTranslation.getY());
       matrix.set(index++, 0, jointTranslation.getZ());
@@ -284,9 +284,9 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
    public void setConfiguration(DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
-      RotationFunctions.matrixToQuaternion(jointRotation, matrix, rowStart);
-      RotationFunctions.assertQuaternionNormalized(jointRotation, "SixDoFJoint " + name + ":");
-      index += RotationFunctions.QUATERNION_SIZE;
+      RotationTools.matrixToQuaternion(jointRotation, matrix, rowStart);
+      RotationTools.assertQuaternionNormalized(jointRotation, "SixDoFJoint " + name + ":");
+      index += RotationTools.QUATERNION_SIZE;
       jointTranslation.setX(matrix.get(index++, 0));
       jointTranslation.setY(matrix.get(index++, 0));
       jointTranslation.setZ(matrix.get(index++, 0));
@@ -316,7 +316,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
    {
       int positionSize = 3;
 
-      return RotationFunctions.QUATERNION_SIZE + positionSize;
+      return RotationTools.QUATERNION_SIZE + positionSize;
    }
 
    private SixDoFJoint checkAndGetAsSiXDoFJoint(InverseDynamicsJoint originalJoint)

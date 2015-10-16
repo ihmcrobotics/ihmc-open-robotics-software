@@ -4,7 +4,7 @@ import javax.vecmath.Matrix3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 
 
 public class OrientationConstantAcceleratingYawDriftCorruptor implements SignalCorruptor<Matrix3d>
@@ -52,6 +52,6 @@ public class OrientationConstantAcceleratingYawDriftCorruptor implements SignalC
       tempRotation.mul(yawDriftRotation, signal);
       signal.set(tempRotation);
       
-      corruptedIMUYawAngle.set(RotationFunctions.getYaw(tempRotation));
+      corruptedIMUYawAngle.set(RotationTools.getYaw(tempRotation));
    }
 }

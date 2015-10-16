@@ -12,7 +12,7 @@ import javax.vecmath.Vector3f;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.IMUPacket;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -174,7 +174,7 @@ public class RobotConfigurationData extends IHMCRosApiPacket<RobotConfigurationD
          return false;
       }
 
-      if (!RotationFunctions.quaternionEpsilonEquals(rootOrientation, other.rootOrientation, 1e-3f))
+      if (!RotationTools.quaternionEpsilonEquals(rootOrientation, other.rootOrientation, 1e-3f))
       {
          return false;
       }

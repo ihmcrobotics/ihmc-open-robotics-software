@@ -31,7 +31,7 @@ import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomTools;
 
 public class ContactableValveRobotTest
@@ -254,7 +254,7 @@ public class ContactableValveRobotTest
       Point3d position = new Point3d(x, y, z);
       Quat4d orientation = new Quat4d();
 
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
       framePose.setPose(position, orientation);
 
       return framePose;

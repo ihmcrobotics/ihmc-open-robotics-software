@@ -15,7 +15,7 @@ import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
 
@@ -112,7 +112,7 @@ public class ChestOrientationPacket extends IHMCRosApiPacket<ChestOrientationPac
       }
       else
       {
-         boolean ret = RotationFunctions.quaternionEpsilonEquals(this.getOrientation(), other.getOrientation(), epsilon);
+         boolean ret = RotationTools.quaternionEpsilonEquals(this.getOrientation(), other.getOrientation(), epsilon);
          ret &= MathTools.epsilonEquals(this.trajectoryTime, other.trajectoryTime, epsilon);
          return ret;
       }

@@ -13,7 +13,7 @@ import ihmc_msgs.BatchRawImuData;
 import ihmc_msgs.RawImuData;
 import std_msgs.Header;
 import us.ihmc.communication.packets.IMUPacket;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.time.TimeTools;
 
 public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<BatchRawImuData>
@@ -78,7 +78,7 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<BatchRawImuD
    public synchronized void appendRawImuData(long timestampInNanoSeconds, Quat4f orientation, Vector3f linearAcceleration)
    {
       RawImuData rawImuData = newMessageFromType(RawImuData._TYPE);
-      RotationFunctions.setYawPitchRollBasedOnQuaternion(currentImuOrientation, orientation);
+      RotationTools.setYawPitchRollBasedOnQuaternion(currentImuOrientation, orientation);
       rawImuData.setImuTimestamp(TimeTools.nanoSecondsToMicroseconds(timestampInNanoSeconds));
       //delta angle (radians) in the frame of the IMU
       rawImuData.setDax(currentImuOrientation[2] - previousImuOrientation[2]);

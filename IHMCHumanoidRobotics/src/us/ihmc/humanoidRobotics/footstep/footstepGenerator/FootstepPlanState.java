@@ -4,7 +4,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepPlanState implements Comparable<FootstepPlanState>
@@ -38,7 +38,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
    {
       footstepData.location = new Point3d(x, y, 0);
       footstepData.orientation = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(footstepData.orientation, theta, 0, 0);
+      RotationTools.setQuaternionBasedOnYawPitchRoll(footstepData.orientation, theta, 0, 0);
       footstepData.robotSide = side;
       this.theta = theta;
    }

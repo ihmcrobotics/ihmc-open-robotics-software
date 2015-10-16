@@ -20,7 +20,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.random.RandomTools;
@@ -134,57 +134,57 @@ public class NewPelvisPoseHistoryCorrectionTest
 
       timeStamp = 0;
       translation.set(0.0, 0.0, 0.7);
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(0.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(0.0));
       putPelvisWaypointInTransformBuffer(pelvisTransformInWorldFrame, timeStamp, translation, rotation);
 
       timeStamp = 5000;
       translation.set(1.0, 0.0, 0.5);
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(0.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(0.0));
       putPelvisWaypointInTransformBuffer(pelvisTransformInWorldFrame, timeStamp, translation, rotation);
 
       timeStamp = 10000;
       translation.set(1.0, 1.0, 0.7);
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(0.0), Math.toRadians(5.0), Math.toRadians(5.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(0.0), Math.toRadians(5.0), Math.toRadians(5.0));
       putPelvisWaypointInTransformBuffer(pelvisTransformInWorldFrame, timeStamp, translation, rotation);
 
       timeStamp = 15000;
       translation.set(1.0, 1.0, 0.6);
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(-45.0), Math.toRadians(0.0), Math.toRadians(-1.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(-45.0), Math.toRadians(0.0), Math.toRadians(-1.0));
       putPelvisWaypointInTransformBuffer(pelvisTransformInWorldFrame, timeStamp, translation, rotation);
 
       timeStamp = 20000;
       translation.set(3.0, -1.0, 0.6);
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(-45.0), Math.toRadians(-12.0), Math.toRadians(0.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(-45.0), Math.toRadians(-12.0), Math.toRadians(0.0));
       putPelvisWaypointInTransformBuffer(pelvisTransformInWorldFrame, timeStamp, translation, rotation);
 
       timeStamp = 25000;
       translation.set(3.0, -1.0, 0.6);
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(135.0), Math.toRadians(0.0), Math.toRadians(0.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(135.0), Math.toRadians(0.0), Math.toRadians(0.0));
       putPelvisWaypointInTransformBuffer(pelvisTransformInWorldFrame, timeStamp, translation, rotation);
 
       timeStamp = 30000;
       translation.set(1.0, 1.0, 0.9);
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(135.0), Math.toRadians(0.0), Math.toRadians(-2.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(135.0), Math.toRadians(0.0), Math.toRadians(-2.0));
       putPelvisWaypointInTransformBuffer(pelvisTransformInWorldFrame, timeStamp, translation, rotation);
 
       timeStamp = 35000;
       translation.set(1.0, 1.0, 0.9);
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(0.0), Math.toRadians(-15.0), Math.toRadians(5.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(0.0), Math.toRadians(-15.0), Math.toRadians(5.0));
       putPelvisWaypointInTransformBuffer(pelvisTransformInWorldFrame, timeStamp, translation, rotation);
 
       timeStamp = 40000;
       translation.set(-1.0, 1.0, 0.5);
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(0.0), Math.toRadians(-1.0), Math.toRadians(-5.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(0.0), Math.toRadians(-1.0), Math.toRadians(-5.0));
       putPelvisWaypointInTransformBuffer(pelvisTransformInWorldFrame, timeStamp, translation, rotation);
 
       timeStamp = 45000;
       translation.set(-1.0, -1.0, 0.7);
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(0.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(0.0));
       putPelvisWaypointInTransformBuffer(pelvisTransformInWorldFrame, timeStamp, translation, rotation);
 
       timeStamp = 50000;
       translation.set(-1.0, -1.0, 0.2);
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(180.0), Math.toRadians(10.0), Math.toRadians(10.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(rotation, Math.toRadians(180.0), Math.toRadians(10.0), Math.toRadians(10.0));
       putPelvisWaypointInTransformBuffer(pelvisTransformInWorldFrame, timeStamp, translation, rotation);
    }
 
@@ -378,37 +378,37 @@ public class NewPelvisPoseHistoryCorrectionTest
       Random random = new Random();
       Quat4d[] orientationTooBigOffset = new Quat4d[16];
       Quat4d tempQuat = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(10.1), Math.toRadians(0.0), Math.toRadians(0.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(10.1), Math.toRadians(0.0), Math.toRadians(0.0));
       orientationTooBigOffset[0] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(10.5), Math.toRadians(0.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(10.5), Math.toRadians(0.0));
       orientationTooBigOffset[1] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(11.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(11.0));
       orientationTooBigOffset[2] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(10.5), Math.toRadians(22.0), Math.toRadians(0.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(10.5), Math.toRadians(22.0), Math.toRadians(0.0));
       orientationTooBigOffset[3] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(30.0), Math.toRadians(0.0), Math.toRadians(15.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(30.0), Math.toRadians(0.0), Math.toRadians(15.0));
       orientationTooBigOffset[4] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(15.0), Math.toRadians(20.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(15.0), Math.toRadians(20.0));
       orientationTooBigOffset[5] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(10.15), Math.toRadians(20.0), Math.toRadians(30.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(10.15), Math.toRadians(20.0), Math.toRadians(30.0));
       orientationTooBigOffset[6] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-11.0), Math.toRadians(0.0), Math.toRadians(0.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-11.0), Math.toRadians(0.0), Math.toRadians(0.0));
       orientationTooBigOffset[7] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(-12.0), Math.toRadians(0.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(-12.0), Math.toRadians(0.0));
       orientationTooBigOffset[8] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(-50.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(-50.0));
       orientationTooBigOffset[9] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-22.0), Math.toRadians(-22.0), Math.toRadians(0.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-22.0), Math.toRadians(-22.0), Math.toRadians(0.0));
       orientationTooBigOffset[10] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-30.0), Math.toRadians(0.0), Math.toRadians(-60.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-30.0), Math.toRadians(0.0), Math.toRadians(-60.0));
       orientationTooBigOffset[11] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(-12.0), Math.toRadians(-22.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(-12.0), Math.toRadians(-22.0));
       orientationTooBigOffset[12] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-12.0), Math.toRadians(-11.0), Math.toRadians(-10.2));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-12.0), Math.toRadians(-11.0), Math.toRadians(-10.2));
       orientationTooBigOffset[13] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(12.0), Math.toRadians(-20.0), Math.toRadians(0.0));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(12.0), Math.toRadians(-20.0), Math.toRadians(0.0));
       orientationTooBigOffset[14] = tempQuat;
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-20.0), Math.toRadians(0.0), Math.toRadians(0.9));
+      RotationTools.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-20.0), Math.toRadians(0.0), Math.toRadians(0.9));
       orientationTooBigOffset[15] = tempQuat;
       
       for(long timeStamp = 3000; timeStamp <50000; timeStamp += 3000)

@@ -13,7 +13,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -59,7 +59,7 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
 
       Quat4d robotInitialOrientation = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(robotInitialOrientation, robotInitialYaw, 0.0, 0.0);
+      RotationTools.setQuaternionBasedOnYawPitchRoll(robotInitialOrientation, robotInitialYaw, 0.0, 0.0);
       Point3d robotPosition = new Point3d(robotInitialPosition);
       FramePose robotInitialPose = new FramePose(constructionWorldFrame, robotPosition, robotInitialOrientation);
 
@@ -155,7 +155,7 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
    {
       FramePose debrisPose = new FramePose(robotInitialPoseReferenceFrame);
       Quat4d orientation = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(orientation, debrisYaw, debrisPitch, debrisRoll);
+      RotationTools.setQuaternionBasedOnYawPitchRoll(orientation, debrisYaw, debrisPitch, debrisRoll);
       debrisPose.setPose(positionWithRespectToRobot, orientation);
       debrisPose.changeFrame(constructionWorldFrame);
       return debrisPose;

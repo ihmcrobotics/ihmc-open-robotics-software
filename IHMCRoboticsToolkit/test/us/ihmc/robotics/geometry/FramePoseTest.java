@@ -3,7 +3,7 @@ package us.ihmc.robotics.geometry;
 import org.junit.Test;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RotationFunctions.ComparisonMode;
+import us.ihmc.robotics.geometry.RotationTools.ComparisonMode;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -244,7 +244,7 @@ public class FramePoseTest
          rotatedPose.getOrientation(actualRotationAxisAngle);
 
          assertTrue("Actual rotation: " + actualRotationAxisAngle + " does not match desired: " + desiredRotationAxisAngle,
-               RotationFunctions.axisAngleEpsilonEquivalent(desiredRotationAxisAngle, actualRotationAxisAngle, 1e-5,
+               RotationTools.axisAngleEpsilonEquivalent(desiredRotationAxisAngle, actualRotationAxisAngle, 1e-5,
                      ComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS));
 
          angleToRotate += Math.toRadians(5.0);

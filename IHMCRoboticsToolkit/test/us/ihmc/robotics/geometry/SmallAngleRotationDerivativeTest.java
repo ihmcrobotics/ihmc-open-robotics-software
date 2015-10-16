@@ -49,7 +49,7 @@ public class SmallAngleRotationDerivativeTest
 
          // actual
          AxisAngle4d perturbationAxisAngle = new AxisAngle4d();
-         RotationFunctions.setAxisAngleBasedOnRotationVector(perturbationAxisAngle, perturbationRotationVector);
+         RotationTools.setAxisAngleBasedOnRotationVector(perturbationAxisAngle, perturbationRotationVector);
          Quat4d perturbationQuaternion = new Quat4d();
          perturbationQuaternion.set(perturbationAxisAngle);
          Quat4d perturbedQuaternion = new Quat4d();

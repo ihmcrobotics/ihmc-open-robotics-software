@@ -2,7 +2,7 @@ package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -40,7 +40,7 @@ public class ZUpFrame extends ReferenceFrame
       origin.getReferenceFrame().getTransformToDesiredFrame(nonZUpToWorld, worldFrame);
       nonZUpToWorld.getRotation(nonZUpToWorldRotation);
 
-      double yaw = RotationFunctions.getYaw(nonZUpToWorldRotation);
+      double yaw = RotationTools.getYaw(nonZUpToWorldRotation);
       euler.set(0.0, 0.0, yaw);
       transformToParent.setEuler(euler);
 

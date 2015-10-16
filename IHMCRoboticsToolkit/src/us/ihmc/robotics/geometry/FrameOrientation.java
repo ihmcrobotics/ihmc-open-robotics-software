@@ -214,7 +214,7 @@ public class FrameOrientation extends ReferenceFrameHolder
 
    public void getQuaternion(Quat4d quat4d)
    {
-      RotationFunctions.setQuaternionBasedOnTransform(quat4d, transform3D);
+      RotationTools.setQuaternionBasedOnTransform(quat4d, transform3D);
    }
 
    public void getMatrix3d(Matrix3d matrixToPack)
@@ -263,26 +263,26 @@ public class FrameOrientation extends ReferenceFrameHolder
    public double getYaw()
    {
       transform3D.get(rotationMatrix);
-      return RotationFunctions.getYaw(rotationMatrix);
+      return RotationTools.getYaw(rotationMatrix);
    }
 
    public double getPitch()
    {
       transform3D.get(rotationMatrix);
-      return RotationFunctions.getPitch(rotationMatrix);
+      return RotationTools.getPitch(rotationMatrix);
    }
 
    public double getRoll()
    {
       transform3D.get(rotationMatrix);
-      return RotationFunctions.getRoll(rotationMatrix);
+      return RotationTools.getRoll(rotationMatrix);
    }
 
    public Quat4d getQuaternionCopy()
    {
       Quat4d quaternionToReturn = new Quat4d();
 
-      RotationFunctions.setQuaternionBasedOnTransform(quaternionToReturn, transform3D);
+      RotationTools.setQuaternionBasedOnTransform(quaternionToReturn, transform3D);
 
       return quaternionToReturn;
    }
@@ -344,8 +344,8 @@ public class FrameOrientation extends ReferenceFrameHolder
       if (orientationTwo.tempQuat4d == null)
          orientationTwo.tempQuat4d = new Quat4d();
 
-      RotationFunctions.setQuaternionBasedOnTransform(orientationOne.tempQuat4d, orientationOne.transform3D);
-      RotationFunctions.setQuaternionBasedOnTransform(orientationTwo.tempQuat4d, orientationTwo.transform3D);
+      RotationTools.setQuaternionBasedOnTransform(orientationOne.tempQuat4d, orientationOne.transform3D);
+      RotationTools.setQuaternionBasedOnTransform(orientationTwo.tempQuat4d, orientationTwo.transform3D);
 
       tempQuat4d.interpolate(orientationOne.tempQuat4d, orientationTwo.tempQuat4d, alpha);
 

@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -210,7 +210,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
       errorTransform.multiply(actualTransform);
 
       errorTransform.get(errorRotationMatrix);
-      RotationFunctions.axisAngleFromMatrix(errorRotationMatrix, errorAxisAngle);
+      RotationTools.axisAngleFromMatrix(errorRotationMatrix, errorAxisAngle);
 
       axis.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
       errorRotationVector.set(axis);

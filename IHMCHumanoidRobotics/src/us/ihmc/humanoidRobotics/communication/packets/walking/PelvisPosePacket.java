@@ -11,7 +11,7 @@ import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
 
@@ -126,7 +126,7 @@ public class PelvisPosePacket extends IHMCRosApiPacket<PelvisPosePacket> impleme
       }
       else
       {
-         return (RotationFunctions.quaternionEpsilonEquals(this.getOrientation(), other.getOrientation(), epsilon) && this.getPosition().epsilonEquals(
+         return (RotationTools.quaternionEpsilonEquals(this.getOrientation(), other.getOrientation(), epsilon) && this.getPosition().epsilonEquals(
                other.getPosition(), epsilon));
       }
    }

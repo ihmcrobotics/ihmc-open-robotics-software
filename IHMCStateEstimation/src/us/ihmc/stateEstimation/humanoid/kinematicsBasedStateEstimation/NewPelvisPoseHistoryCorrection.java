@@ -16,7 +16,7 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationFunctions;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -272,7 +272,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       totalErrorTranslation_Y.set(totalErrorTranslation.getY());
       totalErrorTranslation_Z.set(totalErrorTranslation.getZ());
       totalErrorBetweenPelvisAndLocalizationTransform.getRotation(totalErrorRotation);
-      RotationFunctions.setYawPitchRollBasedOnQuaternion(totalErrorYawPitchRoll, totalErrorRotation);
+      RotationTools.setYawPitchRollBasedOnQuaternion(totalErrorYawPitchRoll, totalErrorRotation);
       totalErrorRotation_Yaw.set(totalErrorYawPitchRoll[0]);
       totalErrorRotation_Pitch.set(totalErrorYawPitchRoll[1]);
       totalErrorRotation_Roll.set(totalErrorYawPitchRoll[2]);
