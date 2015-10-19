@@ -1,0 +1,21 @@
+<package>
+  <description brief="rqt_param">
+   This rqt plugin provides the way to view and edit the parameters,
+   as well as to introspect the parameters over time.
+  </description>
+  <author>Isaac Saito, Ze'ev Klapow</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rqt_param</url>
+  <depend package="rospy"/>
+  <depend package="dynamic_reconfigure"/>
+  <depend package="qt_gui"/>  
+  <depend package="rqt_gui"/>
+  <depend package="rqt_gui_py"/>
+  <depend package="rqt_py_common"/>
+
+  <!-- all the existing tags -->
+  <export>
+      <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
+</package>

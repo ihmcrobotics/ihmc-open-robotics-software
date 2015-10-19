@@ -1,0 +1,7 @@
+string topic
+string id
+duration delay_connect
+duration delay_death
+bool inhibit_death
+bool inhibit_death_message
+---

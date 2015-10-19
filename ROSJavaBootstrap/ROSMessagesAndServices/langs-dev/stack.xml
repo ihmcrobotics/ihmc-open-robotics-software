@@ -1,0 +1,20 @@
+<stack>
+  <name>langs-dev</name>
+  <version>0.1.3</version>
+  <description>Meta package modeling the build-time dependencies for language bindings of messages.</description>
+  <author>The ROS Ecosystem</author>
+  <maintainer email="dthomas@willowgarage.com">Dirk Thomas</maintainer>
+  <license>BSD</license>
+  <copyright>Willow Garage</copyright>
+  <url>http://www.ros.org</url>
+
+  <build_depends>catkin</build_depends>
+  <build_depends>gencpp</build_depends>
+  <build_depends>genlisp</build_depends>
+  <build_depends>genpy</build_depends>
+
+  <depends>catkin</depends>
+  <depends>gencpp</depends> <!-- provide the generators to wet downstream packages -->
+  <depends>genlisp</depends> <!-- provide the generators to wet downstream packages -->
+  <depends>genpy</depends> <!-- provide the generators to wet downstream packages -->
+</stack>

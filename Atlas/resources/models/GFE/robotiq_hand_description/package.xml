@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package>
+  <name>robotiq_hand_description</name>
+  <version>0.0.1</version>
+  <description>
+    This package contains RobotiQ hand description files.
+  </description>
+  <maintainer email="caguero@osrfoundation.org">Carlos Agüero</maintainer>
+  <author email="caguero@osrfoundation.org">Carlos Agüero and Shaun Edwards</author>
+  <license>Apache 2.0</license>
+  <url type="website">http://gazebosim.org/wiki/DRC</url>
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>xacro</run_depend>
+</package>

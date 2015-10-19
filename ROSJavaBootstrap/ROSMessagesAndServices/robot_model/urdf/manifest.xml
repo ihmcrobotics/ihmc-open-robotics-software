@@ -1,0 +1,27 @@
+<package>
+  <description brief="URDF Xml robot description parser.">
+    This package contains a C++ parser for the Unified Robot Description
+    Format (URDF), which is an XML format for representing a robot model. 
+    The code API of the parser has been through our review process and will remain
+    backwards compatible in future releases.
+  </description>
+  <author>Wim Meeussen, John Hsu, Rosen Diankov</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes=""/>
+  <url>http://ros.org/wiki/urdf</url>
+
+  <depend package="roscpp" />
+  <depend package="colladadom" />
+  <depend package="urdf_parser" />
+  <depend package="collada_parser" />
+
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lurdf"/>
+  </export>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+
+

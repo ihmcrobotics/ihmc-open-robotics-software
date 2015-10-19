@@ -1,0 +1,21 @@
+<package>
+  <description brief="Plugin for visualizing 3D poses">
+    rqt_pose_view provides a GUI plugin for visualizing 3D poses.
+  </description>
+  <author>Dorian Scholz</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rqt_pose_view</url>
+
+  <depend package="rqt_gui"/>
+  <depend package="rqt_gui_py"/>
+  <depend package="rostopic"/>
+  <depend package="geometry_msgs"/>
+  <depend package="tf"/>
+  <rosdep name="python-opengl"/>
+  <rosdep name="python-qt-bindings-gl"/>
+
+  <export>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
+</package>

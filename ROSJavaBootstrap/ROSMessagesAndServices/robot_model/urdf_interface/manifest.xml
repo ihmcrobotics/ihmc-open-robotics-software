@@ -1,0 +1,19 @@
+<package>
+  <description brief="URDF C++ interface.">
+    This package contains URDF C++ interface headers that define the
+    user API to the C++ URDF model.
+  </description>
+  <author>Wim Meeussen, John Hsu</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes=""/>
+  <url>http://ros.org/wiki/urdf_interface</url>
+
+  <rosdep name="tinyxml" />
+
+  <export>
+    <cpp cflags="-I${prefix}/include"/>
+  </export>
+
+</package>
+
+

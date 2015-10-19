@@ -1,0 +1,25 @@
+<package>
+  <description brief="Camera calibration information manager">
+
+     This package provides a C++ interface for camera calibration
+     information.  It provides CameraInfo, and handles SetCameraInfo
+     service requests, saving and restoring the camera calibration
+     data.
+
+  </description>
+  <author>Jack O'Quin</author>
+`  <license>BSD</license>
+  <review status="Doc reviewed" notes="2011-07-12"/>
+  <url>http://ros.org/wiki/camera_info_manager</url>
+
+  <depend package="camera_calibration_parsers"/>
+  <depend package="sensor_msgs"/>
+  <depend package="roslib"/>
+  <depend package="rostest"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include"
+         lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lcamera_info_manager"/>
+  </export>
+
+</package>

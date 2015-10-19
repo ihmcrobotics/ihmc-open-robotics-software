@@ -1,0 +1,17 @@
+<package>
+  <description brief="rqt_logger_level">
+     rqt_logger_level provides a GUI plugin for configuring the logger level of ROS nodes.
+  </description>
+  <author>Aaron Blasdel</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rqt_logger_level</url>
+  <depend package="rospy"/>
+  <depend package="rqt_gui"/>
+  <depend package="rqt_gui_py"/>
+  <export>
+      <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
+</package>
+
+

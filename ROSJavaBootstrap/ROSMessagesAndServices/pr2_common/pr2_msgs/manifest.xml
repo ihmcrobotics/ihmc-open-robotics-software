@@ -1,0 +1,19 @@
+<package>
+  <description brief="PR2 Messages">
+
+    Messages for representing PR2 state, such as battery information and the PR2 fingertip sensors.
+
+  </description>
+  <author>Eric Berger and many others</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes="2010/01/18"/>
+  <url>http://ros.org/wiki/pr2_msgs</url>
+
+  <depend package="std_msgs"/>
+  <depend package="geometry_msgs"/>
+
+  <depend package="rostest"/>
+  <depend package="rosbag"/>
+  
+</package>
+

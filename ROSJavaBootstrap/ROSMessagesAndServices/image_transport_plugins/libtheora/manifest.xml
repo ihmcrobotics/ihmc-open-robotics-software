@@ -1,0 +1,31 @@
+<package>
+  <description brief="Theora Video Codec">
+
+    Open source video codec for streaming video over the network.
+
+    This package will eventually be replaced with a rosdep. It is
+    currently needed due to a problem with Ubuntu's libtheora-dev
+    up through Jaunty, see:
+    https://bugs.launchpad.net/ubuntu/+source/libtheora/+bug/347235
+
+  </description>
+  <author>Xiph.org</author>
+  <license>BSD</license>
+  <review status="3rdparty" notes=""/>
+  <url>http://www.theora.org/</url>
+  <export>
+    <cpp cflags="-I${prefix}/installed/include"
+         lflags="-Wl,-rpath,${prefix}/installed/lib -L${prefix}/installed/lib -ltheora -ltheoraenc -ltheoradec" />
+  </export>
+  <versioncontrol type="svn" url="http://svn.xiph.org/trunk/theora" />
+
+  <rosdep name="autoconf"/>
+  <rosdep name="automake"/>
+  <rosdep name="libtool"/>
+  <rosdep name="libogg"/>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+

@@ -1,0 +1,12 @@
+<stack>
+  <description brief="Robot diagnostics and instrumentation tools.">Packages related to gathering, viewing, and analyzing diagnostics data from robots.</description>
+  <author>Maintained by Kevin Watts</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/diagnostics</url>
+  <depend stack="common_msgs" /> <!-- diagnostic_msgs -->
+  <depend stack="pluginlib" /> <!-- pluginlib -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- roscpp, xmlrpcpp, std_msgs, rostest, rospy, rosbag -->
+
+</stack>

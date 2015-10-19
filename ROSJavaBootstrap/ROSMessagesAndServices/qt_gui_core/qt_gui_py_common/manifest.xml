@@ -1,0 +1,11 @@
+<package>
+  <description brief="Common functionality for plugins">
+    qt_gui_py_common provides common functionality for GUI plugins written in Python.
+  </description>
+  <author>Dorian Scholz</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/qt_gui_py_common</url>
+
+  <depend package="qt_gui"/>
+</package>

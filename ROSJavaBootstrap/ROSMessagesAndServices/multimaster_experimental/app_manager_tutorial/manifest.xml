@@ -1,0 +1,16 @@
+<package>
+  <description brief="app_manager_tutorial">
+
+     app_manager_tutorial
+
+  </description>
+  <author>Jeremy Leibs</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/app_manager_tutorial</url>
+  <depend package="rospy"/>
+  <depend package="app_manager"/>
+
+</package>
+
+
