@@ -1,0 +1,22 @@
+<package>
+  <description brief="Plugin for plotting numeric values">
+    rqt_plot provides a GUI plugin visualizing numeric values in a 2D plot using different plotting backends.
+  </description>
+  <author>Dorian Scholz</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rqt_plot</url>
+
+  <depend package="rqt_gui"/>
+  <depend package="rqt_gui_py"/>
+  <depend package="rqt_py_common"/>
+  <depend package="qt_gui_py_common"/>
+  <depend package="rostopic"/>
+  <depend package="rosgraph"/>
+  <rosdep name="python-qt-bindings-qwt5"/>
+  <rosdep name="python-matplotlib"/>
+
+  <export>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
+</package>

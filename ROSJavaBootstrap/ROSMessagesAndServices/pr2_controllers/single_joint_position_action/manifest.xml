@@ -1,0 +1,24 @@
+<package>
+  <description brief="single_joint_position_action">
+
+  The single joint position action is a node that provides an action
+  interface for commanding a trajectory to move a joint to a particular
+  position. The action reports success when the joint reaches the desired
+  position.
+
+  </description>
+  <author>Stuart Glaser</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes="http://www.ros.org/wiki/single_joint_position_action/Reviews/2010-01-13_Doc_Review"/>
+  <url>http://ros.org/wiki/single_joint_position_action</url>
+  
+  <depend package="roscpp"/>
+  <depend package="pr2_controllers_msgs"/>
+  <depend package="actionlib"/>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+
+

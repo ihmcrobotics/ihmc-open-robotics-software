@@ -1,0 +1,28 @@
+<package>
+  <description brief="interactive_marker_helpers">
+
+    A library that provides useful interactive marker functions.
+
+  </description>
+  <author>Adam Leeper</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/interactive_marker_helpers</url>
+  <depend package="roscpp"/>
+  <depend package="interactive_markers"/>
+  <depend package="sensor_msgs"/>
+  <depend package="visualization_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="tf"/>
+
+  <!-- Only for message helpers... -->
+  <depend package="object_manipulator"/>
+
+
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -linteractive_marker_helpers"/>
+  </export>
+  
+</package>
+
+

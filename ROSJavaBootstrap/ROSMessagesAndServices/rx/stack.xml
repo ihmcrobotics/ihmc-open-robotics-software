@@ -1,0 +1,32 @@
+<stack>
+  <name>rx</name>
+  <version>1.8.9</version>
+  <description>GUI tools for ROS - rxbag, rxplot, rxgraph, and others</description>
+  <author>Ken Conley</author>
+  <author>Brian Gerkey</author>
+  <maintainer email="dthomas@willowgarage.com">Dirk Thomas</maintainer>
+  <license>BSD,LGPL/BSD,Creative Commons,wxWindows,BSD, Creative Commons</license>  
+  <copyright>Willow Garage</copyright>
+  <url>http://www.ros.org/wiki/rx</url>
+
+  <build_depends>catkin</build_depends>
+  <build_depends>graphviz</build_depends>
+  <build_depends>python-gtk2</build_depends>
+  <build_depends>python-matplotlib</build_depends>
+  <build_depends>ros</build_depends> <!-- roslib -->
+  <build_depends>ros_comm</build_depends> <!-- roscpp, rosgraph, std_msgs, rostest, rospy, rostopic, rosnode, rosbag -->
+  <build_depends>rospack</build_depends>
+  <build_depends>swig-wx</build_depends>
+  <build_depends>wxpython</build_depends>
+  <build_depends>wxwidgets</build_depends>
+
+  <depends>graphviz</depends>
+  <depends>python-gtk2</depends>
+  <depends>python-matplotlib</depends>
+  <depends>ros</depends>
+  <depends>ros_comm</depends>
+  <depends>rospack</depends>
+  <depends>swig-wx</depends>
+  <depends>wxpython</depends>
+  <depends>wxwidgets</depends>
+</stack>

@@ -1,0 +1,22 @@
+<package>
+  <description brief="Teleoperated the PR2">
+  This package contains launch files for starting joystick or
+  keyboard-based teleoperation (remote control) of the PR2.
+  </description>
+  <author>Kevin Watts</author>
+  <license>BSD</license>
+  <url>http://ros.org/wiki/pr2_teleop</url>
+  <review status="na" notes="" />
+  <depend package="std_msgs" />
+  <depend package="geometry_msgs" />
+  <depend package="sensor_msgs" />
+  <depend package="pr2_controllers_msgs" />
+  <depend package="roscpp" />
+  <depend package="topic_tools" />
+  <depend package="actionlib" />
+  <depend package="rospy" />
+  <depend package="tf" />
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>

@@ -1,0 +1,21 @@
+<package>
+  <description brief="rqt_robot_dashboard">
+
+     robot_dashboard
+
+  </description>
+  <author>Ze'ev Klapow</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rqt_robot_dashboard</url>
+  <depend package="rospy"/>
+  <depend package="rqt_gui"/>
+  <depend package="rqt_gui_py"/>
+
+  <depend package="rqt_robot_monitor"/>
+  <depend package="rqt_console" />
+  <depend package="rqt_nav_view" />
+
+</package>
+
+

@@ -1,0 +1,15 @@
+<package>
+  <description brief="Converts SimMechanics XML to URDF">
+	Converts SimMechanics XML to URDF
+  </description>
+  <author>David Lu!!</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/simmechanics_to_urdf</url>
+  <depend package="rospy"/>
+  <depend package="sensor_msgs"/>
+  <depend package="tf"/>
+  <rosdep name="python-yaml"/>
+</package>
+
+

@@ -1,0 +1,47 @@
+<package>
+<description brief="PR2 Controller Manager">
+
+<p>
+The controller manager (CM) package provides the infrastructure to
+run controllers in a hard realtime loop. In every cycle of the control
+loop, all controllers loaded into CM will get triggered. The order in in
+which the controllers are triggered is determined by the CM scheduler.
+CM provides ROS services to load/start/stop/unload controllers.
+</p>
+<p>
+The controller manager also enforces low level safety limits 
+on the effort/velocity/position of each joint.
+</p>
+
+</description>
+<author>Eric Berger berger@willowgarage.com, Stuart Glaser, Wim Meeussen</author>
+<license>BSD</license>
+<review status="doc reviewed" notes="Realtime review pending"/>
+<url>http://ros.org/pr2_controller_manager</url>
+
+<rosdep name="tinyxml"/>
+
+<depend package="pr2_hardware_interface"/>
+<depend package="pr2_mechanism_model"/>
+<depend package="pr2_mechanism_diagnostics"/>
+<depend package="pr2_description"/>
+<depend package="pr2_controller_interface"/>
+<depend package="pr2_mechanism_msgs" />
+<depend package="diagnostic_msgs" />
+<depend package="sensor_msgs" />
+<!--<depend package="robot_state_publisher" />-->
+<depend package="realtime_tools" />
+<depend package="roscpp" />
+<depend package="rospy" />
+<depend package="rosparam" />
+<depend package="pluginlib" />
+<export>
+    <cpp cflags='-I${prefix}/include'
+	 lflags='-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpr2_controller_manager'/>
+    <pr2_controller_interface plugin="${prefix}/test/controller_plugin.xml" />
+</export>
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+

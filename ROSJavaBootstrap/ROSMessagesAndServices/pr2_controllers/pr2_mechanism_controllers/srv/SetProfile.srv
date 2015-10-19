@@ -1,0 +1,11 @@
+float64 UpperTurnaround
+float64 LowerTurnaround
+float64 upperDecelBuffer
+float64 lowerDecelBuffer
+float64 profile
+float64 period
+float64 amplitude
+float64 offset
+---
+float64 time
+

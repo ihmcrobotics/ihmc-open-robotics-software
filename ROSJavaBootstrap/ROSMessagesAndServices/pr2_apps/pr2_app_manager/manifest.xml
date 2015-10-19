@@ -1,0 +1,17 @@
+<package>
+  <description brief="Scripts and tools for the app manager">
+    Scripts and tools for running the application manager on the PR2.
+  </description>
+  <author>Vijay Pradeep</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/application_manager</url>
+
+  <depend package="app_manager"/>
+  <depend package="willow_maps"/>
+
+  <rosdep name="python-pexpect" />
+
+</package>
+
+

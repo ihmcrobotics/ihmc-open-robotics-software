@@ -1,0 +1,14 @@
+<package>
+  <description brief="roomba_stage">
+
+     roomba_stage
+
+  </description>
+  <author>Gonçalo Cabrita</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/roomba_stage</url>
+
+</package>
+
+

@@ -1,0 +1,20 @@
+<package>
+  <description brief="interactive_markers">
+
+     Interactive markers allow you to add a 3D user interface
+     to your application, which can be accessed from tools like RViz.
+
+  </description>
+  <author>David Gossow (C++), Michael Ferguson (Python)</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/interactive_markers</url>
+  <depend package="roscpp"/>
+  <depend package="visualization_msgs"/>
+  <depend package="tf"/>
+
+  <export> 
+      <cpp cflags="-I${prefix}/include/" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -linteractive_markers"/>
+  </export>
+
+</package>

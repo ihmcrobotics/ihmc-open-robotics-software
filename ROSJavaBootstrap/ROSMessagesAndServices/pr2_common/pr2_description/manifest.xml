@@ -1,0 +1,23 @@
+<package>
+  <description brief="pr2_description">
+
+  This package contains the description (mechanical, kinematic, visual,
+  etc.) of the PR2 robot.  The files in this package are parsed and used by
+  a variety of other components.  Most users will not interact directly
+  with this package.
+
+  </description>
+  <author>John Hsu, Eric Berger</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/pr2_description</url>
+  <depend package="convex_decomposition"/>
+  <depend package="ivcon"/>
+  <depend package="urdfdom" /> <!-- Testing -->
+  <depend package="xacro" /> <!-- Testing -->
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+
+

@@ -1,0 +1,42 @@
+<package>
+<description brief="The Open Source Object-Oriented Graphics Rendering Engine">
+
+<p>
+OGRE (Object-Oriented Graphics Rendering Engine) is a scene-oriented, flexible 3D engine written in C++ designed to make it easier and more intuitive for developers to produce applications utilising hardware-accelerated 3D graphics. The class library abstracts all the details of using the underlying system libraries like Direct3D and OpenGL and provides an interface based on world objects and other intuitive classes.
+</p>
+<p>
+Given how fast things move in world of 3D graphics, we will update the Ogre version for bugfixes and new features we determine to be necessary.  This will
+likely mean keeping updated to the latest version when possible.
+</p>
+
+</description>
+<author> Steve 'sinbad' Streeting, Justin Walsh, Brian Johnstone and more.</author>
+<license>LGPL</license>
+<review status="3rdparty doc reviewed" notes=""/>
+<url>http://ogre3d.org</url>
+<export>
+  <cpp lflags="-Wl,-rpath,${prefix}/ogre/lib -L${prefix}/ogre/lib/OGRE `PKG_CONFIG_PATH=${prefix}/ogre/lib/pkgconfig:$PKG_CONFIG_PATH pkg-config --libs OGRE OGRE-RTShaderSystem`" cflags="`PKG_CONFIG_PATH=${prefix}/ogre/lib/pkgconfig:$PKG_CONFIG_PATH pkg-config --cflags OGRE OGRE-RTShaderSystem`"/>
+    <!-- The usage of -dylib_file is a workaround for a bug in Apple's
+    installation of libGL.dylib, as explained here:
+      http://developer.apple.com/qa/qa2007/qa1567.html
+    -->
+  <cpp os="osx" lflags="-F${prefix}/ogre/lib -framework Ogre -framework Carbon -dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib -Wl,-rpath,${prefix}/ogre/lib" cflags="-I${prefix}/ogre/include -DOGRE_PLUGIN_PATH='\\\&quot;${prefix}/ogre/lib\\\&quot;'"/>
+        
+  <doxymaker external="http://ogre3d.org"/>
+</export>
+
+<depend package="common_rosdeps"/>
+<rosdep name="zziplib"/>
+<rosdep name="libxaw"/>
+<rosdep name="opengl"/>
+<rosdep name="libxxf86vm"/>
+<rosdep name="libxrandr"/>
+<rosdep name="gtk2"/>
+<rosdep name="freeimage"/>
+<rosdep name="nvidia-cg"/>
+<rosdep name="pkg-config"/>
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+

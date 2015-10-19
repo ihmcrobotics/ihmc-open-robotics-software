@@ -1,0 +1,25 @@
+<package>
+  <description brief="rqt_bag_plugins">
+
+<p>rqt_bag_plugins contains visualization plugins for the <a href="/wiki/rqt_bag">rqt_bag</a> ROSGUI plugin.</p>
+<p><a href="/wiki/rqt_bag">rqt_bag</a> is a graphical framework for analyzing <a href="/wiki/Bags">bag</a> (log) files. rqt_bag_plugins provide visualizers for <a href="/wiki/Messages">messages</a> of different types.</p>
+
+  </description>
+  <author>Aaron Blasdel</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rqt_bag_plugins</url>
+  <depend package="rospy"/>
+  <depend package="roslib"/>
+  <depend package="std_msgs"/>
+  <depend package="rosbag"/>  
+  <depend package="rqt_bag"/> 
+  <depend package="geometry_msgs"/>
+  <depend package="sensor_msgs"/>
+  <export>
+    <rqt_bag plugin="rqt_bag_plugins.plugins" />
+  </export>
+
+</package>
+
+

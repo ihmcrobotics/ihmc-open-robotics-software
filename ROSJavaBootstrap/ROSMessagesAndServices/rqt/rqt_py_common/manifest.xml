@@ -1,0 +1,13 @@
+<package>
+  <description brief="Common functionality for plugins">
+    rqt_py_common provides common functionality for GUI plugins written in Python.
+  </description>
+  <author>Dorian Scholz</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rqt_py_common</url>
+
+  <depend package="qt_gui"/>
+  <depend package="rospy"/>
+  <depend package="rostopic"/>
+</package>
