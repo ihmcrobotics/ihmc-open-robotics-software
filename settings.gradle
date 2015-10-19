@@ -1,0 +1,11 @@
+def siblingDirs = new File(".").list(new FilenameFilter() {
+  @Override
+  boolean accept(File dir, String name) {
+    File f = new File(dir, name).getCanonicalFile();
+    return f.isDirectory() && new File(f, "build.gradle").exists();
+  }
+})
+
+siblingDirs.each {
+  include it
+}
