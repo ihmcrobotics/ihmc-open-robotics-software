@@ -179,7 +179,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
 
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
-      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider, stateEstimatorParameters, jointHandles, imuHandles, forceTorqueSensorHandles);
+      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider, stateEstimatorParameters, jointHandles, imuHandles, forceTorqueSensorHandles, robotModel.getSensorInformation());
       
       /*
        * Create controllers
