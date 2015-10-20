@@ -118,7 +118,7 @@ public class MicrostrainUDPPacketListener implements Runnable
                readFields(receiveBuffer);
                break;
             default:
-               log.warning("Unknown packet type  " + descriptor);
+               log.warning("Unknown packet type  " + (descriptor & 0xff));
             }
          }
          catch (IOException e)
