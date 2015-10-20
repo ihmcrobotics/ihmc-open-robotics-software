@@ -321,7 +321,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCRobotSensorInformation getSensorInformation()
+   public ValkyrieSensorInformation getSensorInformation()
    {
       return sensorInformation;
    }
