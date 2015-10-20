@@ -49,14 +49,18 @@ public class MicroStrainIMUHandle implements IMUHandle
    {
       microStrainData = imuListener.getLatestData();
 
-      linearAcceleration.set(microStrainData.getAcceleration());
-      linearAcceleration.scale(MicroStrainData.MICROSTRAIN_GRAVITY);
-
-      angularVelocity.set(microStrainData.getGyro());
-
-      quaternionConversionMatrix.set(microStrainData.getQuaternion());
-      orientationMatrix.mul(MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD, quaternionConversionMatrix);
-      RotationTools.setQuaternionBasedOnMatrix3d(orientation, orientationMatrix);
+      if(microStrainData != null)
+      {
+	      linearAcceleration.set(microStrainData.getAcceleration());
+	      linearAcceleration.scale(MicroStrainData.MICROSTRAIN_GRAVITY);
+	
+	      angularVelocity.set(microStrainData.getGyro());
+	
+	      quaternionConversionMatrix.set(microStrainData.getQuaternion());
+	      orientationMatrix.mul(MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD, quaternionConversionMatrix);
+	      RotationTools.setQuaternionBasedOnMatrix3d(orientation, orientationMatrix);
+//	      orientation.set(microStrainData.getQuaternion());
+      }
    }
 
    @Override

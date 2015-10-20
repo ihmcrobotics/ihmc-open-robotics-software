@@ -89,11 +89,8 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
          }
       }
 
-      List<IMUDefinition> imuList = stateEstimatorSensorDefinitions.getIMUSensorDefinitions();
-
-      for (IMUDefinition imuDefinition : imuList)
+      for (IMUDefinition imuDefinition : imuDefinitions)
       {
-
          if (USE_USB_MICROSTRAIN_IMUS)
          {
             HashMap<String, Integer> imuUSBSerialIds = sensorInformation.getImuUSBSerialIds();
@@ -107,6 +104,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
             }
             else
             {
+               stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinition);
                System.err.println("Cannot create listener for IMU " + imuDefinition.getName() + ", cannot find corresponding serial in ValkyrieSensorNames");
             }
          }
