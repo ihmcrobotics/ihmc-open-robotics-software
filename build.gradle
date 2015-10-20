@@ -76,8 +76,8 @@ remotes
 	valkyrieRealtimeComputer
 	{
 		host = '10.7.4.200'
-		user = 'val'
-		password = '***REMOVED***'
+        user = project.hasProperty('valkyrie_realtime_username')?"${valkyrie_realtime_username}":"invalid"
+        password = project.hasProperty('valkyrie_realtime_password')?"${valkyrie_realtime_password}":"invalid"
 		knownHosts = allowAnyHosts
 	}
 }
