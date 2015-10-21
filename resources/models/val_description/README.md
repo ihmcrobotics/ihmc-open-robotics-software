@@ -9,7 +9,7 @@ If you don't have ROS installed, shimmy over to [here](http://wiki.ros.org/indig
 cd <path_to_your_catkin_workspace> 
 catkin_make
 ```
-The URDF will be in the directory <val_description>/build/val_description/model/urdf/
+The URDF will be in the directory <val_description>/devel/share/val_description/model/urdf/
 
 #Credits
 - Johnson Space Center - ER4 - Valkyrie Team

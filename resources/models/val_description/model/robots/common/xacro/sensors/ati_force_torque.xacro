@@ -1,19 +1,18 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ati_force_torque_sensor">
-  <xacro:macro name="ati_force_torque_sensor" params="sensorName parentLink origin_xyz origin_rpy">
-	
-	<xacro:massless_virtual_link name="${sensorName}_Frame" 
-                    origin_rpy="0 0 0" 
-                    origin_xyz="0 0 0"/>
-
-    <xacro:fixed_joint jointName="${sensorName}_Offset"
-                       parent="${parentLink}" child="${sensorName}_Frame"
-                       origin_rpy="${origin_rpy}"
-                       origin_xyz="${origin_xyz}"/>
+  <xacro:macro name="ati_force_torque_sensor" params="sensorName parentLink joint_to_attach_sensor_to origin_xyz origin_rpy sensor_number sensor_node sensor_api">
              
-    <gazebo reference="${sensorName}_Offset">          	
+    <gazebo reference="${joint_to_attach_sensor_to}">          	
       <sensor name="${sensorName}" type="force_torque">
-        <frame>child</frame>  
+        <pose>${origin_xyz} ${origin_rpy}</pose>
+        <sensor_number id="${sensor_number}" />
+        <node id="${sensor_node}" />
+        <api name="${sensor_api}" />
+        <always_on>true</always_on>
+        <update_rate>1000</update_rate>
+        <force_torque>
+          <frame>sensor</frame>
+        </force_torque>
     	</sensor>
     </gazebo>
 

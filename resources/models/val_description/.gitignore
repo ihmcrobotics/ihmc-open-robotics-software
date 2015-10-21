@@ -3,8 +3,13 @@
 val*.urdf
 valkyrie*.sdf
 valkyrie*.xml
+test_bench*.xml
 *.bak
 *.pdf
 *.gv
 *.orig
 *.pyc
+*.swp
+.*.*.swp
+*.*.swp
+instance/instances/instance_files/*

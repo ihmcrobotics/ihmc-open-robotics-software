@@ -1,15 +1,15 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="leg">
-  <xacro:include filename="../../common/xacro/joint_names/valkyrie_joint_names.xacro"/>
-  <xacro:include filename="../../common/xacro/actuator_names/valkyrie_actuator_names.xacro"/>
-  <xacro:include filename="../../common/xacro/nodes/valkyrie_nodes.xacro"/>
-  <xacro:include filename="../../common/xacro/api/valkyrie_api.xacro"/>
-  <xacro:include filename="common/xacro/leg/joint_axes.xacro"/>
-  <xacro:include filename="common/xacro/leg/link_names.xacro"/>
-  <xacro:include filename="common/xacro/leg/joint_limits.xacro"/>
-  <xacro:include filename="common/xacro/leg/frame_parameters.xacro"/>
-  <xacro:include filename="common/xacro/leg/mass_parameters.xacro"/>
-  <xacro:include filename="common/xacro/sensors/ati_force_torque.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/joint_names/valkyrie_joint_names.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/actuator_names/valkyrie_actuator_names.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/nodes/valkyrie_nodes.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/api/valkyrie_api.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/leg/joint_axes.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/leg/link_names.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/leg/joint_limits.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/leg/frame_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/leg/mass_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/sensors/ati_force_torque.xacro"/>
 
   <xacro:macro name="make_leg_links" params="prefix reflect leg_root_link">
     <xacro:standard_link name="${HipYawLinkName}"
@@ -18,7 +18,6 @@
                     ixx="${HipYawLinkInertia_IXX}" ixy="${HipYawLinkInertia_IXY}" ixz="${HipYawLinkInertia_IXZ}"
                     iyy="${HipYawLinkInertia_IYY}" iyz="${HipYawLinkInertia_IYZ}" izz="${HipYawLinkInertia_IZZ}"
                     visual_mesh="${mesh_root}/legs/lj1_${prefix}.dae"
-                    material="Gold"
                     collision_mesh="${mesh_root}/legs/lj1_${prefix}.dae"/>
 
     <xacro:standard_link name="${HipRollLinkName}"
@@ -28,7 +27,6 @@
                     iyy="${HipRollLinkInertia_IYY}" iyz="${HipRollLinkInertia_IYZ}" izz="${HipRollLinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/legs/lj2_${prefix}.dae"
-                    material="White"
                     collision_mesh="${mesh_root}/legs/lj2_${prefix}.dae"/>
 
     <xacro:standard_link name="${HipPitchLinkName}"
@@ -38,7 +36,6 @@
                     iyy="${HipPitchLinkInertia_IYY}" iyz="${HipPitchLinkInertia_IYZ}" izz="${HipPitchLinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/legs/lj3_${prefix}.dae"
-                    material="White"
                     collision_mesh="${mesh_root}/legs/lj3_${prefix}.dae"/>
 
     <xacro:standard_link name="${KneePitchLinkName}"
@@ -48,7 +45,6 @@
                     iyy="${KneePitchLinkInertia_IYY}" iyz="${KneePitchLinkInertia_IYZ}" izz="${KneePitchLinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/legs/lj4_${prefix}.dae"
-                    material="White"
                     collision_mesh="${mesh_root}/legs/lj4_${prefix}.dae"/>
 
     <xacro:standard_link name="${AnklePitchLinkName}"
@@ -58,7 +54,6 @@
                     iyy="${AnklePitchLinkInertia_IYY}" iyz="${AnklePitchLinkInertia_IYZ}" izz="${AnklePitchLinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/legs/lj5.dae"
-                    material="White"
                     collision_mesh="${mesh_root}/legs/lj5.dae"/>
 
     <xacro:link_box_collision_mesh_visual name="${AnkleRollLinkName}"
@@ -68,7 +63,6 @@
                     iyy="${FootInertia_IYY}" iyz="${FootInertia_IYZ}" izz="${FootInertia_IZZ}"
                     inertial_rpy="0 0 0"
                     visual_mesh="${mesh_root}/legs/foot.dae"
-                    material="White"
                     width="0.27"
                     height="0.16"
                     depth="0.064"
@@ -158,17 +152,21 @@
     <xacro:make_ankle_joints prefix="${prefix}" reflect="${reflect}" leg_root_link="${leg_root_link}" />
   </xacro:macro>
 
-  <xacro:macro name="v1_leg_sensors" params="prefix reflect">
+  <xacro:macro name="v1_leg_sensors" params="prefix reflect ATI_serial_number ATI_node">
 
     <xacro:virtual_fixed_frame_offset name="${prefix}COP"
                        parentLink="${AnkleRollLinkName}"
                        origin_xyz="0.0189 0.0 -0.0783"
-                       origin_rpy="0.0 0.13 0.0"/>
+                       origin_rpy="0.0 0.0 0.0"/>
 
     <xacro:ati_force_torque_sensor sensorName="${prefix}FootSixAxis"
                         parentLink="${AnkleRollLinkName}"
+                        joint_to_attach_sensor_to="${AnkleRollJointName}"
                         origin_xyz="0.0215646 0.0 -0.051054"
-                        origin_rpy="3.14 0.0 -1.047"/>
+                        origin_rpy="3.14 0.0 -1.047"
+                        sensor_number="${ATI_serial_number}" 
+                        sensor_node="${ATI_node}"
+                        sensor_api="${AtiSensorApi}" />
   </xacro:macro>
 
   <xacro:macro name="leg_transmissions_hw" params="prefix">
@@ -176,7 +174,7 @@
     <xacro:simple_transmission jointName="${HipRollJointName}" actuatorName="${HipRollActuatorName}" nodeName="${HipRollNode}" actuatorApi="${HipRollApi}"/>
     <xacro:simple_transmission jointName="${HipPitchJointName}" actuatorName="${HipPitchActuatorName}" nodeName="${HipPitchNode}" actuatorApi="${HipPitchApi}"/>
     <xacro:simple_transmission jointName="${KneePitchJointName}" actuatorName="${KneePitchActuatorName}" nodeName="${KneePitchNode}" actuatorApi="${KneePitchApi}"/> 
-    <xacro:pushrod_transmission transmissionName="${prefix}AnkleTransmission" joint1Name="${AnklePitchJointName}" joint2Name="${AnkleRollJointName}" actuator1Name="${AnkleInsideActuatorName}" actuator2Name="${AnkleOutsideActuatorName}" actuator1Node="${AnkleInsideActuatorNode}" actuator2Node="${AnkleOutsideActuatorNode}" joint1Role="pitch" joint2Role="roll" actuator1Role="insideActuator" actuator2Role="outsideActuator" actuator1Api="${AnkleInsideActuatorApi}" actuator2Api="${AnkleOutsideActuatorApi}"/>
+    <xacro:pushrod_transmission transmissionName="${prefix}AnkleTransmission" transmissionType="AnklePushrodTransmission" joint1Name="${AnklePitchJointName}" joint2Name="${AnkleRollJointName}" actuator1Name="${AnkleRightActuatorName}" actuator2Name="${AnkleLeftActuatorName}" actuator1Node="${AnkleRightActuatorNode}" actuator2Node="${AnkleLeftActuatorNode}" actuator1Api="${AnkleRightActuatorApi}" actuator2Api="${AnkleLeftActuatorApi}"/>
   </xacro:macro>
 
   <xacro:macro name="leg_transmissions_sim" params="prefix">
@@ -184,7 +182,7 @@
     <xacro:simple_transmission jointName="${HipRollJointName}" actuatorName="${HipRollActuatorName}" nodeName="${HipRollNode}" actuatorApi="${SimApi}"/>
     <xacro:simple_transmission jointName="${HipPitchJointName}" actuatorName="${HipPitchActuatorName}" nodeName="${HipPitchNode}" actuatorApi="${SimApi}"/>
     <xacro:simple_transmission jointName="${KneePitchJointName}" actuatorName="${KneePitchActuatorName}" nodeName="${KneePitchNode}" actuatorApi="${SimApi}"/> 
-    <xacro:simple_transmission jointName="${AnklePitchJointName}" actuatorName="${AnkleInsideActuatorName}" nodeName="${AnkleInsideActuatorNode}" actuatorApi="${SimApi}"/> 
-    <xacro:simple_transmission jointName="${AnkleRollJointName}" actuatorName="${AnkleOutsideActuatorName}" nodeName="${AnkleOutsideActuatorNode}" actuatorApi="${SimApi}"/> 
+    <xacro:simple_transmission jointName="${AnklePitchJointName}" actuatorName="${AnkleLeftActuatorName}" nodeName="${AnkleLeftActuatorNode}" actuatorApi="${SimApi}"/> 
+    <xacro:simple_transmission jointName="${AnkleRollJointName}" actuatorName="${AnkleRightActuatorName}" nodeName="${AnkleRightActuatorNode}" actuatorApi="${SimApi}"/> 
   </xacro:macro>
 </robot>

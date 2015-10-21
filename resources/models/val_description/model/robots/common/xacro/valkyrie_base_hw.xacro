@@ -13,12 +13,12 @@
     <xacro:make_index_finger prefix="left" reflect="1" index_finger_root_link="leftPalm"/>
     <xacro:make_middle_finger prefix="left" reflect="1" middle_finger_root_link="leftPalm"/>
     <xacro:make_pinky_finger prefix="left" reflect="1" pinky_finger_root_link="leftPalm"/>
-    <xacro:make_leg prefix="right" reflect="-1" leg_root_link="${Pelvis_Link_Name}" />
-    <xacro:make_leg prefix="left" reflect="1" leg_root_link="${Pelvis_Link_Name}" />
+    <xacro:make_leg prefix="right" reflect="-1" leg_root_link="${Pelvis_Link_Name}"/>
+    <xacro:make_leg prefix="left" reflect="1" leg_root_link="${Pelvis_Link_Name}"/>
 
     <xacro:v1_trunk_sensors/>
-    <xacro:v1_leg_sensors prefix="left" reflect="1" />
-    <xacro:v1_leg_sensors prefix="right" reflect="-1" />
+    <xacro:v1_leg_sensors prefix="left" reflect="1" ATI_serial_number="${left_foot_ATI_serial}" ATI_node="${left_foot_ATI_node}"/>
+    <xacro:v1_leg_sensors prefix="right" reflect="-1" ATI_serial_number="${right_foot_ATI_serial}" ATI_node="${right_foot_ATI_node}"/>
     <xacro:include_multisense_hw />
     <xacro:v1_pelvis_sensors/>
 

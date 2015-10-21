@@ -1,7 +1,7 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="valkyrie_B">
 
 	<xacro:property name="instance" value="valkyrie_B" />
-	<xacro:include filename="xacro/serial_numbers/valkyrie_B_serials.xacro" />
-    <xacro:include filename="xacro/common/valkyrie_full_template.xacro"/>
+	<xacro:include filename="$(find val_description)/common/xacro/serial_numbers/valkyrie_B_serials.xacro" />
+    <xacro:include filename="$(find val_description)/instance/instances/robots/xacro/common/valkyrie_full_template.xacro"/>
 
 </robot>

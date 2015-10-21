@@ -1,5 +1,5 @@
 <launch>
-	<param name="robot_description" textfile="$(find val_description)/model/urdf/valkyrie_A_sim.urdf" />
+	<param name="robot_description" textfile="$(find val_description)/urdf/valkyrie_A_sim.urdf" />
 
 	<param name="use_gui" value="true" />
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />

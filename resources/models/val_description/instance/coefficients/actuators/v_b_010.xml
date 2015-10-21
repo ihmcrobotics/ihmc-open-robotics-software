@@ -6,6 +6,7 @@
     </Properties>
     <ClassFile id="b.xml"/>
     <ControllerFile id="b_sv.xml"/>
+    <LocationFile id="testbench.xml"/>
     <SensorsFile id="sensors.xml"/>
     <SafetyFile id="safety.xml"/>
     <ModeFile id="mode.xml"/>

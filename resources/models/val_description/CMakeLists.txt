@@ -5,7 +5,12 @@ project(val_description)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  xacro
+  xacro 
+  rospy
+)
+
+catkin_package(
+ CATKIN_DEPENDS xacro rospy
 )
 
 set(urdf_files "")
@@ -22,9 +27,14 @@ file(GLOB instance_xacro_files ${PATH_TO_ROBOTS_INSTANCE}/xacro/*/*.xacro)
 file(GLOB urdf_xacro_files ${PATH_TO_ROBOTS_MODEL}/*.xacro)
 file(GLOB instance_xacro_files ${PATH_TO_ROBOTS_INSTANCE}/*.xacro)
 
+set(URDF_OUTPUT_PATH ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf)
+set(INSTANCE_OUTPUT_PATH ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/instance_files)
+
+message(${CATKIN_PACKAGE_SHARE_DESTINATION})
+
 # Create output directories
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/model/urdf)
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/instance/instances/instance_files)
+file(MAKE_DIRECTORY ${URDF_OUTPUT_PATH})
+file(MAKE_DIRECTORY ${INSTANCE_OUTPUT_PATH})
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/model/urdf)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/instance/instances/instance_files)
 
@@ -35,7 +45,7 @@ foreach(it ${urdf_xacro_files})
 
   message("processing urdf file :" ${basepath}/${basename})
 
-  set(expanded_file "${CMAKE_CURRENT_BINARY_DIR}/model/urdf/${basename}.urdf")
+  set(expanded_file "${URDF_OUTPUT_PATH}/${basename}.urdf")
   message("produce expanded file :" ${expanded_file})
 
   xacro_add_xacro_file(${it} ${expanded_file})
@@ -50,17 +60,13 @@ foreach(it ${instance_xacro_files})
 
   message("processing xml file :" ${basepath}/${basename})
 
-  set(expanded_file "${CMAKE_CURRENT_BINARY_DIR}/instance/instances/instance_files/${basename}.xml")
+  set(expanded_file "${INSTANCE_OUTPUT_PATH}/${basename}.xml")
   message("produce expanded file :" ${expanded_file})
 
   xacro_add_xacro_file(${it} ${expanded_file})
   
   set(instance_files ${instance_files} ${expanded_file})
 endforeach(it)
-
-catkin_package(
- CATKIN_DEPENDS xacro
-)
 
 catkin_python_setup()
 
@@ -78,9 +84,16 @@ install(DIRECTORY model/meshes/
 install(DIRECTORY model/robots/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/robots
 )
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/model/urdf/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
+install(DIRECTORY instance/coefficients/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/instance/coefficients
 )
+install(DIRECTORY ${URDF_OUTPUT_PATH}
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+# Install multisense_sl urdf
+install(DIRECTORY model/urdf/ 
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  )
 
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/instance/instances/instance_files 
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/instance_files)
+install(DIRECTORY ${INSTANCE_OUTPUT_PATH}
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

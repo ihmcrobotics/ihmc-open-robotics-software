@@ -5,7 +5,7 @@
     <actuator name="${name}" type="${api}"/>
   </xacro:macro>
 
-  <xacro:macro name="standard_link" params="name mass origin_rpy origin_xyz ixx ixy ixz iyy iyz izz visual_mesh material collision_mesh">
+  <xacro:macro name="standard_link" params="name mass origin_rpy origin_xyz ixx ixy ixz iyy iyz izz visual_mesh collision_mesh">
     <link name="${name}">
       <inertial>
         <mass value="${mass}"/>
@@ -19,7 +19,6 @@
             <mesh filename="${visual_mesh}"/>
           </geometry>
           <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
-          <material name="${material}"/>
         </visual>
         <collision>
         <geometry>
@@ -56,7 +55,7 @@
   </xacro:macro>
 
   <xacro:macro name="link_box_collision_mesh_visual"
-          params="name width height depth mass inertial_xyz inertial_rpy ixx ixy ixz iyy iyz izz visual_mesh material box_xyz box_rpy">
+          params="name width height depth mass inertial_xyz inertial_rpy ixx ixy ixz iyy iyz izz visual_mesh box_xyz box_rpy">
     <link name="${name}">
       <inertial>
         <mass value="${mass}" />
@@ -70,7 +69,6 @@
           <mesh filename="${visual_mesh}"/>
         </geometry>
         <origin rpy="0 0 0" xyz="0 0 0"/>
-        <material name="${material}"/>
       </visual>
       <collision>
         <geometry>
@@ -222,6 +220,7 @@
     <transmission name="${jointName}Transmission">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="${jointName}">
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
       </joint>
       <actuator name="${actuatorName}">
         <node name="${nodeName}"/>
@@ -231,24 +230,26 @@
     </transmission>
   </xacro:macro>
 
-  <xacro:macro name="pushrod_transmission" params="transmissionName joint1Name joint2Name actuator1Name actuator2Name actuator1Node actuator2Node joint1Role joint2Role actuator1Role actuator2Role actuator1Api actuator2Api">
+  <xacro:macro name="pushrod_transmission" params="transmissionName transmissionType joint1Name joint2Name actuator1Name actuator2Name actuator1Node actuator2Node actuator1Api actuator2Api">
     <transmission name="${transmissionName}">
-      <type>transmission_interface/PushrodTransmission</type>
+      <type>robot_transmission_interface/${transmissionType}</type>
       <joint name="${joint1Name}">
-        <role>${joint1Role}</role>
+        <role>joint1</role>
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
       </joint>
       <joint name="${joint2Name}">
-        <role>${joint2Role}</role>
+        <role>joint2</role>
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
       </joint>
        <actuator name="${actuator1Name}">
         <node name="${actuator1Node}"/>
-        <role>${actuator1Role}</role>
+        <role>actuator1</role>
         <mechanicalReduction>1</mechanicalReduction>
         <api name="${actuator1Api}"/>
       </actuator>
       <actuator name="${actuator2Name}">
         <node name="${actuator2Node}"/>
-        <role>${actuator2Role}</role>
+        <role>actuator2</role>
         <mechanicalReduction>1</mechanicalReduction>
         <api name="${actuator2Api}"/>
       </actuator>
