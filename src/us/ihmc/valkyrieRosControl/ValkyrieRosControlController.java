@@ -3,6 +3,7 @@ package us.ihmc.valkyrieRosControl;
 import java.io.IOException;
 import java.util.HashMap;
 
+import us.ihmc.affinity.Affinity;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -78,6 +79,9 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
    
    private final SettableTimestampProvider timestampProvider = new SettableTimestampProvider();
    
+   private boolean firstTick = true;
+   
+   private final ValkyrieAffinity valkyrieAffinity = new ValkyrieAffinity();
    
 
 //   private static final boolean AUTO_CALIBRATE_TORQUE_OFFSETS = false;
@@ -162,7 +166,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
       /*
        * Create registries
        */
-      ValkyrieAffinity valkyrieAffinity = new ValkyrieAffinity();
+
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.REAL_ROBOT, true);
       DRCRobotSensorInformation sensorInformation = (ValkyrieSensorInformation) robotModel.getSensorInformation();
       
@@ -259,6 +263,17 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
    @Override
    protected void doControl(long time, long duration)
    {
+      if(firstTick)
+      {
+         if(valkyrieAffinity.setAffinity())
+         {
+            System.out.println("Setting estimator thread affinity to processor " + valkyrieAffinity.getEstimatorThreadProcessor().getId());
+            Affinity.setAffinity(valkyrieAffinity.getEstimatorThreadProcessor());
+         }
+         firstTick = false;
+      }
+      
+      
       timestampProvider.setTimestamp(time);
       robotController.read();
    }
