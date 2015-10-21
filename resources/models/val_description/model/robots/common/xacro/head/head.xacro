@@ -1,14 +1,14 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="head">
 
-  <xacro:include filename="../../common/xacro/joint_names/valkyrie_joint_names.xacro"/>
-  <xacro:include filename="../../common/xacro/actuator_names/valkyrie_actuator_names.xacro"/>
-  <xacro:include filename="../../common/xacro/nodes/valkyrie_nodes.xacro"/>
-  <xacro:include filename="../../common/xacro/api/valkyrie_api.xacro"/>
-  <xacro:include filename="common/xacro/head/joint_axes.xacro"/>
-  <xacro:include filename="common/xacro/head/link_names.xacro"/>
-  <xacro:include filename="common/xacro/head/joint_limits.xacro"/>
-  <xacro:include filename="common/xacro/head/frame_parameters.xacro"/>
-  <xacro:include filename="common/xacro/head/mass_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/joint_names/valkyrie_joint_names.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/actuator_names/valkyrie_actuator_names.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/nodes/valkyrie_nodes.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/api/valkyrie_api.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/joint_axes.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/link_names.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/joint_limits.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/frame_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/mass_parameters.xacro"/>
   
   <xacro:property name="NJ3_Link_Radius" value="0.139"/>
 
@@ -24,7 +24,6 @@
                         ixx="${LowerNeckPitchLinkInertia_IXX}" ixy="${LowerNeckPitchLinkInertia_IXY}" ixz="${LowerNeckPitchLinkInertia_IXZ}"
                         iyy="${LowerNeckPitchLinkInertia_IYY}" iyz="${LowerNeckPitchLinkInertia_IYZ}" izz="${LowerNeckPitchLinkInertia_IZZ}"
                         visual_mesh="${mesh_root}/head/neckj1.dae"
-                        material="White"
                         collision_mesh="${mesh_root}/head/neckj1.dae"/>
 
     <xacro:standard_link name="${NeckYawLinkName}"
@@ -34,7 +33,6 @@
                         ixx="${NeckYawLinkInertia_IXX}" ixy="${NeckYawLinkInertia_IXY}" ixz="${NeckYawLinkInertia_IXZ}"
                         iyy="${NeckYawLinkInertia_IYY}" iyz="${NeckYawLinkInertia_IYZ}" izz="${NeckYawLinkInertia_IZZ}"
                         visual_mesh="${mesh_root}/head/neckj2.dae"
-                        material="White"
                         collision_mesh="${mesh_root}/head/neckj2.dae" />
 
     <xacro:standard_link name="${UpperNeckPitchLinkName}"
@@ -44,7 +42,6 @@
                        iyy="${UpperNeckPitchLinkInertia_IYY}" iyz="${UpperNeckPitchLinkInertia_IYZ}" izz="${UpperNeckPitchLinkInertia_IZZ}"
                        origin_rpy="0 0 0"
                        visual_mesh="${mesh_root}/head/head_multisense_no_visor.dae"
-                       material="White"
                        collision_mesh="${mesh_root}/head/head_multisense_no_visor.dae"/>
 
     <xacro:revolute_joint_ex jointName="${LowerNeckPitchJointName}"

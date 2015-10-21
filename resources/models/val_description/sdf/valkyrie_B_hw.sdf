@@ -52,7 +52,7 @@
             </accel>
           </noise>
         </imu>
-        <pose>0.0515 0.115 -0.042 1.57 -5.55112e-17 -1.274</pose>
+        <pose>0.0647446 0.075311 -0.0632485 0 -1.57 0</pose>
       </sensor>
       <gravity>1</gravity>
       <velocity_decay/>
@@ -76,7 +76,7 @@
             </accel>
           </noise>
         </imu>
-        <pose>0.0515 -0.115 -0.042 -1.57 -5.55112e-17 1.274</pose>
+        <pose>0.0647446 -0.074041 -0.0632485 0 -1.57 0</pose>
       </sensor>
     </link>
     <link name='leftHipYawLink'>
@@ -277,15 +277,15 @@
     <link name='leftKneePitchLink'>
       <pose>0.000112225 0.137705 -0.677159 0 -0 0</pose>
       <inertial>
-        <pose>0.002425 -0.001543 -0.189511 0 -0 0</pose>
-        <mass>6.6</mass>
+        <pose>-0.022183 0.001703 -0.189418 0 -0 0</pose>
+        <mass>6.2</mass>
         <inertia>
-          <ixx>0.0961175</ixx>
-          <ixy>0.000107885</ixy>
-          <ixz>0.00631905</ixz>
-          <iyy>0.0971184</iyy>
-          <iyz>-0.000494739</iyz>
-          <izz>0.0137229</izz>
+          <ixx>0.0869357</ixx>
+          <ixy>9.929e-05</ixy>
+          <ixz>0.000573207</ixz>
+          <iyy>0.0915841</iyy>
+          <iyz>0.000313745</iyz>
+          <izz>0.0140173</izz>
         </inertia>
       </inertial>
       <collision name='leftKneePitchLink_collision'>
@@ -343,14 +343,14 @@
       <pose>-0.0101259 0.137705 -1.08343 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>0.06</mass>
+        <mass>0.03</mass>
         <inertia>
-          <ixx>1.1226e-05</ixx>
+          <ixx>4.377e-06</ixx>
           <ixy>0</ixy>
-          <ixz>2.735e-06</ixz>
-          <iyy>2.67e-05</iyy>
+          <ixz>0</ixz>
+          <iyy>4.322e-06</iyy>
           <iyz>0</iyz>
-          <izz>1.8792e-05</izz>
+          <izz>7.015e-06</izz>
         </inertia>
       </inertial>
       <collision name='leftAnklePitchLink_collision'>
@@ -407,15 +407,15 @@
     <link name='leftFoot'>
       <pose>-0.0101259 0.137705 -1.08343 0 -0 0</pose>
       <inertial>
-        <pose>0.0371416 0.00500717 -0.048548 0 -0 0</pose>
-        <mass>3.355</mass>
+        <pose>0.0369087 0.00494324 -0.0489279 0 -0 0</pose>
+        <mass>2.37</mass>
         <inertia>
-          <ixx>0.00914413</ixx>
-          <ixy>-9.54435e-05</ixy>
-          <ixz>0.00389419</ixz>
-          <iyy>0.0241527</iyy>
-          <iyz>8.9863e-05</iyz>
-          <izz>0.02829</izz>
+          <ixx>0.00641532</ixx>
+          <ixy>0.00020788</ixy>
+          <ixz>0.00128536</ixz>
+          <iyy>0.0179943</iyy>
+          <iyz>-0.000202908</iyz>
+          <izz>0.0209358</izz>
         </inertia>
       </inertial>
       <collision name='leftFoot_collision'>
@@ -467,6 +467,14 @@
           </limit>
         </ode>
       </physics>
+      <sensor name='leftFootSixAxis' type='force_torque'>
+        <pose>0.0215646 0 -0.051054 3.14 -1.0842e-19 -1.047</pose>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <force_torque>
+          <frame>sensor</frame>
+        </force_torque>
+      </sensor>
     </joint>
     <link name='rightHipYawLink'>
       <pose>0 -0.1016 -0.1853 0 -0 0</pose>
@@ -666,15 +674,15 @@
     <link name='rightKneePitchLink'>
       <pose>0.000112225 -0.137705 -0.677159 0 -0 0</pose>
       <inertial>
-        <pose>0.002425 -0.001543 -0.189511 0 -0 0</pose>
-        <mass>6.6</mass>
+        <pose>-0.022183 0.001703 -0.189418 0 -0 0</pose>
+        <mass>6.2</mass>
         <inertia>
-          <ixx>0.0961175</ixx>
-          <ixy>0.000107885</ixy>
-          <ixz>0.00631905</ixz>
-          <iyy>0.0971184</iyy>
-          <iyz>-0.000494739</iyz>
-          <izz>0.0137229</izz>
+          <ixx>0.0869357</ixx>
+          <ixy>9.929e-05</ixy>
+          <ixz>0.000573207</ixz>
+          <iyy>0.0915841</iyy>
+          <iyz>0.000313745</iyz>
+          <izz>0.0140173</izz>
         </inertia>
       </inertial>
       <collision name='rightKneePitchLink_collision'>
@@ -732,14 +740,14 @@
       <pose>-0.0101259 -0.137705 -1.08343 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>0.06</mass>
+        <mass>0.03</mass>
         <inertia>
-          <ixx>1.1226e-05</ixx>
+          <ixx>4.377e-06</ixx>
           <ixy>0</ixy>
-          <ixz>2.735e-06</ixz>
-          <iyy>2.67e-05</iyy>
+          <ixz>0</ixz>
+          <iyy>4.322e-06</iyy>
           <iyz>0</iyz>
-          <izz>1.8792e-05</izz>
+          <izz>7.015e-06</izz>
         </inertia>
       </inertial>
       <collision name='rightAnklePitchLink_collision'>
@@ -796,15 +804,15 @@
     <link name='rightFoot'>
       <pose>-0.0101259 -0.137705 -1.08343 0 -0 0</pose>
       <inertial>
-        <pose>0.0371416 0.00500717 -0.048548 0 -0 0</pose>
-        <mass>3.355</mass>
+        <pose>0.0369087 0.00494324 -0.0489279 0 -0 0</pose>
+        <mass>2.37</mass>
         <inertia>
-          <ixx>0.00914413</ixx>
-          <ixy>-9.54435e-05</ixy>
-          <ixz>0.00389419</ixz>
-          <iyy>0.0241527</iyy>
-          <iyz>8.9863e-05</iyz>
-          <izz>0.02829</izz>
+          <ixx>0.00641532</ixx>
+          <ixy>0.00020788</ixy>
+          <ixz>0.00128536</ixz>
+          <iyy>0.0179943</iyy>
+          <iyz>-0.000202908</iyz>
+          <izz>0.0209358</izz>
         </inertia>
       </inertial>
       <collision name='rightFoot_collision'>
@@ -856,6 +864,14 @@
           </limit>
         </ode>
       </physics>
+      <sensor name='rightFootSixAxis' type='force_torque'>
+        <pose>0.0215646 0 -0.051054 3.14 -1.0842e-19 -1.047</pose>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <force_torque>
+          <frame>sensor</frame>
+        </force_torque>
+      </sensor>
     </joint>
     <link name='torsoYawLink'>
       <pose>0 0 0 0 -0 0</pose>
@@ -994,7 +1010,7 @@
         <mass>39.47</mass>
         <inertia>
           <ixx>0.873269</ixx>
-          <ixy>9.95629e-05</ixy>
+          <ixy>9.95622e-05</ixy>
           <ixz>0.0613452</ixz>
           <iyy>1.01085</iyy>
           <iyz>0.00181849</iyz>
@@ -1056,9 +1072,11 @@
             </accel>
           </noise>
         </imu>
-        <pose>-0.047 0.134 0.363 1.57 4.33681e-19 3.14</pose>
+        <pose>-0.046863 0.134239 0.363068 1.57 4.33681e-19 3.14</pose>
       </sensor>
+      <gravity>1</gravity>
       <velocity_decay/>
+      <self_collide>0</self_collide>
       <sensor name='rightHazardCamera' type='camera'>
         <camera name='__default__'>
           <image>
@@ -1074,30 +1092,6 @@
         </camera>
         <update_rate>60</update_rate>
         <pose>0.0345 -0.0406 0.1135 1.57 -5.55112e-17 1.57</pose>
-      </sensor>
-      <gravity>1</gravity>
-      <velocity_decay/>
-      <self_collide>0</self_collide>
-      <sensor name='rightTorsoIMU' type='imu'>
-        <always_on>1</always_on>
-        <imu>
-          <noise>
-            <type>gaussian</type>
-            <rate>
-              <mean>0</mean>
-              <stddev>0.0002</stddev>
-              <bias_mean>7.5e-06</bias_mean>
-              <bias_stddev>8e-07</bias_stddev>
-            </rate>
-            <accel>
-              <mean>0</mean>
-              <stddev>0.017</stddev>
-              <bias_mean>0.1</bias_mean>
-              <bias_stddev>0.001</bias_stddev>
-            </accel>
-          </noise>
-        </imu>
-        <pose>-0.047 -0.134 0.363 -1.57 -4.33681e-19 3.14</pose>
       </sensor>
     </link>
     <joint name='torsoRoll' type='revolute'>
@@ -3927,5 +3921,36 @@
         </ode>
       </physics>
     </joint>
+    <plugin name='imu_plugin_ros' filename='libgazebo_ros_imu.so'>
+      <alwaysOn>true</alwaysOn>
+      <topicName>leftTorsoIMU/imu</topicName>
+      <serviceName>leftTorsoIMU/imu_service</serviceName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <updateRate>1000.0</updateRate>
+      <bodyName>torso</bodyName>
+      <xyzOffset>0.046863 -0.134239 -0.363068</xyzOffset>
+      <rpyOffset>1.57 -0.00159265 -3.14159</rpyOffset>
+    </plugin>
+    <plugin name='imu_plugin_ros' filename='libgazebo_ros_imu.so'>
+      <alwaysOn>true</alwaysOn>
+      <topicName>rightPelvisIMU/imu</topicName>
+      <serviceName>rightPelvisIMU/imu_service</serviceName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <updateRate>1000.0</updateRate>
+      <bodyName>pelvis</bodyName>
+      <xyzOffset>-0.0647446 0.074041 0.0632485</xyzOffset>
+      <rpyOffset>0 1.57 0</rpyOffset>
+    </plugin>
+    <static>0</static>
+    <plugin name='imu_plugin_ros' filename='libgazebo_ros_imu.so'>
+      <alwaysOn>true</alwaysOn>
+      <topicName>leftPelvisIMU/imu</topicName>
+      <serviceName>leftPelvisIMU/imu_service</serviceName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <updateRate>1000.0</updateRate>
+      <bodyName>pelvis</bodyName>
+      <xyzOffset>-0.0647446 -0.075311 0.0632485</xyzOffset>
+      <rpyOffset>0 1.57 0</rpyOffset>
+    </plugin>
   </model>
 </sdf>

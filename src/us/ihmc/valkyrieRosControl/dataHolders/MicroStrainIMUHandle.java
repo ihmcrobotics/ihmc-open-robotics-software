@@ -56,10 +56,7 @@ public class MicroStrainIMUHandle implements IMUHandle
 	
 	      angularVelocity.set(microStrainData.getGyro());
 	
-	      quaternionConversionMatrix.set(microStrainData.getQuaternion());
-	      orientationMatrix.mul(MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD, quaternionConversionMatrix);
-	      RotationTools.setQuaternionBasedOnMatrix3d(orientation, orientationMatrix);
-//	      orientation.set(microStrainData.getQuaternion());
+	      orientation.set(microStrainData.getQuaternion());
       }
    }
 

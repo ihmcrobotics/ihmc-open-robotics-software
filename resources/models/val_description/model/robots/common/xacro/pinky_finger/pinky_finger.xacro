@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="pinky_finger">
 
-  <xacro:include filename="../../common/xacro/joint_names/valkyrie_joint_names.xacro"/>
-  <xacro:include filename="common/xacro/pinky_finger/joint_axes.xacro"/>
-  <xacro:include filename="common/xacro/pinky_finger/link_names.xacro"/>
-  <xacro:include filename="common/xacro/pinky_finger/joint_limits.xacro"/>
-  <xacro:include filename="common/xacro/pinky_finger/frame_parameters.xacro"/>
-  <xacro:include filename="common/xacro/pinky_finger/mass_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/joint_names/valkyrie_joint_names.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/pinky_finger/joint_axes.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/pinky_finger/link_names.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/pinky_finger/joint_limits.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/pinky_finger/frame_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/pinky_finger/mass_parameters.xacro"/>
 
   <xacro:macro name="make_pinky_finger" params="prefix reflect pinky_finger_root_link">
 
@@ -17,7 +17,6 @@
                     iyy="${PinkyPitch1LinkInertia_IYY}" iyz="${PinkyPitch1LinkInertia_IYZ}" izz="${PinkyPitch1LinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/fingers/pinkyj1_${prefix}.dae"
-                    material="Gold"
                     collision_mesh="${mesh_root}/fingers/pinkyj1_${prefix}.dae"/>
 
     <xacro:standard_link name="${PinkyPitch2LinkName}"
@@ -27,7 +26,6 @@
                     iyy="${PinkyPitch2LinkInertia_IYY}" iyz="${PinkyPitch2LinkInertia_IYZ}" izz="${PinkyPitch2LinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/fingers/pinkyj2_${prefix}.dae"
-                    material="Gold"
                     collision_mesh="${mesh_root}/fingers/pinkyj2_${prefix}.dae"/>
 
     <xacro:standard_link name="${PinkyPitch3LinkName}"
@@ -37,7 +35,6 @@
                     iyy="${PinkyPitch3LinkInertia_IYY}" iyz="${PinkyPitch3LinkInertia_IYZ}" izz="${PinkyPitch3LinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/fingers/pinkyj3_${prefix}.dae"
-                    material="Gold"
                     collision_mesh="${mesh_root}/fingers/pinkyj3_${prefix}.dae"/>
 
     <xacro:revolute_joint jointName="${PinkyPitch1JointName}"

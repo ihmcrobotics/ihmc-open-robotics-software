@@ -8,19 +8,19 @@
                         ixx="0.11866378" ixy="-0.000143482" ixz="0.003271293"
                         iyy="0.097963425" iyz="0.002159545" izz="0.083854638"
                         origin_rpy="0 0 0"
-                        visual_mesh="${mesh_root}/pelvis/pelvis.dae" material="White"
+                        visual_mesh="${mesh_root}/pelvis/pelvis.dae"
                         collision_mesh="${mesh_root}/pelvis/pelvis.dae"/>
     </xacro:macro>
 
     <xacro:macro name="v1_pelvis_sensors">
         <xacro:microstrain_sensor sensorName="rightPelvisIMU"
                                   parentLink="${Pelvis_Link_Name}"
-                                  origin_xyz="0.0515 -0.115 -0.042"
-                                  origin_rpy="-1.57 0.0 1.274" />
+                                  origin_xyz="0.06474460 -0.074041 -0.06324854"
+                                  origin_rpy="0 -1.57 0" />
 
         <xacro:microstrain_sensor sensorName="leftPelvisIMU"
                                   parentLink="${Pelvis_Link_Name}"
-                                  origin_xyz="0.0515 0.115 -0.042"
-                                  origin_rpy="1.57 0 -1.274" />
+                                  origin_xyz="0.0647446 0.075311 -0.06324854"
+                                  origin_rpy="0 -1.57 0" />
     </xacro:macro>
 </robot>

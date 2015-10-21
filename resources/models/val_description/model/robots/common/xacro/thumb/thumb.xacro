@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="thumb">
   
-  <xacro:include filename="../../common/xacro/joint_names/valkyrie_joint_names.xacro"/>
-  <xacro:include filename="common/xacro/thumb/joint_axes.xacro"/>
-  <xacro:include filename="common/xacro/thumb/link_names.xacro"/>
-  <xacro:include filename="common/xacro/thumb/joint_limits.xacro"/>
-  <xacro:include filename="common/xacro/thumb/frame_parameters.xacro"/>
-  <xacro:include filename="common/xacro/thumb/mass_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/joint_names/valkyrie_joint_names.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/thumb/joint_axes.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/thumb/link_names.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/thumb/joint_limits.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/thumb/frame_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/thumb/mass_parameters.xacro"/>
 
   <xacro:macro name="make_thumb" params="prefix reflect thumb_root_link">
     <xacro:standard_link name="${ThumbRollLinkName}"
@@ -16,7 +16,6 @@
                     iyy="${ThumbRollLinkInertia_IYY}" iyz="${ThumbRollLinkInertia_IYZ}" izz="${ThumbRollLinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/fingers/thumbj1_${prefix}.dae"
-                    material="Gold"
                     collision_mesh="${mesh_root}/fingers/thumbj1_${prefix}.dae"/>
 
     <xacro:standard_link name="${ThumbPitch1LinkName}"
@@ -26,7 +25,6 @@
                     iyy="${ThumbPitch1LinkInertia_IYY}" iyz="${ThumbPitch1LinkInertia_IYZ}" izz="${ThumbPitch1LinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/fingers/thumbj2_${prefix}.dae"
-                    material="Gold"
                     collision_mesh="${mesh_root}/fingers/thumbj2_${prefix}.dae"/>
 
     <xacro:standard_link name="${ThumbPitch2LinkName}"
@@ -36,7 +34,6 @@
                     iyy="${ThumbPitch2LinkInertia_IYY}" iyz="${ThumbPitch2LinkInertia_IYZ}" izz="${ThumbPitch2LinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/fingers/thumbj3_${prefix}.dae"
-                    material="Gold"
                     collision_mesh="${mesh_root}/fingers/thumbj3_${prefix}.dae"/>
 
     <xacro:standard_link name="${ThumbPitch3LinkName}"
@@ -46,7 +43,6 @@
                     iyy="${ThumbPitch3LinkInertia_IYY}" iyz="${ThumbPitch3LinkInertia_IYZ}" izz="${ThumbPitch3LinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/fingers/thumbj4_${prefix}.dae"
-                    material="Gold"
                     collision_mesh="${mesh_root}/fingers/thumbj4_${prefix}.dae"/>
 
     <xacro:revolute_joint jointName="${ThumbRollJointName}"

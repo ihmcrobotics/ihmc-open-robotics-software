@@ -4,5 +4,5 @@
     <arg name="world_name" value="$(find val_description)/model/test/EmptyWorldWithValkyrie.world"/>
     <arg name="paused" value="True" />
   </include>
-  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-file $(find val_description)/model/urdf/valkyrie_A_sim.urdf -urdf -z 1.5 -model valkyrie" />
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-file $(find val_description)/urdf/valkyrie_A_sim.urdf -urdf -z 1.5 -model valkyrie" />
 </launch>

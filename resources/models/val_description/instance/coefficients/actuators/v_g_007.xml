@@ -5,7 +5,8 @@
     </Properties>
     <ClassFile id="g.xml"/>
     <ControllerFile id="g_sv.xml"/>
-    <SensorsFile id="sensors.xml"/>
+    <LocationFile id="testbench.xml"/>
+    <SensorsFile id="sensors_leonidas.xml"/>
     <SafetyFile id="safety.xml"/>
     <ModeFile id="mode.xml"/>
     <Coeffs>

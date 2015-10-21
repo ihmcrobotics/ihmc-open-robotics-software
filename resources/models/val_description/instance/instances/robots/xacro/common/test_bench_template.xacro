@@ -1,8 +1,8 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="test_bench_template">
 
-	<xacro:include filename="xacro/serial_numbers/test_bench_serials.xacro" />
-	<xacro:include filename="../../../common/xacro/nodes/test_bench_nodes.xacro" />
-	<xacro:include filename="xacro/mechanisms/mechanisms.xacro"/>
+	<xacro:include filename="$(find val_description)/common/xacro/serial_numbers/test_bench_serials.xacro" />
+	<xacro:include filename="$(find val_description)/common/xacro/nodes/test_bench_nodes.xacro" />
+	<xacro:include filename="$(find val_description)/instance/instances/robots/xacro/mechanisms/mechanisms.xacro"/>
 
 	<RobotInstance id="testbench" />
 

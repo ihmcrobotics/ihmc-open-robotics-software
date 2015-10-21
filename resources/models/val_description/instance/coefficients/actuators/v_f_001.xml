@@ -5,6 +5,7 @@
     </Properties>
     <ClassFile id="f.xml"/>
     <ControllerFile id="f_sv.xml"/>
+    <LocationFile id="testbench.xml"/>
     <SensorsFile id="sensors.xml"/>
     <SafetyFile id="safety.xml"/>
     <ModeFile id="mode.xml"/>

@@ -1,17 +1,17 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="waist">
 
-  <xacro:include filename="../../common/xacro/joint_names/valkyrie_joint_names.xacro"/>
-  <xacro:include filename="../../common/xacro/actuator_names/valkyrie_actuator_names.xacro"/>
-  <xacro:include filename="../../common/xacro/nodes/valkyrie_nodes.xacro"/>
-  <xacro:include filename="../../common/xacro/api/valkyrie_api.xacro"/>
-  <xacro:include filename="common/xacro/waist/joint_axes.xacro"/>
-  <xacro:include filename="common/xacro/waist/joint_axes.xacro"/>
-  <xacro:include filename="common/xacro/waist/link_names.xacro"/>
-  <xacro:include filename="common/xacro/waist/joint_limits.xacro"/>
-  <xacro:include filename="common/xacro/waist/frame_parameters.xacro"/>
-  <xacro:include filename="common/xacro/waist/mass_parameters.xacro"/>
-  <xacro:include filename="common/xacro/sensors/microstrain.xacro"/>
-  <xacro:include filename="common/xacro/sensors/flea.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/joint_names/valkyrie_joint_names.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/actuator_names/valkyrie_actuator_names.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/nodes/valkyrie_nodes.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/api/valkyrie_api.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/waist/joint_axes.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/waist/joint_axes.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/waist/link_names.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/waist/joint_limits.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/waist/frame_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/waist/mass_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/sensors/microstrain.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/sensors/flea.xacro"/>
 
   <xacro:macro name="make_waist_common" params="waist_root_link">
 
@@ -55,7 +55,6 @@
                     ixx="${TorsoYawLinkInertia_IXX}" ixy="${TorsoYawLinkInertia_IXY}" ixz="${TorsoYawLinkInertia_IXZ}"
                     iyy="${TorsoYawLinkInertia_IYY}" iyz="${TorsoYawLinkInertia_IYZ}" izz="${TorsoYawLinkInertia_IZZ}"
                     visual_mesh="${mesh_root}/torso/torsoyaw.dae"
-                    material="White"
                     collision_mesh="${mesh_root}/torso/torsoyaw.dae" />
 
     <xacro:standard_link name="${TorsoPitchLinkName}"
@@ -65,7 +64,6 @@
                     ixx="${TorsoPitchLinkInertia_IXX}" ixy="${TorsoPitchLinkInertia_IXY}" ixz="${TorsoPitchLinkInertia_IXZ}"
                     iyy="${TorsoPitchLinkInertia_IYY}" iyz="${TorsoPitchLinkInertia_IYZ}" izz="${TorsoPitchLinkInertia_IZZ}"
                     visual_mesh="${mesh_root}/torso/torsopitch.dae"
-                    material="White"
                     collision_mesh="${mesh_root}/torso/torsopitch.dae" />
 
     <xacro:standard_link name="${TorsoRollLinkName}"
@@ -75,7 +73,6 @@
                     origin_rpy="0 0 0"
                     origin_xyz="${TorsoRollLinkComPosition}"
                     visual_mesh="${mesh_root}/torso/torso.dae"
-                    material="White"
                     collision_mesh="${mesh_root}/torso/torso.dae" />
 
     <xacro:make_waist_common waist_root_link="${waist_root_link}"/>
@@ -88,15 +85,10 @@
   </xacro:macro>
 
   <xacro:macro name="v1_trunk_sensors">
-    <xacro:microstrain_sensor sensorName="rightTorsoIMU"
-                              parentLink="${TorsoRollLinkName}"
-                              origin_xyz="-0.047 -0.134 0.363"
-                              origin_rpy="-1.57 0.0 3.14" />
-
     <xacro:microstrain_sensor sensorName="leftTorsoIMU"
                               parentLink="${TorsoRollLinkName}"
-                              origin_xyz="-0.047 0.134 0.363"
-                              origin_rpy="1.57 0.0 3.14" />
+                              origin_xyz="-0.046863 0.134239 0.3630676"
+                              origin_rpy="1.57 0 3.14" />
 
     <xacro:flea3_camera sensorName="rightHazardCamera"
                         parentLink="${TorsoRollLinkName}"
@@ -115,7 +107,7 @@
 
    <xacro:macro name="waist_transmissions_hw">
     <xacro:simple_transmission jointName="${TorsoYawJointName}" actuatorName="${TorsoYawActuatorName}" nodeName="${TrunkYawNode}" actuatorApi="${TrunkYawApi}"/> 
-    <xacro:pushrod_transmission transmissionName="WaistTransmission" joint1Name="${TorsoPitchJointName}" joint2Name="${TorsoRollJointName}" actuator1Name="${WaistLeftActuatorName}" actuator2Name="${WaistRightActuatorName}" actuator1Node="${WaistLeftActuatorNode}" actuator2Node="${WaistRightActuatorNode}" joint1Role="pitch" joint2Role="roll" actuator1Role="leftActuator" actuator2Role="rightActuator" actuator1Api="${WaistLeftActuatorApi}" actuator2Api="${WaistRightActuatorApi}"/>
+    <xacro:pushrod_transmission transmissionName="WaistTransmission" transmissionType="TorsoPushrodTransmission" joint1Name="${TorsoPitchJointName}" joint2Name="${TorsoRollJointName}" actuator1Name="${WaistRightActuatorName}" actuator2Name="${WaistLeftActuatorName}" actuator1Node="${WaistRightActuatorNode}" actuator2Node="${WaistLeftActuatorNode}" actuator1Api="${WaistRightActuatorApi}" actuator2Api="${WaistLeftActuatorApi}"/>
    </xacro:macro>
 
    <xacro:macro name="waist_transmissions_sim">

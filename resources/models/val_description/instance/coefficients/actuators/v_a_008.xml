@@ -4,6 +4,7 @@
     </Properties>
     <ClassFile id="a.xml"/>
     <ControllerFile id="a_sv.xml"/>
+    <LocationFile id="torso_yaw.xml"/>
     <SensorsFile id="sensors.xml"/>
     <SafetyFile id="safety.xml"/>
     <ModeFile id="mode.xml"/>
@@ -20,13 +21,10 @@
         <Coeff id="JointMaxValue" value="3.14159265359"/>
         <Coeff id="JointMinValue" value="-3.14159265359"/>
         <Coeff id="JointSafety_LimitZone_Rad" value="0.07"/>
-        <Coeff id="JointSafety_LowerLimit_Rad" value="-2.6"/>
-        <Coeff id="JointSafety_UpperLimit_Rad" value="2.6"/>
         <Coeff id="PositionControl_MotorTorqueDirection" value="1.0"/>
         <Coeff id="SpringAPS_BitOffset" value="1033209000.0"/>
         <Coeff id="TorqueControl_MotorTorqueDirection" value="1.0"/>
         <Coeff id="TorqueOffset_Nm" value="0.0"/>
-        <Coeff id="PositionOffset_Rad" value="2.02562162081"/>
-        <Coeff id="JointTorqueLimit_Nm" value="190.0"/>
+        <Coeff id="PositionOffset_Rad" value="2.0295"/>
     </Coeffs>
 </CoeffData>

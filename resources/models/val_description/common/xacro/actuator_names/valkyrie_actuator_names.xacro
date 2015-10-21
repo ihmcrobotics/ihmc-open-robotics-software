@@ -7,8 +7,8 @@
 	<xacro:property name="HipRollActuatorName" value="${prefix}HipRoll"/>
 	<xacro:property name="HipPitchActuatorName" value="${prefix}HipPitch"/>
 	<xacro:property name="KneePitchActuatorName" value="${prefix}KneePitch"/>
-	<xacro:property name="AnkleOutsideActuatorName" value="${prefix}AnkleOutsideActuator"/>
-	<xacro:property name="AnkleInsideActuatorName" value="${prefix}AnkleInsideActuator"/>
+	<xacro:property name="AnkleRightActuatorName" value="${prefix}AnkleRightActuator"/>
+	<xacro:property name="AnkleLeftActuatorName" value="${prefix}AnkleLeftActuator"/>
 	<xacro:property name="LowerNeckPitchActuatorName" value="lowerNeckPitch"/>
 	<xacro:property name="NeckYawActuatorName" value="neckYaw"/>
 	<xacro:property name="UpperNeckPitchActuatorName" value="upperNeckPitch"/>

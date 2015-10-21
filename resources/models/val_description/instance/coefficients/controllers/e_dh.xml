@@ -15,25 +15,29 @@
     <Coeff description="-1=master,0=six,1=4quad,2=sv,3=dh" value="3.0" id="Commutation_Select"/>
 
     <!-- Torque Controller -->
+        <Coeff id="EffortControl_Alpha" value="0.8"/>
+        <Coeff id="EffortControl_AlphaDot" value="0.8"/>
+
         <!-- Model -->
         <Coeff id="ForceControl_m" value="275.0"/>
         <Coeff id="ForceControl_b" value="10000.0"/>
 
         <!-- FF -->
-        <Coeff id="ForceControl_Current2MotorTorque" value="0.0375"/>
+        <Coeff id="ForceControl_Current2MotorForce" value="0.0375"/>
         <Coeff id="ForceControl_enableFF" value="1.0"/>
 
         <!-- PID -->
         <Coeff id="ForceControl_enablePID" value="1.0"/>
-        <Coeff id="ForceControl_Kp" value="0.001"/>
+        <Coeff id="ForceControl_Kp" value="0.08"/>
+        <Coeff id="ForceControl_Kd" value="0.0006"/>
         <Coeff id="ForceControl_PD_damp" value="0.95"/>
-        <Coeff id="ForceControl_autoKd" value="1.0"/>
+        <Coeff id="ForceControl_autoKd" value="0.0"/>
         <Coeff id="ForceControl_Kd_fc_Hz" value="50.0"/>
 
         <!-- DOB -->
         <Coeff id="ForceControl_dobWindupLimit_N" value="1000.0"/>
         <Coeff id="ForceControl_dob_fc_Hz" value="50.0"/>
-        <Coeff id="ForceControl_enableDOB" value="1.0"/>
+        <Coeff id="ForceControl_enableDOB" value="0.0"/>
 
         <!-- DynFF -->
         <Coeff id="ForceControl_FFd_fc_Hz" value="20.0"/>
