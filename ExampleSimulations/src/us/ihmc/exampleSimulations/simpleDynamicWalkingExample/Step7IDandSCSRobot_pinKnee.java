@@ -112,8 +112,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
    Vector3d comOffsetFoot = new Vector3d(footX / 2.0 - 0.075, 0.0, -footZ / 2.0);
 
    private double bodyZ, bodyX; //global so that it is created only once (avoid generating garbage)
-   private double initialBodyHeight = RobotParameters.LENGTHS.get(LinkNames.UPPER_LINK) + RobotParameters.LENGTHS.get(LinkNames.LOWER_LINK) - 0.1 + footZ
-         - 0.029 + 0.024;
+   private double initialBodyHeight = RobotParameters.LENGTHS.get(LinkNames.UPPER_LINK) + RobotParameters.LENGTHS.get(LinkNames.LOWER_LINK) - 0.1 + footZ - 0.029 + 0.024 - 0.064;
 
    // Frames
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
@@ -225,12 +224,12 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
 
          if (robotSide == RobotSide.LEFT)
          {
-            hipJointSCS.setQ(-0.6);
+            hipJointSCS.setQ(-0.3); //-0.6
          }
 
          else
          {
-            hipJointSCS.setQ(0.1);
+            hipJointSCS.setQ(0.63); //0.1
          }
 
          bodyJointSCS.addJoint(hipJointSCS);
@@ -238,8 +237,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
          createAndAttachCylinderLink(LinkNames.UPPER_LINK, JointNames.HIP, robotSide);
 
          // KNEE SCS
-         PinJoint kneeJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.KNEE.getName(), new Vector3d(0.0, 0.0, kneeOffsetZ), this,
-               jointAxesPinJoints);
+         PinJoint kneeJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.KNEE.getName(), new Vector3d(0.0, 0.0, kneeOffsetZ), this, jointAxesPinJoints);
          kneeJointSCS.setLimitStops(-0.01, 1.8, 1e5, 1e3);
          hipJointSCS.addJoint(kneeJointSCS);
          idToSCSLegJointMap.put(allLegJoints.get(robotSide).get(JointNames.KNEE), kneeJointSCS);
@@ -250,9 +248,14 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
                jointAxesPinJoints);
          ankleJointSCS.setLimitStops(-0.7, 0.7, 1e3, 1e2);
 
-         if (robotSide == RobotSide.RIGHT)
+//         if (robotSide == RobotSide.RIGHT)
+//         {
+//            ankleJointSCS.setQ(-0.1);
+//         }
+         
+         if (robotSide == RobotSide.LEFT)
          {
-            ankleJointSCS.setQ(-0.1);
+            ankleJointSCS.setQ(0.31);
          }
 
          kneeJointSCS.addJoint(ankleJointSCS);
@@ -294,7 +297,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
       qd_wy = bodyJointSCS.getQd_rot().getDoubleValue();
 
       
-      /****************** Visualization ***********************/
+      /****************** Visualizers ***********************/
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
