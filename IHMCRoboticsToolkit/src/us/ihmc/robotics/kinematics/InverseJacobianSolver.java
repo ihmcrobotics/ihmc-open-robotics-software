@@ -213,6 +213,41 @@ public class InverseJacobianSolver
       return success;
    }
 
+   public boolean solveUsingNullspaceMethodWithoutSelectionMatrix(DenseMatrix64F spatialVelocity, DenseMatrix64F jacobianMatrix, DenseMatrix64F privilegedJointVelocities)
+   {
+      int numberOfConstraints = jacobianMatrix.getNumRows();
+      subspaceJacobianMatrix.reshape(numberOfConstraints, jacobianMatrix.getNumCols());
+      subspaceJacobianMatrix.set(jacobianMatrix);
+      subspaceSpatialVelocity.reshape(spatialVelocity.getNumRows(), subspaceSpatialVelocity.getNumCols());
+      subspaceSpatialVelocity.set(spatialVelocity);
+
+      intermediateSubspaceSpatialVelocity.reshape(numberOfConstraints, 1);
+      intermediateSubspaceSpatialVelocity.set(subspaceSpatialVelocity);
+      // xDot - J qDot0
+      CommonOps.multAdd(-1.0, subspaceJacobianMatrix, privilegedJointVelocities, intermediateSubspaceSpatialVelocity);
+
+      // J^T
+      jacobianMatrixTransposed.reshape(numberOfDoF, numberOfConstraints);
+      CommonOps.transpose(subspaceJacobianMatrix, jacobianMatrixTransposed);
+
+      // J J^T
+      jacobianTimesJacobianTransposedMatrix.reshape(numberOfConstraints, numberOfConstraints);
+      CommonOps.multOuter(subspaceJacobianMatrix, jacobianTimesJacobianTransposedMatrix);
+
+      intermediateResultInTaskspace.reshape(numberOfConstraints, 1);
+
+      boolean success = linearAlgebraSolver.setA(jacobianTimesJacobianTransposedMatrix);
+
+      // Solve J*J^T xDot = f
+      if (success)
+         linearAlgebraSolver.solve(intermediateSubspaceSpatialVelocity, intermediateResultInTaskspace);
+      // qDot = J^T f + qDot0
+      jointspaceVelocity.set(privilegedJointVelocities);
+      CommonOps.multAdd(jacobianMatrixTransposed, intermediateResultInTaskspace, jointspaceVelocity);
+
+      return success;
+   }
+
    private void computeJacobianTransposedTimesJacobian(DenseMatrix64F resultToPack, DenseMatrix64F jacobian)
    {
       resultToPack.reshape(numberOfDoF, numberOfDoF);
