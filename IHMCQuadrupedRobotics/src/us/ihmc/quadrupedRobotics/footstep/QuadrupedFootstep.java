@@ -1,4 +1,4 @@
-package us.ihmc.robotics.quadruped;
+package us.ihmc.quadrupedRobotics.footstep;
 
 import java.io.PrintWriter;
 
