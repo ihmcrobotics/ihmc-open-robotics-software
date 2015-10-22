@@ -25,6 +25,8 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class SpringFlamingoSimulation
 {
+	//Hello there. 
+	
    YoVariableRegistry registry; //TODO
    
    private static final SupportedGraphics3DAdapter graphics3DAdapterToUse = SupportedGraphics3DAdapter.JAVA_MONKEY_ENGINE;
