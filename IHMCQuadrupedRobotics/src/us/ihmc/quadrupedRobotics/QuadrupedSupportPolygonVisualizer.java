@@ -28,7 +28,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class MiniBeastSupportPolygonVisualizer implements RobotController
+public class QuadrupedSupportPolygonVisualizer implements RobotController
 {
    private static final double simulateDT = 0.01;
    private static final int recordFrequency = 1;
@@ -42,7 +42,7 @@ public class MiniBeastSupportPolygonVisualizer implements RobotController
    private final FloatingJoint rootJoint;
 
    private final QuadrantDependentList<YoFramePoint> vertices = new QuadrantDependentList<YoFramePoint>();
-   private MiniBeastSupportPolygon supportPolygon = new MiniBeastSupportPolygon(); 
+   private QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon(); 
    private final YoFrameConvexPolygon2d currentSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
    private final YoArtifactPolygon currentQuadSupportPolygonArtifact = new YoArtifactPolygon("supportPolygonArtifact", currentSupportPolygon, Color.blue, false);
 
@@ -58,7 +58,7 @@ public class MiniBeastSupportPolygonVisualizer implements RobotController
    
    private DoubleYoVariable bodyHeadingAngle = new DoubleYoVariable("bodyHeadingAngle", registry);
 
-   public MiniBeastSupportPolygonVisualizer()
+   public QuadrupedSupportPolygonVisualizer()
    {
       robot = new Robot("viz");
       rootJoint = new FloatingJoint("floating", new Vector3d(), robot);
@@ -167,7 +167,7 @@ public class MiniBeastSupportPolygonVisualizer implements RobotController
       ThreadTools.sleep(10);
    }
    
-   private void drawSupportPolygon(MiniBeastSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
+   private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
    {
       ConvexPolygon2d polygon = new ConvexPolygon2d();
       for(RobotQuadrant quadrant : RobotQuadrant.values)
@@ -185,6 +185,6 @@ public class MiniBeastSupportPolygonVisualizer implements RobotController
    
    public static void main(String[] args)
    {
-      new MiniBeastSupportPolygonVisualizer();
+      new QuadrupedSupportPolygonVisualizer();
    }
 }

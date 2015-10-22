@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.MiniBeastSupportPolygon;
+import us.ihmc.quadrupedRobotics.QuadrupedSupportPolygon;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -87,8 +87,8 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    private final MidFootZUpSwingTargetGenerator footChoser;
    private final MockQuadrupedReferenceFrames referenceFrames;
 
-   private final MiniBeastSupportPolygon fourFootSupportPolygon = new MiniBeastSupportPolygon();
-   private final MiniBeastSupportPolygon commonSupportPolygon = new MiniBeastSupportPolygon();
+   private final QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
+   private final QuadrupedSupportPolygon commonSupportPolygon = new QuadrupedSupportPolygon();
    private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoFrameConvexPolygon2d currentTriplePolygon = new YoFrameConvexPolygon2d("currentTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
    
@@ -280,7 +280,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       ThreadTools.sleep(10);
    }
 
-   private void drawSupportPolygon(MiniBeastSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
+   private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
    {
       ConvexPolygon2d polygon = new ConvexPolygon2d();
       for(RobotQuadrant quadrant : RobotQuadrant.values)

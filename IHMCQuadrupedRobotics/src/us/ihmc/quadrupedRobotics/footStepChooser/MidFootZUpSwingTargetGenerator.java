@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.footStepChooser;
 
-import us.ihmc.quadrupedRobotics.MiniBeastSupportPolygon;
+import us.ihmc.quadrupedRobotics.QuadrupedSupportPolygon;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -32,7 +32,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final DoubleYoVariable maxSkew = new DoubleYoVariable("maxSkew", registry);
    private final DoubleYoVariable maxYawPerStep = new DoubleYoVariable("maxYawPerStep", registry);
    private final DoubleYoVariable minimumDistanceFromSameSideFoot = new DoubleYoVariable("minimumDistanceFromSameSideFoot", registry);
-   private final MiniBeastSupportPolygon supportPolygon = new MiniBeastSupportPolygon();
+   private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
    private final FramePoint centroid = new FramePoint(ReferenceFrame.getWorldFrame());
 
    public MidFootZUpSwingTargetGenerator(CommonQuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)

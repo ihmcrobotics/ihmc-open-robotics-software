@@ -35,16 +35,16 @@ import us.ihmc.robotics.robotSide.RobotSide;
  * @author not attributable
  * @version 1.0
  */
-public class MiniBeastSupportPolygon implements Serializable
+public class QuadrupedSupportPolygon implements Serializable
 {
    protected final QuadrantDependentList<FramePoint> footsteps = new QuadrantDependentList<FramePoint>();
 
-   public MiniBeastSupportPolygon()
+   public QuadrupedSupportPolygon()
    {
       
    }
    
-   public MiniBeastSupportPolygon(QuadrantDependentList<FramePoint> footsteps)
+   public QuadrupedSupportPolygon(QuadrantDependentList<FramePoint> footsteps)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -56,7 +56,7 @@ public class MiniBeastSupportPolygon implements Serializable
       }
    }
 
-   public MiniBeastSupportPolygon(MiniBeastSupportPolygon polygon)
+   public QuadrupedSupportPolygon(QuadrupedSupportPolygon polygon)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -136,9 +136,9 @@ public class MiniBeastSupportPolygon implements Serializable
     *
     * @return SupportPolygon
     */
-   public MiniBeastSupportPolygon changeFrameCopy(ReferenceFrame referenceFrame)
+   public QuadrupedSupportPolygon changeFrameCopy(ReferenceFrame referenceFrame)
    {
-      MiniBeastSupportPolygon newPolygon = new MiniBeastSupportPolygon(this);
+      QuadrupedSupportPolygon newPolygon = new QuadrupedSupportPolygon(this);
       newPolygon.changeFrame(referenceFrame);
       return newPolygon;
    }
@@ -307,7 +307,7 @@ public class MiniBeastSupportPolygon implements Serializable
       return null;
    }
    
-   public void set(MiniBeastSupportPolygon polygon)
+   public void set(QuadrupedSupportPolygon polygon)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -368,7 +368,7 @@ public class MiniBeastSupportPolygon implements Serializable
     *
     * @return int the number of footsteps that epsilon match
     */
-   public int getNumberOfMatchinfFootsteps(MiniBeastSupportPolygon polygon)
+   public int getNumberOfMatchinfFootsteps(QuadrupedSupportPolygon polygon)
    {
       // check the number of null legs
       int numberOfMatching = 0;
@@ -440,7 +440,7 @@ public class MiniBeastSupportPolygon implements Serializable
     * @param shrinkDistance double
     * @return Polygon
     */
-   public MiniBeastSupportPolygon getShrunkenPolygon(double shrinkDistance)
+   public QuadrupedSupportPolygon getShrunkenPolygon(double shrinkDistance)
    {
       if (getNumberOfLegs() != 3)
       {
@@ -488,7 +488,7 @@ public class MiniBeastSupportPolygon implements Serializable
       footPoint.add(new FrameVector(footPoint.getReferenceFrame(), edgeNormal));
       newFeet.put(RobotQuadrant.HIND_RIGHT, footPoint);
 
-      return new MiniBeastSupportPolygon(newFeet);
+      return new QuadrupedSupportPolygon(newFeet);
    }
 
    /**
@@ -1461,7 +1461,7 @@ public class MiniBeastSupportPolygon implements Serializable
       return distances;
    }
 
-   public boolean hasSameFootsteps(MiniBeastSupportPolygon polyTwo)
+   public boolean hasSameFootsteps(QuadrupedSupportPolygon polyTwo)
    {
       for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -1585,7 +1585,7 @@ public class MiniBeastSupportPolygon implements Serializable
    }
 
 
-   public boolean epsilonEquals(MiniBeastSupportPolygon polyTwo)
+   public boolean epsilonEquals(QuadrupedSupportPolygon polyTwo)
    {
       if (polyTwo == null)
          return false;
@@ -1779,9 +1779,9 @@ public class MiniBeastSupportPolygon implements Serializable
       return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
    }
    
-   public MiniBeastSupportPolygon deleteLegCopy(RobotQuadrant legName)
+   public QuadrupedSupportPolygon deleteLegCopy(RobotQuadrant legName)
    {
-      MiniBeastSupportPolygon newPolygon = new MiniBeastSupportPolygon(this);
+      QuadrupedSupportPolygon newPolygon = new QuadrupedSupportPolygon(this);
       newPolygon.deleteLeg(legName);
       return newPolygon;
    }
@@ -1804,7 +1804,7 @@ public class MiniBeastSupportPolygon implements Serializable
     * @return SupportPolygon That is common to both (can be null for opposite side swing legs)
     *        This should be the two matching feet and the intersection of the two tror lines
     */
-   public MiniBeastSupportPolygon getCommonSupportPolygon(MiniBeastSupportPolygon nextSupportPolygon, RobotQuadrant specifiedLegName)
+   public QuadrupedSupportPolygon getCommonSupportPolygon(QuadrupedSupportPolygon nextSupportPolygon, RobotQuadrant specifiedLegName)
    {
       // verify both have exactly three legs
       if (this.getNumberOfLegs() != 3)
@@ -1853,7 +1853,7 @@ public class MiniBeastSupportPolygon implements Serializable
       commonFeetPositions.put(currentSwingLeg.getAcrossBodyQuadrant(), getFootstep(currentSwingLeg.getAcrossBodyQuadrant()));
       commonFeetPositions.put(currentSwingLeg.getDiagonalOppositeQuadrant(), getFootstep(currentSwingLeg.getDiagonalOppositeQuadrant()));
 
-      return new MiniBeastSupportPolygon(commonFeetPositions);
+      return new QuadrupedSupportPolygon(commonFeetPositions);
    }
 
    /**
@@ -1877,11 +1877,11 @@ public class MiniBeastSupportPolygon implements Serializable
     *        Each side is shrunken by the specified distance.
     *        If the remaining distance is insufficent to shrink, then return null
     */
-   public MiniBeastSupportPolygon getShrunkenCommonSupportPolygon(MiniBeastSupportPolygon nextSupportPolygon, RobotQuadrant specifiedLegName, double frontDistance,
+   public QuadrupedSupportPolygon getShrunkenCommonSupportPolygon(QuadrupedSupportPolygon nextSupportPolygon, RobotQuadrant specifiedLegName, double frontDistance,
            double sideDistance, double hindDistance)
    {
       // get common polygon
-      MiniBeastSupportPolygon commonSupportPolygon = getCommonSupportPolygon(nextSupportPolygon, specifiedLegName);
+      QuadrupedSupportPolygon commonSupportPolygon = getCommonSupportPolygon(nextSupportPolygon, specifiedLegName);
 
       // if it is null return null
       if (commonSupportPolygon == null)
@@ -1905,8 +1905,8 @@ public class MiniBeastSupportPolygon implements Serializable
       FramePoint swingLegSameSideFootstep = new FramePoint(commonSupportPolygon.getFootstep(swingLeg.getSameSideQuadrant()));
       FramePoint oppositeFrontFootstep = new FramePoint(commonSupportPolygon.getFootstep(oppositeFront));
       FramePoint oppositeHindFootstep = new FramePoint(commonSupportPolygon.getFootstep(oppositeHind));
-      Point2d point1 = MiniBeastSupportPolygon.projectXY(swingLegSameSideFootstep);
-      Point2d point2 = MiniBeastSupportPolygon.projectXY(oppositeFrontFootstep);
+      Point2d point1 = QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep);
+      Point2d point2 = QuadrupedSupportPolygon.projectXY(oppositeFrontFootstep);
       Vector2d frontVector;
       if (swingLeg.isQuadrantOnLeftSide())
       {
@@ -1919,8 +1919,8 @@ public class MiniBeastSupportPolygon implements Serializable
          frontVector = new Vector2d(point2);
       }
 
-      point2 = MiniBeastSupportPolygon.projectXY(swingLegSameSideFootstep);
-      point1 = MiniBeastSupportPolygon.projectXY(oppositeHindFootstep);
+      point2 = QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep);
+      point1 = QuadrupedSupportPolygon.projectXY(oppositeHindFootstep);
       Vector2d hindVector;
       if (swingLeg.isQuadrantOnLeftSide())
       {
@@ -1933,8 +1933,8 @@ public class MiniBeastSupportPolygon implements Serializable
          hindVector = new Vector2d(point2);
       }
 
-      point1 = MiniBeastSupportPolygon.projectXY(oppositeFrontFootstep);
-      point2 = MiniBeastSupportPolygon.projectXY(oppositeHindFootstep);
+      point1 = QuadrupedSupportPolygon.projectXY(oppositeFrontFootstep);
+      point2 = QuadrupedSupportPolygon.projectXY(oppositeHindFootstep);
       Vector2d sideVector;
       if (swingLeg.isQuadrantOnLeftSide())
       {
@@ -1956,8 +1956,8 @@ public class MiniBeastSupportPolygon implements Serializable
       directionOfShrinkage.scale(frontDistance);
 
       // apply to each foot
-      point1 = MiniBeastSupportPolygon.projectXY(swingLegSameSideFootstep);
-      point2 = MiniBeastSupportPolygon.projectXY(oppositeFrontFootstep);
+      point1 = QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep);
+      point2 = QuadrupedSupportPolygon.projectXY(oppositeFrontFootstep);
       point1.add(directionOfShrinkage);
       point2.add(directionOfShrinkage);
 
@@ -1965,9 +1965,9 @@ public class MiniBeastSupportPolygon implements Serializable
       Vector2d point1ToPoint2 = new Vector2d(point1);
       point1ToPoint2.sub(point2);
       Point2d newSwingLegSameSidePoint = GeometryTools.getIntersectionBetweenTwoLines(point1, point1ToPoint2,
-                                            MiniBeastSupportPolygon.projectXY(swingLegSameSideFootstep), hindVector);
+                                            QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep), hindVector);
       Point2d oppositeFrontPoint = GeometryTools.getIntersectionBetweenTwoLines(point1, point1ToPoint2,
-                                      MiniBeastSupportPolygon.projectXY(oppositeFrontFootstep), sideVector);
+                                      QuadrupedSupportPolygon.projectXY(oppositeFrontFootstep), sideVector);
 
       // update foot positions
       FramePoint position = new FramePoint(commonSupportPolygon.getReferenceFrame(), newSwingLegSameSidePoint.x, newSwingLegSameSidePoint.y, 0.0);
@@ -1986,8 +1986,8 @@ public class MiniBeastSupportPolygon implements Serializable
       directionOfShrinkage.scale(hindDistance);
 
       // apply to each foot
-      point1 = MiniBeastSupportPolygon.projectXY(swingLegSameSideFootstep);
-      point2 = MiniBeastSupportPolygon.projectXY(oppositeHindFootstep);
+      point1 = QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep);
+      point2 = QuadrupedSupportPolygon.projectXY(oppositeHindFootstep);
       point1.add(directionOfShrinkage);
       point2.add(directionOfShrinkage);
 
@@ -1995,9 +1995,9 @@ public class MiniBeastSupportPolygon implements Serializable
       point1ToPoint2 = new Vector2d(point1);
       point1ToPoint2.sub(point2);
       newSwingLegSameSidePoint = GeometryTools.getIntersectionBetweenTwoLines(point1, point1ToPoint2,
-              MiniBeastSupportPolygon.projectXY(swingLegSameSideFootstep), frontVector);
+              QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep), frontVector);
       Point2d oppositeHindPoint = GeometryTools.getIntersectionBetweenTwoLines(point1, point1ToPoint2,
-                                     MiniBeastSupportPolygon.projectXY(oppositeFrontFootstep), sideVector);
+                                     QuadrupedSupportPolygon.projectXY(oppositeFrontFootstep), sideVector);
 
       // update foot positions
       position = new FramePoint(commonSupportPolygon.getReferenceFrame(), newSwingLegSameSidePoint.x, newSwingLegSameSidePoint.y, 0.0);
@@ -2016,8 +2016,8 @@ public class MiniBeastSupportPolygon implements Serializable
       directionOfShrinkage.scale(sideDistance);
 
       // apply to each foot
-      point1 = MiniBeastSupportPolygon.projectXY(oppositeFrontFootstep);
-      point2 = MiniBeastSupportPolygon.projectXY(oppositeHindFootstep);
+      point1 = QuadrupedSupportPolygon.projectXY(oppositeFrontFootstep);
+      point2 = QuadrupedSupportPolygon.projectXY(oppositeHindFootstep);
       point1.add(directionOfShrinkage);
       point2.add(directionOfShrinkage);
 
@@ -2025,9 +2025,9 @@ public class MiniBeastSupportPolygon implements Serializable
       point1ToPoint2 = new Vector2d(point1);
       point1ToPoint2.sub(point2);
       oppositeFrontPoint = GeometryTools.getIntersectionBetweenTwoLines(point1, point1ToPoint2,
-              MiniBeastSupportPolygon.projectXY(swingLegSameSideFootstep), frontVector);
+              QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep), frontVector);
       oppositeHindPoint = GeometryTools.getIntersectionBetweenTwoLines(point1, point1ToPoint2,
-              MiniBeastSupportPolygon.projectXY(swingLegSameSideFootstep), hindVector);
+              QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep), hindVector);
 
       // update foot positions
       position = new FramePoint(commonSupportPolygon.getReferenceFrame(), oppositeFrontPoint.x, oppositeFrontPoint.y, 0.0);
@@ -2044,7 +2044,7 @@ public class MiniBeastSupportPolygon implements Serializable
       commonFootsteps.put(oppositeFront, oppositeFrontFootstep);
       commonFootsteps.put(oppositeHind, oppositeHindFootstep);
 
-      return new MiniBeastSupportPolygon(commonFootsteps);
+      return new QuadrupedSupportPolygon(commonFootsteps);
    }
 
 
@@ -2056,7 +2056,7 @@ public class MiniBeastSupportPolygon implements Serializable
     * @param supportPolygonEnd SupportPolygon
     * @return LegName
     */
-   public RobotQuadrant getSwingLegFromHereToNextPolygon(MiniBeastSupportPolygon nextSupportPolygon)
+   public RobotQuadrant getSwingLegFromHereToNextPolygon(QuadrupedSupportPolygon nextSupportPolygon)
    {
       RobotQuadrant swingLeg = null;
 
@@ -2258,9 +2258,9 @@ public class MiniBeastSupportPolygon implements Serializable
     * @param footstep Footstep
     * @return Polygon
     */
-   public MiniBeastSupportPolygon replaceFootstepCopy(RobotQuadrant quadrant, FramePoint footstep)
+   public QuadrupedSupportPolygon replaceFootstepCopy(RobotQuadrant quadrant, FramePoint footstep)
    {
-      MiniBeastSupportPolygon newPolygon = new MiniBeastSupportPolygon(this);
+      QuadrupedSupportPolygon newPolygon = new QuadrupedSupportPolygon(this);
       newPolygon.setFootstep(quadrant, footstep);
       return newPolygon;
    }
@@ -2442,7 +2442,7 @@ public class MiniBeastSupportPolygon implements Serializable
       framePoint = new FramePoint(frame, 1.0, -1.0, 0.0);
       footsteps.put(RobotQuadrant.HIND_RIGHT, new FramePoint(framePoint));
 
-      MiniBeastSupportPolygon polygon = new MiniBeastSupportPolygon(footsteps);
+      QuadrupedSupportPolygon polygon = new QuadrupedSupportPolygon(footsteps);
 
       Point2d point = new Point2d(0.5, 0.25);
       System.out.println("DI=" + polygon.distanceInside(point));
