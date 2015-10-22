@@ -9,6 +9,7 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.robotics.geometry.Transform3d;
 
+import com.jme3.app.Application;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
@@ -34,9 +35,9 @@ public class JMEGraphics3DNode extends Node implements JMEUpdatable
    private JMEGraphicsObject graphics;
    private Node graphicsObjectNode;
    private final JMEAssetLocator assetManager;
-   private final JMERenderer application;
+   private final Application application;
    
-   public JMEGraphics3DNode(Graphics3DNode graphics3dNode, JMEAssetLocator assetManager, JMERenderer application)
+   public JMEGraphics3DNode(Graphics3DNode graphics3dNode, JMEAssetLocator assetManager, Application application)
    {  
       super(graphics3dNode.getName());
       this.graphics3dNode = graphics3dNode;
