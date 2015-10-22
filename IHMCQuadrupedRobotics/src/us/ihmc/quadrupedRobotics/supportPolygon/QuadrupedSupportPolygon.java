@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics;
+package us.ihmc.quadrupedRobotics.supportPolygon;
 
 import java.io.Serializable;
 import java.util.ArrayList;

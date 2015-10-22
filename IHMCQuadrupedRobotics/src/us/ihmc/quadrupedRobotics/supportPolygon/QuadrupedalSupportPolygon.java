@@ -1,4 +1,4 @@
-package us.ihmc.robotics.quadruped;
+package us.ihmc.quadrupedRobotics.supportPolygon;
 
 import java.util.ArrayList;
 
@@ -6,6 +6,8 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 
+import us.ihmc.quadrupedRobotics.footstep.CartesianQuadrupedFootstep;
+import us.ihmc.quadrupedRobotics.footstep.QuadrupedFootstep;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;

@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.footStepChooser;
+package us.ihmc.quadrupedRobotics.footstepChooser;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
