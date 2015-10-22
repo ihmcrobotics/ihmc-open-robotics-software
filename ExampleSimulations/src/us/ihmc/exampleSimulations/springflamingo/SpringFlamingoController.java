@@ -40,7 +40,6 @@ public class SpringFlamingoController implements RobotController
 {
    /**
     * Initialization 
-    * Playing with Git.
     */
    
    private final YoVariableRegistry registry = new YoVariableRegistry("SpringFlamingoController");
