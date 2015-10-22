@@ -24,8 +24,11 @@ import us.ihmc.simulationconstructionset.util.visualizers.RobotFreezeFramer;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SpringFlamingoSimulation
-{
+{	
    YoVariableRegistry registry; //TODO
+   
+   //
+   //
    
    private static final SupportedGraphics3DAdapter graphics3DAdapterToUse = SupportedGraphics3DAdapter.JAVA_MONKEY_ENGINE;
 //   private static final SupportedGraphics3DAdapter graphics3DAdapterToUse = SupportedGraphics3DAdapter.JAVA3D;
@@ -97,8 +100,6 @@ public class SpringFlamingoSimulation
         
          YoVariableRegistry registry = springFlamingo.getRobotsYoVariableRegistry(); //TODO
         
-         
-         
          // System.out.println(springFlamingo);
          RobotController controller = null;
          if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
@@ -130,13 +131,9 @@ public class SpringFlamingoSimulation
 
          System.out.println("xStart = " + xStart + ", gravity = " + gravity);
          springFlamingo.q_x.set(xStart);
-         springFlamingo.setGravity(gravity);
-         
-         
-         
+         springFlamingo.setGravity(gravity);  
       }
 
-      
       
       if (!SHOW_GUI)
       {
