@@ -1,12 +1,12 @@
-package us.ihmc.quadrupedRobotics.footStepChooser;
+package us.ihmc.quadrupedRobotics.footstepChooser;
 
-import us.ihmc.quadrupedRobotics.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.quadruped.CommonQuadrupedReferenceFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;

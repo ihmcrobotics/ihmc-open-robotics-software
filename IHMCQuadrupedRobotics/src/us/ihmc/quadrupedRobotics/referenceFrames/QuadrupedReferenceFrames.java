@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.frames;
+package us.ihmc.quadrupedRobotics.referenceFrames;
 
 import java.util.EnumMap;
 
@@ -9,11 +9,10 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
-import us.ihmc.quadrupedRobotics.QuadrupedJointNameMap;
-import us.ihmc.quadrupedRobotics.QuadrupedPhysicalProperties;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPhysicalProperties;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.quadruped.CommonQuadrupedReferenceFrames;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;

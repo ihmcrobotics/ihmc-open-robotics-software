@@ -1,4 +1,4 @@
-package us.ihmc.robotics.quadruped;
+package us.ihmc.quadrupedRobotics.referenceFrames;
 
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;

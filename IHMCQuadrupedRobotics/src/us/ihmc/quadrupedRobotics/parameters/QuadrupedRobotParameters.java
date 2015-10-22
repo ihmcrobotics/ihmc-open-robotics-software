@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics;
+package us.ihmc.quadrupedRobotics.parameters;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFParameters;
