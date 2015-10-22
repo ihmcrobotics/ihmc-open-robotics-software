@@ -39,7 +39,8 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 public class SpringFlamingoController implements RobotController
 {
    /**
-    * Initialization
+    * Initialization 
+    * Playing with Git.
     */
    
    private final YoVariableRegistry registry = new YoVariableRegistry("SpringFlamingoController");
