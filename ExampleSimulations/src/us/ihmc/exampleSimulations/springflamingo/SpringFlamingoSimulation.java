@@ -130,13 +130,9 @@ public class SpringFlamingoSimulation
 
          System.out.println("xStart = " + xStart + ", gravity = " + gravity);
          springFlamingo.q_x.set(xStart);
-         springFlamingo.setGravity(gravity);
-         
-         
-         
+         springFlamingo.setGravity(gravity);  
       }
 
-      
       
       if (!SHOW_GUI)
       {
