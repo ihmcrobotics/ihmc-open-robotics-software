@@ -97,8 +97,6 @@ public class SpringFlamingoSimulation
         
          YoVariableRegistry registry = springFlamingo.getRobotsYoVariableRegistry(); //TODO
         
-         
-         
          // System.out.println(springFlamingo);
          RobotController controller = null;
          if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
