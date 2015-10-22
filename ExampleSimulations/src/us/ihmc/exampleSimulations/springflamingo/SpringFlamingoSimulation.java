@@ -27,6 +27,9 @@ public class SpringFlamingoSimulation
 {	
    YoVariableRegistry registry; //TODO
    
+   //
+   //
+   
    private static final SupportedGraphics3DAdapter graphics3DAdapterToUse = SupportedGraphics3DAdapter.JAVA_MONKEY_ENGINE;
 //   private static final SupportedGraphics3DAdapter graphics3DAdapterToUse = SupportedGraphics3DAdapter.JAVA3D;
 
