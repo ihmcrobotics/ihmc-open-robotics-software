@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
@@ -35,22 +36,15 @@ import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBo
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -58,8 +52,10 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -80,6 +76,15 @@ import us.ihmc.robotics.screwTheory.TotalWrenchCalculator;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 
 public class MomentumBasedController
@@ -139,6 +144,7 @@ public class MomentumBasedController
 
    private final YoFrameVector admissibleDesiredGroundReactionTorque;
    private final YoFrameVector admissibleDesiredGroundReactionForce;
+   private final YoFramePoint2d admissibleDesiredCenterOfPressure;
 
    // private final YoFrameVector groundReactionTorqueCheck;
    // private final YoFrameVector groundReactionForceCheck;
@@ -290,6 +296,9 @@ public class MomentumBasedController
 
       this.admissibleDesiredGroundReactionTorque = new YoFrameVector("admissibleDesiredGroundReactionTorque", centerOfMassFrame, registry);
       this.admissibleDesiredGroundReactionForce = new YoFrameVector("admissibleDesiredGroundReactionForce", centerOfMassFrame, registry);
+      this.admissibleDesiredCenterOfPressure = new YoFramePoint2d("admissibleDesiredCenterOfPressure", worldFrame, registry);
+      admissibleDesiredCenterOfPressure.setToNaN();
+      yoGraphicsListRegistry.registerArtifact("Desired Center of Pressure", new YoGraphicPosition("Desired Overall Center of Pressure", admissibleDesiredCenterOfPressure, 0.008, YoAppearance.Navy(), GraphicType.BALL).createArtifact());
 
       // this.groundReactionTorqueCheck = new YoFrameVector("groundReactionTorqueCheck", centerOfMassFrame, registry);
       // this.groundReactionForceCheck = new YoFrameVector("groundReactionForceCheck", centerOfMassFrame, registry);
@@ -662,6 +671,8 @@ public class MomentumBasedController
       admissibleDesiredGroundReactionForce.set(admissibleGroundReactionWrench.getLinearPartX(), admissibleGroundReactionWrench.getLinearPartY(),
               admissibleGroundReactionWrench.getLinearPartZ());
 
+      computeDesiredCenterOfPressure();
+
       // SpatialForceVector groundReactionWrenchCheck = inverseDynamicsCalculator.computeTotalExternalWrench(centerOfMassFrame);
       // groundReactionTorqueCheck.set(groundReactionWrenchCheck.getAngularPartCopy());
       // groundReactionForceCheck.set(groundReactionWrenchCheck.getLinearPartCopy());
@@ -670,6 +681,15 @@ public class MomentumBasedController
 
       updateYoVariables();
       desiredSpatialAccelerationCommandPool.recycleObjectPool();
+   }
+
+   private final FramePoint2d desiredCenterOfPressure = new FramePoint2d();
+   private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
+
+   private void computeDesiredCenterOfPressure()
+   {
+      centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(desiredCenterOfPressure, admissibleGroundReactionWrench, worldFrame);
+      admissibleDesiredCenterOfPressure.set(desiredCenterOfPressure);
    }
 
    // FIXME GET RID OF THAT HACK!!!
