@@ -17,6 +17,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -228,5 +229,13 @@ public class LogDataProcessorHelper
    public YoVariableHolder getLogYoVariableHolder()
    {
       return scs;
+   }
+
+   public YoFrameVector findYoFrameVector(String vectorName, ReferenceFrame vectorFrame)
+   {
+      DoubleYoVariable x = (DoubleYoVariable) scs.getVariable(vectorName + "X");
+      DoubleYoVariable y = (DoubleYoVariable) scs.getVariable(vectorName + "Y");
+      DoubleYoVariable z = (DoubleYoVariable) scs.getVariable(vectorName + "Z");
+      return new YoFrameVector(x, y, z, vectorFrame);
    }
 }
