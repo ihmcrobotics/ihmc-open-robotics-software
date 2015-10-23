@@ -659,6 +659,8 @@ public class ScrewTools
       {
          joint.packConfigurationMatrix(jointPositionsToPack, rowStart);
          rowStart += joint.getDegreesOfFreedom();
+         if (joint instanceof SixDoFJoint || joint instanceof SphericalJoint)
+            rowStart++; // Because of stupid quaternions
       }
    }
 
@@ -679,6 +681,8 @@ public class ScrewTools
       {
          joint.setConfiguration(jointPositions, rowStart);
          rowStart += joint.getDegreesOfFreedom();
+         if (joint instanceof SixDoFJoint || joint instanceof SphericalJoint)
+            rowStart++; // Because of stupid quaternions
       }
    }
 
