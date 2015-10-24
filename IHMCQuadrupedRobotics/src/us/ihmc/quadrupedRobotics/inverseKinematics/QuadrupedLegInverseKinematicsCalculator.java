@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics;
+package us.ihmc.quadrupedRobotics.inverseKinematics;
 
 import javax.vecmath.Vector3d;
 
