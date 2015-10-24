@@ -56,10 +56,16 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    private final DoubleYoVariable inscribedCircleRadius = new DoubleYoVariable("inscribedCircleRadius", registry);
    private final YoArtifactCircle inscribedCircle = new YoArtifactCircle("inscribedCircle", circleCenter, inscribedCircleRadius, Color.BLACK);
    
+   private final YoFramePoint miniCircleCenter = new YoFramePoint("miniCircleCenter", ReferenceFrame.getWorldFrame(), registry);
+   
+   private final DoubleYoVariable miniCircleRadius = new DoubleYoVariable("miniCircleRadius", registry);
+   private final YoArtifactCircle miniCircle = new YoArtifactCircle("miniCircle", miniCircleCenter, miniCircleRadius, Color.YELLOW);
+   
    private DoubleYoVariable bodyHeadingAngle = new DoubleYoVariable("bodyHeadingAngle", registry);
 
    public QuadrupedSupportPolygonVisualizer()
    {
+      miniCircleRadius.set(0.2);
       robot = new Robot("viz");
       rootJoint = new FloatingJoint("floating", new Vector3d(), robot);
       
@@ -87,6 +93,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       yoGraphicsListRegistry.registerArtifact("centroid", centroidGraphic.createArtifact());
       yoGraphicsListRegistry.registerArtifact("inscribedCircle", inscribedCircle);
       yoGraphicsListRegistry.registerArtifact("inscribedCircleCenter", circleCenterGraphic.createArtifact());
+      yoGraphicsListRegistry.registerArtifact("miniCircle", miniCircle);
       
       yoGraphicsListRegistry.registerArtifact("currentQuadSupportPolygonArtifact", currentQuadSupportPolygonArtifact);
 
@@ -164,6 +171,11 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       circleCenter.setX(centerOfInscribedCircle.getX());
       circleCenter.setY(centerOfInscribedCircle.getY());
       inscribedCircleRadius.set(radius);
+      
+      Point2d centerOfMiniCircle = new Point2d();
+      supportPolygon.getTangentTangentRadiusCircleCenter(RobotQuadrant.HIND_LEFT, miniCircleRadius.getDoubleValue(), centerOfMiniCircle);
+      miniCircleCenter.setX(centerOfMiniCircle.getX());
+      miniCircleCenter.setY(centerOfMiniCircle.getY());
       ThreadTools.sleep(10);
    }
    
