@@ -2452,7 +2452,7 @@ public class QuadrupedSupportPolygon implements Serializable
    {
       if(useThisLeg(robotQuadrantToAnchorTo) && getNumberOfLegs() == 3)
       {
-         double maximumInCircleRadius = getInCircle(centerToPack);
+         double maximumInCircleRadius = getInCircleRadius3Legs();
          if(maximumInCircleRadius < radius)
          {
             return false;
