@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics;
+package us.ihmc.quadrupedRobotics.trajectory;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
