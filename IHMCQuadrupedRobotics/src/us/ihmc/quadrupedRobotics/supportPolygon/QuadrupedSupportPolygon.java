@@ -2447,4 +2447,66 @@ public class QuadrupedSupportPolygon implements Serializable
       Point2d point = new Point2d(0.5, 0.25);
       System.out.println("DI=" + polygon.distanceInside(point));
    }
+
+   public boolean getTangentTangentRadiusCircleCenter(RobotQuadrant robotQuadrantToAnchorTo, double radius, Point2d centerToPack)
+   {
+      if(useThisLeg(robotQuadrantToAnchorTo) && getNumberOfLegs() == 3)
+      {
+         double maximumInCircleRadius = getInCircleRadius3Legs();
+         if(maximumInCircleRadius < radius)
+         {
+            return false;
+         }
+         
+         FramePoint vertex = getFootstep(robotQuadrantToAnchorTo);
+         FramePoint pointA = null;
+         FramePoint pointB = null;
+         
+         for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            FramePoint footstep = getFootstep(robotQuadrant);
+            if(footstep == null || robotQuadrant == robotQuadrantToAnchorTo)
+            {
+               continue;
+            }
+            if(pointA == null)
+            {
+               pointA = footstep;
+            }
+            else if(pointB == null)
+            {
+               pointB = footstep;
+            }
+         }
+         
+         Point2d vertex2d = new Point2d(vertex.getX(), vertex.getY());
+         Point2d A2d = new Point2d(pointA.getX(), pointA.getY());
+         Point2d B2d = new Point2d(pointB.getX(), pointB.getY());
+         
+         double VA = vertex.distance(pointA);
+         double VB = vertex.distance(pointB);
+         double AB = pointA.distance(pointB);
+         
+         double theta = GeometryTools.getUnknownTriangleAngleByLawOfCosine(VA, VB, AB);
+         
+         double bisectTheta = 0.5 * theta;
+         
+         double radiusOffsetAlongBisector = radius * (Math.sin(Math.PI / 2.0) / Math.sin(bisectTheta));
+         Point2d adjacentBisector = GeometryTools.getTriangleBisector(A2d, vertex2d, B2d);
+         
+         Vector2d bisectorVector = new Vector2d(adjacentBisector.getX() - vertex.getX(), adjacentBisector.getY() - vertex.getY());
+         double scalar = radiusOffsetAlongBisector / bisectorVector.length();
+         
+         bisectorVector.scale(scalar);
+         
+         vertex2d.add(bisectorVector);
+         centerToPack.set(vertex2d);
+         
+         return true;
+      }
+      
+      return false;
+      
+      
+   }
 }

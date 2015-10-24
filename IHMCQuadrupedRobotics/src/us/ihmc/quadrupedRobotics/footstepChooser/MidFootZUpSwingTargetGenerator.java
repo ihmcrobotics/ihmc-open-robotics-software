@@ -15,10 +15,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 {
-   private final double MINIMUM_VELOCITY_FOR_FULL_SKEW = 0.03;
+   private final double MINIMUM_VELOCITY_FOR_FULL_SKEW = 0.1;
    public static double MINIMUM_DISTANCE_FROM_SAMESIDE_FOOT = 0.04;
-   public static double DEFAULT_STRIDE_LENGTH = 0.34;
-   public static double DEFAULT_STANCE_WIDTH = 0.24;
+   public static double DEFAULT_STRIDE_LENGTH = 1.373;//0.34;
+   public static double DEFAULT_STANCE_WIDTH = 0.36922*2;//0.24;
    public static double DEFAULT_MAX_SKEW = 0.1;
    public static double DEFAULT_MAX_YAW = 0.25;
 
@@ -35,7 +35,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
    private final FramePoint centroid = new FramePoint(ReferenceFrame.getWorldFrame());
 
-   public MidFootZUpSwingTargetGenerator(CommonQuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+   public MidFootZUpSwingTargetGenerator(SwingTargetGeneratorParameters footStepParameters, CommonQuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
       parentRegistry.addChild(registry);
@@ -45,12 +45,25 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
          FramePoint footPosition = new FramePoint(ReferenceFrame.getWorldFrame());
          feetLocations.put(robotQuadrant, footPosition);
       }
-      minimumDistanceFromSameSideFoot.set(MINIMUM_DISTANCE_FROM_SAMESIDE_FOOT);
-      minimumVelocityForFullSkew.set(MINIMUM_VELOCITY_FOR_FULL_SKEW);
-      strideLength.set(DEFAULT_STRIDE_LENGTH);
-      stanceWidth.set(DEFAULT_STANCE_WIDTH);
-      maxSkew.set(DEFAULT_MAX_SKEW);
-      maxYawPerStep.set(DEFAULT_MAX_YAW);
+      
+      if(footStepParameters != null)
+      {
+         minimumDistanceFromSameSideFoot.set(footStepParameters.getMinimumDistanceFromSameSideFoot());
+         minimumVelocityForFullSkew.set(footStepParameters.getMinimumVelocityForFullSkew());
+         strideLength.set(footStepParameters.getStrideLength());
+         stanceWidth.set(footStepParameters.getStanceWidth());
+         maxSkew.set(footStepParameters.getMaxSkew());
+         maxYawPerStep.set(footStepParameters.getMaxYawPerStep());
+      }
+      else
+      {
+         minimumDistanceFromSameSideFoot.set(MINIMUM_DISTANCE_FROM_SAMESIDE_FOOT);
+         minimumVelocityForFullSkew.set(MINIMUM_VELOCITY_FOR_FULL_SKEW);
+         strideLength.set(DEFAULT_STRIDE_LENGTH);
+         stanceWidth.set(DEFAULT_STANCE_WIDTH);
+         maxSkew.set(DEFAULT_MAX_SKEW);
+         maxYawPerStep.set(DEFAULT_MAX_YAW);
+      }
    }
 
    @Override
