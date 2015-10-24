@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -58,6 +59,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    
    private final YoFramePoint miniCircleCenter = new YoFramePoint("miniCircleCenter", ReferenceFrame.getWorldFrame(), registry);
    
+   private final BooleanYoVariable miniCircleRadiusSuccess = new BooleanYoVariable("miniCircleRadiusSuccess", registry);
    private final DoubleYoVariable miniCircleRadius = new DoubleYoVariable("miniCircleRadius", registry);
    private final YoArtifactCircle miniCircle = new YoArtifactCircle("miniCircle", miniCircleCenter, miniCircleRadius, Color.YELLOW);
    
@@ -173,9 +175,14 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       inscribedCircleRadius.set(radius);
       
       Point2d centerOfMiniCircle = new Point2d();
-      supportPolygon.getTangentTangentRadiusCircleCenter(RobotQuadrant.HIND_LEFT, miniCircleRadius.getDoubleValue(), centerOfMiniCircle);
-      miniCircleCenter.setX(centerOfMiniCircle.getX());
-      miniCircleCenter.setY(centerOfMiniCircle.getY());
+      boolean successful = supportPolygon.getTangentTangentRadiusCircleCenter(RobotQuadrant.HIND_LEFT, miniCircleRadius.getDoubleValue(), centerOfMiniCircle);
+      
+      miniCircleRadiusSuccess.set(successful);
+      if(successful)
+      {
+         miniCircleCenter.setX(centerOfMiniCircle.getX());
+         miniCircleCenter.setY(centerOfMiniCircle.getY());
+      }
       ThreadTools.sleep(10);
    }
    

@@ -2452,6 +2452,12 @@ public class QuadrupedSupportPolygon implements Serializable
    {
       if(useThisLeg(robotQuadrantToAnchorTo) && getNumberOfLegs() == 3)
       {
+         double maximumInCircleRadius = getInCircle(centerToPack);
+         if(maximumInCircleRadius < radius)
+         {
+            return false;
+         }
+         
          FramePoint vertex = getFootstep(robotQuadrantToAnchorTo);
          FramePoint pointA = null;
          FramePoint pointB = null;
@@ -2489,10 +2495,13 @@ public class QuadrupedSupportPolygon implements Serializable
          Point2d adjacentBisector = GeometryTools.getTriangleBisector(A2d, vertex2d, B2d);
          
          Vector2d bisectorVector = new Vector2d(adjacentBisector.getX() - vertex.getX(), adjacentBisector.getY() - vertex.getY());
-         bisectorVector.scale(radiusOffsetAlongBisector / bisectorVector.length());
+         double scalar = radiusOffsetAlongBisector / bisectorVector.length();
+         
+         bisectorVector.scale(scalar);
          
          vertex2d.add(bisectorVector);
          centerToPack.set(vertex2d);
+         
          return true;
       }
       
