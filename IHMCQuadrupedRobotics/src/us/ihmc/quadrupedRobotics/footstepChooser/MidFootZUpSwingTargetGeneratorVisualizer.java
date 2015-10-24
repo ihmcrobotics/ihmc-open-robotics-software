@@ -117,7 +117,8 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       cartesianTrajectoryGenerator = new ParabolicCartesianTrajectoryGenerator("swingLegTraj", ReferenceFrame.getWorldFrame(), swingTimeDoubleProvider,
             groundClearance, registry);
 
-      footChoser = new MidFootZUpSwingTargetGenerator(referenceFrames, registry);
+      DefaultSwingTargetGeneratorParameters desfaultFootStepParameters = new DefaultSwingTargetGeneratorParameters();
+      footChoser = new MidFootZUpSwingTargetGenerator(desfaultFootStepParameters, referenceFrames, registry);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
