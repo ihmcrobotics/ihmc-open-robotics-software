@@ -117,12 +117,12 @@ public class PathTools
       {
       }
    }
-
-   public static void walkFlat(final Path directory, final BasicPathVisitor basicFileVisitor)
+   
+   public static void walkDepth(final Path directory, int maxDepth, final BasicPathVisitor basicFileVisitor)
    {
       try
       {
-         Files.walkFileTree(directory, EnumSet.noneOf(FileVisitOption.class), 1, new SimpleFileVisitor<Path>()
+         Files.walkFileTree(directory, EnumSet.noneOf(FileVisitOption.class), maxDepth, new SimpleFileVisitor<Path>()
          {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
@@ -149,5 +149,10 @@ public class PathTools
       catch (IOException e)
       {
       }
+   }
+
+   public static void walkFlat(final Path directory, final BasicPathVisitor basicFileVisitor)
+   {
+      walkDepth(directory, 1, basicFileVisitor);
    }
 }
