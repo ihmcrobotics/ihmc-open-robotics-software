@@ -42,13 +42,12 @@ public class DRCLidar
       return lidarSensors.get(0);
    }
 
-   public static void setupDRCRobotLidar(DRCSimulationFactory drcSimulation, LocalObjectCommunicator objectCommunicator, DRCRobotJointMap jointMap,
+   public static void setupDRCRobotLidar(SDFRobot robot, Graphics3DAdapter graphics3dAdapter, LocalObjectCommunicator objectCommunicator, DRCRobotJointMap jointMap,
          DRCRobotLidarParameters lidarParams, TimestampProvider timestampProvider, boolean startLidar)
  {
-    Graphics3DAdapter graphics3dAdapter = drcSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
     if (graphics3dAdapter != null)
     {
-       LidarMount lidarMount = getSensor(drcSimulation.getRobot(), lidarParams.getSensorNameInSdf());
+       LidarMount lidarMount = getSensor(robot, lidarParams.getSensorNameInSdf());
 
        LidarScanParameters lidarScanParameters = lidarMount.getLidarScanParameters();
        int horizontalRays = lidarScanParameters.pointsPerSweep;

@@ -35,6 +35,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameter
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.VariousWalkingProviderFromScriptFactory;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCRenderedSceneVideoHandler;
+import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.humanoidBehaviors.BehaviorVisualizer;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
@@ -422,6 +423,8 @@ public class DRCSimulationStarter
          DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
          DRCRobotJointMap jointMap = robotModel.getJointMap();
          TimestampProvider timeStampProvider = drcSimulationFactory.getTimeStampProvider();
+         SDFHumanoidRobot robot = drcSimulationFactory.getRobot();
+         Graphics3DAdapter graphics3dAdapter = simulationConstructionSet.getGraphics3dAdapter();
 
          printIfDebug("Streaming SCS Video");
          DRCRobotCameraParameters cameraParameters = sensorInformation.getCameraParameters(0);
@@ -441,7 +444,7 @@ public class DRCSimulationStarter
 
          for (DRCRobotLidarParameters lidarParams : sensorInformation.getLidarParameters())
          {
-            DRCLidar.setupDRCRobotLidar(drcSimulationFactory, scsSensorOutputPacketCommunicator, jointMap, lidarParams, timeStampProvider, true);
+            DRCLidar.setupDRCRobotLidar(robot, graphics3dAdapter, scsSensorOutputPacketCommunicator, jointMap, lidarParams, timeStampProvider, true);
          }
       }
 
