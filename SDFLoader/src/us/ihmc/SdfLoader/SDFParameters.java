@@ -1,5 +1,6 @@
 package us.ihmc.SdfLoader;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 public interface SDFParameters
@@ -14,5 +15,7 @@ public interface SDFParameters
    String getResourceDirectory();
 
    ArrayList<String> getResourceDirectoriesArrayList();
+   
+   InputStream getSdfAsInputStream();
 
 }
