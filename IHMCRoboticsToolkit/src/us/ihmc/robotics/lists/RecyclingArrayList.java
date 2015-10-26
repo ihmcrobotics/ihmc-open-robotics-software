@@ -213,7 +213,7 @@ public class RecyclingArrayList<T>
       }
    }
 
-   private T newInstance()
+   protected T newInstance()
    {
       T newInstance = null;
 
