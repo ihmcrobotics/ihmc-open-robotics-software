@@ -10,7 +10,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -38,9 +38,9 @@ public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWhee
 
    private final PacketConsumer<DesiredSteeringAnglePacket> desiredSteeringAngleProvider;
 
-   private final GlobalDataProducer globalDataProducer;
+   private final HumanoidGlobalDataProducer globalDataProducer;
 
-   public DesiredSteeringWheelProvider(final GlobalDataProducer globalDataProducer)
+   public DesiredSteeringWheelProvider(final HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
 

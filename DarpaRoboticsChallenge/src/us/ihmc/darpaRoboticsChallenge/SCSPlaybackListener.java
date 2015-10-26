@@ -1,15 +1,15 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.humanoidRobotics.communication.packets.SCSListenerPacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 
 
 public class SCSPlaybackListener implements PlaybackListener
 {
-   public GlobalDataProducer networkServer;
+   public HumanoidGlobalDataProducer networkServer;
 
-   public SCSPlaybackListener(GlobalDataProducer dataProducer)
+   public SCSPlaybackListener(HumanoidGlobalDataProducer dataProducer)
    {
       this.networkServer = dataProducer;
    }

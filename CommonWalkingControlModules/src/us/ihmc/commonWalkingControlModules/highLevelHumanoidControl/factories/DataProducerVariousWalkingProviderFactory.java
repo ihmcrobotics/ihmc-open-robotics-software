@@ -72,7 +72,7 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacke
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.SingleJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -87,11 +87,11 @@ import us.ihmc.util.PeriodicThreadScheduler;
 
 public class DataProducerVariousWalkingProviderFactory implements VariousWalkingProviderFactory
 {
-   private final GlobalDataProducer objectCommunicator;
+   private final HumanoidGlobalDataProducer objectCommunicator;
    private final FootstepTimingParameters footstepTimingParameters;
    private final PeriodicThreadScheduler scheduler;
 
-   public DataProducerVariousWalkingProviderFactory(GlobalDataProducer objectCommunicator, FootstepTimingParameters footstepTimingParameters, PeriodicThreadScheduler scheduler)
+   public DataProducerVariousWalkingProviderFactory(HumanoidGlobalDataProducer objectCommunicator, FootstepTimingParameters footstepTimingParameters, PeriodicThreadScheduler scheduler)
    {
       this.objectCommunicator = objectCommunicator;
       this.footstepTimingParameters = footstepTimingParameters;

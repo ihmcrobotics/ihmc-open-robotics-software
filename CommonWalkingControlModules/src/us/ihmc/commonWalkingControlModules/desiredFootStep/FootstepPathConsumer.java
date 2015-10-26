@@ -9,7 +9,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -23,10 +23,10 @@ public class FootstepPathConsumer implements PacketConsumer<FootstepDataList>
    private boolean DEBUG = false;
    private FootstepPathCoordinator footstepPathCoordinator;
    private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
-   private final GlobalDataProducer globalDataProducer;
+   private final HumanoidGlobalDataProducer globalDataProducer;
 
    public FootstepPathConsumer(SideDependentList<? extends ContactablePlaneBody> bipedFeet, FootstepPathCoordinator footstepPathCoordinator,
-                               HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, GlobalDataProducer globalDataProducer)
+                               HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
       this.footstepPathCoordinator = footstepPathCoordinator;

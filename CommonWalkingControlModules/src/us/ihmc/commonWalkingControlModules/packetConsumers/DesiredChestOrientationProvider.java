@@ -8,7 +8,7 @@ import javax.vecmath.Quat4d;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.trajectories.WaypointOrientationTrajectoryData;
@@ -29,9 +29,9 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
 
    private final AtomicReference<WaypointOrientationTrajectoryData> desiredChestOrientationWithWaypoints = new AtomicReference<>(null);
 
-   private final GlobalDataProducer globalDataProducer;
+   private final HumanoidGlobalDataProducer globalDataProducer;
 
-   public DesiredChestOrientationProvider(ReferenceFrame chestOrientationFrame, double defaultTrajectoryTime, GlobalDataProducer globalDataProducer)
+   public DesiredChestOrientationProvider(ReferenceFrame chestOrientationFrame, double defaultTrajectoryTime, HumanoidGlobalDataProducer globalDataProducer)
    {
       this.chestOrientationFrame = chestOrientationFrame;
       this.globalDataProducer = globalDataProducer;

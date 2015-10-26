@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LookAtPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -22,9 +22,9 @@ public class DesiredHeadOrientationProvider implements HeadOrientationProvider
    private final ReferenceFrame lookAtFrame = ReferenceFrame.getWorldFrame();
    private final FramePoint pointToTrack = new FramePoint(lookAtFrame);
    private final FrameOrientation headOrientation;
-   private final GlobalDataProducer globalDataProducer;
+   private final HumanoidGlobalDataProducer globalDataProducer;
 
-   public DesiredHeadOrientationProvider(ReferenceFrame headOrientationFrame, GlobalDataProducer globalDataProducer)
+   public DesiredHeadOrientationProvider(ReferenceFrame headOrientationFrame, HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
       headOrientationPacketConsumer = new HeadOrientationPacketConsumer();
