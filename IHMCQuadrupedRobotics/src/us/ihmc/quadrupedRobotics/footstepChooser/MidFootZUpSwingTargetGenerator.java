@@ -5,6 +5,7 @@ import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -37,6 +38,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 
    private final QuadrantDependentList<Double> legLengths = new QuadrantDependentList<Double>();
    private final FramePoint swingLegHipPitchPoint = new FramePoint();
+   private final FrameOrientation swingLegHipRollOrientation = new FrameOrientation();
    
    public MidFootZUpSwingTargetGenerator(SwingTargetGeneratorParameters footStepParameters, CommonQuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
@@ -94,11 +96,20 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    public void getSwingTarget(RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, FramePoint swingTargetToPack, double desiredYawRate)
    {
       updateFeetPositions();
-      
+
+      //calculate hipPitchHeight
       swingLegHipPitchPoint.setToZero(referenceFrames.getHipPitchFrame(swingLeg));
       swingLegHipPitchPoint.changeFrame(ReferenceFrame.getWorldFrame());
       double swingLegHipPitchHeight = swingLegHipPitchPoint.getZ();
-      double maxStepDistance = 0.7 * Math.sqrt(Math.pow(legLengths.get(swingLeg), 2) - Math.pow(swingLegHipPitchHeight, 2));
+      
+      //calculate hip Roll
+      swingLegHipRollOrientation.setToZero(referenceFrames.getHipRollFrame(swingLeg));
+      swingLegHipRollOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      double stepDistanceRemovedBecauseOfRoll = legLengths.get(swingLeg) * Math.sin(Math.abs(swingLegHipRollOrientation.getRoll()));
+      
+      double maxStepDistance = Math.sqrt(Math.pow(legLengths.get(swingLeg), 2) - Math.pow(swingLegHipPitchHeight, 2)) - stepDistanceRemovedBecauseOfRoll;
+      
+      System.out.println(maxStepDistance);
       
       RobotQuadrant sameSideQuadrant = swingLeg.getSameSideQuadrant();
       RobotSide swingSide = swingLeg.getSide();
