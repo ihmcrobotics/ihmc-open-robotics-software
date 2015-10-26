@@ -6,6 +6,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.convexOptimization.qpOASES.returnValue;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.footstepChooser.MidFootZUpSwingTargetGenerator;
@@ -156,6 +157,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final FramePoint centerOfMassFramePoint = new FramePoint();
+   private final Point2d centerOfMassPoint2d = new Point2d();
    private final YoGraphicPosition centerOfMassViz = new YoGraphicPosition("centerOfMass", centerOfMassPosition, 0.02, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
    
    private final YoFramePoint currentSwingTarget = new YoFramePoint("currentSwingTarget", ReferenceFrame.getWorldFrame(), registry);
@@ -313,7 +315,9 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return bodyTrajectoryGenerator.isDone() && (desiredVelocity.length() != 0.0 || desiredYawRate.getDoubleValue() != 0);
+            boolean isCommonTriangleNull = quadrupleSupportState.isCommonTriangleNull();
+            
+            return (isCommonTriangleNull || (!isCommonTriangleNull && quadrupleSupportState.isCoMInsideCommonTriangle())) && (desiredVelocity.length() != 0.0 || desiredYawRate.getDoubleValue() != 0); //bodyTrajectoryGenerator.isDone() &&
          }
       };
 
@@ -420,6 +424,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       updateFeetLocations();
       walkingStateMachine.checkTransitionConditions();
       walkingStateMachine.doAction();
+      updateDesiredBodyIK();
       updateDesiredBody();
       updateLegsBasedOnDesiredBody();
    }
@@ -476,6 +481,19 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          fourFootSupportPolygon.setFootstep(robotQuadrant, footLocation);
       }
       drawSupportPolygon(fourFootSupportPolygon, supportPolygon);
+   }
+   
+   private void updateDesiredBodyIK()
+   {
+      if(!bodyTrajectoryGenerator.isDone())
+      {
+         FramePoint desiredBodyFramePose = new FramePoint(ReferenceFrame.getWorldFrame());
+         bodyMovementTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - bodyMovementTrajectoryTimeStart.getDoubleValue());
+         bodyTrajectoryGenerator.compute(bodyMovementTrajectoryTimeCurrent.getDoubleValue());
+         bodyTrajectoryGenerator.get(desiredBodyFramePose);
+         desiredBodyFramePose.setZ(desiredCoMPose.getPosition().getZ());
+         desiredCoMPose.setPosition(desiredBodyFramePose);
+      }
    }
 
    private void updateDesiredBody()
@@ -582,9 +600,8 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       return shrunkenCommonSupportPolygon;
    }
    
-   private void initializeBodyTrajectory(RobotQuadrant nextSwingLeg, FramePoint swingTarget)
+   private void initializeBodyTrajectory(RobotQuadrant nextSwingLeg, QuadrupedSupportPolygon commonTriangle)
    {
-      QuadrupedSupportPolygon commonTriangle = getCommonSupportPolygon(nextSwingLeg, swingTarget);
       if(commonTriangle != null)
       {
          commonSupportPolygon.set(commonTriangle);
@@ -657,6 +674,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private class QuadrupleSupportState extends State<CrawlGateWalkingState>
    {
       private final FramePoint nextEstimatedFootPosition = new FramePoint();
+      private QuadrupedSupportPolygon nextEstimatedCommonTriangle;
       
       public QuadrupleSupportState(CrawlGateWalkingState stateEnum)
       {
@@ -666,7 +684,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       @Override
       public void doAction()
       {
-         updateDesiredBodyIK();
+         
       }
 
       @Override
@@ -680,7 +698,8 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          
          nextEstimatedFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
          calculateSwingTarget(robotQuadrant, nextEstimatedFootPosition);
-         initializeBodyTrajectory(robotQuadrant, nextEstimatedFootPosition);
+         nextEstimatedCommonTriangle = getCommonSupportPolygon(robotQuadrant, nextEstimatedFootPosition);
+         initializeBodyTrajectory(robotQuadrant, nextEstimatedCommonTriangle);
       }
 
       @Override
@@ -689,17 +708,17 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
         
       }
       
-      private void updateDesiredBodyIK()
+      public boolean isCommonTriangleNull()
       {
-         if(!bodyTrajectoryGenerator.isDone())
-         {
-            FramePoint desiredBodyFramePose = new FramePoint(ReferenceFrame.getWorldFrame());
-            bodyMovementTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - bodyMovementTrajectoryTimeStart.getDoubleValue());
-            bodyTrajectoryGenerator.compute(bodyMovementTrajectoryTimeCurrent.getDoubleValue());
-            bodyTrajectoryGenerator.get(desiredBodyFramePose);
-            desiredBodyFramePose.setZ(desiredCoMPose.getPosition().getZ());
-            desiredCoMPose.setPosition(desiredBodyFramePose);
-         }
+         return nextEstimatedCommonTriangle == null;
+      }
+      
+      public boolean isCoMInsideCommonTriangle()
+      {
+         centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+         centerOfMassFramePoint.getPoint2d(centerOfMassPoint2d);
+        
+         return nextEstimatedCommonTriangle.isInside(centerOfMassPoint2d);
       }
    }
 
