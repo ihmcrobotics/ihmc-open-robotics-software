@@ -10,7 +10,7 @@ import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointA
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -61,7 +61,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
     * @param yoVariableRegistry 
     */
    public ValkyrieFingerController(DRCRobotModel robotModel, SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, 
-         GlobalDataProducer globalDataProducer, YoVariableRegistry controllerRegistry, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+         HumanoidGlobalDataProducer globalDataProducer, YoVariableRegistry controllerRegistry, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       this.isRunningOnRealRobot = robotModel.getStateEstimatorParameters().isRunningOnRealRobot();
       PrintTools.debug(DEBUG, "Running on real robot: " + isRunningOnRealRobot);
