@@ -35,7 +35,8 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
    private final FramePoint centroid = new FramePoint(ReferenceFrame.getWorldFrame());
 
-   private final QuadrantDependentList<Double> legLengths = new QuadrantDependentList<Double>(); 
+   private final QuadrantDependentList<Double> legLengths = new QuadrantDependentList<Double>();
+   private final FramePoint swingLegHipPitchPoint = new FramePoint();
    
    public MidFootZUpSwingTargetGenerator(SwingTargetGeneratorParameters footStepParameters, CommonQuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
@@ -93,7 +94,11 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    public void getSwingTarget(RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, FramePoint swingTargetToPack, double desiredYawRate)
    {
       updateFeetPositions();
-
+      
+      swingLegHipPitchPoint.setToZero(referenceFrames.getHipPitchFrame(swingLeg));
+      swingLegHipPitchPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      double swingLegHipPitchHeight = swingLegHipPitchPoint.getZ();
+      
       RobotQuadrant sameSideQuadrant = swingLeg.getSameSideQuadrant();
       RobotSide swingSide = swingLeg.getSide();
       RobotSide oppositeSide = swingLeg.getOppositeSide();
