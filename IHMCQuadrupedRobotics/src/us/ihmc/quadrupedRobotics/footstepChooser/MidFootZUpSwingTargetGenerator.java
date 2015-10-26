@@ -118,6 +118,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       double clippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStrideLength);
       double clippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getX() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
       double amountToSkew = clippedSkewScalar * clippedSkew;
+      amountToSkew = MathTools.clipToMinMax(amountToSkew, maxStepDistance);
       double newY = robotEnd.negateIfFrontEnd(halfStrideLength) - amountToSkew;
       swingFootPosition.setY(newY);
 
