@@ -10,7 +10,7 @@ import javax.vecmath.Vector3f;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.humanoidRobotics.communication.streamingData.AtomicLastPacketHolder.LastPacket;
+import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
