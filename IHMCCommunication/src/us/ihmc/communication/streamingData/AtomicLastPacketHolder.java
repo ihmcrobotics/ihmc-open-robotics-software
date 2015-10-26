@@ -1,4 +1,4 @@
-package us.ihmc.humanoidRobotics.communication.streamingData;
+package us.ihmc.communication.streamingData;
 
 import java.util.concurrent.atomic.AtomicLong;
 
