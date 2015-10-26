@@ -2,9 +2,9 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector;
 
 import java.util.HashMap;
 
-import us.ihmc.humanoidRobotics.communication.packets.ControllerCrashNotificationPacket;
+import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
-import us.ihmc.humanoidRobotics.communication.packets.InvalidPacketNotificationPacket;
+import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModeResponsePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
