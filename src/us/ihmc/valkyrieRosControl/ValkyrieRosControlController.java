@@ -21,7 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -92,7 +92,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
    }
    
    private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel,
-         GlobalDataProducer dataProducer, DRCRobotSensorInformation sensorInformation)
+         HumanoidGlobalDataProducer dataProducer, DRCRobotSensorInformation sensorInformation)
    {
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
 
@@ -175,7 +175,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
        */
       PacketCommunicator drcNetworkProcessorServer = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.LOGGER_PRIORITY), robotModel.getLogModelProvider(), robotModel.getLogSettings(), robotModel.getEstimatorDT());
-      GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
+      HumanoidGlobalDataProducer dataProducer = new HumanoidGlobalDataProducer(drcNetworkProcessorServer);
       
       /*
        * Create sensors
