@@ -109,9 +109,6 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
          swingFootPosition.add(0.0, robotEnd.negateIfFrontEnd(minimumRadiusFromSameSideFoot), 0.0);
       }
       
-      
-      
-      
       swingFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
       
       //rotate the foot about the centroid of the predicted foot polygon
@@ -132,5 +129,13 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
          supportPolygon.setFootstep(robotQuadrant, footPosition);
       }
+   }
+
+   @Override
+   public void getSwingTarget(QuadrupedSupportPolygon footPostions, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, FramePoint swingTargetToPack,
+         double desiredYawRate)
+   {
+      // TODO Auto-generated method stub
+      
    }
 }
