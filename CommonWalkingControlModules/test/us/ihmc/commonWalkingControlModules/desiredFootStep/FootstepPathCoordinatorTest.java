@@ -19,10 +19,10 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
@@ -60,7 +60,7 @@ public class FootstepPathCoordinatorTest
    {
       // create a random list of footsteps
       YoVariableRegistry registry = new YoVariableRegistry("Test");
-      GlobalDataProducer objectCommunicator = null;
+      HumanoidGlobalDataProducer objectCommunicator = null;
       BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
@@ -89,7 +89,7 @@ public class FootstepPathCoordinatorTest
    {
       // verify list is initially empty
       YoVariableRegistry registry = new YoVariableRegistry("Test");
-      GlobalDataProducer objectCommunicator = null;
+      HumanoidGlobalDataProducer objectCommunicator = null;
       BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
@@ -123,7 +123,7 @@ public class FootstepPathCoordinatorTest
    {
       // create a random list of footsteps
       YoVariableRegistry registry = new YoVariableRegistry("Test");
-      GlobalDataProducer objectCommunicator = null;
+      HumanoidGlobalDataProducer objectCommunicator = null;
       BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
@@ -166,7 +166,7 @@ public class FootstepPathCoordinatorTest
    {
       // create a random list of footsteps
       YoVariableRegistry registry = new YoVariableRegistry("Test");
-      GlobalDataProducer objectCommunicator = null;
+      HumanoidGlobalDataProducer objectCommunicator = null;
       BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);

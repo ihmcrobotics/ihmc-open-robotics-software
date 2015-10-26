@@ -20,7 +20,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -66,7 +66,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       diagnosticsWhenHangingControllerFactory.setTransitionRequested(true);
       momentumBasedControllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingControllerFactory);
 
-      GlobalDataProducer globalDataProducer = null;
+      HumanoidGlobalDataProducer globalDataProducer = null;
 
       DRCSimulationFactory drcSimulation = new DRCSimulationFactory(model, momentumBasedControllerFactory, environment, robotInitialSetup, scsInitialSetup,
             guiInitialSetup, globalDataProducer);

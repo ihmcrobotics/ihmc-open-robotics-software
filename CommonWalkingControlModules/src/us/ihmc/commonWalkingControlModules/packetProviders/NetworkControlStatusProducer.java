@@ -2,15 +2,15 @@ package us.ihmc.commonWalkingControlModules.packetProviders;
 
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket.ControlStatus;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class NetworkControlStatusProducer implements ControlStatusProducer
 {
    
-   private final GlobalDataProducer globalDataProducer;
+   private final HumanoidGlobalDataProducer globalDataProducer;
    
-   public NetworkControlStatusProducer(GlobalDataProducer globalDataProducer)
+   public NetworkControlStatusProducer(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
    }

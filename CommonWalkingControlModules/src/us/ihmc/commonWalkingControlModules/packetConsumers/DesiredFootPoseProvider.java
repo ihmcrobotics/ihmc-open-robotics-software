@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -32,9 +32,9 @@ public class DesiredFootPoseProvider implements PacketConsumer<FootPosePacket>, 
    private double trajectoryTime = Double.NaN;
    private final double defaultTrajectoryTime;
 
-   private final GlobalDataProducer globalDataProducer;
+   private final HumanoidGlobalDataProducer globalDataProducer;
 
-   public DesiredFootPoseProvider(double defaultTrajectoryTime, GlobalDataProducer globalDataProducer)
+   public DesiredFootPoseProvider(double defaultTrajectoryTime, HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
       this.defaultTrajectoryTime = defaultTrajectoryTime;

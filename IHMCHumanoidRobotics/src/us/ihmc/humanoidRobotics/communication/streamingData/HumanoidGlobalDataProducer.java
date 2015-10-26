@@ -17,14 +17,14 @@ import us.ihmc.humanoidRobotics.communication.streamingData.AtomicLastPacketHold
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class GlobalDataProducer
+public class HumanoidGlobalDataProducer
 {
    private final PacketCommunicator communicator;
    private final ConcurrentLinkedQueue<Packet<?>> queuedData = new ConcurrentLinkedQueue<Packet<?>>();
-   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("GlobalDataProducer"));
+   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("HumanoidGlobalDataProducer"));
    private final AtomicLastPacketHolder lastPacketHolder = new AtomicLastPacketHolder();
   
-   public GlobalDataProducer(PacketCommunicator communicator)
+   public HumanoidGlobalDataProducer(PacketCommunicator communicator)
    {
       this.communicator = communicator;
       executor.scheduleAtFixedRate(new DataProducerImpl(), 0, 1, TimeUnit.MILLISECONDS);
