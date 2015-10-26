@@ -11,6 +11,8 @@ import us.ihmc.valkyrie.roboNet.TurboDriver;
 
 public class EfficientPushRodTransmission implements PushRodTransmissionInterface
 {
+	
+	//Will wuz here
    private static final double INFINITY_THRESHOLD = 1e10;
 
    // Temporary matrix
