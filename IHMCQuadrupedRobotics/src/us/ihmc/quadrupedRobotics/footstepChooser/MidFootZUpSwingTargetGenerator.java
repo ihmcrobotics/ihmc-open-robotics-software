@@ -35,15 +35,18 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
    private final FramePoint centroid = new FramePoint(ReferenceFrame.getWorldFrame());
 
+   private final QuadrantDependentList<Double> legLengths = new QuadrantDependentList<Double>(); 
+   
    public MidFootZUpSwingTargetGenerator(SwingTargetGeneratorParameters footStepParameters, CommonQuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
       parentRegistry.addChild(registry);
-
+      
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          FramePoint footPosition = new FramePoint(ReferenceFrame.getWorldFrame());
          feetLocations.put(robotQuadrant, footPosition);
+         legLengths.put(robotQuadrant, calculateLegLength(robotQuadrant));
       }
       
       if(footStepParameters != null)
@@ -66,7 +69,27 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       }
    }
 
-   @Override
+  private double calculateLegLength(RobotQuadrant robotQuadrant)
+   {
+     ReferenceFrame hipPitchFrame = referenceFrames.getHipPitchFrame(robotQuadrant);
+     ReferenceFrame kneePitchFrame = referenceFrames.getKneeFrame(robotQuadrant);
+     ReferenceFrame footFrame = referenceFrames.getFootFrame(robotQuadrant);
+     
+     FramePoint hipPitch = new FramePoint(hipPitchFrame);
+     FramePoint kneePitch = new FramePoint(kneePitchFrame);
+     FramePoint foot = new FramePoint(footFrame);
+     
+     kneePitch.changeFrame(hipPitchFrame);
+     double thighLength = kneePitch.distance(hipPitch);
+     
+     kneePitch.changeFrame(kneePitchFrame);
+     foot.changeFrame(kneePitchFrame);
+     double shinLength = foot.distance(kneePitch);
+     
+     return thighLength + shinLength;
+   }
+
+ @Override
    public void getSwingTarget(RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, FramePoint swingTargetToPack, double desiredYawRate)
    {
       updateFeetPositions();
@@ -81,13 +104,14 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       FramePoint swingFootPosition = feetLocations.get(swingLeg);
       FramePoint footPositionSameSideOppositeEnd = feetLocations.get(sameSideQuadrant);
 
-      //midZUpFrame is oriented so X is perpendicular to the two same side feet
+      //midZUpFrame is oriented so X is perpendicular to the two same side feet, Y pointing backward
       
       //handle forward backward placement
       swingFootPosition.changeFrame(oppositeSideZUpFrame);
       double halfStrideLength = 0.5 * strideLength.getDoubleValue();
       double clippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStrideLength);
-      double amountToSkew = MathTools.clipToMinMax(desiredBodyVelocity.getX() / minimumVelocityForFullSkew.getDoubleValue(), 1.0) * clippedSkew;
+      double clippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getX() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
+      double amountToSkew = clippedSkewScalar * clippedSkew;
       double newY = robotEnd.negateIfFrontEnd(halfStrideLength) - amountToSkew;
       swingFootPosition.setY(newY);
 
