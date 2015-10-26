@@ -98,6 +98,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       swingLegHipPitchPoint.setToZero(referenceFrames.getHipPitchFrame(swingLeg));
       swingLegHipPitchPoint.changeFrame(ReferenceFrame.getWorldFrame());
       double swingLegHipPitchHeight = swingLegHipPitchPoint.getZ();
+      double maxStepDistance = Math.sqrt(Math.pow(legLengths.get(swingLeg), 2) - Math.pow(swingLegHipPitchHeight, 2));
       
       RobotQuadrant sameSideQuadrant = swingLeg.getSameSideQuadrant();
       RobotSide swingSide = swingLeg.getSide();
