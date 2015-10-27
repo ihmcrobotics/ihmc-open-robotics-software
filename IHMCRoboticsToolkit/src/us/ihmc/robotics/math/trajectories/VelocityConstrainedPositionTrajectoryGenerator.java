@@ -30,6 +30,11 @@ public class VelocityConstrainedPositionTrajectoryGenerator implements PositionT
    private final YoFrameVector currentVelocity;
    private final YoFrameVector currentAcceleration;
 
+   public VelocityConstrainedPositionTrajectoryGenerator(String name, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   {
+      this(name, 4, referenceFrame, parentRegistry);
+   }
+
    public VelocityConstrainedPositionTrajectoryGenerator(String name, int numberOfCoefficients, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
