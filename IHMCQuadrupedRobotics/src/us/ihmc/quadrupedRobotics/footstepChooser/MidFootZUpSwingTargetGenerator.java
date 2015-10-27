@@ -126,51 +126,51 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 
       ReferenceFrame oppositeSideZUpFrame = referenceFrames.getSideDependentMidFeetZUpFrame(oppositeSide);
 
-      FramePoint swingFootPosition = feetLocations.get(swingLeg);
+      FramePoint desiredSwingFootPositionFromMidStance = feetLocations.get(swingLeg);
       FramePoint footPositionSameSideOppositeEnd = feetLocations.get(sameSideQuadrant);
 
       //midZUpFrame is oriented so X is perpendicular to the two same side feet, Y pointing backward
       
       //handle forward backward placement
-      swingFootPosition.changeFrame(oppositeSideZUpFrame);
+      desiredSwingFootPositionFromMidStance.changeFrame(oppositeSideZUpFrame);
       double halfStrideLength = 0.5 * strideLength.getDoubleValue();
       double clippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStrideLength);
       double clippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getX() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
       double amountToSkew = clippedSkewScalar * clippedSkew;
       amountToSkew = MathTools.clipToMinMax(amountToSkew, maxStepDistance);
       double newY = robotEnd.negateIfFrontEnd(halfStrideLength) - amountToSkew;
-      swingFootPosition.setY(newY);
+      desiredSwingFootPositionFromMidStance.setY(newY);
 
       //handle left right placement
-      swingFootPosition.setX(swingSide.negateIfRightSide(stanceWidth.getDoubleValue()));
+      desiredSwingFootPositionFromMidStance.setX(swingSide.negateIfRightSide(stanceWidth.getDoubleValue()));
       
 
       // maintain minimumDistanceFromSameSideFoot inline
       footPositionSameSideOppositeEnd.changeFrame(oppositeSideZUpFrame);
       double minimumRadiusFromSameSideFoot = minimumDistanceFromSameSideFoot.getDoubleValue();
       
-      boolean footIsForwardOfOtherFoot = swingFootPosition.getY() < footPositionSameSideOppositeEnd.getY();
-      boolean footIsBehindOtherFoot = swingFootPosition.getY() > footPositionSameSideOppositeEnd.getY();
-      boolean footIsCloseToOtherFoot = swingFootPosition.distance(footPositionSameSideOppositeEnd) < minimumRadiusFromSameSideFoot;
+      boolean footIsForwardOfOtherFoot = desiredSwingFootPositionFromMidStance.getY() < footPositionSameSideOppositeEnd.getY();
+      boolean footIsBehindOtherFoot = desiredSwingFootPositionFromMidStance.getY() > footPositionSameSideOppositeEnd.getY();
+      boolean footIsCloseToOtherFoot = desiredSwingFootPositionFromMidStance.distance(footPositionSameSideOppositeEnd) < minimumRadiusFromSameSideFoot;
       
       if ((robotEnd.equals(RobotEnd.HIND) && footIsForwardOfOtherFoot) || (robotEnd.equals(RobotEnd.FRONT) && footIsBehindOtherFoot) || footIsCloseToOtherFoot)
       {
-         swingFootPosition.setY(footPositionSameSideOppositeEnd.getY());
-         swingFootPosition.add(0.0, robotEnd.negateIfFrontEnd(minimumRadiusFromSameSideFoot), 0.0);
+         desiredSwingFootPositionFromMidStance.setY(footPositionSameSideOppositeEnd.getY());
+         desiredSwingFootPositionFromMidStance.add(0.0, robotEnd.negateIfFrontEnd(minimumRadiusFromSameSideFoot), 0.0);
       }
       
       
       
       
-      swingFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredSwingFootPositionFromMidStance.changeFrame(ReferenceFrame.getWorldFrame());
       
       //rotate the foot about the centroid of the predicted foot polygon
-      supportPolygon.setFootstep(swingLeg, swingFootPosition);
+      supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromMidStance);
       supportPolygon.getCentroid(centroid);
       double deltaYaw = MathTools.clipToMinMax(desiredYawRate, maxYawPerStep.getDoubleValue());
-      swingFootPosition.set(swingFootPosition.yawAboutPoint(centroid, deltaYaw));
+      desiredSwingFootPositionFromMidStance.set(desiredSwingFootPositionFromMidStance.yawAboutPoint(centroid, deltaYaw));
 //      swingTargetToPack.setZ(0.0);
-      swingTargetToPack.set(swingFootPosition);
+      swingTargetToPack.set(desiredSwingFootPositionFromMidStance);
    }
 
    private void updateFeetPositions()
