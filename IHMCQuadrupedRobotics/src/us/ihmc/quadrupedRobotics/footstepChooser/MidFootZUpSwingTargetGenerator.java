@@ -8,7 +8,9 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -26,7 +28,6 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final CommonQuadrupedReferenceFrames referenceFrames;
-   private final QuadrantDependentList<FramePoint> feetLocations = new QuadrantDependentList<FramePoint>();
    private final DoubleYoVariable minimumVelocityForFullSkew = new DoubleYoVariable("minimumVelocityForFullSkew", registry);
    private final DoubleYoVariable strideLength = new DoubleYoVariable("strideLength", registry);
    private final DoubleYoVariable stanceWidth = new DoubleYoVariable("stanceWidth", registry);
@@ -51,8 +52,6 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         FramePoint footPosition = new FramePoint(ReferenceFrame.getWorldFrame());
-         feetLocations.put(robotQuadrant, footPosition);
          legLengths.put(robotQuadrant, calculateLegLength(robotQuadrant));
       }
 
@@ -100,7 +99,40 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    public void getSwingTarget(RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, FramePoint swingTargetToPack, double desiredYawRate)
    {
       updateFeetPositions();
+      RobotSide oppositeSide = swingLeg.getOppositeSide();
+      ReferenceFrame oppositeSideZUpFrame = referenceFrames.getSideDependentMidFeetZUpFrame(oppositeSide);
+      calculateSwingTarget(supportPolygon, oppositeSideZUpFrame, swingLeg, desiredBodyVelocity, desiredYawRate, swingTargetToPack);
+   }
 
+   private TranslationReferenceFrame hindFoot = new TranslationReferenceFrame("backFoot", ReferenceFrame.getWorldFrame());
+   private TranslationReferenceFrame frontFoot = new TranslationReferenceFrame("frontFoot", ReferenceFrame.getWorldFrame());
+   private MidFrameZUpFrame midFeetZUpFrame = new MidFrameZUpFrame("MidFeetZUpFrame", ReferenceFrame.getWorldFrame(), hindFoot, frontFoot);
+   
+   @Override
+   public void getSwingTarget(QuadrupedSupportPolygon footPostions, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, FramePoint swingTargetToPack,
+         double desiredYawRate)
+   {
+      FramePoint across = footPostions.getFootstep(swingLeg.getAcrossBodyQuadrant());
+      FramePoint diag = footPostions.getFootstep(swingLeg.getDiagonalOppositeQuadrant());
+
+      if(swingLeg.isQuadrantInFront())
+      {
+         frontFoot.updateTranslation(across);
+         hindFoot.updateTranslation(diag);
+      }
+      else
+      {
+         frontFoot.updateTranslation(diag);
+         hindFoot.updateTranslation(across);
+      }
+      midFeetZUpFrame.update();
+      
+      calculateSwingTarget(footPostions, midFeetZUpFrame, swingLeg, desiredBodyVelocity, desiredYawRate, swingTargetToPack);
+   }
+
+   private void calculateSwingTarget(QuadrupedSupportPolygon supportPolygon, ReferenceFrame oppositeSideZUpFrame, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double desiredYawRate,
+         FramePoint swingTargetToPack)
+   {
       //calculate hipPitchHeight
       swingLegHipPitchPoint.setToZero(referenceFrames.getHipPitchFrame(swingLeg));
       swingLegHipPitchPoint.changeFrame(ReferenceFrame.getWorldFrame());
@@ -129,12 +161,11 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       RobotQuadrant sameEndQuadrant = swingLeg.getAcrossBodyQuadrant();
       RobotSide oppositeSide = swingLeg.getOppositeSide();
 
-      ReferenceFrame oppositeSideZUpFrame = referenceFrames.getSideDependentMidFeetZUpFrame(oppositeSide);
-      FramePoint footPositionSameSideOppositeEnd = feetLocations.get(sameSideQuadrant);
-      FramePoint footPositionOppositeSideSameEnd = feetLocations.get(sameEndQuadrant);
+      FramePoint footPositionSameSideOppositeEnd =new FramePoint(supportPolygon.getFootstep(sameSideQuadrant));
+      FramePoint footPositionOppositeSideSameEnd = new FramePoint(supportPolygon.getFootstep(sameEndQuadrant));
 
       //midZUpFrame is oriented so X is perpendicular to the two same side feet, Y pointing backward
-      determineFootPositionFromHalfStride(swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, footPositionSameSideOppositeEnd, oppositeSideZUpFrame);
+      determineFootPositionFromHalfStride(supportPolygon, swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, footPositionSameSideOppositeEnd, oppositeSideZUpFrame);
 
       determineFootPositionFromOppositeSideFoot(swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, footPositionSameSideOppositeEnd,
             footPositionOppositeSideSameEnd, oppositeSideZUpFrame);
@@ -143,7 +174,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 //      swingTargetToPack.set(desiredSwingFootPositionFromOppositeSideFoot);
    }
 
-   private void determineFootPositionFromHalfStride(RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
+   private void determineFootPositionFromHalfStride(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
           FramePoint footPositionSameSideOppositeEnd, ReferenceFrame oppositeSideZUpFrame)
    {
       
@@ -226,7 +257,12 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         FramePoint footPosition = feetLocations.get(robotQuadrant);
+         FramePoint footPosition = supportPolygon.getFootstep(robotQuadrant);
+         if(footPosition == null)
+         {
+            footPosition = new FramePoint(ReferenceFrame.getWorldFrame());
+         }
+         
          footPosition.setToZero(referenceFrames.getFootFrame(robotQuadrant));
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
          supportPolygon.setFootstep(robotQuadrant, footPosition);
