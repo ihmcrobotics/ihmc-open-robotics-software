@@ -55,7 +55,7 @@ public class QuadrupedPathPreviewVisualizer implements RobotController
       DefaultSwingTargetGeneratorParameters defaultFootStepParameters = new DefaultSwingTargetGeneratorParameters();
       MidFootZUpSwingTargetGenerator swingTargetGenerator = new MidFootZUpSwingTargetGenerator(defaultFootStepParameters, referenceFrames, registry);
       
-      pathPreview = new QuadrupedPathPreview(swingTargetGenerator, referenceFrames, yoGraphicsListRegistry);
+      pathPreview = new QuadrupedPathPreview(swingTargetGenerator, referenceFrames, registry, yoGraphicsListRegistry);
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
