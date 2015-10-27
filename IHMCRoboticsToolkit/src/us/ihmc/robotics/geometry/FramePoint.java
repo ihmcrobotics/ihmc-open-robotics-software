@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import java.util.List;
 import java.util.Random;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 
@@ -177,6 +178,12 @@ public class FramePoint extends FrameTuple<Point3d>
    public void getFramePoint2d(FramePoint2d pointToPack)
    {
       pointToPack.setIncludingFrame(this.getReferenceFrame(), this.getX(), this.getY());
+   }
+   
+   public void getPoint2d(Point2d pointToPack)
+   {
+      pointToPack.setX(this.getX());
+      pointToPack.setY(this.getY());
    }
    
    /**
