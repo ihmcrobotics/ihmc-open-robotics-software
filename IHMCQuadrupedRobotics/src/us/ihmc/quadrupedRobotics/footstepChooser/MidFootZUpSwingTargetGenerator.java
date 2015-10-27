@@ -136,20 +136,22 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       FramePoint footPositionOppositeSideSameEnd = feetLocations.get(sameEndQuadrant);
 
       //midZUpFrame is oriented so X is perpendicular to the two same side feet, Y pointing backward
-      determineFootPositionFromHalfStride(swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, swingSide, robotEnd, oppositeSideZUpFrame,
-            footPositionSameSideOppositeEnd);
+      determineFootPositionFromHalfStride(swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, footPositionSameSideOppositeEnd, oppositeSideZUpFrame);
 
-      determineFootPositionFromOppositeSideFoot(swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, footPositionOppositeSideSameEnd, swingSide,
-            oppositeSideZUpFrame, footPositionSameSideOppositeEnd);
-
+      determineFootPositionFromOppositeSideFoot(swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, footPositionSameSideOppositeEnd,
+            footPositionOppositeSideSameEnd, oppositeSideZUpFrame);
       
       swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);
 //      swingTargetToPack.set(desiredSwingFootPositionFromOppositeSideFoot);
    }
 
    private void determineFootPositionFromHalfStride(RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
-         RobotSide swingSide, RobotEnd robotEnd, ReferenceFrame oppositeSideZUpFrame, FramePoint footPositionSameSideOppositeEnd)
+          FramePoint footPositionSameSideOppositeEnd, ReferenceFrame oppositeSideZUpFrame)
    {
+      
+      RobotSide swingSide = swingLeg.getSide();
+      RobotEnd robotEnd = swingLeg.getEnd();
+      
       //handle forward backward placement
       desiredSwingFootPositionFromHalfStride.setToZero(oppositeSideZUpFrame);
       double halfStrideLength = 0.5 * strideLength.getDoubleValue();
@@ -187,8 +189,10 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    }
 
    private void determineFootPositionFromOppositeSideFoot(RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
-         FramePoint footPositionOppositeSideSameEnd, RobotSide swingSide, ReferenceFrame oppositeSideZUpFrame, FramePoint footPositionSameSideOppositeEnd)
+         FramePoint footPositionSameSideOppositeEnd, FramePoint footPositionOppositeSideSameEnd, ReferenceFrame oppositeSideZUpFrame)
    {
+      RobotSide swingSide = swingLeg.getSide();
+      
       desiredSwingFootPositionFromOppositeSideFoot.setToZero(oppositeSideZUpFrame);
       double halfStrideLength = 0.5 * strideLength.getDoubleValue();
       double clippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStrideLength);
