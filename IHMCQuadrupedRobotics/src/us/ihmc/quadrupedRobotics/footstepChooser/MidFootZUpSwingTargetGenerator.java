@@ -167,7 +167,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       //midZUpFrame is oriented so X is perpendicular to the two same side feet, Y pointing backward
       determineFootPositionFromHalfStride(supportPolygon, swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, footPositionSameSideOppositeEnd, oppositeSideZUpFrame);
 
-      determineFootPositionFromOppositeSideFoot(swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, footPositionSameSideOppositeEnd,
+      determineFootPositionFromOppositeSideFoot(supportPolygon, swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, footPositionSameSideOppositeEnd,
             footPositionOppositeSideSameEnd, oppositeSideZUpFrame);
       
       swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);
@@ -217,7 +217,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       //      swingTargetToPack.setZ(0.0);
    }
 
-   private void determineFootPositionFromOppositeSideFoot(RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
+   private void determineFootPositionFromOppositeSideFoot(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
          FramePoint footPositionSameSideOppositeEnd, FramePoint footPositionOppositeSideSameEnd, ReferenceFrame oppositeSideZUpFrame)
    {
       RobotSide swingSide = swingLeg.getSide();
