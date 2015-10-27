@@ -76,6 +76,12 @@ public class VelocityConstrainedPositionTrajectoryGenerator implements PositionT
       this.initialVelocity.set(initialVelocity);
    }
 
+   public void setInitialConditions(YoFramePoint initialPosition, FrameVector initialVelocity)
+   {
+      this.initialPosition.set(initialPosition);
+      this.initialVelocity.setAndMatchFrame(initialVelocity);
+   }
+
    public void setFinalConditions(FramePoint finalPosition, FrameVector finalVelocity)
    {
       this.finalPosition.setAndMatchFrame(finalPosition);
@@ -86,6 +92,12 @@ public class VelocityConstrainedPositionTrajectoryGenerator implements PositionT
    {
       this.finalPosition.set(finalPosition);
       this.finalVelocity.set(finalVelocity);
+   }
+   
+   public void setFinalConditions(YoFramePoint finalPosition, FrameVector finalVelocity)
+   {
+      this.finalPosition.set(finalPosition);
+      this.finalVelocity.setAndMatchFrame(finalVelocity);
    }
 
    public void setTrajectoryParameters(double duration, FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalPosition, FrameVector finalVelocity)

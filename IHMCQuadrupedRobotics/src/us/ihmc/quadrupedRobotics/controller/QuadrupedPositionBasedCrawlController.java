@@ -38,6 +38,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoPositionProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -118,6 +119,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
 
    private final EnumYoVariable<RobotQuadrant> swingLeg = new EnumYoVariable<RobotQuadrant>("swingLeg", registry, RobotQuadrant.class, true);
    private final YoFrameVector desiredVelocity;
+   private final FrameVector desiredBodyVelocity = new FrameVector();
    private final DoubleYoVariable desiredYawRate = new DoubleYoVariable("desiredYawRate", registry);
 
    private final DoubleYoVariable nominalYaw = new DoubleYoVariable("nominalYaw", registry);
@@ -186,7 +188,8 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private final YoGraphicReferenceFrame rightMidZUpFrameViz;
    
    /** body sway trajectory **/
-   private final StraightLinePositionTrajectoryGenerator bodyTrajectoryGenerator;
+   private final VelocityConstrainedPositionTrajectoryGenerator bodyTrajectoryGenerator = new VelocityConstrainedPositionTrajectoryGenerator("body", ReferenceFrame.getWorldFrame(), registry);
+//   private final StraightLinePositionTrajectoryGenerator bodyTrajectoryGenerator;
    private final YoFramePoint initialCoMPosition = new YoFramePoint("initialBodyPosition", ReferenceFrame.getWorldFrame(), registry);
    private final DoubleYoVariable bodyMovementTrajectoryTimeStart = new DoubleYoVariable("bodyMovementTrajectoryTimeStart", registry);
    private final DoubleYoVariable bodyMovementTrajectoryTimeCurrent = new DoubleYoVariable("bodyMovementTrajectoryTimeCurrent", registry);
@@ -221,7 +224,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       desiredVelocity.setX(0.0);
       bodyMovementTrajectoryTimeDesired.set(1.0);
       
-      bodyTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator("body", ReferenceFrame.getWorldFrame(), trajectoryTimeProvider, initialBodyPositionProvider, finalBodyPositionProvider, registry);
+//      bodyTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator("body", ReferenceFrame.getWorldFrame(), trajectoryTimeProvider, initialBodyPositionProvider, finalBodyPositionProvider, registry);
       
       selectedSwingTargetGenerator = new EnumYoVariable<QuadrupedPositionBasedCrawlController.SwingTargetGeneratorType>("selectedSwingTargetGenerator", registry, SwingTargetGeneratorType.class);
       selectedSwingTargetGenerator.set(SwingTargetGeneratorType.MIDZUP);
@@ -659,6 +662,16 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          initialCoMPosition.set(desiredBodyCurrent);
          desiredCoMTarget.setXY(circleCenter2d);
          desiredCoMTarget.setZ(desiredBodyCurrent.getZ());
+         
+         
+         
+         desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
+         desiredBodyVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+         double distance = initialCoMPosition.distance(desiredCoMTarget);
+         
+         bodyTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.getX());
+         bodyTrajectoryGenerator.setInitialConditions(initialCoMPosition, desiredBodyVelocity);
+         bodyTrajectoryGenerator.setFinalConditions(desiredCoMTarget, desiredBodyVelocity);
          
          bodyTrajectoryGenerator.initialize();
          bodyMovementTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
