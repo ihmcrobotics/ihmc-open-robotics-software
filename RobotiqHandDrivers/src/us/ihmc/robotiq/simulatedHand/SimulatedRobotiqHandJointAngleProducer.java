@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
@@ -23,7 +23,7 @@ public class SimulatedRobotiqHandJointAngleProducer
    
    private final SideDependentList<HandJointAngleCommunicator> jointAngleCommunicators = new SideDependentList<>();
 
-   public SimulatedRobotiqHandJointAngleProducer(GlobalDataProducer dataProducer, SDFRobot simulatedRobot, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public SimulatedRobotiqHandJointAngleProducer(HumanoidGlobalDataProducer dataProducer, SDFRobot simulatedRobot, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

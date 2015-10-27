@@ -9,6 +9,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -20,7 +21,6 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingDi
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingSpeed;
 import us.ihmc.humanoidRobotics.communication.packets.walking.BlindWalkingPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 public class FootstepPathCoordinator implements FootstepProvider
@@ -33,7 +33,7 @@ public class FootstepPathCoordinator implements FootstepProvider
    private final YoVariableRegistry registry = new YoVariableRegistry("FootstepPathCoordinator");
    private final EnumYoVariable<WalkMethod> walkMethod = new EnumYoVariable<WalkMethod>("walkMethod", registry, WalkMethod.class);
    private final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused", registry);
-   private final GlobalDataProducer footstepStatusDataProducer;
+   private final HumanoidGlobalDataProducer footstepStatusDataProducer;
    private Footstep stepInProgress = null;
 
    private final IntegerYoVariable currentFootstepIndex = new IntegerYoVariable("currentFootstepIndex", registry);
@@ -46,7 +46,7 @@ public class FootstepPathCoordinator implements FootstepProvider
    private final Point3d actualFootPositionInWorld;
    private final Quat4d actualFootOrientationInWorld;
 
-   public FootstepPathCoordinator(FootstepTimingParameters footstepTimingParameters, GlobalDataProducer objectCommunicator,
+   public FootstepPathCoordinator(FootstepTimingParameters footstepTimingParameters, HumanoidGlobalDataProducer objectCommunicator,
          BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator,
          ConstantSwingTimeCalculator constantSwingTimeCalculator, ConstantTransferTimeCalculator constantTransferTimeCalculator,
          YoVariableRegistry parentRegistry)

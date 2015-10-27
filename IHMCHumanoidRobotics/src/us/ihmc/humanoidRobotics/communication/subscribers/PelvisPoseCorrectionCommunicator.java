@@ -5,14 +5,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 
 public class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCommunicatorInterface
 {
    private final ConcurrentLinkedQueue<StampedPosePacket> packetQueue = new ConcurrentLinkedQueue<StampedPosePacket>();
-   private GlobalDataProducer globalDataProducer;
+   private HumanoidGlobalDataProducer globalDataProducer;
    
-   public PelvisPoseCorrectionCommunicator(GlobalDataProducer globalDataProducer)
+   public PelvisPoseCorrectionCommunicator(HumanoidGlobalDataProducer globalDataProducer)
    {
 	   this.globalDataProducer = globalDataProducer;
    }

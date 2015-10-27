@@ -24,7 +24,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.robotDataCommunication.YoVariableServer;
@@ -88,13 +88,13 @@ public class DRCSimulationFactory
 
    private ThreadDataSynchronizerInterface threadDataSynchronizer;
 
-   private GlobalDataProducer globalDataProducer;
+   private HumanoidGlobalDataProducer globalDataProducer;
    
    private CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
    
    public DRCSimulationFactory(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, CommonAvatarEnvironmentInterface environment,
          DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
-         GlobalDataProducer globalDataProducer)
+         HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
       
@@ -182,7 +182,7 @@ public class DRCSimulationFactory
       return drcControllerThread.getFullRobotModelCorruptor();
    }
    
-   private void createRobotController(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, GlobalDataProducer globalDataProducer,
+   private void createRobotController(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, HumanoidGlobalDataProducer globalDataProducer,
          SDFHumanoidRobot simulatedRobot, SimulationConstructionSet scs, DRCSCSInitialSetup scsInitialSetup,
          DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup)
    {

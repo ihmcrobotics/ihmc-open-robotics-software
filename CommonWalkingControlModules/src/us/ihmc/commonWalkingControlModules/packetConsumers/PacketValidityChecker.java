@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public abstract class PacketValidityChecker
@@ -445,7 +445,7 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   public static boolean validateSteeringWheelInformationPacket(SteeringWheelInformationPacket packet, SideDependentList<AtomicInteger> steeringWheelIdAtomic, GlobalDataProducer globalDataProducer)
+   public static boolean validateSteeringWheelInformationPacket(SteeringWheelInformationPacket packet, SideDependentList<AtomicInteger> steeringWheelIdAtomic, HumanoidGlobalDataProducer globalDataProducer)
    {
       boolean packetIsValid = true;
 
@@ -519,7 +519,7 @@ public abstract class PacketValidityChecker
       return packetIsValid;
    }
 
-   public static boolean validateDesiredSteeringAnglePacket(DesiredSteeringAnglePacket packet, SideDependentList<AtomicInteger> steeringWheelIdAtomic, GlobalDataProducer globalDataProducer)
+   public static boolean validateDesiredSteeringAnglePacket(DesiredSteeringAnglePacket packet, SideDependentList<AtomicInteger> steeringWheelIdAtomic, HumanoidGlobalDataProducer globalDataProducer)
    {
       boolean packetIsValid = true;
 
