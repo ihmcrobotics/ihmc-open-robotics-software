@@ -119,8 +119,6 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
          maxStepDistance = Math.max(maxStepDistance, 0.0);
       }
       
-      System.out.println(maxStepDistance);
-      
       RobotQuadrant sameSideQuadrant = swingLeg.getSameSideQuadrant();
       RobotSide swingSide = swingLeg.getSide();
       RobotSide oppositeSide = swingLeg.getOppositeSide();
