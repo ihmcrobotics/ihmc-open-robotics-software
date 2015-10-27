@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.referenceFrames.MockQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -15,7 +15,6 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
@@ -23,15 +22,10 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.ParabolicCartesianTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -66,8 +60,8 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    private final ParabolicCartesianTrajectoryGenerator cartesianTrajectoryGenerator;
    private final YoVariableDoubleProvider swingTimeDoubleProvider = new YoVariableDoubleProvider("swingTime", registry);
 
-   private final HashMap<RobotQuadrant, YoFramePoint> yoFootPositions = new HashMap<RobotQuadrant, YoFramePoint>();
-   private final HashMap<RobotQuadrant, YoGraphicPosition> footPositionGraphics = new HashMap<RobotQuadrant, YoGraphicPosition>();
+   private final QuadrantDependentList<YoFramePoint> yoFootPositions = new QuadrantDependentList< YoFramePoint>();
+   private final QuadrantDependentList<YoGraphicPosition> footPositionGraphics = new QuadrantDependentList<YoGraphicPosition>();
 
    private final YoFramePoint swingTarget = new YoFramePoint("swingTarget", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition targetViz = new YoGraphicPosition("swingTarget", swingTarget, 0.01, YoAppearance.Red());
@@ -229,7 +223,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    @Override
    public void doControl()
    {
-      referenceFrames.update();
+      referenceFrames.update(yoFootPositions);
       if (!cartesianTrajectoryGenerator.isDone())
       {
          RobotQuadrant robotQuadrant = swingLeg.getEnumValue();
@@ -294,142 +288,5 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       }
       polygon.update();
       yoFramePolygon.setConvexPolygon2d(polygon);
-   }
-
-   private class MockQuadrupedReferenceFrames implements CommonQuadrupedReferenceFrames
-   {
-      private final QuadrantDependentList<FramePose> footPoses = new QuadrantDependentList<FramePose>();
-      private final QuadrantDependentList<PoseReferenceFrame> soleFrames = new QuadrantDependentList<PoseReferenceFrame>();
-      private final SideDependentList<ReferenceFrame> sideDependentMidFeetZUpFrames = new SideDependentList<ReferenceFrame>();
-      private final EndDependentList<ReferenceFrame> endDependentMidFeetZUpFrames = new EndDependentList<ReferenceFrame>();
-
-      public MockQuadrupedReferenceFrames()
-      {
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         {
-            footPoses.put(robotQuadrant, new FramePose(ReferenceFrame.getWorldFrame()));
-            soleFrames.put(robotQuadrant,
-                  new PoseReferenceFrame(robotQuadrant.getCamelCaseNameForStartOfExpression() + "soleFrame", footPoses.get(robotQuadrant)));
-         }
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            RobotQuadrant hindSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.HIND, robotSide);
-            RobotQuadrant frontSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide);
-
-            MidFrameZUpFrame midFeetZUpFrame = new MidFrameZUpFrame(robotSide.getCamelCaseNameForStartOfExpression() + "MidFeetZUpFrame",
-                  ReferenceFrame.getWorldFrame(), soleFrames.get(hindSoleQuadrant), soleFrames.get(frontSoleQuadrant));
-            sideDependentMidFeetZUpFrames.put(robotSide, midFeetZUpFrame);
-         }
-
-         for (RobotEnd robotEnd : RobotEnd.values)
-         {
-            RobotQuadrant leftSoleQuadrant = RobotQuadrant.getQuadrant(robotEnd, RobotSide.LEFT);
-            RobotQuadrant rightSoleQuadrant = RobotQuadrant.getQuadrant(robotEnd, RobotSide.RIGHT);
-
-            MidFrameZUpFrame midFeetZUpFrame = new MidFrameZUpFrame(robotEnd.getCamelCaseNameForStartOfExpression() + "MidFeetZUpFrame",
-                  ReferenceFrame.getWorldFrame(), soleFrames.get(leftSoleQuadrant), soleFrames.get(rightSoleQuadrant));
-            endDependentMidFeetZUpFrames.put(robotEnd, midFeetZUpFrame);
-         }
-      }
-
-      public void update()
-      {
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         {
-            FramePose footPose = footPoses.get(robotQuadrant);
-            footPose.setPosition(yoFootPositions.get(robotQuadrant).getFramePointCopy());
-            soleFrames.get(robotQuadrant).setPoseAndUpdate(footPose);
-         }
-         for (RobotEnd robotEnd : RobotEnd.values)
-         {
-            endDependentMidFeetZUpFrames.get(robotEnd).update();
-         }
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            sideDependentMidFeetZUpFrames.get(robotSide).update();
-         }
-      }
-
-      @Override
-      public ReferenceFrame getSideDependentMidFeetZUpFrame(RobotSide robotSide)
-      {
-         return sideDependentMidFeetZUpFrames.get(robotSide);
-      }
-
-      @Override
-      public ReferenceFrame getRootJointFrame()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public ReferenceFrame getLegAttachmentFrame(RobotQuadrant robotQuadrant)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public ReferenceFrame getKneeFrame(RobotQuadrant robotQuadrant)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public ReferenceFrame getHipRollFrame(RobotQuadrant robotQuadrant)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public ReferenceFrame getHipPitchFrame(RobotQuadrant robotQuadrant)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public QuadrantDependentList<ReferenceFrame> getFootReferenceFrames()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public ReferenceFrame getFootFrame(RobotQuadrant robotQuadrant)
-      {
-         return soleFrames.get(robotQuadrant);
-      }
-
-      @Override
-      public ReferenceFrame getEndDependentMidFeetZUpFrame(RobotEnd robotEnd)
-      {
-         return endDependentMidFeetZUpFrames.get(robotEnd);
-      }
-
-      @Override
-      public ReferenceFrame getCenterOfMassFrame()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public ReferenceFrame getBodyZUpFrame()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public ReferenceFrame getBodyFrame()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
    }
 }
