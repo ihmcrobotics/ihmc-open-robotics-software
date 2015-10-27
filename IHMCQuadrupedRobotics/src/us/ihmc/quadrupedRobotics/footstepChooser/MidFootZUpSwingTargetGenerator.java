@@ -127,9 +127,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 
       RobotQuadrant sameSideQuadrant = swingLeg.getSameSideQuadrant();
       RobotQuadrant sameEndQuadrant = swingLeg.getAcrossBodyQuadrant();
-      RobotSide swingSide = swingLeg.getSide();
       RobotSide oppositeSide = swingLeg.getOppositeSide();
-      RobotEnd robotEnd = swingLeg.getEnd();
 
       ReferenceFrame oppositeSideZUpFrame = referenceFrames.getSideDependentMidFeetZUpFrame(oppositeSide);
       FramePoint footPositionSameSideOppositeEnd = feetLocations.get(sameSideQuadrant);
