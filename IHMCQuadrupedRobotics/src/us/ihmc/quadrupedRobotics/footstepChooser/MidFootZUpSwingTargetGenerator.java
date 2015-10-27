@@ -139,7 +139,12 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       determineFootPositionFromHalfStride(swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, swingSide, robotEnd, oppositeSideZUpFrame,
             footPositionSameSideOppositeEnd);
 
+      determineFootPositionFromOppositeSideFoot(swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, footPositionOppositeSideSameEnd, swingSide,
+            oppositeSideZUpFrame, footPositionSameSideOppositeEnd);
+
+      
       swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);
+//      swingTargetToPack.set(desiredSwingFootPositionFromOppositeSideFoot);
    }
 
    private void determineFootPositionFromHalfStride(RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
@@ -181,6 +186,40 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       //      swingTargetToPack.setZ(0.0);
    }
 
+   private void determineFootPositionFromOppositeSideFoot(RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
+         FramePoint footPositionOppositeSideSameEnd, RobotSide swingSide, ReferenceFrame oppositeSideZUpFrame, FramePoint footPositionSameSideOppositeEnd)
+   {
+      desiredSwingFootPositionFromOppositeSideFoot.setToZero(oppositeSideZUpFrame);
+      double halfStrideLength = 0.5 * strideLength.getDoubleValue();
+      double clippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStrideLength);
+      double clippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getX() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
+      double amountToSkew = clippedSkewScalar * clippedSkew;
+      amountToSkew = MathTools.clipToMinMax(amountToSkew, maxStepDistance);
+      
+      footPositionOppositeSideSameEnd.changeFrame(oppositeSideZUpFrame);      
+      
+      double newY = footPositionOppositeSideSameEnd.getY() - amountToSkew;
+      
+   // maintain minimumDistanceFromSameSideFoot inline
+      
+      footPositionSameSideOppositeEnd.changeFrame(oppositeSideZUpFrame);
+      if(swingLeg.isQuadrantInHind() && footPositionSameSideOppositeEnd.getY() > newY)
+         newY = footPositionSameSideOppositeEnd.getY() + minimumDistanceFromSameSideFoot.getDoubleValue();
+      
+      desiredSwingFootPositionFromOppositeSideFoot.setY(newY);
+      
+      //handle left right placement
+      desiredSwingFootPositionFromOppositeSideFoot.setX(swingSide.negateIfRightSide(stanceWidth.getDoubleValue()));
+      
+      desiredSwingFootPositionFromOppositeSideFoot.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      //rotate the foot about the centroid of the predicted foot polygon
+      supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromOppositeSideFoot);
+      supportPolygon.getCentroid(centroid);
+      desiredSwingFootPositionFromOppositeSideFoot.set(desiredSwingFootPositionFromOppositeSideFoot.yawAboutPoint(centroid, deltaYaw));
+      
+   }
+   
    private void updateFeetPositions()
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
