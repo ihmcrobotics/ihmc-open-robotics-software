@@ -107,7 +107,19 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       swingLegHipRollOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       double stepDistanceRemovedBecauseOfRoll = legLengths.get(swingLeg) * Math.sin(Math.abs(swingLegHipRollOrientation.getRoll()));
       
-      double maxStepDistance = Math.sqrt(Math.pow(legLengths.get(swingLeg), 2) - Math.pow(swingLegHipPitchHeight, 2)) - stepDistanceRemovedBecauseOfRoll;
+      double maxStepDistance;
+      double maxStepDistanceWithNoRoll = Math.sqrt(Math.pow(legLengths.get(swingLeg), 2) - Math.pow(swingLegHipPitchHeight, 2));
+      if(Double.isNaN(stepDistanceRemovedBecauseOfRoll))
+      {
+         maxStepDistance = 0.0;
+      }
+      else
+      {
+         maxStepDistance = maxStepDistanceWithNoRoll - stepDistanceRemovedBecauseOfRoll;
+         maxStepDistance = Math.max(maxStepDistance, 0.0);
+      }
+      
+      System.out.println(maxStepDistance);
       
       RobotQuadrant sameSideQuadrant = swingLeg.getSameSideQuadrant();
       RobotSide swingSide = swingLeg.getSide();
