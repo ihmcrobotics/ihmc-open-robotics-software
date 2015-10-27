@@ -5,11 +5,13 @@ import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,6 +36,13 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final DoubleYoVariable minimumDistanceFromSameSideFoot = new DoubleYoVariable("minimumDistanceFromSameSideFoot", registry);
    private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
    private final FramePoint centroid = new FramePoint(ReferenceFrame.getWorldFrame());
+   
+   private final QuadrantDependentList<Double> legLengths = new QuadrantDependentList<Double>();
+   private final FramePoint swingLegHipPitchPoint = new FramePoint();
+   private final FrameOrientation swingLegHipRollOrientation = new FrameOrientation();
+
+   private final FramePoint desiredSwingFootPositionFromHalfStride = new FramePoint();
+   private final FramePoint desiredSwingFootPositionFromOppositeSideFoot = new FramePoint();
 
    public MidFootZUpSwingTargetGenerator(SwingTargetGeneratorParameters footStepParameters, CommonQuadrupedReferenceFrames referenceFrames,
          YoVariableRegistry parentRegistry)
@@ -41,6 +50,11 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       this.referenceFrames = referenceFrames;
       parentRegistry.addChild(registry);
 
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         legLengths.put(robotQuadrant, calculateLegLength(robotQuadrant));
+      }
+      
       if (footStepParameters != null)
       {
          minimumDistanceFromSameSideFoot.set(footStepParameters.getMinimumDistanceFromSameSideFoot());
@@ -59,6 +73,26 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
          maxSkew.set(DEFAULT_MAX_SKEW);
          maxYawPerStep.set(DEFAULT_MAX_YAW);
       }
+   }
+   
+   private double calculateLegLength(RobotQuadrant robotQuadrant)
+   {
+      ReferenceFrame hipPitchFrame = referenceFrames.getHipPitchFrame(robotQuadrant);
+      ReferenceFrame kneePitchFrame = referenceFrames.getKneeFrame(robotQuadrant);
+      ReferenceFrame footFrame = referenceFrames.getFootFrame(robotQuadrant);
+
+      FramePoint hipPitch = new FramePoint(hipPitchFrame);
+      FramePoint kneePitch = new FramePoint(kneePitchFrame);
+      FramePoint foot = new FramePoint(footFrame);
+
+      kneePitch.changeFrame(hipPitchFrame);
+      double thighLength = kneePitch.distance(hipPitch);
+
+      kneePitch.changeFrame(kneePitchFrame);
+      foot.changeFrame(kneePitchFrame);
+      double shinLength = foot.distance(kneePitch);
+
+      return thighLength + shinLength;
    }
 
    @Override
@@ -99,49 +133,83 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private void calculateSwingTarget(QuadrupedSupportPolygon supportPolygon, ReferenceFrame oppositeSideZUpFrame, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double desiredYawRate,
          FramePoint swingTargetToPack)
    {
+      //calculate hipPitchHeight
+      swingLegHipPitchPoint.setToZero(referenceFrames.getHipPitchFrame(swingLeg));
+      swingLegHipPitchPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      double swingLegHipPitchHeight = swingLegHipPitchPoint.getZ();
+
+      //calculate hip Roll
+      swingLegHipRollOrientation.setToZero(referenceFrames.getHipRollFrame(swingLeg));
+      swingLegHipRollOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      double stepDistanceRemovedBecauseOfRoll = legLengths.get(swingLeg) * Math.sin(Math.abs(swingLegHipRollOrientation.getRoll()));
+
+      double maxStepDistance;
+      double maxStepDistanceWithNoRoll = Math.sqrt(Math.pow(legLengths.get(swingLeg), 2) - Math.pow(swingLegHipPitchHeight, 2));
+      if (Double.isNaN(stepDistanceRemovedBecauseOfRoll))
+      {
+         maxStepDistance = 0.0;
+      }
+      else
+      {
+         maxStepDistance = maxStepDistanceWithNoRoll - stepDistanceRemovedBecauseOfRoll;
+         maxStepDistance = Math.max(maxStepDistance, 0.0);
+      }
+
+      double deltaYaw = MathTools.clipToMinMax(desiredYawRate, maxYawPerStep.getDoubleValue());
+
       RobotQuadrant sameSideQuadrant = swingLeg.getSameSideQuadrant();
+      RobotQuadrant sameEndQuadrant = swingLeg.getAcrossBodyQuadrant();
       RobotSide swingSide = swingLeg.getSide();
+      RobotSide oppositeSide = swingLeg.getOppositeSide();
       RobotEnd robotEnd = swingLeg.getEnd();
 
-      FramePoint swingFootPosition = new FramePoint(supportPolygon.getFootstep(swingLeg));
-      FramePoint footPositionSameSideOppositeEnd = new FramePoint(supportPolygon.getFootstep(sameSideQuadrant));
+      FramePoint footPositionSameSideOppositeEnd =new FramePoint(supportPolygon.getFootstep(sameSideQuadrant));
+      FramePoint footPositionOppositeSideSameEnd = new FramePoint(supportPolygon.getFootstep(sameEndQuadrant));
 
-      //midZUpFrame is oriented so X is perpendicular to the two same side feet
+      //midZUpFrame is oriented so X is perpendicular to the two same side feet, Y pointing backward
+      determineFootPositionFromHalfStride(supportPolygon, swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, swingSide, robotEnd, oppositeSideZUpFrame,
+            footPositionSameSideOppositeEnd);
 
+      swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);
+   }
+   
+   private void determineFootPositionFromHalfStride(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
+         RobotSide swingSide, RobotEnd robotEnd, ReferenceFrame oppositeSideZUpFrame, FramePoint footPositionSameSideOppositeEnd)
+   {
       //handle forward backward placement
-      swingFootPosition.changeFrame(oppositeSideZUpFrame);
+      desiredSwingFootPositionFromHalfStride.setToZero(oppositeSideZUpFrame);
       double halfStrideLength = 0.5 * strideLength.getDoubleValue();
       double clippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStrideLength);
-      double amountToSkew = MathTools.clipToMinMax(desiredBodyVelocity.getX() / minimumVelocityForFullSkew.getDoubleValue(), 1.0) * clippedSkew;
+      double clippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getX() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
+      double amountToSkew = clippedSkewScalar * clippedSkew;
+      amountToSkew = MathTools.clipToMinMax(amountToSkew, maxStepDistance);
       double newY = robotEnd.negateIfFrontEnd(halfStrideLength) - amountToSkew;
-      swingFootPosition.setY(newY);
+      desiredSwingFootPositionFromHalfStride.setY(newY);
 
       //handle left right placement
-      swingFootPosition.setX(swingSide.negateIfRightSide(stanceWidth.getDoubleValue()));
+      desiredSwingFootPositionFromHalfStride.setX(swingSide.negateIfRightSide(stanceWidth.getDoubleValue()));
 
       // maintain minimumDistanceFromSameSideFoot inline
       footPositionSameSideOppositeEnd.changeFrame(oppositeSideZUpFrame);
       double minimumRadiusFromSameSideFoot = minimumDistanceFromSameSideFoot.getDoubleValue();
 
-      boolean footIsForwardOfOtherFoot = swingFootPosition.getY() < footPositionSameSideOppositeEnd.getY();
-      boolean footIsBehindOtherFoot = swingFootPosition.getY() > footPositionSameSideOppositeEnd.getY();
-      boolean footIsCloseToOtherFoot = swingFootPosition.distance(footPositionSameSideOppositeEnd) < minimumRadiusFromSameSideFoot;
+      boolean footIsForwardOfOtherFoot = desiredSwingFootPositionFromHalfStride.getY() < footPositionSameSideOppositeEnd.getY();
+      boolean footIsBehindOtherFoot = desiredSwingFootPositionFromHalfStride.getY() > footPositionSameSideOppositeEnd.getY();
+      boolean footIsCloseToOtherFoot = desiredSwingFootPositionFromHalfStride.distance(footPositionSameSideOppositeEnd) < minimumRadiusFromSameSideFoot;
 
       if ((robotEnd.equals(RobotEnd.HIND) && footIsForwardOfOtherFoot) || (robotEnd.equals(RobotEnd.FRONT) && footIsBehindOtherFoot) || footIsCloseToOtherFoot)
       {
-         swingFootPosition.setY(footPositionSameSideOppositeEnd.getY());
-         swingFootPosition.add(0.0, robotEnd.negateIfFrontEnd(minimumRadiusFromSameSideFoot), 0.0);
+         desiredSwingFootPositionFromHalfStride.setY(footPositionSameSideOppositeEnd.getY());
+         desiredSwingFootPositionFromHalfStride.add(0.0, robotEnd.negateIfFrontEnd(minimumRadiusFromSameSideFoot), 0.0);
       }
 
-      swingFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredSwingFootPositionFromHalfStride.changeFrame(ReferenceFrame.getWorldFrame());
 
       //rotate the foot about the centroid of the predicted foot polygon
-      supportPolygon.setFootstep(swingLeg, swingFootPosition);
+      supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromHalfStride);
       supportPolygon.getCentroid(centroid);
-      double deltaYaw = MathTools.clipToMinMax(desiredYawRate, maxYawPerStep.getDoubleValue());
-      swingFootPosition.set(swingFootPosition.yawAboutPoint(centroid, deltaYaw));
+      desiredSwingFootPositionFromHalfStride.set(desiredSwingFootPositionFromHalfStride.yawAboutPoint(centroid, deltaYaw));
       //      swingTargetToPack.setZ(0.0);
-      swingTargetToPack.set(swingFootPosition);
    }
 
    private void updateFeetPositions()
