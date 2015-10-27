@@ -149,6 +149,11 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          FramePoint footPosition = supportPolygon.getFootstep(robotQuadrant);
+         if(footPosition == null)
+         {
+            footPosition = new FramePoint(ReferenceFrame.getWorldFrame());
+         }
+         
          footPosition.setToZero(referenceFrames.getFootFrame(robotQuadrant));
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
          supportPolygon.setFootstep(robotQuadrant, footPosition);
