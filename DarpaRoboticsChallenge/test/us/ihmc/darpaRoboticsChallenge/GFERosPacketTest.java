@@ -38,7 +38,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPP
 import us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMap;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -145,7 +145,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
       DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
       DRCSimulationOutputWriter outputWriter = new DRCSimulationOutputWriter(sdfRobot);
-      GlobalDataProducer globalDataProducer = new GlobalDataProducer(controllerCommunicatorServer);
+      HumanoidGlobalDataProducer globalDataProducer = new HumanoidGlobalDataProducer(controllerCommunicatorServer);
       
       AbstractThreadedRobotController robotController = createController(robotModel, globalDataProducer, outputWriter, sdfRobot);
       sdfRobot.setController(robotController);
@@ -241,7 +241,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 	   DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
 	   robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
 	   DRCSimulationOutputWriter outputWriter = new DRCSimulationOutputWriter(sdfRobot);
-	   GlobalDataProducer globalDataProducer = new GlobalDataProducer(packetCommunicatorServer);
+	   HumanoidGlobalDataProducer globalDataProducer = new HumanoidGlobalDataProducer(packetCommunicatorServer);
 	   
 	   AbstractThreadedRobotController robotController = createController(robotModel, globalDataProducer, outputWriter, sdfRobot);
 	   sdfRobot.setController(robotController);
@@ -300,7 +300,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 	   }
    }
    
-   private AbstractThreadedRobotController createController(DRCRobotModel robotModel, GlobalDataProducer dataProducer, DRCSimulationOutputWriter outputWriter, SDFRobot sdfRobot)
+   private AbstractThreadedRobotController createController(DRCRobotModel robotModel, HumanoidGlobalDataProducer dataProducer, DRCSimulationOutputWriter outputWriter, SDFRobot sdfRobot)
    {
 	   YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 	   double gravity = -9.7925;
@@ -329,7 +329,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 	   return robotController;
    }
    
-   private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel, GlobalDataProducer dataProducer)
+   private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel, HumanoidGlobalDataProducer dataProducer)
    {
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
 
