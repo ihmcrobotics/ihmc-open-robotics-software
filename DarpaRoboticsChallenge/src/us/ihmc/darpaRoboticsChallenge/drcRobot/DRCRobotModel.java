@@ -16,7 +16,7 @@ import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -84,7 +84,7 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
    public abstract SideDependentList<HandCommandManager> createHandCommandManager();
 
    public abstract MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot,
-           ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry);
+           ThreadDataSynchronizerInterface threadDataSynchronizer, HumanoidGlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry);
 
    public abstract DRCHandType getDRCHandType();
    

@@ -1,29 +1,26 @@
-package us.ihmc.humanoidRobotics.communication.streamingData;
+package us.ihmc.communication.streamingData;
+
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
+import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
+import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
+import us.ihmc.tools.thread.ThreadTools;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.ControllerCrashNotificationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
-import us.ihmc.humanoidRobotics.communication.packets.InvalidPacketNotificationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.communication.streamingData.AtomicLastPacketHolder.LastPacket;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.tools.thread.ThreadTools;
-
 public class GlobalDataProducer
 {
-   private final PacketCommunicator communicator;
+   protected final PacketCommunicator communicator;
    private final ConcurrentLinkedQueue<Packet<?>> queuedData = new ConcurrentLinkedQueue<Packet<?>>();
-   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("GlobalDataProducer"));
+   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("HumanoidGlobalDataProducer"));
    private final AtomicLastPacketHolder lastPacketHolder = new AtomicLastPacketHolder();
-  
+
    public GlobalDataProducer(PacketCommunicator communicator)
    {
       this.communicator = communicator;
@@ -56,41 +53,12 @@ public class GlobalDataProducer
    {
       executor.shutdown();
    }
-   
+
    public LastPacket getLastPacket()
    {
       return lastPacketHolder.getLastPacket();
    }
 
-   /**
-    * Special method to directly send RobotConfigurationData, skipping the queue
-    * @param robotConfigData
-    */
-   public void send(RobotConfigurationData robotConfigData)
-   {
-      communicator.send(robotConfigData);
-   }
-
-   /**
-    * Special method to directly send HandJointAnglePacket, skipping the queue
-    * @param handJointAnglePacket
-    */
-   public void send(HandJointAnglePacket handJointAnglePacket)
-   {
-      communicator.send(handJointAnglePacket);
-   }
-   
-
-   /**
-    * Special method to directly send CapturabilityBasedStatus, skipping the queue
-    * 
-    * @param status
-    */
-   public void send(CapturabilityBasedStatus status)
-   {
-      communicator.send(status);
-   }
-   
    public void setRobotTime(long time)
    {
       lastPacketHolder.setRobotTime(time);
@@ -110,5 +78,4 @@ public class GlobalDataProducer
       }
 
    }
-
 }

@@ -1,6 +1,6 @@
 package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving;
 
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 
 /**
  *
@@ -49,7 +49,7 @@ public interface DrivingInterface
    /**
     * VRC hack for DO_NOTHING command
     */
-   public abstract GlobalDataProducer getStatusProducer();
+   public abstract HumanoidGlobalDataProducer getStatusProducer();
    
    
    public enum GearName

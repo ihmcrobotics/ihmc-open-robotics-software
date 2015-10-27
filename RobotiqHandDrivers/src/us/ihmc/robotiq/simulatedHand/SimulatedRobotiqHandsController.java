@@ -11,7 +11,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -62,7 +62,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
    private final SideDependentList<Boolean> hasRobotiqHand = new SideDependentList<Boolean>(false, false);
 
    public SimulatedRobotiqHandsController(SDFRobot simulatedRobot, DRCRobotModel robotModel, ThreadDataSynchronizerInterface threadDataSynchronizer,
-         GlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+         HumanoidGlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.controlDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getControllerDT());

@@ -1,7 +1,4 @@
-package us.ihmc.humanoidRobotics.communication.packets;
-
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
+package us.ihmc.communication.packets;
 
 public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNotificationPacket>
 {

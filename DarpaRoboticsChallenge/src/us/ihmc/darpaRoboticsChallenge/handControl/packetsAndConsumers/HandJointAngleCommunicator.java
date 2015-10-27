@@ -9,7 +9,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
@@ -19,7 +19,7 @@ public class HandJointAngleCommunicator implements CloseableAndDisposable
    private final int WORKER_SLEEP_TIME_MILLIS = 500;
 
    private final PacketCommunicator packetCommunicator;
-   private final GlobalDataProducer dataProducer;
+   private final HumanoidGlobalDataProducer dataProducer;
 
    private final ConcurrentCopier<HandJointAnglePacket> packetCopier;
    private double[][] fingers = new double[3][];
@@ -34,12 +34,12 @@ public class HandJointAngleCommunicator implements CloseableAndDisposable
       this(side, packetCommunicator, null, closeableAndDisposableRegistry);
    }
 
-   public HandJointAngleCommunicator(RobotSide side, GlobalDataProducer dataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public HandJointAngleCommunicator(RobotSide side, HumanoidGlobalDataProducer dataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       this(side, null, dataProducer, closeableAndDisposableRegistry);
    }
 
-   private HandJointAngleCommunicator(RobotSide side, PacketCommunicator packetCommunicator, GlobalDataProducer dataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   private HandJointAngleCommunicator(RobotSide side, PacketCommunicator packetCommunicator, HumanoidGlobalDataProducer dataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       this.side = side;
       this.packetCommunicator = packetCommunicator;

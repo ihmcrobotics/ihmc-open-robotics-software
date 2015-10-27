@@ -13,10 +13,10 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFoo
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
+import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
@@ -93,14 +93,14 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final RobotMotionStatusHolder robotMotionStatusFromController;
    private final DRCPoseCommunicator poseCommunicator;
 
-   private final GlobalDataProducer globalDataProducer;
+   private final HumanoidGlobalDataProducer globalDataProducer;
 
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
    private final ReferenceFrame rootFrame;
 
    public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, RobotContactPointParameters contactPointParameters,
          StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
-         PeriodicThreadScheduler scheduler, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity)
+         PeriodicThreadScheduler scheduler, HumanoidGlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.robotVisualizer = robotVisualizer;

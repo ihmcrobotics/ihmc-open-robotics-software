@@ -3,18 +3,17 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 
 public class AutomaticManipulationAbortCommunicator implements PacketConsumer<AutomaticManipulationAbortPacket>
 {
-   private final GlobalDataProducer globalDataProducer;
+   private final HumanoidGlobalDataProducer globalDataProducer;
    private final AtomicBoolean hasReceivedNewPacket = new AtomicBoolean(false);
    private final AtomicBoolean enableAutomaticManipulationAbort = new AtomicBoolean(false);
 
-   public AutomaticManipulationAbortCommunicator(GlobalDataProducer globalDataProducer)
+   public AutomaticManipulationAbortCommunicator(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
    }

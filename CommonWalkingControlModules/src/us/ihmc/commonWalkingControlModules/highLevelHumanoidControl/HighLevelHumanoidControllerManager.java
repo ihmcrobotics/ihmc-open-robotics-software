@@ -7,12 +7,12 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -49,7 +49,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
    
    public HighLevelHumanoidControllerManager(HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
          MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders,
-         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, GlobalDataProducer dataProducer)
+         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, HumanoidGlobalDataProducer dataProducer)
    {
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
       this.stateMachine = setUpStateMachine(highLevelBehaviors, yoTime, registry, dataProducer);
@@ -92,7 +92,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
       fallbackControllerForFailureReference.set(fallbackController);
    }
 
-   private StateMachine<HighLevelState> setUpStateMachine(ArrayList<HighLevelBehavior> highLevelBehaviors, DoubleYoVariable yoTime, YoVariableRegistry registry, final GlobalDataProducer dataProducer)
+   private StateMachine<HighLevelState> setUpStateMachine(ArrayList<HighLevelBehavior> highLevelBehaviors, DoubleYoVariable yoTime, YoVariableRegistry registry, final HumanoidGlobalDataProducer dataProducer)
    {
       StateMachine<HighLevelState> highLevelStateMachine = new StateMachine<HighLevelState>("highLevelState", "switchTimeName", HighLevelState.class, yoTime, registry);
 

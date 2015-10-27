@@ -39,7 +39,7 @@ import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.humanoidBehaviors.BehaviorVisualizer;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -348,10 +348,10 @@ public class DRCSimulationStarter
 
    private void createSimulationFactory()
    {
-      GlobalDataProducer dataProducer = null;
+      HumanoidGlobalDataProducer dataProducer = null;
       if (controllerPacketCommunicator != null)
       {
-         dataProducer = new GlobalDataProducer(controllerPacketCommunicator);
+         dataProducer = new HumanoidGlobalDataProducer(controllerPacketCommunicator);
       }
 
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
@@ -389,7 +389,7 @@ public class DRCSimulationStarter
       drcSimulationFactory.start();
    }
 
-   private void registerWalkingProviderFactory(GlobalDataProducer dataProducer, MomentumBasedControllerFactory controllerFactory)
+   private void registerWalkingProviderFactory(HumanoidGlobalDataProducer dataProducer, MomentumBasedControllerFactory controllerFactory)
    {
       if ((scriptFileName != null) && (!scriptFileName.equals("")))
       {
@@ -400,7 +400,7 @@ public class DRCSimulationStarter
       }
       else if (dataProducer != null)
       {
-         // Create providers that listen to incoming packets through the GlobalDataProducer, some of the producers are also able to send feedback.
+         // Create providers that listen to incoming packets through the HumanoidGlobalDataProducer, some of the producers are also able to send feedback.
          FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControllerParameters);
          VariousWalkingProviderFactory variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters, new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"));
          controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
