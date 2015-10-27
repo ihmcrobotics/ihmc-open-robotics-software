@@ -4,14 +4,14 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatus;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandPoseStatusProducer
 {
-   private final GlobalDataProducer objectCommunicator;
+   private final HumanoidGlobalDataProducer objectCommunicator;
 
-   public HandPoseStatusProducer(GlobalDataProducer objectCommunicator)
+   public HandPoseStatusProducer(HumanoidGlobalDataProducer objectCommunicator)
    {
       this.objectCommunicator = objectCommunicator;
    }

@@ -14,8 +14,8 @@ import us.ihmc.commonWalkingControlModules.sensors.ReferenceFrameUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CenterOfMassVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
-import us.ihmc.humanoidRobotics.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -108,7 +108,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
 
-   private final GlobalDataProducer globalDataProducer;
+   private final HumanoidGlobalDataProducer globalDataProducer;
    
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
    private final ReferenceFrame rootFrame;
@@ -116,7 +116,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    
    public DRCControllerThread(WholeBodyControllerParameters robotModel, DRCRobotSensorInformation sensorInformation,
          MomentumBasedControllerFactory controllerFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, DRCOutputWriter outputWriter,
-         GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity, double estimatorDT)
+         HumanoidGlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity, double estimatorDT)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = outputWriter;
@@ -207,7 +207,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          HumanoidReferenceFrames referenceFramesForController, DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory,
          DoubleYoVariable yoTime, double controlDT, double gravity, ForceSensorDataHolderReadOnly forceSensorDataHolderForController, ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
-         GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
+         HumanoidGlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
    {
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(controllerModel.getElevator());
 

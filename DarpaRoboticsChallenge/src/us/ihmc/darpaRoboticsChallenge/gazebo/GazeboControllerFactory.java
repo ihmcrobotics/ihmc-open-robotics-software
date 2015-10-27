@@ -26,7 +26,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPP
 import us.ihmc.darpaRoboticsChallenge.robotController.GazeboThreadedRobotController;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -65,7 +65,7 @@ public class GazeboControllerFactory
       YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler("GazeboYoVariableServer"), robotModel.getLogModelProvider(), robotModel.getLogSettings(),
             robotModel.getEstimatorDT());
 
-      GlobalDataProducer dataProducer = new GlobalDataProducer(controllerCommunicator);
+      HumanoidGlobalDataProducer dataProducer = new HumanoidGlobalDataProducer(controllerCommunicator);
 
       /*
        * Create controllers
@@ -157,7 +157,7 @@ public class GazeboControllerFactory
 
    }
 
-   private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel, GlobalDataProducer dataProducer)
+   private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel, HumanoidGlobalDataProducer dataProducer)
    {
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
 

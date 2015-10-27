@@ -44,7 +44,7 @@ import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.LowLevelDrivingAction;
 import us.ihmc.humanoidRobotics.communication.packets.LowLevelDrivingStatus;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 
 
 /**
@@ -59,7 +59,7 @@ public class DrivingFootControlModule
    private final EuclideanPositionController toePointPositionController;
    private final MomentumBasedController momentumBasedController;
 
-   private final GlobalDataProducer statusProducer;
+   private final HumanoidGlobalDataProducer statusProducer;
 
    private final FramePoint desiredPosition = new FramePoint();
    private final FrameVector desiredVelocity = new FrameVector();
@@ -113,7 +113,7 @@ public class DrivingFootControlModule
 
    public DrivingFootControlModule(FullRobotModel fullRobotModel, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
                                    DrivingReferenceFrames drivingReferenceFrames, double dt, DoubleYoVariable yoTime, TwistCalculator twistCalculator,
-                                   YoVariableRegistry parentRegistry, GlobalDataProducer statusProducer,
+                                   YoVariableRegistry parentRegistry, HumanoidGlobalDataProducer statusProducer,
                                    YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.statusProducer = statusProducer;

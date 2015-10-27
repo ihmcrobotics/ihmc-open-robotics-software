@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.controllers;
 import java.util.List;
 
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
@@ -12,11 +12,11 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 public class DRCSimulatedIMUPublisher implements MultiThreadedRobotControlElement
 {
 
-   GlobalDataProducer globalDataProducer;
+   HumanoidGlobalDataProducer globalDataProducer;
    RawIMUPacket packet = new RawIMUPacket();
    IMUSensorReadOnly imuSensorReader = null;
 
-   public DRCSimulatedIMUPublisher(GlobalDataProducer globalDataProducer, List<? extends IMUSensorReadOnly> simulatedIMUOutput, String headLinkName)
+   public DRCSimulatedIMUPublisher(HumanoidGlobalDataProducer globalDataProducer, List<? extends IMUSensorReadOnly> simulatedIMUOutput, String headLinkName)
    {
 
       for (int i = 0; i < simulatedIMUOutput.size(); i++)

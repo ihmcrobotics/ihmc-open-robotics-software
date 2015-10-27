@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
-import us.ihmc.humanoidRobotics.communication.streamingData.GlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.WaypointPositionTrajectoryData;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -28,9 +28,9 @@ public class DesiredComHeightProvider
    private final AtomicReference<WaypointPositionTrajectoryData> multipointTrajectory = new  AtomicReference<WaypointPositionTrajectoryData>(null);
 
    private final double defaultTrajectoryTime = 0.5; //Hackish default time for height trajectory. We need to just ensure that this is always set in the packet instead and then get rid of this.
-   private final GlobalDataProducer globalDataProducer;
+   private final HumanoidGlobalDataProducer globalDataProducer;
    
-   public DesiredComHeightProvider(GlobalDataProducer globalDataProducer)
+   public DesiredComHeightProvider(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
       
