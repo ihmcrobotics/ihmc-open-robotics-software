@@ -163,8 +163,8 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       RobotSide oppositeSide = swingLeg.getOppositeSide();
       RobotEnd robotEnd = swingLeg.getEnd();
 
-      FramePoint footPositionSameSideOppositeEnd = supportPolygon.getFootstep(sameSideQuadrant);
-      FramePoint footPositionOppositeSideSameEnd = supportPolygon.getFootstep(sameEndQuadrant);
+      FramePoint footPositionSameSideOppositeEnd =new FramePoint(supportPolygon.getFootstep(sameSideQuadrant));
+      FramePoint footPositionOppositeSideSameEnd = new FramePoint(supportPolygon.getFootstep(sameEndQuadrant));
 
       //midZUpFrame is oriented so X is perpendicular to the two same side feet, Y pointing backward
       determineFootPositionFromHalfStride(supportPolygon, swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, swingSide, robotEnd, oppositeSideZUpFrame,
