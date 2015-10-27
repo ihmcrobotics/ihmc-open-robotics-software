@@ -40,6 +40,9 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final FramePoint swingLegHipPitchPoint = new FramePoint();
    private final FrameOrientation swingLegHipRollOrientation = new FrameOrientation();
    
+   private final FramePoint desiredSwingFootPositionFromMidStance = new FramePoint();
+   private final FramePoint desiredSwingFootPositionFromOppositeSideFoot = new FramePoint();
+      
    public MidFootZUpSwingTargetGenerator(SwingTargetGeneratorParameters footStepParameters, CommonQuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
@@ -125,14 +128,11 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       RobotEnd robotEnd = swingLeg.getEnd();
 
       ReferenceFrame oppositeSideZUpFrame = referenceFrames.getSideDependentMidFeetZUpFrame(oppositeSide);
-
-      FramePoint desiredSwingFootPositionFromMidStance = feetLocations.get(swingLeg);
       FramePoint footPositionSameSideOppositeEnd = feetLocations.get(sameSideQuadrant);
 
       //midZUpFrame is oriented so X is perpendicular to the two same side feet, Y pointing backward
-      
       //handle forward backward placement
-      desiredSwingFootPositionFromMidStance.changeFrame(oppositeSideZUpFrame);
+      desiredSwingFootPositionFromMidStance.setToZero(oppositeSideZUpFrame);
       double halfStrideLength = 0.5 * strideLength.getDoubleValue();
       double clippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStrideLength);
       double clippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getX() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
