@@ -166,6 +166,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private final DoubleYoVariable subCircleRadius = new DoubleYoVariable("subCircleRadius", registry);
    
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
+   private final FrameVector comVelocity = new FrameVector();
    private final FramePoint centerOfMassFramePoint = new FramePoint();
    private final Point2d centerOfMassPoint2d = new Point2d();
    private final YoGraphicPosition centerOfMassViz = new YoGraphicPosition("centerOfMass", centerOfMassPosition, 0.02, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
@@ -469,7 +470,6 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
 	  // compute center of mass position and velocity
 	  FramePoint comPosition = new FramePoint(comFrame);
 	  comPosition.changeFrame(ReferenceFrame.getWorldFrame());
-	  FrameVector comVelocity = new FrameVector();
 	  centerOfMassJacobian.compute();
 	  centerOfMassJacobian.packCenterOfMassVelocity(comVelocity);
 	  comVelocity.changeFrame(ReferenceFrame.getWorldFrame());
@@ -670,7 +670,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          double distance = initialCoMPosition.distance(desiredCoMTarget);
          
          bodyTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.getX());
-         bodyTrajectoryGenerator.setInitialConditions(initialCoMPosition, desiredBodyVelocity);
+         bodyTrajectoryGenerator.setInitialConditions(initialCoMPosition, comVelocity);
          bodyTrajectoryGenerator.setFinalConditions(desiredCoMTarget, desiredBodyVelocity);
          
          bodyTrajectoryGenerator.initialize();
