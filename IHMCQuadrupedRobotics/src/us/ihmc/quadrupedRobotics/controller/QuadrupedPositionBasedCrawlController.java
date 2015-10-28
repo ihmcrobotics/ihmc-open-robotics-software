@@ -329,14 +329,14 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       centerOfMassPose.setZ(filteredDesiredCoMHeight.getDoubleValue());
       desiredCoMPose.set(centerOfMassPose);
       
-      QuadrupleSupportState quadrupleSupportState = new QuadrupleSupportState(CrawlGateWalkingState.QUADRUPLE_SUPPORT, DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT);
+      final QuadrupleSupportState quadrupleSupportState = new QuadrupleSupportState(CrawlGateWalkingState.QUADRUPLE_SUPPORT, DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT);
       TripleSupportState tripleSupportState = new TripleSupportState(CrawlGateWalkingState.TRIPLE_SUPPORT);
       
       walkingStateMachine.addState(quadrupleSupportState);
       walkingStateMachine.addState(tripleSupportState);
       walkingStateMachine.setCurrentState(CrawlGateWalkingState.QUADRUPLE_SUPPORT);
 
-      BooleanYoVariable isCoMInsideTriangleForSwingLeg = new BooleanYoVariable("isCoMInsideTriangleForSwingLeg", registry);
+      final BooleanYoVariable isCoMInsideTriangleForSwingLeg = new BooleanYoVariable("isCoMInsideTriangleForSwingLeg", registry);
       
       StateTransitionCondition quadrupleToTripleCondition = new StateTransitionCondition()
       {
