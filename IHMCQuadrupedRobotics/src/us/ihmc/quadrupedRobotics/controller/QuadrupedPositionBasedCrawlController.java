@@ -663,13 +663,12 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          desiredCoMTarget.setXY(circleCenter2d);
          desiredCoMTarget.setZ(desiredBodyCurrent.getZ());
          
-         
-         
-         desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
-         desiredBodyVelocity.changeFrame(ReferenceFrame.getWorldFrame());
          double distance = initialCoMPosition.distance(desiredCoMTarget);
-         
+         desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
          bodyTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.getX());
+         
+         
+         desiredBodyVelocity.changeFrame(ReferenceFrame.getWorldFrame());
          bodyTrajectoryGenerator.setInitialConditions(initialCoMPosition, comVelocity);
          bodyTrajectoryGenerator.setFinalConditions(desiredCoMTarget, desiredBodyVelocity);
          
