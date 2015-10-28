@@ -159,7 +159,6 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 
       RobotQuadrant sameSideQuadrant = swingLeg.getSameSideQuadrant();
       RobotQuadrant sameEndQuadrant = swingLeg.getAcrossBodyQuadrant();
-      RobotSide oppositeSide = swingLeg.getOppositeSide();
 
       FramePoint footPositionSameSideOppositeEnd =new FramePoint(supportPolygon.getFootstep(sameSideQuadrant));
       FramePoint footPositionOppositeSideSameEnd = new FramePoint(supportPolygon.getFootstep(sameEndQuadrant));
@@ -170,8 +169,12 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       determineFootPositionFromOppositeSideFoot(supportPolygon, swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, footPositionSameSideOppositeEnd,
             footPositionOppositeSideSameEnd, oppositeSideZUpFrame);
       
+      //pack the destination with 20% of the position from halfStride and 80% of the position from the opposite side foot
+      desiredSwingFootPositionFromHalfStride.scale(0.2);
+      desiredSwingFootPositionFromOppositeSideFoot.scale(0.8);
+      
       swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);
-//      swingTargetToPack.set(desiredSwingFootPositionFromOppositeSideFoot);
+      swingTargetToPack.add(desiredSwingFootPositionFromOppositeSideFoot);
    }
 
    private void determineFootPositionFromHalfStride(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
