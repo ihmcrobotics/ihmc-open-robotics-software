@@ -1,0 +1,170 @@
+<?xml version='1.0'?>
+<sdf version='1.4'>
+ <model name="four_bar">
+    <static>false</static>
+    <pose>0 0 0.05 0 0 0</pose>
+    <link name='base_link'>
+      <pose>0.0 0 0.0 0 0 0</pose>
+      <self_collide>1</self_collide>
+      <collision name='base_link_collision'>
+        <geometry>
+          <box>
+            <size>0.9 .1 .1</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='base_link_visual'>
+        <geometry>
+          <box>
+            <size>1.0 .1 .1</size>
+          </box>
+        </geometry>
+      </visual>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>10</mass>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>1.0</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0</izz>
+        </inertia>
+      </inertial>
+    </link> 
+    <link name='input_link'>
+      <pose>-0.5 0 0.25 0 0 0</pose>
+      <self_collide>1</self_collide>
+      <collision name='input_link_collision'>
+        <geometry>
+          <box>
+            <size>.1 .1 0.4</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='input_link_visual'>
+        <geometry>
+          <box>
+            <size>.1 .1 0.5</size>
+          </box>
+        </geometry>
+      </visual>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>10</mass>
+        <inertia>
+          <ixx>1.0</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>1.0</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+    </link> 
+    <link name='output_link'>
+      <pose>0.5 0 0.25 0 0 0</pose>
+      <self_collide>1</self_collide>
+      <collision name='output_link_collision'>
+        <geometry>
+          <box>
+            <size>.1 .1 0.4</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='output_link_visual'>
+        <geometry>
+          <box>
+            <size>.1 .1 0.5</size>
+          </box>
+        </geometry>
+      </visual>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>10</mass>
+        <inertia>
+          <ixx>1.0</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>1.0</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+    </link>      
+    <link name='floating_link'>
+      <pose>0.0 0 0.5 0 0 0</pose>
+      <self_collide>1</self_collide>
+      <collision name='floating_link_collision'>
+        <geometry>
+          <box>
+            <size>0.9 .1 .1</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='floating_link_visual'>
+        <geometry>
+          <box>
+            <size>1.0 .1 .1</size>
+          </box>
+        </geometry>
+      </visual>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>10</mass>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>1.0</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint type="revolute" name="world_to_base">
+      <child>base_link</child>
+      <parent>world</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint> 
+    <joint type="ball" name="base_to_input">
+      <pose>0 0 -0.25 0 0 0</pose>
+      <child>input_link</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+      </axis>
+    </joint>
+    <joint type="ball" name="input_to_floating">
+      <pose>-0.5 0 0 0 0 0</pose>
+      <child>floating_link</child>
+      <parent>input_link</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+      </axis>
+    </joint>
+    <joint type="ball" name="floating_to_output">
+      <pose>0 0 0.25 0 0 0</pose>
+      <child>output_link</child>
+      <parent>floating_link</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+      </axis>
+    </joint>
+    <joint type="ball" name="output_to_base">
+      <pose>0.5 0 0 0 0 0</pose>
+      <child>base_link</child>
+      <parent>output_link</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+      </axis>
+    </joint>
+  </model> 
+</sdf>
