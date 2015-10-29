@@ -141,22 +141,33 @@ task deployLocal(dependsOn: jar) {
 	}
 }
 
-task mipsserver(type:Exec) {
+task mipsservercmake(type:Exec) {
 	def projectDir = project.buildscript.sourceFile.parent
 	
 	mkdir new File(projectDir, "cbuild")
 		
 	workingDir "${projectDir}/cbuild"
 	commandLine 'cmake', '..'
+
+}
+
+task mipsservermake(type:Exec, dependsOn: 'mipsservercmake') {
+	def projectDir = project.buildscript.sourceFile.parent
+	workingDir "${projectDir}/cbuild"
 	commandLine 'make'
 }
 
-task deploy(dependsOn: ['jar', 'mipsserver']) {
+task deploy(dependsOn: ['jar', 'mipsservermake']) {
 	
 	def projectDir = project.buildscript.sourceFile.parent 
 	def directory = 'valkyrie'
 
 	doLast {
+    	if(!project.hasProperty('valkyrie_realtime_username') || !project.hasProperty('valkyrie_realtime_password'))
+    	{
+    		throw new GradleException("Please set valkyrie_realtime_username and valkyrie_realtime_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+    	}
+	
 		sshexec {
 			session(remotes.valkyrieRealtimeComputer)
 			{
