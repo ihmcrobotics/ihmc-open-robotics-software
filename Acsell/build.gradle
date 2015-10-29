@@ -19,16 +19,18 @@ setupProjectSpecificDependencies()
 remotes {
 	stepprController
    	{
-    	host = '10.66.171.20' //CPU1
-        user = 'root'
-        password = 'unknownpw'
+    	host = '10.66.171.20' //CPU1   	
+		// Set the username and password in ~/.gradle/gradle.properties.
+        user = project.hasProperty('steppr_username')?"${steppr_username}":"invalid"
+        password = project.hasProperty('steppr_password')?"${steppr_password}":"invalid"
         knownHosts = allowAnyHosts
 	}
 	wandererController
     {
 		host = '10.66.171.21'
-    	user = 'root'
-		password = 'unknownpw'
+		// Set the username and password in ~/.gradle/gradle.properties.
+        user = project.hasProperty('wanderer_username')?"${wanderer_username}":"invalid"
+        password = project.hasProperty('wanderer_password')?"${wanderer_password}":"invalid"
 		knownHosts = allowAnyHosts
     }
 }
@@ -50,8 +52,7 @@ jar {
 
             "Bundle-Name": project.name,
             "Bundle-Version": project.version,
-            "Bundle-Description": "IHMCRoboticsToolKit contains useful fuctions to create robot controllers",
-            "Bundle-License": "IHMC Proprietary",
+            "Bundle-License": "http://gnu.org/licenses/gpl-3.0.txt",
             "Bundle-Vendor": "IHMC")
    }
 }
@@ -62,15 +63,30 @@ task deploy(dependsOn: assemble) << {
 	def scriptDir;
 	def directory;
 	
+	
+	
 	if(!project.hasProperty("robot")) {
 		throw new GradleException("No robot passed in. Pass in -Probot=[robot].");
 	}
 	else if("$robot" == "steppr") {
+	    	
+    	if(!project.hasProperty('steppr_username') || !project.hasProperty('steppr_password'))
+    	{
+    		throw new GradleException("Please set stepper_username and steppr_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+    	}
+    	
 		rep = remotes.stepprController
 		scriptDir = new File("scripts/steppr");
 		directory = "steppr"
 	}
 	else if("$robot" == "wanderer") {
+	
+		    	
+    	if(!project.hasProperty('wanderer_username') || !project.hasProperty('wanderer_password'))
+    	{
+    		throw new GradleException("Please set wanderer_username and wanderer_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+    	}
+	
 		rep = remotes.wandererController
 		scriptDir = new File("scripts/wanderer");
 		directory = "wanderer"
