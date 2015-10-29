@@ -125,6 +125,18 @@ public class FileTools
       }
    }
    
+   public static void writeAllLines(List<String> lines, Path path)
+   {
+      PrintWriter printer = newPrintWriter(path);
+      
+      for (String line : lines)
+      {
+         printer.println(line);
+      }
+      
+      printer.close();
+   }
+   
    public static byte[] readAllBytes(Path path)
    {
       try
