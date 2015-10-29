@@ -1,0 +1,130 @@
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.bono.q_l_leg_mhx</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.bono.q_l_leg_kny</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.walkingState</Variables>
+		<GraphConfiguration>
+			<Name>config3</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.StepprOutputProcessor.totalPredictedMotorPower</Variables>
+		<GraphConfiguration>
+			<Name>config4</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController.pelvisOrientationErrorMagnitude</Variables>
+		<GraphConfiguration>
+			<Name>config5</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.WrenchVisualizer.DesiredExternalWrenchl_footTorqueZ,root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.WrenchVisualizer.DesiredExternalWrenchl_footForceX,root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.WrenchVisualizer.DesiredExternalWrenchl_footForceY</Variables>
+		<GraphConfiguration>
+			<Name>config6</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+<Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab
+</Title>
+<Entry Boxes>chestCoMOffsetX,pelvisCoMOffsetX,kpPelvisOrientation</Entry Boxes>
+</EntryBoxTab>
+</Entry Boxes Tab Pane>
+
+<Number of ViewPorts>1</Number of ViewPorts>
+ <Main Viewport> 
+<Visible> true</Visible>
+</Main Viewport>
+
+<Graph Array Window Size>0</Graph Array Window Size>
+
+
+<Extra Panels>
+<Main Viewport>
+Plotter,
+</Main Viewport></Extra Panels>
+
+<Current View>Normal View</Current View>
+ <Canvas 1> 
+ <Camera X>1.1335977461139635</Camera X>
+ <Camera Y>9.349523536497665</Camera Y>
+ <Camera Z>1.3771945453388976</Camera Z>
+ <Dolly data> 
+ <Position X>2.0</Position X>
+ <Position Y>12.0</Position Y>
+ <Position Z>0.0</Position Z>
+<Dolly Booleans>
+<Dolly>false</Dolly>
+<Dolly X>true</Dolly X>
+<Dolly Y>true</Dolly Y>
+<Dolly Z>true</Dolly Z>
+</Dolly Booleans>
+</Dolly data>
+ <Track data> 
+ <Position X>0.0</Position X>
+ <Position Y>0.0</Position Y>
+ <Position Z>0.0</Position Z>
+ <Track Booleans>
+<Track>true</Track>
+<Track X>true</Track X>
+<Track Y>true</Track Y>
+<Track Z>true</Track Z>
+</Track Booleans>
+</Track data>
+<Fix Position>
+<Fix X>5.10190416251595</Fix X>
+<Fix Y>1.6054907759424046</Fix Y>
+<Fix Z>0.6175427863347988</Fix Z>
+</Fix Position>
+</Canvas 1>
