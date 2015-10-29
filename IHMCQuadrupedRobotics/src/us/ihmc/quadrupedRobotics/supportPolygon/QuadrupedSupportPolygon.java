@@ -330,6 +330,12 @@ public class QuadrupedSupportPolygon implements Serializable
    
    public void setFootstep(RobotQuadrant quadrant, FramePoint newFootstep)
    {
+      if(newFootstep == null)
+      {
+         footsteps.put(quadrant, null);
+         return;
+      }
+      
       FramePoint polygonFootstep = footsteps.get(quadrant);
       if(polygonFootstep != null)
       {
@@ -2508,5 +2514,31 @@ public class QuadrupedSupportPolygon implements Serializable
       return false;
       
       
+   }
+
+   public RobotQuadrant getClosestFootStep(FramePoint midPoint)
+   {
+      double minDistance = Double.MAX_VALUE;
+      RobotQuadrant quadrant = null;
+      for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         FramePoint footStep = getFootstep(robotQuadrant);
+         if(footStep != null)
+         {
+            if(footStep.distance(midPoint) < minDistance)
+            {
+               quadrant = robotQuadrant;
+            }
+         }
+      }
+      return quadrant;
+   }
+
+   public QuadrupedSupportPolygon swapSameSideFeetCopy(RobotQuadrant quadrant)
+   {
+      QuadrupedSupportPolygon newQuadrupedSupportPolygon = new QuadrupedSupportPolygon(this);
+      newQuadrupedSupportPolygon.setFootstep(quadrant, getFootstep(quadrant.getSameSideQuadrant()));
+      newQuadrupedSupportPolygon.setFootstep(quadrant.getSameSideQuadrant(), getFootstep(quadrant));
+      return newQuadrupedSupportPolygon;
    }
 }

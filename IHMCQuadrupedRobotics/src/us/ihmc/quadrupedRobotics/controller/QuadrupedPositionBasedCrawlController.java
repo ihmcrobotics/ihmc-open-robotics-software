@@ -635,7 +635,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       return shrunkenCommonSupportPolygon;
    }
    
-   private void initializeBodyTrajectory(RobotQuadrant nextSwingLeg, QuadrupedSupportPolygon commonTriangle)
+   private void initializeBodyTrajectory(RobotQuadrant upcommingSwingLeg, QuadrupedSupportPolygon commonTriangle)
    {
       if(commonTriangle != null)
       {
@@ -648,7 +648,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          double radius = subCircleRadius.getDoubleValue();
          if(useSubCircleForBodyShiftTarget.getBooleanValue())
          {
-            ttrCircleSuccess = commonSupportPolygon.getTangentTangentRadiusCircleCenter(nextSwingLeg, radius, circleCenter2d);
+            ttrCircleSuccess = commonSupportPolygon.getTangentTangentRadiusCircleCenter(upcommingSwingLeg, radius, circleCenter2d);
          }
          
          if(!ttrCircleSuccess)
@@ -726,7 +726,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       private QuadrupedSupportPolygon stateAfterSecondStepWithThirdSwinging;
       private QuadrupedSupportPolygon stateAfterThirdStepWithFourthSwinging;
       
-      private SideDependentList<QuadrupedSupportPolygon> estimatedCommonTriangle = new SideDependentList<>();
+      private QuadrantDependentList<QuadrupedSupportPolygon> estimatedCommonTriangle = new QuadrantDependentList<>();
       private DoubleYoVariable minimumTimeInQuadSupport;
       private BooleanYoVariable minimumTimeInQuadSupportElapsed;
       
@@ -753,13 +753,8 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          swingLeg.set(currentSwingLeg);
          calculateNextThreeFootSteps(currentSwingLeg);
          
-//         swingDesired.changeFrame(ReferenceFrame.getWorldFrame());
-//         calculateSwingTarget(nextSwingLeg, swingDesired);
-//         QuadrupedSupportPolygon shrunkenCommonSupportPolygon = getCommonSupportPolygon(nextSwingLeg, swingDesired);
-//         closestEstimatedCommonTriangle.put(nextSwingLeg.getSide(), shrunkenCommonSupportPolygon);
-         
-         QuadrupedSupportPolygon quadrupedSupportPolygon = estimatedCommonTriangle.get(currentSwingLeg.getNextRegularGaitSwingQuadrant().getSide());
-         initializeBodyTrajectory(currentSwingLeg, quadrupedSupportPolygon);
+         QuadrupedSupportPolygon quadrupedSupportPolygon = estimatedCommonTriangle.get(currentSwingLeg.getNextRegularGaitSwingQuadrant());
+         initializeBodyTrajectory(currentSwingLeg.getNextRegularGaitSwingQuadrant(), quadrupedSupportPolygon);
       }
       
       public void calculateNextThreeFootSteps(RobotQuadrant firstSwingLeg)
@@ -792,7 +787,8 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
                0.02, 0.02, 0.02);
          if(firstAndSecondCommonPolygon != null)
          {
-            estimatedCommonTriangle.put(firstSwingLeg.getSide(), firstAndSecondCommonPolygon);
+            estimatedCommonTriangle.put(firstSwingLeg, firstAndSecondCommonPolygon);
+            estimatedCommonTriangle.put(firstSwingLeg.getSameSideQuadrant(), firstAndSecondCommonPolygon.swapSameSideFeetCopy(firstSwingLeg));
             drawSupportPolygon(firstAndSecondCommonPolygon, commonTriplePolygons.get(firstSwingLeg.getSide()));
          }
          
@@ -802,7 +798,8 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
                0.02, 0.02, 0.02);
          if(secondAndThirdCommonPolygon != null)
          {
-            estimatedCommonTriangle.put(secondSwingLeg.getSide(), secondAndThirdCommonPolygon);
+            estimatedCommonTriangle.put(secondSwingLeg, secondAndThirdCommonPolygon);
+            estimatedCommonTriangle.put(secondSwingLeg.getSameSideQuadrant(), secondAndThirdCommonPolygon.swapSameSideFeetCopy(secondSwingLeg));
             drawSupportPolygon(secondAndThirdCommonPolygon, commonTriplePolygons.get(secondSwingLeg.getSide()));
          }
          
@@ -812,7 +809,8 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
                0.02, 0.02, 0.02);
          if(thirdAndFourthCommonPolygon != null)
          {
-            estimatedCommonTriangle.put(thirdSwingLeg.getSide(), thirdAndFourthCommonPolygon);
+            estimatedCommonTriangle.put(thirdSwingLeg, thirdAndFourthCommonPolygon);
+            estimatedCommonTriangle.put(thirdSwingLeg.getSameSideQuadrant(), thirdAndFourthCommonPolygon.swapSameSideFeetCopy(thirdSwingLeg));
             drawSupportPolygon(thirdAndFourthCommonPolygon, commonTriplePolygons.get(thirdSwingLeg.getSide()));
          }
          
