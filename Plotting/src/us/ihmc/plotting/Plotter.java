@@ -961,6 +961,13 @@ public class Plotter extends JPanel
       }
    }
 
+   public void showInNewWindow()
+   {
+      JFrame frame = new JFrame("Plotter");
+      frame.getContentPane().add(this, BorderLayout.CENTER);
+      frame.pack();
+      frame.setVisible(true);
+   }
 
    public void addArtifactsChangedListener(ArtifactsChangedListener artifactsChangedListener)
    {
