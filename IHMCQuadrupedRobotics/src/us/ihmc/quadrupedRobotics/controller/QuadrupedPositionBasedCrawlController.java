@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedDataProvider;
 import us.ihmc.quadrupedRobotics.footstepChooser.MidFootZUpSwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.footstepChooser.QuadrupedControllerParameters;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
@@ -189,12 +190,12 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private final YoPositionProvider initialBodyPositionProvider = new YoPositionProvider(initialCoMPosition);
    private final YoPositionProvider finalBodyPositionProvider = new YoPositionProvider(desiredCoMTarget);
 
-   private final VectorProvider desiredVelocityProvider;
-   private final DoubleProvider desiredYawRateProvider;
+   private VectorProvider desiredVelocityProvider;
+   private DoubleProvider desiredYawRateProvider;
    
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel, QuadrupedJointNameMap quadrupedJointNameMap,
          final QuadrupedReferenceFrames referenceFrames, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, YoGraphicsListRegistry yoGraphicsListRegistry,
-         DoubleYoVariable yoTime, VectorProvider desiredVelocityProvider, DoubleProvider desiredYawRateProvider)
+         DoubleYoVariable yoTime, QuadrupedDataProvider dataProvider)
    {
       swingDuration.set(0.3);
       subCircleRadius.set(0.1);
@@ -209,9 +210,12 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>(name, "walkingStateTranistionTime", CrawlGateWalkingState.class, yoTime, registry);
       inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
 
-      this.desiredVelocityProvider = desiredVelocityProvider;
-      this.desiredYawRateProvider = desiredYawRateProvider;
-      
+      if(dataProvider != null)
+      {
+         desiredVelocityProvider = dataProvider.getDesiredVelocityProvider();
+         desiredYawRateProvider = dataProvider.getDesiredYawRateProvider();
+      }
+
       QuadrupedControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedControllerParameters();
       referenceFrames.updateFrames();
       bodyFrame = referenceFrames.getBodyFrame();
