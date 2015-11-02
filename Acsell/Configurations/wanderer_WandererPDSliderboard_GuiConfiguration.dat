@@ -1,0 +1,222 @@
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remotemain.wanderer.Wanderer.rightHipYActuator.rightHipYActuatorJointEncoderVelocity,root.remotemain.wanderer.Wanderer.rightHipXActuator.rightHipXActuatorJointEncoderVelocity,root.remotemain.wanderer.Wanderer.rightHipZActuator.rightHipZActuatorJointEncoderVelocity,root.remotemain.wanderer.Wanderer.rightKneeActuator.rightKneeActuatorJointEncoderVelocity,root.remotemain.wanderer.Wanderer.rightAnkleLeftActuator.rightAnkleLeftActuatorJointEncoderVelocity,root.remotemain.wanderer.Wanderer.rightAnkleRightActuator.rightAnkleRightActuatorJointEncoderVelocity,root.remotemain.wanderer.Wanderer.rightAnkleLeftActuator.rightAnkleLeftActuatorJointEncoderPosition</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.wanderer.Wanderer.leftHipXActuator.leftHipXActuatorJointEncoderVelocity,root.remotemain.wanderer.Wanderer.leftHipYActuator.leftHipYActuatorJointEncoderVelocity,root.remotemain.wanderer.Wanderer.leftHipZActuator.leftHipZActuatorJointEncoderVelocity,root.remotemain.wanderer.Wanderer.leftKneeActuator.leftKneeActuatorJointEncoderVelocity,root.remotemain.wanderer.Wanderer.leftAnkleLeftActuator.leftAnkleLeftActuatorJointEncoderVelocity,root.remotemain.wanderer.Wanderer.leftAnkleRightActuator.leftAnkleRightActuatorJointEncoderVelocity</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.wanderer.Wanderer.rightAnkleLeftActuator.rightAnkleLeftActuatorMotorVelocityEstimate,root.remotemain.wanderer.Wanderer.rightAnkleRightActuator.rightAnkleRightActuatorMotorVelocityEstimate</Variables>
+		<GraphConfiguration>
+			<Name>config3</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.wanderer.Wanderer.leftHipXActuator.leftHipXActuatorQuadratureCompositeStatorCurrent,root.remotemain.wanderer.Wanderer.leftHipYActuator.leftHipYActuatorQuadratureCompositeStatorCurrent,root.remotemain.wanderer.Wanderer.leftHipZActuator.leftHipZActuatorQuadratureCompositeStatorCurrent,root.remotemain.wanderer.Wanderer.leftKneeActuator.leftKneeActuatorQuadratureCompositeStatorCurrent,root.remotemain.wanderer.Wanderer.leftAnkleLeftActuator.leftAnkleLeftActuatorQuadratureCompositeStatorCurrent,root.remotemain.wanderer.Wanderer.leftAnkleRightActuator.leftAnkleRightActuatorQuadratureCompositeStatorCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config4</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+<Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab0
+</Title>
+<Entry Boxes>selectedJoint</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+SelectedJoint
+</Title>
+<Entry Boxes>selectedJoint,selectedJoint_enabled,selectedJoint_q,selectedJoint_qd,selectedJoint_tau,selectedJoint_tau_d,selectedJoint_q_d,selectedJoint_qd_d,selectedJoint_kp,selectedJoint_kd,selectedJoint_tauFF</Entry Boxes>
+</EntryBoxTab>
+</Entry Boxes Tab Pane>
+
+<Number of ViewPorts>1</Number of ViewPorts>
+ <Main Viewport> 
+<Visible> true</Visible>
+</Main Viewport>
+
+<Graph Array Window Size>2</Graph Array Window Size>
+<Graph Array Window1>
+<ScreenID>1</ScreenID>
+<WindowLocation>1920.0, 0.0</WindowLocation>
+<WindowSize>1918.0, 1163.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.remotemain.wanderer.Wanderer.leftHipYActuator.leftHipYActuatorQuadratureCompositeStatorCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config5</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.wanderer.Wanderer.rightAnkleRightActuator.rightAnkleRightActuatorQuadratureCompositeStatorCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config6</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window1><Graph Array Window2>
+<ScreenID>1</ScreenID>
+<WindowLocation>1918.0, -3.0</WindowLocation>
+<WindowSize>1924.0, 1207.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remotemain.wanderer.WandererCommand.rightKneeActuator.rightKneeActuatorCurrentDesired,root.remotemain.wanderer.Wanderer.rightKneeActuator.rightKneeActuatorControlTarget,root.remotemain.wanderer.WandererCommand.rightKneeActuator.rightKneeActuatorCurrentDesired_filt</Variables>
+		<GraphConfiguration>
+			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.wanderer.WandererCommand.r_leg_lhy.r_leg_lhyTauDesired,root.remotemain.wanderer.Wanderer.r_leg_lhy.r_leg_lhy_tauPredictedCurrent,root.remotemain.wanderer.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorSensorMCUTime</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.wanderer.Wanderer.rightAnkleRightActuator.rightAnkleRightActuatorMicroControllerTime,root.remotemain.wanderer.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorRawPhaseACurrentADTicks,root.remotemain.wanderer.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorRawPhaseBCurrentADTicks,root.remotemain.wanderer.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorRawPhaseCCurrentADTicks</Variables>
+		<GraphConfiguration>
+			<Name>config9</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.wanderer.Wanderer.rightHipYActuator.rightHipYActuatorQuadratureCompositeStatorCurrent,root.remotemain.wanderer.Wanderer.rightHipYActuator.rightHipYActuatorInphaseCompositeStatorCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config10</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.wanderer.Wanderer.rightHipYActuator.SlowSensors.rightHipYActuatorQuadratureControlEffort,root.remotemain.wanderer.Wanderer.rightHipYActuator.SlowSensors.rightHipYActuatorInphaseControlEffort,root.remotemain.wanderer.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config11</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.wanderer.Wanderer.rightAnkleRightActuator.rightAnkleRightActuatorQuadratureCompositeStatorCurrent,root.remotemain.wanderer.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorQuadratureControlEffort,root.remotemain.wanderer.WandererCommand.rightAnkleCommand.rightAnkleCommandRightActuator.rightAnkleCommandRightActuatorCurrentDesired_filt</Variables>
+		<GraphConfiguration>
+			<Name>config12</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window2>
+
+<Extra Panels>
+<Main Viewport>
+Dashboard,
+</Main Viewport></Extra Panels>
+
+<Current View>Normal View</Current View>
+ <Canvas 1> 
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
+ <Dolly data> 
+ <Position X>2.0</Position X>
+ <Position Y>12.0</Position Y>
+ <Position Z>0.0</Position Z>
+<Dolly Booleans>
+<Dolly>false</Dolly>
+<Dolly X>true</Dolly X>
+<Dolly Y>true</Dolly Y>
+<Dolly Z>true</Dolly Z>
+</Dolly Booleans>
+</Dolly data>
+ <Track data> 
+ <Position X>0.0</Position X>
+ <Position Y>0.0</Position Y>
+ <Position Z>0.0</Position Z>
+ <Track Booleans>
+<Track>false</Track>
+<Track X>true</Track X>
+<Track Y>true</Track Y>
+<Track Z>false</Track Z>
+</Track Booleans>
+</Track data>
+<Fix Position>
+<Fix X>0.0</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.6</Fix Z>
+</Fix Position>
+</Canvas 1>
