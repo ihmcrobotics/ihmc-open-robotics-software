@@ -192,9 +192,11 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private final VectorProvider desiredVelocityProvider;
    private final DoubleProvider desiredYawRateProvider;
    
-   public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel, QuadrupedJointNameMap quadrupedJointNameMap,
-         final QuadrupedReferenceFrames referenceFrames, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, YoGraphicsListRegistry yoGraphicsListRegistry,
-         DoubleYoVariable yoTime, VectorProvider desiredVelocityProvider, DoubleProvider desiredYawRateProvider)
+   public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
+         QuadrupedJointNameMap quadrupedJointNameMap, final QuadrupedReferenceFrames referenceFrames,
+         QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, YoGraphicsListRegistry yoGraphicsListRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, DoubleYoVariable yoTime, VectorProvider desiredVelocityProvider,
+         DoubleProvider desiredYawRateProvider)
    {
       swingDuration.set(0.3);
       subCircleRadius.set(0.1);
@@ -320,6 +322,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
 
          tripleSupportArtifactPolygons[i] = new YoArtifactPolygon(polygonName, yoFrameConvexPolygon2d, Color.getHSBColor(hue, saturation, brightness), false);
          yoGraphicsListRegistry.registerArtifact(polygonName, tripleSupportArtifactPolygons[i]);
+         yoGraphicsListRegistryForDetachedOverhead.registerArtifact(polygonName, tripleSupportArtifactPolygons[i]);
       }
       
       createGraphicsAndArtifacts(yoGraphicsListRegistry);
