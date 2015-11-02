@@ -24,6 +24,9 @@ public class LineArtifact extends Artifact implements Serializable
       super(id);
    }
 
+   /**
+    * Set to normalized line. Length = 1.
+    */
    public LineArtifact(String id, Line2d line)
    {
       super(id);

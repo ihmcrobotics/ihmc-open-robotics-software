@@ -1,0 +1,383 @@
+material ACSELL/l_foot_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture l_foot_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/ll_ankle_pulley_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture ll_ankle_pulley_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/l_lglut_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture l_lglut_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/l_lleg_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture l_lleg_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/ll_push_rod_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture ll_push_rod_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/lr_ankle_pulley_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture lr_ankle_pulley_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/lr_push_rod_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture lr_push_rod_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/l_talus_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture l_talus_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/l_uglut_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture l_uglut_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/l_uleg_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture l_uleg_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/pelvis_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture pelvis_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/r_foot_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture r_foot_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/rl_ankle_pulley_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture rl_ankle_pulley_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/r_lglut_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture r_lglut_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/r_lleg_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture r_lleg_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/rl_push_rod_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture rl_push_rod_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/rr_ankle_pulley_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture rr_ankle_pulley_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/rr_push_rod_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture rr_push_rod_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/r_talus_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture r_talus_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/r_uglut_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture r_uglut_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/r_uleg_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture r_uleg_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/ltorso_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture ltorso_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/mtorso_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture mtorso_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}
+
+material ACSELL/utorso_color
+{
+  technique
+  {
+    pass
+    {
+        texture_unit
+        {
+          texture utorso_color.png
+          filtering anistropic
+	  max_anisotropy 16
+        }
+    }
+  }
+}

@@ -1,13 +1,13 @@
 package us.ihmc.quadrupedRobotics.footstepChooser;
 
 import java.awt.Color;
-import java.util.HashMap;
 
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.referenceFrames.MockQuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -79,14 +79,15 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    private final YoGraphicReferenceFrame rightMidZUpFrameViz;
 
    private final MidFootZUpSwingTargetGenerator footChoser;
-   private final MockQuadrupedReferenceFrames referenceFrames;
+   private final QuadrupedReferenceFrames referenceFrames;
 
    private final QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon commonSupportPolygon = new QuadrupedSupportPolygon();
    private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoFrameConvexPolygon2d currentTriplePolygon = new YoFrameConvexPolygon2d("currentTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
+   private final QuadrupedSupportPolygon quadrupedSupportPolygon = new QuadrupedSupportPolygon();
    
-   public MidFootZUpSwingTargetGeneratorVisualizer()
+   public MidFootZUpSwingTargetGeneratorVisualizer(QuadrupedReferenceFrames referenceFrames)
    {
       desiredVelocity.setX(0.24);
 
@@ -96,7 +97,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       robot.setController(this);
       scs = new SimulationConstructionSet();
       scs.setRobot(robot);
-      referenceFrames = new MockQuadrupedReferenceFrames();
+      this.referenceFrames = referenceFrames;
       swingLeg.set(RobotQuadrant.FRONT_RIGHT);
 
       leftMidZUpFrameViz = new YoGraphicReferenceFrame(referenceFrames.getSideDependentMidFeetZUpFrame(RobotSide.LEFT), registry, 0.2);
@@ -187,11 +188,6 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       }
    }
 
-   public static void main(String[] args)
-   {
-      new MidFootZUpSwingTargetGeneratorVisualizer();
-   }
-
    @Override
    public void initialize()
    {
@@ -223,7 +219,11 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    @Override
    public void doControl()
    {
-      referenceFrames.update(yoFootPositions);
+      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         quadrupedSupportPolygon.setFootstep(quadrant, yoFootPositions.get(quadrant).getFrameTuple());
+      }
+//      referenceFrames.update(yoFootPositions);
       if (!cartesianTrajectoryGenerator.isDone())
       {
          RobotQuadrant robotQuadrant = swingLeg.getEnumValue();
@@ -242,7 +242,8 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
          FramePoint desiredFootPosition = new FramePoint();
          //         desiredFootPosition.set(initialPosition);
          //         desiredFootPosition.add(0.1,0.0,0.0);
-         footChoser.getSwingTarget(robotQuadrant, desiredVelocity.getFrameTuple(), desiredFootPosition, desiredYawRate.getDoubleValue());
+         
+         footChoser.getSwingTarget(quadrupedSupportPolygon, robotQuadrant, desiredVelocity.getFrameTuple(), desiredFootPosition, desiredYawRate.getDoubleValue());
          cartesianTrajectoryGenerator.initialize(initialPosition, initialVelocity, intialAcceleration, desiredFootPosition, finalDesiredVelocity);
          swingTarget.set(desiredFootPosition);
       }

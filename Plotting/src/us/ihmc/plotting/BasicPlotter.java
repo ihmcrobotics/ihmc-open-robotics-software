@@ -2,6 +2,7 @@ package us.ihmc.plotting;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -26,76 +27,72 @@ import us.ihmc.plotting.shapes.PolygonArtifact;
 import us.ihmc.plotting.shapes.ShapeArtifact;
 import us.ihmc.robotics.geometry.Line2d;
 
-public class BasicPlotter extends JPanel
+public class BasicPlotter
 {
-   /**
-    * 
-    */
-   private static final long serialVersionUID = -1504885485210316586L;
-
+   @SuppressWarnings("serial")
+   private JPanel panel = new JPanel()
+   {
+      protected void paintComponent(Graphics g)
+      {
+         super.paintComponent(g);
+         
+         BasicPlotter.this.paintComponent(g);
+      };
+   };
 
    private final ArrayList<ArtifactsChangedListener> artifactsChangedListeners = new ArrayList<ArtifactsChangedListener>();
-
 
    private BufferedImage backgroundImage = null;
 
    // simpanel
    private Dimension preferredSize;
    private final HashMap<String, Artifact> artifacts = new HashMap<String, Artifact>();
-   int _Xcenter;
-   int _Ycenter;
-   double _Xoffset = 0;
-   double _Yoffset = 0;
-   double _scale = 20;
-   double _scaleFactor;
-   double _origScale = -1.0;
-   double _ullon, _ullat, _lrlon, _lrlat;
-   int _origRange = 0;
-   int _orientation = Plottable.X_Y;
-   double _Xselected = 0;
-   double _Yselected = 0;
+   private int _Xcenter;
+   private int _Ycenter;
+   private double _Xoffset = 0;
+   private double _Yoffset = 0;
+   private double _scale = 20;
+   private double _scaleFactor;
+   private double _origScale = -1.0;
+   private double _ullon, _ullat, _lrlon, _lrlat;
+   private int _origRange = 0;
+   private int _orientation = Plottable.X_Y;
+   private double _Xselected = 0;
+   private double _Yselected = 0;
 
-   private boolean SHOW_GRID_LINES = true;
+   private boolean showGridLines = true;
 
    public BasicPlotter(int width, int height)
    {
       preferredSize = new Dimension(width, height);
 
       // Initialize class variables
-      this.setDoubleBuffered(true);
+      panel.setDoubleBuffered(true);
 
       // Set LayoutManager to null
-      this.setLayout(null);
+      panel.setLayout(null);
 
       // simpane
       Border raisedBevel = BorderFactory.createRaisedBevelBorder();
       Border loweredBevel = BorderFactory.createLoweredBevelBorder();
       Border compound = BorderFactory.createCompoundBorder(raisedBevel, loweredBevel);
-      setBorder(compound);
+      panel.setBorder(compound);
 
-      super.setBackground(new Color(180, 220, 240));
-      super.setPreferredSize(preferredSize);
+      panel.setBackground(new Color(180, 220, 240));
+      panel.setPreferredSize(preferredSize);
+   }
+   
+   public void setShowGridLines(boolean showGridLines)
+   {
+      this.showGridLines = showGridLines;
    }
 
-   public void showGridLines()
+   public void paintComponent(Graphics graphics)
    {
-      this.SHOW_GRID_LINES = true;
-   }
-
-   public void hideGridLines()
-   {
-      this.SHOW_GRID_LINES = false;
-   }
-
-   public void paintComponent(Graphics gO)
-   {
-      // paint background
-      super.paintComponent(gO);
-
-      Graphics2D g = (Graphics2D) gO;
+      Graphics2D g2d = (Graphics2D) graphics;
 
       // get current size and determine scaling factor
-      Dimension d = this.getSize();
+      Dimension d = panel.getSize();
       int h = (int)Math.round(d.getHeight());
       int w = (int)Math.round(d.getWidth());
       _Xcenter = w / 2;    // 0;//w/2;
@@ -117,7 +114,7 @@ public class BasicPlotter extends JPanel
             {
                if (artifact.getLevel() == 86)
                {
-                  artifact.draw(g, _Xcenter, _Ycenter, headingOffset, _scaleFactor);
+                  artifact.draw(g2d, _Xcenter, _Ycenter, headingOffset, _scaleFactor);
                }
             }
             else
@@ -143,11 +140,11 @@ public class BasicPlotter extends JPanel
          int lrx = (int) plr.getX();
          int lry = (int) plr.getY();
 
-         g.drawImage(backgroundImage, ulx, uly, lrx, lry, 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight(), this);
+         g2d.drawImage(backgroundImage, ulx, uly, lrx, lry, 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight(), panel);
       }
       else
       {
-         if (SHOW_GRID_LINES)
+         if (showGridLines)
          {
             // change grid line scale from 1m to 10cm ehn below 10m
             double interval = 1.0;
@@ -167,11 +164,11 @@ public class BasicPlotter extends JPanel
             {
                double distance = Math.floor(minX) + (i * interval);
                if (distance / interval % 10 == 0)
-                  g.setColor(new Color(180, 190, 210));
+                  g2d.setColor(new Color(180, 190, 210));
                else if (distance / interval % 5 == 0)
-                  g.setColor(new Color(180, 210, 230));
+                  g2d.setColor(new Color(180, 210, 230));
                else
-                  g.setColor(new Color(180, 230, 250));
+                  g2d.setColor(new Color(180, 230, 250));
 
                // get pixel from meter for positive
                Coordinate coord = convertFromMetersToPixels(new Coordinate(distance, distance, Coordinate.METER));
@@ -179,16 +176,16 @@ public class BasicPlotter extends JPanel
                int y = (int)Math.round(coord.getY());
 
                // draw line
-               g.drawLine(x, 0, x, h);
-               g.drawLine(0, y, w, y);
+               g2d.drawLine(x, 0, x, h);
+               g2d.drawLine(0, y, w, y);
             }
          }
       }
 
-      if (SHOW_GRID_LINES)
+      if (showGridLines)
       {
          // paint grid centerline
-         g.setColor(Color.gray);
+         g2d.setColor(Color.gray);
 
          // get pixel from meter for positive
          Coordinate coord = convertFromMetersToPixels(new Coordinate(0, 0, Coordinate.METER));
@@ -196,8 +193,8 @@ public class BasicPlotter extends JPanel
          int y0 = (int)Math.round(coord.getY());
 
          // draw line
-         g.drawLine(x0, 0, x0, h);
-         g.drawLine(0, y0, w, y0);
+         g2d.drawLine(x0, 0, x0, h);
+         g2d.drawLine(0, y0, w, y0);
       }
 
       // Paint all artifacts by level
@@ -214,7 +211,7 @@ public class BasicPlotter extends JPanel
                {
                   if (artifact.getLevel() == i)
                   {
-                     artifact.draw(g, _Xcenter, _Ycenter, headingOffset, _scaleFactor);    // , _orientation);
+                     artifact.draw(g2d, _Xcenter, _Ycenter, headingOffset, _scaleFactor);    // , _orientation);
                   }
                }
                else
@@ -235,7 +232,7 @@ public class BasicPlotter extends JPanel
       else
       {
          backgroundImage = bgi;
-         repaint();
+         panel.repaint();
       }
    }
 
@@ -249,7 +246,7 @@ public class BasicPlotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public void updateArtifact(Artifact newArtifact)
@@ -260,7 +257,7 @@ public class BasicPlotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public void updateArtifactNoRePaint(Artifact newArtifact)
@@ -300,7 +297,7 @@ public class BasicPlotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public void addArtifactNoRepaint(Artifact newArtifact)
@@ -347,7 +344,7 @@ public class BasicPlotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public void removeArtifact(String id)
@@ -358,7 +355,7 @@ public class BasicPlotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
 
@@ -390,7 +387,7 @@ public class BasicPlotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public double getSelectedX()
@@ -408,7 +405,7 @@ public class BasicPlotter extends JPanel
    private Point convertCoordinates(JPanel plot, Point2D.Double pt)
    {
       // get current size and determine scaling factor
-      Dimension d = this.getSize();
+      Dimension d = panel.getSize();
       int h = (int)Math.round(d.getHeight());
       int w =(int)Math.round(d.getWidth());
 
@@ -486,13 +483,13 @@ public class BasicPlotter extends JPanel
       _lrlon = lrlon;
       _lrlat = lrlat;
 
-      repaint();
+      panel.repaint();
    }
 
    public void setRange(double range)
    {
       _scale = range;
-      repaint();
+      panel.repaint();
    }
 
    public double getRange()
@@ -503,7 +500,7 @@ public class BasicPlotter extends JPanel
    public void setOrientation(int orientation)
    {
       _orientation = orientation;
-      repaint();
+      panel.repaint();
    }
 
    public void setXoffset(double x)
@@ -562,7 +559,7 @@ public class BasicPlotter extends JPanel
          }
       }
 
-      repaint();
+      panel.repaint();
    }
 
    public void update(String objectID, PolygonArtifact polygonArtifact)
@@ -591,27 +588,20 @@ public class BasicPlotter extends JPanel
          }
       }
 
-      repaint();
+      panel.repaint();
+   }
+   
+   public void showInNewWindow()
+   {
+      JFrame frame = new JFrame("Plotter");
+      frame.getContentPane().add(panel, BorderLayout.CENTER);
+      frame.pack();
+      frame.setVisible(true);
    }
 
-   // test driver //////////////////////////////////////////////////
-   public static void main(String[] args)
+   public JPanel getJPanel()
    {
-      // plotter
-      BasicPlotter p = new BasicPlotter(300, 500);
-
-      JFrame f = new JFrame("Basic Plotter Test");
-      f.addWindowListener(new WindowAdapter()
-      {
-         public void windowClosing(WindowEvent e)
-         {
-            System.exit(0);
-         }
-      });
-
-      f.getContentPane().add(p, BorderLayout.CENTER);
-      f.pack();
-      f.setVisible(true);
+      return panel;
    }
 
    public void addArtifactsChangedListener(ArtifactsChangedListener artifactsChangedListener)
@@ -645,7 +635,7 @@ public class BasicPlotter extends JPanel
       this.addArtifactsChangedListener(plotterLegendPanel);
 
       ret.setLayout(new BorderLayout());
-      ret.add(this, "Center");
+      ret.add(panel, "Center");
       ret.add(plotterLegendPanel, "West");
 
       return ret;
