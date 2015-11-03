@@ -204,7 +204,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       double lateralClippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getY() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
       double lateralAmountToSkew = lateralClippedSkewScalar * lateralClippedSkew;
       lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, 0.2 * maxStepDistance);
-      double newX = swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) - lateralAmountToSkew;
+      double newX = swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) + lateralAmountToSkew;
       desiredSwingFootPositionFromHalfStride.setX(newX);
       
       // maintain minimumDistanceFromSameSideFoot inline
@@ -261,7 +261,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       double lateralAmountToSkew = lateralClippedSkewScalar * lateralClippedSkew;
       lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, 0.2 * maxStepDistance);
       
-      double newX = swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) - lateralAmountToSkew;
+      double newX = swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) + lateralAmountToSkew;
       desiredSwingFootPositionFromOppositeSideFoot.setX(newX);
       
       desiredSwingFootPositionFromOppositeSideFoot.changeFrame(ReferenceFrame.getWorldFrame());
