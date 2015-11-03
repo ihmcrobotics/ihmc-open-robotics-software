@@ -175,6 +175,10 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       
       swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);
       swingTargetToPack.add(desiredSwingFootPositionFromOppositeSideFoot);
+      
+      //for debug
+//      swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);
+//      swingTargetToPack.set(desiredSwingFootPositionFromOppositeSideFoot);
    }
 
    private void determineFootPositionFromHalfStride(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
@@ -195,8 +199,15 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       desiredSwingFootPositionFromHalfStride.setY(newY);
 
       //handle left right placement
-      desiredSwingFootPositionFromHalfStride.setX(swingSide.negateIfRightSide(stanceWidth.getDoubleValue()));
-
+      double halfStanceWidth = 0.5 * stanceWidth.getDoubleValue();
+      double lateralClippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStanceWidth);
+      double lateralClippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getY() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
+      double lateralAmountToSkew = lateralClippedSkewScalar * lateralClippedSkew;
+      lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, maxStepDistance);
+      double newX = swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) - lateralAmountToSkew;
+      desiredSwingFootPositionFromHalfStride.setX(newX);
+//      desiredSwingFootPositionFromHalfStride.setX(swingSide.negateIfRightSide(stanceWidth.getDoubleValue()));
+      
       // maintain minimumDistanceFromSameSideFoot inline
       footPositionSameSideOppositeEnd.changeFrame(oppositeSideZUpFrame);
       double minimumRadiusFromSameSideFoot = minimumDistanceFromSameSideFoot.getDoubleValue();
@@ -245,7 +256,15 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       desiredSwingFootPositionFromOppositeSideFoot.setY(newY);
       
       //handle left right placement
-      desiredSwingFootPositionFromOppositeSideFoot.setX(swingSide.negateIfRightSide(stanceWidth.getDoubleValue()));
+      double halfStanceWidth = 0.5 * stanceWidth.getDoubleValue();
+      double lateralClippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStanceWidth);
+      double lateralClippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getY() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
+      double lateralAmountToSkew = lateralClippedSkewScalar * lateralClippedSkew;
+      lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, maxStepDistance);
+      
+      double newX = footPositionOppositeSideSameEnd.getX() + swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) + swingSide.negateIfRightSide(lateralAmountToSkew);
+      desiredSwingFootPositionFromOppositeSideFoot.setX(newX);
+//      desiredSwingFootPositionFromOppositeSideFoot.setX(swingSide.negateIfRightSide(stanceWidth.getDoubleValue()));
       
       desiredSwingFootPositionFromOppositeSideFoot.changeFrame(ReferenceFrame.getWorldFrame());
       
