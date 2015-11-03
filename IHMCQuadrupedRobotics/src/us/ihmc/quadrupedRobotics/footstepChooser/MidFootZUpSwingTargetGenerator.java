@@ -203,10 +203,9 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       double lateralClippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStanceWidth);
       double lateralClippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getY() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
       double lateralAmountToSkew = lateralClippedSkewScalar * lateralClippedSkew;
-      lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, maxStepDistance);
+      lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, 0.2 * maxStepDistance);
       double newX = swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) - lateralAmountToSkew;
       desiredSwingFootPositionFromHalfStride.setX(newX);
-//      desiredSwingFootPositionFromHalfStride.setX(swingSide.negateIfRightSide(stanceWidth.getDoubleValue()));
       
       // maintain minimumDistanceFromSameSideFoot inline
       footPositionSameSideOppositeEnd.changeFrame(oppositeSideZUpFrame);
@@ -260,11 +259,10 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       double lateralClippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStanceWidth);
       double lateralClippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getY() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
       double lateralAmountToSkew = lateralClippedSkewScalar * lateralClippedSkew;
-      lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, maxStepDistance);
+      lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, 0.2 * maxStepDistance);
       
-      double newX = footPositionOppositeSideSameEnd.getX() + swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) + swingSide.negateIfRightSide(lateralAmountToSkew);
+      double newX = swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) - lateralAmountToSkew;
       desiredSwingFootPositionFromOppositeSideFoot.setX(newX);
-//      desiredSwingFootPositionFromOppositeSideFoot.setX(swingSide.negateIfRightSide(stanceWidth.getDoubleValue()));
       
       desiredSwingFootPositionFromOppositeSideFoot.changeFrame(ReferenceFrame.getWorldFrame());
       
