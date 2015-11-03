@@ -196,7 +196,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
          QuadrupedJointNameMap quadrupedJointNameMap, final QuadrupedReferenceFrames referenceFrames,
          QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, DoubleYoVariable yoTime, QuadrupedDataProvider dataProvider)
+         YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, QuadrupedDataProvider dataProvider, DoubleYoVariable yoTime)
    {
       swingDuration.set(0.3);
       subCircleRadius.set(0.1);
