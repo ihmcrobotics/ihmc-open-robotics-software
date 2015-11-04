@@ -1,34 +1,28 @@
 package us.ihmc.quadrupedRobotics.dataProviders;
 
-import us.ihmc.communication.packetCommunicator.ConcurrentPacketQueue;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.concurrent.Builder;
 import us.ihmc.quadrupedRobotics.packets.DesiredYawRatePacket;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
-public class DesiredYawRateProvider implements DoubleProvider
+import java.util.concurrent.atomic.AtomicReference;
+
+public class DesiredYawRateProvider implements DoubleProvider, PacketConsumer<DesiredYawRatePacket>
 {
-   private final ConcurrentPacketQueue<DesiredYawRatePacket> packetQueue = new ConcurrentPacketQueue<>();
-   private double lastReceivedYawRate;
+   private final AtomicReference<DesiredYawRatePacket> latestPacket = new AtomicReference<>();
 
    public DesiredYawRateProvider(GlobalDataProducer dataProducer)
    {
-      dataProducer.attachListener(DesiredYawRatePacket.class, packetQueue);
+      dataProducer.attachListener(DesiredYawRatePacket.class, this);
    }
 
    @Override public double getValue()
    {
-      if(packetQueue.isNewPacketAvailable())
-         lastReceivedYawRate = packetQueue.getPacket().getYawRate();
-
-      return lastReceivedYawRate;
+      return latestPacket.get().getYawRate();
    }
 
-   class DesiredYawRatePacketBuilder implements Builder<DesiredYawRatePacket>
+   @Override public void receivedPacket(DesiredYawRatePacket packet)
    {
-      @Override public DesiredYawRatePacket newInstance()
-      {
-         return new DesiredYawRatePacket(0.0);
-      }
+      latestPacket.set(packet);
    }
 }
