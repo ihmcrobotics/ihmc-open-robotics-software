@@ -144,7 +144,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       return robotConfigurationData.getTimestamp();
    }
 
-   public boolean updateFullRobotModelWithNewestData(FullHumanoidRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolder)
+   public boolean updateFullRobotModelWithNewestData(FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolder)
    {
       int currentIndex = this.currentIndex.get() - 1;
       if (currentIndex < 0)
