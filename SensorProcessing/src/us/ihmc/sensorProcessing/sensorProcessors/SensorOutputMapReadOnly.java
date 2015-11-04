@@ -6,14 +6,8 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public interface SensorOutputMapReadOnly
-{
-   public long getTimestamp();
-
-   public long getVisionSensorTimestamp();
-
-   public long getSensorHeadPPSTimestamp();
-   
+public interface SensorOutputMapReadOnly extends SensorTimestampHolder
+{  
    public double getJointPositionProcessedOutput(OneDoFJoint oneDoFJoint);
 
    public double getJointVelocityProcessedOutput(OneDoFJoint oneDoFJoint);

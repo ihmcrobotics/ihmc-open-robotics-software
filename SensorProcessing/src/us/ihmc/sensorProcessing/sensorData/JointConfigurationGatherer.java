@@ -1,18 +1,20 @@
 package us.ihmc.sensorProcessing.sensorData;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModelUtils;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class JointConfigurationGatherer
 {
@@ -51,6 +53,13 @@ public class JointConfigurationGatherer
          ForceSensorDataReadOnly forceSensorData = forceSensorDataHolderForEstimator.get(definition);
          forceSensorDataList.add(forceSensorData);
       }
+   }
+   
+   public JointConfigurationGatherer(FullRobotModel estimatorModel)
+   {
+      this.rootJoint = estimatorModel.getRootJoint();
+      this.joints.addAll(Arrays.asList(estimatorModel.getOneDoFJoints()));
+      this.forceSensorDefinitions = new ForceSensorDefinition[0];
    }
 
    public int getNumberOfJoints()
