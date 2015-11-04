@@ -4,5 +4,6 @@ import us.ihmc.SdfLoader.models.FullRobotModelFactory;
 
 public interface SDFFullRobotModelFactory extends FullRobotModelFactory
 {
-   public SDFFullHumanoidRobotModel createFullRobotModel();
+   public SDFFullRobotModel createFullRobotModel();
+
 }

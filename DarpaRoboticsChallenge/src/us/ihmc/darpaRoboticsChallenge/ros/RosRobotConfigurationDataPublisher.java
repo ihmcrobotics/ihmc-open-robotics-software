@@ -9,7 +9,7 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.ros.message.Time;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -71,7 +71,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
    private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTransforms;
 
-   public RosRobotConfigurationDataPublisher(SDFFullRobotModelFactory sdfFullRobotModelFactory, PacketCommunicator rosModulePacketCommunicator,
+   public RosRobotConfigurationDataPublisher(SDFFullHumanoidRobotModelFactory sdfFullRobotModelFactory, PacketCommunicator rosModulePacketCommunicator,
          final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
          DRCRobotJointMap jointMap, String rosNameSpace, RosTfPublisher tfPublisher)
    {

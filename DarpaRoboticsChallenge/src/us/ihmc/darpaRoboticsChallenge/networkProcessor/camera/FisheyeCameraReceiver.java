@@ -6,7 +6,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import boofcv.struct.calib.IntrinsicParameters;
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.producers.CompressedVideoHandler;
@@ -22,7 +22,7 @@ import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
 public class FisheyeCameraReceiver extends CameraDataReceiver
 {
    private static final boolean DEBUG = false;
-   public FisheyeCameraReceiver(SDFFullRobotModelFactory fullRobotModelFactory, final DRCRobotCameraParameters cameraParameters,
+   public FisheyeCameraReceiver(SDFFullHumanoidRobotModelFactory fullRobotModelFactory, final DRCRobotCameraParameters cameraParameters,
          RobotConfigurationDataBuffer robotConfigurationDataBuffer, PacketCommunicator packetCommunicator,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, final RosMainNode rosMainNode)
    {

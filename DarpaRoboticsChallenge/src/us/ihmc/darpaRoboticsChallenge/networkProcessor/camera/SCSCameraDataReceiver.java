@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -17,7 +17,7 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
 {
    private final RobotSide robotSide;
    
-   public SCSCameraDataReceiver(RobotSide robotSide, SDFFullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer, ObjectCommunicator scsSensorsCommunicator,
+   public SCSCameraDataReceiver(RobotSide robotSide, SDFFullHumanoidRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer, ObjectCommunicator scsSensorsCommunicator,
          PacketCommunicator sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
       super(fullRobotModelFactory, sensorNameInSdf, robotConfigurationDataBuffer, new VideoPacketHandler(sensorSuitePacketCommunicator), ppsTimestampOffsetProvider);
