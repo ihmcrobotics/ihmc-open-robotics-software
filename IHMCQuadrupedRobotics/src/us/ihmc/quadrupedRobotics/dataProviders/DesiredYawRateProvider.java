@@ -1,15 +1,17 @@
 package us.ihmc.quadrupedRobotics.dataProviders;
 
+
+import com.google.common.util.concurrent.AtomicDouble;
+
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.packets.DesiredYawRatePacket;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
-import java.util.concurrent.atomic.AtomicReference;
 
 public class DesiredYawRateProvider implements DoubleProvider, PacketConsumer<DesiredYawRatePacket>
 {
-   private final AtomicReference<DesiredYawRatePacket> latestPacket = new AtomicReference<>();
+   private final AtomicDouble lastReceivedYawRate = new AtomicDouble(0.0);
 
    public DesiredYawRateProvider(GlobalDataProducer dataProducer)
    {
@@ -18,11 +20,12 @@ public class DesiredYawRateProvider implements DoubleProvider, PacketConsumer<De
 
    @Override public double getValue()
    {
-      return latestPacket.get().getYawRate();
+      return lastReceivedYawRate.get();
    }
 
-   @Override public void receivedPacket(DesiredYawRatePacket packet)
+   @Override
+   public void receivedPacket(DesiredYawRatePacket packet)
    {
-      latestPacket.set(packet);
+      lastReceivedYawRate.set(packet.getYawRate());
    }
 }
