@@ -9,12 +9,13 @@ import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 /**
  * Buffer for RobotConfigurationData. Allows updating a fullrobotmodel based on timestamps. Make sure not to share fullrobotmodels between thread
@@ -33,10 +34,10 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
    private final ReentrantLock updateLock = new ReentrantLock();
    private final Condition timestampCondition = updateLock.newCondition();
 
-   private final ThreadLocal<HashMap<FullHumanoidRobotModel, FullRobotModelCache>> fullRobotModelsCache = new ThreadLocal<HashMap<FullHumanoidRobotModel, FullRobotModelCache>>()
+   private final ThreadLocal<HashMap<FullRobotModel, FullRobotModelCache>> fullRobotModelsCache = new ThreadLocal<HashMap<FullRobotModel, FullRobotModelCache>>()
    {
       @Override
-      protected HashMap<FullHumanoidRobotModel, FullRobotModelCache> initialValue()
+      protected HashMap<FullRobotModel, FullRobotModelCache> initialValue()
       {
          return new HashMap<>();
       }
@@ -127,7 +128,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
     * 
     * @return true if model is updated
     */
-   public long updateFullRobotModel(boolean waitForTimestamp, long timestamp, FullHumanoidRobotModel model, ForceSensorDataHolder forceSensorDataHolder)
+   public long updateFullRobotModel(boolean waitForTimestamp, long timestamp, FullRobotModel model, ForceSensorDataHolder forceSensorDataHolder)
    {
       if (waitForTimestamp)
       {
@@ -162,7 +163,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       return true;
    }
 
-   private void updateFullRobotModel(RobotConfigurationData robotConfigurationData, FullHumanoidRobotModel model, ForceSensorDataHolder forceSensorDataHolder)
+   private void updateFullRobotModel(RobotConfigurationData robotConfigurationData, FullRobotModel model, ForceSensorDataHolder forceSensorDataHolder)
    {
       FullRobotModelCache fullRobotModelCache = getFullRobotModelCache(model);
 
@@ -196,9 +197,9 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       }
    }
 
-   private FullRobotModelCache getFullRobotModelCache(FullHumanoidRobotModel fullRobotModel)
+   private FullRobotModelCache getFullRobotModelCache(FullRobotModel fullRobotModel)
    {
-      HashMap<FullHumanoidRobotModel, FullRobotModelCache> cache = fullRobotModelsCache.get();
+      HashMap<FullRobotModel, FullRobotModelCache> cache = fullRobotModelsCache.get();
       FullRobotModelCache fullRobotModelCache = cache.get(fullRobotModel);
       if (fullRobotModelCache == null)
       {
@@ -215,9 +216,12 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       private final OneDoFJoint[] allJoints;
       private final long jointNameHash;
 
-      private FullRobotModelCache(FullHumanoidRobotModel fullRobotModel)
+      private FullRobotModelCache(FullRobotModel fullRobotModel)
       {
-         allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
+         if(fullRobotModel instanceof FullHumanoidRobotModel)
+            allJoints = FullRobotModelUtils.getAllJointsExcludingHands((FullHumanoidRobotModel) fullRobotModel);
+         else
+            allJoints = fullRobotModel.getOneDoFJoints();
          jointNameHash = RobotConfigurationData.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
       }
    }

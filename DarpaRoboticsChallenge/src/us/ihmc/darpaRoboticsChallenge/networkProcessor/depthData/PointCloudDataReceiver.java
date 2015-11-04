@@ -11,7 +11,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -58,7 +58,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
    private final PacketCommunicator sensorSuitePacketCommunicator;
    private boolean DEBUG_WITH_MOCAP = false;
 
-   public PointCloudDataReceiver(SDFFullRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
+   public PointCloudDataReceiver(SDFFullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotJointMap jointMap, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
          PacketCommunicator sensorSuitePacketCommunicator)
    {

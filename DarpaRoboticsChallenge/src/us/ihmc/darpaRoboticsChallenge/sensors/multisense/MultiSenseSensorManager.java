@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.sensors.multisense;
 
 import java.net.URI;
 
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraLogger;
@@ -23,7 +23,7 @@ public class MultiSenseSensorManager
 {
    private RosCameraReceiver cameraReceiver;
 
-   private final SDFFullRobotModelFactory fullRobotModelFactory;
+   private final SDFFullHumanoidRobotModelFactory fullRobotModelFactory;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final RosMainNode rosMainNode;
    private final PacketCommunicator packetCommunicator;
@@ -38,7 +38,7 @@ public class MultiSenseSensorManager
    private final PointCloudDataReceiver pointCloudDataReceiver;
    private MultiSenseParamaterSetter multiSenseParamaterSetter;
 
-   public MultiSenseSensorManager(SDFFullRobotModelFactory sdfFullRobotModelFactory, PointCloudDataReceiver pointCloudDataReceiver, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
+   public MultiSenseSensorManager(SDFFullHumanoidRobotModelFactory sdfFullRobotModelFactory, PointCloudDataReceiver pointCloudDataReceiver, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
          RosMainNode rosMainNode, PacketCommunicator sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, URI sensorURI, DRCRobotCameraParameters cameraParamaters,
          DRCRobotLidarParameters lidarParamaters, DRCRobotPointCloudParameters stereoParamaters, boolean setROSParameters)
    {
@@ -96,7 +96,7 @@ public class MultiSenseSensorManager
    {
       CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
       cameraReceiver = new RosCameraReceiver(fullRobotModelFactory, cameraParamaters, robotConfigurationDataBuffer, rosMainNode, packetCommunicator,
-            ppsTimestampOffsetProvider, logger, sensorURI);
+            ppsTimestampOffsetProvider, logger);
 
       cameraReceiver.start();
    }

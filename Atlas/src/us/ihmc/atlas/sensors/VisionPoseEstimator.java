@@ -28,7 +28,7 @@ import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
 import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.point.Point3D_F64;
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
@@ -52,10 +52,10 @@ public class VisionPoseEstimator implements DRCStereoListener
 
    PacketCommunicator communicator;
    LinkedBlockingQueue<ImmutablePair<CameraData, RigidBodyTransform>> imagesToProcess = new LinkedBlockingQueue<>(2);
-   SDFFullRobotModelFactory modelFactory;
+   SDFFullHumanoidRobotModelFactory modelFactory;
    PointCloudDataReceiver pointCloudDataReceiver;
 
-   public VisionPoseEstimator(PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver, SDFFullRobotModelFactory modelFactory,
+   public VisionPoseEstimator(PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver, SDFFullHumanoidRobotModelFactory modelFactory,
          RobotConfigurationDataBuffer robotConfigurationDataBuffer, boolean runningOnRealRobot)
    {
       if (runningOnRealRobot)
