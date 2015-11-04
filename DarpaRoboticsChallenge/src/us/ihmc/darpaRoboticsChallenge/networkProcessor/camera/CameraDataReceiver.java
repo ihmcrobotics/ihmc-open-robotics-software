@@ -21,7 +21,7 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBu
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 
-public abstract class CameraDataReceiver extends Thread
+public class CameraDataReceiver extends Thread
 {
    protected static final boolean DEBUG = false;
    private final VideoDataServer compressedVideoDataServer;
