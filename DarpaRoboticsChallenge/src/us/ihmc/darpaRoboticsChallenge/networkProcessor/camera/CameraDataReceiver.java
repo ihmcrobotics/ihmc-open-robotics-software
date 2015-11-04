@@ -40,6 +40,8 @@ public abstract class CameraDataReceiver extends Thread
    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
    private volatile boolean running = true;
    
+   private boolean useTimestamps = true;
+   
    public CameraDataReceiver(SDFFullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
          CompressedVideoHandler compressedVideoHandler, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
@@ -79,9 +81,22 @@ public abstract class CameraDataReceiver extends Thread
                   System.out.println("Updating full robot model");
                }
                long robotTimestamp = ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(data.timestamp);
-               if (robotConfigurationDataBuffer.updateFullRobotModel(false, robotTimestamp, fullRobotModel, null) < 0)
+               
+               if(useTimestamps)
                {
-                  continue;
+                  if (robotConfigurationDataBuffer.updateFullRobotModel(false, robotTimestamp, fullRobotModel, null) < 0)
+                  {
+                     if(DEBUG)
+                     {
+                        System.out.println("Cannot update full robot model, skipping frame");
+                     }
+                     
+                     continue;
+                  }
+               }
+               else
+               {
+                  robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null);
                }
                cameraFrame.update();
                cameraFrame.getTransformToWorldFrame().get(cameraOrientation, cameraPosition);
@@ -106,6 +121,11 @@ public abstract class CameraDataReceiver extends Thread
             continue;
          }
       }
+   }
+   
+   public void setUseTimestamps(boolean useTimestamps)
+   {
+      this.useTimestamps = useTimestamps;
    }
    
    protected void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, IntrinsicParameters intrinsicParameters)
