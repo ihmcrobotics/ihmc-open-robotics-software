@@ -160,7 +160,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       RobotQuadrant sameSideQuadrant = swingLeg.getSameSideQuadrant();
       RobotQuadrant sameEndQuadrant = swingLeg.getAcrossBodyQuadrant();
 
-      FramePoint footPositionSameSideOppositeEnd =new FramePoint(supportPolygon.getFootstep(sameSideQuadrant));
+      FramePoint footPositionSameSideOppositeEnd = new FramePoint(supportPolygon.getFootstep(sameSideQuadrant));
       FramePoint footPositionOppositeSideSameEnd = new FramePoint(supportPolygon.getFootstep(sameEndQuadrant));
 
       //midZUpFrame is oriented so X is perpendicular to the two same side feet, Y pointing backward
@@ -175,6 +175,10 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       
       swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);
       swingTargetToPack.add(desiredSwingFootPositionFromOppositeSideFoot);
+      
+      //for debug
+//      swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);
+//      swingTargetToPack.set(desiredSwingFootPositionFromOppositeSideFoot);
    }
 
    private void determineFootPositionFromHalfStride(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
@@ -195,8 +199,14 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       desiredSwingFootPositionFromHalfStride.setY(newY);
 
       //handle left right placement
-      desiredSwingFootPositionFromHalfStride.setX(swingSide.negateIfRightSide(stanceWidth.getDoubleValue()));
-
+      double halfStanceWidth = 0.5 * stanceWidth.getDoubleValue();
+      double lateralClippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStanceWidth);
+      double lateralClippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getY() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
+      double lateralAmountToSkew = lateralClippedSkewScalar * lateralClippedSkew;
+      lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, 0.2 * maxStepDistance);
+      double newX = swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) + lateralAmountToSkew;
+      desiredSwingFootPositionFromHalfStride.setX(newX);
+      
       // maintain minimumDistanceFromSameSideFoot inline
       footPositionSameSideOppositeEnd.changeFrame(oppositeSideZUpFrame);
       double minimumRadiusFromSameSideFoot = minimumDistanceFromSameSideFoot.getDoubleValue();
@@ -245,7 +255,14 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       desiredSwingFootPositionFromOppositeSideFoot.setY(newY);
       
       //handle left right placement
-      desiredSwingFootPositionFromOppositeSideFoot.setX(swingSide.negateIfRightSide(stanceWidth.getDoubleValue()));
+      double halfStanceWidth = 0.5 * stanceWidth.getDoubleValue();
+      double lateralClippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStanceWidth);
+      double lateralClippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getY() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
+      double lateralAmountToSkew = lateralClippedSkewScalar * lateralClippedSkew;
+      lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, 0.2 * maxStepDistance);
+      
+      double newX = swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) + lateralAmountToSkew;
+      desiredSwingFootPositionFromOppositeSideFoot.setX(newX);
       
       desiredSwingFootPositionFromOppositeSideFoot.changeFrame(ReferenceFrame.getWorldFrame());
       
