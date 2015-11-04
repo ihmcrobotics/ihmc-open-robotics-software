@@ -1,29 +1,29 @@
 package us.ihmc.quadrupedRobotics.dataProviders;
 
-import us.ihmc.communication.packetCommunicator.ConcurrentPacketQueue;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.packets.DesiredVelocityPacket;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
 
-import javax.vecmath.Vector3d;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class DesiredVelocityProvider implements VectorProvider
+public class DesiredVelocityProvider implements VectorProvider, PacketConsumer<DesiredVelocityPacket>
 {
-   private final ConcurrentPacketQueue<DesiredVelocityPacket> packetQueue = new ConcurrentPacketQueue<>();
-   private FrameVector lastReceivedVelocity = new FrameVector(ReferenceFrame.getWorldFrame(), new Vector3d());
+   private final AtomicReference<DesiredVelocityPacket> latestPacket = new AtomicReference<>();
 
    public DesiredVelocityProvider(GlobalDataProducer dataProducer)
    {
-      dataProducer.attachListener(DesiredVelocityPacket.class, packetQueue);
+      dataProducer.attachListener(DesiredVelocityPacket.class, this);
    }
 
    @Override public void get(FrameVector frameVectorToPack)
    {
-      if(packetQueue.isNewPacketAvailable())
-         lastReceivedVelocity.set(packetQueue.getPacket().getVelocity());
+      latestPacket.get();
+   }
 
-      frameVectorToPack.setIncludingFrame(lastReceivedVelocity);
+   @Override public void receivedPacket(DesiredVelocityPacket packet)
+   {
+      latestPacket.set(packet);
    }
 }
