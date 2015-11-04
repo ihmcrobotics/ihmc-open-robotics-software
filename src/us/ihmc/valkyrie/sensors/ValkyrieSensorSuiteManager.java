@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.sensors;
 import java.io.IOException;
 import java.net.URI;
 
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
@@ -36,9 +36,9 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private final DRCRobotSensorInformation sensorInformation;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
    private final PointCloudDataReceiver pointCloudDataReceiver;
-   private final SDFFullRobotModelFactory fullRobotModelFactory;
+   private final SDFFullHumanoidRobotModelFactory fullRobotModelFactory;
 
-   public ValkyrieSensorSuiteManager(SDFFullRobotModelFactory fullRobotModelFactory, DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider,
+   public ValkyrieSensorSuiteManager(SDFFullHumanoidRobotModelFactory fullRobotModelFactory, DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider,
          DRCRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap, DRCRobotModel.RobotTarget target)
    {
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
