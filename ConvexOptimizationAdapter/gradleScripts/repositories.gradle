@@ -13,10 +13,6 @@ repositories {
         url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
     }
     
-    maven{
-    	url "https://bengal.ihmc.us/nexus/content/repositories/xuggle/"
-    }
-    
 	maven {
 		url "https://bengal.ihmc.us/nexus/content/repositories/releases/"
 	}
