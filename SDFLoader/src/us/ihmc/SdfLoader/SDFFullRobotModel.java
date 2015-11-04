@@ -85,6 +85,12 @@ public class SDFFullRobotModel implements FullRobotModel
 
       checkLinkIsNeededForSensor(rootJoint, rootLink);
       addSensorDefinitions(rootJoint, rootLink);
+      
+      if (pelvis.getName().equals(sdfJointNameMap.getHeadName()))
+      {
+         head = pelvis;
+      }
+
       for (SDFJointHolder sdfJoint : rootLink.getChildren())
       {
          addJointsRecursively(sdfJoint, pelvis);
