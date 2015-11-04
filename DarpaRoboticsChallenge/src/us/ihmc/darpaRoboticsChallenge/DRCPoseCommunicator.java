@@ -1,18 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -33,17 +26,23 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 import us.ihmc.util.PeriodicThreadScheduler;
 
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4f;
+import javax.vecmath.Vector3f;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 // fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 
 public class DRCPoseCommunicator implements RawOutputWriter
 {
    private final int WORKER_SLEEP_TIME_MILLIS = 1;
-   private final IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
+   private final NetClassList netClassList;
 
 //   private final ScheduledExecutorService writeExecutor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("DRCPoseCommunicator"));
    private final PeriodicThreadScheduler scheduler;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final HumanoidGlobalDataProducer dataProducer;
+   private final GlobalDataProducer dataProducer;
    private final JointConfigurationGatherer jointConfigurationGathererAndProducer;
    private final SensorTimestampHolder sensorOutputMapReadOnly;
    private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
@@ -62,7 +61,8 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final ConcurrentRingBuffer<RobotConfigurationData> robotConfigurationDataRingBuffer;
 
    public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer, AuxiliaryRobotDataProvider auxiliaryRobotDataProvider,
-         HumanoidGlobalDataProducer dataProducer, SensorTimestampHolder sensorTimestampHolder, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly, RobotMotionStatusHolder robotMotionStatusFromController, DRCRobotSensorInformation sensorInformation, PeriodicThreadScheduler scheduler)
+         GlobalDataProducer dataProducer, SensorTimestampHolder sensorTimestampHolder, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly,
+         RobotMotionStatusHolder robotMotionStatusFromController, DRCRobotSensorInformation sensorInformation, PeriodicThreadScheduler scheduler, NetClassList netClassList)
    {
       this.dataProducer = dataProducer;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
@@ -70,6 +70,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       this.sensorRawOutputMapReadOnly = sensorRawOutputMapReadOnly;
       this.robotMotionStatusFromController = robotMotionStatusFromController;
       this.scheduler = scheduler;
+      this.netClassList = netClassList;
 
       if(sensorInformation != null)
       {
@@ -123,6 +124,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    // this thread reads from the stateRingBuffer and pushes the data out to the objectConsumer
    private void startWriterThread()
    {
+      dataProducer.registerPacketToSkipQueue(RobotConfigurationData.class);
       scheduler.schedule(new Runnable()
       {
          @Override
@@ -135,7 +137,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
                   RobotConfigurationData robotConfigData;
                   while ((robotConfigData = robotConfigurationDataRingBuffer.read()) != null)
                   {
-                     dataProducer.send(robotConfigData);
+                     dataProducer.skipQueueAndSend(robotConfigData);
                   }
                   robotConfigurationDataRingBuffer.flush();
                }
