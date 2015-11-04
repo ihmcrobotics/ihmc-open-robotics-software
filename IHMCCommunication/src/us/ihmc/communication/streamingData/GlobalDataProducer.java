@@ -9,6 +9,8 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
 import us.ihmc.tools.thread.ThreadTools;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -20,6 +22,7 @@ public class GlobalDataProducer
    private final ConcurrentLinkedQueue<Packet<?>> queuedData = new ConcurrentLinkedQueue<Packet<?>>();
    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("HumanoidGlobalDataProducer"));
    private final AtomicLastPacketHolder lastPacketHolder = new AtomicLastPacketHolder();
+   private final ArrayList<Class<? extends Packet<?>>> queueSkippingPackets = new ArrayList<>();
 
    public GlobalDataProducer(PacketCommunicator communicator)
    {
@@ -64,6 +67,32 @@ public class GlobalDataProducer
       lastPacketHolder.setRobotTime(time);
    }
 
+   public void skipQueueAndSend(Packet<?> packet) throws IOException
+   {
+      boolean successfullySentPacket = false;
+      for (int i = 0; i < queueSkippingPackets.size(); i++)
+      {
+         if(queueSkippingPackets.get(i).isInstance(packet))
+         {
+            communicator.send(packet);
+            successfullySentPacket = true;
+            break;
+         }
+      }
+
+      if(!successfullySentPacket)
+         throw new IOException("The packet type " + packet.getClass().getSimpleName() +  " is not registered to skip the queue.");
+   }
+
+   /**
+    * Do NOT register classes to skip the packet queue without first consulting <a href="mailto:jsmith@ihmc.us">Jesper Smith</a>.
+    * @param clazz Packet class given permission to skip the packet queue and send immediately.
+    */
+   public void registerPacketToSkipQueue(Class<? extends Packet<?>> clazz)
+   {
+      queueSkippingPackets.add(clazz);
+   }
+
    private class DataProducerImpl implements Runnable
    {
 
@@ -76,6 +105,5 @@ public class GlobalDataProducer
             communicator.send(dataObject);
          }
       }
-
    }
 }
