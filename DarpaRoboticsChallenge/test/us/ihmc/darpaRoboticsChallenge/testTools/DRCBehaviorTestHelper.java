@@ -35,7 +35,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehavior
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
-import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
+import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataCommunication.YoVariableServer;
@@ -72,7 +72,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final PacketCommunicator mockUIPacketCommunicatorServer;//send packets as if it was sent from the UI
    private final PacketCommunicator behaviorCommunicatorServer;
    private final BehaviorCommunicationBridge behaviorCommunicationBridge;
-   private final RobotDataReceiver robotDataReceiver;
+   private final HumanoidRobotDataReceiver robotDataReceiver;
    private final HumanoidReferenceFrames referenceFrames;
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
@@ -131,7 +131,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       behaviorCommunicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer, registry);
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
-      robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder);
+      robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, forceSensorDataHolder);
       mockUIPacketCommunicatorServer.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -169,7 +169,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return behaviorDispatcher;
    }
 
-   public RobotDataReceiver getRobotDataReceiver()
+   public HumanoidRobotDataReceiver getRobotDataReceiver()
    {
       return robotDataReceiver;
    }
@@ -230,7 +230,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    }
 
    private BehaviorDisptacher setupBehaviorDispatcher(FullRobotModel fullRobotModel, PacketCommunicator behaviorCommunicator,
-         RobotDataReceiver robotDataReceiver, YoGraphicsListRegistry yoGraphicsListRegistry)
+         HumanoidRobotDataReceiver robotDataReceiver, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
       behaviorCommunicator.attachListener(BehaviorControlModePacket.class, desiredBehaviorControlSubscriber);

@@ -44,7 +44,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehavior
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
-import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
+import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -130,7 +130,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
    private HumanoidReferenceFrames referenceFrames;
    private WalkingControllerParameters walkingControllerParameters;
 
-   private RobotDataReceiver robotDataReceiver;
+   private HumanoidRobotDataReceiver robotDataReceiver;
    private BehaviorDisptacher behaviorDispatcher;
 
    private BooleanYoVariable yoDoubleSupport;
@@ -207,7 +207,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
          YoGraphicsListRegistry yoGraphicsListRegistry, PacketCommunicator behaviorCommunicatorServer, YoVariableRegistry registry)
    {
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
-      robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder);
+      robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, forceSensorDataHolder);
       behaviorCommunicatorServer.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();

@@ -30,7 +30,7 @@ import us.ihmc.humanoidBehaviors.behaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket.WalkToGoalAction;
-import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
+import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -106,7 +106,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
    private DoubleYoVariable yoTime;
 
    private ForceSensorDataHolder forceSensorDataHolder;
-   private RobotDataReceiver robotDataReceiver;
+   private HumanoidRobotDataReceiver robotDataReceiver;
 
    private BehaviorCommunicationBridge communicationBridge;
 
@@ -143,7 +143,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       fullRobotModel = getRobotModel().createFullRobotModel();
 
       forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
-      robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder);
+      robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, forceSensorDataHolder);
 
       drcSimulationTestHelper.attachListener(RobotConfigurationData.class, robotDataReceiver);
 

@@ -26,7 +26,7 @@ import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
-import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
+import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -84,7 +84,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
    private final double ORIENTATION_THRESHOLD = 0.05;
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
-   private RobotDataReceiver robotDataReceiver;
+   private HumanoidRobotDataReceiver robotDataReceiver;
    private SDFHumanoidRobot robot;
    private FullHumanoidRobotModel fullRobotModel;
 
