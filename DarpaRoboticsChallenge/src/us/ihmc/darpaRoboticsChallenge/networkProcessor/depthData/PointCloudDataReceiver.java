@@ -37,7 +37,7 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class PointCloudDataReceiver extends Thread implements NetStateListener
+public class PointCloudDataReceiver extends Thread implements NetStateListener, PointCloudDataReceiverInterface
 {
    private final SDFFullHumanoidRobotModel fullRobotModel;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
@@ -242,6 +242,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
     * @param points
     * @param sources
     */
+   @Override
    public void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3d> points,
          PointCloudSource... sources)
    {

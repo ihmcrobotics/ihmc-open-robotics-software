@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.vecmath.Point3d;
@@ -59,12 +60,25 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
       }
    }
    
+   
    public void setDecayingWorldScan(Point3d[] pointCloud)
    {
       decayingWorldScan = new float[pointCloud.length*3];
       for (int i = 0; i < pointCloud.length; i++)
       {
          Point3d point = pointCloud[i];
+         decayingWorldScan[3 * i] = (float) point.getX();
+         decayingWorldScan[3 * i + 1] = (float) point.getY();
+         decayingWorldScan[3 * i + 2] = (float) point.getZ();
+      }
+   }
+
+   public void setDecayingWorldScan(ArrayList<Point3d> pointCloud)
+   {
+      decayingWorldScan = new float[pointCloud.size()*3];
+      for (int i = 0; i < pointCloud.size(); i++)
+      {
+         Point3d point = pointCloud.get(i);
          decayingWorldScan[3 * i] = (float) point.getX();
          decayingWorldScan[3 * i + 1] = (float) point.getY();
          decayingWorldScan[3 * i + 2] = (float) point.getZ();
