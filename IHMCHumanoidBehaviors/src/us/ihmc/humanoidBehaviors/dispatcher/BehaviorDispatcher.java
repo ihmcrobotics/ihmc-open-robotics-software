@@ -32,7 +32,7 @@ import us.ihmc.tools.thread.ThreadTools;
  * DO NOT add smart AI stuff in there, create and register a new behavior in {@link IHMCHumanoidBehaviorManager} instead.
  *
  */
-public class BehaviorDisptacher<E extends Enum<E>> implements Runnable
+public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 {
    private static final boolean DEBUG = true;
    private final Class<E> behaviorEnum;
@@ -60,7 +60,7 @@ public class BehaviorDisptacher<E extends Enum<E>> implements Runnable
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
 
-   public BehaviorDisptacher(DoubleYoVariable yoTime, RobotDataReceiver robotDataReceiver,
+   public BehaviorDispatcher(DoubleYoVariable yoTime, RobotDataReceiver robotDataReceiver,
          BehaviorControlModeSubscriber desiredBehaviorControlSubscriber, BehaviorTypeSubscriber<E> desiredBehaviorSubscriber,
          BehaviorCommunicationBridge communicationBridge, YoVariableServer yoVaribleServer, Class<E> behaviourEnum, E stopBehavior, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
