@@ -6,6 +6,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 
 public class HumanoidRobotDataReceiver extends RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
 {

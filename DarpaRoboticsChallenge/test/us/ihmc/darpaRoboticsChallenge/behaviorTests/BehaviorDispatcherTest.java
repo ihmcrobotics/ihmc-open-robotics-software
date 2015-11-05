@@ -235,7 +235,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       assertTrue(success);
 
       PelvisPoseBehavior pelvisPoseBehavior = new PelvisPoseBehavior(communicationBridge, yoTime);
-      behaviorDispatcher.addHumanoidBehavior(HumanoidBehaviorType.TEST, pelvisPoseBehavior);
+      behaviorDispatcher.addBehavior(HumanoidBehaviorType.TEST, pelvisPoseBehavior);
 
       behaviorDispatcher.start();
 
@@ -279,7 +279,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
       WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(communicationBridge, fullRobotModel, referenceFrames,
             walkingControllerParameters);
-      behaviorDispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToLocationBehavior);
+      behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToLocationBehavior);
 
       behaviorDispatcher.start();
 
@@ -334,7 +334,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
       WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(communicationBridge, fullRobotModel, referenceFrames,
             walkingControllerParameters);
-      behaviorDispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToLocationBehavior);
+      behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToLocationBehavior);
 
       behaviorDispatcher.start();
 
@@ -383,7 +383,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
       WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(communicationBridge, fullRobotModel, referenceFrames,
             walkingControllerParameters);
-      behaviorDispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToLocationBehavior);
+      behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToLocationBehavior);
 
       behaviorDispatcher.start();
 
