@@ -224,6 +224,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       
       desiredVelocity = new YoFrameVector("desiredVelocity", bodyFrame, registry);
       desiredVelocity.setX(0.0);
+      desiredVelocity.setY(0.0);
       bodyMovementTrajectoryTimeDesired.set(1.0);
       
 //      bodyTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator("body", ReferenceFrame.getWorldFrame(), trajectoryTimeProvider, initialBodyPositionProvider, finalBodyPositionProvider, registry);
@@ -718,7 +719,8 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          
          double distance = initialCoMPosition.distance(desiredCoMTarget);
          desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
-         bodyTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.getX());
+         bodyTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.length());
+//         bodyTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.getX());
          
          
          desiredBodyVelocity.changeFrame(ReferenceFrame.getWorldFrame());
