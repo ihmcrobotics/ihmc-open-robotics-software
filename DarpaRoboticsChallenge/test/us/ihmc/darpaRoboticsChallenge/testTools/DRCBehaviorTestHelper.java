@@ -208,7 +208,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    public void dispatchBehavior(BehaviorInterface behaviorToTest) throws SimulationExceededMaximumTimeException
    {
       HumanoidBehaviorType testBehaviorType = HumanoidBehaviorType.TEST;
-      behaviorDispatcher.addHumanoidBehavior(testBehaviorType, behaviorToTest);
+      behaviorDispatcher.addBehavior(testBehaviorType, behaviorToTest);
 
       behaviorDispatcher.start();
 
@@ -223,7 +223,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    public void sendBehaviorToDispatcher(BehaviorInterface behaviorToTest) throws SimulationExceededMaximumTimeException
    {
       HumanoidBehaviorType testBehaviorType = HumanoidBehaviorType.TEST;
-      behaviorDispatcher.addHumanoidBehavior(testBehaviorType, behaviorToTest);
+      behaviorDispatcher.addBehavior(testBehaviorType, behaviorToTest);
       
       HumanoidBehaviorTypePacket requestTestBehaviorPacket = new HumanoidBehaviorTypePacket(testBehaviorType);
       mockUIPacketCommunicatorServer.send(requestTestBehaviorPacket);
