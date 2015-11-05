@@ -174,36 +174,36 @@ public class IHMCHumanoidBehaviorManager
       EnumYoVariable<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
       YoFrameConvexPolygon2d yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DO_NOTHING, new SimpleDoNothingBehavior(outgoingCommunicationBridge));
+      dispatcher.addBehavior(HumanoidBehaviorType.DO_NOTHING, new SimpleDoNothingBehavior(outgoingCommunicationBridge));
 
       ScriptBehavior scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport,
             wholeBodyControllerParameters.getWalkingControllerParameters());
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.SCRIPT, scriptBehavior);
+      dispatcher.addBehavior(HumanoidBehaviorType.SCRIPT, scriptBehavior);
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
             outgoingCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
+      dispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
 
       LocalizationBehavior localizationBehavior = new LocalizationBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport,
             wholeBodyControllerParameters.getWalkingControllerParameters());
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.LOCALIZATION, localizationBehavior);
+      dispatcher.addBehavior(HumanoidBehaviorType.LOCALIZATION, localizationBehavior);
 
       TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime,
             tippingDetectedBoolean, yoDoubleSupport, wholeBodyControllerParameters);
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
 
       RemoveMultipleDebrisBehavior removeDebrisBehavior = new RemoveMultipleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
             wristSensors, yoTime, wholeBodyControllerParameters);
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DEBRIS_TASK, removeDebrisBehavior);
+      dispatcher.addBehavior(HumanoidBehaviorType.DEBRIS_TASK, removeDebrisBehavior);
 
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, wholeBodyControllerParameters
             .getWalkingControllerParameters().getAnkleHeight());
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
 
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.RECEIVE_IMAGE, new ReceiveImageBehavior(outgoingCommunicationBridge));
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.LOCALIZE_DRILL, new LocalizeDrillBehavior(outgoingCommunicationBridge, referenceFrames));
+      dispatcher.addBehavior(HumanoidBehaviorType.RECEIVE_IMAGE, new ReceiveImageBehavior(outgoingCommunicationBridge));
+      dispatcher.addBehavior(HumanoidBehaviorType.LOCALIZE_DRILL, new LocalizeDrillBehavior(outgoingCommunicationBridge, referenceFrames));
 
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.TALK_AND_MOVE_HANDS, new TalkAndMoveHandsBehavior(outgoingCommunicationBridge, referenceFrames, yoTime));
+      dispatcher.addBehavior(HumanoidBehaviorType.TALK_AND_MOVE_HANDS, new TalkAndMoveHandsBehavior(outgoingCommunicationBridge, referenceFrames, yoTime));
       
       
       // TODO: Fix or remove this behavior
@@ -211,13 +211,13 @@ public class IHMCHumanoidBehaviorManager
 //      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.PUSH_BUTTON, pushButtonBehavior);
 
       ForceControlledWallTaskBehavior forcecontrolledWallTaskBehavior = new ForceControlledWallTaskBehavior(outgoingCommunicationBridge, referenceFrames, fullRobotModel, yoTime, yoGraphicsListRegistry);
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.FORCECONTROL_WALL_TASK, forcecontrolledWallTaskBehavior);
+      dispatcher.addBehavior(HumanoidBehaviorType.FORCECONTROL_WALL_TASK, forcecontrolledWallTaskBehavior);
 
       if (wholeBodyControllerParameters.createWholeBodyIkSolver() != null)
       {
          DrillPickUpBehavior drillPickUpBehavior = new DrillPickUpBehavior(outgoingCommunicationBridge, yoTime, fullRobotModel, referenceFrames,
                wholeBodyControllerParameters);
-         dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DRILL_PICK_UP, drillPickUpBehavior);
+         dispatcher.addBehavior(HumanoidBehaviorType.DRILL_PICK_UP, drillPickUpBehavior);
       }
    }
 
@@ -232,7 +232,7 @@ public class IHMCHumanoidBehaviorManager
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
             outgoingCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
       diagnosticBehavior.setupForAutomaticDiagnostic(timeToWait);
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
+      dispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
       dispatcher.requestBehavior(HumanoidBehaviorType.DIAGNOSTIC);
    }
 

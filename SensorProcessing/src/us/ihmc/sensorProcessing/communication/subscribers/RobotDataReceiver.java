@@ -1,4 +1,4 @@
-package us.ihmc.humanoidRobotics.communication.subscribers;
+package us.ihmc.sensorProcessing.communication.subscribers;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
