@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.utilities;
 import static org.junit.Assert.assertTrue;
 
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -43,26 +43,26 @@ public class TimeBasedStopThreadUpdatable extends StopThreadUpdatable
       if (hasThresholdBeenCrossed(pauseTime))
       {
          PrintTools.debug(this, "Requesting Pause");
-         setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.PAUSE);
+         setRequestedBehaviorControlMode(BehaviorControlModeEnum.PAUSE);
       }
       else if (hasThresholdBeenCrossed(resumeTime))
       {
          assertTrue(!behavior.isDone());
 
          PrintTools.debug(this, "Requesting Resume");
-         setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.RESUME);
+         setRequestedBehaviorControlMode(BehaviorControlModeEnum.RESUME);
       }
       else if (hasThresholdBeenCrossed(stopTime))
       {
          PrintTools.debug(this, "Requesting Stop");
-         setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.STOP);
+         setRequestedBehaviorControlMode(BehaviorControlModeEnum.STOP);
       }
       else if (behavior.isDone())
       {
          doneTime = elapsedTime;
          setShouldBehaviorRunnerBeStopped(true);
       }
-      else if (getRequestedBehaviorControlMode().equals(HumanoidBehaviorControlModeEnum.STOP))
+      else if (getRequestedBehaviorControlMode().equals(BehaviorControlModeEnum.STOP))
       {
          if (Double.isNaN(doneTime))
          {

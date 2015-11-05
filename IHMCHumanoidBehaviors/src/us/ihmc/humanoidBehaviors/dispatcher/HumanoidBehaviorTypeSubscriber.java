@@ -6,7 +6,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 
-public class HumanoidBehaviorTypeSubscriber implements PacketConsumer<HumanoidBehaviorTypePacket>
+public class HumanoidBehaviorTypeSubscriber implements PacketConsumer<HumanoidBehaviorTypePacket>, BehaviorTypeSubscriber<HumanoidBehaviorType>
 {
    private final AtomicReference<HumanoidBehaviorTypePacket> packetReference = new AtomicReference<HumanoidBehaviorTypePacket>(null);
 
@@ -15,11 +15,19 @@ public class HumanoidBehaviorTypeSubscriber implements PacketConsumer<HumanoidBe
       
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.humanoidBehaviors.dispatcher.BehaviorTypeSubscriber#checkForNewBehaviorRequested()
+    */
+   @Override
    public boolean checkForNewBehaviorRequested()
    {
       return packetReference.get() != null;
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.humanoidBehaviors.dispatcher.BehaviorTypeSubscriber#getRequestedBehavior()
+    */
+   @Override
    public HumanoidBehaviorType getRequestedBehavior()
    {
       return packetReference.getAndSet(null).getBehaviorType();

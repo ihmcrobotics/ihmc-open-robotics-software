@@ -22,15 +22,15 @@ import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDisptacher;
-import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorControlModeSubscriber;
+import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.StopThreadUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.TimeBasedStopThreadUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
@@ -232,8 +232,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private BehaviorDisptacher setupBehaviorDispatcher(FullRobotModel fullRobotModel, PacketCommunicator behaviorCommunicator,
          RobotDataReceiver robotDataReceiver, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new HumanoidBehaviorControlModeSubscriber();
-      behaviorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
+      BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
+      behaviorCommunicator.attachListener(BehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
 
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
       behaviorCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
@@ -241,8 +241,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       YoVariableServer yoVariableServer = null;
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
 
-      BehaviorDisptacher ret = new BehaviorDisptacher(yoTimeBehaviorDispatcher, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
-            behaviorCommunicationBridge, yoVariableServer, registry, yoGraphicsListRegistry);
+      BehaviorDisptacher<HumanoidBehaviorType> ret = new BehaviorDisptacher<>(yoTimeBehaviorDispatcher, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
+            behaviorCommunicationBridge, yoVariableServer, HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry, yoGraphicsListRegistry);
 
       ret.addUpdatable(capturePointUpdatable);
       ret.addUpdatable(wristForceSensorUpdatables.get(RobotSide.LEFT));
@@ -500,7 +500,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    {
       private final StopThreadUpdatable stopThreadUpdatable;
 
-      private HumanoidBehaviorControlModeEnum currentControlMode = HumanoidBehaviorControlModeEnum.RESUME;
+      private BehaviorControlModeEnum currentControlMode = BehaviorControlModeEnum.RESUME;
 
       public StoppableBehaviorRunner(BehaviorInterface behavior, StopThreadUpdatable stopThreadUpdatable)
       {
@@ -526,36 +526,36 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
             stopThreadUpdatable.update(yoTimeRobot.getDoubleValue());
 
-            HumanoidBehaviorControlModeEnum requestedControlMode = stopThreadUpdatable.getRequestedBehaviorControlMode();
+            BehaviorControlModeEnum requestedControlMode = stopThreadUpdatable.getRequestedBehaviorControlMode();
 
             if (stopThreadUpdatable.shouldBehaviorRunnerBeStopped())
             {
                PrintTools.debug(this, "Stopping Thread!");
                isRunning = false;
             }
-            else if (requestedControlMode.equals(HumanoidBehaviorControlModeEnum.PAUSE) && !currentControlMode.equals(HumanoidBehaviorControlModeEnum.PAUSE))
+            else if (requestedControlMode.equals(BehaviorControlModeEnum.PAUSE) && !currentControlMode.equals(BehaviorControlModeEnum.PAUSE))
             {
                for (BehaviorInterface behavior : behaviors)
                {
                   behavior.pause();
                }
-               currentControlMode = HumanoidBehaviorControlModeEnum.PAUSE;
+               currentControlMode = BehaviorControlModeEnum.PAUSE;
             }
-            else if (requestedControlMode.equals(HumanoidBehaviorControlModeEnum.STOP) && !currentControlMode.equals(HumanoidBehaviorControlModeEnum.STOP))
+            else if (requestedControlMode.equals(BehaviorControlModeEnum.STOP) && !currentControlMode.equals(BehaviorControlModeEnum.STOP))
             {
                for (BehaviorInterface behavior : behaviors)
                {
                   behavior.stop();
                }
-               currentControlMode = HumanoidBehaviorControlModeEnum.STOP;
+               currentControlMode = BehaviorControlModeEnum.STOP;
             }
-            else if (requestedControlMode.equals(HumanoidBehaviorControlModeEnum.RESUME) && !currentControlMode.equals(HumanoidBehaviorControlModeEnum.RESUME))
+            else if (requestedControlMode.equals(BehaviorControlModeEnum.RESUME) && !currentControlMode.equals(BehaviorControlModeEnum.RESUME))
             {
                for (BehaviorInterface behavior : behaviors)
                {
                   behavior.resume();
                }
-               currentControlMode = HumanoidBehaviorControlModeEnum.RESUME;
+               currentControlMode = BehaviorControlModeEnum.RESUME;
             }
 
             ThreadTools.sleep(1);

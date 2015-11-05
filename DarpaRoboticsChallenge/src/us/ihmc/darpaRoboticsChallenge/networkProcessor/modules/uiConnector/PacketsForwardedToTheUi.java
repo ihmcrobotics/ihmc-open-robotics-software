@@ -6,7 +6,7 @@ import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModeResponsePacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
@@ -47,7 +47,7 @@ public class PacketsForwardedToTheUi
       FootstepStatus.class,                          
       ScriptBehaviorStatusPacket.class,
       PelvisPoseErrorPacket.class,                   
-      HumanoidBehaviorControlModeResponsePacket.class,
+      BehaviorControlModeResponsePacket.class,
       BDIBehaviorStatusPacket.class,                 
       ControlStatusPacket.class,                     
       FootstepDataList.class,                        

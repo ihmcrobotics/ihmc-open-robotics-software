@@ -21,11 +21,11 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavi
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDisptacher;
-import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorControlModeSubscriber;
+import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
@@ -99,11 +99,11 @@ public class IHMCHumanoidBehaviorManager
       HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
       behaviorPacketCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
-      HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new HumanoidBehaviorControlModeSubscriber();
+      BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
 
-      BehaviorDisptacher dispatcher = new BehaviorDisptacher(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
-            communicationBridge, yoVariableServer, registry, yoGraphicsListRegistry);
+      BehaviorDisptacher<HumanoidBehaviorType> dispatcher = new BehaviorDisptacher<>(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
+            communicationBridge, yoVariableServer, HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry, yoGraphicsListRegistry);
 
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
       behaviorPacketCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
@@ -138,7 +138,7 @@ public class IHMCHumanoidBehaviorManager
                capturePointUpdatable, wholeBodyControllerParameters);
       }
 
-      behaviorPacketCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
+      behaviorPacketCommunicator.attachListener(BehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       behaviorPacketCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
 
       behaviorPacketCommunicator.connect();
@@ -164,7 +164,7 @@ public class IHMCHumanoidBehaviorManager
     * @param forceSensorDataHolder Holds the force sensor data
     * @param ankleHeight 
     */
-   private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, SDFFullHumanoidRobotModel fullRobotModel,
+   private void createAndRegisterBehaviors(BehaviorDisptacher<HumanoidBehaviorType> dispatcher, SDFFullHumanoidRobotModel fullRobotModel,
          SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry,
          CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters)
@@ -221,7 +221,7 @@ public class IHMCHumanoidBehaviorManager
       }
    }
 
-   private void createAndRegisterAutomaticDiagnostic(BehaviorDisptacher dispatcher, SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+   private void createAndRegisterAutomaticDiagnostic(BehaviorDisptacher<HumanoidBehaviorType> dispatcher, SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
          DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, CapturePointUpdatable capturePointUpdatable,
          WholeBodyControllerParameters wholeBodyControllerParameters, double timeToWait, YoGraphicsListRegistry yoGraphicsListRegistry)
    {

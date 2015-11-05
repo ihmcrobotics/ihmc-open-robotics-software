@@ -23,7 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.utilities.StopThreadUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
@@ -338,7 +338,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       SideDependentList<FramePose2d> footPosesAtStop = new SideDependentList<FramePose2d>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         ReferenceFrame footFrame = stopThreadUpdatable.getReferenceFramesAtTransition(HumanoidBehaviorControlModeEnum.STOP).getFootFrame(robotSide);
+         ReferenceFrame footFrame = stopThreadUpdatable.getReferenceFramesAtTransition(BehaviorControlModeEnum.STOP).getFootFrame(robotSide);
          footPosesAtStop.put(robotSide, stopThreadUpdatable.getTestFramePose2dCopy(footFrame.getTransformToWorldFrame()));
       }
 

@@ -36,9 +36,9 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.ButtonData;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.DebrisData;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.DrillPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorButtonPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModeResponsePacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorDebrisPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
@@ -335,11 +335,11 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Humanoid Behaviors
       registerPacketClass(HumanoidBehaviorTypePacket.class);
       registerPacketField(HumanoidBehaviorType.class);
-      registerPacketClass(HumanoidBehaviorControlModePacket.class);
-      registerPacketField(HumanoidBehaviorControlModeEnum.class);
+      registerPacketClass(BehaviorControlModePacket.class);
+      registerPacketField(BehaviorControlModeEnum.class);
       registerPacketClass(ScriptBehaviorStatusPacket.class);
       registerPacketClass(ScriptBehaviorStatusEnum.class);
-      registerPacketClass(HumanoidBehaviorControlModeResponsePacket.class);
+      registerPacketClass(BehaviorControlModeResponsePacket.class);
       registerPacketClass(ScriptBehaviorInputPacket.class);
       registerPacketClass(WallTaskBehaviorData.class);
       registerPacketField(WallTaskBehaviorData.Commands.class);

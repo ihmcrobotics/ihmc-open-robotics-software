@@ -13,9 +13,8 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleForwardingBehav
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateWrapper;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModeResponsePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -33,9 +32,10 @@ import us.ihmc.tools.thread.ThreadTools;
  * DO NOT add smart AI stuff in there, create and register a new behavior in {@link IHMCHumanoidBehaviorManager} instead.
  *
  */
-public class BehaviorDisptacher implements Runnable
+public class BehaviorDisptacher<E extends Enum<E>> implements Runnable
 {
    private static final boolean DEBUG = true;
+   private final Class<E> behaviorEnum;
    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("BehaviorDispatcher"));
    
    private final String name = getClass().getSimpleName();
@@ -44,12 +44,12 @@ public class BehaviorDisptacher implements Runnable
 
    private final DoubleYoVariable yoTime;
    private final YoVariableServer yoVaribleServer;
-   private final BehaviorStateMachine<HumanoidBehaviorType> stateMachine;
+   private final BehaviorStateMachine<E> stateMachine;
 
-   private final EnumYoVariable<HumanoidBehaviorType> requestedBehavior = new EnumYoVariable<>("requestedBehavior", registry, HumanoidBehaviorType.class, true);
+   private final EnumYoVariable<E> requestedBehavior;
 
-   private final HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber;
-   private final HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber;
+   private final BehaviorTypeSubscriber<E> desiredBehaviorSubscriber;
+   private final BehaviorControlModeSubscriber desiredBehaviorControlSubscriber;
    private final BehaviorCommunicationBridge communicationBridge;
 
    private final RobotDataReceiver robotDataReceiver;
@@ -61,59 +61,61 @@ public class BehaviorDisptacher implements Runnable
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
 
    public BehaviorDisptacher(DoubleYoVariable yoTime, RobotDataReceiver robotDataReceiver,
-         HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber, HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber,
-         BehaviorCommunicationBridge communicationBridge, YoVariableServer yoVaribleServer, YoVariableRegistry parentRegistry,
+         BehaviorControlModeSubscriber desiredBehaviorControlSubscriber, BehaviorTypeSubscriber<E> desiredBehaviorSubscriber,
+         BehaviorCommunicationBridge communicationBridge, YoVariableServer yoVaribleServer, Class<E> behaviourEnum, E stopBehavior, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.behaviorEnum = behaviourEnum;
       this.yoTime = yoTime;
       this.yoVaribleServer = yoVaribleServer;
       this.communicationBridge = communicationBridge;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
+      this.requestedBehavior = new EnumYoVariable<E>("requestedBehavior", registry, behaviourEnum, true);
 
       this.robotDataReceiver = robotDataReceiver;
       this.desiredBehaviorSubscriber = desiredBehaviorSubscriber;
       this.desiredBehaviorControlSubscriber = desiredBehaviorControlSubscriber;
 
-      stateMachine = new BehaviorStateMachine<HumanoidBehaviorType>("behaviorState", "behaviorSwitchTime", HumanoidBehaviorType.class, yoTime, registry);
+      stateMachine = new BehaviorStateMachine<E>("behaviorState", "behaviorSwitchTime", behaviourEnum, yoTime, registry);
 
       SimpleForwardingBehavior simpleForwardingBehavior = new SimpleForwardingBehavior(communicationBridge);
       attachListeners(simpleForwardingBehavior);
-      addHumanoidBehavior(HumanoidBehaviorType.STOP, simpleForwardingBehavior);
-      stateMachine.setCurrentState(HumanoidBehaviorType.STOP);
+      addHumanoidBehavior(stopBehavior, simpleForwardingBehavior);
+      stateMachine.setCurrentState(stopBehavior);
 
       requestedBehavior.set(null);
 
       parentRegistry.addChild(registry);
    }
 
-   public void requestBehavior(HumanoidBehaviorType behaviorEnum)
+   public void requestBehavior(E behaviorEnum)
    {
       requestedBehavior.set(behaviorEnum);
    }
 
-   public void addHumanoidBehaviors(List<HumanoidBehaviorType> humanoidBehaviorTypes, List<BehaviorInterface> newBehaviors)
+   public void addHumanoidBehaviors(List<E> Es, List<BehaviorInterface> newBehaviors)
    {
-      if (humanoidBehaviorTypes.size() != newBehaviors.size())
+      if (Es.size() != newBehaviors.size())
          throw new RuntimeException("Arguments don't have the same size.");
 
-      for (int i = 0; i < humanoidBehaviorTypes.size(); i++)
+      for (int i = 0; i < Es.size(); i++)
       {
-         addHumanoidBehavior(humanoidBehaviorTypes.get(i), newBehaviors.get(i));
+         addHumanoidBehavior(Es.get(i), newBehaviors.get(i));
       }
    }
 
-   public void addHumanoidBehavior(HumanoidBehaviorType humanoidBehaviorType, BehaviorInterface behaviorToAdd)
+   public void addHumanoidBehavior(E E, BehaviorInterface behaviorToAdd)
    {
-      BehaviorStateWrapper<HumanoidBehaviorType> behaviorStateToAdd = new BehaviorStateWrapper<HumanoidBehaviorType>(humanoidBehaviorType, behaviorToAdd);
+      BehaviorStateWrapper<E> behaviorStateToAdd = new BehaviorStateWrapper<E>(E, behaviorToAdd);
 
       this.stateMachine.addState(behaviorStateToAdd);
       this.registry.addChild(behaviorToAdd.getYoVariableRegistry());
 
-      ArrayList<BehaviorStateWrapper<HumanoidBehaviorType>> allOtherBehaviorStates = new ArrayList<BehaviorStateWrapper<HumanoidBehaviorType>>();
+      ArrayList<BehaviorStateWrapper<E>> allOtherBehaviorStates = new ArrayList<BehaviorStateWrapper<E>>();
 
-      for (HumanoidBehaviorType otherBehaviorType : HumanoidBehaviorType.values)
+      for (E otherBehaviorType : behaviorEnum.getEnumConstants())
       {
-         BehaviorStateWrapper<HumanoidBehaviorType> otherBehaviorState = stateMachine.getState(otherBehaviorType);
+         BehaviorStateWrapper<E> otherBehaviorState = stateMachine.getState(otherBehaviorType);
 
          if (otherBehaviorState == null)
          {
@@ -194,21 +196,21 @@ public class BehaviorDisptacher implements Runnable
          {
          case STOP:
             stateMachine.stop();
-            communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.STOP));
+            communicationBridge.sendPacketToNetworkProcessor(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.STOP));
             break;
          case PAUSE:
             stateMachine.pause();
             communicationBridge.setPacketPassThrough(true);
-            communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.PAUSE));
+            communicationBridge.sendPacketToNetworkProcessor(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.PAUSE));
             break;
          case RESUME:
             stateMachine.resume();
             communicationBridge.setPacketPassThrough(false);
-            communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.RESUME));
+            communicationBridge.sendPacketToNetworkProcessor(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
             break;
          case ENABLE_ACTIONS:
             stateMachine.enableActions();
-            communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.ENABLE_ACTIONS));
+            communicationBridge.sendPacketToNetworkProcessor(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.ENABLE_ACTIONS));
             break;
          default:
             throw new IllegalArgumentException("BehaviorCommunicationBridge, unhandled control!");
@@ -250,11 +252,11 @@ public class BehaviorDisptacher implements Runnable
 
    private class SwitchGlobalListenersAction implements StateTransitionAction
    {
-      private final BehaviorStateWrapper<HumanoidBehaviorType> fromBehaviorState;
-      private final BehaviorStateWrapper<HumanoidBehaviorType> toBehaviorState;
+      private final BehaviorStateWrapper<E> fromBehaviorState;
+      private final BehaviorStateWrapper<E> toBehaviorState;
 
-      public SwitchGlobalListenersAction(BehaviorStateWrapper<HumanoidBehaviorType> fromBehaviorState,
-            BehaviorStateWrapper<HumanoidBehaviorType> toBehaviorState)
+      public SwitchGlobalListenersAction(BehaviorStateWrapper<E> fromBehaviorState,
+            BehaviorStateWrapper<E> toBehaviorState)
       {
          this.fromBehaviorState = fromBehaviorState;
          this.toBehaviorState = toBehaviorState;
