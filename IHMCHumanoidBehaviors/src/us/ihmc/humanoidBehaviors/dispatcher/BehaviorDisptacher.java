@@ -15,7 +15,7 @@ import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateWrapper;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
-import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
+import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -52,7 +52,7 @@ public class BehaviorDisptacher<E extends Enum<E>> implements Runnable
    private final BehaviorControlModeSubscriber desiredBehaviorControlSubscriber;
    private final BehaviorCommunicationBridge communicationBridge;
 
-   private final RobotDataReceiver robotDataReceiver;
+   private final HumanoidRobotDataReceiver robotDataReceiver;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
@@ -60,7 +60,7 @@ public class BehaviorDisptacher<E extends Enum<E>> implements Runnable
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
 
-   public BehaviorDisptacher(DoubleYoVariable yoTime, RobotDataReceiver robotDataReceiver,
+   public BehaviorDisptacher(DoubleYoVariable yoTime, HumanoidRobotDataReceiver robotDataReceiver,
          BehaviorControlModeSubscriber desiredBehaviorControlSubscriber, BehaviorTypeSubscriber<E> desiredBehaviorSubscriber,
          BehaviorCommunicationBridge communicationBridge, YoVariableServer yoVaribleServer, Class<E> behaviourEnum, E stopBehavior, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)

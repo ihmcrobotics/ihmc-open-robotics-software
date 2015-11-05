@@ -35,7 +35,7 @@ import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangePacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
+import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.ihmcPerception.IHMCProntoRosLocalizationUpdateSubscriber;
 import us.ihmc.ihmcPerception.RosLocalizationPoseCorrectionSubscriber;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
@@ -89,7 +89,7 @@ public class ThePeoplesGloriousNetworkProcessor
       this.nodeConfiguration = NodeConfiguration.newPrivate();
       this.messageFactory = nodeConfiguration.getTopicMessageFactory();
       this.fullRobotModel = robotModel.createFullRobotModel();
-      RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
+      HumanoidRobotDataReceiver robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, null);
       gfe_communicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
       gfe_communicator.attachListener(RobotConfigurationData.class, ppsOffsetProvider);
       gfe_communicator.attachListener(HighLevelStateChangePacket.class, new PeriodicRosHighLevelStatePublisher(rosMainNode, namespace));
@@ -186,7 +186,7 @@ public class ThePeoplesGloriousNetworkProcessor
       }
    }
 
-   private void setupInputs(String namespace, RobotDataReceiver robotDataReceiver, FullHumanoidRobotModel fullRobotModel)
+   private void setupInputs(String namespace, HumanoidRobotDataReceiver robotDataReceiver, FullHumanoidRobotModel fullRobotModel)
    {
       Map<String, Class> inputPacketList = IHMCRosApiMessageMap.INPUT_PACKET_MESSAGE_NAME_MAP;
 

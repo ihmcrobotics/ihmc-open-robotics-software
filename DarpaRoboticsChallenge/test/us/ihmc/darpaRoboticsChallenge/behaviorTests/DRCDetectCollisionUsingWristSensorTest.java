@@ -15,7 +15,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.Frame;
-import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
+import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
@@ -110,7 +110,7 @@ public abstract class DRCDetectCollisionUsingWristSensorTest implements MultiRob
       drcBehaviorTestHelper.getRobot().setController(handImpactDetector);
    }
 
-   private MonitorForceSensorController setupUpdateForceSensorController(RobotDataReceiver robotDataReceiver, WristForceSensorFilteredUpdatable wristUpdatable)
+   private MonitorForceSensorController setupUpdateForceSensorController(HumanoidRobotDataReceiver robotDataReceiver, WristForceSensorFilteredUpdatable wristUpdatable)
    {
       ArrayList<WrenchCalculatorInterface> forceSensors = new ArrayList<WrenchCalculatorInterface>();
       drcBehaviorTestHelper.getRobot().getForceSensors(forceSensors);

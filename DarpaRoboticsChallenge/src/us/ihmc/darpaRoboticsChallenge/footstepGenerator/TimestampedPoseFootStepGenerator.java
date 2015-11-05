@@ -7,7 +7,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
-import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
+import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.AbstractSimpleParametersFootstepGenerator;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
@@ -28,12 +28,12 @@ public class TimestampedPoseFootStepGenerator extends AbstractRosTopicSubscriber
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private SimplePathParameters pathType = new SimplePathParameters(0.4, 0.30, 0.0, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
-   private final RobotDataReceiver robotDataReceiver;
+   private final HumanoidRobotDataReceiver robotDataReceiver;
    private final PacketCommunicator controllerCommunicator;
    private final SideDependentList<RigidBody> feet;
    private final SideDependentList<ReferenceFrame> soleFrames;
 
-   public TimestampedPoseFootStepGenerator(RobotDataReceiver robotDataReceiver, FullHumanoidRobotModel fullRobotModel, PacketCommunicator controllerCommunicationBridge)
+   public TimestampedPoseFootStepGenerator(HumanoidRobotDataReceiver robotDataReceiver, FullHumanoidRobotModel fullRobotModel, PacketCommunicator controllerCommunicationBridge)
    {
       super(geometry_msgs.PoseStamped._TYPE);
       this.robotDataReceiver = robotDataReceiver;

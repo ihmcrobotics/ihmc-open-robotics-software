@@ -14,7 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseMocapExperimentPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseTest;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseTest.MultisenseFrameName;
-import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
+import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -28,7 +28,7 @@ public class MultisensePointCloudReceiver extends RosPointCloudSubscriber
    private final AtomicReference<RigidBodyTransform> headInMocapFrame = new AtomicReference<RigidBodyTransform>(new RigidBodyTransform());
    private ReferenceFrame pointCloudReferenceFrame;
    private final ReferenceFrame headRootReferenceFrame;
-   private final RobotDataReceiver robotDataReceiver;
+   private final HumanoidRobotDataReceiver robotDataReceiver;
    
    public MultisensePointCloudReceiver(PacketCommunicator packetCommunicator, MultisenseTest testInfo, DRCRobotModel robotModel)
    {
@@ -37,7 +37,7 @@ public class MultisensePointCloudReceiver extends RosPointCloudSubscriber
       this.frame = testInfo.getFrame();
       
       SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
+      robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, null);
       HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
       
       this.headRootReferenceFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);

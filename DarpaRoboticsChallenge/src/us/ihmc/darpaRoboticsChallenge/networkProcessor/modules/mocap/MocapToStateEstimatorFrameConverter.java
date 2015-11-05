@@ -7,7 +7,7 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
+import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -25,7 +25,7 @@ public class MocapToStateEstimatorFrameConverter
    HashMap<Integer, RigidBodyTransform> mocapRigidBodyTransforms = new HashMap<Integer, RigidBodyTransform>();
    
    /** Get robot configuration from controller **/
-   private final RobotDataReceiver robotDataReceiver;
+   private final HumanoidRobotDataReceiver robotDataReceiver;
 
    /** Atlas specific assumption!!! head frame for atlas coincides with neck_ry joint */
    private final ReferenceFrame robotHeadFrame;
@@ -66,7 +66,7 @@ public class MocapToStateEstimatorFrameConverter
    public MocapToStateEstimatorFrameConverter(DRCRobotModel robotModel, PacketCommunicator mocapModulePacketCommunicator)
    {
       SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
+      robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, null);
       HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
       robotHeadFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);
       
