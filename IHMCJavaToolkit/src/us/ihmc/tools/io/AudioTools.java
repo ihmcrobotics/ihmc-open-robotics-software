@@ -63,6 +63,7 @@ public class AudioTools
       }
       catch (Exception e)
       {
+         e.printStackTrace();
          return null;
       }
    }
