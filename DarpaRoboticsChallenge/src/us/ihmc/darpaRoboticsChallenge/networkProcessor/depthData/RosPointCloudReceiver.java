@@ -14,12 +14,12 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 public class RosPointCloudReceiver extends RosPointCloudSubscriber
 {
    private final ReferenceFrame cloudFrame;
-   private final PointCloudDataReceiver pointCloudDataReceiver;
+   private final PointCloudDataReceiverInterface pointCloudDataReceiver;
    private final ReferenceFrame sensorframe;
    private final PointCloudSource[] pointCloudSource;
 
    public RosPointCloudReceiver(String sensorNameInSdf, String rosTopic, RosMainNode rosMainNode, ReferenceFrame scanFrame,
-         PointCloudDataReceiver pointCloudDataReceiver, PointCloudSource... pointCloudSource)
+         PointCloudDataReceiverInterface pointCloudDataReceiver, PointCloudSource... pointCloudSource)
    {
       this.cloudFrame = scanFrame;
       this.pointCloudDataReceiver = pointCloudDataReceiver;
@@ -32,7 +32,7 @@ public class RosPointCloudReceiver extends RosPointCloudSubscriber
    }
    
    public RosPointCloudReceiver(DRCRobotPointCloudParameters pointCloudParameters, RosMainNode rosMainNode, ReferenceFrame cloudFrame,
-         PointCloudDataReceiver pointCloudDataReceiver, PointCloudSource... pointCloudSource)
+         PointCloudDataReceiverInterface pointCloudDataReceiver, PointCloudSource... pointCloudSource)
    {
       this.cloudFrame = cloudFrame;
       this.pointCloudDataReceiver = pointCloudDataReceiver;

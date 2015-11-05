@@ -15,7 +15,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class SCSPointCloudLidarReceiver implements ObjectConsumer<SimulatedLidarScanPacket>
 {
 
-   private final PointCloudDataReceiver pointCloudDataReceiver;
+   private final PointCloudDataReceiverInterface pointCloudDataReceiver;
    private final ReferenceFrame lidarFrame;
 
    private final ReferenceFrame lidarScanFrame;
