@@ -80,7 +80,7 @@ public class BehaviorDisptacher<E extends Enum<E>> implements Runnable
 
       SimpleForwardingBehavior simpleForwardingBehavior = new SimpleForwardingBehavior(communicationBridge);
       attachListeners(simpleForwardingBehavior);
-      addHumanoidBehavior(stopBehavior, simpleForwardingBehavior);
+      addBehavior(stopBehavior, simpleForwardingBehavior);
       stateMachine.setCurrentState(stopBehavior);
 
       requestedBehavior.set(null);
@@ -93,18 +93,18 @@ public class BehaviorDisptacher<E extends Enum<E>> implements Runnable
       requestedBehavior.set(behaviorEnum);
    }
 
-   public void addHumanoidBehaviors(List<E> Es, List<BehaviorInterface> newBehaviors)
+   public void addBehaviors(List<E> Es, List<BehaviorInterface> newBehaviors)
    {
       if (Es.size() != newBehaviors.size())
          throw new RuntimeException("Arguments don't have the same size.");
 
       for (int i = 0; i < Es.size(); i++)
       {
-         addHumanoidBehavior(Es.get(i), newBehaviors.get(i));
+         addBehavior(Es.get(i), newBehaviors.get(i));
       }
    }
 
-   public void addHumanoidBehavior(E E, BehaviorInterface behaviorToAdd)
+   public void addBehavior(E E, BehaviorInterface behaviorToAdd)
    {
       BehaviorStateWrapper<E> behaviorStateToAdd = new BehaviorStateWrapper<E>(E, behaviorToAdd);
 
