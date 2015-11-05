@@ -8,13 +8,14 @@ import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 
-public class RobotDataReceiver
+public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
 {
 
    private final AtomicReference<RobotConfigurationData> packet = new AtomicReference<RobotConfigurationData>(null);
