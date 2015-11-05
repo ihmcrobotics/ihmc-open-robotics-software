@@ -15,6 +15,11 @@ public class DesiredVelocityPacket extends Packet<DesiredVelocityPacket>
       this.velocity = velocity;
    }
 
+   public DesiredVelocityPacket(double x, double y, double z)
+   {
+      this.velocity = new Vector3d(x, y, z);
+   }
+
    public Vector3d getVelocity()
    {
       return velocity;
