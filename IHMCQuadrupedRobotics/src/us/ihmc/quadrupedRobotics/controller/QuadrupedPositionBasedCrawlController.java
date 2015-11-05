@@ -12,6 +12,7 @@ import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.trajectory.QuadrupedSwingTrajectoryGenerator;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -718,8 +719,11 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          
          double distance = initialCoMPosition.distance(desiredCoMTarget);
          desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
-         bodyTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.length());
-//         bodyTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.getX());
+         if (!MathTools.epsilonEquals(desiredBodyVelocity.length(), 0.0, 1e-5))
+            bodyTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.length());
+         else
+            bodyTrajectoryGenerator.setTrajectoryTime(1.0);
+         //         bodyTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.getX());
          
          
          desiredBodyVelocity.changeFrame(ReferenceFrame.getWorldFrame());
