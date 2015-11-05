@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface.BehaviorStatus;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FramePose;
@@ -24,11 +24,11 @@ public abstract class StopThreadUpdatable implements Updatable
 
    private boolean stopBehaviorThread = false;
 
-   private HumanoidBehaviorControlModeEnum requestedControlMode = HumanoidBehaviorControlModeEnum.ENABLE_ACTIONS;
+   private BehaviorControlModeEnum requestedControlMode = BehaviorControlModeEnum.ENABLE_ACTIONS;
 
-   protected LinkedHashMap<HumanoidBehaviorControlModeEnum, BehaviorStatus> behaviorStatus = new LinkedHashMap<HumanoidBehaviorControlModeEnum, BehaviorStatus>();
-   protected LinkedHashMap<HumanoidBehaviorControlModeEnum, RigidBodyTransform> testFrameTransformToWorld = new LinkedHashMap<HumanoidBehaviorControlModeEnum, RigidBodyTransform>();
-   protected LinkedHashMap<HumanoidBehaviorControlModeEnum, HumanoidReferenceFrames> referenceFramesForLogging = new LinkedHashMap<HumanoidBehaviorControlModeEnum, HumanoidReferenceFrames>();
+   protected LinkedHashMap<BehaviorControlModeEnum, BehaviorStatus> behaviorStatus = new LinkedHashMap<BehaviorControlModeEnum, BehaviorStatus>();
+   protected LinkedHashMap<BehaviorControlModeEnum, RigidBodyTransform> testFrameTransformToWorld = new LinkedHashMap<BehaviorControlModeEnum, RigidBodyTransform>();
+   protected LinkedHashMap<BehaviorControlModeEnum, HumanoidReferenceFrames> referenceFramesForLogging = new LinkedHashMap<BehaviorControlModeEnum, HumanoidReferenceFrames>();
 
    public StopThreadUpdatable(RobotDataReceiver robotDataReceiver, BehaviorInterface behavior, ReferenceFrame frameToKeepTrackOf)
    {
@@ -37,17 +37,17 @@ public abstract class StopThreadUpdatable implements Updatable
       this.frameToKeepTrackOf = frameToKeepTrackOf;
       this.currentTransformToWorld = new RigidBodyTransform();
 
-      testFrameTransformToWorld.put(HumanoidBehaviorControlModeEnum.PAUSE, new RigidBodyTransform());
-      testFrameTransformToWorld.put(HumanoidBehaviorControlModeEnum.STOP, new RigidBodyTransform());
-      testFrameTransformToWorld.put(HumanoidBehaviorControlModeEnum.RESUME, new RigidBodyTransform());
+      testFrameTransformToWorld.put(BehaviorControlModeEnum.PAUSE, new RigidBodyTransform());
+      testFrameTransformToWorld.put(BehaviorControlModeEnum.STOP, new RigidBodyTransform());
+      testFrameTransformToWorld.put(BehaviorControlModeEnum.RESUME, new RigidBodyTransform());
    }
 
-   public HumanoidBehaviorControlModeEnum getRequestedBehaviorControlMode()
+   public BehaviorControlModeEnum getRequestedBehaviorControlMode()
    {
       return requestedControlMode;
    }
 
-   public void setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum newRequestedControlMode)
+   public void setRequestedBehaviorControlMode(BehaviorControlModeEnum newRequestedControlMode)
    {
       if (!this.requestedControlMode.equals(newRequestedControlMode))
       {
@@ -58,7 +58,7 @@ public abstract class StopThreadUpdatable implements Updatable
       }
    }
 
-   public HumanoidReferenceFrames getReferenceFramesAtTransition(HumanoidBehaviorControlModeEnum controlMode)
+   public HumanoidReferenceFrames getReferenceFramesAtTransition(BehaviorControlModeEnum controlMode)
    {
       return referenceFramesForLogging.get(controlMode);
    }
@@ -70,12 +70,12 @@ public abstract class StopThreadUpdatable implements Updatable
       return currentTransformToWorld;
    }
 
-   public RigidBodyTransform getTestFrameTransformToWorldAtTransition(HumanoidBehaviorControlModeEnum controlMode)
+   public RigidBodyTransform getTestFrameTransformToWorldAtTransition(BehaviorControlModeEnum controlMode)
    {
       return testFrameTransformToWorld.get(controlMode);
    }
 
-   public FramePose getTestFramePoseCopyAtTransition(HumanoidBehaviorControlModeEnum controlMode)
+   public FramePose getTestFramePoseCopyAtTransition(BehaviorControlModeEnum controlMode)
    {
       FramePose ret = new FramePose(ReferenceFrame.getWorldFrame(), getTestFrameTransformToWorldAtTransition(controlMode));
       return ret;
@@ -93,7 +93,7 @@ public abstract class StopThreadUpdatable implements Updatable
       poseToPack.setPoseIncludingFrame(worldFrame, getCurrentTestFrameTransformToWorld());
    }
 
-   public FramePose2d getTestFramePose2dAtTransition(HumanoidBehaviorControlModeEnum controlMode)
+   public FramePose2d getTestFramePose2dAtTransition(BehaviorControlModeEnum controlMode)
    {
       FramePose2d ret = new FramePose2d();
       ret.setPose(getTestFrameTransformToWorldAtTransition(controlMode));
@@ -112,7 +112,7 @@ public abstract class StopThreadUpdatable implements Updatable
       return ret;
    }
 
-   public BehaviorStatus getBehaviorStatusAtTransition(HumanoidBehaviorControlModeEnum controlMode)
+   public BehaviorStatus getBehaviorStatusAtTransition(BehaviorControlModeEnum controlMode)
    {
       return behaviorStatus.get(controlMode);
    }

@@ -33,12 +33,12 @@ import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDisptacher;
-import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorControlModeSubscriber;
+import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
@@ -210,8 +210,8 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder);
       behaviorCommunicatorServer.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
-      HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new HumanoidBehaviorControlModeSubscriber();
-      behaviorCommunicatorServer.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
+      BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
+      behaviorCommunicatorServer.attachListener(BehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
 
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
       behaviorCommunicatorServer.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
@@ -219,8 +219,8 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       YoVariableServer yoVariableServer = null;
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
 
-      BehaviorDisptacher ret = new BehaviorDisptacher(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
-            communicationBridge, yoVariableServer, registry, yoGraphicsListRegistry);
+      BehaviorDisptacher<HumanoidBehaviorType> ret = new BehaviorDisptacher<>(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
+            communicationBridge, yoVariableServer, HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry, yoGraphicsListRegistry);
 
       return ret;
    }
@@ -357,7 +357,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       assertTrue(success);
       FramePose2d poseBeforeStop = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
-      HumanoidBehaviorControlModePacket stopModePacket = new HumanoidBehaviorControlModePacket(HumanoidBehaviorControlModeEnum.STOP);
+      BehaviorControlModePacket stopModePacket = new BehaviorControlModePacket(BehaviorControlModeEnum.STOP);
       behaviorCommunicatorClient.send(stopModePacket);
       PrintTools.debug(this, "Sending Stop Request");
 
@@ -406,7 +406,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       assertTrue(success);
       FramePose2d poseBeforePause = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
-      HumanoidBehaviorControlModePacket pauseModePacket = new HumanoidBehaviorControlModePacket(HumanoidBehaviorControlModeEnum.PAUSE);
+      BehaviorControlModePacket pauseModePacket = new BehaviorControlModePacket(BehaviorControlModeEnum.PAUSE);
       behaviorCommunicatorClient.send(pauseModePacket);
       PrintTools.debug(this, "Sending Pause Request");
 
@@ -418,7 +418,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       assertTrue(distanceWalkedAfterStopRequest < walkingControllerParameters.getMaxStepLength());
       assertTrue(!walkToLocationBehavior.isDone());
 
-      HumanoidBehaviorControlModePacket resumeModePacket = new HumanoidBehaviorControlModePacket(HumanoidBehaviorControlModeEnum.RESUME);
+      BehaviorControlModePacket resumeModePacket = new BehaviorControlModePacket(BehaviorControlModeEnum.RESUME);
       behaviorCommunicatorClient.send(resumeModePacket);
       PrintTools.debug(this, "Sending Resume Request");
 

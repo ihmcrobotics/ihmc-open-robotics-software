@@ -21,7 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.utilities.StopThreadUpdatable;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidRobotics.communication.util.PacketControllerTools;
@@ -370,8 +370,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
             frameToKeepTrackOf);
       PrintTools.debug(this, "Behavior Should Be Done");
 
-      FramePose handPoseAtPauseStart = stopThreadUpdatable.getTestFramePoseCopyAtTransition(HumanoidBehaviorControlModeEnum.PAUSE);
-      FramePose handPoseAtPauseEnd = stopThreadUpdatable.getTestFramePoseCopyAtTransition(HumanoidBehaviorControlModeEnum.RESUME);
+      FramePose handPoseAtPauseStart = stopThreadUpdatable.getTestFramePoseCopyAtTransition(BehaviorControlModeEnum.PAUSE);
+      FramePose handPoseAtPauseEnd = stopThreadUpdatable.getTestFramePoseCopyAtTransition(BehaviorControlModeEnum.RESUME);
       assertPosesAreWithinThresholds(handPoseAtPauseStart, handPoseAtPauseEnd, 5.0 * POSITION_THRESHOLD, 5.0 * ORIENTATION_THRESHOLD);
       assertCurrentHandPoseIsWithinThresholds(robotSide, handPoseTarget);
       assertTrue(handPoseBehavior.isDone());
@@ -401,7 +401,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       StopThreadUpdatable stopThreadUpdatable = drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(handPoseBehavior, Double.POSITIVE_INFINITY,
             Double.POSITIVE_INFINITY, simTimeBeforeStop, frameToKeepTrackOf);
 
-      FramePose handPoseJustAfterStop = stopThreadUpdatable.getTestFramePoseCopyAtTransition(HumanoidBehaviorControlModeEnum.STOP);
+      FramePose handPoseJustAfterStop = stopThreadUpdatable.getTestFramePoseCopyAtTransition(BehaviorControlModeEnum.STOP);
       FramePose handPoseAfterResting = stopThreadUpdatable.getCurrentTestFramePoseCopy();
       assertPosesAreWithinThresholds(handPoseJustAfterStop, handPoseAfterResting, 5.0 * POSITION_THRESHOLD, 5.0 * ORIENTATION_THRESHOLD);
       assertTrue(!handPoseBehavior.isDone());

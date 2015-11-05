@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.utilities;
 import static org.junit.Assert.assertTrue;
 
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.subscribers.RobotDataReceiver;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -81,7 +81,7 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
       if (hasThresholdBeenCrossed(pausePercent))
       {
          PrintTools.debug(this, "Requesting Pause");
-         setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.PAUSE);
+         setRequestedBehaviorControlMode(BehaviorControlModeEnum.PAUSE);
          pauseStartTime = elapsedTime;
       }
       else if ((elapsedTimeOld - pauseStartTime) < pauseDuration && (elapsedTime - pauseStartTime) >= pauseDuration)
@@ -89,19 +89,19 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
          assertTrue(!behavior.isDone());
 
          PrintTools.debug(this, "Requesting Resume");
-         setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.RESUME);
+         setRequestedBehaviorControlMode(BehaviorControlModeEnum.RESUME);
       }
       else if (hasThresholdBeenCrossed(stopPercent))
       {
          PrintTools.debug(this, "Requesting Stop");
-         setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.STOP);
+         setRequestedBehaviorControlMode(BehaviorControlModeEnum.STOP);
       }
       else if (behavior.isDone())
       {
          doneTime = time;
          setShouldBehaviorRunnerBeStopped(true);
       }
-      else if (getRequestedBehaviorControlMode().equals(HumanoidBehaviorControlModeEnum.STOP))
+      else if (getRequestedBehaviorControlMode().equals(BehaviorControlModeEnum.STOP))
       {
          if (Double.isNaN(doneTime))
          {
