@@ -2,6 +2,8 @@ package us.ihmc.quadrupedRobotics.dataProviders;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.packets.DesiredVelocityPacket;
@@ -11,7 +13,7 @@ import us.ihmc.robotics.trajectories.providers.VectorProvider;
 
 public class DesiredVelocityProvider implements VectorProvider, PacketConsumer<DesiredVelocityPacket>
 {
-   private final AtomicReference<DesiredVelocityPacket> lastReceivedVelocityPacket = new AtomicReference<DesiredVelocityPacket>(new DesiredVelocityPacket());
+   private final AtomicReference<DesiredVelocityPacket> lastReceivedVelocityPacket = new AtomicReference<DesiredVelocityPacket>(new DesiredVelocityPacket(new Vector3d()));
    
    
    public DesiredVelocityProvider(GlobalDataProducer dataProducer)
