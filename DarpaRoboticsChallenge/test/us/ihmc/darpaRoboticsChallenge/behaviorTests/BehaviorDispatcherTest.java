@@ -32,7 +32,7 @@ import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDisptacher;
+import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
@@ -131,7 +131,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
    private WalkingControllerParameters walkingControllerParameters;
 
    private HumanoidRobotDataReceiver robotDataReceiver;
-   private BehaviorDisptacher behaviorDispatcher;
+   private BehaviorDispatcher behaviorDispatcher;
 
    private BooleanYoVariable yoDoubleSupport;
 
@@ -203,7 +203,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       return ret;
    }
 
-   private BehaviorDisptacher setupBehaviorDispatcher(FullHumanoidRobotModel fullRobotModel, BehaviorCommunicationBridge communicationBridge,
+   private BehaviorDispatcher setupBehaviorDispatcher(FullHumanoidRobotModel fullRobotModel, BehaviorCommunicationBridge communicationBridge,
          YoGraphicsListRegistry yoGraphicsListRegistry, PacketCommunicator behaviorCommunicatorServer, YoVariableRegistry registry)
    {
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
@@ -219,7 +219,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       YoVariableServer yoVariableServer = null;
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
 
-      BehaviorDisptacher<HumanoidBehaviorType> ret = new BehaviorDisptacher<>(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
+      BehaviorDispatcher<HumanoidBehaviorType> ret = new BehaviorDispatcher<>(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
             communicationBridge, yoVariableServer, HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry, yoGraphicsListRegistry);
 
       return ret;

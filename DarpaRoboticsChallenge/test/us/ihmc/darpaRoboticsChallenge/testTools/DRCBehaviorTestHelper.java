@@ -21,7 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDisptacher;
+import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
@@ -79,7 +79,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final CapturePointUpdatable capturePointUpdatable;
    private final SideDependentList<WristForceSensorFilteredUpdatable> wristForceSensorUpdatables;
 
-   private final BehaviorDisptacher behaviorDispatcher;
+   private final BehaviorDispatcher behaviorDispatcher;
 
    
    private final PacketCommunicator behaviorCommunicatorClient;
@@ -164,7 +164,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return referenceFrames;
    }
 
-   public BehaviorDisptacher getBehaviorDisptacher()
+   public BehaviorDispatcher getBehaviorDisptacher()
    {
       return behaviorDispatcher;
    }
@@ -229,7 +229,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       mockUIPacketCommunicatorServer.send(requestTestBehaviorPacket);
    }
 
-   private BehaviorDisptacher setupBehaviorDispatcher(FullRobotModel fullRobotModel, PacketCommunicator behaviorCommunicator,
+   private BehaviorDispatcher setupBehaviorDispatcher(FullRobotModel fullRobotModel, PacketCommunicator behaviorCommunicator,
          HumanoidRobotDataReceiver robotDataReceiver, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
@@ -241,7 +241,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       YoVariableServer yoVariableServer = null;
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
 
-      BehaviorDisptacher<HumanoidBehaviorType> ret = new BehaviorDisptacher<>(yoTimeBehaviorDispatcher, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
+      BehaviorDispatcher<HumanoidBehaviorType> ret = new BehaviorDispatcher<>(yoTimeBehaviorDispatcher, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
             behaviorCommunicationBridge, yoVariableServer, HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry, yoGraphicsListRegistry);
 
       ret.addUpdatable(capturePointUpdatable);
