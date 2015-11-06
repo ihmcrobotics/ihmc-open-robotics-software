@@ -11,6 +11,7 @@ import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
 
 public class ClosedFormJacobian
 {
+	//Will wuz here
    private double h;
    private double length;
    private double lengthSquared;
