@@ -121,7 +121,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    
    private final QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon commonSupportPolygon = new QuadrupedSupportPolygon();
-   
+
    private final QuadrantDependentList<QuadrupedSwingTrajectoryGenerator> swingTrajectoryGenerators = new QuadrantDependentList<>();
    private final DoubleYoVariable swingDuration = new DoubleYoVariable("swingDuration", registry);
    
@@ -197,7 +197,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
          QuadrupedJointNameMap quadrupedJointNameMap, final QuadrupedReferenceFrames referenceFrames,
          QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, QuadrupedDataProvider dataProvider, DoubleYoVariable yoTime)
+         YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, final QuadrupedDataProvider dataProvider, DoubleYoVariable yoTime)
    {
       swingDuration.set(0.3);
       subCircleRadius.set(0.1);
@@ -212,11 +212,8 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>(name, "walkingStateTranistionTime", CrawlGateWalkingState.class, yoTime, registry);
       inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
 
-      if(dataProvider != null)
-      {
-         desiredVelocityProvider = dataProvider.getDesiredVelocityProvider();
-         desiredYawRateProvider = dataProvider.getDesiredYawRateProvider();
-      }
+      desiredVelocityProvider = dataProvider.getDesiredVelocityProvider();
+      desiredYawRateProvider = dataProvider.getDesiredYawRateProvider();
 
       QuadrupedControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedControllerParameters();
       referenceFrames.updateFrames();
@@ -287,9 +284,8 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         QuadrupedSwingTrajectoryGenerator swingTrajectoryGenerator = new QuadrupedSwingTrajectoryGenerator(referenceFrames, robotQuadrant, registry, yoGraphicsListRegistry, dt);
-         swingTrajectoryGenerators.put(robotQuadrant, swingTrajectoryGenerator);
-         
+         swingTrajectoryGenerators.put(robotQuadrant, dataProvider.getSwingTrajectoryGenerator(robotQuadrant));
+
          ReferenceFrame footReferenceFrame = referenceFrames.getFootFrame(robotQuadrant);
          ReferenceFrame legAttachmentFrame = referenceFrames.getLegAttachmentFrame(robotQuadrant);
          
@@ -370,7 +366,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return isSwingFinished(swingLeg.getEnumValue());
+            return dataProvider.getFootSwitchProvider(swingLeg.getEnumValue()).switchFoot();
          }
       };
 
@@ -655,12 +651,6 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    {
       QuadrupedSwingTrajectoryGenerator swingTrajectoryGenerator = swingTrajectoryGenerators.get(swingLeg);
       swingTrajectoryGenerator.computeSwing(framePointToPack);
-   }
-   
-   private boolean isSwingFinished(RobotQuadrant swingLeg)
-   {
-      QuadrupedSwingTrajectoryGenerator miniBeastSwingTrajectoryGenerator = swingTrajectoryGenerators.get(swingLeg);
-      return miniBeastSwingTrajectoryGenerator.isDone();
    }
    
    private QuadrupedSupportPolygon copyCurrentSupportPolygonWithNewFootPosition(RobotQuadrant robotQuadrant, FramePoint footPosition)

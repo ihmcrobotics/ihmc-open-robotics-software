@@ -353,6 +353,26 @@ public enum RobotQuadrant
 
       throw new RuntimeException("Invalid quadrant name: " + quadrantName);
    }
+
+   public static RobotQuadrant guessQuadrantFromName(String name)
+   {
+      if(name.contains("front") || name.contains("Front"))
+      {
+         if(name.contains("left") || name.contains("Left"))
+            return RobotQuadrant.FRONT_LEFT;
+         else if(name.contains("right") || name.contains("Right"))
+            return RobotQuadrant.FRONT_RIGHT;
+      }
+      else if(name.contains("hind") || name.contains("Hind"))
+      {
+         if(name.contains("left") || name.contains("Left"))
+            return RobotQuadrant.HIND_LEFT;
+         else if(name.contains("right") || name.contains("Right"))
+            return RobotQuadrant.HIND_RIGHT;
+      }
+
+      throw new RuntimeException("Could not find an associated quadrant for " + name);
+   }
    
    public String getCamelCaseNameForStartOfExpression()
    {

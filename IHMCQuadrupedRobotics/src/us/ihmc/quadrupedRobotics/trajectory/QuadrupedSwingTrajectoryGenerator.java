@@ -6,6 +6,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.trajectories.CartesianTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.ParabolicCartesianTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -96,5 +97,10 @@ public class QuadrupedSwingTrajectoryGenerator
    public RobotQuadrant getRobotQuadrant()
    {
       return robotQuadrant;
+   }
+
+   public CartesianTrajectoryGenerator getTrajectoryGenerator()
+   {
+      return cartesianTrajectoryGenerator;
    }
 }
