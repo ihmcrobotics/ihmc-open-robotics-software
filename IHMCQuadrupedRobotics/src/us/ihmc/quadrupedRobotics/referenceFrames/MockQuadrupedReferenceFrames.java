@@ -12,7 +12,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class MockQuadrupedReferenceFrames implements CommonQuadrupedReferenceFrames
+public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
 {
    private final QuadrantDependentList<FramePose> footPoses = new QuadrantDependentList<FramePose>();
    private final QuadrantDependentList<PoseReferenceFrame> soleFrames = new QuadrantDependentList<PoseReferenceFrame>();
@@ -47,6 +47,8 @@ public class MockQuadrupedReferenceFrames implements CommonQuadrupedReferenceFra
                ReferenceFrame.getWorldFrame(), soleFrames.get(leftSoleQuadrant), soleFrames.get(rightSoleQuadrant));
          endDependentMidFeetZUpFrames.put(robotEnd, midFeetZUpFrame);
       }
+      
+      initializeCommonValues();
    }
 
    public void update(QuadrantDependentList<YoFramePoint> yoFootPositions)

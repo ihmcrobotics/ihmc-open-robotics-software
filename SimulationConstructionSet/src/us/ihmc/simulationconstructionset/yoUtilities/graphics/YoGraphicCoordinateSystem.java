@@ -46,7 +46,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
    {
       super(name);
 
-      framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      ReferenceFrame.getWorldFrame().checkReferenceFrameMatch(framePoint);
       framePoint.checkReferenceFrameMatch(orientation.getReferenceFrame());
 
       x = framePoint.getYoX();

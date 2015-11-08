@@ -6,7 +6,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.referenceFrames.MockQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -78,7 +77,8 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    private final YoGraphicReferenceFrame leftMidZUpFrameViz;
    private final YoGraphicReferenceFrame rightMidZUpFrameViz;
 
-   private final MidFootZUpSwingTargetGenerator footChoser;
+   private final LongestFeasibleStepChooser nextStepFootChooser;
+   private final MidFootZUpSwingTargetGenerator swingTargetGenerator;
    private final QuadrupedReferenceFrames referenceFrames;
 
    private final QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
@@ -113,7 +113,8 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
             groundClearance, registry);
 
       DefaultSwingTargetGeneratorParameters desfaultFootStepParameters = new DefaultSwingTargetGeneratorParameters();
-      footChoser = new MidFootZUpSwingTargetGenerator(desfaultFootStepParameters, referenceFrames, registry);
+      nextStepFootChooser = new LongestFeasibleStepChooser(desfaultFootStepParameters, referenceFrames, registry, yoGraphicsListRegistry);
+      swingTargetGenerator = new MidFootZUpSwingTargetGenerator(desfaultFootStepParameters, referenceFrames, registry);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -236,6 +237,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       {
          RobotQuadrant robotQuadrant = swingLeg.getEnumValue();
          robotQuadrant = robotQuadrant.getNextRegularGaitSwingQuadrant();
+         nextStepFootChooser.chooseNextStepQuadrant(quadrupedSupportPolygon, robotQuadrant, desiredVelocity.getFrameTuple(), desiredYawRate.getDoubleValue());
          swingLeg.set(robotQuadrant);
 
          FramePoint initialPosition = new FramePoint(yoFootPositions.get(robotQuadrant).getFramePointCopy());
@@ -243,7 +245,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
          //         desiredFootPosition.set(initialPosition);
          //         desiredFootPosition.add(0.1,0.0,0.0);
          
-         footChoser.getSwingTarget(quadrupedSupportPolygon, robotQuadrant, desiredVelocity.getFrameTuple(), desiredFootPosition, desiredYawRate.getDoubleValue());
+         swingTargetGenerator.getSwingTarget(quadrupedSupportPolygon, robotQuadrant, desiredVelocity.getFrameTuple(), desiredFootPosition, desiredYawRate.getDoubleValue());
          cartesianTrajectoryGenerator.initialize(initialPosition, initialVelocity, intialAcceleration, desiredFootPosition, finalDesiredVelocity);
          swingTarget.set(desiredFootPosition);
       }

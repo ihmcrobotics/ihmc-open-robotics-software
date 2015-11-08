@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
@@ -143,7 +144,7 @@ public class QuadrupedSupportPolygon implements Serializable
       return newPolygon;
    }
 
-   private void changeFrame(ReferenceFrame referenceFrame)
+   public void changeFrame(ReferenceFrame referenceFrame)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -930,8 +931,8 @@ public class QuadrupedSupportPolygon implements Serializable
    /**
     * getInCirclePoint
     *
-    * his method assumes the points are in a specific order (U-shape).
-    * It returns the InCricle Point based on the two angles formed by the three line segments
+    * This method assumes the points are in a specific order (U-shape).
+    * It returns the InCircle Point based on the two angles formed by the three line segments
     *
     * @param p1 Point2d point defining the three line segments (must be in order)
     * @param p2 Point2d point defining the three line segments (must be in order)
@@ -1387,6 +1388,22 @@ public class QuadrupedSupportPolygon implements Serializable
          {
             FramePoint rotatedPoint = footstep.yawAboutPoint(centroid, yaw);
             footstep.set(rotatedPoint);
+         }
+      }
+   }
+   
+   /**
+    * Translates this polygon in X and Y.
+    */
+   public void translate(Vector3d translateBy)
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         FramePoint footstep = footsteps.get(robotQuadrant);
+         
+         if (useThisLeg(footstep))
+         {
+            footstep.add(translateBy);
          }
       }
    }

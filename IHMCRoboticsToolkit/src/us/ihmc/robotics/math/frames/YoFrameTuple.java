@@ -178,7 +178,7 @@ public abstract class YoFrameTuple<T extends FrameTuple<?>> extends ReferenceFra
 
    public final void set(ReferenceFrame referenceFrame, double x, double y, double z)
    {
-      checkReferenceFrameMatch(getReferenceFrame());
+      checkReferenceFrameMatch(referenceFrame);
       set(x, y, z);
    }
    

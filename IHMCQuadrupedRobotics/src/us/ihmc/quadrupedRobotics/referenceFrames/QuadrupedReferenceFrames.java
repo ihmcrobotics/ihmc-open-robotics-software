@@ -40,7 +40,7 @@ import us.ihmc.tools.containers.ContainerTools;
  * @author not attributable
  * @version 1.0
  */
-public class QuadrupedReferenceFrames implements CommonQuadrupedReferenceFrames
+public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
 {
    private final FullRobotModel fullRobotModel;
 
@@ -145,6 +145,7 @@ public class QuadrupedReferenceFrames implements CommonQuadrupedReferenceFrames
       centerOfMassFrameWithRotation = new PoseReferenceFrame("centerOfMassFrameWithRotation", bodyFrame);
       centerOfMassFrameWithRotation.setPoseAndUpdate(centerOfMassPose);
       
+      initializeCommonValues();
    }
 
    public static ReferenceFrame getWorldFrame()
@@ -269,11 +270,3 @@ public class QuadrupedReferenceFrames implements CommonQuadrupedReferenceFrames
       centerOfMassFrameWithRotation.setPoseAndUpdate(centerOfMassPose);
    }
 }
-
-
-
-
-
-
-
-

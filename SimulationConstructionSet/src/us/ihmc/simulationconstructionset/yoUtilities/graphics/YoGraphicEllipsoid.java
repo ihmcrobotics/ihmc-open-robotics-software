@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.yoUtilities.graphics;
 
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -37,7 +36,7 @@ public class YoGraphicEllipsoid extends YoGraphicCoordinateSystem
       this.radii.set(radii);
    }
 
-   public void setRadii(Point3d radii)
+   public void setRadii(Vector3d radii)
    {
       this.radii.set(radii);
    }

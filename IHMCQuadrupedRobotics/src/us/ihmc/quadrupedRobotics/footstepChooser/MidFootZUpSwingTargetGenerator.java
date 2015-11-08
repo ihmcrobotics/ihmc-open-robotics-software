@@ -37,7 +37,6 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
    private final FramePoint centroid = new FramePoint(ReferenceFrame.getWorldFrame());
 
-   private final QuadrantDependentList<Double> legLengths = new QuadrantDependentList<Double>();
    private final FramePoint swingLegHipPitchPoint = new FramePoint();
    private final FrameOrientation swingLegHipRollOrientation = new FrameOrientation();
 
@@ -50,16 +49,11 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       this.referenceFrames = referenceFrames;
       parentRegistry.addChild(registry);
 
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         legLengths.put(robotQuadrant, calculateLegLength(robotQuadrant));
-      }
-
       if (footStepParameters != null)
       {
          minimumDistanceFromSameSideFoot.set(footStepParameters.getMinimumDistanceFromSameSideFoot());
          minimumVelocityForFullSkew.set(footStepParameters.getMinimumVelocityForFullSkew());
-         strideLength.set(footStepParameters.getStrideLength());
+         strideLength.set(footStepParameters.getStanceLength());
          stanceWidth.set(footStepParameters.getStanceWidth());
          maxSkew.set(footStepParameters.getMaxSkew());
          maxYawPerStep.set(footStepParameters.getMaxYawPerStep());
@@ -73,26 +67,6 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
          maxSkew.set(DEFAULT_MAX_SKEW);
          maxYawPerStep.set(DEFAULT_MAX_YAW);
       }
-   }
-
-   private double calculateLegLength(RobotQuadrant robotQuadrant)
-   {
-      ReferenceFrame hipPitchFrame = referenceFrames.getHipPitchFrame(robotQuadrant);
-      ReferenceFrame kneePitchFrame = referenceFrames.getKneeFrame(robotQuadrant);
-      ReferenceFrame footFrame = referenceFrames.getFootFrame(robotQuadrant);
-
-      FramePoint hipPitch = new FramePoint(hipPitchFrame);
-      FramePoint kneePitch = new FramePoint(kneePitchFrame);
-      FramePoint foot = new FramePoint(footFrame);
-
-      kneePitch.changeFrame(hipPitchFrame);
-      double thighLength = kneePitch.distance(hipPitch);
-
-      kneePitch.changeFrame(kneePitchFrame);
-      foot.changeFrame(kneePitchFrame);
-      double shinLength = foot.distance(kneePitch);
-
-      return thighLength + shinLength;
    }
 
    @Override
@@ -141,10 +115,10 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       //calculate hip Roll
       swingLegHipRollOrientation.setToZero(referenceFrames.getHipRollFrame(swingLeg));
       swingLegHipRollOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      double stepDistanceRemovedBecauseOfRoll = legLengths.get(swingLeg) * Math.sin(Math.abs(swingLegHipRollOrientation.getRoll()));
+      double stepDistanceRemovedBecauseOfRoll = referenceFrames.getLegLength(swingLeg) * Math.sin(Math.abs(swingLegHipRollOrientation.getRoll()));
 
       double maxStepDistance;
-      double maxStepDistanceWithNoRoll = Math.sqrt(Math.pow(legLengths.get(swingLeg), 2) - Math.pow(swingLegHipPitchHeight, 2));
+      double maxStepDistanceWithNoRoll = Math.sqrt(Math.pow(referenceFrames.getLegLength(swingLeg), 2) - Math.pow(swingLegHipPitchHeight, 2));
       if (Double.isNaN(stepDistanceRemovedBecauseOfRoll))
       {
          maxStepDistance = 0.0;
