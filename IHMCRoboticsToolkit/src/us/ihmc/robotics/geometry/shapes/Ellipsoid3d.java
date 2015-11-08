@@ -7,8 +7,6 @@ import javax.vecmath.Vector3d;
 
 public class Ellipsoid3d implements Shape3d
 {
-   private static final double DEFAULT_EPSILON = 1e-7;
-
    private RigidBodyTransform transform = new RigidBodyTransform();
    private RigidBodyTransform inverseTransform = new RigidBodyTransform();
    private double xRadius, yRadius, zRadius;
@@ -39,6 +37,11 @@ public class Ellipsoid3d implements Shape3d
    {
       centerToPack.set(0.0, 0.0, 0.0);
       transform.transform(centerToPack);
+   }
+   
+   public void getRadii(Vector3d radiiToPack)
+   {
+      radiiToPack.set(xRadius, yRadius, zRadius);
    }
 
    public double getXRadius()
@@ -198,5 +201,4 @@ public class Ellipsoid3d implements Shape3d
    {
       return "xRadius = " + xRadius + ", yRadius = " + yRadius + ", zRadius = " + zRadius + ", \ntransform = " + transform + "\n";
    }
-
 }

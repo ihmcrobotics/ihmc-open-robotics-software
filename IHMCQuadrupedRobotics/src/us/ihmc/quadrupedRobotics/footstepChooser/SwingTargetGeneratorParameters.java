@@ -7,7 +7,7 @@ public interface SwingTargetGeneratorParameters
 
    double getMinimumDistanceFromSameSideFoot();
 
-   double getStrideLength();
+   double getStanceLength();
 
    double getStanceWidth();
 
