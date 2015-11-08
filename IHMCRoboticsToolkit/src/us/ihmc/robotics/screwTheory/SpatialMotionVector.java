@@ -103,6 +103,14 @@ public abstract class SpatialMotionVector
    /**
     * Sets the angular velocity part of the spatial motion vector
     */
+   public void setAngularPart(double x, double y, double z)
+   {
+      angularPart.set(x, y, z);
+   }
+
+   /**
+    * Sets the angular velocity part of the spatial motion vector
+    */
    public void setAngularPart(Vector3d newAngularVelocity)
    {
       angularPart.set(newAngularVelocity);
@@ -163,6 +171,14 @@ public abstract class SpatialMotionVector
    public void setLinearPartZ(double val)
    {
       linearPart.setZ(val);
+   }
+
+   /**
+    * Sets the linear velocity part of the spatial motion vector
+    */
+   public void setLinearPart(double x, double y, double z)
+   {
+      linearPart.set(x, y, z);
    }
 
    /**
@@ -398,7 +414,7 @@ public abstract class SpatialMotionVector
          linearPart.scale(maximumMagnitude/linearPart.length());
       }
    }
-   
+
    public void limitAngularPartMagnitude(double maximumMagnitude)
    {
       if (maximumMagnitude < 1e-7) angularPart.set(0.0, 0.0, 0.0);
@@ -408,7 +424,17 @@ public abstract class SpatialMotionVector
          angularPart.scale(maximumMagnitude/angularPart.length());
       }
    }
-   
+
+   public double getAngularPartMagnitude()
+   {
+      return angularPart.length();
+   }
+
+   public double getLinearPartMagnitude()
+   {
+      return linearPart.length();
+   }
+
    /**
     * Packs an existing FrameVector with the angular velocity part
     */
