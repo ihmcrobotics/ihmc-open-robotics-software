@@ -4,7 +4,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public interface CartesianTrajectoryGenerator
+public interface CartesianTrajectoryGenerator extends Finishable
 {
    /**
     * initializes the trajectory generator with an initial position and velocity, final position and ground height.
