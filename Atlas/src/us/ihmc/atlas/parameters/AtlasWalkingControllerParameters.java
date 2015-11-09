@@ -83,9 +83,9 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getOmega0()
    {
       // TODO probably need to be tuned.
-//      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
-//      return realRobot ? 3.4 : 3.0; // 3.0 seems more appropriate.
-      return 3.0;
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+      return realRobot ? 3.4 : 3.0; // 3.0 seems more appropriate.
+//      return 3.0;
    }
 
    @Override
