@@ -66,6 +66,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    private final QuadrantDependentList<YoGraphicPosition> footPositionGraphics = new QuadrantDependentList<YoGraphicPosition>();
 
    private final YoFramePoint swingTarget = new YoFramePoint("swingTarget", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector finalDesiredVelocity = new YoFrameVector("finalDesiredVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition targetViz = new YoGraphicPosition("swingTarget", swingTarget, 0.01, YoAppearance.Red());
    
    private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
@@ -111,11 +112,9 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       
       nominalYawGraphic = new YoGraphicLineSegment("nominalYaw", centroid, nominalYawEndpoint, 0.2, YoAppearance.Yellow(), true, 0.02);
       
-      double groundClearance = 0.1;
       boolean showOverheadView = true;
       desiredSwingTime.set(0.4);
       cartesianTrajectoryGenerator = new ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator("swingLegTraj", ReferenceFrame.getWorldFrame(), registry);
-//      swingTimeDoubleProvider
       DefaultSwingTargetGeneratorParameters desfaultFootStepParameters = new DefaultSwingTargetGeneratorParameters();
       nextStepFootChooser = new LongestFeasibleStepChooser(desfaultFootStepParameters, referenceFrames, registry, yoGraphicsListRegistry);
       swingTargetGenerator = new MidFootZUpSwingTargetGenerator(desfaultFootStepParameters, referenceFrames, registry);
@@ -218,7 +217,6 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    }
 
    FrameVector intialAcceleration = new FrameVector();
-   FrameVector finalDesiredVelocity = new FrameVector();
 
    @Override
    public void doControl()
@@ -248,12 +246,11 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
          FramePoint initialPosition = new FramePoint(yoFootPositions.get(robotQuadrant).getFramePointCopy());
          FramePoint intermediatePosition = new FramePoint(ReferenceFrame.getWorldFrame(), 0.0,0.0,0.1);
          FramePoint desiredFootPosition = new FramePoint();
-         //         desiredFootPosition.set(initialPosition);
-         //         desiredFootPosition.add(0.1,0.0,0.0);
          
          swingTimeTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
          swingTargetGenerator.getSwingTarget(quadrupedSupportPolygon, robotQuadrant, desiredVelocity.getFrameTuple(), desiredFootPosition, desiredYawRate.getDoubleValue());
-         cartesianTrajectoryGenerator.setTrajectoryParameters(desiredSwingTime.getDoubleValue(), initialPosition, intermediatePosition, desiredFootPosition, finalDesiredVelocity);
+         cartesianTrajectoryGenerator.setTrajectoryParameters(desiredSwingTime.getDoubleValue(), initialPosition, intermediatePosition, desiredFootPosition, finalDesiredVelocity.getFrameTuple());
+         cartesianTrajectoryGenerator.initialize();
          swingTarget.set(desiredFootPosition);
       }
       
