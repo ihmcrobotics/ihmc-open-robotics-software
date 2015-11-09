@@ -304,6 +304,27 @@ public class YoPolynomial
       setYoVariables();
    }
    
+   public void setCubicWithFinalVelocityConstraint(double t0, double tFinal, double z0, double zFinal, double zdFinal)
+   {
+      MathTools.checkIfEqual(numberOfCoefficients, 3);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tFinal, zFinal);
+      setVelocityRow(2, tFinal, zdFinal);
+      solveForCoefficients();
+      setYoVariables();
+   }
+
+   public void setCubicWithIntermediatePositionAndFinalVelocityConstraint(double t0, double tIntermediate, double tFinal, double z0, double zIntermediate, double zFinal, double zdFinal)
+   {
+      MathTools.checkIfEqual(numberOfCoefficients, 4);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tIntermediate, zIntermediate);
+      setPositionRow(2, tFinal, zFinal);
+      setVelocityRow(3, tFinal, zdFinal);
+      solveForCoefficients();
+      setYoVariables();
+   }
+   
    public void setInitialPositionVelocityZeroFinalHighOrderDerivatives(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
    {
       if (numberOfCoefficients < 4) throw new RuntimeException("Need at least 4 coefficients in order to set initial and final positions and velocities");

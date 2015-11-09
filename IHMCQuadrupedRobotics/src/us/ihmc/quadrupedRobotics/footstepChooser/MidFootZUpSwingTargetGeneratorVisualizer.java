@@ -20,6 +20,7 @@ import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.ParabolicCartesianTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -56,8 +57,10 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    private final DoubleYoVariable desiredYawRate = new DoubleYoVariable("desiredYawRate", registry);
 
    /** Foot Swing **/
-   private final ParabolicCartesianTrajectoryGenerator cartesianTrajectoryGenerator;
-   private final YoVariableDoubleProvider swingTimeDoubleProvider = new YoVariableDoubleProvider("swingTime", registry);
+   private final ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator cartesianTrajectoryGenerator;
+   private final DoubleYoVariable swingTimeTrajectoryTimeStart = new DoubleYoVariable("swingTimeTrajectoryTimeStart", registry);
+   private final DoubleYoVariable swingTimeTrajectoryTimeCurrent = new DoubleYoVariable("swingTimeTrajectoryTimeCurrent", registry);
+   private final DoubleYoVariable desiredSwingTime = new DoubleYoVariable("desiredSwingTime", registry);
 
    private final QuadrantDependentList<YoFramePoint> yoFootPositions = new QuadrantDependentList< YoFramePoint>();
    private final QuadrantDependentList<YoGraphicPosition> footPositionGraphics = new QuadrantDependentList<YoGraphicPosition>();
@@ -86,6 +89,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoFrameConvexPolygon2d currentTriplePolygon = new YoFrameConvexPolygon2d("currentTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
    private final QuadrupedSupportPolygon quadrupedSupportPolygon = new QuadrupedSupportPolygon();
+   private final DoubleYoVariable robotTimestamp;
    
    public MidFootZUpSwingTargetGeneratorVisualizer(QuadrupedReferenceFrames referenceFrames)
    {
@@ -97,6 +101,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       robot.setController(this);
       scs = new SimulationConstructionSet();
       scs.setRobot(robot);
+      robotTimestamp = robot.getYoTime();
       this.referenceFrames = referenceFrames;
       swingLeg.set(RobotQuadrant.FRONT_RIGHT);
 
@@ -108,10 +113,9 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       
       double groundClearance = 0.1;
       boolean showOverheadView = true;
-      swingTimeDoubleProvider.set(0.4);
-      cartesianTrajectoryGenerator = new ParabolicCartesianTrajectoryGenerator("swingLegTraj", ReferenceFrame.getWorldFrame(), swingTimeDoubleProvider,
-            groundClearance, registry);
-
+      desiredSwingTime.set(0.4);
+      cartesianTrajectoryGenerator = new ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator("swingLegTraj", ReferenceFrame.getWorldFrame(), registry);
+//      swingTimeDoubleProvider
       DefaultSwingTargetGeneratorParameters desfaultFootStepParameters = new DefaultSwingTargetGeneratorParameters();
       nextStepFootChooser = new LongestFeasibleStepChooser(desfaultFootStepParameters, referenceFrames, registry, yoGraphicsListRegistry);
       swingTargetGenerator = new MidFootZUpSwingTargetGenerator(desfaultFootStepParameters, referenceFrames, registry);
@@ -213,7 +217,6 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       return getName();
    }
 
-   FrameVector initialVelocity = new FrameVector();
    FrameVector intialAcceleration = new FrameVector();
    FrameVector finalDesiredVelocity = new FrameVector();
 
@@ -227,9 +230,11 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
 //      referenceFrames.update(yoFootPositions);
       if (!cartesianTrajectoryGenerator.isDone())
       {
+         swingTimeTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - swingTimeTrajectoryTimeStart.getDoubleValue());
          RobotQuadrant robotQuadrant = swingLeg.getEnumValue();
          FramePoint swingLegPosition = new FramePoint();
-         cartesianTrajectoryGenerator.computeNextTick(swingLegPosition, simulateDT);
+         cartesianTrajectoryGenerator.compute(swingTimeTrajectoryTimeCurrent.getDoubleValue());
+         cartesianTrajectoryGenerator.get(swingLegPosition);
 
          yoFootPositions.get(robotQuadrant).set(swingLegPosition);
       }
@@ -241,12 +246,14 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
          swingLeg.set(robotQuadrant);
 
          FramePoint initialPosition = new FramePoint(yoFootPositions.get(robotQuadrant).getFramePointCopy());
+         FramePoint intermediatePosition = new FramePoint(ReferenceFrame.getWorldFrame(), 0.0,0.0,0.1);
          FramePoint desiredFootPosition = new FramePoint();
          //         desiredFootPosition.set(initialPosition);
          //         desiredFootPosition.add(0.1,0.0,0.0);
          
+         swingTimeTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
          swingTargetGenerator.getSwingTarget(quadrupedSupportPolygon, robotQuadrant, desiredVelocity.getFrameTuple(), desiredFootPosition, desiredYawRate.getDoubleValue());
-         cartesianTrajectoryGenerator.initialize(initialPosition, initialVelocity, intialAcceleration, desiredFootPosition, finalDesiredVelocity);
+         cartesianTrajectoryGenerator.setTrajectoryParameters(desiredSwingTime.getDoubleValue(), initialPosition, intermediatePosition, desiredFootPosition, finalDesiredVelocity);
          swingTarget.set(desiredFootPosition);
       }
       
