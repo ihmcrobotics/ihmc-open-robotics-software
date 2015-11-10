@@ -1,5 +1,5 @@
 <GraphGroup>
-	<Cols>3</Cols>
+	<Cols>2</Cols>
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.actualEstimatorDT</Variables>
 		<GraphConfiguration>
@@ -49,81 +49,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.bdi_calibrate_state</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.pump_supply_pressure</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.motor_temperature,root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.motor_driver_temperature</Variables>
-		<GraphConfiguration>
-			<Name>config6</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.pump_supply_pressure,root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.desiredPumpPSI</Variables>
-		<GraphConfiguration>
-			<Name>config7</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.pump_inlet_pressure,root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.air_sump_pressure</Variables>
-		<GraphConfiguration>
-			<Name>config8</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config9</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_r_arm_wrx.ll_out_r_arm_wrx_a_k_q_p,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_r_arm_wrx.ll_out_r_arm_wrx_k_q_p</Variables>
-		<GraphConfiguration>
-			<Name>config10</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.AtlasAutomatedStandPrep.StandPrepStateMachine</Variables>
-		<GraphConfiguration>
-			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -138,7 +66,7 @@
 <Title>
 Walking
 </Title>
-<Entry Boxes>requestedBehavior,ll_in_back_bkx_angleOffsetPreTransmission,maxICPErrorBeforeSingleSupport,swingTime,transferTime,captureKpParallel,captureKpOrthogonal,l_footTouchdownVelocityZ,r_footTouchdownVelocityZ,icpPlannerInitialTransferDuration,slopTimeForSmoothedJointTorques,icpInFromCenter,captureKi,captureKiBleedoff,maximumAccelerationArmJointspace,alphaDesiredVelocityLegs,alphaDesiredVelocityArms,JOINT_BACK_BKXKVelActuatorValve,doAccelerationIntegration_back_bkx,jointBacklashSlopTime,slopTimeRootJointLinearVelocityBacklashKinematics,armJointBacklashSlopTime,linearMomentumXYWeight,linearMomentumZWeight</Entry Boxes>
+<Entry Boxes>requestedBehavior,ll_in_back_bkx_angleOffsetPreTransmission,swingTime,transferTime,captureKpParallel,captureKpOrthogonal,l_footTouchdownVelocityZ,r_footTouchdownVelocityZ,icpPlannerInitialTransferDuration,slopTimeForSmoothedJointTorques,icpInFromCenter,captureKi,captureKiBleedoff,maximumAccelerationArmJointspace,alphaDesiredVelocityLegs,alphaDesiredVelocityArms,JOINT_BACK_BKXKVelActuatorValve,doAccelerationIntegration_back_bkx,jointBacklashSlopTime,slopTimeRootJointLinearVelocityBacklashKinematics,armJointBacklashSlopTime,linearMomentumXYWeight,linearMomentumZWeight</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -174,13 +102,13 @@ KVelActuatorValve
 <Title>
 Stiffness
 </Title>
-<Entry Boxes>l_leg_hpystiffness,r_leg_hpystiffness,l_leg_knystiffness,r_leg_knystiffness,l_leg_hpxstiffness,r_leg_hpxstiffness</Entry Boxes>
+<Entry Boxes>l_leg_hpystiffness,r_leg_hpystiffness,l_leg_knystiffness,r_leg_knystiffness,l_leg_hpxstiffness,r_leg_hpxstiffness,chestCoMOffsetX,chestCoMOffsetZ,back_bkystiffness,l_leg_hpzstiffness,r_leg_hpzstiffness</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
 Tab8
 </Title>
-<Entry Boxes>jointVelocityAlphaFilter,armJointVelocityAlphaFilter,jointBacklashSlopTime,armJointBacklashSlopTime,desiredPumpPSI</Entry Boxes>
+<Entry Boxes>jointVelocityAlphaFilter,jointBacklashSlopTime,armJointBacklashSlopTime,desiredPumpPSI</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -198,7 +126,7 @@ Car
 <Title>
 Rumble
 </Title>
-<Entry Boxes>l_footTouchdownVelocityZ,r_footTouchdownVelocityZ,ll_out_l_leg_aky_ff_qd,ll_out_r_leg_aky_ff_qd,ll_out_l_leg_aky_k_f_p,ll_out_r_leg_aky_k_f_p,slopTimeForSmoothedJointTorques,desiredPumpPSI,timeToGetPreparedForLocomotion,highLevelState,requestedHighLevelState,icpPlannerDoubleSupportSplitFractior,additionalSwingTimeForICP</Entry Boxes>
+<Entry Boxes>l_footTouchdownVelocityZ,r_footTouchdownVelocityZ,ll_out_l_leg_aky_ff_qd,ll_out_r_leg_aky_ff_qd,ll_out_l_leg_aky_k_f_p,ll_out_r_leg_aky_k_f_p,slopTimeForSmoothedJointTorques,desiredPumpPSI,timeToGetPreparedForLocomotion,highLevelState,requestedHighLevelState,additionalSwingTimeForICP</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -234,7 +162,7 @@ Calibration
 <Title>
 Filters
 </Title>
-<Entry Boxes>angularVelocityAlphaFilter,jointVelocityAlphaFilter,armJointVelocityAlphaFilter</Entry Boxes>
+<Entry Boxes>angularVelocityAlphaFilter,jointVelocityAlphaFilter</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -254,6 +182,30 @@ wristX
 </Title>
 <Entry Boxes>ll_out_l_arm_wrx_a_k_q_p,ll_out_l_arm_wrx_a_k_qd_p,ll_out_l_arm_wrx_a_ff_const,ll_out_l_arm_wrx_q_d,ll_out_elec_motor_l_arm_wrx_enable_elec_motor,requestCalibrateLeftWristSensor,requestedHighLevelState</Entry Boxes>
 </EntryBoxTab>
+<EntryBoxTab>
+<Title>
+RIGHT_ELY
+</Title>
+<Entry Boxes>kp_JOINT_R_ARM_ELY_PID,kd_JOINT_R_ARM_ELY_PID,ki_JOINT_R_ARM_ELY_PID,leak_JOINT_R_ARM_ELY_PID,max_kp_JOINT_R_ARM_ELY_PID,max_kd_JOINT_R_ARM_ELY_PID,lowGainReduction_JOINT_R_ARM_ELY_PID,holdLowGainsTime_JOINT_R_ARM_ELY_PID,gainReduction_JOINT_R_ARM_ELY_PID</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+SHX
+</Title>
+<Entry Boxes>max_kp_JOINT_L_ARM_SHX_PID,max_kp_JOINT_R_ARM_SHX_PID</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+SHZ
+</Title>
+<Entry Boxes>max_kp_JOINT_L_ARM_SHZ_PID,max_kp_JOINT_R_ARM_SHZ_PID</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+LEFT_ELY
+</Title>
+<Entry Boxes>max_kp_JOINT_L_ARM_ELY_PID,ki_JOINT_L_ARM_ELY_PID,leak_JOINT_L_ARM_ELY_PID,lowGainReduction_JOINT_L_ARM_ELY_PID</Entry Boxes>
+</EntryBoxTab>
 </Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
@@ -261,27 +213,8 @@ wristX
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>1</Graph Array Window Size>
-<Graph Array Window1>
-<ScreenID>3</ScreenID>
-<WindowLocation>5758.0, -3.0</WindowLocation>
-<WindowSize>1924.0, 1207.0</WindowSize>
-<GraphGroup>
-	<Cols>1</Cols>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.AtlasAutomatedStandPrep.robotTime</Variables>
-		<GraphConfiguration>
-			<Name>config12</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-</GraphGroup>
-</Graph Array Window1>
+<Graph Array Window Size>0</Graph Array Window Size>
+
 
 <Extra Panels>
 <Main Viewport>
