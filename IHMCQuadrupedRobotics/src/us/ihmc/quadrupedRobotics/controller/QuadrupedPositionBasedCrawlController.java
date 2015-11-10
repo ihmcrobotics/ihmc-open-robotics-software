@@ -749,7 +749,11 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          calculateNextThreeFootSteps(currentSwingLeg);
          
          QuadrupedSupportPolygon quadrupedSupportPolygon = estimatedCommonTriangle.get(currentSwingLeg.getNextRegularGaitSwingQuadrant());
-         initializeBodyTrajectory(currentSwingLeg.getNextRegularGaitSwingQuadrant(), quadrupedSupportPolygon);
+         if(quadrupedSupportPolygon != null)
+         {
+            calculateTrajectoryTarget(currentSwingLeg.getNextRegularGaitSwingQuadrant(), quadrupedSupportPolygon, circleCenter2d);
+            initializeCoMTrajectory(circleCenter2d);
+         }
       }
       
       public void calculateNextThreeFootSteps(RobotQuadrant firstSwingLeg)
@@ -810,52 +814,53 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          }
       }
       
-      private void initializeBodyTrajectory(RobotQuadrant upcommingSwingLeg, QuadrupedSupportPolygon commonTriangle)
+      private void calculateTrajectoryTarget(RobotQuadrant upcommingSwingLeg, QuadrupedSupportPolygon commonTriangle, Point2d comTargetToPack)
       {
-         if(commonTriangle != null)
+         commonSupportPolygon.set(commonTriangle);
+         boolean ttrCircleSuccess = false;
+         double radius = subCircleRadius.getDoubleValue();
+         if(useSubCircleForBodyShiftTarget.getBooleanValue())
          {
-            commonSupportPolygon.set(commonTriangle);
-            
-            FramePoint desiredBodyCurrent = desiredCoMPose.getPosition().getFramePointCopy();
-//            FramePoint desiredBodyFinal = commonSupportPolygon.getCentroidFramePoint();
-            
-            boolean ttrCircleSuccess = false;
-            double radius = subCircleRadius.getDoubleValue();
-            if(useSubCircleForBodyShiftTarget.getBooleanValue())
-            {
-               ttrCircleSuccess = commonSupportPolygon.getTangentTangentRadiusCircleCenter(upcommingSwingLeg, radius, circleCenter2d);
-            }
-            
-            if(!ttrCircleSuccess)
-            {
-               radius = commonSupportPolygon.getInCircle(circleCenter2d);
-            }
-            inscribedCircleRadius.set(radius);
-            
-            circleCenter.setXY(circleCenter2d);
-            
-            initialCoMPosition.set(desiredBodyCurrent);
-            desiredCoMTarget.setXY(circleCenter2d);
-            desiredCoMTarget.setZ(desiredBodyCurrent.getZ());
-            
-            double distance = initialCoMPosition.distance(desiredCoMTarget);
-            desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
-            if (!MathTools.epsilonEquals(desiredBodyVelocity.length(), 0.0, 1e-5))
-               comTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.length());
-            else
-               comTrajectoryGenerator.setTrajectoryTime(1.0);
-            //         bodyTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.getX());
-            
-            
-            desiredBodyVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-            comTrajectoryGenerator.setInitialConditions(initialCoMPosition, comVelocity);
-            comTrajectoryGenerator.setFinalConditions(desiredCoMTarget, desiredBodyVelocity);
-            
-            comTrajectoryGenerator.initialize();
-            comTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
+            ttrCircleSuccess = commonSupportPolygon.getTangentTangentRadiusCircleCenter(upcommingSwingLeg, radius, comTargetToPack);
          }
+         
+         if(!ttrCircleSuccess)
+         {
+            radius = commonSupportPolygon.getInCircle(comTargetToPack);
+         }
+         inscribedCircleRadius.set(radius);
+         
+         circleCenter.setXY(comTargetToPack);
       }
       
+      private void initializeCoMTrajectory(Point2d target)
+      {
+         FramePoint desiredBodyCurrent = desiredCoMPose.getPosition().getFramePointCopy();
+         initialCoMPosition.set(desiredBodyCurrent);
+         
+         desiredCoMTarget.setXY(target);
+         desiredCoMTarget.setZ(desiredBodyCurrent.getZ());
+         
+         double distance = initialCoMPosition.distance(desiredCoMTarget);
+         desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
+         
+         if (!MathTools.epsilonEquals(desiredBodyVelocity.length(), 0.0, 1e-5))
+         {
+            comTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.length());
+         }
+         else
+         {
+            comTrajectoryGenerator.setTrajectoryTime(1.0);
+         }
+         
+         desiredBodyVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+         
+         comTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
+         comTrajectoryGenerator.setInitialConditions(initialCoMPosition, comVelocity);
+         comTrajectoryGenerator.setFinalConditions(desiredCoMTarget, desiredBodyVelocity);
+         comTrajectoryGenerator.initialize();
+      }
+
       public boolean isMinimumTimeInQuadSupportElapsed()
       {
          if(getTimeInCurrentState() > minimumTimeInQuadSupport.getDoubleValue())
