@@ -666,92 +666,6 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       return footPositionInLegAttachmentFrame;
    }
    
-   private void initializeSwingTrajectory(RobotQuadrant swingLeg, FramePoint swingInitial, FramePoint swingTarget, double swingTime)
-   {
-      QuadrupedSwingTrajectoryGenerator swingTrajectoryGenerator = swingTrajectoryGenerators.get(swingLeg);
-      FrameVector speedMatchVelocity = new FrameVector(desiredBodyVelocity);
-      speedMatchVelocity.scale(-1.0);
-      swingTrajectoryGenerator.initializeSwing(swingTime, swingInitial, swingTarget, speedMatchVelocity);
-   }
-
-   private void computeFootPositionAlongSwingTrajectory(RobotQuadrant swingLeg, FramePoint framePointToPack)
-   {
-      QuadrupedSwingTrajectoryGenerator swingTrajectoryGenerator = swingTrajectoryGenerators.get(swingLeg);
-      swingTrajectoryGenerator.computeSwing(framePointToPack);
-   }
-   
-   private QuadrupedSupportPolygon copyCurrentSupportPolygonWithNewFootPosition(RobotQuadrant robotQuadrant, FramePoint footPosition)
-   {
-      QuadrupedSupportPolygon swingLegSupportPolygon = fourFootSupportPolygon.replaceFootstepCopy(robotQuadrant, footPosition);
-      return swingLegSupportPolygon;
-   }
-   
-   private QuadrupedSupportPolygon getCommonSupportPolygon(RobotQuadrant swingLeg, FramePoint desiredPosition)
-   {
-      QuadrupedSupportPolygon swingLegSupportPolygon = fourFootSupportPolygon.deleteLegCopy(swingLeg);
-      drawSupportPolygon(swingLegSupportPolygon, currentTriplePolygon);
-      
-      RobotQuadrant nextRegularGaitSwingQuadrant = swingLeg.getNextRegularGaitSwingQuadrant();
-      QuadrupedSupportPolygon nextSwingLegSupportPolygon = copyCurrentSupportPolygonWithNewFootPosition(swingLeg, desiredPosition);
-      nextSwingLegSupportPolygon.deleteLeg(nextRegularGaitSwingQuadrant);
-      drawSupportPolygon(nextSwingLegSupportPolygon, upcommingTriplePolygon);
-      
-      QuadrupedSupportPolygon shrunkenCommonSupportPolygon = swingLegSupportPolygon.getShrunkenCommonSupportPolygon(nextSwingLegSupportPolygon, swingLeg, 0.02,
-            0.02, 0.02);
-      if(shrunkenCommonSupportPolygon != null)
-      {
-         drawSupportPolygon(shrunkenCommonSupportPolygon, commonTriplePolygon);
-      }
-      
-      return shrunkenCommonSupportPolygon;
-   }
-   
-   private void initializeBodyTrajectory(RobotQuadrant upcommingSwingLeg, QuadrupedSupportPolygon commonTriangle)
-   {
-      if(commonTriangle != null)
-      {
-         commonSupportPolygon.set(commonTriangle);
-         
-         FramePoint desiredBodyCurrent = desiredCoMPose.getPosition().getFramePointCopy();
-//         FramePoint desiredBodyFinal = commonSupportPolygon.getCentroidFramePoint();
-         
-         boolean ttrCircleSuccess = false;
-         double radius = subCircleRadius.getDoubleValue();
-         if(useSubCircleForBodyShiftTarget.getBooleanValue())
-         {
-            ttrCircleSuccess = commonSupportPolygon.getTangentTangentRadiusCircleCenter(upcommingSwingLeg, radius, circleCenter2d);
-         }
-         
-         if(!ttrCircleSuccess)
-         {
-            radius = commonSupportPolygon.getInCircle(circleCenter2d);
-         }
-         inscribedCircleRadius.set(radius);
-         
-         circleCenter.setXY(circleCenter2d);
-         
-         initialCoMPosition.set(desiredBodyCurrent);
-         desiredCoMTarget.setXY(circleCenter2d);
-         desiredCoMTarget.setZ(desiredBodyCurrent.getZ());
-         
-         double distance = initialCoMPosition.distance(desiredCoMTarget);
-         desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
-         if (!MathTools.epsilonEquals(desiredBodyVelocity.length(), 0.0, 1e-5))
-            comTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.length());
-         else
-            comTrajectoryGenerator.setTrajectoryTime(1.0);
-         //         bodyTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.getX());
-         
-         
-         desiredBodyVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-         comTrajectoryGenerator.setInitialConditions(initialCoMPosition, comVelocity);
-         comTrajectoryGenerator.setFinalConditions(desiredCoMTarget, desiredBodyVelocity);
-         
-         comTrajectoryGenerator.initialize();
-         comTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
-      }
-   }
-
    public void calculateSwingTarget(RobotQuadrant swingLeg, FramePoint framePointToPack)
    {
       FrameVector desiredVelocityVector = desiredVelocity.getFrameTuple();
@@ -888,8 +802,52 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
             estimatedCommonTriangle.put(thirdSwingLeg.getSameSideQuadrant(), thirdAndFourthCommonPolygon.swapSameSideFeetCopy(thirdSwingLeg));
             drawSupportPolygon(thirdAndFourthCommonPolygon, commonTriplePolygons.get(thirdSwingLeg.getSide()));
          }
-         
-         
+      }
+      
+      private void initializeBodyTrajectory(RobotQuadrant upcommingSwingLeg, QuadrupedSupportPolygon commonTriangle)
+      {
+         if(commonTriangle != null)
+         {
+            commonSupportPolygon.set(commonTriangle);
+            
+            FramePoint desiredBodyCurrent = desiredCoMPose.getPosition().getFramePointCopy();
+//            FramePoint desiredBodyFinal = commonSupportPolygon.getCentroidFramePoint();
+            
+            boolean ttrCircleSuccess = false;
+            double radius = subCircleRadius.getDoubleValue();
+            if(useSubCircleForBodyShiftTarget.getBooleanValue())
+            {
+               ttrCircleSuccess = commonSupportPolygon.getTangentTangentRadiusCircleCenter(upcommingSwingLeg, radius, circleCenter2d);
+            }
+            
+            if(!ttrCircleSuccess)
+            {
+               radius = commonSupportPolygon.getInCircle(circleCenter2d);
+            }
+            inscribedCircleRadius.set(radius);
+            
+            circleCenter.setXY(circleCenter2d);
+            
+            initialCoMPosition.set(desiredBodyCurrent);
+            desiredCoMTarget.setXY(circleCenter2d);
+            desiredCoMTarget.setZ(desiredBodyCurrent.getZ());
+            
+            double distance = initialCoMPosition.distance(desiredCoMTarget);
+            desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
+            if (!MathTools.epsilonEquals(desiredBodyVelocity.length(), 0.0, 1e-5))
+               comTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.length());
+            else
+               comTrajectoryGenerator.setTrajectoryTime(1.0);
+            //         bodyTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.getX());
+            
+            
+            desiredBodyVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+            comTrajectoryGenerator.setInitialConditions(initialCoMPosition, comVelocity);
+            comTrajectoryGenerator.setFinalConditions(desiredCoMTarget, desiredBodyVelocity);
+            
+            comTrajectoryGenerator.initialize();
+            comTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
+         }
       }
       
       public boolean isMinimumTimeInQuadSupportElapsed()
@@ -965,7 +923,6 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       {        
          RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
          YoFramePoint yoDesiredFootPosition = desiredFeetLocations.get(swingQuadrant);
-         YoFramePoint yoActualFootPosition = actualFeetLocations.get(swingQuadrant);
          swingTarget.changeFrame(ReferenceFrame.getWorldFrame());
          calculateSwingTarget(swingQuadrant, swingTarget);
          currentSwingTarget.set(swingTarget);
@@ -976,6 +933,20 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       @Override
       public void doTransitionOutOfAction()
       {
+      }
+      
+      private void initializeSwingTrajectory(RobotQuadrant swingLeg, FramePoint swingInitial, FramePoint swingTarget, double swingTime)
+      {
+         QuadrupedSwingTrajectoryGenerator swingTrajectoryGenerator = swingTrajectoryGenerators.get(swingLeg);
+         FrameVector speedMatchVelocity = new FrameVector(desiredBodyVelocity);
+         speedMatchVelocity.scale(-1.0);
+         swingTrajectoryGenerator.initializeSwing(swingTime, swingInitial, swingTarget, speedMatchVelocity);
+      }
+      
+      private void computeFootPositionAlongSwingTrajectory(RobotQuadrant swingLeg, FramePoint framePointToPack)
+      {
+         QuadrupedSwingTrajectoryGenerator swingTrajectoryGenerator = swingTrajectoryGenerators.get(swingLeg);
+         swingTrajectoryGenerator.computeSwing(framePointToPack);
       }
    }
 
