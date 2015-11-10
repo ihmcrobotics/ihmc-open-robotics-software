@@ -71,8 +71,6 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private static final double DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY = 0.6;
    private static final double DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT = 0.01;
    
-   
-   
    private final double dt;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -82,7 +80,6 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    {
       QUADRUPLE_SUPPORT, TRIPLE_SUPPORT
    }
-
    
    private final StateMachine<CrawlGateWalkingState> walkingStateMachine;
    private final QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators;
@@ -93,6 +90,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame comFrame;
    private final PoseReferenceFrame desiredCoMPoseReferenceFrame = new PoseReferenceFrame("desiredCoMPoseReferenceFrame", ReferenceFrame.getWorldFrame());
+   private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final FramePoint desiredCoMFramePosition = new FramePoint(ReferenceFrame.getWorldFrame());
    private final FramePose desiredCoMFramePose = new FramePose(ReferenceFrame.getWorldFrame());
    
@@ -104,8 +102,6 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    
    private final DoubleYoVariable filteredDesiredCoMRollAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredCoMRollAlphaBreakFrequency", registry);
    private final DoubleYoVariable filteredDesiredCoMRollAlpha = new DoubleYoVariable("filteredDesiredCoMRollAlpha", registry);
-
-   private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
 
    private final DoubleYoVariable desiredCoMHeight = new DoubleYoVariable("desiredCoMHeight", registry);
    private final DoubleYoVariable filteredDesiredCoMHeightAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredCoMHeightAlphaBreakFrequency", registry);
@@ -166,6 +162,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private final BooleanYoVariable useSubCircleForBodyShiftTarget = new BooleanYoVariable("useSubCircleForBodyShiftTarget", registry);
    private final DoubleYoVariable subCircleRadius = new DoubleYoVariable("subCircleRadius", registry);
    
+   private final BooleanYoVariable isCoMInsideTriangleForSwingLeg = new BooleanYoVariable("isCoMInsideTriangleForSwingLeg", registry);
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final FrameVector comVelocity = new FrameVector();
    private final FramePoint centerOfMassFramePoint = new FramePoint();
@@ -190,9 +187,8 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private final YoGraphicReferenceFrame rightMidZUpFrameViz;
    
    /** body sway trajectory **/
-   private final VelocityConstrainedPositionTrajectoryGenerator comTrajectoryGenerator = new VelocityConstrainedPositionTrajectoryGenerator("body", ReferenceFrame.getWorldFrame(), registry);
-//   private final StraightLinePositionTrajectoryGenerator bodyTrajectoryGenerator;
-   private final YoFramePoint initialCoMPosition = new YoFramePoint("initialBodyPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final VelocityConstrainedPositionTrajectoryGenerator comTrajectoryGenerator = new VelocityConstrainedPositionTrajectoryGenerator("comTraj", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint initialCoMPosition = new YoFramePoint("initialCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final DoubleYoVariable comTrajectoryTimeStart = new DoubleYoVariable("comTrajectoryTimeStart", registry);
    private final DoubleYoVariable comTrajectoryTimeCurrent = new DoubleYoVariable("comTrajectoryTimeCurrent", registry);
    private final DoubleYoVariable comTrajectoryTimeDesired = new DoubleYoVariable("comTrajectoryTimeDesired", registry);
@@ -230,8 +226,6 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       desiredVelocity.setX(0.0);
       comTrajectoryTimeDesired.set(1.0);
       
-//      bodyTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator("body", ReferenceFrame.getWorldFrame(), trajectoryTimeProvider, initialBodyPositionProvider, finalBodyPositionProvider, registry);
-      
       selectedSwingTargetGenerator = new EnumYoVariable<QuadrupedPositionBasedCrawlController.SwingTargetGeneratorType>("selectedSwingTargetGenerator", registry, SwingTargetGeneratorType.class);
       selectedSwingTargetGenerator.set(SwingTargetGeneratorType.MIDZUP);
       zUpSwingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, referenceFrames, registry);
@@ -263,7 +257,6 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
             AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filteredDesiredCoMHeightAlphaBreakFrequency.getDoubleValue(), dt));
       filteredDesiredCoMHeightAlphaBreakFrequency.addVariableChangedListener(new VariableChangedListener()
       {
-
          @Override
          public void variableChanged(YoVariable<?> v)
          {
@@ -351,32 +344,9 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       walkingStateMachine.addState(tripleSupportState);
       walkingStateMachine.setCurrentState(CrawlGateWalkingState.QUADRUPLE_SUPPORT);
 
-      final BooleanYoVariable isCoMInsideTriangleForSwingLeg = new BooleanYoVariable("isCoMInsideTriangleForSwingLeg", registry);
+      StateTransitionCondition quadrupleToTripleCondition = new QuadrupleToTripleCondition(quadrupleSupportState);
+      StateTransitionCondition tripleToQuadrupleCondition = new TripleToQuadrupleCondition(dataProvider);
       
-      StateTransitionCondition quadrupleToTripleCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            if(!quadrupleSupportState.isMinimumTimeInQuadSupportElapsed())
-            {
-               return false;
-            }
-            isCoMInsideTriangleForSwingLeg.set(quadrupleSupportState.isCoMInsideTriangleForSwingLeg(swingLeg.getEnumValue()));
-            
-            return quadrupleSupportState.isCoMInsideTriangleForSwingLeg(swingLeg.getEnumValue()) && (desiredVelocity.length() != 0.0 || desiredYawRate.getDoubleValue() != 0); //bodyTrajectoryGenerator.isDone() &&
-         }
-      };
-
-      StateTransitionCondition tripleToQuadrupleCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return dataProvider.getFootSwitchProvider(swingLeg.getEnumValue()).switchFoot();
-         }
-      };
-
       quadrupleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.TRIPLE_SUPPORT, quadrupleToTripleCondition));
       tripleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, tripleToQuadrupleCondition));
    }
@@ -702,6 +672,42 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       }
       polygon.update();
       yoFramePolygon.setConvexPolygon2d(polygon);
+   }
+   
+   private class QuadrupleToTripleCondition implements StateTransitionCondition
+   {
+      private final QuadrupleSupportState quadrupleSupportState;
+      public QuadrupleToTripleCondition(QuadrupleSupportState quadSupportState)
+      {
+         this.quadrupleSupportState = quadSupportState;
+      }
+      
+      @Override
+      public boolean checkCondition()
+      {
+         if(!quadrupleSupportState.isMinimumTimeInQuadSupportElapsed())
+         {
+            return false;
+         }
+         isCoMInsideTriangleForSwingLeg.set(quadrupleSupportState.isCoMInsideTriangleForSwingLeg(swingLeg.getEnumValue()));
+         
+         return quadrupleSupportState.isCoMInsideTriangleForSwingLeg(swingLeg.getEnumValue()) && (desiredVelocity.length() != 0.0 || desiredYawRate.getDoubleValue() != 0); //bodyTrajectoryGenerator.isDone() &&
+      }
+   }
+   
+   private class TripleToQuadrupleCondition implements StateTransitionCondition
+   {
+      private final QuadrupedDataProvider dataProvider;
+      public TripleToQuadrupleCondition(QuadrupedDataProvider dataProvider)
+      {
+         this.dataProvider = dataProvider;
+      }
+      
+      @Override
+      public boolean checkCondition()
+      {
+         return dataProvider.getFootSwitchProvider(swingLeg.getEnumValue()).switchFoot();
+      }
    }
    
    private class QuadrupleSupportState extends State<CrawlGateWalkingState>
