@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.referenceFrames;
 
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
