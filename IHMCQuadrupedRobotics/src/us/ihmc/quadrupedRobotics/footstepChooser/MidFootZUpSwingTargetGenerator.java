@@ -221,8 +221,6 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       FrameOrientation2d oppositeSideOrientation = new FrameOrientation2d(oppositeSideZUpFrame);
       oppositeSideOrientation.changeFrame(referenceFrames.getBodyZUpFrame());
       double orientationDeltaWithBody = oppositeSideOrientation.getYaw() - Math.PI / 2.0;
-      System.out.println(orientationDeltaWithBody);
-      
       
       desiredSwingFootPositionFromOppositeSideFoot.setToZero(oppositeSideZUpFrame);
       double halfStrideLength = 0.5 * strideLength.getDoubleValue();
