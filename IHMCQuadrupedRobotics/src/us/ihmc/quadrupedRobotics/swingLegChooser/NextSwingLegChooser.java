@@ -6,5 +6,5 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public interface NextSwingLegChooser
 {
-   public RobotQuadrant chooseNextStepQuadrant(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepQuadrant, FrameVector desiredVelocity, double desiredYawRate);
+   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector desiredVelocity, double desiredYawRate);
 }

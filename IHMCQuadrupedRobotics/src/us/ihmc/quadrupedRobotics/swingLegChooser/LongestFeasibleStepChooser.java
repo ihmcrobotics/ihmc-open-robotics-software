@@ -139,7 +139,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
    }
    
    @Override
-   public RobotQuadrant chooseNextStepQuadrant(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepFoot, FrameVector desiredVelocity, double desiredYawRate)
+   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepFoot, FrameVector desiredVelocity, double desiredYawRate)
    {
       updateState();
       return doTheCalculations(desiredVelocity, desiredYawRate, lastStepFoot, supportPolygon);
