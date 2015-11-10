@@ -19,7 +19,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicEllipsoid;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public class LongestFeasibleStepChooser implements NextStepQuadrantChooser
+public class LongestFeasibleStepChooser implements NextSwingLegChooser
 {
    private static final double ZERO_THRESHOLD = 1e-4;
    private static final double MYSTERIOUS_SCALAR = 1.0;
