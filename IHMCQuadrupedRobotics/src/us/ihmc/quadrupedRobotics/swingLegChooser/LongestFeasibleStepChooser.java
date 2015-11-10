@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.footstepChooser;
+package us.ihmc.quadrupedRobotics.swingLegChooser;
 
 import javax.vecmath.Vector3d;
 
