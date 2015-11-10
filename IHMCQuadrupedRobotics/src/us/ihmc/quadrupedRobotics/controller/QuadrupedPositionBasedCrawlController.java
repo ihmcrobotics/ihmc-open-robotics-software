@@ -10,6 +10,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedDataProvider;
 import us.ihmc.quadrupedRobotics.footstepChooser.MidFootZUpSwingTargetGenerator;
+import us.ihmc.quadrupedRobotics.footstepChooser.SwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedControllerParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
@@ -84,6 +85,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private final StateMachine<CrawlGateWalkingState> walkingStateMachine;
    private final QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators;
    private final NextSwingLegChooser nextSwingLegChooser;
+   private final SwingTargetGenerator swingTargetGenerator;
    
    private final SDFFullRobotModel fullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
@@ -132,10 +134,6 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private final QuadrantDependentList<QuadrupedSwingTrajectoryGenerator> swingTrajectoryGenerators = new QuadrantDependentList<>();
    private final DoubleYoVariable swingDuration = new DoubleYoVariable("swingDuration", registry);
    private final DoubleYoVariable swingHeight = new DoubleYoVariable("swingHeight", registry);
-   
-   private enum SwingTargetGeneratorType {MIDZUP, INPLACE};
-   private final EnumYoVariable<SwingTargetGeneratorType> selectedSwingTargetGenerator;
-   private final MidFootZUpSwingTargetGenerator zUpSwingTargetGenerator;
    
    private final QuadrantDependentList<ReferenceFrame> legAttachmentFrames = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFramePoint> actualFeetLocations = new QuadrantDependentList<YoFramePoint>();
@@ -199,7 +197,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private DoubleProvider desiredYawRateProvider;
    
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
-         final QuadrupedReferenceFrames referenceFrames, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, NextSwingLegChooser nextSwingLegChooser, 
+         final QuadrupedReferenceFrames referenceFrames, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, NextSwingLegChooser nextSwingLegChooser, SwingTargetGenerator swingTargetGenerator,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, final QuadrupedDataProvider dataProvider, DoubleYoVariable yoTime)
    {
       QuadrupedControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedControllerParameters();
@@ -217,6 +215,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>(name, "walkingStateTranistionTime", CrawlGateWalkingState.class, yoTime, registry);
       this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
       this.nextSwingLegChooser = nextSwingLegChooser;
+      this.swingTargetGenerator = swingTargetGenerator;
 
       desiredVelocityProvider = dataProvider.getDesiredVelocityProvider();
       desiredYawRateProvider = dataProvider.getDesiredYawRateProvider();
@@ -229,9 +228,6 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       desiredVelocity.setX(0.0);
       comTrajectoryTimeDesired.set(1.0);
       
-      selectedSwingTargetGenerator = new EnumYoVariable<QuadrupedPositionBasedCrawlController.SwingTargetGeneratorType>("selectedSwingTargetGenerator", registry, SwingTargetGeneratorType.class);
-      selectedSwingTargetGenerator.set(SwingTargetGeneratorType.MIDZUP);
-      zUpSwingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, referenceFrames, registry);
       
       comPoseYoGraphic = new YoGraphicReferenceFrame("rasta_", referenceFrames.getCenterOfMassFrame(), registry, 0.25, YoAppearance.Green());
       leftMidZUpFrameViz = new YoGraphicReferenceFrame(referenceFrames.getSideDependentMidFeetZUpFrame(RobotSide.LEFT), registry, 0.2);
@@ -643,23 +639,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    {
       FrameVector desiredVelocityVector = desiredVelocity.getFrameTuple();
       double yawRate = desiredYawRate.getDoubleValue();
-      
-      switch (selectedSwingTargetGenerator.getEnumValue())
-      {
-         case INPLACE:
-         {
-            YoFramePoint yoFootPosition = actualFeetLocations.get(swingLeg);
-            FramePoint footPosition = yoFootPosition.getFrameTuple();
-            footPosition.changeFrame(ReferenceFrame.getWorldFrame());
-            framePointToPack.set(footPosition);
-            break;
-         }
-         case MIDZUP:
-         {
-            zUpSwingTargetGenerator.getSwingTarget(swingLeg, desiredVelocityVector, framePointToPack, yawRate);
-            break;
-         }
-      }
+      swingTargetGenerator.getSwingTarget(swingLeg, desiredVelocityVector, framePointToPack, yawRate);
    }
    
    private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
@@ -773,10 +753,10 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          calculateSwingTarget(firstSwingLeg, swingDesired);
          quadStateAfterFirstStep = fourFootSupportPolygon.replaceFootstepCopy(firstSwingLeg, swingDesired);
          
-         zUpSwingTargetGenerator.getSwingTarget(quadStateAfterFirstStep, secondSwingLeg, desiredVelocityVector, swingDesired, yawRate);
+         swingTargetGenerator.getSwingTarget(quadStateAfterFirstStep, secondSwingLeg, desiredVelocityVector, swingDesired, yawRate);
          quadStateAfterSecondStep = quadStateAfterFirstStep.replaceFootstepCopy(secondSwingLeg, swingDesired);
          
-         zUpSwingTargetGenerator.getSwingTarget(quadStateAfterSecondStep, thirdSwingLeg, desiredVelocityVector, swingDesired, yawRate);
+         swingTargetGenerator.getSwingTarget(quadStateAfterSecondStep, thirdSwingLeg, desiredVelocityVector, swingDesired, yawRate);
          quadStateAfterThirdStep = quadStateAfterSecondStep.replaceFootstepCopy(thirdSwingLeg, swingDesired);
          
          trippleStateWithFirstStepSwinging = quadStateAfterFirstStep.deleteLegCopy(secondSwingLeg);
