@@ -153,8 +153,8 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       swingTargetToPack.add(desiredSwingFootPositionFromOppositeSideFoot);
       
       //for debug
-//      swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);
-//      swingTargetToPack.set(desiredSwingFootPositionFromOppositeSideFoot);
+      //      swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);
+      //      swingTargetToPack.set(desiredSwingFootPositionFromOppositeSideFoot);
    }
 
    private void determineFootPositionFromHalfStride(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
@@ -164,9 +164,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       RobotEnd robotEnd = swingLeg.getEnd();
 
       //check the difference in orientation between the oppositeSideZUpFrame and the bodyZUpFrame
-      FrameOrientation2d oppositeSideOrientation = new FrameOrientation2d(oppositeSideZUpFrame);
-      oppositeSideOrientation.changeFrame(referenceFrames.getBodyZUpFrame());
-      double orientationDeltaWithBody = oppositeSideOrientation.getYaw() - Math.PI / 2.0;
+      double orientationDeltaWithBody = calculateOppositeSideOrientationWithRespectToBody(oppositeSideZUpFrame);
       
       //handle forward backward placement
       desiredSwingFootPositionFromHalfStride.setToZero(oppositeSideZUpFrame);
@@ -210,7 +208,6 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromHalfStride);
       supportPolygon.getCentroid(centroid);
       desiredSwingFootPositionFromHalfStride.set(desiredSwingFootPositionFromHalfStride.yawAboutPoint(centroid, deltaYaw));
-      //      swingTargetToPack.setZ(0.0);
    }
 
    private void determineFootPositionFromOppositeSideFoot(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
@@ -219,9 +216,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       RobotSide swingSide = swingLeg.getSide();
       
       //check the difference in orientation between the oppositeSideZUpFrame and the bodyZUpFrame
-      FrameOrientation2d oppositeSideOrientation = new FrameOrientation2d(oppositeSideZUpFrame);
-      oppositeSideOrientation.changeFrame(referenceFrames.getBodyZUpFrame());
-      double orientationDeltaWithBody = oppositeSideOrientation.getYaw() - Math.PI / 2.0;
+      double orientationDeltaWithBody = calculateOppositeSideOrientationWithRespectToBody(oppositeSideZUpFrame);
       
       desiredSwingFootPositionFromOppositeSideFoot.setToZero(oppositeSideZUpFrame);
       double halfStrideLength = 0.5 * strideLength.getDoubleValue();
@@ -233,9 +228,8 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       footPositionOppositeSideSameEnd.changeFrame(oppositeSideZUpFrame);      
       
       double newY = footPositionOppositeSideSameEnd.getY() - amountToSkew;
-      
-   // maintain minimumDistanceFromSameSideFoot inline
-      
+
+      // maintain minimumDistanceFromSameSideFoot inline
       footPositionSameSideOppositeEnd.changeFrame(oppositeSideZUpFrame);
       if(swingLeg.isQuadrantInHind() && (footPositionSameSideOppositeEnd.getY() + minimumDistanceFromSameSideFoot.getDoubleValue() > newY ))
          newY = footPositionSameSideOppositeEnd.getY() + minimumDistanceFromSameSideFoot.getDoubleValue();
@@ -257,14 +251,20 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       
       desiredSwingFootPositionFromOppositeSideFoot.changeFrame(ReferenceFrame.getWorldFrame());
       
-      
       //rotate the foot about the centroid of the predicted foot polygon
       supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromOppositeSideFoot);
       supportPolygon.getCentroid(centroid);
       desiredSwingFootPositionFromOppositeSideFoot.set(desiredSwingFootPositionFromOppositeSideFoot.yawAboutPoint(centroid, deltaYaw));
-      
    }
-   
+
+   private double calculateOppositeSideOrientationWithRespectToBody(ReferenceFrame oppositeSideZUpFrame)
+   {
+      FrameOrientation2d oppositeSideOrientation = new FrameOrientation2d(oppositeSideZUpFrame);
+      oppositeSideOrientation.changeFrame(referenceFrames.getBodyZUpFrame());
+      double orientationDeltaWithBody = oppositeSideOrientation.getYaw() - Math.PI / 2.0;
+      return orientationDeltaWithBody;
+   }
+
    private void updateFeetPositions()
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
