@@ -6,8 +6,8 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.trajectories.CartesianTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.ParabolicCartesianTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.Finishable;
+import us.ihmc.robotics.math.trajectories.ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -19,20 +19,18 @@ public class QuadrupedSwingTrajectoryGenerator
    private final double DEFAULT_SWING_TIME = 0.3;
    private final double dt;
    
-   private final ParabolicCartesianTrajectoryGenerator cartesianTrajectoryGenerator;
+   private final ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator cartesianTrajectoryGenerator;
    
    private final RobotQuadrant robotQuadrant;
 
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable swingHeightAboveStartAtFiftyPercent;
+   private final DoubleYoVariable swingHeight;
    private final YoVariableDoubleProvider swingTimeDoubleProvider;
    
    private final ReferenceFrame soleFrame;
    private final FramePoint currentFootPosition = new FramePoint();
    private final FramePoint desiredEndEffectorPosition = new FramePoint();
    private final FramePoint initialPosition = new FramePoint();
-   private final FrameVector initialAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector initialVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector finalDesiredVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
 
    private BagOfBalls bagOfBalls;
@@ -43,22 +41,21 @@ public class QuadrupedSwingTrajectoryGenerator
       this.dt = dt;
       this.robotQuadrant = robotQuadrant;
       soleFrame = referenceFrames.getFootFrame(robotQuadrant);
-      registry = new YoVariableRegistry(robotQuadrant.getCamelCaseNameForStartOfExpression() + "MiniBeastSwingTrajectoryGenerator");
-      swingTimeDoubleProvider = new YoVariableDoubleProvider("swingTime", registry);
+      String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
+      registry = new YoVariableRegistry(prefix + "MiniBeastSwingTrajectoryGenerator");
+      swingTimeDoubleProvider = new YoVariableDoubleProvider(prefix + "swingTime", registry);
       swingTimeDoubleProvider.set(DEFAULT_SWING_TIME);
       
-      swingHeightAboveStartAtFiftyPercent = new DoubleYoVariable("swingHeightAboveStartAtFiftyPercent", registry);
-      swingHeightAboveStartAtFiftyPercent.set(0.1);
+      swingHeight = new DoubleYoVariable(prefix + "swingHeight", registry);
+      swingHeight.set(0.1);
       
-      ReferenceFrame bodyReferenceFrame = referenceFrames.getBodyFrame();
-      
-      cartesianTrajectoryGenerator = new ParabolicCartesianTrajectoryGenerator("swingLegTraj", ReferenceFrame.getWorldFrame(), swingTimeDoubleProvider, swingHeightAboveStartAtFiftyPercent.getDoubleValue(), registry);
+      cartesianTrajectoryGenerator = new ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator("swingLegTraj", ReferenceFrame.getWorldFrame(), registry);
       parentRegistry.addChild(registry);
 
-      bagOfBalls = new BagOfBalls(50, 0.01, robotQuadrant.getCamelCaseNameForStartOfExpression() + "SwingTrajectoryBoB", registry, yoGraphicsListRegistry);
+      bagOfBalls = new BagOfBalls(50, 0.01, prefix + "SwingTrajectoryBoB", registry, yoGraphicsListRegistry);
    }
    
-   public void initializeSwing(double swingTime, FramePoint swingInitial, FramePoint swingTarget)
+   public void initializeSwing(double swingTime, FramePoint swingInitial, FramePoint swingTarget, FrameVector desiredFinalVelocity)
    {
       bagOfBalls.reset();
       
@@ -66,14 +63,16 @@ public class QuadrupedSwingTrajectoryGenerator
       currentFootPosition.setToZero(soleFrame);
       currentFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
       initialPosition.setIncludingFrame(swingInitial);
+      finalDesiredVelocity.set(desiredFinalVelocity);
       
-      cartesianTrajectoryGenerator.updateGroundClearance(currentFootPosition.getZ() + swingHeightAboveStartAtFiftyPercent.getDoubleValue());
-      cartesianTrajectoryGenerator.initialize(initialPosition, initialVelocity, initialAcceleration, swingTarget, finalDesiredVelocity);
+      cartesianTrajectoryGenerator.setTrajectoryParameters(swingTime, initialPosition, swingHeight.getDoubleValue(), swingTarget, finalDesiredVelocity);
+      cartesianTrajectoryGenerator.initialize();
    }
    
    public void computeSwing(FramePoint framePointToPack)
    {
-      cartesianTrajectoryGenerator.computeNextTick(desiredEndEffectorPosition, dt);
+      cartesianTrajectoryGenerator.compute(dt);
+      cartesianTrajectoryGenerator.get(desiredEndEffectorPosition);
       framePointToPack.setIncludingFrame(desiredEndEffectorPosition);
       
       updateBagOfBalls(desiredEndEffectorPosition);
@@ -99,7 +98,7 @@ public class QuadrupedSwingTrajectoryGenerator
       return robotQuadrant;
    }
 
-   public CartesianTrajectoryGenerator getTrajectoryGenerator()
+   public Finishable getTrajectoryGenerator()
    {
       return cartesianTrajectoryGenerator;
    }

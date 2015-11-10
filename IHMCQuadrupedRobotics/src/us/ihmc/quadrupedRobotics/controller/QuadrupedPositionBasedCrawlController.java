@@ -644,7 +644,9 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private void initializeSwingTrajectory(RobotQuadrant swingLeg, FramePoint swingInitial, FramePoint swingTarget, double swingTime)
    {
       QuadrupedSwingTrajectoryGenerator swingTrajectoryGenerator = swingTrajectoryGenerators.get(swingLeg);
-      swingTrajectoryGenerator.initializeSwing(swingTime, swingInitial, swingTarget);
+      FrameVector speedMatchVelocity = new FrameVector(desiredBodyVelocity);
+      speedMatchVelocity.scale(-1.0);
+      swingTrajectoryGenerator.initializeSwing(swingTime, swingInitial, swingTarget, speedMatchVelocity);
    }
 
    private void computeFootPositionAlongSwingTrajectory(RobotQuadrant swingLeg, FramePoint framePointToPack)
