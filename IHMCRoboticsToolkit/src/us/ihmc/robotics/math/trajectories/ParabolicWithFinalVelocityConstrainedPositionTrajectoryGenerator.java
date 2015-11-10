@@ -21,7 +21,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
    private final DoubleYoVariable trajectoryTime;
    
    private final YoFramePoint initialPosition;
-   private final YoFramePoint intermediatePosition;
+   private final DoubleYoVariable intermediateZPosition;
 
    private final YoFramePoint finalPosition;
    private final YoFrameVector finalVelocity;
@@ -35,7 +35,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       registry = new YoVariableRegistry(name);
       
       initialPosition = new YoFramePoint(name + "InitialPosition", referenceFrame, registry);
-      intermediatePosition = new YoFramePoint(name + "IntermediatePosition", referenceFrame, registry);
+      intermediateZPosition = new DoubleYoVariable(name + "IntermediateZPosition", registry);
       
       finalPosition = new YoFramePoint(name + "FinalPosition", referenceFrame, registry);
       finalVelocity = new YoFrameVector(name + "FinalVelocity", referenceFrame, registry);
@@ -69,14 +69,14 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       this.initialPosition.set(initialPosition);
    }
 
-   public void setIntermediateConditions(FramePoint intermediatePosition)
+   public void setIntermediateConditions(double intermediateZPosition)
    {
-      this.intermediatePosition.set(intermediatePosition);  
+      this.intermediateZPosition.set(intermediateZPosition);  
    }
    
-   public void setIntermediateConditions(YoFramePoint intermediatePosition)
+   public void setIntermediateConditions(DoubleYoVariable intermediateZPosition)
    {
-      this.intermediatePosition.set(intermediatePosition);  
+      this.intermediateZPosition.set(intermediateZPosition.getDoubleValue());  
    }
    
    public void setFinalConditions(FramePoint finalPosition, FrameVector finalVelocity)
@@ -97,32 +97,32 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       this.finalVelocity.setAndMatchFrame(finalVelocity);
    }
 
-   public void setTrajectoryParameters(double duration, FramePoint initialPosition, FramePoint intermediatePosition, FramePoint finalPosition, FrameVector finalVelocity)
+   public void setTrajectoryParameters(double duration, FramePoint initialPosition, double intermediateZPosition, FramePoint finalPosition, FrameVector finalVelocity)
    {
       trajectoryTime.set(duration);
 
       this.initialPosition.set(initialPosition);
-      this.intermediatePosition.set(intermediatePosition);
+      this.intermediateZPosition.set(intermediateZPosition);
       this.finalPosition.set(finalPosition);
       this.finalVelocity.set(finalVelocity);
    }
 
-   public void setTrajectoryParameters(double duration, YoFramePoint initialPosition, YoFramePoint intermediatePosition, YoFramePoint finalPosition, YoFrameVector finalVelocity)
+   public void setTrajectoryParameters(double duration, YoFramePoint initialPosition, DoubleYoVariable intermediateZPosition, YoFramePoint finalPosition, YoFrameVector finalVelocity)
    {
       trajectoryTime.set(duration);
 
       this.initialPosition.set(initialPosition);
-      this.intermediatePosition.set(intermediatePosition);
+      this.intermediateZPosition.set(intermediateZPosition.getDoubleValue());
       this.finalPosition.set(finalPosition);
       this.finalVelocity.set(finalVelocity);
    }
 
-   public void setTrajectoryParameters(double duration, Point3d initialPosition, Point3d intermediatePosition, Point3d finalPosition, Vector3d finalVelocity)
+   public void setTrajectoryParameters(double duration, Point3d initialPosition, double intermediatePosition, Point3d finalPosition, Vector3d finalVelocity)
    {
       trajectoryTime.set(duration);
 
       this.initialPosition.set(initialPosition);
-      this.intermediatePosition.set(intermediatePosition);
+      this.intermediateZPosition.set(intermediatePosition);
       this.finalPosition.set(finalPosition);
       this.finalVelocity.set(finalVelocity);
    }
@@ -133,16 +133,16 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       double tIntermediate = trajectoryTime.getDoubleValue() / 2.0;
       xPolynomial.setCubicWithFinalVelocityConstraint(0.0,trajectoryTime.getDoubleValue(), initialPosition.getX(), finalPosition.getX(), finalVelocity.getX());
       yPolynomial.setCubicWithFinalVelocityConstraint(0.0,trajectoryTime.getDoubleValue(), initialPosition.getY(), finalPosition.getY(), finalVelocity.getY());
-      zPolynomial.setCubicWithIntermediatePositionAndFinalVelocityConstraint(0.0,  tIntermediate, trajectoryTime.getDoubleValue(), initialPosition.getZ(), intermediatePosition.getZ(), finalPosition.getZ(), finalVelocity.getZ());
+      zPolynomial.setCubicWithIntermediatePositionAndFinalVelocityConstraint(0.0,  tIntermediate, trajectoryTime.getDoubleValue(), initialPosition.getZ(), intermediateZPosition.getDoubleValue(), finalPosition.getZ(), finalVelocity.getZ());
 
       currentPosition.set(initialPosition);
       currentAcceleration.setToZero();
    }
 
-   public void compute(double time)
+   public void compute(double dt)
    {
-      this.currentTime.set(time);
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      this.currentTime.add(dt);
+      double time = MathTools.clipToMinMax(currentTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue());
       xPolynomial.compute(time);
       yPolynomial.compute(time);
       zPolynomial.compute(time);

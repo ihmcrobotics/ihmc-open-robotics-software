@@ -61,6 +61,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    private final DoubleYoVariable swingTimeTrajectoryTimeStart = new DoubleYoVariable("swingTimeTrajectoryTimeStart", registry);
    private final DoubleYoVariable swingTimeTrajectoryTimeCurrent = new DoubleYoVariable("swingTimeTrajectoryTimeCurrent", registry);
    private final DoubleYoVariable desiredSwingTime = new DoubleYoVariable("desiredSwingTime", registry);
+   private final DoubleYoVariable swingHeight = new DoubleYoVariable("swingHeight", registry);
 
    private final QuadrantDependentList<YoFramePoint> yoFootPositions = new QuadrantDependentList< YoFramePoint>();
    private final QuadrantDependentList<YoGraphicPosition> footPositionGraphics = new QuadrantDependentList<YoGraphicPosition>();
@@ -95,6 +96,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    public MidFootZUpSwingTargetGeneratorVisualizer(QuadrupedReferenceFrames referenceFrames)
    {
       desiredVelocity.setX(0.24);
+      swingHeight.set(0.2);
 
       robot = new Robot("viz");
       rootJoint = new FloatingJoint("floating", new Vector3d(), robot);
@@ -231,7 +233,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
          swingTimeTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - swingTimeTrajectoryTimeStart.getDoubleValue());
          RobotQuadrant robotQuadrant = swingLeg.getEnumValue();
          FramePoint swingLegPosition = new FramePoint();
-         cartesianTrajectoryGenerator.compute(swingTimeTrajectoryTimeCurrent.getDoubleValue());
+         cartesianTrajectoryGenerator.compute(simulateDT);
          cartesianTrajectoryGenerator.get(swingLegPosition);
 
          yoFootPositions.get(robotQuadrant).set(swingLegPosition);
@@ -244,12 +246,11 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
          swingLeg.set(robotQuadrant);
 
          FramePoint initialPosition = new FramePoint(yoFootPositions.get(robotQuadrant).getFramePointCopy());
-         FramePoint intermediatePosition = new FramePoint(ReferenceFrame.getWorldFrame(), 0.0,0.0,0.1);
          FramePoint desiredFootPosition = new FramePoint();
          
          swingTimeTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
          swingTargetGenerator.getSwingTarget(quadrupedSupportPolygon, robotQuadrant, desiredVelocity.getFrameTuple(), desiredFootPosition, desiredYawRate.getDoubleValue());
-         cartesianTrajectoryGenerator.setTrajectoryParameters(desiredSwingTime.getDoubleValue(), initialPosition, intermediatePosition, desiredFootPosition, finalDesiredVelocity.getFrameTuple());
+         cartesianTrajectoryGenerator.setTrajectoryParameters(desiredSwingTime.getDoubleValue(), initialPosition, swingHeight.getDoubleValue(), desiredFootPosition, finalDesiredVelocity.getFrameTuple());
          cartesianTrajectoryGenerator.initialize();
          swingTarget.set(desiredFootPosition);
       }
