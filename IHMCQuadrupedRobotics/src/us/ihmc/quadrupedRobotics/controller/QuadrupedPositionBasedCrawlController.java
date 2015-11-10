@@ -10,8 +10,8 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedDataProvider;
 import us.ihmc.quadrupedRobotics.footstepChooser.MidFootZUpSwingTargetGenerator;
-import us.ihmc.quadrupedRobotics.footstepChooser.QuadrupedControllerParameters;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedControllerParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
@@ -197,9 +197,8 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private DoubleProvider desiredYawRateProvider;
    
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
-         QuadrupedJointNameMap quadrupedJointNameMap, final QuadrupedReferenceFrames referenceFrames,
-         QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, final QuadrupedDataProvider dataProvider, DoubleYoVariable yoTime)
+         final QuadrupedReferenceFrames referenceFrames, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, final QuadrupedDataProvider dataProvider, DoubleYoVariable yoTime)
    {
       swingDuration.set(0.3);
       subCircleRadius.set(0.1);

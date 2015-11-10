@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.footstepChooser;
+package us.ihmc.quadrupedRobotics.parameters;
 
 public interface QuadrupedControllerParameters extends SwingTargetGeneratorParameters
 {

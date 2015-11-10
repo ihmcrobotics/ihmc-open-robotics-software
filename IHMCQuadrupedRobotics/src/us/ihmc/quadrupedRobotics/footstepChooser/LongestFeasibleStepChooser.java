@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.footstepChooser;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.quadrupedRobotics.parameters.DefaultSwingTargetGeneratorParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedGeometryTools;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
