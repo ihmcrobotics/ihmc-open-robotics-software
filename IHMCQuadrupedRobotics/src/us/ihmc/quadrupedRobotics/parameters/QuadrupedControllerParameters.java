@@ -4,5 +4,11 @@ public interface QuadrupedControllerParameters extends SwingTargetGeneratorParam
 {
 
    public double getInitalCoMHeight();
+   
+   public double getDefaultSwingHeight();
+
+   public double getDefaultSwingDuration();
+
+   public double getDefaultSubCircleRadius();
 
 }

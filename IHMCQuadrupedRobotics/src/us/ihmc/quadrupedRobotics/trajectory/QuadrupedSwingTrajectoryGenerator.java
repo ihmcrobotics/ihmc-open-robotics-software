@@ -24,7 +24,6 @@ public class QuadrupedSwingTrajectoryGenerator
    private final RobotQuadrant robotQuadrant;
 
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable swingHeight;
    private final YoVariableDoubleProvider swingTimeDoubleProvider;
    
    private final ReferenceFrame soleFrame;
@@ -46,16 +45,13 @@ public class QuadrupedSwingTrajectoryGenerator
       swingTimeDoubleProvider = new YoVariableDoubleProvider(prefix + "swingTime", registry);
       swingTimeDoubleProvider.set(DEFAULT_SWING_TIME);
       
-      swingHeight = new DoubleYoVariable(prefix + "swingHeight", registry);
-      swingHeight.set(0.1);
-      
       cartesianTrajectoryGenerator = new ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator("swingLegTraj", ReferenceFrame.getWorldFrame(), registry);
       parentRegistry.addChild(registry);
 
       bagOfBalls = new BagOfBalls(50, 0.01, prefix + "SwingTrajectoryBoB", registry, yoGraphicsListRegistry);
    }
    
-   public void initializeSwing(double swingTime, FramePoint swingInitial, FramePoint swingTarget, FrameVector desiredFinalVelocity)
+   public void initializeSwing(double swingTime, FramePoint swingInitial, double swingHeight, FramePoint swingTarget, FrameVector desiredFinalVelocity)
    {
       bagOfBalls.reset();
       
@@ -65,7 +61,7 @@ public class QuadrupedSwingTrajectoryGenerator
       initialPosition.setIncludingFrame(swingInitial);
       finalDesiredVelocity.set(desiredFinalVelocity);
       
-      cartesianTrajectoryGenerator.setTrajectoryParameters(swingTime, initialPosition, swingHeight.getDoubleValue(), swingTarget, finalDesiredVelocity);
+      cartesianTrajectoryGenerator.setTrajectoryParameters(swingTime, initialPosition, swingHeight, swingTarget, finalDesiredVelocity);
       cartesianTrajectoryGenerator.initialize();
    }
    
