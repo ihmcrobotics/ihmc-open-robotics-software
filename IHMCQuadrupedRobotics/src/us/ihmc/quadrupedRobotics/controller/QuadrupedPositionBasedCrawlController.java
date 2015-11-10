@@ -85,6 +85,8 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame comFrame;
    private final PoseReferenceFrame desiredCoMPoseReferenceFrame = new PoseReferenceFrame("desiredCoMPoseReferenceFrame", ReferenceFrame.getWorldFrame());
+   private final FramePoint desiredCoMFramePosition = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePose desiredCoMFramePose = new FramePose(ReferenceFrame.getWorldFrame());
    
    private final DoubleYoVariable filteredDesiredCoMYawAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredCoMYawAlphaBreakFrequency", registry);
    private final DoubleYoVariable filteredDesiredCoMYawAlpha = new DoubleYoVariable("filteredDesiredCoMYawAlpha", registry);
@@ -493,8 +495,11 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       walkingStateMachine.checkTransitionConditions();
       walkingStateMachine.doAction();
       updateDesiredCoMTrajectory();
-      updateDesiredBody();
-      updateLegsBasedOnDesiredBody();
+      updateDesiredYaw();
+      updateDesiredHeight();
+      alphaFilterDesiredBodyOrientation();
+      updateDesiredCoMPose();
+      updateLegsBasedOnDesiredCoM();
    }
 
    private void pollDataProviders()
@@ -577,20 +582,20 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       drawSupportPolygon(fourFootSupportPolygon, supportPolygon);
    }
    
-   FramePoint desiredCoMFramePose = new FramePoint(ReferenceFrame.getWorldFrame());
+   
    private void updateDesiredCoMTrajectory()
    {
       if(!comTrajectoryGenerator.isDone())
       {
          comTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - comTrajectoryTimeStart.getDoubleValue());
          comTrajectoryGenerator.compute(comTrajectoryTimeCurrent.getDoubleValue());
-         comTrajectoryGenerator.get(desiredCoMFramePose);
-         desiredCoMFramePose.setZ(desiredCoMPose.getPosition().getZ());
-         desiredCoMPose.setPosition(desiredCoMFramePose);
+         comTrajectoryGenerator.get(desiredCoMFramePosition);
+         desiredCoMFramePosition.setZ(desiredCoMPose.getPosition().getZ());
+         desiredCoMPose.setPosition(desiredCoMFramePosition);
       }
    }
 
-   private void updateDesiredBody()
+   private void updateDesiredYaw()
    {
       FramePoint centroidFramePoint = fourFootSupportPolygon.getCentroidFramePoint();
       nominalYaw.set(fourFootSupportPolygon.getNominalYaw());
@@ -603,21 +608,29 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       nominalYawLineSegment.set(centroidFramePoint2d, endPoint2d);
       DoubleYoVariable desiredYaw = desiredCoMOrientation.getYaw();
       desiredYaw.set(nominalYaw.getDoubleValue());
-      
+   }
+   
+   private void updateDesiredHeight()
+   {
+      filteredDesiredCoMHeight.update();
+      desiredCoMPosition.setZ(filteredDesiredCoMHeight.getDoubleValue());
+   }
+   
+   private void alphaFilterDesiredBodyOrientation()
+   {
       filteredDesiredCoMYaw.update();
       filteredDesiredCoMPitch.update();
       filteredDesiredCoMRoll.update();
-      
-      filteredDesiredCoMHeight.update();
-      desiredCoMPosition.setZ(filteredDesiredCoMHeight.getDoubleValue());
-      
-      FramePose updatedPose = new FramePose(ReferenceFrame.getWorldFrame());
-      desiredCoMPose.getFramePose(updatedPose);
-      desiredCoM.set(updatedPose.getFramePointCopy());
-      desiredCoMPoseReferenceFrame.setPoseAndUpdate(updatedPose);
    }
    
-   private void updateLegsBasedOnDesiredBody()
+   private void updateDesiredCoMPose()
+   {
+      desiredCoMPose.getFramePose(desiredCoMFramePose);
+      desiredCoM.set(desiredCoMFramePose.getFramePointCopy());
+      desiredCoMPoseReferenceFrame.setPoseAndUpdate(desiredCoMFramePose);
+   }
+   
+   private void updateLegsBasedOnDesiredCoM()
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
