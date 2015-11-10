@@ -184,12 +184,9 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private final VelocityConstrainedPositionTrajectoryGenerator bodyTrajectoryGenerator = new VelocityConstrainedPositionTrajectoryGenerator("body", ReferenceFrame.getWorldFrame(), registry);
 //   private final StraightLinePositionTrajectoryGenerator bodyTrajectoryGenerator;
    private final YoFramePoint initialCoMPosition = new YoFramePoint("initialBodyPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final DoubleYoVariable bodyMovementTrajectoryTimeStart = new DoubleYoVariable("bodyMovementTrajectoryTimeStart", registry);
-   private final DoubleYoVariable bodyMovementTrajectoryTimeCurrent = new DoubleYoVariable("bodyMovementTrajectoryTimeCurrent", registry);
-   private final DoubleYoVariable bodyMovementTrajectoryTimeDesired = new DoubleYoVariable("bodyMovementTrajectoryTimeDesired", registry);
-   private final YoVariableDoubleProvider trajectoryTimeProvider =new YoVariableDoubleProvider(bodyMovementTrajectoryTimeDesired);
-   private final YoPositionProvider initialBodyPositionProvider = new YoPositionProvider(initialCoMPosition);
-   private final YoPositionProvider finalBodyPositionProvider = new YoPositionProvider(desiredCoMTarget);
+   private final DoubleYoVariable comTrajectoryTimeStart = new DoubleYoVariable("comTrajectoryTimeStart", registry);
+   private final DoubleYoVariable comTrajectoryTimeCurrent = new DoubleYoVariable("comTrajectoryTimeCurrent", registry);
+   private final DoubleYoVariable comTrajectoryTimeDesired = new DoubleYoVariable("comTrajectoryTimeDesired", registry);
 
    private VectorProvider desiredVelocityProvider;
    private DoubleProvider desiredYawRateProvider;
@@ -222,7 +219,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       
       desiredVelocity = new YoFrameVector("desiredVelocity", bodyFrame, registry);
       desiredVelocity.setX(0.0);
-      bodyMovementTrajectoryTimeDesired.set(1.0);
+      comTrajectoryTimeDesired.set(1.0);
       
 //      bodyTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator("body", ReferenceFrame.getWorldFrame(), trajectoryTimeProvider, initialBodyPositionProvider, finalBodyPositionProvider, registry);
       
@@ -488,19 +485,18 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    @Override
    public void doControl()
    {
-      updateYoVariables();
       referenceFrames.updateFrames();
       updateEstimates();
       updateGraphics();
-      updateFeetLocations();
+      pollDataProviders();
       walkingStateMachine.checkTransitionConditions();
       walkingStateMachine.doAction();
-      updateDesiredBodyIK();
+      updateDesiredCoMTrajectory();
       updateDesiredBody();
       updateLegsBasedOnDesiredBody();
    }
 
-   private void updateYoVariables()
+   private void pollDataProviders()
    {
       if(desiredVelocityProvider != null)
       {
@@ -514,6 +510,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          desiredYawRate.set(desiredYawRateProvider.getValue());
    }
    
+   FramePoint footLocation = new FramePoint();
    private void updateEstimates()
    {
 	  // compute center of mass position and velocity
@@ -530,6 +527,25 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
 	  currentICP.setX(comPosition.getX() + comVelocity.getX()/omega);
 	  currentICP.setY(comPosition.getY() + comVelocity.getY()/omega);
 	  currentICP.setZ(zFoot);
+	  
+	  updateFeetLocations();
+   }
+
+   private void updateFeetLocations()
+   {
+      // update feet locations and alpha filter the desireds towards the actuals
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         ReferenceFrame footFrame = referenceFrames.getFootFrame(robotQuadrant);
+         footLocation.setToZero(footFrame);
+         footLocation.changeFrame(ReferenceFrame.getWorldFrame());
+
+         YoFramePoint yoFootLocation = actualFeetLocations.get(robotQuadrant);
+         yoFootLocation.set(footLocation);
+
+         fourFootSupportPolygon.setFootstep(robotQuadrant, footLocation);
+         desiredFeetLocations.get(robotQuadrant).update();
+      }
    }
 
    private void updateGraphics()
@@ -542,41 +558,19 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       centerOfMassFramePoint.setToZero(comFrame);
       centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassPosition.set(centerOfMassFramePoint);
-   }
-   
-   FramePoint footLocation = new FramePoint();
-
-   private void updateFeetLocations()
-   {
-      for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         YoFramePoint yoFootLocation = actualFeetLocations.get(robotQuadrant);
-         yoFootLocation.getFrameTuple(footLocation);
-         
-         ReferenceFrame footFrame = referenceFrames.getFootFrame(robotQuadrant);
-         footLocation.setToZero(footFrame);
-         footLocation.changeFrame(ReferenceFrame.getWorldFrame());
-         yoFootLocation.set(footLocation);
-//         if(enableFootAlpha.getBooleanValue())
-         {
-            desiredFeetLocations.get(robotQuadrant).update();
-         }
-         
-         fourFootSupportPolygon.setFootstep(robotQuadrant, footLocation);
-      }
       drawSupportPolygon(fourFootSupportPolygon, supportPolygon);
    }
    
-   private void updateDesiredBodyIK()
+   FramePoint desiredCoMFramePose = new FramePoint(ReferenceFrame.getWorldFrame());
+   private void updateDesiredCoMTrajectory()
    {
       if(!bodyTrajectoryGenerator.isDone())
       {
-         FramePoint desiredBodyFramePose = new FramePoint(ReferenceFrame.getWorldFrame());
-         bodyMovementTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - bodyMovementTrajectoryTimeStart.getDoubleValue());
-         bodyTrajectoryGenerator.compute(bodyMovementTrajectoryTimeCurrent.getDoubleValue());
-         bodyTrajectoryGenerator.get(desiredBodyFramePose);
-         desiredBodyFramePose.setZ(desiredCoMPose.getPosition().getZ());
-         desiredCoMPose.setPosition(desiredBodyFramePose);
+         comTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - comTrajectoryTimeStart.getDoubleValue());
+         bodyTrajectoryGenerator.compute(comTrajectoryTimeCurrent.getDoubleValue());
+         bodyTrajectoryGenerator.get(desiredCoMFramePose);
+         desiredCoMFramePose.setZ(desiredCoMPose.getPosition().getZ());
+         desiredCoMPose.setPosition(desiredCoMFramePose);
       }
    }
 
@@ -723,7 +717,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          bodyTrajectoryGenerator.setFinalConditions(desiredCoMTarget, desiredBodyVelocity);
          
          bodyTrajectoryGenerator.initialize();
-         bodyMovementTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
+         comTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
       }
    }
 
