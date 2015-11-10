@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.footstepChooser;
+package us.ihmc.quadrupedRobotics.swingLegChooser;
 
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.geometry.FrameVector;
