@@ -713,13 +713,13 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private class QuadrupleSupportState extends State<CrawlGateWalkingState>
    {
       private final FramePoint swingDesired = new FramePoint();
-      private QuadrupedSupportPolygon stateAfterFirstStep;
-      private QuadrupedSupportPolygon stateAfterSecondStep;
-      private QuadrupedSupportPolygon stateAfterThirdStep;
-      private QuadrupedSupportPolygon stateWithFirstStepSwinging;
-      private QuadrupedSupportPolygon stateAfterFirstStepWithSecondSwinging;
-      private QuadrupedSupportPolygon stateAfterSecondStepWithThirdSwinging;
-      private QuadrupedSupportPolygon stateAfterThirdStepWithFourthSwinging;
+      private QuadrupedSupportPolygon quadStateAfterFirstStep;
+      private QuadrupedSupportPolygon quadStateAfterSecondStep;
+      private QuadrupedSupportPolygon quadStateAfterThirdStep;
+      private QuadrupedSupportPolygon trippleStateWithFirstStepSwinging;
+      private QuadrupedSupportPolygon trippleStateAfterFirstStepWithSecondSwinging;
+      private QuadrupedSupportPolygon trippleStateAfterSecondStepWithThirdSwinging;
+      private QuadrupedSupportPolygon trippleStateAfterThirdStepWithFourthSwinging;
       
       private QuadrantDependentList<QuadrupedSupportPolygon> estimatedCommonTriangle = new QuadrantDependentList<>();
       private DoubleYoVariable minimumTimeInQuadSupport;
@@ -767,22 +767,22 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          
          swingDesired.changeFrame(ReferenceFrame.getWorldFrame());
          calculateSwingTarget(firstSwingLeg, swingDesired);
-         stateAfterFirstStep = fourFootSupportPolygon.replaceFootstepCopy(firstSwingLeg, swingDesired);
+         quadStateAfterFirstStep = fourFootSupportPolygon.replaceFootstepCopy(firstSwingLeg, swingDesired);
          
-         zUpSwingTargetGenerator.getSwingTarget(stateAfterFirstStep, secondSwingLeg, desiredVelocityVector, swingDesired, yawRate);
-         stateAfterSecondStep = stateAfterFirstStep.replaceFootstepCopy(secondSwingLeg, swingDesired);
+         zUpSwingTargetGenerator.getSwingTarget(quadStateAfterFirstStep, secondSwingLeg, desiredVelocityVector, swingDesired, yawRate);
+         quadStateAfterSecondStep = quadStateAfterFirstStep.replaceFootstepCopy(secondSwingLeg, swingDesired);
          
-         zUpSwingTargetGenerator.getSwingTarget(stateAfterSecondStep, thirdSwingLeg, desiredVelocityVector, swingDesired, yawRate);
-         stateAfterThirdStep = stateAfterSecondStep.replaceFootstepCopy(thirdSwingLeg, swingDesired);
+         zUpSwingTargetGenerator.getSwingTarget(quadStateAfterSecondStep, thirdSwingLeg, desiredVelocityVector, swingDesired, yawRate);
+         quadStateAfterThirdStep = quadStateAfterSecondStep.replaceFootstepCopy(thirdSwingLeg, swingDesired);
          
-         stateWithFirstStepSwinging = stateAfterFirstStep.deleteLegCopy(secondSwingLeg);
-         stateAfterFirstStepWithSecondSwinging = stateAfterFirstStep.deleteLegCopy(secondSwingLeg);
-         stateAfterSecondStepWithThirdSwinging = stateAfterSecondStep.deleteLegCopy(thirdSwingLeg);
-         stateAfterThirdStepWithFourthSwinging = stateAfterThirdStep.deleteLegCopy(fourthSwingLeg);
+         trippleStateWithFirstStepSwinging = quadStateAfterFirstStep.deleteLegCopy(secondSwingLeg);
+         trippleStateAfterFirstStepWithSecondSwinging = quadStateAfterFirstStep.deleteLegCopy(secondSwingLeg);
+         trippleStateAfterSecondStepWithThirdSwinging = quadStateAfterSecondStep.deleteLegCopy(thirdSwingLeg);
+         trippleStateAfterThirdStepWithFourthSwinging = quadStateAfterThirdStep.deleteLegCopy(fourthSwingLeg);
          
-         drawSupportPolygon(stateWithFirstStepSwinging, tripleSupportPolygons[0]);
-         drawSupportPolygon(stateAfterFirstStepWithSecondSwinging, tripleSupportPolygons[1]);
-         QuadrupedSupportPolygon firstAndSecondCommonPolygon = stateWithFirstStepSwinging.getShrunkenCommonSupportPolygon(stateAfterFirstStepWithSecondSwinging,
+         drawSupportPolygon(trippleStateWithFirstStepSwinging, tripleSupportPolygons[0]);
+         drawSupportPolygon(trippleStateAfterFirstStepWithSecondSwinging, tripleSupportPolygons[1]);
+         QuadrupedSupportPolygon firstAndSecondCommonPolygon = trippleStateWithFirstStepSwinging.getShrunkenCommonSupportPolygon(trippleStateAfterFirstStepWithSecondSwinging,
                firstSwingLeg, 0.02, 0.02, 0.02);
          if(firstAndSecondCommonPolygon != null)
          {
@@ -791,10 +791,10 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
             drawSupportPolygon(firstAndSecondCommonPolygon, commonTriplePolygons.get(firstSwingLeg.getSide()));
          }
          
-         drawSupportPolygon(stateAfterFirstStepWithSecondSwinging, tripleSupportPolygons[2]);
-         drawSupportPolygon(stateAfterSecondStepWithThirdSwinging, tripleSupportPolygons[3]);
-         QuadrupedSupportPolygon secondAndThirdCommonPolygon = stateAfterFirstStepWithSecondSwinging.getShrunkenCommonSupportPolygon(
-               stateAfterSecondStepWithThirdSwinging, secondSwingLeg, 0.02, 0.02, 0.02);
+         drawSupportPolygon(trippleStateAfterFirstStepWithSecondSwinging, tripleSupportPolygons[2]);
+         drawSupportPolygon(trippleStateAfterSecondStepWithThirdSwinging, tripleSupportPolygons[3]);
+         QuadrupedSupportPolygon secondAndThirdCommonPolygon = trippleStateAfterFirstStepWithSecondSwinging.getShrunkenCommonSupportPolygon(
+               trippleStateAfterSecondStepWithThirdSwinging, secondSwingLeg, 0.02, 0.02, 0.02);
          if(secondAndThirdCommonPolygon != null)
          {
             estimatedCommonTriangle.put(secondSwingLeg, secondAndThirdCommonPolygon);
@@ -802,10 +802,10 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
             drawSupportPolygon(secondAndThirdCommonPolygon, commonTriplePolygons.get(secondSwingLeg.getSide()));
          }
          
-         drawSupportPolygon(stateAfterSecondStepWithThirdSwinging, tripleSupportPolygons[2]);
-         drawSupportPolygon(stateAfterThirdStepWithFourthSwinging, tripleSupportPolygons[3]);
-         QuadrupedSupportPolygon thirdAndFourthCommonPolygon = stateAfterSecondStepWithThirdSwinging.getShrunkenCommonSupportPolygon(
-               stateAfterThirdStepWithFourthSwinging, thirdSwingLeg, 0.02, 0.02, 0.02);
+         drawSupportPolygon(trippleStateAfterSecondStepWithThirdSwinging, tripleSupportPolygons[2]);
+         drawSupportPolygon(trippleStateAfterThirdStepWithFourthSwinging, tripleSupportPolygons[3]);
+         QuadrupedSupportPolygon thirdAndFourthCommonPolygon = trippleStateAfterSecondStepWithThirdSwinging.getShrunkenCommonSupportPolygon(
+               trippleStateAfterThirdStepWithFourthSwinging, thirdSwingLeg, 0.02, 0.02, 0.02);
          if(thirdAndFourthCommonPolygon != null)
          {
             estimatedCommonTriangle.put(thirdSwingLeg, thirdAndFourthCommonPolygon);
@@ -901,11 +901,15 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          return supportTriangleDuringStep.isInside(centerOfMassPoint2d);
       }
    }
-
+   
+   /**
+    * Nothing fancy, just calculate where to swing the leg and swing it until it's done
+    */
    private class TripleSupportState extends State<CrawlGateWalkingState>
    {
       private final FramePoint swingTarget = new FramePoint(ReferenceFrame.getWorldFrame());
       private final FramePoint currentDesiredInTrajectory = new FramePoint();
+      private final FrameVector speedMatchVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
       private final Vector3d footPositionInLegAttachmentFrame = new Vector3d();
       public TripleSupportState(CrawlGateWalkingState stateEnum)
       {
@@ -946,10 +950,13 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       {
       }
       
+      /**
+       * tries to do some fancy ground speed matching, not well tuned
+       */
       private void initializeSwingTrajectory(RobotQuadrant swingLeg, FramePoint swingInitial, FramePoint swingTarget, double swingTime)
       {
          QuadrupedSwingTrajectoryGenerator swingTrajectoryGenerator = swingTrajectoryGenerators.get(swingLeg);
-         FrameVector speedMatchVelocity = new FrameVector(desiredBodyVelocity);
+         speedMatchVelocity.setIncludingFrame(desiredBodyVelocity);
          speedMatchVelocity.scale(-1.0);
          swingTrajectoryGenerator.initializeSwing(swingTime, swingInitial, swingTarget, speedMatchVelocity);
       }
