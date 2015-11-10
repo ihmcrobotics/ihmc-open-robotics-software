@@ -12,10 +12,10 @@ import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedDataProvider;
 import us.ihmc.quadrupedRobotics.footstepChooser.MidFootZUpSwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedControllerParameters;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedRobotics.swingLegChooser.NextSwingLegChooser;
 import us.ihmc.quadrupedRobotics.trajectory.QuadrupedSwingTrajectoryGenerator;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -83,6 +83,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    
    private final StateMachine<CrawlGateWalkingState> walkingStateMachine;
    private final QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators;
+   private final NextSwingLegChooser nextSwingLegChooser;
    
    private final SDFFullRobotModel fullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
@@ -130,6 +131,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
 
    private final QuadrantDependentList<QuadrupedSwingTrajectoryGenerator> swingTrajectoryGenerators = new QuadrantDependentList<>();
    private final DoubleYoVariable swingDuration = new DoubleYoVariable("swingDuration", registry);
+   private final DoubleYoVariable swingHeight = new DoubleYoVariable("swingHeight", registry);
    
    private enum SwingTargetGeneratorType {MIDZUP, INPLACE};
    private final EnumYoVariable<SwingTargetGeneratorType> selectedSwingTargetGenerator;
@@ -197,11 +199,13 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private DoubleProvider desiredYawRateProvider;
    
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
-         final QuadrupedReferenceFrames referenceFrames, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator,
+         final QuadrupedReferenceFrames referenceFrames, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, NextSwingLegChooser nextSwingLegChooser, 
          YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, final QuadrupedDataProvider dataProvider, DoubleYoVariable yoTime)
    {
-      swingDuration.set(0.3);
-      subCircleRadius.set(0.1);
+      QuadrupedControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedControllerParameters();
+      swingDuration.set(quadrupedControllerParameters.getDefaultSwingDuration());
+      swingHeight.set(quadrupedControllerParameters.getDefaultSwingHeight());
+      subCircleRadius.set(quadrupedControllerParameters.getDefaultSubCircleRadius());
       useSubCircleForBodyShiftTarget.set(true);
       swingLeg.set(RobotQuadrant.FRONT_RIGHT);
       
@@ -211,12 +215,12 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       this.fullRobotModel = fullRobotModel;
       this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>(name, "walkingStateTranistionTime", CrawlGateWalkingState.class, yoTime, registry);
-      inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
+      this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
+      this.nextSwingLegChooser = nextSwingLegChooser;
 
       desiredVelocityProvider = dataProvider.getDesiredVelocityProvider();
       desiredYawRateProvider = dataProvider.getDesiredYawRateProvider();
 
-      QuadrupedControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedControllerParameters();
       referenceFrames.updateFrames();
       bodyFrame = referenceFrames.getBodyFrame();
       comFrame = referenceFrames.getCenterOfMassFrame();
@@ -743,23 +747,24 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       public void doTransitionIntoAction()
       {
          RobotQuadrant lastSwingLeg = swingLeg.getEnumValue();
-         RobotQuadrant currentSwingLeg = lastSwingLeg.getNextRegularGaitSwingQuadrant();
+         RobotQuadrant currentSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(fourFootSupportPolygon, lastSwingLeg, desiredBodyVelocity, desiredYawRate.getDoubleValue()); 
+         RobotQuadrant nextSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(fourFootSupportPolygon, currentSwingLeg, desiredBodyVelocity, desiredYawRate.getDoubleValue());
          swingLeg.set(currentSwingLeg);
          calculateNextThreeFootSteps(currentSwingLeg);
          
-         QuadrupedSupportPolygon quadrupedSupportPolygon = estimatedCommonTriangle.get(currentSwingLeg.getNextRegularGaitSwingQuadrant());
+         QuadrupedSupportPolygon quadrupedSupportPolygon = estimatedCommonTriangle.get(nextSwingLeg);
          if(quadrupedSupportPolygon != null)
          {
-            calculateTrajectoryTarget(currentSwingLeg.getNextRegularGaitSwingQuadrant(), quadrupedSupportPolygon, circleCenter2d);
+            calculateTrajectoryTarget(nextSwingLeg, quadrupedSupportPolygon, circleCenter2d);
             initializeCoMTrajectory(circleCenter2d);
          }
       }
       
       public void calculateNextThreeFootSteps(RobotQuadrant firstSwingLeg)
       {
-         RobotQuadrant secondSwingLeg = firstSwingLeg.getNextRegularGaitSwingQuadrant();
-         RobotQuadrant thirdSwingLeg = secondSwingLeg.getNextRegularGaitSwingQuadrant();
-         RobotQuadrant fourthSwingLeg = thirdSwingLeg.getNextRegularGaitSwingQuadrant();
+         RobotQuadrant secondSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(fourFootSupportPolygon, firstSwingLeg, desiredBodyVelocity, desiredYawRate.getDoubleValue());//firstSwingLeg.getNextRegularGaitSwingQuadrant();
+         RobotQuadrant thirdSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(fourFootSupportPolygon, secondSwingLeg, desiredBodyVelocity, desiredYawRate.getDoubleValue());//secondSwingLeg.getNextRegularGaitSwingQuadrant();
+         RobotQuadrant fourthSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(fourFootSupportPolygon, thirdSwingLeg, desiredBodyVelocity, desiredYawRate.getDoubleValue());//thirdSwingLeg.getNextRegularGaitSwingQuadrant();
          
          FrameVector desiredVelocityVector = desiredVelocity.getFrameTuple();
          double yawRate = desiredYawRate.getDoubleValue();
@@ -957,7 +962,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          QuadrupedSwingTrajectoryGenerator swingTrajectoryGenerator = swingTrajectoryGenerators.get(swingLeg);
          speedMatchVelocity.setIncludingFrame(desiredBodyVelocity);
          speedMatchVelocity.scale(-1.0);
-         swingTrajectoryGenerator.initializeSwing(swingTime, swingInitial, swingTarget, speedMatchVelocity);
+         swingTrajectoryGenerator.initializeSwing(swingTime, swingInitial, swingHeight.getDoubleValue(), swingTarget, speedMatchVelocity);
       }
       
       private void computeFootPositionAlongSwingTrajectory(RobotQuadrant swingLeg, FramePoint framePointToPack)
