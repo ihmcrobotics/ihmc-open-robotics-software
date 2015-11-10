@@ -2,8 +2,8 @@ package us.ihmc.quadrupedRobotics.supportPolygon;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.quadrupedRobotics.footstepChooser.DefaultSwingTargetGeneratorParameters;
 import us.ihmc.quadrupedRobotics.footstepChooser.MidFootZUpSwingTargetGenerator;
+import us.ihmc.quadrupedRobotics.parameters.DefaultSwingTargetGeneratorParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.MockQuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;

@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.footstepChooser;
 
+import us.ihmc.quadrupedRobotics.parameters.SwingTargetGeneratorParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.MathTools;

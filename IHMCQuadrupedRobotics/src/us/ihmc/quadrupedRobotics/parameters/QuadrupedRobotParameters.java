@@ -3,7 +3,6 @@ package us.ihmc.quadrupedRobotics.parameters;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFParameters;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.quadrupedRobotics.footstepChooser.QuadrupedControllerParameters;
 
 public interface QuadrupedRobotParameters
 {
