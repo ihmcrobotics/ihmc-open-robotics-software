@@ -28,7 +28,7 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
    
    public VideoPacket()
    {
-      setDestination(PacketDestination.UI);
+//      setDestination(PacketDestination.UI);
    }
 
    public long getTimeStamp()
@@ -54,7 +54,7 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
 
    public VideoPacket(RobotSide robotSide, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
    {
-      setDestination(PacketDestination.UI);
+//      setDestination(PacketDestination.UI);
       this.robotSide = robotSide;
       this.timeStamp = timeStamp;
       this.data = data;

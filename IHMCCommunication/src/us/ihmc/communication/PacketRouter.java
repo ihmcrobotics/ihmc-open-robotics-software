@@ -15,7 +15,7 @@ public class PacketRouter<T extends Enum<T>>
    private final T[] destinationConstants;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
    private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all destinations
-   private Class<?>[] packetTypesToDebug = null; //set to null to debug all packets
+   private String[] packetTypesToDebug = null; //set to null to debug all packets
    
    private final int BROADCAST = 0;
 
@@ -235,7 +235,7 @@ public class PacketRouter<T extends Enum<T>>
       {
          for (int i=0; i< packetTypesToDebug.length; i++)
          {
-            if(packetTypesToDebug[i] == packetType) {
+            if(packetTypesToDebug[i].equals(packetType.getSimpleName())) {
                return true;
             }
          }
@@ -263,13 +263,13 @@ public class PacketRouter<T extends Enum<T>>
    
    public void setPacketTypeToDebug(Class<?> packetTypeToDebug)
    {
-      this.packetTypesToDebug = new Class[]{ packetTypeToDebug };
+      this.packetTypesToDebug = new String[]{ packetTypeToDebug.getSimpleName() };
    }
    
-   public void setPacketTypesToDebug(Class<?>[] packetTypesToDebug)
-   {
-      this.packetTypesToDebug = packetTypesToDebug;
-   }
+//   public void setPacketTypesToDebug(Class<?>[] packetTypesToDebug)
+//   {
+//      this.packetTypesToDebug = packetTypesToDebug;
+//   }
    
    private class PacketRoutingAction implements GlobalPacketConsumer
    {
