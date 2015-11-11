@@ -2,12 +2,12 @@ package us.ihmc.sensorProcessing.sensorProcessors;
 
 import java.util.List;
 
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public interface SensorRawOutputMapReadOnly
+public interface SensorRawOutputMapReadOnly extends SensorTimestampHolder
 {
    public long getTimestamp();
 
