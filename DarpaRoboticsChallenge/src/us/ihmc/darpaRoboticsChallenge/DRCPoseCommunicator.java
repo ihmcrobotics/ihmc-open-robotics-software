@@ -1,6 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4f;
+import javax.vecmath.Vector3f;
+
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
@@ -25,12 +32,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.AuxiliaryRobotDataProvider;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 import us.ihmc.util.PeriodicThreadScheduler;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 // fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 
 public class DRCPoseCommunicator implements RawOutputWriter
@@ -60,7 +61,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
    private final ConcurrentRingBuffer<RobotConfigurationData> robotConfigurationDataRingBuffer;
 
-   public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer, AuxiliaryRobotDataProvider auxiliaryRobotDataProvider,
+   public DRCPoseCommunicator(FullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer, AuxiliaryRobotDataProvider auxiliaryRobotDataProvider,
          GlobalDataProducer dataProducer, SensorTimestampHolder sensorTimestampHolder, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly,
          RobotMotionStatusHolder robotMotionStatusFromController, DRCRobotSensorInformation sensorInformation, PeriodicThreadScheduler scheduler, NetClassList netClassList)
    {
@@ -98,7 +99,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       startWriterThread();
    }
 
-   private void setupForceSensorMassCompensators(SDFFullRobotModel estimatorModel, SideDependentList<String> wristForceSensorNames)
+   private void setupForceSensorMassCompensators(FullRobotModel estimatorModel, SideDependentList<String> wristForceSensorNames)
    {
       ForceSensorDefinition[] forceSensorDefinitions = estimatorModel.getForceSensorDefinitions();
 
