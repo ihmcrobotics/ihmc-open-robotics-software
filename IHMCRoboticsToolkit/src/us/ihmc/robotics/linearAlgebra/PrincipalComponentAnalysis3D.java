@@ -1,14 +1,16 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
+import java.util.List;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
-import java.util.List;
+
+import org.ejml.alg.dense.decomposition.svd.SvdImplicitQrDecompose_D64;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition;
+import org.ejml.ops.CommonOps;
 
 /**
  * Compute the singular value decomposition of a data matrix to find the three principal axes (called: principal axis, secondary axis, and third axis) and the associated variance.
@@ -41,8 +43,11 @@ public class PrincipalComponentAnalysis3D
 
    private final Vector3d principalValues = new Vector3d();
 
+   private final SingularValueDecomposition<DenseMatrix64F> svd;
+
    public PrincipalComponentAnalysis3D()
    {
+      svd = new SvdImplicitQrDecompose_D64(true, false, true, false);
    }
 
    /**
@@ -56,6 +61,7 @@ public class PrincipalComponentAnalysis3D
       this.pointCloud.reshape(numberOfPoints, 3);
 
       double scale = 1.0 / numberOfPoints;
+      mean.set(0.0, 0.0, 0.0);
       for (int row = 0; row < numberOfPoints; row++)
       {
          mean.x += pointCloud.get(row).x * scale;
@@ -74,13 +80,52 @@ public class PrincipalComponentAnalysis3D
          System.out.println("PointCloud: \n" + pointCloud);
    }
 
+   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(1, 1);
+
+   public void setPointCloud(DenseMatrix64F pointCloud)
+   {
+      if (pointCloud.getNumRows() == 3)
+      {
+         numberOfPoints = pointCloud.getNumCols();
+         tempMatrix.reshape(pointCloud.getNumCols(), pointCloud.getNumRows());
+         CommonOps.transpose(pointCloud, tempMatrix);
+      }
+      else if (pointCloud.getNumCols() == 3)
+      {
+         numberOfPoints = pointCloud.getNumRows();
+         tempMatrix.set(pointCloud);
+      }
+      else
+         throw new RuntimeException("Unexpected size");
+
+      this.pointCloud.reshape(numberOfPoints, 3);
+
+      double scale = 1.0 / numberOfPoints;
+      mean.set(0.0, 0.0, 0.0);
+      for (int row = 0; row < numberOfPoints; row++)
+      {
+         mean.x += tempMatrix.get(row, 0) * scale;
+         mean.y += tempMatrix.get(row, 1) * scale;
+         mean.z += tempMatrix.get(row, 2) * scale;
+      }
+
+      for (int row = 0; row < numberOfPoints; row++)
+      {
+         this.pointCloud.set(row, 0, tempMatrix.get(row, 0) - mean.x);
+         this.pointCloud.set(row, 1, tempMatrix.get(row, 1) - mean.y);
+         this.pointCloud.set(row, 2, tempMatrix.get(row, 2) - mean.z);
+      }
+
+      if (DEBUG)
+         System.out.println("PointCloud: \n" + pointCloud);
+   }
+
    /**
     * Performs the singular value decomposition to get the principal axes and necessary to get information, such as the variance, on the data.
     * The point cloud needs to be provided before being able to call {@link #compute()}.
     */
    public void compute()
    {
-      SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(numberOfPoints, 3, false, true, true);
       svd.decompose(pointCloud);
 
       svd.getV(V, false);
@@ -93,7 +138,7 @@ public class PrincipalComponentAnalysis3D
       thirdAxis.cross(principalAxis, secondaryAxis);
 
       svd.getW(W);
-      
+
       if (DEBUG)
          System.out.println("W: \n" + W);
 
@@ -157,6 +202,11 @@ public class PrincipalComponentAnalysis3D
       principalVectorToPack.set(principalAxis);
       secondaryVectorToPack.set(secondaryAxis);
       thirdVectorToPack.set(thirdAxis);
+   }
+
+   public void getPrincipalVector(Vector3d principalVectorToPack)
+   {
+      principalVectorToPack.set(principalVectorToPack);
    }
 
    /**
