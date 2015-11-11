@@ -20,6 +20,7 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
    private final DoubleYoVariable firstSingularValueThreshold;
    private final DoubleYoVariable secondSingularValueThreshold;
    private final DoubleYoVariable singularValueAlpha;
+   private final DoubleYoVariable yoMinSingularValue;
    private final DoubleYoVariable[] yoSingularValues;
    private final DoubleYoVariable[] yoSingularValuesInverse;
 
@@ -36,6 +37,7 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
       firstSingularValueThreshold = new DoubleYoVariable(namePrefix + "FirstSingularValueThreshold", registry);
       secondSingularValueThreshold = new DoubleYoVariable(namePrefix + "SecondSingularValueThreshold", registry);
       singularValueAlpha = new DoubleYoVariable(namePrefix + "SingularValueAlpha", registry);
+      yoMinSingularValue = new DoubleYoVariable(namePrefix + "MinSingularValue", registry);
 
       mu.set(0.003);
       firstSingularValueThreshold.set(5.0e-3);
@@ -56,7 +58,8 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
          yoSingularValuesInverse[i].set(Double.NaN);
       }
 
-      parentRegistry.addChild(registry);
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
    }
 
    public void setThresholds(double firstThreshold, double secondThreshold)
@@ -70,11 +73,13 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
       this.mu.set(mu);
    }
 
+   private double alpha = 1.0;
+
    @Override
    public boolean setA(DenseMatrix64F A)
    {
       pseudoInverse.reshape(A.numCols, A.numRows, false);
-      tempV.reshape(A.numCols, A.numCols, false);
+      tempV.reshape(A.numCols, A.numRows, false);
 
       if (!svd.decompose(A))
          return false;
@@ -84,8 +89,7 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
       double[] S = svd.getSingularValues();
       int N = Math.min(A.numRows, A.numCols);
 
-      // compute the threshold for singular values which are to be zeroed
-      double minSingular = 0;
+      double minSingular = Double.POSITIVE_INFINITY;
       for (int i = 0; i < N; i++)
       {
          yoSingularValues[i].set(S[i]);
@@ -94,10 +98,11 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
             minSingular = S[i];
       }
 
-      double alpha = 1.0;
+      yoMinSingularValue.set(minSingular);
       double deltaThresholds = firstSingularValueThreshold.getDoubleValue() - secondSingularValueThreshold.getDoubleValue();
       double muSquare = mu.getDoubleValue() * mu.getDoubleValue();
 
+      alpha = 1.0;
       if (minSingular < secondSingularValueThreshold.getDoubleValue())
       {
          alpha = 0.0;
@@ -128,12 +133,6 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
          yoSingularValuesInverse[i].set(S[i]);
       }
 
-      for (int i = N; i < yoSingularValues.length; i++)
-      {
-         yoSingularValues[i].set(Double.NaN);
-         yoSingularValuesInverse[i].set(Double.NaN);
-      }
-
       // V*W
       for (int i = 0; i < V.numRows; i++)
       {
@@ -153,7 +152,7 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
    @Override
    public double quality()
    {
-      throw new IllegalArgumentException("Not supported by this solver.");
+      return alpha;
    }
 
    @Override
