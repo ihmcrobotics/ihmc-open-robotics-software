@@ -452,41 +452,59 @@ public abstract class ReferenceFrame implements Serializable
       return frameName;
    }
    
-   public RigidBodyTransform getTransformToDesiredFrame(ReferenceFrame desiredFrame)
+   public RigidBodyTransform getTransformFromFrame(ReferenceFrame frame)
    {
       RigidBodyTransform ret = new RigidBodyTransform();
-      getTransformToDesiredFrame(ret, desiredFrame);
+      getTransformToDesiredFrame(ret, frame);
 
       return ret;
    }
-
-   public RigidBodyTransform getTransformToWorldFrame()
+   
+   /**
+    * @deprecated Really gets transform FROM desired frame.
+    * @use getTransformFromFrame(ReferenceFrame frame)
+    */
+   public RigidBodyTransform getTransformToDesiredFrame(ReferenceFrame desiredFrame)
+   {
+      return getTransformFromFrame(desiredFrame);
+   }
+   
+   public RigidBodyTransform getTransformFromWorldFrame()
    {
       RigidBodyTransform ret = new RigidBodyTransform();
       getTransformToDesiredFrame(ret, worldFrame);
       return ret;
    }
 
+   /**
+    * @deprecated Really gets transform FROM world frame.
+    * @use getTransformFromWorldFrame()
+    */
+   public RigidBodyTransform getTransformToWorldFrame()
+   {
+      return getTransformFromWorldFrame();
+   }
+
    // JEP 10117: Temporary transform to save lots of memory generation.
    // Determined it was needed after running profiler.
    // JEP 101215: Made it a serializableTransform3D to make sure LittleDog planner RMI stuff still works.
 
-   public void getTransformToDesiredFrame(RigidBodyTransform transformToPack, ReferenceFrame desiredFrame)
+   public void getTransformFromFrame(RigidBodyTransform transformToPack, ReferenceFrame frame)
    {
-      verifySameRoots(desiredFrame);
+      verifySameRoots(frame);
 
       this.efficientComputeTransform();
-      desiredFrame.efficientComputeTransform();
+      frame.efficientComputeTransform();
 
-      if (desiredFrame.inverseTransformToRoot != null)
+      if (frame.inverseTransformToRoot != null)
       {
          if (this.transformToRoot != null)
          {
-            transformToPack.multiply(desiredFrame.inverseTransformToRoot, this.transformToRoot);
+            transformToPack.multiply(frame.inverseTransformToRoot, this.transformToRoot);
          }
          else
          {
-            transformToPack.set(desiredFrame.inverseTransformToRoot);
+            transformToPack.set(frame.inverseTransformToRoot);
          }
       }
       else
@@ -500,6 +518,15 @@ public abstract class ReferenceFrame implements Serializable
             transformToPack.setIdentity();
          }
       }
+   }
+   
+   /**
+    * @deprecated Really gets transform FROM desired frame.
+    * @use getTransformFromFrame(RigidBodyTransform transformToPack, ReferenceFrame frame)
+    */
+   public void getTransformToDesiredFrame(RigidBodyTransform transformToPack, ReferenceFrame desiredFrame)
+   {
+      getTransformFromFrame(transformToPack, desiredFrame);
    }
 
    public boolean isParentFrame(ReferenceFrame frame)
