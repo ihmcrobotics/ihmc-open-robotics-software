@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.parameters;
 
-public class DefaultSwingTargetGeneratorParameters implements SwingTargetGeneratorParameters 
+public class DefaultSwingTargetGeneratorParameters implements QuadrupedControllerParameters 
 {
    private final double minimumVelocityForFullSkew = 0.1;
    private final double minimumDistanceFromSameSideFoot = 0.04;
@@ -43,5 +43,33 @@ public class DefaultSwingTargetGeneratorParameters implements SwingTargetGenerat
    public double getMaxYawPerStep()
    {
       return maxYawPerStep;
+   }
+
+   @Override
+   public double getInitalCoMHeight()
+   {
+      // TODO Auto-generated method stub
+      return 0;
+   }
+
+   @Override
+   public double getDefaultSwingHeight()
+   {
+      // TODO Auto-generated method stub
+      return 0;
+   }
+
+   @Override
+   public double getDefaultSwingDuration()
+   {
+      // TODO Auto-generated method stub
+      return 0;
+   }
+
+   @Override
+   public double getDefaultSubCircleRadius()
+   {
+      // TODO Auto-generated method stub
+      return 0;
    }
 }
