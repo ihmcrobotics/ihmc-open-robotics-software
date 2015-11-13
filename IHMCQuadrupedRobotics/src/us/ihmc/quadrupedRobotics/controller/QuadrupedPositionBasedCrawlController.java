@@ -720,7 +720,33 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       @Override
       public void doAction()
       {
+         if(shouldTranistionToTripleButItsNotSafeToStep())
+         {
+            RobotQuadrant currentSwingLeg = swingLeg.getEnumValue();
+            QuadrupedSupportPolygon trippleStateWithoutCurrentSwing = fourFootSupportPolygon.deleteLegCopy(currentSwingLeg);
+            FramePoint centroidFramePoint = trippleStateWithoutCurrentSwing.getCentroidFramePoint();
+            initializeCoMTrajectory(new Point2d(centroidFramePoint.getX(), centroidFramePoint.getY()));
+         }
+      }
+
+      private boolean shouldTranistionToTripleButItsNotSafeToStep()
+      {
+         if(!comTrajectoryGenerator.isDone())
+         {
+            return false;
+         }
          
+         if(!isMinimumTimeInQuadSupportElapsed())
+         {
+            return false;
+         }
+         
+         if(desiredVelocity.length() == 0.0 && desiredYawRate.getDoubleValue() == 0)
+         {
+            return false;
+         }
+         
+         return true;
       }
 
       @Override
