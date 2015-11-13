@@ -15,6 +15,7 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBu
  */
 public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectConsumer<LocalVideoPacket>
 {
+   private static final boolean DEBUG = false;
    private final RobotSide robotSide;
    
    public SCSCameraDataReceiver(RobotSide robotSide, SDFFullHumanoidRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer, ObjectCommunicator scsSensorsCommunicator,
