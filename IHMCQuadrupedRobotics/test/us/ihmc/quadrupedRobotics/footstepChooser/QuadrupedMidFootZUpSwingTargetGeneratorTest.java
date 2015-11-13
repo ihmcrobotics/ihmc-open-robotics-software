@@ -53,7 +53,7 @@ import us.ihmc.tools.thread.ThreadTools;
  
 public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements RobotController
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -230,6 +230,118 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       
       success &= robotTranslation.epsilonEquals(expectedTranslation, 1e-2);
 
+      if(DEBUG)
+      {
+         System.out.println("Expected translation:");
+         System.out.println(expectedTranslation);
+         System.out.println("Robot translation:");
+         System.out.println(robotTranslation);
+      }
+      
+      return success;
+   }
+   
+   protected boolean setupAndTestSidewaysLeftWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters)
+   {
+      boolean success = true;
+      
+      setupTestParameters(0.0, 1.0, 0.0, RobotQuadrant.FRONT_RIGHT, 5.0); //ask for a very high speed to be sure to ask for the longest step
+      setupRobot(referenceFrames, quadrupedControllerParameters);
+      setupScs();
+      
+      if (simulationTestingParameters.getCreateGUI())
+         createGraphicsAndArtifacts(referenceFrames, yoGraphicsListRegistry);
+      
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, simulateDuration + 0.5 * simulateDuration);
+      try
+      {
+         blockingSimulationRunner.simulateNTicksAndBlock(1);
+      }
+      catch (SimulationExceededMaximumTimeException | ControllerFailureException e1)
+      {
+         success = false;
+         e1.printStackTrace();
+      }
+      
+      Vector3d startPosition = new Vector3d();
+      rootJoint.getPosition(startPosition);
+      
+      try
+      {
+         blockingSimulationRunner.simulateAndBlock(simulateDuration);
+      }
+      catch (SimulationExceededMaximumTimeException | ControllerFailureException e)
+      {
+         success = false;
+         e.printStackTrace();
+      }
+      
+      Vector3d endPosition = new Vector3d();
+      rootJoint.getPosition(endPosition);
+      
+      Vector3d robotTranslation = new Vector3d();
+      robotTranslation.sub(endPosition, startPosition);
+      
+      Vector3d expectedTranslation = new Vector3d(0.0, quadrupedControllerParameters.getStanceWidth() / 4.0 * simulateDuration, robotTranslation.getZ());
+      
+      success &= robotTranslation.epsilonEquals(expectedTranslation, 2e-2);
+      
+      if(DEBUG)
+      {
+         System.out.println("Expected translation:");
+         System.out.println(expectedTranslation);
+         System.out.println("Robot translation:");
+         System.out.println(robotTranslation);
+      }
+      
+      return success;
+   }
+   
+   protected boolean setupAndTestSidewaysRightWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters)
+   {
+      boolean success = true;
+      
+      setupTestParameters(0.0, -1.0, 0.0, RobotQuadrant.FRONT_RIGHT, 5.0); //ask for a very high speed to be sure to ask for the longest step
+      setupRobot(referenceFrames, quadrupedControllerParameters);
+      setupScs();
+      
+      if (simulationTestingParameters.getCreateGUI())
+         createGraphicsAndArtifacts(referenceFrames, yoGraphicsListRegistry);
+      
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, simulateDuration + 0.5 * simulateDuration);
+      try
+      {
+         blockingSimulationRunner.simulateNTicksAndBlock(1);
+      }
+      catch (SimulationExceededMaximumTimeException | ControllerFailureException e1)
+      {
+         success = false;
+         e1.printStackTrace();
+      }
+      
+      Vector3d startPosition = new Vector3d();
+      rootJoint.getPosition(startPosition);
+      
+      try
+      {
+         blockingSimulationRunner.simulateAndBlock(simulateDuration);
+      }
+      catch (SimulationExceededMaximumTimeException | ControllerFailureException e)
+      {
+         success = false;
+         e.printStackTrace();
+      }
+      
+      Vector3d endPosition = new Vector3d();
+      rootJoint.getPosition(endPosition);
+      
+      Vector3d robotTranslation = new Vector3d();
+      robotTranslation.sub(endPosition, startPosition);
+      
+      Vector3d expectedTranslation = new Vector3d(0.0, -quadrupedControllerParameters.getStanceWidth() / 4.0 * simulateDuration, robotTranslation.getZ());
+      
+      success &= robotTranslation.epsilonEquals(expectedTranslation, 2e-2);
+      
       if(DEBUG)
       {
          System.out.println("Expected translation:");
