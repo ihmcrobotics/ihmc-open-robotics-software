@@ -8,6 +8,7 @@ import javax.vecmath.Point3d;
 import sensor_msgs.PointCloud2;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 
@@ -37,6 +38,16 @@ public class RosPointCloudReceiver extends RosPointCloudSubscriber
       this.cloudFrame = cloudFrame;
       this.pointCloudDataReceiver = pointCloudDataReceiver;
       this.sensorframe = pointCloudDataReceiver.getLidarFrame(pointCloudParameters.getSensorNameInSdf());
+      
+      if (sensorframe == null)
+      {
+         PrintTools.error("Sensor name in SDF does not exist: " + pointCloudParameters.getSensorNameInSdf());
+      }
+      else
+      {
+         PrintTools.info("Using lidar frame: " + sensorframe.getName());
+      }
+      
       this.pointCloudSource=pointCloudSource;
 
       rosMainNode.attachSubscriber(pointCloudParameters.getRosTopic(), this);

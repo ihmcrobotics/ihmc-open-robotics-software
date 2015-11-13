@@ -9,9 +9,11 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.printing.PrintTools;
 
 class VideoPacketHandler implements CompressedVideoHandler
 {
+   private static final boolean DEBUG = false;
    private final PacketCommunicator packetCommunicator;
 
    public VideoPacketHandler(PacketCommunicator sensorSuitePacketCommunicator)
@@ -21,10 +23,8 @@ class VideoPacketHandler implements CompressedVideoHandler
 
    public void newVideoPacketAvailable(RobotSide robotSide, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
    {
-      if (CameraDataReceiver.DEBUG)
-      {
-         System.out.println(getClass().getName() + " sending new VideoPacket");
-      }
+      PrintTools.debug(DEBUG, this, getClass().getName() + " sending new VideoPacket");
+         
       packetCommunicator.send(new VideoPacket(robotSide, timeStamp, data, position, orientation, intrinsicParameters));
    }
 

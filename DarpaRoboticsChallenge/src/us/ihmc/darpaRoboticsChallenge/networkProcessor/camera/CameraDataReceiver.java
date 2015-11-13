@@ -7,6 +7,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -20,10 +21,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public abstract class CameraDataReceiver extends Thread
 {
-   protected static final boolean DEBUG = false;
+   private static final boolean DEBUG = false;
    private final VideoDataServer compressedVideoDataServer;
    private final ArrayList<DRCStereoListener> stereoListeners = new ArrayList<DRCStereoListener>();
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
@@ -49,6 +51,18 @@ public abstract class CameraDataReceiver extends Thread
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
       this.cameraFrame = fullRobotModel.getCameraFrame(sensorNameInSdf);
+      
+      if (cameraFrame == null)
+      {
+         new Exception().printStackTrace();
+         PrintTools.error("Camera frame in SDF does not exist: " + sensorNameInSdf);
+      }
+      else
+      {
+         Vector3d point = new Vector3d();
+         cameraFrame.getTransformFromWorldFrame().getTranslation(point);
+         PrintTools.info("Using camera frame: " + cameraFrame.getName() + " at " + point);
+      }
 
       compressedVideoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(compressedVideoHandler);
    }
