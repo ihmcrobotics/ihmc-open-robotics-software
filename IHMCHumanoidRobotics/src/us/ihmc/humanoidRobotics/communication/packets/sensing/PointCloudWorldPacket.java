@@ -12,8 +12,6 @@ import us.ihmc.communication.packets.PacketDestination;
 @HighBandwidthPacket
 public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
 {
-
-
    public long timestamp;
    
    public float[] groundQuadTreeSupport;
@@ -22,7 +20,6 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
    public float[] decayingWorldScan;
 
    public float defaultGroundHeight;
-   
    
    public PointCloudWorldPacket(Random random)
    {
@@ -59,7 +56,6 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
          groundQuadTreeSupport[3 * i + 2] = (float) point.getZ();
       }
    }
-   
    
    public void setDecayingWorldScan(Point3d[] pointCloud)
    {
@@ -105,7 +101,6 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
 
    public Point3f[] getDecayingWorldScan()
    {
-      
       int numberOfPoints = decayingWorldScan.length/3;
       
       Point3f[] points = new Point3f[numberOfPoints];
