@@ -18,7 +18,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.MatOfPoint3f;
-import org.opencv.core.Point;
 import org.opencv.core.Point3;
 import org.opencv.core.Size;
 import org.opencv.core.TermCriteria;
@@ -29,23 +28,28 @@ import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 public class OpenCVChessboardPoseEstimator
 {
+   private static final boolean DEBUG = true;
    static
    {
       NativeLibraryLoader.loadLibrary("org.opencv", "opencv_java2411");
    }
-   public boolean DEBUG = true;
 
-   Size boardInnerCrossPattern;
-   double gridWidth;
-   Point3[] boardPoints;
-   MatOfPoint2f corners = new MatOfPoint2f();
-   TermCriteria termCriteria = new TermCriteria(TermCriteria.EPS + TermCriteria.MAX_ITER, 30, 0.001);
-   Mat cameraMatrix = null;
-   MatOfDouble distCoeffs = new MatOfDouble();
+   private Size boardInnerCrossPattern;
+   private double gridWidth;
+   private Point3[] boardPoints;
+   private MatOfPoint2f corners = new MatOfPoint2f();
+   private TermCriteria termCriteria = new TermCriteria(TermCriteria.EPS + TermCriteria.MAX_ITER, 30, 0.001);
+   private Mat cameraMatrix = null;
+   private MatOfDouble distCoeffs = new MatOfDouble();
 
    public OpenCVChessboardPoseEstimator(int rowsOfSquare, int colsOfSquare, double gridWidth)
    {
       setBoardSize(rowsOfSquare, colsOfSquare, gridWidth);
+   }
+   
+   public void setMaxIterationsAndAccuracy(int maxIterations, double accuracyEpsilon)
+   {
+      termCriteria = new TermCriteria(TermCriteria.EPS + TermCriteria.MAX_ITER, maxIterations, accuracyEpsilon);
    }
 
    public void setBoardSize(int rowsOfSquare, int colsOfSquare, double gridWidth)
@@ -53,7 +57,6 @@ public class OpenCVChessboardPoseEstimator
       boardInnerCrossPattern = new Size(colsOfSquare - 1, rowsOfSquare - 1);
       this.gridWidth = gridWidth;
       generateBoardPoints();
-
    }
 
    private void generateBoardPoints()
@@ -61,12 +64,14 @@ public class OpenCVChessboardPoseEstimator
       boardPoints = new Point3[(int) boardInnerCrossPattern.area()];
       int count = 0;
       for (int j = 0; j < boardInnerCrossPattern.height; j++)
+      {
          for (int i = 0; i < boardInnerCrossPattern.width; i++)
          {
             double x = gridWidth * (i - boardInnerCrossPattern.width / 2 + 0.5);
             double y = -gridWidth * (j - boardInnerCrossPattern.height / 2 + 0.5);
             boardPoints[count++] = new Point3(x, y, 0.0);
          }
+      }
    }
 
    static public Mat convertBufferedImageToMat(BufferedImage image)
@@ -93,7 +98,6 @@ public class OpenCVChessboardPoseEstimator
       }
       imageMat.put(0, 0, pixel);
       return imageMat;
-
    }
 
    public void setCameraMatrix(double fx, double fy, double cx, double cy)
@@ -116,27 +120,26 @@ public class OpenCVChessboardPoseEstimator
       cameraMatrix.put(1, 2, rows / 2.0); //cy
       cameraMatrix.put(2, 2, 1);
    }
-
+   
    public boolean findChessCornerRobustForExtremePitch(Mat original, Size patternSize, MatOfPoint2f corners, int flags)
    {
-      if (Calib3d.findChessboardCorners(original, boardInnerCrossPattern, corners, flags))
+      boolean success = Calib3d.findChessboardCorners(original, boardInnerCrossPattern, corners, flags);
+      if (success)
       {
-         return true;
+         return success;
       }
 
-      //try stretch image vertically
-      Mat resizeMat = new Mat();
-      Imgproc.resize(original, resizeMat, new Size(original.width(), original.height() * 2));
-      if (Calib3d.findChessboardCorners(resizeMat, boardInnerCrossPattern, corners, flags))
-      {
-         System.out.println("Found corners using rescaled-height image");
-         Point[] cornerArray = corners.toArray();
-         for (Point p : cornerArray)
-            p.y /= 2;
-         corners.fromArray(cornerArray);
-         return true;
-      }
-      
+//      //try stretch image vertically
+//      Mat resizeMat = new Mat();
+//      Imgproc.resize(original, resizeMat, new Size(original.width(), original.height() * 2));
+//      if (Calib3d.findChessboardCorners(resizeMat, boardInnerCrossPattern, corners, flags))
+//      {
+//         Point[] cornerArray = corners.toArray();
+//         for (Point p : cornerArray)
+//            p.y /= 2;
+//         corners.fromArray(cornerArray);
+//         return true;
+//      }
       
       return false;
    }
@@ -163,10 +166,10 @@ public class OpenCVChessboardPoseEstimator
 
          if (DEBUG)
          {
-            printMat(cameraMatrix);
+//            printMat(cameraMatrix);
             drawImagePoints(image, corners, Color.GREEN);
-            drawReprojectedPoints(image, rvec, tvec, Color.RED);
-            drawAxis(image, transform, 0.2);
+//            drawReprojectedPoints(image, rvec, tvec, Color.RED);
+//            drawAxis(image, transform, 0.2);
          }
          return transform;
       }
@@ -174,7 +177,6 @@ public class OpenCVChessboardPoseEstimator
       {
          return null;
       }
-
    }
 
    public static RigidBodyTransform opencvTRtoRigidBodyTransform(Mat rvec, Mat tvec)
@@ -286,7 +288,6 @@ public class OpenCVChessboardPoseEstimator
 
    public void drawImagePoints(BufferedImage image, Point2d[] imagePoints, Color color)
    {
-
       Graphics2D g2 = image.createGraphics();
       g2.setStroke(new BasicStroke(4));
       g2.setColor(color);
@@ -308,5 +309,4 @@ public class OpenCVChessboardPoseEstimator
       }
       g2.finalize();
    }
-
 }

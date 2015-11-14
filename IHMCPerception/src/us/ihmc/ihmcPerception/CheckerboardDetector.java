@@ -16,6 +16,11 @@ public class CheckerboardDetector
    {
       detector = new OpenCVChessboardPoseEstimator(gridRows, gridCollumns, gridSize);
    }
+   
+   public void setMaxIterationsAndAccuracy(int maxIterations, double accuracyEpsilon)
+   {
+      detector.setMaxIterationsAndAccuracy(maxIterations, accuracyEpsilon);
+   }
 
    public void setIntrinsicParameters(IntrinsicParameters intrinsicParameters)
    {
