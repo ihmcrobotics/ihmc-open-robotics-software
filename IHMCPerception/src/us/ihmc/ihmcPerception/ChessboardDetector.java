@@ -7,12 +7,12 @@ import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.io.printing.PrintTools;
 
-public class CheckerboardDetector
+public class ChessboardDetector
 {
    private final OpenCVChessboardPoseEstimator detector;
    private boolean intrinsicSet = false;
 
-   public CheckerboardDetector(int gridCollumns, int gridRows, double gridSize)
+   public ChessboardDetector(int gridCollumns, int gridRows, double gridSize)
    {
       detector = new OpenCVChessboardPoseEstimator(gridRows, gridCollumns, gridSize);
    }
@@ -29,7 +29,7 @@ public class CheckerboardDetector
       intrinsicSet = true;
    }
 
-   public RigidBodyTransform detectCheckerboard(BufferedImage image)
+   public RigidBodyTransform detectChessboard(BufferedImage image)
    {
       if (!intrinsicSet)
       {
