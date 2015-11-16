@@ -373,8 +373,8 @@ public enum RobotQuadrant
 
       throw new RuntimeException("Could not find an associated quadrant for " + name);
    }
-   
-   public String getCamelCaseNameForStartOfExpression()
+
+   public String getCamelCaseNameForMiddleOfExpression()
    {
       switch (this)
       {
@@ -405,7 +405,7 @@ public enum RobotQuadrant
       }
    }
    
-   public String getCamelCaseNameForMiddleOfExpression()
+   public String getCamelCaseNameForStartOfExpression()
    {
       switch (this)
       {
