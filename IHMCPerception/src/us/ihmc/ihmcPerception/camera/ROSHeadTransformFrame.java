@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
+package us.ihmc.ihmcPerception.camera;
 
 import geometry_msgs.Transform;
 import org.ros.message.Time;

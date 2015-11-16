@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
+package us.ihmc.ihmcPerception.depthData;
 
 import java.util.ArrayList;
 

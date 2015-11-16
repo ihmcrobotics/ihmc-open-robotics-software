@@ -51,7 +51,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
@@ -377,7 +377,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          return new SimulationRosClockPPSTimestampOffsetProvider();
       }
 
-      return new AlwaysZeroOffsetPPSTimestampOffsetProvider();
+      return new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
    }
 
    @Override

@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
+package us.ihmc.ihmcPerception.depthData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +23,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateComm
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseMocapExperimentPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseTest;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
-import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
-import us.ihmc.ihmcPerception.depthData.PointCloudWorldPacketGenerator;
-import us.ihmc.ihmcPerception.depthData.RobotDepthDataFilter;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
