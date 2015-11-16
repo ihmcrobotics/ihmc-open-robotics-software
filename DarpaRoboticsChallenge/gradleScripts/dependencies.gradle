@@ -55,6 +55,7 @@ dependencies {
 	compile project(':IHMCStateEstimation')
 	compile project(':IHMCJavaToolkit')
 	compile project(':IHMCRoboticsToolkit')
+	compile project(':Vicon')
 
     testCompile project(':IHMCUnitTesting')
 	testCompile project(':CommonWalkingControlModules').sourceSets.test.output

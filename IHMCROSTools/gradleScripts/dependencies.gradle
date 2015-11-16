@@ -12,10 +12,10 @@ dependencies {
  	compile project(':ROSJavaBootstrap')
  	compile project(':ROSJavaMessages')
  	compile project(':ROSJavaGeometry')
- 	compile project(':Graphics3DAdapter')
+ 	//compile project(':Graphics3DAdapter')
  	
  	compile project(':IHMCCommunication')
- 	compile project(':Vicon')
+ 	//compile project(':Vicon')
 	compile project(':IHMCJavaToolkit')
 	compile project(':IHMCRoboticsToolkit')
 	testCompile project(':IHMCUnitTesting')
