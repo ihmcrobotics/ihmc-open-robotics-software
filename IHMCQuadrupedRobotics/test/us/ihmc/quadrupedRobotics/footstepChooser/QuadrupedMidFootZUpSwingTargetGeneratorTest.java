@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.footstepChooser;
 
 import java.awt.Color;
 
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
@@ -21,6 +22,7 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -53,7 +55,7 @@ import us.ihmc.tools.thread.ThreadTools;
  
 public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements RobotController
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -107,7 +109,8 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
    private final QuadrupedSupportPolygon quadrupedSupportPolygon = new QuadrupedSupportPolygon();
    private DoubleYoVariable robotTimestamp;
    
-   private double simulateDuration; 
+   private double simulateDuration;
+   private double maxStepLength;
    
    @Before
    public void showMemoryUsageBeforeTest()
@@ -361,8 +364,8 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       swingLeg.set(startingLeg);
       this.simulateDuration = simulateDuration; 
       
-      swingHeight.set(0.2);
-      desiredSwingTime.set(0.4);
+      swingHeight.set(0.15);
+      desiredSwingTime.set(0.1);
    }
 
    private void setupScs()
@@ -395,6 +398,22 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
 
          FramePoint initialFootPosition = new FramePoint(referenceFrames.getFootFrame(robotQuadrant));
          initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
+         ReferenceFrame hipPitchFrame = referenceFrames.getHipPitchFrame(robotQuadrant);
+         RigidBodyTransform currenthipPitchFrameTransform = hipPitchFrame.getTransformToRoot();
+         Vector3d hipPitchFrameTranslation = new Vector3d();
+         currenthipPitchFrameTransform.getTranslation(hipPitchFrameTranslation );
+         
+         double robotHeight = 0.7 * referenceFrames.getLegLength(robotQuadrant);
+         RigidBodyTransform preCorruptionTransform = new RigidBodyTransform(new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(0.0, 0.0, robotHeight - hipPitchFrameTranslation.getZ()));
+         hipPitchFrame.corruptTransformToParentPreMultiply(preCorruptionTransform);
+
+         maxStepLength = Math.sqrt(Math.pow(referenceFrames.getLegLength(robotQuadrant), 2) - Math.pow(robotHeight, 2));
+         double amountToSkew = Math.min(quadrupedControllerParameters.getMaxSkew(), quadrupedControllerParameters.getStanceLength() / 2.0);
+         maxStepLength = 2.0 * Math.min(maxStepLength, amountToSkew);
+         
+         System.out.println(maxStepLength);
+         
          initialFootPosition.setZ(0.0);
 
          footPosition.set(initialFootPosition);
