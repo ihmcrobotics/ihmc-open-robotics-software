@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
+package us.ihmc.ihmcPerception.camera;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;

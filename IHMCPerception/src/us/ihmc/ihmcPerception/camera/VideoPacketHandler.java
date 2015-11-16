@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
+package us.ihmc.ihmcPerception.camera;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;

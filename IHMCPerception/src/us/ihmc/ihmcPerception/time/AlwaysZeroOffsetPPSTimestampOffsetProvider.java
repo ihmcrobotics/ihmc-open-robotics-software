@@ -1,12 +1,16 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.time;
+package us.ihmc.ihmcPerception.time;
 
-
-import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.utilities.ros.RosMainNode;
 
-public class AlwaysZeroOffsetPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffsetProvider
+public class AlwaysZeroOffsetPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
 {
+
+   public AlwaysZeroOffsetPPSTimestampOffsetProvider()
+   {
+      super();
+   }
+
    public long getCurrentTimestampOffset()
    {
       return 0;
@@ -34,8 +38,4 @@ public class AlwaysZeroOffsetPPSTimestampOffsetProvider implements DRCROSPPSTime
       
    }
 
-   @Override
-   public void attachToRosMainNode(RosMainNode rosMainNode)
-   {
-   }
 }

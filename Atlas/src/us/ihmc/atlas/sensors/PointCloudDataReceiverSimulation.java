@@ -20,13 +20,13 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudSource;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
+import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
+import us.ihmc.ihmcPerception.depthData.PointCloudSource;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
@@ -50,7 +50,7 @@ public class PointCloudDataReceiverSimulation implements Runnable, PacketConsume
       robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
       SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       robotConfigurationData = new RobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), fullRobotModel.getForceSensorDefinitions(), null, fullRobotModel.getIMUDefinitions());
-      PPSTimestampOffsetProvider ppsTimestampOffsetProvider = new AlwaysZeroOffsetPPSTimestampOffsetProvider();
+      PPSTimestampOffsetProvider ppsTimestampOffsetProvider = new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
 
       PacketCommunicator sensorSuitePacketCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER,
             new IHMCCommunicationKryoNetClassList());

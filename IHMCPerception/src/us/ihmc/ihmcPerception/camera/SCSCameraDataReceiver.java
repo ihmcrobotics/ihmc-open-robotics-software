@@ -1,10 +1,9 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
+package us.ihmc.ihmcPerception.camera;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -27,7 +26,7 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
 
       scsSensorsCommunicator.attachListener(LocalVideoPacket.class, this);
 
-      CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
+//      CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
    }
 
    public void consumeObject(LocalVideoPacket object)
