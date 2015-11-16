@@ -15,6 +15,7 @@ import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.swingLegChooser.LongestFeasibleStepChooser;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -55,13 +56,15 @@ import us.ihmc.tools.thread.ThreadTools;
  
 public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements RobotController
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
    private BlockingSimulationRunner blockingSimulationRunner;
    
    private static final double simulateDT = 0.01;
    private static final int recordFrequency = 1;
+
+   private static final double EPSILON = 1e-3;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("MidFootZUpSwingTargetGeneratorTest");
    private SimulationConstructionSet scs;
@@ -109,8 +112,14 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
    private final QuadrupedSupportPolygon quadrupedSupportPolygon = new QuadrupedSupportPolygon();
    private DoubleYoVariable robotTimestamp;
    
-   private double simulateDuration;
-   private double maxStepLength;
+   private QuadrantDependentList<Double> maxStepLengthsForward = new QuadrantDependentList<Double>();
+   private QuadrantDependentList<Double> maxStepLengthsSideways = new QuadrantDependentList<Double>();
+   private double stepDuration = 0.25;
+   private int numberOfSteps = 20; //5 steps per legs
+   private double simulateDuration = stepDuration * numberOfSteps;
+   private double minimumDistanceFromSameSideFoot;
+   
+   private final QuadrantDependentList<YoFramePoint> yoFootPositionsBeforeStep = new QuadrantDependentList<YoFramePoint>();
    
    @Before
    public void showMemoryUsageBeforeTest()
@@ -132,11 +141,11 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   protected boolean setupAndTestForwardWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters)
+   protected boolean setupAndTestForwardWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       boolean success = true;
       
-      setupTestParameters(1.0, 0.0, 0.0, RobotQuadrant.FRONT_RIGHT, 10.0); //ask for a very high speed to be sure to ask for the longest step
+      setupTestParameters(1.0, 0.0, 0.0, RobotQuadrant.FRONT_RIGHT); //ask for a very high speed to be sure to ask for the longest step
       setupRobot(referenceFrames, quadrupedControllerParameters);
       setupScs();
       
@@ -144,167 +153,109 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
          createGraphicsAndArtifacts(referenceFrames, yoGraphicsListRegistry);
       
       blockingSimulationRunner = new BlockingSimulationRunner(scs, simulateDuration + 0.5 * simulateDuration);
-      try
+
+      //Simulate one tick so that the robot can be initialized
+      blockingSimulationRunner.simulateNTicksAndBlock(1);
+
+      int numberOfTicks = (int)(stepDuration / simulateDT);
+      
+      for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
       {
+         blockingSimulationRunner.simulateNTicksAndBlock(numberOfTicks);
+         
+         double footDisplacementX = yoFootPositions.get(swingLeg.getEnumValue()).getX() - yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).getX();  
+         double footDisplacementY = yoFootPositions.get(swingLeg.getEnumValue()).getY() - yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).getY();  
+         
+         if(stepIndex < 2) //the first 2 steps are only half steps because the feet are in a square configuration
+         {
+            success &= MathTools.isInsideBoundsInclusive(footDisplacementX, maxStepLengthsForward.get(swingLeg.getEnumValue()) / 2.0 - minimumDistanceFromSameSideFoot - EPSILON, maxStepLengthsForward.get(swingLeg.getEnumValue()) / 2.0 + EPSILON);
+            success &= MathTools.epsilonEquals(footDisplacementY, 0.0, EPSILON);
+         }
+         else
+         {
+            success &= MathTools.isInsideBoundsInclusive(footDisplacementX, maxStepLengthsForward.get(swingLeg.getEnumValue()) - minimumDistanceFromSameSideFoot - EPSILON, maxStepLengthsForward.get(swingLeg.getEnumValue()) + EPSILON);
+            success &= MathTools.epsilonEquals(footDisplacementY, 0.0, EPSILON);
+         }
+                  
+         if(DEBUG)
+         {
+            System.out.println("////////////////////////////////////");
+            System.out.println("success = " + success);
+            System.out.println(swingLeg.getEnumValue());
+            System.out.println(" footDisplacementX");
+            System.out.println(footDisplacementX);
+            System.out.println(" footDisplacementY");
+            System.out.println(footDisplacementY);
+         }
+         
+         yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).set(yoFootPositions.get(swingLeg.getEnumValue()).getFramePointCopy());
+         
          blockingSimulationRunner.simulateNTicksAndBlock(1);
-      }
-      catch (SimulationExceededMaximumTimeException | ControllerFailureException e1)
-      {
-         success = false;
-         e1.printStackTrace();
-      }
-      
-      Vector3d startPosition = new Vector3d();
-      rootJoint.getPosition(startPosition);
-      
-      try
-      {
-         blockingSimulationRunner.simulateAndBlock(simulateDuration);
-      }
-      catch (SimulationExceededMaximumTimeException | ControllerFailureException e)
-      {
-         success = false;
-         e.printStackTrace();
-      }
-            
-      Vector3d endPosition = new Vector3d();
-      rootJoint.getPosition(endPosition);
-
-      Vector3d robotTranslation = new Vector3d();
-      robotTranslation.sub(endPosition, startPosition);
-      
-      Vector3d expectedTranslation = new Vector3d(quadrupedControllerParameters.getStanceLength() / 4.0 * simulateDuration, 0.0, robotTranslation.getZ());
-
-      success &= robotTranslation.epsilonEquals(expectedTranslation, 1e-2);
-
-      if(DEBUG)
-      {
-         System.out.println("Expected translation:");
-         System.out.println(expectedTranslation);
-         System.out.println("Robot translation:");
-         System.out.println(robotTranslation);
       }
       
       return success;
    }
 
-   protected boolean setupAndTestBackwardWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters)
+   protected boolean setupAndTestBackwardWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       boolean success = true;
       
-      setupTestParameters(-1.0, 0.0, 0.0, RobotQuadrant.FRONT_RIGHT, 10.0); //ask for a very high speed to be sure to ask for the longest step
+      setupTestParameters(-1.0, 0.0, 0.0, RobotQuadrant.FRONT_RIGHT); //ask for a very high speed to be sure to ask for the longest step
       setupRobot(referenceFrames, quadrupedControllerParameters);
       setupScs();
       
       if (simulationTestingParameters.getCreateGUI())
          createGraphicsAndArtifacts(referenceFrames, yoGraphicsListRegistry);
-      
-      blockingSimulationRunner = new BlockingSimulationRunner(scs, simulateDuration + 0.5 * simulateDuration);
-      try
-      {
-         blockingSimulationRunner.simulateNTicksAndBlock(1);
-      }
-      catch (SimulationExceededMaximumTimeException | ControllerFailureException e1)
-      {
-         success = false;
-         e1.printStackTrace();
-      }
-      
-      Vector3d startPosition = new Vector3d();
-      rootJoint.getPosition(startPosition);
-      
-      try
-      {
-         blockingSimulationRunner.simulateAndBlock(simulateDuration);
-      }
-      catch (SimulationExceededMaximumTimeException | ControllerFailureException e)
-      {
-         success = false;
-         e.printStackTrace();
-      }
-            
-      Vector3d endPosition = new Vector3d();
-      rootJoint.getPosition(endPosition);
 
-      Vector3d robotTranslation = new Vector3d();
-      robotTranslation.sub(endPosition, startPosition);
-      
-      Vector3d expectedTranslation = new Vector3d(-quadrupedControllerParameters.getStanceLength() / 4.0 * simulateDuration, 0.0, robotTranslation.getZ());
-      
-      success &= robotTranslation.epsilonEquals(expectedTranslation, 1e-2);
-
-      if(DEBUG)
-      {
-         System.out.println("Expected translation:");
-         System.out.println(expectedTranslation);
-         System.out.println("Robot translation:");
-         System.out.println(robotTranslation);
-      }
-      
-      return success;
-   }
-   
-   protected boolean setupAndTestSidewaysLeftWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters)
-   {
-      boolean success = true;
-      
-      setupTestParameters(0.0, 1.0, 0.0, RobotQuadrant.FRONT_RIGHT, 5.0); //ask for a very high speed to be sure to ask for the longest step
-      setupRobot(referenceFrames, quadrupedControllerParameters);
-      setupScs();
-      
-      if (simulationTestingParameters.getCreateGUI())
-         createGraphicsAndArtifacts(referenceFrames, yoGraphicsListRegistry);
-      
       blockingSimulationRunner = new BlockingSimulationRunner(scs, simulateDuration + 0.5 * simulateDuration);
-      try
+
+      //Simulate one tick so that the robot can be initialized
+      blockingSimulationRunner.simulateNTicksAndBlock(1);
+
+      int numberOfTicks = (int)(stepDuration / simulateDT);
+      
+      for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
       {
+         blockingSimulationRunner.simulateNTicksAndBlock(numberOfTicks);
+         
+         double footDisplacementX = yoFootPositions.get(swingLeg.getEnumValue()).getX() - yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).getX();  
+         double footDisplacementY = yoFootPositions.get(swingLeg.getEnumValue()).getY() - yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).getY();  
+         
+         if(stepIndex < 2) //the first 2 steps are only half steps because the feet are in a square configuration
+         {
+            success &= MathTools.isInsideBoundsInclusive(footDisplacementX,  - maxStepLengthsForward.get(swingLeg.getEnumValue()) / 2.0 - EPSILON, - maxStepLengthsForward.get(swingLeg.getEnumValue()) / 2.0 + minimumDistanceFromSameSideFoot + EPSILON);
+            success &= MathTools.epsilonEquals(footDisplacementY, 0.0, EPSILON);
+         }
+         else
+         {
+            success &= MathTools.isInsideBoundsInclusive(footDisplacementX,  - maxStepLengthsForward.get(swingLeg.getEnumValue()) - EPSILON, - maxStepLengthsForward.get(swingLeg.getEnumValue()) + minimumDistanceFromSameSideFoot + EPSILON);
+            success &= MathTools.epsilonEquals(footDisplacementY, 0.0, EPSILON);
+         }
+                  
+         if(DEBUG)
+         {
+            System.out.println("////////////////////////////////////");
+            System.out.println("success = " + success);
+            System.out.println(swingLeg.getEnumValue());
+            System.out.println(" footDisplacementX");
+            System.out.println(footDisplacementX);
+            System.out.println(" footDisplacementY");
+            System.out.println(footDisplacementY);
+         }
+         
+         yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).set(yoFootPositions.get(swingLeg.getEnumValue()).getFramePointCopy());
+         
          blockingSimulationRunner.simulateNTicksAndBlock(1);
-      }
-      catch (SimulationExceededMaximumTimeException | ControllerFailureException e1)
-      {
-         success = false;
-         e1.printStackTrace();
-      }
-      
-      Vector3d startPosition = new Vector3d();
-      rootJoint.getPosition(startPosition);
-      
-      try
-      {
-         blockingSimulationRunner.simulateAndBlock(simulateDuration);
-      }
-      catch (SimulationExceededMaximumTimeException | ControllerFailureException e)
-      {
-         success = false;
-         e.printStackTrace();
-      }
-      
-      Vector3d endPosition = new Vector3d();
-      rootJoint.getPosition(endPosition);
-      
-      Vector3d robotTranslation = new Vector3d();
-      robotTranslation.sub(endPosition, startPosition);
-      
-      Vector3d expectedTranslation = new Vector3d(0.0, quadrupedControllerParameters.getStanceWidth() / 4.0 * simulateDuration, robotTranslation.getZ());
-      
-      success &= robotTranslation.epsilonEquals(expectedTranslation, 2e-2);
-      
-      if(DEBUG)
-      {
-         System.out.println("Expected translation:");
-         System.out.println(expectedTranslation);
-         System.out.println("Robot translation:");
-         System.out.println(robotTranslation);
       }
       
       return success;
    }
    
-   protected boolean setupAndTestSidewaysRightWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters)
+   protected boolean setupAndTestSidewaysLeftWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       boolean success = true;
       
-      setupTestParameters(0.0, -1.0, 0.0, RobotQuadrant.FRONT_RIGHT, 5.0); //ask for a very high speed to be sure to ask for the longest step
+      setupTestParameters(0.0, 1.0, 0.0, RobotQuadrant.FRONT_RIGHT); //ask for a very high speed to be sure to ask for the longest step
       setupRobot(referenceFrames, quadrupedControllerParameters);
       setupScs();
       
@@ -312,60 +263,113 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
          createGraphicsAndArtifacts(referenceFrames, yoGraphicsListRegistry);
       
       blockingSimulationRunner = new BlockingSimulationRunner(scs, simulateDuration + 0.5 * simulateDuration);
-      try
+
+      //Simulate one tick so that the robot can be initialized
+      blockingSimulationRunner.simulateNTicksAndBlock(1);
+
+      int numberOfTicks = (int)(stepDuration / simulateDT);
+      
+      for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
       {
+         blockingSimulationRunner.simulateNTicksAndBlock(numberOfTicks);
+         
+         double footDisplacementX = yoFootPositions.get(swingLeg.getEnumValue()).getX() - yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).getX();  
+         double footDisplacementY = yoFootPositions.get(swingLeg.getEnumValue()).getY() - yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).getY();  
+         
+         if(stepIndex < 2) //the first 2 steps are only half steps because the feet are in a square configuration
+         {
+            success &= MathTools.epsilonEquals(footDisplacementX, 0.0, EPSILON);
+            success &= MathTools.isInsideBoundsInclusive(footDisplacementY, maxStepLengthsSideways.get(swingLeg.getEnumValue()) / 2.0 - minimumDistanceFromSameSideFoot - EPSILON, maxStepLengthsSideways.get(swingLeg.getEnumValue()) / 2.0 + EPSILON);
+         }
+         else
+         {
+            success &= MathTools.epsilonEquals(footDisplacementX, 0.0, EPSILON);
+            success &= MathTools.isInsideBoundsInclusive(footDisplacementY, maxStepLengthsSideways.get(swingLeg.getEnumValue()) - minimumDistanceFromSameSideFoot - EPSILON, maxStepLengthsSideways.get(swingLeg.getEnumValue()) + EPSILON);
+         }
+                  
+         if(DEBUG)
+         {
+            System.out.println("////////////////////////////////////");
+            System.out.println("success = " + success);
+            System.out.println(swingLeg.getEnumValue());
+            System.out.println(" footDisplacementX");
+            System.out.println(footDisplacementX);
+            System.out.println(" footDisplacementY");
+            System.out.println(footDisplacementY);
+         }
+         
+         yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).set(yoFootPositions.get(swingLeg.getEnumValue()).getFramePointCopy());
+         
          blockingSimulationRunner.simulateNTicksAndBlock(1);
-      }
-      catch (SimulationExceededMaximumTimeException | ControllerFailureException e1)
-      {
-         success = false;
-         e1.printStackTrace();
-      }
-      
-      Vector3d startPosition = new Vector3d();
-      rootJoint.getPosition(startPosition);
-      
-      try
-      {
-         blockingSimulationRunner.simulateAndBlock(simulateDuration);
-      }
-      catch (SimulationExceededMaximumTimeException | ControllerFailureException e)
-      {
-         success = false;
-         e.printStackTrace();
-      }
-      
-      Vector3d endPosition = new Vector3d();
-      rootJoint.getPosition(endPosition);
-      
-      Vector3d robotTranslation = new Vector3d();
-      robotTranslation.sub(endPosition, startPosition);
-      
-      Vector3d expectedTranslation = new Vector3d(0.0, -quadrupedControllerParameters.getStanceWidth() / 4.0 * simulateDuration, robotTranslation.getZ());
-      
-      success &= robotTranslation.epsilonEquals(expectedTranslation, 2e-2);
-      
-      if(DEBUG)
-      {
-         System.out.println("Expected translation:");
-         System.out.println(expectedTranslation);
-         System.out.println("Robot translation:");
-         System.out.println(robotTranslation);
       }
       
       return success;
    }
    
-   private void setupTestParameters(double desiredVelocityX, double desiredVelocityY, double desiredYawRate, RobotQuadrant startingLeg, double simulateDuration)
+   protected boolean setupAndTestSidewaysRightWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters) throws SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      boolean success = true;
+      
+      setupTestParameters(0.0, -1.0, 0.0, RobotQuadrant.FRONT_RIGHT); //ask for a very high speed to be sure to ask for the longest step
+      setupRobot(referenceFrames, quadrupedControllerParameters);
+      setupScs();
+      
+      if (simulationTestingParameters.getCreateGUI())
+         createGraphicsAndArtifacts(referenceFrames, yoGraphicsListRegistry);
+
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, simulateDuration + 0.5 * simulateDuration);
+
+      //Simulate one tick so that the robot can be initialized
+      blockingSimulationRunner.simulateNTicksAndBlock(1);
+
+      int numberOfTicks = (int)(stepDuration / simulateDT);
+      
+      for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
+      {
+         blockingSimulationRunner.simulateNTicksAndBlock(numberOfTicks);
+         
+         double footDisplacementX = yoFootPositions.get(swingLeg.getEnumValue()).getX() - yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).getX();  
+         double footDisplacementY = yoFootPositions.get(swingLeg.getEnumValue()).getY() - yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).getY();  
+         
+         if(stepIndex < 2) //the first 2 steps are only half steps because the feet are in a square configuration
+         {
+            success &= MathTools.epsilonEquals(footDisplacementX, 0.0, EPSILON);
+            success &= MathTools.isInsideBoundsInclusive(footDisplacementY,  - maxStepLengthsSideways.get(swingLeg.getEnumValue()) / 2.0 - EPSILON, - maxStepLengthsSideways.get(swingLeg.getEnumValue()) / 2.0 + minimumDistanceFromSameSideFoot + EPSILON);
+         }
+         else
+         {
+            success &= MathTools.epsilonEquals(footDisplacementX, 0.0, EPSILON);
+            success &= MathTools.isInsideBoundsInclusive(footDisplacementY,  - maxStepLengthsSideways.get(swingLeg.getEnumValue()) - EPSILON, - maxStepLengthsSideways.get(swingLeg.getEnumValue()) + minimumDistanceFromSameSideFoot + EPSILON);
+         }
+                  
+         if(DEBUG)
+         {
+            System.out.println("////////////////////////////////////");
+            System.out.println("success = " + success);
+            System.out.println(swingLeg.getEnumValue());
+            System.out.println(" footDisplacementX");
+            System.out.println(footDisplacementX);
+            System.out.println(" footDisplacementY");
+            System.out.println(footDisplacementY);
+         }
+         
+         yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).set(yoFootPositions.get(swingLeg.getEnumValue()).getFramePointCopy());
+         
+         blockingSimulationRunner.simulateNTicksAndBlock(1);
+      }
+      
+      return success;
+   }
+   
+   private void setupTestParameters(double desiredVelocityX, double desiredVelocityY, double desiredYawRate, RobotQuadrant startingLeg)
    {
       desiredVelocity.setX(desiredVelocityX);
       desiredVelocity.setY(desiredVelocityY);
       this.desiredYawRate.set(desiredYawRate);
       swingLeg.set(startingLeg);
-      this.simulateDuration = simulateDuration; 
       
       swingHeight.set(0.15);
-      desiredSwingTime.set(0.1);
+      desiredSwingTime.set(stepDuration);
    }
 
    private void setupScs()
@@ -391,10 +395,13 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       nextStepFootChooser = new LongestFeasibleStepChooser(quadrupedControllerParameters, referenceFrames, registry, yoGraphicsListRegistry);
       swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, referenceFrames, registry);
 
+      minimumDistanceFromSameSideFoot = quadrupedControllerParameters.getMinimumDistanceFromSameSideFoot();
+      
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
          YoFramePoint footPosition = new YoFramePoint(prefix + "footPosition", ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoint footPositionBeforeSwing = new YoFramePoint(prefix + "footPositionBeforeSwing", ReferenceFrame.getWorldFrame(), registry);
 
          FramePoint initialFootPosition = new FramePoint(referenceFrames.getFootFrame(robotQuadrant));
          initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -408,17 +415,30 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
          RigidBodyTransform preCorruptionTransform = new RigidBodyTransform(new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(0.0, 0.0, robotHeight - hipPitchFrameTranslation.getZ()));
          hipPitchFrame.corruptTransformToParentPreMultiply(preCorruptionTransform);
 
-         maxStepLength = Math.sqrt(Math.pow(referenceFrames.getLegLength(robotQuadrant), 2) - Math.pow(robotHeight, 2));
+         double maxStepLengthForward = Math.sqrt(Math.pow(referenceFrames.getLegLength(robotQuadrant), 2) - Math.pow(robotHeight, 2));
          double amountToSkew = Math.min(quadrupedControllerParameters.getMaxSkew(), quadrupedControllerParameters.getStanceLength() / 2.0);
-         maxStepLength = 2.0 * Math.min(maxStepLength, amountToSkew);
+         maxStepLengthForward = 2.0 * Math.min(maxStepLengthForward, amountToSkew);
          
-         System.out.println(maxStepLength);
+         double maxStepLengthSideways = Math.sqrt(Math.pow(referenceFrames.getLegLength(robotQuadrant), 2) - Math.pow(robotHeight, 2));
+         amountToSkew = Math.min(quadrupedControllerParameters.getMaxSkew(), quadrupedControllerParameters.getStanceWidth() / 2.0);
+         maxStepLengthSideways= 2.0 * Math.min(maxStepLengthSideways, amountToSkew);
+         
+         maxStepLengthsForward.put(robotQuadrant, maxStepLengthForward);
+         maxStepLengthsSideways.put(robotQuadrant, maxStepLengthSideways);
+         
+         if(DEBUG)
+         {
+            System.out.println("maxStepLenghtForward = " + maxStepLengthForward);
+            System.out.println("maxStepLenghtSideways = " + maxStepLengthSideways);
+         }
          
          initialFootPosition.setZ(0.0);
 
          footPosition.set(initialFootPosition);
+         footPositionBeforeSwing.set(initialFootPosition);
          
          yoFootPositions.put(robotQuadrant, footPosition);
+         yoFootPositionsBeforeStep.put(robotQuadrant, footPositionBeforeSwing);
       }
    }
    
@@ -497,7 +517,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
    @Override
    public String getName()
    {
-      return "test";
+      return "QuadrupedMidFootZUpSwingTargetGeneratorTest";
    }
 
    @Override
