@@ -26,7 +26,6 @@ public interface WholeBodyControllerParameters extends SDFFullHumanoidRobotModel
 
 	public SDFHumanoidRobot createSdfRobot(boolean createCollisionMeshes);
 	
-	public abstract GeneralizedSDFRobotModel getGeneralizedRobotModel();
 	
 	public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel);
 	

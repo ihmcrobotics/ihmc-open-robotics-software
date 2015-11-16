@@ -70,7 +70,7 @@ public class JoystickUpdater implements Runnable
       }
    }
    
-   public Component findComponent(Identifier identifier)
+   public Component findComponent(Identifier identifier) throws JoystickComponentNotFoundException
    {
       for (Component component : joystickController.getComponents())
       {
@@ -78,7 +78,8 @@ public class JoystickUpdater implements Runnable
             return component;
       }
       
-      throw new RuntimeException("component with identifier " + identifier + " not found");
+      
+      throw new JoystickComponentNotFoundException(identifier);
    }
    
 
