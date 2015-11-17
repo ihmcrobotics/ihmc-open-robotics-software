@@ -24,6 +24,10 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
 
    public abstract SideDependentList<String> getWristForceSensorNames();
 
+   public abstract boolean requestFootForceSensorCalibrationAtStart();
+
+   public abstract SideDependentList<String> getFootForceSensorNames();
+
    // Parameters related to the kinematics based state estimator
    public abstract double getKinematicsPelvisPositionFilterFreqInHertz();
    public abstract double getKinematicsPelvisLinearVelocityFilterFreqInHertz();
