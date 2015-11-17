@@ -122,7 +122,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 
       double maxStepDistance;
       double maxStepDistanceWithNoRoll = Math.sqrt(Math.pow(referenceFrames.getLegLength(swingLeg), 2) - Math.pow(swingLegHipPitchHeight, 2));
-      if (Double.isNaN(stepDistanceRemovedBecauseOfRoll))
+      if (Double.isNaN(maxStepDistanceWithNoRoll) || Double.isNaN(stepDistanceRemovedBecauseOfRoll))
       {
          maxStepDistance = 0.0;
       }

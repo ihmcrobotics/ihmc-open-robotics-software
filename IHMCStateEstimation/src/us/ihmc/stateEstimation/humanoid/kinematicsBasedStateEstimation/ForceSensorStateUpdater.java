@@ -40,29 +40,40 @@ public class ForceSensorStateUpdater
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
    private final ForceSensorDataHolder outputForceSensorDataHolder;
    private final ForceSensorDataHolder outputForceSensorDataHolderWithGravityCancelled;
+
    private final SideDependentList<ForceSensorDefinition> wristForceSensorDefinitions;
-   private final SideDependentList<CenterOfMassReferenceFrame> subtreeCenterOfMassFrames;
+   private final SideDependentList<CenterOfMassReferenceFrame> wristsubtreeCenterOfMassFrames;
 
    private final BooleanYoVariable calibrateWristForceSensors;
-   private final SideDependentList<DoubleYoVariable> subtreeMass;
+   private final SideDependentList<DoubleYoVariable> wristSubtreeMass;
    private final SideDependentList<YoFrameVector> wristForcesSubtreeWeightCancelled;
    private final SideDependentList<YoFrameVector> wristTorquesSubtreeWeightCancelled;
 
    private final SideDependentList<YoFrameVector> wristForceCalibrationOffsets;
    private final SideDependentList<YoFrameVector> wristTorqueCalibrationOffsets;
 
+   private final BooleanYoVariable calibrateFootForceSensors;
+
+   private final SideDependentList<ForceSensorDefinition> footForceSensorDefinitions;
+
+   private final SideDependentList<YoFrameVector> footForceCalibrationOffsets;
+   private final SideDependentList<YoFrameVector> footTorqueCalibrationOffsets;
+
    private RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = null;
 
    private final Wrench wristWrenchDueToGravity = new Wrench();
-   private final Wrench wristTempWrench = new Wrench();
-   private final FrameVector tempWristForce = new FrameVector();
-   private final FrameVector tempWristTorque = new FrameVector();
+   private final Wrench tempWrench = new Wrench();
+   private final FrameVector tempForce = new FrameVector();
+   private final FrameVector tempTorque = new FrameVector();
 
    private final double gravity;
 
    // For the viz
    private final Map<RigidBody, Wrench> wrenches;
    private final WrenchVisualizer wrenchVisualizer;
+
+   private final boolean hasWristForceSensors;
+   private final boolean hasFootForceSensors;
 
    public ForceSensorStateUpdater(SensorOutputMapReadOnly sensorOutputMapReadOnly, ForceSensorDataHolder forceSensorDataHolderToUpdate,
          StateEstimatorParameters stateEstimatorParameters, double gravity, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentreRegistry)
@@ -71,60 +82,70 @@ public class ForceSensorStateUpdater
       inputForceSensorDataHolder = sensorOutputMapReadOnly.getForceSensorProcessedOutputs();
       this.forceSensorDataHolderToUpdate = forceSensorDataHolderToUpdate;
 
-      SideDependentList<String> wristForceSensorNames = stateEstimatorParameters.getWristForceSensorNames();
+      outputForceSensorDataHolder = new ForceSensorDataHolder(inputForceSensorDataHolder.getForceSensorDefinitions());
+      outputForceSensorDataHolderWithGravityCancelled = new ForceSensorDataHolder(inputForceSensorDataHolder.getForceSensorDefinitions());
 
-      if (wristForceSensorNames == null || wristForceSensorNames.isEmpty())
+      registry = new YoVariableRegistry(getClass().getSimpleName());
+      parentreRegistry.addChild(registry);
+
+      hasWristForceSensors = checkIfWristForceSensorsExist(stateEstimatorParameters);
+      hasFootForceSensors = checkIfFootForceSensorsExist(stateEstimatorParameters);
+
+      if (hasFootForceSensors)
       {
-         wristForceSensorDefinitions = null;
-      }
-      // Make sure that both sensors actually exist
-      else if (inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(RobotSide.LEFT)) == null
-            || inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(RobotSide.RIGHT)) == null)
-      {
-         wristForceSensorDefinitions = null;
+         footForceSensorDefinitions = new SideDependentList<>();
+         SideDependentList<String> footForceSensorNames = stateEstimatorParameters.getFootForceSensorNames();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            ForceSensorDefinition forceSensorDefinition = inputForceSensorDataHolder.findForceSensorDefinition(footForceSensorNames.get(robotSide));
+            footForceSensorDefinitions.put(robotSide, forceSensorDefinition);
+         }
+
+         footForceCalibrationOffsets = new SideDependentList<>();
+         footTorqueCalibrationOffsets = new SideDependentList<>();
+
+         calibrateFootForceSensors = new BooleanYoVariable("calibrateFootForceSensors", registry);
+         calibrateFootForceSensors.set(stateEstimatorParameters.requestFootForceSensorCalibrationAtStart());
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            ForceSensorDefinition forceSensorDefinition = footForceSensorDefinitions.get(robotSide);
+            ReferenceFrame measurementFrame = forceSensorDefinition.getSensorFrame();
+
+            String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+            String namePrefix = sidePrefix + "FootSensor";
+
+            footForceCalibrationOffsets.put(robotSide, new YoFrameVector(namePrefix + "ForceCalibrationOffset", measurementFrame, registry));
+            footTorqueCalibrationOffsets.put(robotSide, new YoFrameVector(namePrefix + "TorqueCalibrationOffset", measurementFrame, registry));
+         }
       }
       else
       {
+         footForceSensorDefinitions = null;
+         footForceCalibrationOffsets = null;
+         footTorqueCalibrationOffsets = null;
+         calibrateFootForceSensors = null;
+      }
+
+      if (hasWristForceSensors)
+      {
          wristForceSensorDefinitions = new SideDependentList<>();
+
+         SideDependentList<String> wristForceSensorNames = stateEstimatorParameters.getWristForceSensorNames();
 
          for (RobotSide robotSide : RobotSide.values)
          {
             ForceSensorDefinition forceSensorDefinition = inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(robotSide));
             wristForceSensorDefinitions.put(robotSide, forceSensorDefinition);
          }
-      }
-      
-      
-      if (wristForceSensorDefinitions == null)
-      {
-         outputForceSensorDataHolder = null;
-         outputForceSensorDataHolderWithGravityCancelled = null;
-         registry = null;
-         wristForcesSubtreeWeightCancelled = null;
-         wristTorquesSubtreeWeightCancelled = null;
-         wristForceCalibrationOffsets = null;
-         wristTorqueCalibrationOffsets = null;
-         subtreeMass = null;
-         subtreeCenterOfMassFrames = null;
-         calibrateWristForceSensors = null;
-
-         wrenches = null;
-         wrenchVisualizer = null;
-      }
-      else
-      {
-         outputForceSensorDataHolder = new ForceSensorDataHolder(inputForceSensorDataHolder.getForceSensorDefinitions());
-         outputForceSensorDataHolderWithGravityCancelled = new ForceSensorDataHolder(inputForceSensorDataHolder.getForceSensorDefinitions());
-
-         registry = new YoVariableRegistry(getClass().getSimpleName());
-         parentreRegistry.addChild(registry);
 
          wristForcesSubtreeWeightCancelled = new SideDependentList<>();
          wristTorquesSubtreeWeightCancelled = new SideDependentList<>();
          wristForceCalibrationOffsets = new SideDependentList<>();
          wristTorqueCalibrationOffsets = new SideDependentList<>();
-         subtreeMass = new SideDependentList<>();
-         subtreeCenterOfMassFrames = new SideDependentList<>();
+         wristSubtreeMass = new SideDependentList<>();
+         wristsubtreeCenterOfMassFrames = new SideDependentList<>();
 
          calibrateWristForceSensors = new BooleanYoVariable("calibrateWristForceSensors", registry);
          calibrateWristForceSensors.set(stateEstimatorParameters.requestWristForceSensorCalibrationAtStart());
@@ -146,9 +167,9 @@ public class ForceSensorStateUpdater
 
             RigidBody[] handBodies = ScrewTools.computeRigidBodiesAfterThisJoint(measurementLink.getParentJoint());
             CenterOfMassReferenceFrame subtreeCoMFrame = new CenterOfMassReferenceFrame(namePrefix + "SubtreeCoMFrame", measurementFrame, handBodies);
-            subtreeCenterOfMassFrames.put(robotSide, subtreeCoMFrame);
+            wristsubtreeCenterOfMassFrames.put(robotSide, subtreeCoMFrame);
             DoubleYoVariable handMass = new DoubleYoVariable(namePrefix + "SubtreeMass", registry);
-            subtreeMass.put(robotSide, handMass);
+            wristSubtreeMass.put(robotSide, handMass);
             handMass.set(TotalMassCalculator.computeSubTreeMass(measurementLink));
          }
 
@@ -172,9 +193,62 @@ public class ForceSensorStateUpdater
             double forceVizScaling = 10.0;
             AppearanceDefinition forceAppearance = YoAppearance.DarkRed();
             AppearanceDefinition torqueAppearance = YoAppearance.DarkBlue();
-            wrenchVisualizer = new WrenchVisualizer("ForceSensorData", bodies, forceVizScaling, yoGraphicsListRegistry, registry, forceAppearance, torqueAppearance);
+            wrenchVisualizer = new WrenchVisualizer("ForceSensorData", bodies, forceVizScaling, yoGraphicsListRegistry, registry, forceAppearance,
+                  torqueAppearance);
          }
       }
+      else
+      {
+         wristForceSensorDefinitions = null;
+         wristForcesSubtreeWeightCancelled = null;
+         wristTorquesSubtreeWeightCancelled = null;
+         wristForceCalibrationOffsets = null;
+         wristTorqueCalibrationOffsets = null;
+         wristSubtreeMass = null;
+         wristsubtreeCenterOfMassFrames = null;
+         calibrateWristForceSensors = null;
+
+         wrenches = null;
+         wrenchVisualizer = null;
+      }
+   }
+
+   private boolean checkIfWristForceSensorsExist(StateEstimatorParameters stateEstimatorParameters)
+   {
+      SideDependentList<String> wristForceSensorNames = stateEstimatorParameters.getWristForceSensorNames();
+
+      if (wristForceSensorNames == null || wristForceSensorNames.isEmpty())
+      {
+         return false;
+      }
+
+      // Make sure that both sensors actually exist
+      if (inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(RobotSide.LEFT)) == null
+            || inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(RobotSide.RIGHT)) == null)
+      {
+         return false;
+      }
+
+      return true;
+   }
+
+   private boolean checkIfFootForceSensorsExist(StateEstimatorParameters stateEstimatorParameters)
+   {
+      SideDependentList<String> footForceSensorNames = stateEstimatorParameters.getFootForceSensorNames();
+
+      if (footForceSensorNames == null || footForceSensorNames.isEmpty())
+      {
+         return false;
+      }
+
+      // Make sure that both sensors actually exist
+      if (inputForceSensorDataHolder.findForceSensorDefinition(footForceSensorNames.get(RobotSide.LEFT)) == null
+            || inputForceSensorDataHolder.findForceSensorDefinition(footForceSensorNames.get(RobotSide.RIGHT)) == null)
+      {
+         return false;
+      }
+
+      return true;
    }
 
    public void initialize()
@@ -184,16 +258,45 @@ public class ForceSensorStateUpdater
 
    public void updateForceSensorState()
    {
-      if (outputForceSensorDataHolder == null)
-      {
-         if (forceSensorDataHolderToUpdate != null)
-            forceSensorDataHolderToUpdate.set(inputForceSensorDataHolder);
-         return;
-      }
-
       outputForceSensorDataHolder.set(inputForceSensorDataHolder);
       outputForceSensorDataHolderWithGravityCancelled.set(inputForceSensorDataHolder);
 
+      if (hasFootForceSensors)
+         updateFootForceSensorState();
+
+      if (hasWristForceSensors)
+         updateWristForceSensorState();
+
+      if (forceSensorDataHolderToUpdate != null)
+         forceSensorDataHolderToUpdate.set(outputForceSensorDataHolder);
+
+      if (wrenchVisualizer != null)
+         wrenchVisualizer.visualize(wrenches);
+   }
+
+   private void updateFootForceSensorState()
+   {
+      if (calibrateFootForceSensors.getBooleanValue())
+         calibrateFootForceSensors();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ForceSensorDefinition footForceSensorDefinition = footForceSensorDefinitions.get(robotSide);
+         ForceSensorDataReadOnly footForceSensor = inputForceSensorDataHolder.get(footForceSensorDefinition);
+         footForceSensor.packWrench(tempWrench);
+
+         footForceCalibrationOffsets.get(robotSide).getFrameTupleIncludingFrame(tempForce);
+         footTorqueCalibrationOffsets.get(robotSide).getFrameTupleIncludingFrame(tempTorque);
+
+         tempWrench.subLinearPart(tempForce);
+         tempWrench.subAngularPart(tempTorque);
+
+         outputForceSensorDataHolder.setForceSensorValue(footForceSensorDefinition, tempWrench);
+      }
+   }
+
+   private void updateWristForceSensorState()
+   {
       if (requestWristForceSensorCalibrationSubscriber != null && requestWristForceSensorCalibrationSubscriber.checkForNewCalibrationRequest())
          calibrateWristForceSensors.set(true);
 
@@ -206,38 +309,48 @@ public class ForceSensorStateUpdater
          ForceSensorDataReadOnly wristForceSensor = inputForceSensorDataHolder.get(wristForceSensorDefinition);
          ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
          RigidBody measurementLink = wristForceSensorDefinition.getRigidBody();
-         wristForceSensor.packWrench(wristTempWrench);
+         wristForceSensor.packWrench(tempWrench);
 
-         wristForceCalibrationOffsets.get(robotSide).getFrameTupleIncludingFrame(tempWristForce);
-         wristTorqueCalibrationOffsets.get(robotSide).getFrameTupleIncludingFrame(tempWristTorque);
+         wristForceCalibrationOffsets.get(robotSide).getFrameTupleIncludingFrame(tempForce);
+         wristTorqueCalibrationOffsets.get(robotSide).getFrameTupleIncludingFrame(tempTorque);
 
-         wristTempWrench.subLinearPart(tempWristForce);
-         wristTempWrench.subAngularPart(tempWristTorque);
+         tempWrench.subLinearPart(tempForce);
+         tempWrench.subAngularPart(tempTorque);
 
-         outputForceSensorDataHolder.setForceSensorValue(wristForceSensorDefinition, wristTempWrench);
+         outputForceSensorDataHolder.setForceSensorValue(wristForceSensorDefinition, tempWrench);
 
-         wristTempWrench.packLinearPartIncludingFrame(tempWristForce);
-         wristTempWrench.packAngularPartIncludingFrame(tempWristTorque);
+         tempWrench.packLinearPartIncludingFrame(tempForce);
+         tempWrench.packAngularPartIncludingFrame(tempTorque);
 
-         cancelHandWeight(robotSide, wristTempWrench, measurementFrame);
+         cancelHandWeight(robotSide, tempWrench, measurementFrame);
 
-         wristTempWrench.packLinearPartIncludingFrame(tempWristForce);
-         wristTempWrench.packAngularPartIncludingFrame(tempWristTorque);
+         tempWrench.packLinearPartIncludingFrame(tempForce);
+         tempWrench.packAngularPartIncludingFrame(tempTorque);
 
-         wristForcesSubtreeWeightCancelled.get(robotSide).setAndMatchFrame(tempWristForce);
-         wristTorquesSubtreeWeightCancelled.get(robotSide).setAndMatchFrame(tempWristTorque);
+         wristForcesSubtreeWeightCancelled.get(robotSide).setAndMatchFrame(tempForce);
+         wristTorquesSubtreeWeightCancelled.get(robotSide).setAndMatchFrame(tempTorque);
 
          if (wrenches != null)
-            wrenches.get(measurementLink).set(wristTempWrench);
+            wrenches.get(measurementLink).set(tempWrench);
 
-         outputForceSensorDataHolderWithGravityCancelled.setForceSensorValue(wristForceSensorDefinition, wristTempWrench);
+         outputForceSensorDataHolderWithGravityCancelled.setForceSensorValue(wristForceSensorDefinition, tempWrench);
       }
+   }
 
-      if (forceSensorDataHolderToUpdate != null)
-         forceSensorDataHolderToUpdate.set(outputForceSensorDataHolder);
+   private void calibrateFootForceSensors()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ForceSensorDataReadOnly footForceSensor = inputForceSensorDataHolder.get(footForceSensorDefinitions.get(robotSide));
+         footForceSensor.packWrench(tempWrench);
 
-      if (wrenchVisualizer != null)
-         wrenchVisualizer.visualize(wrenches);
+         tempWrench.packLinearPartIncludingFrame(tempForce);
+         tempWrench.packAngularPartIncludingFrame(tempTorque);
+
+         footForceCalibrationOffsets.get(robotSide).setAndMatchFrame(tempForce);
+         footTorqueCalibrationOffsets.get(robotSide).setAndMatchFrame(tempTorque);
+      }
+      calibrateFootForceSensors.set(false);
    }
 
    private void calibrateWristForceSensors()
@@ -247,26 +360,26 @@ public class ForceSensorStateUpdater
          ForceSensorDataReadOnly wristForceSensor = inputForceSensorDataHolder.get(wristForceSensorDefinitions.get(robotSide));
          ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
 
-         wristForceSensor.packWrench(wristTempWrench);
-         cancelHandWeight(robotSide, wristTempWrench, measurementFrame);
+         wristForceSensor.packWrench(tempWrench);
+         cancelHandWeight(robotSide, tempWrench, measurementFrame);
 
-         wristTempWrench.packLinearPartIncludingFrame(tempWristForce);
-         wristTempWrench.packAngularPartIncludingFrame(tempWristTorque);
+         tempWrench.packLinearPartIncludingFrame(tempForce);
+         tempWrench.packAngularPartIncludingFrame(tempTorque);
 
-         wristForceCalibrationOffsets.get(robotSide).setAndMatchFrame(tempWristForce);
-         wristTorqueCalibrationOffsets.get(robotSide).setAndMatchFrame(tempWristTorque);
+         wristForceCalibrationOffsets.get(robotSide).setAndMatchFrame(tempForce);
+         wristTorqueCalibrationOffsets.get(robotSide).setAndMatchFrame(tempTorque);
       }
       calibrateWristForceSensors.set(false);
    }
 
    private void cancelHandWeight(RobotSide robotSide, Wrench wrenchToSubstractHandWeightTo, ReferenceFrame measurementFrame)
    {
-      CenterOfMassReferenceFrame handCoMFrame = subtreeCenterOfMassFrames.get(robotSide);
+      CenterOfMassReferenceFrame handCoMFrame = wristsubtreeCenterOfMassFrames.get(robotSide);
       handCoMFrame.update();
-      tempWristForce.setIncludingFrame(worldFrame, 0.0, 0.0, -subtreeMass.get(robotSide).getDoubleValue() * gravity);
-      tempWristForce.changeFrame(handCoMFrame);
+      tempForce.setIncludingFrame(worldFrame, 0.0, 0.0, -wristSubtreeMass.get(robotSide).getDoubleValue() * gravity);
+      tempForce.changeFrame(handCoMFrame);
       wristWrenchDueToGravity.setToZero(measurementFrame, handCoMFrame);
-      wristWrenchDueToGravity.setLinearPart(tempWristForce);
+      wristWrenchDueToGravity.setLinearPart(tempForce);
       wristWrenchDueToGravity.changeFrame(measurementFrame);
 
       wrenchToSubstractHandWeightTo.sub(wristWrenchDueToGravity);

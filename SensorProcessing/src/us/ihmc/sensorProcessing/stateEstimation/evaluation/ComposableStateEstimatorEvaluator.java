@@ -315,6 +315,20 @@ public class ComposableStateEstimatorEvaluator
             // TODO Auto-generated method stub
             return false;
          }
+
+         @Override
+         public boolean requestFootForceSensorCalibrationAtStart()
+         {
+            // TODO Auto-generated method stub
+            return false;
+         }
+
+         @Override
+         public SideDependentList<String> getFootForceSensorNames()
+         {
+            // TODO Auto-generated method stub
+            return null;
+         }
       };
 
       JointAndIMUSensorMap sensorMap = null; // simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader().getJointAndIMUSensorMap();
