@@ -41,6 +41,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    private final double defaultJointStiffness;
    private final HashMap<String, Double> jointSpecificStiffness = new HashMap<String, Double>();
 
+   private final SideDependentList<String> footForceSensorNames;
    private final SideDependentList<String> wristForceSensorNames;
 
    public ValkyrieStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT, ValkyrieSensorInformation sensorInformation, ValkyrieJointMap jointMap)
@@ -51,6 +52,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       
       this.sensorInformation = sensorInformation;
       this.jointMap = jointMap;
+      this.footForceSensorNames = sensorInformation.getFeetForceSensorNames();
       this.wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       jointVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
@@ -311,5 +313,17 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    public SideDependentList<String> getWristForceSensorNames()
    {
       return wristForceSensorNames;
+   }
+
+   @Override
+   public boolean requestFootForceSensorCalibrationAtStart()
+   {
+      return false;
+   }
+
+   @Override
+   public SideDependentList<String> getFootForceSensorNames()
+   {
+      return footForceSensorNames;
    }
 }
