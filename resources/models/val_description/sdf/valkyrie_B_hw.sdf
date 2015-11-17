@@ -1,5 +1,5 @@
 <sdf version='1.5'>
-  <model name='valkyrie_B_hw'>
+  <model name='valkyrie'>
     <link name='pelvis'>
       <pose>0 0 0 0 -0 0</pose>
       <inertial>

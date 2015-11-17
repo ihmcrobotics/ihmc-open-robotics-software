@@ -149,8 +149,8 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    private static final String rightTrunkIMUSensor = "torso_rightTorsoIMU";
    private static final String leftTrunkIMUSensor = "torso_leftTorsoIMU";
-   private static final String leftPelvisIMUSensor = "pelvis_leftPelvisIMU";
-   private static final String rightPelvisIMUSensor = "pelvis_rightPelvisIMU";
+   private static final String rearPelvisIMUSensor = "pelvis_pelvisRearImu";
+   private static final String middlePelvisIMUSensor = "pelvis_pelvisMiddleImu";
    private static final RigidBodyTransform transformFromHeadToCamera = new RigidBodyTransform();
    static
    {
@@ -161,15 +161,15 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final HashMap<String, Integer> imuUSBSerialIds = new HashMap<>();
    static
    {
-      imuUSBSerialIds.put(leftPelvisIMUSensor, 623347094);
-      imuUSBSerialIds.put(rightPelvisIMUSensor, 623347092);
+      imuUSBSerialIds.put(rearPelvisIMUSensor, 623347094);
+      imuUSBSerialIds.put(middlePelvisIMUSensor, 623347092);
       //imuUSBSerialIds.put(leftTrunkIMUSensor, 622730569);
       //imuUSBSerialIds.put(rightTrunkIMUSensor, 622709817);
    }
    
    // Use this until sim can handle multiple IMUs
 //    public static final String[] imuSensorsToUse = {leftPelvisIMUSensor, rightPelvisIMUSensor};
-   public static final String[] imuSensorsToUse = {leftPelvisIMUSensor};
+   public static final String[] imuSensorsToUse = {rearPelvisIMUSensor};
 //   public static final String[] imuSensorsToUse = {rightPelvisIMUSensor};
    
    public ValkyrieSensorInformation(DRCRobotModel.RobotTarget target)
@@ -233,7 +233,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    @Override
    public String getPrimaryBodyImu()
    {
-      return leftPelvisIMUSensor;
+      return rearPelvisIMUSensor;
    }
    
    @Override
@@ -328,14 +328,14 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       return leftTrunkIMUSensor;
    }
 
-   public String getLeftPelvisIMUSensor()
+   public String getRearPelvisIMUSensor()
    {
-      return leftPelvisIMUSensor;
+      return rearPelvisIMUSensor;
    }
 
-   public String getRightPelvisIMUSensor()
+   public String getMiddlePelvisIMUSensor()
    {
-      return rightPelvisIMUSensor;
+      return middlePelvisIMUSensor;
    }
 
    @Override
