@@ -1,9 +1,0 @@
-<robot xmlns:xacro="http://ros.org/wiki/xacro" name="valkyrie_B_no_hands_hw">
-
-    <xacro:property name="mesh_root" value="package://val_description/model/meshes"/>
-    <xacro:include filename="$(find val_description)/model/robots/common/xacro/generic_models.xacro" />
-    <xacro:include filename="$(find val_description)/model/robots/common/xacro/common_bodies.xacro" />
-    <xacro:include filename="$(find val_description)/model/robots/common/xacro/valkyrie_no_hands_base_hw.xacro"/>
-    <xacro:include filename="$(find val_description)/common/xacro/serial_numbers/valkyrie_B_serials.xacro"/>
-
-</robot>
