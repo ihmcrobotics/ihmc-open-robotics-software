@@ -163,8 +163,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       jointStateUpdater.initialize();
       pelvisRotationalStateUpdater.initialize();
-      pelvisLinearStateUpdater.initialize();
       forceSensorStateUpdater.initialize();
+      pelvisLinearStateUpdater.initialize();
    }
 
    @Override
@@ -186,17 +186,18 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       {
          case FROZEN:
             pelvisRotationalStateUpdater.updateForFrozenState();
+            forceSensorStateUpdater.updateForceSensorState();
             pelvisLinearStateUpdater.updateForFrozenState();
             break;
 
          case NORMAL:
          default:
             pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
+            forceSensorStateUpdater.updateForceSensorState();
             pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
             break;
       }
 
-      forceSensorStateUpdater.updateForceSensorState();
 
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {

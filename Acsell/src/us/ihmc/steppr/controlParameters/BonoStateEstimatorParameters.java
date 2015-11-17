@@ -284,4 +284,17 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    {
       return null;
    }
+
+   @Override
+   public boolean requestFootForceSensorCalibrationAtStart()
+   {
+      return false;
+   }
+
+
+   @Override
+   public SideDependentList<String> getFootForceSensorNames()
+   {
+      return null;
+   }
 }
