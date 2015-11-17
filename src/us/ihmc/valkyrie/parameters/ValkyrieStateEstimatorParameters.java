@@ -269,7 +269,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public boolean useIMUsForSpineJointVelocityEstimation()
    {
-      return true;
+      return false;
    }
 
    @Override
@@ -285,7 +285,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
    {
-      return new ImmutablePair<String, String>(sensorInformation.getLeftPelvisIMUSensor(), sensorInformation.getLeftTrunkIMUSensor());
+      return new ImmutablePair<String, String>(sensorInformation.getRearPelvisIMUSensor(), sensorInformation.getLeftTrunkIMUSensor());
    }
    
    @Override
