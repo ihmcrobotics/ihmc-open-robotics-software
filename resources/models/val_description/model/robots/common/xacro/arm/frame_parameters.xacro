@@ -1,0 +1,60 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/arm/dh_parameters">
+  
+  <xacro:property name="ShoulderPitchFrameOrigin_X" value="-0.0316"/>
+  <xacro:property name="ShoulderPitchFrameOrigin_Y" value="0.0"/>
+  <xacro:property name="ShoulderPitchFrameOrigin_Z" value="0.2984"/>
+
+  <xacro:property name="ShoulderPitchFrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="ShoulderPitchFrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="ShoulderPitchFrameOrientation_Yaw" value="0.0"/>
+
+  <xacro:property name="ShoulderRollFrameOrigin_X" value="0.0"/>
+  <xacro:property name="ShoulderRollFrameOrigin_Y" value="${reflect * 0.2499}"/>
+  <xacro:property name="ShoulderRollFrameOrigin_Z" value="0.0"/>
+
+  <xacro:property name="ShoulderRollFrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="ShoulderRollFrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="ShoulderRollFrameOrientation_Yaw" value="0.0"/>
+
+  <xacro:property name="ShoulderYawFrameOrigin_X" value="0.0"/>
+  <xacro:property name="ShoulderYawFrameOrigin_Y" value="0.0"/>
+  <xacro:property name="ShoulderYawFrameOrigin_Z" value="0.0"/>
+
+  <xacro:property name="ShoulderYawFrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="ShoulderYawFrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="ShoulderYawFrameOrientation_Yaw" value="0.0"/>
+
+  <xacro:property name="ElbowPitchFrameOrigin_X" value="0.0254"/>
+  <xacro:property name="ElbowPitchFrameOrigin_Y" value="${reflect * 0.33}"/>
+  <xacro:property name="ElbowPitchFrameOrigin_Z" value="0.0"/>
+
+  <xacro:property name="ElbowPitchFrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="ElbowPitchFrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="ElbowPitchFrameOrientation_Yaw" value="0.0"/>
+
+  <xacro:property name="ForearmYawFrameOrigin_X" value="-0.0254"/>
+  <xacro:property name="ForearmYawFrameOrigin_Y" value="0"/>
+  <xacro:property name="ForearmYawFrameOrigin_Z" value="0"/>
+
+  <xacro:property name="ForearmYawFrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="ForearmYawFrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="ForearmYawFrameOrientation_Yaw" value="0.0"/>
+
+  <xacro:property name="WristRollFrameOrigin_X" value="0.0"/>
+  <xacro:property name="WristRollFrameOrigin_Y" value="${reflect * 0.2871}"/>
+  <xacro:property name="WristRollFrameOrigin_Z" value="0.0"/>
+
+  <xacro:property name="WristRollFrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="WristRollFrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="WristRollFrameOrientation_Yaw" value="0.0"/>
+
+  <xacro:property name="WristPitchFrameOrigin_X" value="0.0"/>
+  <xacro:property name="WristPitchFrameOrigin_Y" value="0.0"/>
+  <xacro:property name="WristPitchFrameOrigin_Z" value="0.0"/>
+
+  <xacro:property name="WristPitchFrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="WristPitchFrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="WristPitchFrameOrientation_Yaw" value="0.0"/>
+
+</robot>

@@ -1,0 +1,39 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="valkyrie">
+
+
+    <gazebo>
+      <plugin filename="libval_gazebo.so" name="SharedMemorySimInterfacePlugin">
+      <robotNamespace>/val</robotNamespace>
+      </plugin>
+    </gazebo>
+
+    <xacro:make_pelvis />
+    <xacro:make_waist waist_root_link="${Pelvis_Link_Name}" />
+    <xacro:make_head head_root_link="${TorsoRollLinkName}" />
+    <xacro:make_arm prefix="right" reflect="-1" arm_root_link="${TorsoRollLinkName}" />
+    <xacro:make_thumb prefix="right" reflect="-1" thumb_root_link="rightPalm"/>
+    <xacro:make_index_finger prefix="right" reflect="-1" index_finger_root_link="rightPalm"/>
+    <xacro:make_middle_finger prefix="right" reflect="-1" middle_finger_root_link="rightPalm"/>
+    <xacro:make_pinky_finger prefix="right" reflect="-1" pinky_finger_root_link="rightPalm"/>
+    <xacro:make_arm prefix="left" reflect="1" arm_root_link="${TorsoRollLinkName}" />
+    <xacro:make_thumb prefix="left" reflect="1" thumb_root_link="leftPalm"/>
+    <xacro:make_index_finger prefix="left" reflect="1" index_finger_root_link="leftPalm"/>
+    <xacro:make_middle_finger prefix="left" reflect="1" middle_finger_root_link="leftPalm"/>
+    <xacro:make_pinky_finger prefix="left" reflect="1" pinky_finger_root_link="leftPalm"/>
+    <xacro:make_leg prefix="right" reflect="-1" leg_root_link="${Pelvis_Link_Name}"/>
+    <xacro:make_leg prefix="left" reflect="1" leg_root_link="${Pelvis_Link_Name}"/>
+    
+    <xacro:v1_pelvis_sensors />
+    <xacro:v1_leg_sensors prefix="left" reflect="1" ATI_serial_number="${sim_ATI_serial}" ATI_node="${left_foot_Sim_ATI_node}"/>
+    <xacro:v1_leg_sensors prefix="right" reflect="-1" ATI_serial_number="${sim_ATI_serial}" ATI_node="${right_foot_Sim_ATI_node}"/>
+    <xacro:include_multisense_sim />
+    <xacro:v1_trunk_sensors/>
+
+    <xacro:waist_transmissions_sim />
+    <xacro:leg_transmissions_sim prefix="left"/>
+    <xacro:leg_transmissions_sim prefix="right"/>
+    <xacro:arm_transmissions_sim prefix="left"/>
+    <xacro:arm_transmissions_sim prefix="right"/>
+    <xacro:neck_transmissions_sim />
+
+</robot>

@@ -1,0 +1,10 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="valkyrie_sim">
+
+    <xacro:property name="mesh_root" value="package://val_description/model/meshes"/>
+    <xacro:include filename="$(find val_description)/model/robots/common/xacro/generic_models.xacro" />
+    <xacro:include filename="$(find val_description)/model/robots/common/xacro/common_bodies.xacro" />
+    <xacro:include filename="$(find val_description)/model/robots/common/xacro/valkyrie_base_sim.xacro"/>
+    <xacro:include filename="$(find val_description)/model/urdf/multisense_sl.urdf" />
+    <xacro:include filename="$(find val_description)/common/xacro/serial_numbers/valkyrie_A_serials.xacro"/>
+
+</robot>
