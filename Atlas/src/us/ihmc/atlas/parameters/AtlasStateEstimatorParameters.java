@@ -38,6 +38,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    private final double defaultJointStiffness;
    private final HashMap<String, Double> jointSpecificStiffness = new HashMap<>();
 
+   private final SideDependentList<String> footForceSensorNames;
    private final SideDependentList<String> wristForceSensorNames;
 
    private final DRCRobotJointMap jointMap;
@@ -50,6 +51,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       this.estimatorDT = estimatorDT;
 
       wristForceSensorNames = sensorInformation.getWristForceSensorNames();
+      footForceSensorNames = sensorInformation.getFeetForceSensorNames();
 
       defaultFilterBreakFrequency = runningOnRealRobot ? 16.0 : Double.POSITIVE_INFINITY;
       defaultFilterBreakFrequencyArm = runningOnRealRobot ? 40.0 : Double.POSITIVE_INFINITY;
@@ -279,6 +281,18 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
+   public double getContactThresholdHeight()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public FootSwitchType getFootSwitchType()
+   {
+      return FootSwitchType.WrenchBased;
+   }
+
+   @Override
    public double getFootSwitchCoPThresholdFraction()
    {
       return 0.02;
@@ -312,20 +326,20 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
-   public double getContactThresholdHeight()
-   {
-      return 0.05;
-   }
-
-   @Override
    public boolean requestWristForceSensorCalibrationAtStart()
    {
       return runningOnRealRobot;
    }
 
    @Override
-   public FootSwitchType getFootSwitchType()
+   public SideDependentList<String> getFootForceSensorNames()
    {
-      return FootSwitchType.WrenchBased;
+      return footForceSensorNames;
+   }
+
+   @Override
+   public boolean requestFootForceSensorCalibrationAtStart()
+   {
+      return false;
    }
 }
