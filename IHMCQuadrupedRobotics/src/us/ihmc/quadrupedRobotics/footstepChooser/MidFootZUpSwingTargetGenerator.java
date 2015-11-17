@@ -32,7 +32,8 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final DoubleYoVariable minimumVelocityForFullSkew = new DoubleYoVariable("minimumVelocityForFullSkew", registry);
    private final DoubleYoVariable strideLength = new DoubleYoVariable("strideLength", registry);
    private final DoubleYoVariable stanceWidth = new DoubleYoVariable("stanceWidth", registry);
-   private final DoubleYoVariable maxSkew = new DoubleYoVariable("maxSkew", registry);
+   private final DoubleYoVariable maxForwardSkew = new DoubleYoVariable("maxForwardSkew", registry);
+   private final DoubleYoVariable maxLateralSkew = new DoubleYoVariable("maxLateralSkew", registry);
    private final DoubleYoVariable maxYawPerStep = new DoubleYoVariable("maxYawPerStep", registry);
    private final DoubleYoVariable minimumDistanceFromSameSideFoot = new DoubleYoVariable("minimumDistanceFromSameSideFoot", registry);
    private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
@@ -56,7 +57,8 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
          minimumVelocityForFullSkew.set(footStepParameters.getMinimumVelocityForFullSkew());
          strideLength.set(footStepParameters.getStanceLength());
          stanceWidth.set(footStepParameters.getStanceWidth());
-         maxSkew.set(footStepParameters.getMaxSkew());
+         maxForwardSkew.set(footStepParameters.getMaxForwardSkew());
+         maxLateralSkew.set(footStepParameters.getMaxLateralSkew());
          maxYawPerStep.set(footStepParameters.getMaxYawPerStep());
       }
       else
@@ -65,7 +67,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
          minimumVelocityForFullSkew.set(MINIMUM_VELOCITY_FOR_FULL_SKEW);
          strideLength.set(DEFAULT_STRIDE_LENGTH);
          stanceWidth.set(DEFAULT_STANCE_WIDTH);
-         maxSkew.set(DEFAULT_MAX_SKEW);
+         maxForwardSkew.set(DEFAULT_MAX_SKEW);
          maxYawPerStep.set(DEFAULT_MAX_YAW);
       }
    }
@@ -169,7 +171,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       //handle forward backward placement
       desiredSwingFootPositionFromHalfStride.setToZero(oppositeSideZUpFrame);
       double halfStrideLength = 0.5 * strideLength.getDoubleValue();
-      double clippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStrideLength);
+      double clippedSkew = MathTools.clipToMinMax(maxForwardSkew.getDoubleValue(), 0.0, halfStrideLength);
       double clippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getX() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
       double amountToSkew = clippedSkewScalar * clippedSkew;
       amountToSkew = MathTools.clipToMinMax(amountToSkew, maxStepDistance);
@@ -178,10 +180,10 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 
       //handle left right placement
       double halfStanceWidth = 0.5 * stanceWidth.getDoubleValue();
-      double lateralClippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStanceWidth);
+      double lateralClippedSkew = MathTools.clipToMinMax(maxLateralSkew.getDoubleValue(), 0.0, halfStanceWidth);
       double lateralClippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getY() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
       double lateralAmountToSkew = lateralClippedSkewScalar * lateralClippedSkew;
-      lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, 0.2 * maxStepDistance);
+      lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, maxStepDistance);
       double newX = swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) + lateralAmountToSkew;
       desiredSwingFootPositionFromHalfStride.setX(newX);
       
@@ -220,7 +222,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       
       desiredSwingFootPositionFromOppositeSideFoot.setToZero(oppositeSideZUpFrame);
       double halfStrideLength = 0.5 * strideLength.getDoubleValue();
-      double clippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStrideLength);
+      double clippedSkew = MathTools.clipToMinMax(maxForwardSkew.getDoubleValue(), 0.0, halfStrideLength);
       double clippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getX() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
       double amountToSkew = clippedSkewScalar * clippedSkew;
       amountToSkew = MathTools.clipToMinMax(amountToSkew, maxStepDistance);
@@ -238,10 +240,10 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       
       //handle left right placement
       double halfStanceWidth = 0.5 * stanceWidth.getDoubleValue();
-      double lateralClippedSkew = MathTools.clipToMinMax(maxSkew.getDoubleValue(), 0.0, halfStanceWidth);
+      double lateralClippedSkew = MathTools.clipToMinMax(maxLateralSkew.getDoubleValue(), 0.0, halfStanceWidth);
       double lateralClippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getY() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
       double lateralAmountToSkew = lateralClippedSkewScalar * lateralClippedSkew;
-      lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, 0.2 * maxStepDistance);
+      lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, maxStepDistance);
       
       double newX = swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) + lateralAmountToSkew;
       desiredSwingFootPositionFromOppositeSideFoot.setX(newX);
