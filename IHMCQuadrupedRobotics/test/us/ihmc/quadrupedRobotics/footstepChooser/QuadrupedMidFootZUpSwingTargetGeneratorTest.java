@@ -416,11 +416,11 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
          hipPitchFrame.corruptTransformToParentPreMultiply(preCorruptionTransform);
 
          double maxStepLengthForward = Math.sqrt(Math.pow(referenceFrames.getLegLength(robotQuadrant), 2) - Math.pow(robotHeight, 2));
-         double amountToSkew = Math.min(quadrupedControllerParameters.getMaxSkew(), quadrupedControllerParameters.getStanceLength() / 2.0);
+         double amountToSkew = Math.min(quadrupedControllerParameters.getMaxForwardSkew(), quadrupedControllerParameters.getStanceLength() / 2.0);
          maxStepLengthForward = 2.0 * Math.min(maxStepLengthForward, amountToSkew);
          
          double maxStepLengthSideways = Math.sqrt(Math.pow(referenceFrames.getLegLength(robotQuadrant), 2) - Math.pow(robotHeight, 2));
-         amountToSkew = Math.min(quadrupedControllerParameters.getMaxSkew(), quadrupedControllerParameters.getStanceWidth() / 2.0);
+         amountToSkew = Math.min(quadrupedControllerParameters.getMaxLateralSkew(), quadrupedControllerParameters.getStanceWidth() / 2.0);
          maxStepLengthSideways= 2.0 * Math.min(maxStepLengthSideways, amountToSkew);
          
          maxStepLengthsForward.put(robotQuadrant, maxStepLengthForward);
