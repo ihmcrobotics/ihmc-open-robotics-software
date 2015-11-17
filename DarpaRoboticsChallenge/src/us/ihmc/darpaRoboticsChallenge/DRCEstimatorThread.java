@@ -313,13 +313,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(estimatorFullRobotModel.getElevator()) * gravityMagnitude;
 
       SideDependentList<FootSwitchInterface> footSwitchesForEstimator = new SideDependentList<>();
-      ForceSensorDataHolderReadOnly forceSensorDataHolder = sensorOutputMapReadOnly.getForceSensorProcessedOutputs();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
          String footContactSensorName = sensorInformation.getFeetContactSensorNames().get(robotSide);
-         ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolder.getByName(footForceSensorName);
+         ForceSensorDataReadOnly footForceSensorForEstimator = estimatorForceSensorDataHolderToUpdate.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
          //         double footSwitchCoPThresholdFraction = 0.01;
