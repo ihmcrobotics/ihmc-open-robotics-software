@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/pinky_finger/mass_parameters">
+  
+  <xacro:property name="PinkyPitch1LinkMass" value="0.02" />
+  <xacro:property name="PinkyFingerPitch1ComPosition" value="0 ${reflect*0.02} 0" />
+  <xacro:property name="PinkyPitch1LinkInertia_IXX" value="0.000005148" />
+  <xacro:property name="PinkyPitch1LinkInertia_IXY" value="${reflect*0.000000042}" />
+  <xacro:property name="PinkyPitch1LinkInertia_IXZ" value="${reflect*0.000000011}" />
+  <xacro:property name="PinkyPitch1LinkInertia_IYY" value="0.000001322" />
+  <xacro:property name="PinkyPitch1LinkInertia_IYZ" value="-0.000000004" />
+  <xacro:property name="PinkyPitch1LinkInertia_IZZ" value="0.000004592" />
+
+  <xacro:property name="PinkyPitch2LinkMass" value="0.011" />
+  <xacro:property name="PinkyFingerPitch2ComPosition" value="0 ${reflect*0.013} 0" />
+  <xacro:property name="PinkyPitch2LinkInertia_IXX" value="0.000001970" />
+  <xacro:property name="PinkyPitch2LinkInertia_IXY" value="${reflect*-0.000000034}" />
+  <xacro:property name="PinkyPitch2LinkInertia_IXZ" value="${reflect*0.000000011}" />
+  <xacro:property name="PinkyPitch2LinkInertia_IYY" value="0.000000554" />
+  <xacro:property name="PinkyPitch2LinkInertia_IYZ" value="-0.000000078" />
+  <xacro:property name="PinkyPitch2LinkInertia_IZZ" value="0.000002272" />
+
+  <xacro:property name="PinkyPitch3LinkMass" value="0.006" />
+  <xacro:property name="PinkyFingerPitch3ComPosition" value="0 ${reflect*0.01} 0" />
+  <xacro:property name="PinkyPitch3LinkInertia_IXX" value="0.000000396" />
+  <xacro:property name="PinkyPitch3LinkInertia_IXY" value="${reflect*0.000000009}" />
+  <xacro:property name="PinkyPitch3LinkInertia_IXZ" value="${reflect*0.000000001}" />
+  <xacro:property name="PinkyPitch3LinkInertia_IYY" value="0.000000160" />
+  <xacro:property name="PinkyPitch3LinkInertia_IYZ" value="0.000000016" />
+  <xacro:property name="PinkyPitch3LinkInertia_IZZ" value="0.000000303" />
+  
+</robot>

@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/head/mass_parameters">
+  
+  <xacro:property name="LowerNeckPitchLinkMass" value="1.05" />
+  <xacro:property name="LowerNeckPitchLinkComPosition" value="-0.020000 0.000000  0.040000" />
+  <xacro:property name="LowerNeckPitchLinkInertia_IXX" value="0.001470716" />
+  <xacro:property name="LowerNeckPitchLinkInertia_IXY" value="-0.000126021" />
+  <xacro:property name="LowerNeckPitchLinkInertia_IXZ" value="0.000632521" />
+  <xacro:property name="LowerNeckPitchLinkInertia_IYY" value="0.001851919" />
+  <xacro:property name="LowerNeckPitchLinkInertia_IYZ" value="0.000243012" />
+  <xacro:property name="LowerNeckPitchLinkInertia_IZZ" value="0.000832117" />
+
+  <xacro:property name="NeckYawLinkMass" value="1.4" />
+  <xacro:property name="NeckYawLinkComPosition" value="-0.030000  -0.010000 0.150000" />
+  <xacro:property name="NeckYawLinkInertia_IXX" value="0.001997698" />
+  <xacro:property name="NeckYawLinkInertia_IXY" value="-0.000180062" />
+  <xacro:property name="NeckYawLinkInertia_IXZ" value="0.000723677" />
+  <xacro:property name="NeckYawLinkInertia_IYY" value="0.002919928" />
+  <xacro:property name="NeckYawLinkInertia_IYZ" value="0.000246467" />
+  <xacro:property name="NeckYawLinkInertia_IZZ" value="0.002119751" />
+
+  <xacro:property name="UpperNeckPitchLinkMass" value="3.89" />
+  <xacro:property name="UpperNeckPitchLinkComPosition" value="0.100912 0.005783 0.034787" />
+  <xacro:property name="UpperNeckPitchLinkInertia_IXX" value="0.039847525" />
+  <xacro:property name="UpperNeckPitchLinkInertia_IXY" value="-0.000470418" />
+  <xacro:property name="UpperNeckPitchLinkInertia_IXZ" value="-0.002829842" />
+  <xacro:property name="UpperNeckPitchLinkInertia_IYY" value="0.041418564" />
+  <xacro:property name="UpperNeckPitchLinkInertia_IYZ" value="-0.000782564" />
+  <xacro:property name="UpperNeckPitchLinkInertia_IZZ" value="0.036841236" />
+
+  <xacro:property name="HokuyoLinkMass" value="0.057664"/>
+  <xacro:property name="HokuyoLinkComPosition" value="0.14793 0.0 0.01"/>
+
+</robot>

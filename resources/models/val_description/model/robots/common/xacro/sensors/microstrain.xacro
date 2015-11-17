@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="microstrain">
+
+  <xacro:macro name="microstrain_sensor" params="sensorName parentLink origin_xyz origin_rpy">
+    
+    <xacro:massless_virtual_link name="${sensorName}_Frame"
+                    origin_rpy="0 0 0"
+                    origin_xyz="0 0 0"/>
+
+    <xacro:fixed_joint jointName="${sensorName}_Offset"
+                       parent="${parentLink}" child="${sensorName}_Frame"
+                       origin_rpy="${origin_rpy}"
+                       origin_xyz="${origin_xyz}"/>
+
+    <gazebo>
+      <plugin filename="libgazebo_ros_imu.so" name="imu_plugin_ros">
+        <alwaysOn>true</alwaysOn>
+        <bodyName>${sensorName}_Frame</bodyName>
+        <topicName>${sensorName}/imu</topicName>
+        <serviceName>${sensorName}/imu_service</serviceName>
+        <gaussianNoise>0.0</gaussianNoise>
+        <updateRate>1000.0</updateRate> 
+      </plugin>
+    </gazebo>
+
+    <gazebo reference="${sensorName}_Frame">
+      <sensor name="${sensorName}" type="imu">
+        <always_on>true</always_on>
+        <pose>0 0 0 0 0 0 </pose>
+        <imu>
+           <noise>
+               <type>gaussian</type>
+               <rate>
+                   <mean>0</mean>
+                   <stddev>0.0002</stddev>
+                   <bias_mean>7.5e-06</bias_mean>
+                   <bias_stddev>8e-07</bias_stddev>
+               </rate>
+               <accel>
+                   <mean>0</mean>
+                   <stddev>0.017</stddev>
+                   <bias_mean>0.1</bias_mean>
+                   <bias_stddev>0.001</bias_stddev>
+               </accel>
+           </noise>
+        </imu> 
+        </sensor>
+    </gazebo>
+
+  </xacro:macro>
+  
+</robot>

@@ -1,0 +1,26 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="Pelvis">
+    <xacro:property name="Pelvis_Link_Name" value="pelvis" />
+
+    <xacro:macro name="make_pelvis">
+        <xacro:standard_link name="${Pelvis_Link_Name}"
+                        mass="8.22"
+                        origin_xyz="-0.00532 -0.003512 -0.0036"
+                        ixx="0.11866378" ixy="-0.000143482" ixz="0.003271293"
+                        iyy="0.097963425" iyz="0.002159545" izz="0.083854638"
+                        origin_rpy="0 0 0"
+                        visual_mesh="${mesh_root}/pelvis/pelvis.dae"
+                        collision_mesh="${mesh_root}/pelvis/pelvis.dae"/>
+    </xacro:macro>
+
+    <xacro:macro name="v1_pelvis_sensors">
+        <xacro:microstrain_sensor sensorName="pelvisRearImu"
+                                  parentLink="${Pelvis_Link_Name}"
+                                  origin_xyz="-0.075844901 0.0 -0.111056426"
+                                  origin_rpy="-3.14159 0.476467 -3.14159" />
+
+        <xacro:microstrain_sensor sensorName="pelvisMiddleImu"
+                                  parentLink="${Pelvis_Link_Name}"
+                                  origin_xyz="0.0 0.0 -0.108184035"
+                                  origin_rpy="3.14159 0.0 0.0" />
+    </xacro:macro>
+</robot>

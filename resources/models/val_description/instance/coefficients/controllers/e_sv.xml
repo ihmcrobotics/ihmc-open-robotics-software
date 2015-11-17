@@ -1,0 +1,41 @@
+<CoeffData>
+  <Properties>
+    <CalibrationDate/>
+    <FileGenDate date="2013-10-25" time="21:34:25.472638"/>
+  </Properties>
+  <Coeffs>
+    <Coeff id="Commutation_Select" value="2.0"/>
+    <Coeff id="DeadTimeCompensation" value="0.02"/>
+    <Coeff id="ForceControl_Current2MotorTorque" value="0.0375"/>
+    <Coeff id="ForceControl_FFd_fc_Hz" value="25.0"/>
+    <Coeff id="ForceControl_Kd" value="0.0006"/>
+    <Coeff id="ForceControl_Kd_fc_Hz" value="50.0"/>
+    <Coeff id="ForceControl_Kp" value="0.08"/>
+    <Coeff id="ForceControl_PD_damp" value="0.95"/>
+    <Coeff id="ForceControl_ParallelDamping" value="0.0"/>
+    <Coeff id="ForceControl_SensorFeedback" value="1.0"/>
+    <Coeff id="ForceControl_autoKd" value="0.0"/>
+    <Coeff id="ForceControl_b" value="25000.0"/>
+    <Coeff id="ForceControl_dobWindupLimit_N" value="1000.0"/>
+    <Coeff id="ForceControl_dob_fc_Hz" value="40.0"/>
+    <Coeff id="ForceControl_enableDOB" value="0.0"/>
+    <Coeff id="ForceControl_enableDynFF" value="0.0"/>
+    <Coeff id="ForceControl_enableFF" value="1.0"/>
+    <Coeff id="ForceControl_enablePID" value="1.0"/>
+    <Coeff id="ForceControl_m" value="400.0"/>
+    <Coeff id="JointVelFilter_fc_Hz" value="100.0"/>
+    <Coeff id="LinearVelFilter_fc_Hz" value="50.0"/>
+    <Coeff id="MotorAccFilter_fc_Hz" value="50.0"/>
+    <Coeff id="MotorVelFilter_fc_Hz" value="800.0"/>
+    <Coeff id="PositionControl_Kd" value="20.0"/>
+    <Coeff id="PositionControl_Kd_fc_Hz" value="200.0"/>
+    <Coeff id="PositionControl_Ki" value="0.0"/>
+    <Coeff id="PositionControl_Kp" value="20000.0"/>
+    <Coeff id="PositionControl_MotorTorqueDirection" value="-1.0"/>
+    <Coeff id="PositionControl_SensorFeedback" value="4.0"/>
+    <Coeff id="SpaceVector_CurrentToSV" value="1.0"/>
+    <Coeff id="SpaceVector_MaxNormVoltage" value="0.666"/>
+    <Coeff id="EffortControl_Alpha" value="0.8"/>
+    <Coeff id="EffortControl_AlphaDot" value="0.8"/>
+  </Coeffs>
+</CoeffData>

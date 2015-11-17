@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/arm/joint_limits">
+  
+  <xacro:property name="ShoulderPitchTorqueLimit" value="190" />
+  <xacro:property name="ShoulderRollTorqueLimit" value="190" />
+  <xacro:property name="ShoulderYawTorqueLimit" value="65" />
+  <xacro:property name="ElbowPitchTorqueLimit" value="65" />
+  <xacro:property name="ForearmYawTorqueLimit" value="26" />
+  <xacro:property name="WristRollTorqueLimit" value="14" />
+  <xacro:property name="WristPitchTorqueLimit" value="14" />
+
+  <xacro:property name="ShoulderPitchPositionLimit_Lower" value="-2.85" />
+  <xacro:property name="ShoulderRollPositionLimit_Lower" value="-1.519" />
+  <xacro:property name="ShoulderYawPositionLimit_Lower" value="-3.1" />
+  <xacro:property name="ElbowPitchPositionLimit_Lower" value="-2.174" />
+  <xacro:property name="ForearmYawPositionLimit_Lower" value="-2.019" />
+  <xacro:property name="WristRollPositionLimit_Lower" value="-0.62" />
+  <xacro:property name="WristPitchPositionLimit_Lower" value="-0.36" />
+
+  <xacro:property name="ShoulderPitchPositionLimit_Upper" value="2.0" />
+  <xacro:property name="ShoulderRollPositionLimit_Upper" value="1.266" />
+  <xacro:property name="ShoulderYawPositionLimit_Upper" value="2.18" />
+  <xacro:property name="ElbowPitchPositionLimit_Upper" value="0.12" />
+  <xacro:property name="ForearmYawPositionLimit_Upper" value="3.14" />
+  <xacro:property name="WristRollPositionLimit_Upper" value="0.625" />
+  <xacro:property name="WristPitchPositionLimit_Upper" value="0.49" />
+
+  <xacro:property name="ShoulderPitchVelocityLimit" value="5.89" />
+  <xacro:property name="ShoulderRollVelocityLimit" value="5.89" />
+  <xacro:property name="ShoulderYawVelocityLimit" value="11.5" />
+  <xacro:property name="ElbowPitchVelocityLimit" value="11.5" />
+  <xacro:property name="ForearmYawVelocityLimit" value="5" />
+  <xacro:property name="WristRollVelocityLimit" value="1" />
+  <xacro:property name="WristPitchVelocityLimit" value="1" />
+</robot>
