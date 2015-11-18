@@ -198,8 +198,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private DoubleProvider desiredYawRateProvider;
    
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
-         QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, 
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, final QuadrupedDataProvider dataProvider, DoubleYoVariable yoTime)
+         QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final QuadrupedDataProvider dataProvider, DoubleYoVariable yoTime,
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
       super(QuadrupedControllerState.POSITION_CRAWL);
       QuadrupedControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedControllerParameters();
@@ -351,6 +351,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       
       quadrupleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.TRIPLE_SUPPORT, quadrupleToTripleCondition));
       tripleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, tripleToQuadrupleCondition));
+      parentRegistry.addChild(registry);
    }
 
 
