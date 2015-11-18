@@ -282,7 +282,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         swingTrajectoryGenerators.put(robotQuadrant, dataProvider.getSwingTrajectoryGenerator(robotQuadrant));
+         swingTrajectoryGenerators.put(robotQuadrant, new QuadrupedSwingTrajectoryGenerator(referenceFrames, robotQuadrant, registry, yoGraphicsListRegistry, dt));
 
          ReferenceFrame footReferenceFrame = referenceFrames.getFootFrame(robotQuadrant);
          ReferenceFrame legAttachmentFrame = referenceFrames.getLegAttachmentFrame(robotQuadrant);
@@ -344,7 +344,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       walkingStateMachine.setCurrentState(CrawlGateWalkingState.QUADRUPLE_SUPPORT);
 
       StateTransitionCondition quadrupleToTripleCondition = new QuadrupleToTripleCondition(quadrupleSupportState);
-      StateTransitionCondition tripleToQuadrupleCondition = new TripleToQuadrupleCondition(dataProvider);
+      StateTransitionCondition tripleToQuadrupleCondition = new TripleToQuadrupleCondition();
       
       quadrupleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.TRIPLE_SUPPORT, quadrupleToTripleCondition));
       tripleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, tripleToQuadrupleCondition));
@@ -680,16 +680,10 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    
    private class TripleToQuadrupleCondition implements StateTransitionCondition
    {
-      private final QuadrupedDataProvider dataProvider;
-      public TripleToQuadrupleCondition(QuadrupedDataProvider dataProvider)
-      {
-         this.dataProvider = dataProvider;
-      }
-      
       @Override
       public boolean checkCondition()
       {
-         return dataProvider.getFootSwitchProvider(swingLeg.getEnumValue()).switchFoot();
+         return swingTrajectoryGenerators.get(swingLeg.getEnumValue()).isDone();
       }
    }
    
