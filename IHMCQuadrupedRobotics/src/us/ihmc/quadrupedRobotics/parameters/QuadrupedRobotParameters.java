@@ -20,4 +20,6 @@ public interface QuadrupedRobotParameters
 
    public QuadrupedControllerParameters getQuadrupedControllerParameters();
 
+   public QuadrupedActuatorParameters getActuatorParameters();
+
 }

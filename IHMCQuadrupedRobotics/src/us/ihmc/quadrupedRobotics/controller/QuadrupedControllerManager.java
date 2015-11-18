@@ -3,12 +3,12 @@ package us.ihmc.quadrupedRobotics.controller;
 import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedDataProvider;
+import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.stateMachines.StateMachine;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -24,10 +24,11 @@ public class QuadrupedControllerManager implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
    private final StateMachine<QuadrupedControllerState> stateMachine;
+   private final EnumYoVariable<QuadrupedControllerState> requestedState;
    
    public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters, QuadrupedDataProvider quadrupedDataProvider,
          RawSensorReader sensorReader, OutputWriter outputWriter, SDFFullRobotModel sdfFullRobotModel, DoubleYoVariable robotTimestamp,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators)
    {
       this.sensorReader = sensorReader;
       this.outputWriter = outputWriter;
@@ -38,16 +39,22 @@ public class QuadrupedControllerManager implements RobotController
       
       // configure state machine
       stateMachine = new StateMachine<>("QuadrupedControllerStateMachine", "QuadrupedControllerSwitchTime", QuadrupedControllerState.class, robotTimestamp, registry);
-      QuadrupedVMCStandController state = new QuadrupedVMCStandController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, robotTimestamp, yoGraphicsListRegistry);
-      stateMachine.addState(state);
-      stateMachine.setCurrentState(QuadrupedControllerState.VMC_STAND);
-      registry.addChild(state.getYovariableRegistry());
+      requestedState = new EnumYoVariable<>("QuadrupedControllerStateMachineRequestedState", registry, QuadrupedControllerState.class, true);
+      QuadrupedVMCStandController vmcStandController = new QuadrupedVMCStandController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, robotTimestamp, yoGraphicsListRegistry);
+      stateMachine.addState(vmcStandController);
+      registry.addChild(vmcStandController.getYoVariableRegistry());
+      
+      QuadrupedPositionBasedCrawlController positionBasedCrawlController = new QuadrupedPositionBasedCrawlController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel,
+            inverseKinematicsCalculators, yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead, quadrupedDataProvider, robotTimestamp);
+      registry.addChild(positionBasedCrawlController.getYoVariableRegistry());
+      stateMachine.addState(positionBasedCrawlController);
+      stateMachine.setCurrentState(QuadrupedControllerState.POSITION_CRAWL);
+      requestedState.set(null);
    }
 
    @Override
    public void initialize()
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -60,20 +67,24 @@ public class QuadrupedControllerManager implements RobotController
    @Override
    public String getName()
    {
-      // TODO Auto-generated method stub
       return getClass().getSimpleName();
    }
 
    @Override
    public String getDescription()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public void doControl()
    {
+      if(requestedState.getEnumValue() != null)
+      {
+         stateMachine.setCurrentState(requestedState.getEnumValue());
+         requestedState.set(null);
+      }
+      
       sensorReader.read();
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();

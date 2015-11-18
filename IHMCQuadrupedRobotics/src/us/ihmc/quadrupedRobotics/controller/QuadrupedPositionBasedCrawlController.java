@@ -16,6 +16,7 @@ import us.ihmc.quadrupedRobotics.parameters.QuadrupedControllerParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedRobotics.swingLegChooser.DefaultGaitSwingLegChooser;
 import us.ihmc.quadrupedRobotics.swingLegChooser.NextSwingLegChooser;
 import us.ihmc.quadrupedRobotics.trajectory.QuadrupedSwingTrajectoryGenerator;
 import us.ihmc.robotics.MathTools;
@@ -47,13 +48,13 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
@@ -62,7 +63,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 
-public class QuadrupedPositionBasedCrawlController implements RobotController
+public class QuadrupedPositionBasedCrawlController extends State<QuadrupedControllerState>
 {
    private static final double INITIAL_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY = 1.0;
    private static final double DEFAULT_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY = 0.15;
@@ -197,9 +198,10 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    private DoubleProvider desiredYawRateProvider;
    
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
-         final QuadrupedReferenceFrames referenceFrames, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, NextSwingLegChooser nextSwingLegChooser, SwingTargetGenerator swingTargetGenerator,
+         QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, 
          YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, final QuadrupedDataProvider dataProvider, DoubleYoVariable yoTime)
    {
+      super(QuadrupedControllerState.POSITION_CRAWL);
       QuadrupedControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedControllerParameters();
       swingDuration.set(quadrupedControllerParameters.getDefaultSwingDuration());
       swingHeight.set(quadrupedControllerParameters.getDefaultSwingHeight());
@@ -209,14 +211,14 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       
       this.robotTimestamp = yoTime;
       this.dt = dt;
-      this.referenceFrames = referenceFrames;
+      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
       this.fullRobotModel = fullRobotModel;
       this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>(name, "walkingStateTranistionTime", CrawlGateWalkingState.class, yoTime, registry);
       this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
-      this.nextSwingLegChooser = nextSwingLegChooser;
-      this.swingTargetGenerator = swingTargetGenerator;
-
+      this.nextSwingLegChooser = new DefaultGaitSwingLegChooser();
+      this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, referenceFrames, registry);
+      
       desiredVelocityProvider = dataProvider.getDesiredVelocityProvider();
       desiredYawRateProvider = dataProvider.getDesiredYawRateProvider();
 
@@ -280,6 +282,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
          }
       });
       
+      referenceFrames.updateFrames();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          swingTrajectoryGenerators.put(robotQuadrant, new QuadrupedSwingTrajectoryGenerator(referenceFrames, robotQuadrant, registry, yoGraphicsListRegistry, dt));
@@ -462,7 +465,7 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
    }
 
    @Override
-   public void doControl()
+   public void doAction()
    {
       referenceFrames.updateFrames();
       updateEstimates();
@@ -972,30 +975,24 @@ public class QuadrupedPositionBasedCrawlController implements RobotController
       }
    }
 
-   @Override
-   public void initialize()
-   {
-      
-   }
-
-
-   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
-
    @Override
-   public String getName()
+   public void doTransitionIntoAction()
    {
-      return null;
+      for(OneDoFJoint oneDofJoint : fullRobotModel.getOneDoFJoints())
+      {
+         oneDofJoint.setUnderPositionControl(true);
+      }
    }
 
 
    @Override
-   public String getDescription()
+   public void doTransitionOutOfAction()
    {
-      return null;
+      
    }
 }

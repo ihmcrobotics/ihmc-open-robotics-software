@@ -447,6 +447,11 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       icpPositionSetpoint.setZ(supportCentroidEstimate.getZ());
       cmpPositionSetpoint.set(icpPositionSetpoint);
       comForceSetpoint.setToZero();
+
+      for(OneDoFJoint oneDofJoint : sdfFullRobotModel.getOneDoFJoints())
+      {
+         oneDofJoint.setUnderPositionControl(false);
+      }
    }
 
    @Override
@@ -456,7 +461,7 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       
    }
 
-   public YoVariableRegistry getYovariableRegistry()
+   public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
