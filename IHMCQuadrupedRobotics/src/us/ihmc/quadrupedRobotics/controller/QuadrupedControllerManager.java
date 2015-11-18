@@ -8,8 +8,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.stateMachines.StateMachine;
-import us.ihmc.robotics.stateMachines.StateTransition;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -36,28 +34,15 @@ public class QuadrupedControllerManager implements RobotController
       // configure state machine
       stateMachine = new StateMachine<>("QuadrupedControllerStateMachine", "QuadrupedControllerSwitchTime", QuadrupedControllerState.class, robotTimestamp, registry);
       requestedState = new EnumYoVariable<>("QuadrupedControllerStateMachineRequestedState", registry, QuadrupedControllerState.class, true);
-      QuadrupedVMCStandController vmcStandController = new QuadrupedVMCStandController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, robotTimestamp, yoGraphicsListRegistry);
-      stateMachine.addState(vmcStandController);
-      registry.addChild(vmcStandController.getYoVariableRegistry());
+      
+      QuadrupedVMCStandController vmcStandController = new QuadrupedVMCStandController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, robotTimestamp, registry, yoGraphicsListRegistry);
       
       QuadrupedPositionBasedCrawlController positionBasedCrawlController = new QuadrupedPositionBasedCrawlController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel,
-            inverseKinematicsCalculators, yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead, quadrupedDataProvider, robotTimestamp);
-      registry.addChild(positionBasedCrawlController.getYoVariableRegistry());
+            inverseKinematicsCalculators, quadrupedDataProvider, robotTimestamp, registry, yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead);
+      
+      stateMachine.addState(vmcStandController);
       stateMachine.addState(positionBasedCrawlController);
-      
-      
-      StateTransitionCondition neverTransition = new StateTransitionCondition()
-      {
-         
-         @Override
-         public boolean checkCondition()
-         {
-            return false;
-         }
-      };
-      
-      StateTransition<QuadrupedControllerState> stateTransition = new StateTransition<QuadrupedControllerState>(QuadrupedControllerState.VMC_STAND, neverTransition );
-      positionBasedCrawlController.addStateTransition(stateTransition);
+
       stateMachine.setCurrentState(QuadrupedControllerState.POSITION_CRAWL);
       requestedState.set(null);
    }

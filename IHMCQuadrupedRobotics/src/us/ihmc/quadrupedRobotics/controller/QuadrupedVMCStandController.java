@@ -95,6 +95,7 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
 		QuadrupedRobotParameters robotParameters,
 		SDFFullRobotModel sdfFullRobotModel,
 		DoubleYoVariable robotTimestamp,
+      YoVariableRegistry parentRegistry, 
       YoGraphicsListRegistry yoGraphicsListRegistry)
 	{
 	   super(QuadrupedControllerState.VMC_STAND);
@@ -180,6 +181,7 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
 			frameVectorStorage[i] = new FrameVector(worldFrame);
 			frameOrientationStorage[i] = new FrameOrientation(worldFrame);
 		}
+      parentRegistry.addChild(registry);
 	}
 
 	private void updateEstimates() {
