@@ -11,7 +11,7 @@ import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
 
-public class JoystickUpdater implements Runnable
+public class JoystickUpdater implements Runnable, ComponentSelector
 {
    private final Controller joystickController;
    private long pollIntervalMillis = 20;
@@ -118,5 +118,10 @@ public class JoystickUpdater implements Runnable
    public void addListener(JoystickEventListener joystickEventListener)
    {
       this.listeners.add(joystickEventListener);
+   }
+   
+   public void clearListeners()
+   {
+      this.listeners.clear();
    }
 }
