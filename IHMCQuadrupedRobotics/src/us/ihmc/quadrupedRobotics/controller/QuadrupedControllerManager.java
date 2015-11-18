@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller;
 
-import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedDataProvider;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
@@ -9,14 +8,13 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.stateMachines.StateMachine;
-import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
+import us.ihmc.robotics.stateMachines.StateTransition;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedControllerManager implements RobotController
 {
-   private final RawSensorReader sensorReader;
-   private final OutputWriter outputWriter;
    private final SDFFullRobotModel sdfFullRobotModel;
    private final DoubleYoVariable robotTimestamp;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -27,11 +25,9 @@ public class QuadrupedControllerManager implements RobotController
    private final EnumYoVariable<QuadrupedControllerState> requestedState;
    
    public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters, QuadrupedDataProvider quadrupedDataProvider,
-         RawSensorReader sensorReader, OutputWriter outputWriter, SDFFullRobotModel sdfFullRobotModel, DoubleYoVariable robotTimestamp,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators)
+         SDFFullRobotModel sdfFullRobotModel, DoubleYoVariable robotTimestamp, YoGraphicsListRegistry yoGraphicsListRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators)
    {
-      this.sensorReader = sensorReader;
-      this.outputWriter = outputWriter;
       this.sdfFullRobotModel = sdfFullRobotModel;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.yoGraphicsListRegistryForDetachedOverhead = yoGraphicsListRegistryForDetachedOverhead;
@@ -48,6 +44,20 @@ public class QuadrupedControllerManager implements RobotController
             inverseKinematicsCalculators, yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead, quadrupedDataProvider, robotTimestamp);
       registry.addChild(positionBasedCrawlController.getYoVariableRegistry());
       stateMachine.addState(positionBasedCrawlController);
+      
+      
+      StateTransitionCondition neverTransition = new StateTransitionCondition()
+      {
+         
+         @Override
+         public boolean checkCondition()
+         {
+            return false;
+         }
+      };
+      
+      StateTransition<QuadrupedControllerState> stateTransition = new StateTransition<QuadrupedControllerState>(QuadrupedControllerState.VMC_STAND, neverTransition );
+      positionBasedCrawlController.addStateTransition(stateTransition);
       stateMachine.setCurrentState(QuadrupedControllerState.POSITION_CRAWL);
       requestedState.set(null);
    }
@@ -85,10 +95,8 @@ public class QuadrupedControllerManager implements RobotController
          requestedState.set(null);
       }
       
-      sensorReader.read();
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
-      outputWriter.write();
    }
 
 }
