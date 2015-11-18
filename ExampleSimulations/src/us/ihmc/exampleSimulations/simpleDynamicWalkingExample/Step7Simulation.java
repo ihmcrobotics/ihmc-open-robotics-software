@@ -36,8 +36,8 @@ public class Step7Simulation
       sim = new SimulationConstructionSet(v7Robot);
       sim.setGroundVisible(true);
       sim.setDT(deltaT, recordFrequency);
-      sim.setCameraFix(1.04, 0.0, 1.05);
-      sim.setCameraPosition(2.6, -7.5, 1.53);
+      sim.setCameraFix(0.0, 0.0, 0.64);
+      sim.setCameraPosition(0.4, -3.77, 0.56);
       sim.changeBufferSize(16000);
       sim.selectConfiguration("step7Config.guiConf");
       sim.setCameraTracking(true, true, true, false);
