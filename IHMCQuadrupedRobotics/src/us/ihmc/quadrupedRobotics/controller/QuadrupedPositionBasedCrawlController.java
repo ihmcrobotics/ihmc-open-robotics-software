@@ -9,7 +9,6 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedDataProvider;
-import us.ihmc.quadrupedRobotics.footstepChooser.MidFootZUpSwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.footstepChooser.SwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedControllerParameters;
@@ -68,9 +67,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private static final double INITIAL_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY = 1.0;
    private static final double DEFAULT_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY = 0.15;
    private static final double DEFAULT_HEADING_CORRECTION_BREAK_FREQUENCY = 1.0;
-   private static final double DEFAULT_COM_PITCH_FILTER_BREAK_FREQUENCY = 0.75;
-   private static final double DEFAULT_COM_ROLL_FILTER_BREAK_FREQUENCY = 0.75;
-   private static final double DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY = 0.6;
+   private static final double DEFAULT_COM_PITCH_FILTER_BREAK_FREQUENCY = 0.5;
+   private static final double DEFAULT_COM_ROLL_FILTER_BREAK_FREQUENCY = 0.5;
+   private static final double DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT = 0.01;
    
    private final double dt;
