@@ -9,12 +9,13 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
+import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedControllerManager implements RobotController
 {
-   private final SensorReader sensorReader;
+   private final RawSensorReader sensorReader;
    private final OutputWriter outputWriter;
    private final SDFFullRobotModel sdfFullRobotModel;
    private final DoubleYoVariable robotTimestamp;
@@ -25,7 +26,7 @@ public class QuadrupedControllerManager implements RobotController
    private final StateMachine<QuadrupedControllerState> stateMachine;
    
    public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters, QuadrupedDataProvider quadrupedDataProvider,
-         SensorReader sensorReader, OutputWriter outputWriter, SDFFullRobotModel sdfFullRobotModel, DoubleYoVariable robotTimestamp,
+         RawSensorReader sensorReader, OutputWriter outputWriter, SDFFullRobotModel sdfFullRobotModel, DoubleYoVariable robotTimestamp,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
       this.sensorReader = sensorReader;
@@ -37,9 +38,10 @@ public class QuadrupedControllerManager implements RobotController
       
       // configure state machine
       stateMachine = new StateMachine<>("QuadrupedControllerStateMachine", "QuadrupedControllerSwitchTime", QuadrupedControllerState.class, robotTimestamp, registry);
-      State<QuadrupedControllerState> state = new QuadrupedVMCStandController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, robotTimestamp, yoGraphicsListRegistry);
+      QuadrupedVMCStandController state = new QuadrupedVMCStandController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, robotTimestamp, yoGraphicsListRegistry);
       stateMachine.addState(state);
       stateMachine.setCurrentState(QuadrupedControllerState.VMC_STAND);
+      registry.addChild(state.getYovariableRegistry());
    }
 
    @Override

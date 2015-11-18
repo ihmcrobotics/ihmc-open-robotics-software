@@ -50,8 +50,6 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
 	private final ReferenceFrame worldFrame;
 	private final ReferenceFrame bodyFrame;
 	private final ReferenceFrame comFrame;
-	private SDFPerfectSimulatedSensorReader sensorReader;
-	private OutputWriter outputWriter;
 	private CenterOfMassJacobian comJacobian;
 	private TwistCalculator twistCalculator;
 	private AxisAngleOrientationController bodyOrientationController;
@@ -426,19 +424,14 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
    public void doAction()
    {
       // TODO Auto-generated method stub
-      sensorReader.read();
-      
       updateEstimates();
       updateSetpoints();
-       
-      outputWriter.write();
    }
 
    @Override
    public void doTransitionIntoAction()
    {
       // initialize estimates
-      sensorReader.read();
       updateEstimates();
       
       // initialize setpoints
@@ -461,5 +454,10 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
    {
       // TODO Auto-generated method stub
       
+   }
+
+   public YoVariableRegistry getYovariableRegistry()
+   {
+      return registry;
    }
 }
