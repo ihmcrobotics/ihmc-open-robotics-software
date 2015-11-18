@@ -1,20 +1,13 @@
-//evaluationDependsOn(':Planning')
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
+	
     compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
     compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
-    
-//    compile group: 'org.boofcv', name: 'all', version: '0.19'
     compile group: 'us.ihmc.thirdparty', name: 'opencv', version: '2.4.11'
-    //ejml core, complex, and equation
-
-//    compile group: 'org.ejml', name: 'all', version: '0.28'
+    
 	compile project(':IHMCCommunication')
     compile project(':IHMCROSTools')
-	
 	compile project(':IHMCWholeBodyController')
-//    compile project(':Planning')
-//    testCompile project(':Planning').sourceSets.test.output
     compile project(':ROSJavaMessages')
     compile project(':SensorProcessing')
     compile project(':SDFLoader')

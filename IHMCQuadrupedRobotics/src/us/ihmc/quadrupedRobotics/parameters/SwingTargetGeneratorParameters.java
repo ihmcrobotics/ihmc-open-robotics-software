@@ -11,7 +11,9 @@ public interface SwingTargetGeneratorParameters
 
    double getStanceWidth();
 
-   double getMaxSkew();
+   double getMaxForwardSkew();
+   
+   double getMaxLateralSkew();
 
    double getMaxYawPerStep();
 

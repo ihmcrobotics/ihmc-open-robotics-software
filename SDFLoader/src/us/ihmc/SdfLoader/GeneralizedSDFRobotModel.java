@@ -186,7 +186,8 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
    public void addForceSensor(String sensorName, String parentJointName, RigidBodyTransform transformToParentJoint)
    {
       SDFForceSensor sdfForceSensor = new SDFForceSensor(sensorName, transformToParentJoint);
-      joints.get(parentJointName).addForceSensor(sdfForceSensor);
+      if(joints.get(parentJointName) != null)
+         joints.get(parentJointName).addForceSensor(sdfForceSensor);
    }
    
    public void addContactSensor(String sensorName, String parentJointName, ContactSensorType type)
