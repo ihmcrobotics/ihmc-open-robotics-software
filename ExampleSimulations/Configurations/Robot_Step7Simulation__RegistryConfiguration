@@ -1,0 +1,7 @@
+root*false*false
+root.Robot*false*false
+root.Robot.LinearGroundContactModel*false*false
+root.Robot.controllerRegistry*false*false
+root.Robot.controllerRegistry.swingTrajectoryParabolicCartesianTrajectoryGenerator*false*false
+root.Robot.controllerRegistry.swingTrajectoryParabolicCartesianTrajectoryGenerator.swingTrajectoryYoParabolicTrajectoryGenerator*false*false
+root.Robot.controllerRegistry.BagOfBallsBalls*false*false
