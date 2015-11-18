@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.swingLegChooser;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.parameters.DefaultSwingTargetGeneratorParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedControllerParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedGeometryTools;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
@@ -23,16 +23,16 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
 {
    private static final double ZERO_THRESHOLD = 1e-4;
    private static final double MYSTERIOUS_SCALAR = 1.0;
-   private final DefaultSwingTargetGeneratorParameters defaultSwingTargetGeneratorParameters;
+   private final QuadrupedControllerParameters quadrupedControllerParameters;
    private CommonQuadrupedReferenceFrames commonQuadrupedReferenceFrames;
    private final QuadrantDependentList<FrameEllipsoid3d> actualFootstepWorkspaces = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoGraphicEllipsoid> footstepWorkspaceYoEllipsoids = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFramePoint> footstepWorkspaceCenterFramePoints = new QuadrantDependentList<>();
    private RobotQuadrant greatestDistanceFeasibleFootstep;
 
-   public LongestFeasibleStepChooser(DefaultSwingTargetGeneratorParameters defaultSwingTargetGeneratorParameters, CommonQuadrupedReferenceFrames commonQuadrupedReferenceFrames, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public LongestFeasibleStepChooser(QuadrupedControllerParameters quadrupedControllerParameters, CommonQuadrupedReferenceFrames commonQuadrupedReferenceFrames, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.defaultSwingTargetGeneratorParameters = defaultSwingTargetGeneratorParameters;
+      this.quadrupedControllerParameters = quadrupedControllerParameters;
       this.commonQuadrupedReferenceFrames = commonQuadrupedReferenceFrames;
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -93,8 +93,8 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          QuadrupedSupportPolygon actualPerfectPolygon = new QuadrupedSupportPolygon();
          FramePoint centroidFramePoint = actualSupportPolygon.getCentroidFramePoint();
          double nominalYaw = actualSupportPolygon.getNominalYaw();
-         double perfectStanceYOffset = defaultSwingTargetGeneratorParameters.getStanceLength() / 2;
-         double perfectStanceXOffset = defaultSwingTargetGeneratorParameters.getStanceWidth() / 2;
+         double perfectStanceYOffset = quadrupedControllerParameters.getStanceLength() / 2;
+         double perfectStanceXOffset = quadrupedControllerParameters.getStanceWidth() / 2;
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             FramePoint framePoint = new FramePoint(centroidFramePoint);

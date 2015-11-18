@@ -1,16 +1,14 @@
 package us.ihmc.ihmcPerception.depthData;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import javax.vecmath.Point3d;
-
 import sensor_msgs.PointCloud2;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
+
+import javax.vecmath.Point3d;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class RosPointCloudReceiver extends RosPointCloudSubscriber
 {
@@ -19,40 +17,28 @@ public class RosPointCloudReceiver extends RosPointCloudSubscriber
    private final ReferenceFrame sensorframe;
    private final PointCloudSource[] pointCloudSource;
 
-   public RosPointCloudReceiver(String sensorNameInSdf, String rosTopic, RosMainNode rosMainNode, ReferenceFrame scanFrame,
+   public RosPointCloudReceiver(String sensorNameInSdf, String rosTopic, RosMainNode rosMainNode, ReferenceFrame cloudFrame,
          PointCloudDataReceiverInterface pointCloudDataReceiver, PointCloudSource... pointCloudSource)
    {
-      this.cloudFrame = scanFrame;
-      this.pointCloudDataReceiver = pointCloudDataReceiver;
-      this.sensorframe = pointCloudDataReceiver.getLidarFrame(sensorNameInSdf);
-      this.pointCloudSource = pointCloudSource;
-
-
-      rosMainNode.attachSubscriber(rosTopic, this);
-
+      this(rosTopic, rosMainNode, cloudFrame, pointCloudDataReceiver.getLidarFrame(sensorNameInSdf), pointCloudDataReceiver, pointCloudSource);
    }
-   
+
    public RosPointCloudReceiver(DRCRobotPointCloudParameters pointCloudParameters, RosMainNode rosMainNode, ReferenceFrame cloudFrame,
+         PointCloudDataReceiverInterface pointCloudDataReceiver, PointCloudSource... pointCloudSource)
+   {
+      this(pointCloudParameters.getRosTopic(), rosMainNode, cloudFrame, pointCloudDataReceiver.getLidarFrame(pointCloudParameters.getSensorNameInSdf()), pointCloudDataReceiver, pointCloudSource);
+   }
+
+   public RosPointCloudReceiver(String rosTopic, RosMainNode rosMainNode, ReferenceFrame cloudFrame, ReferenceFrame sensorframe,
          PointCloudDataReceiverInterface pointCloudDataReceiver, PointCloudSource... pointCloudSource)
    {
       this.cloudFrame = cloudFrame;
       this.pointCloudDataReceiver = pointCloudDataReceiver;
-      this.sensorframe = pointCloudDataReceiver.getLidarFrame(pointCloudParameters.getSensorNameInSdf());
-      
-      if (sensorframe == null)
-      {
-         PrintTools.error("Sensor name in SDF does not exist: " + pointCloudParameters.getSensorNameInSdf());
-      }
-      else
-      {
-         PrintTools.info("Using lidar frame: " + sensorframe.getName());
-      }
-      
-      this.pointCloudSource=pointCloudSource;
+      this.sensorframe = sensorframe;
+      this.pointCloudSource = pointCloudSource;
 
-      rosMainNode.attachSubscriber(pointCloudParameters.getRosTopic(), this);
+      rosMainNode.attachSubscriber(rosTopic, this);
    }
-
 
    @Override
 	public void onNewMessage(PointCloud2 pointCloud) 
