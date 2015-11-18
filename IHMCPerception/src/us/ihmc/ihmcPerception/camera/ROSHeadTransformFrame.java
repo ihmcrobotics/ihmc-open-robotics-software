@@ -23,7 +23,7 @@ public class ROSHeadTransformFrame extends ReferenceFrame implements Runnable
 
    private final RigidBodyTransform headToCameraTransform = new RigidBodyTransform();
 
-   ROSHeadTransformFrame(ReferenceFrame headFrame, RosMainNode rosMainNode, DRCRobotSensorParameters cameraParameters)
+   public ROSHeadTransformFrame(ReferenceFrame headFrame, RosMainNode rosMainNode, DRCRobotSensorParameters cameraParameters)
    {
       super("rosHeadToCameraFrame", headFrame, true, false, false);
       this.cameraParameters = cameraParameters;
