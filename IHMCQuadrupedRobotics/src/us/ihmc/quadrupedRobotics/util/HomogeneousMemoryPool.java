@@ -16,7 +16,7 @@ class HomogeneousMemoryPool<T>
       this.elements = new ArrayList<>();
    }
 
-   public T grab()
+   public T lease()
    {
       if (index >= elements.size())
       {
@@ -33,7 +33,7 @@ class HomogeneousMemoryPool<T>
       return elements.get(index++);
    }
 
-   public void reset()
+   public void evict()
    {
       index = 0;
    }

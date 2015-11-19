@@ -61,36 +61,28 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
    private double startTime;
 
    // Setpoints
-   private QuadrantDependentList<YoFrameVector> footForceSetpoint;
-   private YoFrameOrientation bodyOrientationSetpoint;
-   private YoFrameVector bodyAngularVelocitySetpoint;
-   private YoFrameVector bodyTorqueFeedforwardSetpoint;
-   private YoFrameVector bodyTorqueSetpoint;
-   private DoubleYoVariable comHeightSetpoint;
-   private DoubleYoVariable icpOmegaSetpoint;
-   private YoFramePoint icpPositionSetpoint;
-   private YoFramePoint cmpPositionSetpoint;
-   private YoFrameVector comForceSetpoint;
+   private QuadrantDependentList<YoFrameVector> yoFootForceSetpoint;
+   private YoFrameOrientation yoBodyOrientationSetpoint;
+   private YoFrameVector yoBodyAngularVelocitySetpoint;
+   private YoFrameVector yoBodyTorqueFeedforwardSetpoint;
+   private YoFrameVector yoBodyTorqueSetpoint;
+   private DoubleYoVariable yoComHeightSetpoint;
+   private DoubleYoVariable yoIcpOmegaSetpoint;
+   private YoFramePoint yoIcpPositionSetpoint;
+   private YoFramePoint yoCmpPositionSetpoint;
+   private YoFrameVector yoComForceSetpoint;
 
    // Estimates
-   private QuadrantDependentList<YoFramePoint> footPositionEstimate;
+   private QuadrantDependentList<YoFramePoint> yoFootPositionEstimate;
    private QuadrupedSupportPolygon supportPolygonEstimate;
-   private YoFramePoint supportCentroidEstimate;
-   private YoFrameOrientation bodyOrientationEstimate;
-   private YoFramePoint bodyPositionEstimate;
-   private YoFrameVector bodyAngularVelocityEstimate;
-   private YoFramePoint comPositionEstimate;
-   private YoFrameVector comVelocityEstimate;
-   private DoubleYoVariable comHeightEstimate;
-   private YoFramePoint icpPositionEstimate;
-
-   // Storage
-   private final int STORAGE_SIZE = 5;
-   private Twist[] twistStorage;
-   private FramePose[] framePoseStorage;
-   private FramePoint[] framePointStorage;
-   private FrameVector[] frameVectorStorage;
-   private FrameOrientation[] frameOrientationStorage;
+   private YoFramePoint yoSupportCentroidEstimate;
+   private YoFrameOrientation yoBodyOrientationEstimate;
+   private YoFramePoint yoBodyPositionEstimate;
+   private YoFrameVector yoBodyAngularVelocityEstimate;
+   private YoFramePoint yoComPositionEstimate;
+   private YoFrameVector yoComVelocityEstimate;
+   private DoubleYoVariable yoComHeightEstimate;
+   private YoFramePoint yoIcpPositionEstimate;
 
    private HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
 
@@ -136,53 +128,39 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       startTime = robotTimestamp.getDoubleValue();
 
       // Setpoints
-      footForceSetpoint = new QuadrantDependentList<>();
+      yoFootForceSetpoint = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         footForceSetpoint.put(robotQuadrant, new YoFrameVector(prefix + "FootForceSetpoint", worldFrame, registry));
+         yoFootForceSetpoint.put(robotQuadrant, new YoFrameVector(prefix + "FootForceSetpoint", worldFrame, registry));
       }
-      bodyOrientationSetpoint = new YoFrameOrientation("bodyOrientationSetpoint", worldFrame, registry);
-      bodyAngularVelocitySetpoint = new YoFrameVector("bodyAngularVelocitySetpoint", worldFrame, registry);
-      bodyTorqueFeedforwardSetpoint = new YoFrameVector("bodyTorqueFeedforwardSetpoint", worldFrame, registry);
-      bodyTorqueSetpoint = new YoFrameVector("bodyTorqueSetpoint", worldFrame, registry);
-      comHeightSetpoint = new DoubleYoVariable("comHeightSetpoint", registry);
-      icpOmegaSetpoint = new DoubleYoVariable("icpOmegaSetpoint", registry);
-      icpPositionSetpoint = new YoFramePoint("icpPositionSetpoint", worldFrame, registry);
-      cmpPositionSetpoint = new YoFramePoint("cmpPositionSetpoint", worldFrame, registry);
-      comForceSetpoint = new YoFrameVector("comForceSetpoint", worldFrame, registry);
+      yoBodyOrientationSetpoint = new YoFrameOrientation("bodyOrientationSetpoint", worldFrame, registry);
+      yoBodyAngularVelocitySetpoint = new YoFrameVector("bodyAngularVelocitySetpoint", worldFrame, registry);
+      yoBodyTorqueFeedforwardSetpoint = new YoFrameVector("bodyTorqueFeedforwardSetpoint", worldFrame, registry);
+      yoBodyTorqueSetpoint = new YoFrameVector("bodyTorqueSetpoint", worldFrame, registry);
+      yoComHeightSetpoint = new DoubleYoVariable("comHeightSetpoint", registry);
+      yoIcpOmegaSetpoint = new DoubleYoVariable("icpOmegaSetpoint", registry);
+      yoIcpPositionSetpoint = new YoFramePoint("icpPositionSetpoint", worldFrame, registry);
+      yoCmpPositionSetpoint = new YoFramePoint("cmpPositionSetpoint", worldFrame, registry);
+      yoComForceSetpoint = new YoFrameVector("comForceSetpoint", worldFrame, registry);
 
       // Estimates
-      footPositionEstimate = new QuadrantDependentList<>();
+      yoFootPositionEstimate = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         footPositionEstimate.put(robotQuadrant, new YoFramePoint(prefix + "FootPositionEstimate", worldFrame, registry));
+         yoFootPositionEstimate.put(robotQuadrant, new YoFramePoint(prefix + "FootPositionEstimate", worldFrame, registry));
       }
       supportPolygonEstimate = new QuadrupedSupportPolygon();
-      supportCentroidEstimate = new YoFramePoint("supportCentroidEstimate", worldFrame, registry);
-      bodyOrientationEstimate = new YoFrameOrientation("bodyOrientationEstimate", worldFrame, registry);
-      bodyPositionEstimate = new YoFramePoint("bodyPositionEstimate", worldFrame, registry);
-      bodyAngularVelocityEstimate = new YoFrameVector("bodyAngularVelocityEstimate", worldFrame, registry);
-      comPositionEstimate = new YoFramePoint("comPositionEstimate", worldFrame, registry);
-      comVelocityEstimate = new YoFrameVector("comVelocityEstimate", worldFrame, registry);
-      comHeightEstimate = new DoubleYoVariable("comHeightEstimate", registry);
-      icpPositionEstimate = new YoFramePoint("icpPositionEstimate", worldFrame, registry);
+      yoSupportCentroidEstimate = new YoFramePoint("supportCentroidEstimate", worldFrame, registry);
+      yoBodyOrientationEstimate = new YoFrameOrientation("bodyOrientationEstimate", worldFrame, registry);
+      yoBodyPositionEstimate = new YoFramePoint("bodyPositionEstimate", worldFrame, registry);
+      yoBodyAngularVelocityEstimate = new YoFrameVector("bodyAngularVelocityEstimate", worldFrame, registry);
+      yoComPositionEstimate = new YoFramePoint("comPositionEstimate", worldFrame, registry);
+      yoComVelocityEstimate = new YoFrameVector("comVelocityEstimate", worldFrame, registry);
+      yoComHeightEstimate = new DoubleYoVariable("comHeightEstimate", registry);
+      yoIcpPositionEstimate = new YoFramePoint("icpPositionEstimate", worldFrame, registry);
 
-      // Storage
-      twistStorage = new Twist[STORAGE_SIZE];
-      framePoseStorage = new FramePose[STORAGE_SIZE];
-      framePointStorage = new FramePoint[STORAGE_SIZE];
-      frameVectorStorage = new FrameVector[STORAGE_SIZE];
-      frameOrientationStorage = new FrameOrientation[STORAGE_SIZE];
-      for (int i = 0; i < STORAGE_SIZE; ++i)
-      {
-         twistStorage[i] = new Twist();
-         framePoseStorage[i] = new FramePose(worldFrame);
-         framePointStorage[i] = new FramePoint(worldFrame);
-         frameVectorStorage[i] = new FrameVector(worldFrame);
-         frameOrientationStorage[i] = new FrameOrientation(worldFrame);
-      }
       parentRegistry.addChild(registry);
    }
 
@@ -193,101 +171,111 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       twistCalculator.compute();
 
       // compute foot positions
-      FramePoint footPosition = pool.grab(FramePoint.class);
+      FramePoint footPosition = pool.lease(FramePoint.class);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotQuadrant);
          footPosition.setToZero(footFrame);
          footPosition.changeFrame(worldFrame);
-         footPositionEstimate.get(robotQuadrant).setAndMatchFrame(footPosition);
+         yoFootPositionEstimate.get(robotQuadrant).setAndMatchFrame(footPosition);
       }
 
       // compute support polygon and centroid
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         supportPolygonEstimate.setFootstep(robotQuadrant, footPositionEstimate.get(robotQuadrant).getFrameTuple());
+         supportPolygonEstimate.setFootstep(robotQuadrant, yoFootPositionEstimate.get(robotQuadrant).getFrameTuple());
       }
 
-      FramePoint supportCentroid = pool.grab(FramePoint.class);
+      FramePoint supportCentroid = pool.lease(FramePoint.class);
       supportPolygonEstimate.getCentroid(supportCentroid);
-      supportCentroidEstimate.setAndMatchFrame(supportCentroid);
+      yoSupportCentroidEstimate.setAndMatchFrame(supportCentroid);
 
       // compute body orientation
-      FrameOrientation bodyOrientation = pool.grab(FrameOrientation.class);
+      FrameOrientation bodyOrientation = pool.lease(FrameOrientation.class);
       bodyOrientation.setToZero(bodyFrame);
       bodyOrientation.changeFrame(worldFrame);
-      bodyOrientationEstimate.setAndMatchFrame(bodyOrientation);
+      yoBodyOrientationEstimate.setAndMatchFrame(bodyOrientation);
 
       // compute body position
-      FramePoint bodyPosition = pool.grab(FramePoint.class);
+      FramePoint bodyPosition = pool.lease(FramePoint.class);
       bodyPosition.setToZero(bodyFrame);
       bodyPosition.changeFrame(worldFrame);
-      bodyPositionEstimate.setAndMatchFrame(bodyPosition);
+      yoBodyPositionEstimate.setAndMatchFrame(bodyPosition);
 
       // compute body angular velocity
-      Twist myBodyAngularVelocity = pool.grab(Twist.class);
-      twistCalculator.packTwistOfBody(myBodyAngularVelocity, sdfFullRobotModel.getPelvis());
-      myBodyAngularVelocity.packAngularPart(frameVectorStorage[0]);
-      bodyAngularVelocityEstimate.setAndMatchFrame(frameVectorStorage[0]);
+      Twist bodyTwist = pool.lease(Twist.class);
+      twistCalculator.packTwistOfBody(bodyTwist, sdfFullRobotModel.getPelvis());
+
+      FrameVector bodyAngularVelocity = pool.lease(FrameVector.class);
+      bodyTwist.packAngularPart(bodyAngularVelocity);
+      yoBodyAngularVelocityEstimate.setAndMatchFrame(bodyAngularVelocity);
 
       // compute center of mass position
-      FramePoint comPosition = pool.grab(FramePoint.class);
+      FramePoint comPosition = pool.lease(FramePoint.class);
       comPosition.setToZero(comFrame);
       comPosition.changeFrame(worldFrame);
-      comPositionEstimate.setAndMatchFrame(comPosition);
+      yoComPositionEstimate.setAndMatchFrame(comPosition);
 
       // compute center of mass velocity
-      FrameVector comVelocity = pool.grab(FrameVector.class);
+      FrameVector comVelocity = pool.lease(FrameVector.class);
       comJacobian.compute();
       comJacobian.packCenterOfMassVelocity(comVelocity);
 
       comVelocity.changeFrame(worldFrame);
-      comVelocityEstimate.setAndMatchFrame(comVelocity);
+      yoComVelocityEstimate.setAndMatchFrame(comVelocity);
 
       // compute center of mass height
-      comHeightEstimate.set(comPositionEstimate.getZ() - supportCentroidEstimate.getZ());
+      yoComHeightEstimate.set(yoComPositionEstimate.getZ() - yoSupportCentroidEstimate.getZ());
 
       // compute instantaneous capture point
-      double omega = icpOmegaSetpoint.getDoubleValue();
-      icpPositionEstimate.setX(comPositionEstimate.getX() + comVelocityEstimate.getX() / omega);
-      icpPositionEstimate.setY(comPositionEstimate.getY() + comVelocityEstimate.getY() / omega);
-      icpPositionEstimate.setZ(supportCentroidEstimate.getZ());
+      double omega = yoIcpOmegaSetpoint.getDoubleValue();
+      yoIcpPositionEstimate.setX(yoComPositionEstimate.getX() + yoComVelocityEstimate.getX() / omega);
+      yoIcpPositionEstimate.setY(yoComPositionEstimate.getY() + yoComVelocityEstimate.getY() / omega);
+      yoIcpPositionEstimate.setZ(yoSupportCentroidEstimate.getZ());
    }
 
    private void updateSetpoints()
    {
       // compute capture point natural frequency
-      icpOmegaSetpoint.set(Math.sqrt(gravity / comHeightSetpoint.getDoubleValue()));
+      yoIcpOmegaSetpoint.set(Math.sqrt(gravity / yoComHeightSetpoint.getDoubleValue()));
 
       // compute body torque setpoints to track desired body orientation
-      bodyOrientationSetpoint.getFrameOrientationIncludingFrame(frameOrientationStorage[0]);
-      bodyAngularVelocitySetpoint.getFrameTupleIncludingFrame(frameVectorStorage[1]);
-      bodyAngularVelocityEstimate.getFrameTupleIncludingFrame(frameVectorStorage[2]);
-      bodyTorqueFeedforwardSetpoint.getFrameTupleIncludingFrame(frameVectorStorage[3]);
-      frameOrientationStorage[0].changeFrame(bodyFrame);
-      frameVectorStorage[0].changeFrame(bodyFrame);
-      frameVectorStorage[1].changeFrame(bodyFrame);
-      frameVectorStorage[2].changeFrame(bodyFrame);
-      frameVectorStorage[3].changeFrame(bodyFrame);
-      bodyOrientationController.compute(frameVectorStorage[0], frameOrientationStorage[0], frameVectorStorage[1], frameVectorStorage[2], frameVectorStorage[3]);
-      frameVectorStorage[0].changeFrame(worldFrame);
-      bodyTorqueSetpoint.setAndMatchFrame(frameVectorStorage[0]);
+      FrameOrientation bodyOrientationSetpoint = pool.lease(FrameOrientation.class);
+      yoBodyOrientationSetpoint.getFrameOrientationIncludingFrame(bodyOrientationSetpoint);
+      bodyOrientationSetpoint.changeFrame(bodyFrame);
+
+      FrameVector bodyAngularVelocitySetpoint = pool.lease(FrameVector.class);
+      yoBodyAngularVelocitySetpoint.getFrameTupleIncludingFrame(bodyAngularVelocitySetpoint);
+      bodyAngularVelocitySetpoint.changeFrame(bodyFrame);
+
+      FrameVector bodyAngularVelocityEstimate = pool.lease(FrameVector.class);
+      yoBodyAngularVelocityEstimate.getFrameTupleIncludingFrame(bodyAngularVelocityEstimate);
+      bodyAngularVelocityEstimate.changeFrame(bodyFrame);
+
+      FrameVector bodyTorqueFeedforwardSetpoint = pool.lease(FrameVector.class);
+      yoBodyTorqueFeedforwardSetpoint.getFrameTupleIncludingFrame(bodyTorqueFeedforwardSetpoint);
+      bodyTorqueFeedforwardSetpoint.changeFrame(bodyFrame);
+      
+      FrameVector bodyTorqueSetpoint = pool.lease(FrameVector.class);
+      bodyOrientationController.compute(bodyTorqueSetpoint, bodyOrientationSetpoint, bodyAngularVelocitySetpoint, bodyAngularVelocityEstimate, bodyTorqueFeedforwardSetpoint);
+      bodyTorqueSetpoint.changeFrame(worldFrame);
+      yoBodyTorqueSetpoint.setAndMatchFrame(bodyTorqueSetpoint);
 
       // compute body force setpoints to track desired capture point and center of mass height
-      double omega = icpOmegaSetpoint.getDoubleValue();
-      double cmpX = icpPositionEstimate.getX() - 1 / omega * icpForwardPIDController.compute(icpPositionEstimate.getX(), icpPositionSetpoint.getX(), 0, 0, dt);
-      double cmpY = icpPositionEstimate.getY() - 1 / omega * icpLateralPIDController.compute(icpPositionEstimate.getY(), icpPositionSetpoint.getY(), 0, 0, dt);
-      double cmpZ = icpPositionSetpoint.getZ();
-      double fX = mass * Math.pow(omega, 2) * (comPositionEstimate.getX() - cmpX);
-      double fY = mass * Math.pow(omega, 2) * (comPositionEstimate.getY() - cmpY);
+      double omega = yoIcpOmegaSetpoint.getDoubleValue();
+      double cmpX = yoIcpPositionEstimate.getX() - 1 / omega * icpForwardPIDController.compute(yoIcpPositionEstimate.getX(), yoIcpPositionSetpoint.getX(), 0, 0, dt);
+      double cmpY = yoIcpPositionEstimate.getY() - 1 / omega * icpLateralPIDController.compute(yoIcpPositionEstimate.getY(), yoIcpPositionSetpoint.getY(), 0, 0, dt);
+      double cmpZ = yoIcpPositionSetpoint.getZ();
+      double fX = mass * Math.pow(omega, 2) * (yoComPositionEstimate.getX() - cmpX);
+      double fY = mass * Math.pow(omega, 2) * (yoComPositionEstimate.getY() - cmpY);
       double fZ = 0.75 * mass * gravity
-            + comHeightPIDController.compute(comHeightEstimate.getDoubleValue(), comHeightSetpoint.getDoubleValue(), comVelocityEstimate.getZ(), 0, dt);
-      cmpPositionSetpoint.set(cmpX, cmpY, cmpZ);
-      comForceSetpoint.set(fX, fY, fZ);
+            + comHeightPIDController.compute(yoComHeightEstimate.getDoubleValue(), yoComHeightSetpoint.getDoubleValue(), yoComVelocityEstimate.getZ(), 0, dt);
+      yoCmpPositionSetpoint.set(cmpX, cmpY, cmpZ);
+      yoComForceSetpoint.set(fX, fY, fZ);
 
       // compute ground reaction forces using least squares optimization
-      distributeForcesFourLegs(comForceSetpoint.getX(), comForceSetpoint.getY(), comForceSetpoint.getZ(), bodyTorqueSetpoint.getX(), bodyTorqueSetpoint.getY(),
-            bodyTorqueSetpoint.getZ());
+      distributeForcesFourLegs(yoComForceSetpoint.getX(), yoComForceSetpoint.getY(), yoComForceSetpoint.getZ(), yoBodyTorqueSetpoint.getX(), yoBodyTorqueSetpoint.getY(),
+            yoBodyTorqueSetpoint.getZ());
 
       // compute joint torques using virtual model control
       computeLegTorques();
@@ -303,9 +291,9 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          // compute foot offset relative to body in world coordinates
-         FramePoint footOffset = framePointStorage[0];
-         footOffset.setIncludingFrame(footPositionEstimate.get(robotQuadrant).getFrameTuple());
-         footOffset.sub(bodyPositionEstimate.getFrameTuple());
+         FramePoint footOffset = pool.lease(FramePoint.class);
+         footOffset.setIncludingFrame(yoFootPositionEstimate.get(robotQuadrant).getFrameTuple());
+         footOffset.sub(yoBodyPositionEstimate.getFrameTuple());
 
          // populate constraint matrix coefficients
          forceConstraintsMatrix.set(0, 0 + columnOffset, 1.0); // fX row
@@ -345,9 +333,9 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       int rowOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         footForceSetpoint.get(robotQuadrant).setX(distributedForcesOnTheLegs.get(0 + rowOffset, 0));
-         footForceSetpoint.get(robotQuadrant).setY(distributedForcesOnTheLegs.get(1 + rowOffset, 0));
-         footForceSetpoint.get(robotQuadrant).setZ(distributedForcesOnTheLegs.get(2 + rowOffset, 0));
+         yoFootForceSetpoint.get(robotQuadrant).setX(distributedForcesOnTheLegs.get(0 + rowOffset, 0));
+         yoFootForceSetpoint.get(robotQuadrant).setY(distributedForcesOnTheLegs.get(1 + rowOffset, 0));
+         yoFootForceSetpoint.get(robotQuadrant).setZ(distributedForcesOnTheLegs.get(2 + rowOffset, 0));
          rowOffset += 3;
       }
 
@@ -361,13 +349,13 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          // compute foot force in body coordinates
-         FrameVector footForce = frameVectorStorage[0];
-         footForceSetpoint.get(robotQuadrant).getFrameTupleIncludingFrame(footForce);
+         FrameVector footForce = pool.lease(FrameVector.class);
+         yoFootForceSetpoint.get(robotQuadrant).getFrameTupleIncludingFrame(footForce);
          footForce.changeFrame(bodyFrame);
 
          // compute foot position in body coordinates
-         FramePoint footPosition = framePointStorage[0];
-         footPositionEstimate.get(robotQuadrant).getFrameTupleIncludingFrame(footPosition);
+         FramePoint footPosition = pool.lease(FramePoint.class);
+         yoFootPositionEstimate.get(robotQuadrant).getFrameTupleIncludingFrame(footPosition);
          footPosition.changeFrame(bodyFrame);
 
          // get joint array for the leg chain
@@ -420,7 +408,7 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
    @Override
    public void doAction()
    {
-      pool.reset();
+      pool.evict();
 
       // TODO Auto-generated method stub
       updateEstimates();
@@ -434,18 +422,18 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       updateEstimates();
 
       // initialize setpoints
-      bodyOrientationSetpoint.set(bodyOrientationEstimate);
-      bodyAngularVelocitySetpoint.setToZero();
-      bodyTorqueFeedforwardSetpoint.setToZero();
-      bodyTorqueSetpoint.setToZero();
+      yoBodyOrientationSetpoint.set(yoBodyOrientationEstimate);
+      yoBodyAngularVelocitySetpoint.setToZero();
+      yoBodyTorqueFeedforwardSetpoint.setToZero();
+      yoBodyTorqueSetpoint.setToZero();
       //    comHeightSetpoint.set(comPositionEstimate.getZ() - supportCentroidEstimate.getZ());
-      comHeightSetpoint.set(0.55);
-      icpOmegaSetpoint.set(Math.sqrt(gravity / comHeightSetpoint.getDoubleValue()));
-      icpPositionSetpoint.setX(supportCentroidEstimate.getX());
-      icpPositionSetpoint.setY(supportCentroidEstimate.getY());
-      icpPositionSetpoint.setZ(supportCentroidEstimate.getZ());
-      cmpPositionSetpoint.set(icpPositionSetpoint);
-      comForceSetpoint.setToZero();
+      yoComHeightSetpoint.set(0.55);
+      yoIcpOmegaSetpoint.set(Math.sqrt(gravity / yoComHeightSetpoint.getDoubleValue()));
+      yoIcpPositionSetpoint.setX(yoSupportCentroidEstimate.getX());
+      yoIcpPositionSetpoint.setY(yoSupportCentroidEstimate.getY());
+      yoIcpPositionSetpoint.setZ(yoSupportCentroidEstimate.getZ());
+      yoCmpPositionSetpoint.set(yoIcpPositionSetpoint);
+      yoComForceSetpoint.setToZero();
 
       for (OneDoFJoint oneDofJoint : sdfFullRobotModel.getOneDoFJoints())
       {
