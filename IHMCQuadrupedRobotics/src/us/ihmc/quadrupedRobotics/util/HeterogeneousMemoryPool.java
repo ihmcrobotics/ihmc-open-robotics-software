@@ -4,14 +4,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * THIS IS A HACK NOT
- * 
- * @author Kyle Cesare
- */
 public class HeterogeneousMemoryPool
 {
    private final Map<Class<?>, HomogeneousMemoryPool<?>> pools = new HashMap<>();
+   
+   // Cache the values list to prevent allocation in the reset loop.
    private final Collection<HomogeneousMemoryPool<?>> values = pools.values();
 
    @SuppressWarnings("unchecked")
@@ -23,6 +20,7 @@ public class HeterogeneousMemoryPool
       }
 
       HomogeneousMemoryPool<T> pool = new HomogeneousMemoryPool<>(type);
+
       pools.put(type, pool);
       values.add(pool);
 
