@@ -3,7 +3,10 @@ package us.ihmc.quadrupedRobotics.util;
 import java.util.ArrayList;
 import java.util.List;
 
-class HomogeneousMemoryPool<T>
+/**
+ * @see HeterogeneousMemoryPool
+ */
+public class HomogeneousMemoryPool<T>
 {
    private final Class<T> type;
    private final List<T> elements;
@@ -16,6 +19,9 @@ class HomogeneousMemoryPool<T>
       this.elements = new ArrayList<>();
    }
 
+   /**
+    * @see HeterogeneousMemoryPool#lease(Class)
+    */
    public T lease()
    {
       if (index >= elements.size())
@@ -33,6 +39,9 @@ class HomogeneousMemoryPool<T>
       return elements.get(index++);
    }
 
+   /**
+    * @see HeterogeneousMemoryPool#evict()
+    */
    public void evict()
    {
       index = 0;
