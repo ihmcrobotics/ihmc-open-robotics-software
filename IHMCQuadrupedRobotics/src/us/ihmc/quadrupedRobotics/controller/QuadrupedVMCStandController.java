@@ -8,6 +8,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedRobotics.util.HeterogeneousMemoryPool;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -89,6 +90,8 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
 	private FramePoint[] framePointStorage;
 	private FrameVector[] frameVectorStorage;
 	private FrameOrientation[] frameOrientationStorage;
+	
+	private HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
 
 	public QuadrupedVMCStandController(
 		double dt,
@@ -188,47 +191,56 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
 		// compute forward kinematics
 		referenceFrames.updateFrames();
 		twistCalculator.compute();
-		
+
 		// compute foot positions
+		FramePoint footPosition = pool.grab(FramePoint.class);
 		for (RobotQuadrant robotQuadrant : RobotQuadrant.values) {
 			ReferenceFrame footFrame = referenceFrames.getFootFrame(robotQuadrant);
-			framePointStorage[0].setToZero(footFrame);
-			framePointStorage[0].changeFrame(worldFrame);
-			footPositionEstimate.get(robotQuadrant).setAndMatchFrame(framePointStorage[0]);
+			footPosition.setToZero(footFrame);
+			footPosition.changeFrame(worldFrame);
+			footPositionEstimate.get(robotQuadrant).setAndMatchFrame(footPosition);
 		}
 		
 		// compute support polygon and centroid
 		for (RobotQuadrant robotQuadrant : RobotQuadrant.values) {
 			supportPolygonEstimate.setFootstep(robotQuadrant, footPositionEstimate.get(robotQuadrant).getFrameTuple());
 		}
-		supportPolygonEstimate.getCentroid(framePointStorage[0]);
-		supportCentroidEstimate.setAndMatchFrame(framePointStorage[0]);
+
+		FramePoint supportCentroid = pool.grab(FramePoint.class); 
+		supportPolygonEstimate.getCentroid(supportCentroid);
+		supportCentroidEstimate.setAndMatchFrame(supportCentroid);
 
 		// compute body orientation
-		frameOrientationStorage[0].setToZero(bodyFrame);
-		frameOrientationStorage[0].changeFrame(worldFrame);
-		bodyOrientationEstimate.setAndMatchFrame(frameOrientationStorage[0]);
+		FrameOrientation bodyOrientation = pool.grab(FrameOrientation.class);
+		bodyOrientation.setToZero(bodyFrame);
+		bodyOrientation.changeFrame(worldFrame);
+		bodyOrientationEstimate.setAndMatchFrame(bodyOrientation);
 		
 		// compute body position
-		framePointStorage[0].setToZero(bodyFrame);
-		framePointStorage[0].changeFrame(worldFrame);
-		bodyPositionEstimate.setAndMatchFrame(framePointStorage[0]);
+		FramePoint bodyPosition = pool.grab(FramePoint.class);
+		bodyPosition.setToZero(bodyFrame);
+		bodyPosition.changeFrame(worldFrame);
+		bodyPositionEstimate.setAndMatchFrame(bodyPosition);
 		
 		// compute body angular velocity
-		twistCalculator.packTwistOfBody(twistStorage[0], sdfFullRobotModel.getPelvis());
-		twistStorage[0].packAngularPart(frameVectorStorage[0]);
+		Twist myBodyAngularVelocity = pool.grab(Twist.class);
+		twistCalculator.packTwistOfBody(myBodyAngularVelocity, sdfFullRobotModel.getPelvis());
+		myBodyAngularVelocity.packAngularPart(frameVectorStorage[0]);
 		bodyAngularVelocityEstimate.setAndMatchFrame(frameVectorStorage[0]);
 		
 		// compute center of mass position
-		framePointStorage[0].setToZero(comFrame);
-		framePointStorage[0].changeFrame(worldFrame);
-		comPositionEstimate.setAndMatchFrame(framePointStorage[0]);
+		FramePoint comPosition = pool.grab(FramePoint.class);
+		comPosition.setToZero(comFrame);
+		comPosition.changeFrame(worldFrame);
+		comPositionEstimate.setAndMatchFrame(comPosition);
 
 		// compute center of mass velocity
+		FrameVector comVelocity = pool.grab(FrameVector.class);
 		comJacobian.compute();
-		comJacobian.packCenterOfMassVelocity(frameVectorStorage[0]);
-		frameVectorStorage[0].changeFrame(worldFrame);
-		comVelocityEstimate.setAndMatchFrame(frameVectorStorage[0]);
+		comJacobian.packCenterOfMassVelocity(comVelocity);
+
+		comVelocity.changeFrame(worldFrame);
+		comVelocityEstimate.setAndMatchFrame(comVelocity);
 
 		// compute center of mass height
 		comHeightEstimate.set(comPositionEstimate.getZ() - supportCentroidEstimate.getZ());
@@ -366,6 +378,9 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
 	}
 	
 	private void computeLegTorques() {
+	   FrameVector v = pool.grab(FrameVector.class);
+	   
+
 		for (RobotQuadrant robotQuadrant : RobotQuadrant.values) {
 			// compute foot force in body coordinates
 		    FrameVector footForce = frameVectorStorage[0];
@@ -425,6 +440,8 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
    @Override
    public void doAction()
    {
+      pool.reset();
+
       // TODO Auto-generated method stub
       updateEstimates();
       updateSetpoints();
