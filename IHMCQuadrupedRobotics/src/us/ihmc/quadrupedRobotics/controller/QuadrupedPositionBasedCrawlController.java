@@ -72,6 +72,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private static final double DEFAULT_COM_ROLL_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT = 0.01;
+   private boolean finishedStandPrep = false;
    
    private final double dt;
    private final String name = getClass().getSimpleName();
@@ -476,12 +477,29 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       walkingStateMachine.checkTransitionConditions();
       walkingStateMachine.doAction();
       updateDesiredCoMTrajectory();
-      updateDesiredYaw();
       updateDesiredHeight();
+      updateDesiredYaw();
+      counteractPitchAndRoll();
       alphaFilterDesiredBodyOrientation();
       updateDesiredCoMPose();
       updateLegsBasedOnDesiredCoM();
    }
+
+   FramePose bodyPose = new FramePose();
+   private void counteractPitchAndRoll()
+   {
+      bodyPose.setToZero(bodyFrame);
+      bodyPose.changeFrame(desiredCoMPoseReferenceFrame);
+      
+      DoubleYoVariable desiredRoll = desiredCoMOrientation.getRoll();
+      double rollOffset = -bodyPose.getRoll();
+      desiredRoll.set(rollOffset);
+      
+      DoubleYoVariable desiredPitch = desiredCoMOrientation.getPitch();
+      double pitchOffset = -bodyPose.getPitch();
+      desiredPitch.set(pitchOffset);
+   }
+
 
    private void pollDataProviders()
    {
@@ -521,9 +539,10 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
 
    private void alphaFilterDesiredFeet()
    {
-      if(robotTimestamp.getDoubleValue() > 4.0)
+      if(robotTimestamp.getDoubleValue() > 4.0 && !finishedStandPrep)
       {
          desiredFeetAlphaFilterBreakFrequency.set(DEFAULT_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY);
+         finishedStandPrep = true;
       }
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
