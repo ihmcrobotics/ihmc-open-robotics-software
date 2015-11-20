@@ -348,7 +348,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       walkingStateMachine.setCurrentState(CrawlGateWalkingState.QUADRUPLE_SUPPORT);
 
       StateTransitionCondition quadrupleToTripleCondition = new QuadrupleToTripleCondition(quadrupleSupportState);
-      StateTransitionCondition tripleToQuadrupleCondition = new TripleToQuadrupleCondition();
+      StateTransitionCondition tripleToQuadrupleCondition = new TripleToQuadrupleCondition(tripleSupportState);
       
       quadrupleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.TRIPLE_SUPPORT, quadrupleToTripleCondition));
       tripleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, tripleToQuadrupleCondition));
@@ -685,11 +685,17 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    
    private class TripleToQuadrupleCondition implements StateTransitionCondition
    {
+      private final TripleSupportState tripleSupportState;
+      
+      public TripleToQuadrupleCondition(TripleSupportState tripleSupportState)
+      {
+         this.tripleSupportState = tripleSupportState;
+      }
       @Override
       public boolean checkCondition()
       {
          RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
-         return swingTrajectoryGenerators.get(swingQuadrant).isDone() || stateEstimator.isFootInContact(swingQuadrant);
+         return swingTrajectoryGenerators.get(swingQuadrant).isDone() || stateEstimator.isFootInContact(swingQuadrant) && tripleSupportState.getTimeInCurrentState() > swingDuration.getDoubleValue() / 3.0;
       }
    }
    
