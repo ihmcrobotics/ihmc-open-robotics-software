@@ -15,6 +15,7 @@ import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematics
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedControllerParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.swingLegChooser.DefaultGaitSwingLegChooser;
 import us.ihmc.quadrupedRobotics.swingLegChooser.NextSwingLegChooser;
@@ -87,7 +88,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private final QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators;
    private final NextSwingLegChooser nextSwingLegChooser;
    private final SwingTargetGenerator swingTargetGenerator;
-   
+   private final QuadrupedStateEstimator stateEstimator;
    private final SDFFullRobotModel fullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final CenterOfMassJacobian centerOfMassJacobian;
@@ -198,7 +199,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private DoubleProvider desiredYawRateProvider;
    
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
-         QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final QuadrupedDataProvider dataProvider, DoubleYoVariable yoTime,
+         QuadrupedStateEstimator stateEstimator, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final QuadrupedDataProvider dataProvider, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
       super(QuadrupedControllerState.POSITION_CRAWL);
@@ -218,7 +219,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
       this.nextSwingLegChooser = new DefaultGaitSwingLegChooser();
       this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, referenceFrames, registry);
-      
+      this.stateEstimator = stateEstimator;
       desiredVelocityProvider = dataProvider.getDesiredVelocityProvider();
       desiredYawRateProvider = dataProvider.getDesiredYawRateProvider();
 
@@ -347,7 +348,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       walkingStateMachine.setCurrentState(CrawlGateWalkingState.QUADRUPLE_SUPPORT);
 
       StateTransitionCondition quadrupleToTripleCondition = new QuadrupleToTripleCondition(quadrupleSupportState);
-      StateTransitionCondition tripleToQuadrupleCondition = new TripleToQuadrupleCondition();
+      StateTransitionCondition tripleToQuadrupleCondition = new TripleToQuadrupleCondition(tripleSupportState);
       
       quadrupleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.TRIPLE_SUPPORT, quadrupleToTripleCondition));
       tripleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, tripleToQuadrupleCondition));
@@ -684,10 +685,17 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    
    private class TripleToQuadrupleCondition implements StateTransitionCondition
    {
+      private final TripleSupportState tripleSupportState;
+      
+      public TripleToQuadrupleCondition(TripleSupportState tripleSupportState)
+      {
+         this.tripleSupportState = tripleSupportState;
+      }
       @Override
       public boolean checkCondition()
       {
-         return swingTrajectoryGenerators.get(swingLeg.getEnumValue()).isDone();
+         RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
+         return swingTrajectoryGenerators.get(swingQuadrant).isDone() || stateEstimator.isFootInContact(swingQuadrant) && tripleSupportState.getTimeInCurrentState() > swingDuration.getDoubleValue() / 3.0;
       }
    }
    
