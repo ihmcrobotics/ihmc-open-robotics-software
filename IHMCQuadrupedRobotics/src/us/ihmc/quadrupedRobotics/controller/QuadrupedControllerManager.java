@@ -4,6 +4,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedDataProvider;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
+import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -22,9 +23,9 @@ public class QuadrupedControllerManager implements RobotController
    private final StateMachine<QuadrupedControllerState> stateMachine;
    private final EnumYoVariable<QuadrupedControllerState> requestedState;
    
-   public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters, QuadrupedDataProvider quadrupedDataProvider,
-         SDFFullRobotModel sdfFullRobotModel, DoubleYoVariable robotTimestamp, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators)
+   public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters, SDFFullRobotModel sdfFullRobotModel,
+         QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators, QuadrupedStateEstimator stateEstimator, QuadrupedDataProvider quadrupedDataProvider,
+         DoubleYoVariable robotTimestamp, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
       this.sdfFullRobotModel = sdfFullRobotModel;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
@@ -38,7 +39,7 @@ public class QuadrupedControllerManager implements RobotController
       QuadrupedVMCStandController vmcStandController = new QuadrupedVMCStandController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, robotTimestamp, registry, yoGraphicsListRegistry);
       
       QuadrupedPositionBasedCrawlController positionBasedCrawlController = new QuadrupedPositionBasedCrawlController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel,
-            inverseKinematicsCalculators, quadrupedDataProvider, robotTimestamp, registry, yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead);
+            stateEstimator, inverseKinematicsCalculators, quadrupedDataProvider, robotTimestamp, registry, yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead);
       
       stateMachine.addState(vmcStandController);
       stateMachine.addState(positionBasedCrawlController);

@@ -7,7 +7,6 @@ import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
-import us.ihmc.tools.inputDevices.JInputLibraryLoader;
 
 public class Joystick
 {
@@ -43,7 +42,6 @@ public class Joystick
 
    private Controller getFirstJoystickFoundOnSystem()
    {
-      JInputLibraryLoader.loadLibraries();
       Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 
       ArrayList<Controller> joystickControllers = new ArrayList<Controller>();

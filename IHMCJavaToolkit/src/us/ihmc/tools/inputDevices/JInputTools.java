@@ -32,7 +32,6 @@ public class JInputTools
          System.setProperty("net.java.games.input.plugins", "net.java.games.input.DirectAndRawInputEnvironmentPlugin");
       }
       
-      JInputLibraryLoader.loadLibraries();
       ControllerEnvironment controllerEnvironment = ControllerEnvironment.getDefaultEnvironment();
       
       SystemStreamGobbler gobbler = new SystemStreamGobbler(GobbleType.SYSTEM_OUT, GobbleType.SYSTEM_ERROR);
