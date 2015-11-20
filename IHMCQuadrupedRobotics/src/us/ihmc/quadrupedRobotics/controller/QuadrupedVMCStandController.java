@@ -5,7 +5,9 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedVMCStandParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.util.HeterogeneousMemoryPool;
@@ -37,28 +39,30 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
 {
-
-   private final double dt;
+   // Parameters
    private final SDFFullRobotModel sdfFullRobotModel;
-   private final QuadrupedRobotParameters robotParameters;
-   private final QuadrupedReferenceFrames referenceFrames;
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final DoubleYoVariable robotTimestamp;
+   private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final YoVariableRegistry registry;
-
-   // Utilities
+   private final QuadrupedVMCStandParameters parameters;
+   private final QuadrupedJointNameMap jointNameMap;
+   private final double dt;
    private final double mass;
    private final double gravity;
+   private final double startTime;
+   
+   // Utilities
+   private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame worldFrame;
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame comFrame;
+   private QuadrupedSupportPolygon supportPolygon;
    private CenterOfMassJacobian comJacobian;
    private TwistCalculator twistCalculator;
    private AxisAngleOrientationController bodyOrientationController;
    private PIDController comHeightPIDController;
    private PIDController icpForwardPIDController;
    private PIDController icpLateralPIDController;
-   private double startTime;
 
    // Setpoints
    private QuadrantDependentList<YoFrameVector> yoFootForceSetpoint;
@@ -74,7 +78,6 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
 
    // Estimates
    private QuadrantDependentList<YoFramePoint> yoFootPositionEstimate;
-   private QuadrupedSupportPolygon supportPolygonEstimate;
    private YoFramePoint yoSupportCentroidEstimate;
    private YoFrameOrientation yoBodyOrientationEstimate;
    private YoFramePoint yoBodyPositionEstimate;
@@ -90,42 +93,46 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(QuadrupedControllerState.VMC_STAND);
-      this.dt = dt;
-      this.robotParameters = robotParameters;
+      
+      // Parameters
       this.sdfFullRobotModel = sdfFullRobotModel;
       this.robotTimestamp = robotTimestamp;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-
+      this.registry = new YoVariableRegistry(getClass().getSimpleName());
+      this.parameters = robotParameters.getQuadrupedVMCStandParameters();
+      this.jointNameMap = robotParameters.getJointMap();
+      this.dt = dt;
+      this.mass = sdfFullRobotModel.getTotalMass();
+      this.gravity = 9.81;
+      this.startTime = robotTimestamp.getDoubleValue();
+      
       // Utilities
-      registry = new YoVariableRegistry(getClass().getSimpleName());
       referenceFrames = new QuadrupedReferenceFrames(sdfFullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
-      mass = sdfFullRobotModel.getTotalMass();
-      gravity = 9.81;
       comFrame = referenceFrames.getCenterOfMassFrame();
       bodyFrame = referenceFrames.getBodyFrame();
       worldFrame = QuadrupedReferenceFrames.getWorldFrame();
+      supportPolygon = new QuadrupedSupportPolygon();
       comJacobian = new CenterOfMassJacobian(sdfFullRobotModel.getElevator());
       twistCalculator = new TwistCalculator(worldFrame, sdfFullRobotModel.getElevator());
       bodyOrientationController = new AxisAngleOrientationController("bodyOrientation", bodyFrame, dt, registry);
-      bodyOrientationController.setProportionalGains(2000, 2000, 2000);
-      bodyOrientationController.setIntegralGains(0, 0, 0, 0);
-      bodyOrientationController.setDerivativeGains(300, 300, 300);
+      bodyOrientationController.setProportionalGains(parameters.getBodyOrientationProportionalGains());
+      bodyOrientationController.setIntegralGains(parameters.getBodyOrientationIntegralGains(), parameters.getBodyOrientationMaxIntegralError());
+      bodyOrientationController.setDerivativeGains(parameters.getBodyOrientationDerivativeGains());
       comHeightPIDController = new PIDController("bodyHeight", registry);
-      comHeightPIDController.setProportionalGain(5000);
-      comHeightPIDController.setIntegralGain(100);
-      comHeightPIDController.setMaxIntegralError(0);
-      comHeightPIDController.setDerivativeGain(1000);
+      comHeightPIDController.setProportionalGain(parameters.getComHeightPropotionalGain());
+      comHeightPIDController.setIntegralGain(parameters.getComHeightIntegralGain());
+      comHeightPIDController.setMaxIntegralError(parameters.getComHeightMaxIntegralError());
+      comHeightPIDController.setDerivativeGain(parameters.getComHeightDerivativeGain());
       icpForwardPIDController = new PIDController("icpForward", registry);
-      icpForwardPIDController.setProportionalGain(5);
-      icpForwardPIDController.setIntegralGain(0);
-      icpForwardPIDController.setMaxIntegralError(0);
-      icpForwardPIDController.setDerivativeGain(0);
+      icpForwardPIDController.setProportionalGain(parameters.getIcpForwardProportionalGain());
+      icpForwardPIDController.setIntegralGain(parameters.getIcpForwardIntegralGain());
+      icpForwardPIDController.setMaxIntegralError(parameters.getIcpForwardMaxIntegralError());
+      icpForwardPIDController.setDerivativeGain(parameters.getIcpForwardDerivativeGain());
       icpLateralPIDController = new PIDController("icpLateral", registry);
-      icpLateralPIDController.setProportionalGain(5);
-      icpLateralPIDController.setIntegralGain(0);
-      icpLateralPIDController.setMaxIntegralError(0);
-      icpLateralPIDController.setDerivativeGain(0);
-      startTime = robotTimestamp.getDoubleValue();
+      icpLateralPIDController.setProportionalGain(parameters.getIcpForwardProportionalGain());
+      icpLateralPIDController.setIntegralGain(parameters.getIcpForwardIntegralGain());
+      icpLateralPIDController.setMaxIntegralError(parameters.getIcpForwardMaxIntegralError());
+      icpLateralPIDController.setDerivativeGain(parameters.getIcpForwardDerivativeGain());
 
       // Setpoints
       yoFootForceSetpoint = new QuadrantDependentList<>();
@@ -151,7 +158,6 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
          yoFootPositionEstimate.put(robotQuadrant, new YoFramePoint(prefix + "FootPositionEstimate", worldFrame, registry));
       }
-      supportPolygonEstimate = new QuadrupedSupportPolygon();
       yoSupportCentroidEstimate = new YoFramePoint("supportCentroidEstimate", worldFrame, registry);
       yoBodyOrientationEstimate = new YoFrameOrientation("bodyOrientationEstimate", worldFrame, registry);
       yoBodyPositionEstimate = new YoFramePoint("bodyPositionEstimate", worldFrame, registry);
@@ -166,9 +172,10 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
 
    private void updateEstimates()
    {
-      // compute forward kinematics
+      // update solvers
       referenceFrames.updateFrames();
       twistCalculator.compute();
+      comJacobian.compute();
 
       // compute foot positions
       FramePoint footPosition = pool.lease(FramePoint.class);
@@ -180,14 +187,13 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
          yoFootPositionEstimate.get(robotQuadrant).setAndMatchFrame(footPosition);
       }
 
-      // compute support polygon and centroid
+      // compute support polygon centroid
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         supportPolygonEstimate.setFootstep(robotQuadrant, yoFootPositionEstimate.get(robotQuadrant).getFrameTuple());
+         supportPolygon.setFootstep(robotQuadrant, yoFootPositionEstimate.get(robotQuadrant).getFrameTuple());
       }
-
       FramePoint supportCentroid = pool.lease(FramePoint.class);
-      supportPolygonEstimate.getCentroid(supportCentroid);
+      supportPolygon.getCentroid(supportCentroid);
       yoSupportCentroidEstimate.setAndMatchFrame(supportCentroid);
 
       // compute body orientation
@@ -218,9 +224,7 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
 
       // compute center of mass velocity
       FrameVector comVelocity = pool.lease(FrameVector.class);
-      comJacobian.compute();
       comJacobian.packCenterOfMassVelocity(comVelocity);
-
       comVelocity.changeFrame(worldFrame);
       yoComVelocityEstimate.setAndMatchFrame(comVelocity);
 
@@ -359,7 +363,7 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
          footPosition.changeFrame(bodyFrame);
 
          // get joint array for the leg chain
-         OneDoFJoint kneeJoint = sdfFullRobotModel.getOneDoFJointByName(robotParameters.getJointMap().getJointBeforeFootName(robotQuadrant));
+         OneDoFJoint kneeJoint = sdfFullRobotModel.getOneDoFJointByName(jointNameMap.getJointBeforeFootName(robotQuadrant));
          RigidBody body = sdfFullRobotModel.getRootJoint().getSuccessor();
          RigidBody shin = kneeJoint.getSuccessor();
          OneDoFJoint[] legJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(body, shin), OneDoFJoint.class);
@@ -426,8 +430,7 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       yoBodyAngularVelocitySetpoint.setToZero();
       yoBodyTorqueFeedforwardSetpoint.setToZero();
       yoBodyTorqueSetpoint.setToZero();
-      //    comHeightSetpoint.set(comPositionEstimate.getZ() - supportCentroidEstimate.getZ());
-      yoComHeightSetpoint.set(0.55);
+      yoComHeightSetpoint.set(parameters.getComHeightSetpoint());
       yoIcpOmegaSetpoint.set(Math.sqrt(gravity / yoComHeightSetpoint.getDoubleValue()));
       yoIcpPositionSetpoint.setX(yoSupportCentroidEstimate.getX());
       yoIcpPositionSetpoint.setY(yoSupportCentroidEstimate.getY());
