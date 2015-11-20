@@ -44,7 +44,7 @@ public class QuadrupedControllerManager implements RobotController
       stateMachine.addState(vmcStandController);
       stateMachine.addState(positionBasedCrawlController);
 
-      stateMachine.setCurrentState(QuadrupedControllerState.VMC_STAND);
+      stateMachine.setCurrentState(QuadrupedControllerState.POSITION_CRAWL);
       requestedState.set(null);
    }
 
