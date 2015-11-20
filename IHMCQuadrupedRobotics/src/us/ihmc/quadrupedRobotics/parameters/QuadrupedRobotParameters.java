@@ -19,5 +19,9 @@ public interface QuadrupedRobotParameters
    public QuadrupedPhysicalProperties getPhysicalProperties();
 
    public QuadrupedControllerParameters getQuadrupedControllerParameters();
+   
+   public QuadrupedVMCStandParameters getQuadrupedVMCStandParameters();
+
+   public QuadrupedActuatorParameters getActuatorParameters();
 
 }

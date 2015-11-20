@@ -8,7 +8,6 @@ import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
 import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
-import us.ihmc.tools.inputDevices.JInputLibraryLoader;
 
 
 public class DRCRobotSteeringWheelJoystickController
@@ -50,7 +49,6 @@ public class DRCRobotSteeringWheelJoystickController
     */
    private Controller findController()
    {
-      JInputLibraryLoader.loadLibraries();
       Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 
       for (Controller controller : controllers)

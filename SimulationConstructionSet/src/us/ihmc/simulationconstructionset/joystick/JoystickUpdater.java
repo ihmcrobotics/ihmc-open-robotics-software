@@ -1,87 +1,104 @@
 package us.ihmc.simulationconstructionset.joystick;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
-import us.ihmc.tools.inputDevices.JInputLibraryLoader;
-import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
+import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
+import us.ihmc.tools.io.printing.PrintTools;
 
-public class JoystickUpdater implements Runnable
+public class JoystickUpdater implements Runnable, ComponentSelector
 {
    private final Controller joystickController;
    private long pollIntervalMillis = 20;
    private final ArrayList<JoystickEventListener> listeners = new ArrayList<JoystickEventListener>();
+   private HashSet<Identifier> identifiers = new HashSet<Identifier>();
 
    public JoystickUpdater()
    {
-      this(findFirstController());
+      this(findFirstStickController());
    }
 
-   
    public JoystickUpdater(Controller joystickController)
    {
       this.joystickController = joystickController;
+
+      for (Component component : joystickController.getComponents())
+      {
+         identifiers.add(component.getIdentifier());
+      }
    }
-   
-   
+
    /**
-    * Just return the first stick you find
+    * Return the first stick found.
     */
-   private static Controller findFirstController()
+   private static Controller findFirstStickController()
    {
-      JInputLibraryLoader.loadLibraries();
       Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 
+      List<Controller> sticks = new ArrayList<>(controllers.length);
       for (Controller controller : controllers)
       {
          if (controller.getType() == Controller.Type.STICK)
          {
-            return controller;
+            sticks.add(controller);
          }
       }
-      throw new JoyStickNotFoundException();
 
+      if (sticks.size() > 1)
+      {
+         PrintTools.warn("More than one joystick found! " + sticks);
+      }
+
+      if (!sticks.isEmpty())
+      {
+         return sticks.get(0);
+      }
+      else
+      {
+         throw new JoyStickNotFoundException();
+      }
    }
-   
+
    public static boolean isJoyStickConnected()
    {
-      try{
-              findFirstController();
-              return true;
+      try
+      {
+         findFirstStickController();
+         return true;
       }
-      catch(JoyStickNotFoundException e)
+      catch (JoyStickNotFoundException e)
       {
          return false;
       }
-      
    }
 
-   
    public void listComponents()
    {
-      for(Component component: joystickController.getComponents())
+      for (Component component : joystickController.getComponents())
       {
          System.out.println(component.getIdentifier().getName());
       }
    }
-   
+
    public Component findComponent(Identifier identifier) throws JoystickComponentNotFoundException
    {
-      for (Component component : joystickController.getComponents())
-      {
-         if (component.getIdentifier().equals(identifier))
-            return component;
-      }
-      
-      
-      throw new JoystickComponentNotFoundException(identifier);
+      if (hasComponent(identifier))
+         return joystickController.getComponent(identifier);
+      else
+         throw new JoystickComponentNotFoundException(identifier);
    }
-   
+
+   public boolean hasComponent(Identifier identifier)
+   {
+      return identifiers.contains(identifier);
+   }
 
    public void setPollInterval(long pollIntervalMillis)
    {
@@ -118,5 +135,10 @@ public class JoystickUpdater implements Runnable
    public void addListener(JoystickEventListener joystickEventListener)
    {
       this.listeners.add(joystickEventListener);
+   }
+   
+   public void clearListeners()
+   {
+      this.listeners.clear();
    }
 }
