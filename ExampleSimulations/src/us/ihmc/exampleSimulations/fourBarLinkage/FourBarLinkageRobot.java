@@ -6,6 +6,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -14,28 +15,21 @@ import us.ihmc.simulationconstructionset.Robot;
 
 
 public class FourBarLinkageRobot extends Robot
-{
-	final ExternalForcePoint constraintOnL4, constraintOnL3;
-	
-	public FourBarLinkageRobot(String name, FourBarLinkageParameters fourBarLinkageParameters, Vector3d offsetWorld) 
+{	
+	public FourBarLinkageRobot(String name, FourBarLinkageParameters fourBarLinkageParameters, Vector3d offsetWorld, YoVariableRegistry registry) 
 	{	
 		super("fourBarLinkageRobot" + name);
 		
 		Vector3d offsetJoint12 = new Vector3d(0, 0, fourBarLinkageParameters.linkageLength_1);
 		Vector3d offsetJoint23 = new Vector3d(0, 0, fourBarLinkageParameters.linkageLength_2);
 		Vector3d offsetJoint34 = new Vector3d(0, 0, fourBarLinkageParameters.linkageLength_3);
-		Vector3d offsetJoint14 = new Vector3d(0, 0, fourBarLinkageParameters.linkageLength_4);
 		
 		PinJoint rootPinJoint = new PinJoint("rootPinJoint", offsetWorld, this, Axis.Y);
 		rootPinJoint.setInitialState(fourBarLinkageParameters.angle_1, 0.0);
 		Link fourBarLink1 = fourBarLink("fourBarLink1" + name, fourBarLinkageParameters.linkageLength_1, fourBarLinkageParameters.radius_1, fourBarLinkageParameters.mass_1);
-		Link fourBarLink4 = fourBarLink("fourBarLink4" + name, fourBarLinkageParameters.linkageLength_4, fourBarLinkageParameters.radius_4, fourBarLinkageParameters.mass_4);
 		rootPinJoint.setLink(fourBarLink1);
-		rootPinJoint.setLink(fourBarLink4);
 		rootPinJoint.setDamping(fourBarLinkageParameters.damping_1);
 		this.addRootJoint(rootPinJoint);
-		constraintOnL4 = new ExternalForcePoint("constraintOnL4" + name, offsetJoint14, this);
-		rootPinJoint.physics.addExternalForcePoint(constraintOnL4);
 		
 		PinJoint pinJoint2 = new PinJoint("pinJoint2", offsetJoint12 , this, Axis.Y);
 		pinJoint2.setInitialState(fourBarLinkageParameters.angle_2, 0.0);
@@ -46,12 +40,31 @@ public class FourBarLinkageRobot extends Robot
 		
 		PinJoint pinJoint3 = new PinJoint("pinJoint3", offsetJoint23 , this, Axis.Y);
 		pinJoint3.setInitialState(fourBarLinkageParameters.angle_3, 0.0);
-		Link fourBarLink3 = fourBarLink("fourBarLink3" + name, fourBarLinkageParameters.linkageLength_3, fourBarLinkageParameters.radius_2, fourBarLinkageParameters.mass_2);
+		Link fourBarLink3 = fourBarLink("fourBarLink3" + name, fourBarLinkageParameters.linkageLength_3, fourBarLinkageParameters.radius_3, fourBarLinkageParameters.mass_3);
 		pinJoint3.setLink(fourBarLink3);
 		pinJoint3.setDamping(fourBarLinkageParameters.damping_3);
 		pinJoint2.addJoint(pinJoint3);
-		constraintOnL3 = new ExternalForcePoint("constraintOnL3" + name, offsetJoint34, this);
-		pinJoint3.physics.addExternalForcePoint(constraintOnL3);	
+		
+		PinJoint pinJoint4 = new PinJoint("pinJoint4", offsetJoint34, this, Axis.Y);
+		pinJoint4.setInitialState(fourBarLinkageParameters.angle_3, 0.0);
+      Link fourBarLink4 = fourBarLink("fourBarLink4" + name, fourBarLinkageParameters.linkageLength_3, fourBarLinkageParameters.radius_4, fourBarLinkageParameters.mass_4);
+      pinJoint4.setLink(fourBarLink4);
+      pinJoint4.setDamping(fourBarLinkageParameters.damping_4);
+      pinJoint3.addJoint(pinJoint4);
+      
+      ExternalForcePoint efpJoint1to4 = new ExternalForcePoint(name + "efp_1to4", new Vector3d(0.0, 0.0, fourBarLinkageParameters.linkageLength_4), this);
+      ExternalForcePoint efpJoint1to2 = new ExternalForcePoint(name + "efp_1to2", new Vector3d(fourBarLinkageParameters.linkageLength_1, 0.0, 0.0), this);
+      
+      pinJoint4.addExternalForcePoint(efpJoint1to4);
+      pinJoint2.addExternalForcePoint(efpJoint1to2);
+      
+      FourBarLinkageConstraintToIntegrate fourBarLinkageConstraintToIntegrate = new FourBarLinkageConstraintToIntegrate(name + "ClosingConstraint", efpJoint1to2, efpJoint1to4, rootPinJoint, registry);
+      fourBarLinkageConstraintToIntegrate.setAxialStiffness(100.0);
+      fourBarLinkageConstraintToIntegrate.setAxialDamping(10.0);
+      fourBarLinkageConstraintToIntegrate.setRadialStiffness(10.0);
+      fourBarLinkageConstraintToIntegrate.setRadialDamping(1.0);
+      
+      addFunctionToIntegrate(fourBarLinkageConstraintToIntegrate);
 	}
 
    public Link fourBarLink(String linkName, double length, double radius, double mass) 
