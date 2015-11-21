@@ -21,8 +21,8 @@ public class FourBarLinkageRobot extends Robot
 	{	
 		super("fourBarLinkageRobot" + name);
 		
-		Vector3d offsetJoint12 = new Vector3d(0, 0, -fourBarLinkageParameters.linkageLength_1);
-		Vector3d offsetJoint23 = new Vector3d(0, 0, -fourBarLinkageParameters.linkageLength_2);
+		Vector3d offsetJoint12 = new Vector3d(0, 0, fourBarLinkageParameters.linkageLength_1);
+		Vector3d offsetJoint23 = new Vector3d(0, 0, fourBarLinkageParameters.linkageLength_2);
 		Vector3d offsetJoint34 = new Vector3d(0, 0, fourBarLinkageParameters.linkageLength_3);
 		Vector3d offsetJoint14 = new Vector3d(0, 0, fourBarLinkageParameters.linkageLength_4);
 		
@@ -54,7 +54,7 @@ public class FourBarLinkageRobot extends Robot
 		pinJoint3.physics.addExternalForcePoint(constraintOnL3);	
 	}
 
-	public Link fourBarLink(String linkName, double length, double radius, double mass) 
+   public Link fourBarLink(String linkName, double length, double radius, double mass) 
 	{
 		Link link = new Link(linkName);
 		Matrix3d inertiaCylinder = createInertiaMatrixCylinder(linkName, length, radius, mass);
