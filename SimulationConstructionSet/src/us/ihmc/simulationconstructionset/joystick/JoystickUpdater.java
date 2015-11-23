@@ -35,9 +35,6 @@ public class JoystickUpdater implements Runnable, ComponentSelector
       }
    }
 
-   /**
-    * Return the first stick found.
-    */
    private static Controller findFirstStickController()
    {
       Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
@@ -79,13 +76,13 @@ public class JoystickUpdater implements Runnable, ComponentSelector
       }
    }
 
-   public void listComponents()
-   {
-      for (Component component : joystickController.getComponents())
-      {
-         System.out.println(component.getIdentifier().getName());
-      }
-   }
+//   public void listComponents()
+//   {
+//      for (Component component : joystickController.getComponents())
+//      {
+//         System.out.println(component.getIdentifier().getName());
+//      }
+//   }
 
    public Component findComponent(Identifier identifier) throws JoystickComponentNotFoundException
    {
