@@ -24,7 +24,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.joystick.BooleanYoVariableJoystickEventListener;
 import us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
-import us.ihmc.simulationconstructionset.joystick.JoyStickNotFoundException;
 import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
@@ -104,16 +103,7 @@ public class ValkyrieSliderBoard
 
    public static void setupJoyStickAndTreadmill(YoVariableRegistry registry)
    {
-      final JoystickUpdater joystickUpdater;
-      try
-      {
-         joystickUpdater = new JoystickUpdater();
-      }
-      catch (JoyStickNotFoundException ex)
-      {
-         System.err.println("Joystick not found. Proceeding without joystick");
-         return;
-      }
+      final JoystickUpdater joystickUpdater = new JoystickUpdater();
       Thread thread = new Thread(joystickUpdater);
       thread.start();
 
