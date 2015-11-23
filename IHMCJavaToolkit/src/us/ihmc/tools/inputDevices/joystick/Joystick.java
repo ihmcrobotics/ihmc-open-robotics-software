@@ -1,37 +1,109 @@
 package us.ihmc.tools.inputDevices.joystick;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
+import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
+import net.java.games.input.Component.Identifier;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class Joystick
 {
-   private final ArrayList<JoystickEventListener> listeners = new ArrayList<JoystickEventListener>();
-   private final ArrayList<JoystickGeneralListener> generalListenersList = new ArrayList<JoystickGeneralListener>();
+   private final ArrayList<JoystickEventListener> eventListeners = new ArrayList<JoystickEventListener>();
+   private final ArrayList<JoystickGeneralListener> generalListeners = new ArrayList<JoystickGeneralListener>();
+   private final HashSet<Identifier> identifiers = new HashSet<Identifier>();
+   private final Controller joystickController;
+   private JoystickUpdater joystickUpdater;
 
    public Joystick()
    {
-      Controller joystickController = getFirstJoystickFoundOnSystem();
+      joystickController = getFirstJoystickFoundOnSystem();
 
-      if (joystickController == null)
-      {
-         PrintTools.error("Joystick not found!");
+      if (nullCheck())
          return;
+      
+      for (Component component : joystickController.getComponents())
+      {
+         identifiers.add(component.getIdentifier());
       }
       
-      JoystickUpdater joystickUpdater = new JoystickUpdater(joystickController, listeners, generalListenersList);
+      joystickUpdater = new JoystickUpdater(joystickController, eventListeners, generalListeners);
 
       Thread thread = new Thread(joystickUpdater);
       thread.setPriority(Thread.NORM_PRIORITY);
       thread.start();
    }
 
+   private boolean nullCheck()
+   {
+      if (joystickController == null)
+      {
+         PrintTools.error("Joystick not found!");
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   public void addJoystickEventListener(JoystickEventListener joystickEventListener)
+   {
+      if (nullCheck())
+         return;
+      
+      eventListeners.add(joystickEventListener);
+   }
+   
+   public void addJoystickGeneralListener(JoystickGeneralListener joystickGeneralListener)
+   {
+      if (nullCheck())
+         return;
+      
+      generalListeners.add(joystickGeneralListener);
+   }
+   
+   public void clearEventListeners()
+   {
+      if (nullCheck())
+         return;
+      
+      eventListeners.clear();
+   }
+
+   public Component findComponent(Identifier identifier) throws JoystickComponentNotFoundException
+   {
+      if (nullCheck())
+         return null;
+      
+      if (hasComponent(identifier))
+         return joystickController.getComponent(identifier);
+      else
+         throw new JoystickComponentNotFoundException(identifier);
+   }
+
+   public boolean hasComponent(Identifier identifier)
+   {
+      if (nullCheck())
+         return false;
+      
+      return identifiers.contains(identifier);
+   }
+   
+   public void setPollInterval(int pollIntervalMillis)
+   {
+      if (nullCheck())
+         return;
+      
+      joystickUpdater.setPollIntervalMillis(pollIntervalMillis);
+   }
+   
    private static Controller getFirstJoystickFoundOnSystem()
    {
       Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
-
+   
       ArrayList<Controller> joystickControllers = new ArrayList<Controller>();
       for (Controller controller : controllers)
       {
@@ -40,12 +112,12 @@ public class Joystick
             joystickControllers.add(controller);
          }
       }
-
+   
       if (joystickControllers.size() > 1)
       {
          PrintTools.warn("More than one joystick found! " + joystickControllers);
       }
-
+   
       if (!joystickControllers.isEmpty())
       {
          PrintTools.info("Using joystick: " + joystickControllers.get(0));
@@ -57,17 +129,7 @@ public class Joystick
       }
    }
 
-   public void addJoystickEventListener(JoystickEventListener joystickEventListener)
-   {
-      listeners.add(joystickEventListener);
-   }
-
-   public void addJoystickGeneralListener(JoystickGeneralListener joystickGeneralListener)
-   {
-      generalListenersList.add(joystickGeneralListener);
-   }
-   
-   public static boolean isJoyStickConnected()
+   public static boolean isAJoystickConnectedToSystem()
    {
       return getFirstJoystickFoundOnSystem() != null;
    }

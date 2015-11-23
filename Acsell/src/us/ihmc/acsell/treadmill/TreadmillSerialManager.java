@@ -7,7 +7,7 @@ import java.io.OutputStream;
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
-import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
+import us.ihmc.tools.inputDevices.joystick.Joystick;
 
 
 
@@ -119,11 +119,9 @@ public class TreadmillSerialManager {
 
    public static void setupJoyStick(final OutputStream out)
    {
-      final JoystickUpdater joystickUpdater = new JoystickUpdater();
-      Thread thread = new Thread(joystickUpdater);
-      thread.start();     
+      final Joystick joystickUpdater = new Joystick();
 
-      joystickUpdater.addListener(new TreadmillJoystickEventListener(out));
+      joystickUpdater.addJoystickEventListener(new TreadmillJoystickEventListener(out));
    }
     
     

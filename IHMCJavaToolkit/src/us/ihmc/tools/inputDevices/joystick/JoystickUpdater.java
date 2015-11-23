@@ -10,13 +10,13 @@ import net.java.games.input.EventQueue;
 public class JoystickUpdater implements Runnable
 {
    private static final boolean DEBUG = false;
-   private final Controller joystickController;
-   private HashMap<String, Float> lastValues = new HashMap<String, Float>();
    
+   private final Controller joystickController;
    private final ArrayList<JoystickEventListener> listeners;
    private final ArrayList<JoystickGeneralListener> generalListenersList;
    
-   private final int pollIntervalMillis = 20;
+   private HashMap<String, Float> lastValues = new HashMap<String, Float>();
+   private int pollIntervalMillis = 20;
    private float deadband = 0.2f;
    private boolean connected;
 
@@ -123,5 +123,10 @@ public class JoystickUpdater implements Runnable
       String name = event.getComponent().getName();
 
       return name.equals("X Axis") || name.equals("Y Axis") || name.equals("Z Rotation");
+   }
+
+   public void setPollIntervalMillis(int pollIntervalMillis)
+   {
+      this.pollIntervalMillis = pollIntervalMillis;
    }
 }
