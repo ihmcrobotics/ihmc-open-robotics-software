@@ -5,6 +5,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -25,13 +26,13 @@ public class FourBarLinkageConstraintToIntegrate implements FunctionToIntegrate
    private final ExternalForcePoint connectionPointA;
    private final ExternalForcePoint connectionPointB;
 
-//   private final YoFramePoint yoConnectionAPosition;
-//   private final YoFramePoint yoConnectionBPosition;
+   private final YoFramePoint yoConnectionAPosition;
+   private final YoFramePoint yoConnectionBPosition;
    private final YoFrameVector yoConnectionPositionError;
    private final DoubleYoVariable yoConnectionPositionErrorMagnitude;
 
-//   private final YoFrameVector yoConnectionAVelocity;
-//   private final YoFrameVector yoConnectionBVelocity;
+   private final YoFrameVector yoConnectionAVelocity;
+   private final YoFrameVector yoConnectionBVelocity;
    private final YoFrameVector yoConnectionVelocityError;
    private final DoubleYoVariable yoConnectionVelocityErrorMagnitude;
 
@@ -78,13 +79,13 @@ public class FourBarLinkageConstraintToIntegrate implements FunctionToIntegrate
       this.connectionPointA = connectionPointA;
       this.connectionPointB = connectionPointB;
 
-//      yoConnectionAPosition = connectionPointA.getYoPosition();
-//      yoConnectionBPosition = connectionPointB.getYoPosition();
+      yoConnectionAPosition = connectionPointA.getYoPosition();
+      yoConnectionBPosition = connectionPointB.getYoPosition();
       yoConnectionPositionError = new YoFrameVector(name + "_ConnectionPositionError", jointAReferenceFrame, registry);
       yoConnectionPositionErrorMagnitude = new DoubleYoVariable(name + "_ConnectionPositionErrorMagnitude", registry);
 
-//      yoConnectionAVelocity = connectionPointA.getYoVelocity();
-//      yoConnectionBVelocity = connectionPointB.getYoVelocity();
+      yoConnectionAVelocity = connectionPointA.getYoVelocity();
+      yoConnectionBVelocity = connectionPointB.getYoVelocity();
       yoConnectionVelocityError = new YoFrameVector(name + "_ConnectionVelocityErrorMagnitude", jointAReferenceFrame, registry);
       yoConnectionVelocityErrorMagnitude = new DoubleYoVariable(name + "_ConnectionVelocityErrorMagnitude", registry);
 
@@ -136,7 +137,7 @@ public class FourBarLinkageConstraintToIntegrate implements FunctionToIntegrate
       
       computeErrors();
       
-      totalForce.setToZero();
+      totalForce.setToZero(jointAReferenceFrame);
       
       radialSpringForce.scale(radialStiffness.getDoubleValue(), connectionPositionError);
       double radialPositionErrorForce = radialSpringForce.dot(radialDirection);
@@ -170,11 +171,11 @@ public class FourBarLinkageConstraintToIntegrate implements FunctionToIntegrate
       jointAReferenceFrame.update();
 
       // TODO: test if these updates are actually needed
-      //      yoConnectionAPosition.getFrameTupleIncludingFrame(connectionAPosition);
-      //      yoConnectionBPosition.getFrameTupleIncludingFrame(connectionBPosition);
+      yoConnectionAPosition.getFrameTupleIncludingFrame(connectionAPosition);
+      yoConnectionBPosition.getFrameTupleIncludingFrame(connectionBPosition);
 
-      //      yoConnectionAVelocity.getFrameTupleIncludingFrame(connectionAVelocity);
-      //      yoConnectionBVelocity.getFrameTupleIncludingFrame(connectionBVelocity);
+      yoConnectionAVelocity.getFrameTupleIncludingFrame(connectionAVelocity);
+      yoConnectionBVelocity.getFrameTupleIncludingFrame(connectionBVelocity);
    }
    
    private void changeFrame(ReferenceFrame frame)
@@ -182,7 +183,7 @@ public class FourBarLinkageConstraintToIntegrate implements FunctionToIntegrate
       connectionAPosition.changeFrame(frame);
       connectionBPosition.changeFrame(frame);
       connectionAVelocity.changeFrame(frame);
-      connectionBPosition.changeFrame(frame);
+      connectionBVelocity.changeFrame(frame);
    }
 
    private void computeErrors()
