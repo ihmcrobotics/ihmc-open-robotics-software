@@ -6,12 +6,13 @@ import java.util.HashMap;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 
 public class EnumYoVariableDependentJoystickInputManager<T>
 {
    private final int pollIntervalMillis = 20;
-   private final JoystickUpdater joystickUpdater;
+   private final Joystick joystickUpdater;
    private final HashMap<Enum<?>, ArrayList<JoystickEventListener>> eventListeners = new HashMap<>();
    private final EnumYoVariable<?> enumYoVariable;
    private final T[] enumValues;
@@ -21,12 +22,8 @@ public class EnumYoVariableDependentJoystickInputManager<T>
       this.enumValues = enumType.getEnumConstants();
       this.enumYoVariable = enumYoVariable;
       
-      joystickUpdater = new JoystickUpdater();
+      joystickUpdater = new Joystick();
       joystickUpdater.setPollInterval(pollIntervalMillis);
-
-      Thread thread = new Thread(joystickUpdater);
-      thread.setPriority(Thread.NORM_PRIORITY);
-      thread.start();
       
       enumYoVariable.addVariableChangedListener(new VariableChangedListener()
       {
@@ -38,7 +35,7 @@ public class EnumYoVariableDependentJoystickInputManager<T>
       });
    }
    
-   public ComponentSelector getComponentSelector()
+   public Joystick getComponentSelector()
    {
       return joystickUpdater;
    }
@@ -50,13 +47,13 @@ public class EnumYoVariableDependentJoystickInputManager<T>
    
    private void updateListeners(final EnumYoVariable<?> enumYoVariable)
    {
-      joystickUpdater.clearListeners();
+      joystickUpdater.clearEventListeners();
       T enumValue = enumValues[enumYoVariable.getOrdinal()];
       if(eventListeners.containsKey(enumValue))
       {
          for(JoystickEventListener eventListener : eventListeners.get(enumValue))
          {
-            joystickUpdater.addListener(eventListener);
+            joystickUpdater.addJoystickEventListener(eventListener);
          }
       }
    }
