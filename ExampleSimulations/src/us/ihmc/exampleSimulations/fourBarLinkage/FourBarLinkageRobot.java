@@ -12,10 +12,16 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 
 public class FourBarLinkageRobot extends Robot
 {	
+   private static final boolean SHOW_CONTACT_GRAPHICS = true;
+   
+   private final ExternalForcePoint efpJoint1to4;
+   private final ExternalForcePoint efpJoint1to2;
+   
 	public FourBarLinkageRobot(String name, FourBarLinkageParameters fourBarLinkageParameters, Vector3d offsetWorld, YoVariableRegistry registry) 
 	{	
 		super("fourBarLinkageRobot" + name);
@@ -52,19 +58,26 @@ public class FourBarLinkageRobot extends Robot
       pinJoint4.setDamping(fourBarLinkageParameters.damping_4);
       pinJoint3.addJoint(pinJoint4);
       
-      ExternalForcePoint efpJoint1to4 = new ExternalForcePoint(name + "efp_1to4", new Vector3d(0.0, 0.0, fourBarLinkageParameters.linkageLength_4), this);
-      ExternalForcePoint efpJoint1to2 = new ExternalForcePoint(name + "efp_1to2", new Vector3d(fourBarLinkageParameters.linkageLength_1, 0.0, 0.0), this);
+      efpJoint1to4 = new ExternalForcePoint(name + "efp_1to4", new Vector3d(0.0, 0.0, fourBarLinkageParameters.linkageLength_4), this);
+      efpJoint1to2 = new ExternalForcePoint(name + "efp_1to2", new Vector3d(fourBarLinkageParameters.linkageLength_1, 0.0, 0.0), this);
       
       pinJoint4.addExternalForcePoint(efpJoint1to4);
       pinJoint2.addExternalForcePoint(efpJoint1to2);
       
-      FourBarLinkageConstraintToIntegrate fourBarLinkageConstraintToIntegrate = new FourBarLinkageConstraintToIntegrate(name + "ClosingConstraint", efpJoint1to2, efpJoint1to4, rootPinJoint, registry);
-      fourBarLinkageConstraintToIntegrate.setAxialStiffness(100.0);
-      fourBarLinkageConstraintToIntegrate.setAxialDamping(10.0);
-      fourBarLinkageConstraintToIntegrate.setRadialStiffness(10.0);
-      fourBarLinkageConstraintToIntegrate.setRadialDamping(1.0);
-      
-      addFunctionToIntegrate(fourBarLinkageConstraintToIntegrate);
+      if(SHOW_CONTACT_GRAPHICS)
+      {
+         double radius = 0.1;
+
+         Graphics3DObject joint2Graphics = pinJoint2.getLink().getLinkGraphics();
+         joint2Graphics.identity();
+         joint2Graphics.translate(efpJoint1to2.getOffsetCopy());
+         joint2Graphics.addSphere(radius, YoAppearance.LemonChiffon());
+
+         Graphics3DObject joint4Graphics = pinJoint4.getLink().getLinkGraphics();
+         joint4Graphics.identity();
+         joint4Graphics.translate(efpJoint1to4.getOffsetCopy());
+         joint4Graphics.addSphere(2*radius, YoAppearance.Glass());
+      }
 	}
 
    public Link fourBarLink(String linkName, double length, double radius, double mass) 
@@ -81,6 +94,16 @@ public class FourBarLinkageRobot extends Robot
 		link.addCoordinateSystemToCOM(0.15);
 		return link;
 	}
+   
+   public ExternalForcePoint getEfpJoint1to2()
+   {
+      return efpJoint1to2;
+   }
+   
+   public ExternalForcePoint getEfpJoint1to4()
+   {
+      return efpJoint1to4;
+   }   
 
 	private Matrix3d createInertiaMatrixCylinder(String linkName, double length, double radius, double mass) 
 	{
@@ -88,5 +111,4 @@ public class FourBarLinkageRobot extends Robot
 		inertiaCylinder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, length, Axis.Z);
 		return inertiaCylinder;
 	}
-
 }

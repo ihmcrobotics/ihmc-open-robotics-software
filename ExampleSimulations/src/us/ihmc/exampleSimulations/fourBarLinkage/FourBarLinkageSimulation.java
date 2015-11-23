@@ -12,14 +12,31 @@ public class FourBarLinkageSimulation
    private static final double simDT = 1.0e-4;
    private static final int recordFrequency = 10;
 
+   private static final boolean USE_INTEGRATED_CONSTRAINT = false;
+
    public FourBarLinkageSimulation(FourBarLinkageParameters fourBarLinkageParameters)
    {
       YoVariableRegistry registry = new YoVariableRegistry("fourBarLinkageRegistry");
-      
+
       // Robot
       FourBarLinkageRobot robot = new FourBarLinkageRobot("basicFourBar", fourBarLinkageParameters, offsetWorld, registry);
 
-      // Controller
+      // Four bar constraint
+      if (USE_INTEGRATED_CONSTRAINT)
+      {
+         FourBarLinkageConstraintToIntegrate fourBarLinkageConstraintToIntegrate = new FourBarLinkageConstraintToIntegrate("fourBarIntegratedConstraint",
+               robot.getEfpJoint1to2(), robot.getEfpJoint1to4(), robot.getRootJoints().get(0), registry);
+         fourBarLinkageConstraintToIntegrate.setAxialStiffness(100.0);
+         fourBarLinkageConstraintToIntegrate.setAxialDamping(10.0);
+         fourBarLinkageConstraintToIntegrate.setRadialStiffness(10.0);
+         fourBarLinkageConstraintToIntegrate.setRadialDamping(1.0);
+
+         robot.addFunctionToIntegrate(fourBarLinkageConstraintToIntegrate);
+      }
+      else
+      {
+         robot.setController(new FourBarLinkageSimpleClosedLoopConstraintController(robot));
+      }
 
       // SCS
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
