@@ -198,8 +198,6 @@ public class ValkyrieSliderBoard
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
             minHeadingDot + desiredHeadingDot_Bias, maxHeadingDot + desiredHeadingDot_Bias, deadZone, signFlip));
 
-      joystickUpdater.listComponents();
-
       BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
       joystickUpdater.addListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.TRIGGER), true));
 
