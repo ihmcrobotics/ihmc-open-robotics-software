@@ -1,4 +1,4 @@
-package us.ihmc.stateEstimation.quadruped.kinematicsBasedStateEstimation;
+package us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
