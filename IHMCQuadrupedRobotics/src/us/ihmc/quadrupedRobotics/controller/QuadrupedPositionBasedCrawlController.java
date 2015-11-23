@@ -144,7 +144,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private final QuadrantDependentList<DoubleYoVariable> desiredFeetLocationsAlpha = new QuadrantDependentList<DoubleYoVariable>();
    private final DoubleYoVariable desiredFeetAlphaFilterBreakFrequency = new DoubleYoVariable("desiredFeetAlphaFilterBreakFrequency", registry);
    
-   private final QuadrantDependentList<YoFrameVector> desiredeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
+   private final QuadrantDependentList<YoFrameVector> desiredFeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
    
    private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoFrameConvexPolygon2d currentTriplePolygon = new YoFrameConvexPolygon2d("currentTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
@@ -316,7 +316,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          
          
          YoFrameVector footPositionInLegAttachementFrame = new YoFrameVector(prefix + "FootPositionInLegFrame", null, registry);
-         desiredeetPositionsInLegAttachmentFrame.put(robotQuadrant, footPositionInLegAttachementFrame);
+         desiredFeetPositionsInLegAttachmentFrame.put(robotQuadrant, footPositionInLegAttachementFrame);
       }
       
       for (int i = 0; i < tripleSupportPolygons.length; i++)
@@ -643,7 +643,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       {
          Vector3d footPositionInLegAttachmentFrame = packFootPositionUsingDesiredBodyToBodyHack(robotQuadrant);
          
-         desiredeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(footPositionInLegAttachmentFrame);
+         desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(footPositionInLegAttachmentFrame);
          computeDesiredPositionsAndStoreInFullRobotModel(robotQuadrant, footPositionInLegAttachmentFrame);
       }
    }
