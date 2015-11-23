@@ -10,6 +10,7 @@ import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
+import us.ihmc.tools.inputDevices.joystick.JoystickComponentNotFoundException;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.io.printing.PrintTools;
 
@@ -35,9 +36,6 @@ public class JoystickUpdater implements Runnable, ComponentSelector
       }
    }
 
-   /**
-    * Return the first stick found.
-    */
    private static Controller findFirstStickController()
    {
       Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
@@ -62,29 +60,13 @@ public class JoystickUpdater implements Runnable, ComponentSelector
       }
       else
       {
-         throw new JoyStickNotFoundException();
+         return null;
       }
    }
 
    public static boolean isJoyStickConnected()
    {
-      try
-      {
-         findFirstStickController();
-         return true;
-      }
-      catch (JoyStickNotFoundException e)
-      {
-         return false;
-      }
-   }
-
-   public void listComponents()
-   {
-      for (Component component : joystickController.getComponents())
-      {
-         System.out.println(component.getIdentifier().getName());
-      }
+      return findFirstStickController() != null;
    }
 
    public Component findComponent(Identifier identifier) throws JoystickComponentNotFoundException
@@ -136,7 +118,7 @@ public class JoystickUpdater implements Runnable, ComponentSelector
    {
       this.listeners.add(joystickEventListener);
    }
-   
+
    public void clearListeners()
    {
       this.listeners.clear();

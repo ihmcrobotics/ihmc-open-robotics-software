@@ -1,18 +1,13 @@
-package us.ihmc.simulationconstructionset.joystick;
+package us.ihmc.tools.inputDevices.joystick;
 
 import net.java.games.input.Component.Identifier;
 
 public class JoystickComponentNotFoundException extends RuntimeException
 {
-
-   /**
-    * 
-    */
    private static final long serialVersionUID = 6467832335783181891L;
 
    public JoystickComponentNotFoundException(Identifier identifier)
    {
-      super("component with identifier " + identifier + " not found");
+      super("Component with identifier " + identifier + " not found.");
    }
-   
 }

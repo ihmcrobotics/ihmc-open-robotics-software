@@ -14,7 +14,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.joystick.BooleanYoVariableJoystickEventListener;
 import us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
-import us.ihmc.simulationconstructionset.joystick.JoyStickNotFoundException;
 import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.steppr.parameters.BonoRobotModel;
@@ -58,20 +57,10 @@ public class BonoFlatGroundWalkingTrack
 
    public static void setupJoyStick(YoVariableHolder registry)
    {
-	  
-	  final JoystickUpdater joystickUpdater;
-	  try
-	  {
-		   joystickUpdater = new JoystickUpdater();
-	  }
-      catch (JoyStickNotFoundException ex)
-      {
-    		  System.err.println("Joystick not found. Proceeding without joystick");
-    		  return;
-      }
+      final JoystickUpdater joystickUpdater;
+      joystickUpdater = new JoystickUpdater();
       Thread thread = new Thread(joystickUpdater);
       thread.start();
-
       
       double deadZone = 0.02;
       double desiredVelocityX_Bias = 0.0;
@@ -107,8 +96,6 @@ public class BonoFlatGroundWalkingTrack
       desiredHeadingDot.set(desiredHeadingDot_Bias);
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
     		  -0.1+desiredHeadingDot_Bias, 0.1+desiredHeadingDot_Bias, deadZone/2.0, true));
-      
-      joystickUpdater.listComponents();
       
       BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
       joystickUpdater.addListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.TRIGGER), true));

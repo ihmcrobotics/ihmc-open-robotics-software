@@ -21,7 +21,6 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.joystick.BooleanYoVariableJoystickEventListener;
 import us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
-import us.ihmc.simulationconstructionset.joystick.JoyStickNotFoundException;
 import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.wanderer.hardware.WandererDashboard;
@@ -151,21 +150,9 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
    
   public void setupJoyStick(YoVariableHolder registry)
    {
-	  
-	  final JoystickUpdater joystickUpdater;
-	  try
-	  {
-		   joystickUpdater = new JoystickUpdater();
-	  }
-      catch (JoyStickNotFoundException ex)
-      {
-    		  System.err.println("Joystick not found.");
-    		  System.exit(-1);
-    		  return;
-      }
+      final JoystickUpdater joystickUpdater = new JoystickUpdater();
       Thread thread = new Thread(joystickUpdater);
       thread.start();
-
       
       final double deadZone = 0.02;
       //final double desiredVelocityX_Bias = 0.0;
@@ -222,8 +209,6 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
       desiredHeadingDot.set(desiredHeadingDot_Bias);
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
     		  -0.1+desiredHeadingDot_Bias, 0.1+desiredHeadingDot_Bias, deadZone/2.0, true));
-      
-      joystickUpdater.listComponents();
       
       BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
       joystickUpdater.addListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.TRIGGER), true));
