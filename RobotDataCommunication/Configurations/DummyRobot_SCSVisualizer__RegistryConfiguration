@@ -1,5 +1,5 @@
 root*false*false
 root.DummyRobot*false*false
 root.remotemain*false*false
-root.remotemain.tester*false*false
-root.remotemain.Thread*false*false
+root.remotemain.BeastLLAVisualizer*false*false
+root.remotemain.BeastLLAVisualizer.TestBeastLLA*false*false
