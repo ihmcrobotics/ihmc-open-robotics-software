@@ -7,12 +7,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class FourBarLinkageSimulation
 {
-
    private Vector3d offsetWorld = new Vector3d(0.0, 0.0, 0.0);
    private static final double simDT = 1.0e-4;
    private static final int recordFrequency = 10;
 
-   private static final boolean USE_INTEGRATED_CONSTRAINT = false;
+   private static final MethodToCloseLoop METHOD_TO_CLOSE_LOOP = MethodToCloseLoop.STIFF_AXIAL_FUNCTION_TO_INTEGRATE;
 
    public FourBarLinkageSimulation(FourBarLinkageParameters fourBarLinkageParameters)
    {
@@ -22,20 +21,29 @@ public class FourBarLinkageSimulation
       FourBarLinkageRobot robot = new FourBarLinkageRobot("basicFourBar", fourBarLinkageParameters, offsetWorld, registry);
 
       // Four bar constraint
-      if (USE_INTEGRATED_CONSTRAINT)
+      switch (METHOD_TO_CLOSE_LOOP)
       {
+      case PD_CONTROLLER:
+         robot.setController(new FourBarLinkageSimpleClosedLoopConstraintController(robot));
+         break;
+      case SIMPLE_FUNCTION_TO_INTEGRATE:
+         FourBarLinkagePDConstraintToIntegrate fourBarLinkagePDConstraintToIntegrate = new FourBarLinkagePDConstraintToIntegrate("fourBarIntegratedConstraint",
+               robot.getEfpJoint1to2(), robot.getEfpJoint1to4(), robot.getRobotsYoVariableRegistry());
+         fourBarLinkagePDConstraintToIntegrate.setStiffness(1000.0);
+         fourBarLinkagePDConstraintToIntegrate.setDamping(100.0);
+
+         robot.addFunctionToIntegrate(fourBarLinkagePDConstraintToIntegrate);
+         break;
+      case STIFF_AXIAL_FUNCTION_TO_INTEGRATE:
          FourBarLinkageConstraintToIntegrate fourBarLinkageConstraintToIntegrate = new FourBarLinkageConstraintToIntegrate("fourBarIntegratedConstraint",
-               robot.getEfpJoint1to2(), robot.getEfpJoint1to4(), robot.getRootJoints().get(0), registry);
-         fourBarLinkageConstraintToIntegrate.setAxialStiffness(100.0);
-         fourBarLinkageConstraintToIntegrate.setAxialDamping(10.0);
-         fourBarLinkageConstraintToIntegrate.setRadialStiffness(10.0);
-         fourBarLinkageConstraintToIntegrate.setRadialDamping(1.0);
+               robot.getEfpJoint1to2(), robot.getEfpJoint1to4(), robot.getRootJoints().get(0), robot.getRobotsYoVariableRegistry());
+         fourBarLinkageConstraintToIntegrate.setAxialStiffness(1000.0);
+         fourBarLinkageConstraintToIntegrate.setAxialDamping(100.0);
+         fourBarLinkageConstraintToIntegrate.setRadialStiffness(100.0);
+         fourBarLinkageConstraintToIntegrate.setRadialDamping(10.0);
 
          robot.addFunctionToIntegrate(fourBarLinkageConstraintToIntegrate);
-      }
-      else
-      {
-         robot.setController(new FourBarLinkageSimpleClosedLoopConstraintController(robot));
+         break;
       }
 
       // SCS
@@ -59,5 +67,10 @@ public class FourBarLinkageSimulation
       fourBarLinkageParameters.angle_1 = fourBarLinkageParameters.angle_2 = fourBarLinkageParameters.angle_3 = 0.5 * Math.PI;
 
       new FourBarLinkageSimulation(fourBarLinkageParameters);
+   }
+
+   private enum MethodToCloseLoop
+   {
+      PD_CONTROLLER, SIMPLE_FUNCTION_TO_INTEGRATE, STIFF_AXIAL_FUNCTION_TO_INTEGRATE
    }
 }

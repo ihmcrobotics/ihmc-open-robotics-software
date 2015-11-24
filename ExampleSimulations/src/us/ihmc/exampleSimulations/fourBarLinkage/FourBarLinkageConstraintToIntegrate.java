@@ -1,5 +1,7 @@
 package us.ihmc.exampleSimulations.fourBarLinkage;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -36,6 +38,8 @@ public class FourBarLinkageConstraintToIntegrate implements FunctionToIntegrate
    private final YoFrameVector yoConnectionVelocityError;
    private final DoubleYoVariable yoConnectionVelocityErrorMagnitude;
 
+   private final DoubleYoVariable yoTempDouble;
+
    private final ReferenceFrame jointAReferenceFrame;
 
    private final FrameVector radialDirection;
@@ -62,6 +66,8 @@ public class FourBarLinkageConstraintToIntegrate implements FunctionToIntegrate
       radialDamping = new DoubleYoVariable(name + "_RadialDamping", registry);
       axialStiffness = new DoubleYoVariable(name + "_AxialStiffness", registry);
       axialDamping = new DoubleYoVariable(name + "_AxialDamping", registry);
+
+      yoTempDouble = new DoubleYoVariable(name + "TempDouble", registry);
 
       String namePrefix = jointA.getLink().getName();
 
@@ -90,7 +96,7 @@ public class FourBarLinkageConstraintToIntegrate implements FunctionToIntegrate
       yoConnectionVelocityErrorMagnitude = new DoubleYoVariable(name + "_ConnectionVelocityErrorMagnitude", registry);
 
       axialDirection = new FrameVector(jointAReferenceFrame);
-      axialDirection.set(connectionPointA.getOffsetCopy());
+      axialDirection.set(new Vector3d(0.0, 0.0, 1.0)); // TODO: clean this up
       axialDirection.normalize();
 
       FrameVector jointAxis = new FrameVector(jointAReferenceFrame);
@@ -132,52 +138,55 @@ public class FourBarLinkageConstraintToIntegrate implements FunctionToIntegrate
    private void updateClosedJoint()
    {
       updateFrameAndKinematics();
-      
+
       changeFrame(jointAReferenceFrame);
-      
+
       computeErrors();
-      
+
       totalForce.setToZero(jointAReferenceFrame);
-      
+
       radialSpringForce.scale(radialStiffness.getDoubleValue(), connectionPositionError);
       double radialPositionErrorForce = radialSpringForce.dot(radialDirection);
-      
+
       radialDamperForce.scale(radialDamping.getDoubleValue(), connectionVelocityError);
       double radialVelocityErrorForce = radialDamperForce.dot(radialDirection);
-      
+
       FrameVector radialErrorForce = new FrameVector(radialDirection);
       radialErrorForce.scale(radialPositionErrorForce + radialVelocityErrorForce);
       totalForce.add(radialErrorForce);
-      
+
       axialSpringForce.scale(axialStiffness.getDoubleValue(), connectionPositionError);
       double axialPositionErrorForce = axialSpringForce.dot(axialDirection);
-      
+      yoTempDouble.set(axialPositionErrorForce);
+
       axialDamperForce.scale(axialDamping.getDoubleValue(), connectionVelocityError);
       double axialVelocityErrorForce = axialDamperForce.dot(axialDirection);
-      
+
       FrameVector axialErrorForce = new FrameVector(axialDirection);
       axialErrorForce.scale(axialPositionErrorForce + axialVelocityErrorForce);
-      totalForce.add(axialErrorForce); 
-      
+      totalForce.add(axialErrorForce);
+
       totalForce.changeFrame(worldFrame);
-      
+
       connectionPointA.setForce(totalForce.getVector());
       totalForce.scale(-1.0);
       connectionPointB.setForce(totalForce.getVector());
+
+      connectionAPosition.changeFrame(worldFrame);
+      connectionAPosition.changeFrame(jointAReferenceFrame);
    }
 
    private void updateFrameAndKinematics()
    {
       jointAReferenceFrame.update();
 
-      // TODO: test if these updates are actually needed
       yoConnectionAPosition.getFrameTupleIncludingFrame(connectionAPosition);
       yoConnectionBPosition.getFrameTupleIncludingFrame(connectionBPosition);
 
       yoConnectionAVelocity.getFrameTupleIncludingFrame(connectionAVelocity);
       yoConnectionBVelocity.getFrameTupleIncludingFrame(connectionBVelocity);
    }
-   
+
    private void changeFrame(ReferenceFrame frame)
    {
       connectionAPosition.changeFrame(frame);
@@ -188,10 +197,10 @@ public class FourBarLinkageConstraintToIntegrate implements FunctionToIntegrate
 
    private void computeErrors()
    {
-      connectionPositionError.sub(connectionAPosition, connectionBPosition);
+      connectionPositionError.sub(connectionBPosition, connectionAPosition);
       yoConnectionPositionError.set(connectionPositionError);
       yoConnectionPositionErrorMagnitude.set(connectionPositionError.length());
-      
+
       connectionVelocityError.sub(connectionBVelocity, connectionAVelocity);
       yoConnectionVelocityError.set(connectionVelocityError);
       yoConnectionVelocityErrorMagnitude.set(connectionVelocityError.length());
@@ -201,7 +210,7 @@ public class FourBarLinkageConstraintToIntegrate implements FunctionToIntegrate
    public double[] computeDerivativeVector()
    {
       updateClosedJoint();
-      
+
       return null;
    }
 
