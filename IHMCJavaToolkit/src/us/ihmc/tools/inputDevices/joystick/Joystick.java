@@ -16,6 +16,7 @@ public class Joystick
    private final HashSet<Identifier> identifiers = new HashSet<Identifier>();
    private final Controller joystickController;
    private JoystickUpdater joystickUpdater;
+   private JoystickModel model;
 
    public Joystick()
    {
@@ -23,6 +24,8 @@ public class Joystick
 
       if (nullCheck())
          return;
+      
+      model = JoystickModel.getModelFromName(joystickController.getName());
       
       for (Component component : joystickController.getComponents())
       {
@@ -100,6 +103,11 @@ public class Joystick
       joystickUpdater.setPollIntervalMillis(pollIntervalMillis);
    }
    
+   public JoystickModel getModel()
+   {
+      return model;
+   }
+
    private static Controller getFirstJoystickFoundOnSystem()
    {
       Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
