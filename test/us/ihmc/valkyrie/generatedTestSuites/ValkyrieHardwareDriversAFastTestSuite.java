@@ -15,7 +15,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.valkyrie.simulation.ValkyrieFlatGroundWalkingWithIMUDriftTest.class,
    us.ihmc.valkyrie.simulation.ValkyrieObstacleCourseRampFootstepSnapperTest.class,
    us.ihmc.valkyrie.simulation.ValkyriePosePlaybackDemoTest.class
-   
 })
 
 public class ValkyrieHardwareDriversAFastTestSuite
