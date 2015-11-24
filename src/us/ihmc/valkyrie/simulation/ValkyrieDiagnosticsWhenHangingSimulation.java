@@ -14,7 +14,6 @@ import us.ihmc.darpaRoboticsChallenge.diagnostics.HumanoidDiagnosticsWhenHanging
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -22,8 +21,6 @@ import us.ihmc.simulationconstructionset.util.virtualHoist.VirtualHoist;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
-import us.ihmc.valkyrie.kinematics.transmissions.InefficientPushRodTransmission;
-import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingController;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
 
@@ -117,34 +114,34 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       double reflectBottom = -1.0;
       boolean topJointFirst = true;
 
-      InefficientPushRodTransmission leftAnkleTransmission = new InefficientPushRodTransmission(PushRodTransmissionJoint.ANKLE, reflectTop, reflectBottom,
-                                                                topJointFirst, null, null);
+//      InefficientPushRodTransmission leftAnkleTransmission = new InefficientPushRodTransmission(PushRodTransmissionJoint.ANKLE, reflectTop, reflectBottom,
+//                                                                topJointFirst, null, null);
+//
+//      reflectBottom = 1.0;
+//      InefficientPushRodTransmission rightAnkleTransmission = new InefficientPushRodTransmission(PushRodTransmissionJoint.ANKLE, reflectTop, reflectBottom,
+//                                                                 topJointFirst, null, null);
 
-      reflectBottom = 1.0;
-      InefficientPushRodTransmission rightAnkleTransmission = new InefficientPushRodTransmission(PushRodTransmissionJoint.ANKLE, reflectTop, reflectBottom,
-                                                                 topJointFirst, null, null);
+//      double[] leftAnkleForceOffsets = leftAnkleTransmission.jointToActuatorEffortAtZero(diagnosticsWhenHangingController.getAnkleTorqueOffsets(RobotSide.LEFT));
+//      double[] rightAnkleForceOffsets = rightAnkleTransmission.jointToActuatorEffortAtZero(diagnosticsWhenHangingController.getAnkleTorqueOffsets(RobotSide.RIGHT));
 
-      double[] leftAnkleForceOffsets = leftAnkleTransmission.jointToActuatorEffortAtZero(diagnosticsWhenHangingController.getAnkleTorqueOffsets(RobotSide.LEFT));
-      double[] rightAnkleForceOffsets = rightAnkleTransmission.jointToActuatorEffortAtZero(diagnosticsWhenHangingController.getAnkleTorqueOffsets(RobotSide.RIGHT));
-
-      System.out.println("\nLeft ankle J5 force offset = " + doubleFormat.format(-leftAnkleForceOffsets[0]));
-      System.out.println("Left ankle J6 force offset = " + doubleFormat.format(-leftAnkleForceOffsets[1]));
-
-      System.out.println("\nRight ankle J5 force offset = " + doubleFormat.format(-rightAnkleForceOffsets[0]));
-      System.out.println("Right ankle J6 force offset = " + doubleFormat.format(-rightAnkleForceOffsets[1]));
+//      System.out.println("\nLeft ankle J5 force offset = " + doubleFormat.format(-leftAnkleForceOffsets[0]));
+//      System.out.println("Left ankle J6 force offset = " + doubleFormat.format(-leftAnkleForceOffsets[1]));
+//
+//      System.out.println("\nRight ankle J5 force offset = " + doubleFormat.format(-rightAnkleForceOffsets[0]));
+//      System.out.println("Right ankle J6 force offset = " + doubleFormat.format(-rightAnkleForceOffsets[1]));
 
       reflectTop = -1.0;
       reflectBottom = 1.0;
       topJointFirst = false;
 
-      InefficientPushRodTransmission waistTransmission = new InefficientPushRodTransmission(PushRodTransmissionJoint.WAIST, reflectTop, reflectBottom,
-                                                            topJointFirst, null, null);
+//      InefficientPushRodTransmission waistTransmission = new InefficientPushRodTransmission(PushRodTransmissionJoint.WAIST, reflectTop, reflectBottom,
+//                                                            topJointFirst, null, null);
 
-      double[] waistForceOffsets = waistTransmission.jointToActuatorEffortAtZero(diagnosticsWhenHangingController.getWaistTorqueOffsets());
+//      double[] waistForceOffsets = waistTransmission.jointToActuatorEffortAtZero(diagnosticsWhenHangingController.getWaistTorqueOffsets());
 
       // TODO: Need to figure out why this is not seeming to work correctly...
-      System.out.println("\nWaist J2 force offset = " + doubleFormat.format(waistForceOffsets[0]));
-      System.out.println("Waist J3 force offset = " + doubleFormat.format(-waistForceOffsets[1]));
+//      System.out.println("\nWaist J2 force offset = " + doubleFormat.format(waistForceOffsets[0]));
+//      System.out.println("Waist J3 force offset = " + doubleFormat.format(-waistForceOffsets[1]));
 
    }
    

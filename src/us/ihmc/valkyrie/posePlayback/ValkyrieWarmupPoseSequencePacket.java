@@ -14,8 +14,7 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceRead
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
-import us.ihmc.valkyrie.roboNet.schedule.YamlWithIncludesLoader;
+import us.ihmc.valkyrie.configuration.YamlWithIncludesLoader;
 
 public class ValkyrieWarmupPoseSequencePacket implements PosePlaybackPacket
 {
@@ -30,7 +29,7 @@ public class ValkyrieWarmupPoseSequencePacket implements PosePlaybackPacket
    public ValkyrieWarmupPoseSequencePacket(FullHumanoidRobotModel fullRobotModel, double initialGainScaling)
    {
       @SuppressWarnings("unchecked")
-      Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "gains.yaml");
+      Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) YamlWithIncludesLoader.load("standPrep", "gains.yaml");
 
       this.initialGainScaling = initialGainScaling;
       playbackPoseSequence = new PlaybackPoseSequence(fullRobotModel);
@@ -70,7 +69,7 @@ public class ValkyrieWarmupPoseSequencePacket implements PosePlaybackPacket
    public ValkyrieWarmupPoseSequencePacket(String filename, FullRobotModel fullRobotModel, double initialGainScaling)
    {
       @SuppressWarnings("unchecked")
-      Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "gains.yaml");
+      Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) YamlWithIncludesLoader.load("standPrep", "gains.yaml");
 
       this.initialGainScaling = initialGainScaling;
 //      playbackPoseSequence = PlaybackPoseSequenceReader.readFromFile(fullRobotModel, filename);
