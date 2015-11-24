@@ -487,12 +487,29 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       walkingStateMachine.checkTransitionConditions();
       walkingStateMachine.doAction();
       updateDesiredCoMTrajectory();
-      updateDesiredYaw();
       updateDesiredHeight();
+      updateDesiredYaw();
+      counteractPitchAndRoll();
       alphaFilterDesiredBodyOrientation();
       updateDesiredCoMPose();
       updateLegsBasedOnDesiredCoM();
    }
+
+   FramePose bodyPose = new FramePose();
+   private void counteractPitchAndRoll()
+   {
+      bodyPose.setToZero(bodyFrame);
+      bodyPose.changeFrame(desiredCoMPoseReferenceFrame);
+      
+      DoubleYoVariable desiredRoll = desiredCoMOrientation.getRoll();
+      double rollOffset = -bodyPose.getRoll();
+      desiredRoll.set(rollOffset);
+      
+      DoubleYoVariable desiredPitch = desiredCoMOrientation.getPitch();
+      double pitchOffset = -bodyPose.getPitch();
+      desiredPitch.set(pitchOffset);
+   }
+
 
    private void pollDataProviders()
    {
