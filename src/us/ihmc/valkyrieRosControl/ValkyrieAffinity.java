@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie;
+package us.ihmc.valkyrieRosControl;
 
 import java.util.logging.Logger;
 
