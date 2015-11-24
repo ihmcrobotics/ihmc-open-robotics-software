@@ -66,13 +66,14 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 
 public class QuadrupedPositionBasedCrawlController extends State<QuadrupedControllerState>
 {
-   private static final double INITIAL_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY = 1.0;
-   private static final double DEFAULT_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY = 0.15;
    private static final double DEFAULT_HEADING_CORRECTION_BREAK_FREQUENCY = 1.0;
    private static final double DEFAULT_COM_PITCH_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_COM_ROLL_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT = 0.01;
+   private final double initialDesiredFootCorrectionBreakFrequency;
+   private final double defaultDesiredFootCorrectionBreakFrequency;
+   private boolean finishedStandPrep = false;
    
    private final double dt;
    private final String name = getClass().getSimpleName();
@@ -143,6 +144,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private final QuadrantDependentList<DoubleYoVariable> desiredFeetLocationsAlpha = new QuadrantDependentList<DoubleYoVariable>();
    private final DoubleYoVariable desiredFeetAlphaFilterBreakFrequency = new DoubleYoVariable("desiredFeetAlphaFilterBreakFrequency", registry);
    
+   private final QuadrantDependentList<YoFrameVector> desiredFeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
+   
    private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoFrameConvexPolygon2d currentTriplePolygon = new YoFrameConvexPolygon2d("currentTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
    private final YoFrameConvexPolygon2d upcommingTriplePolygon = new YoFrameConvexPolygon2d("upcommingTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
@@ -204,6 +207,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    {
       super(QuadrupedControllerState.POSITION_CRAWL);
       QuadrupedControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedControllerParameters();
+      
+      initialDesiredFootCorrectionBreakFrequency = quadrupedControllerParameters.getInitialDesiredFootCorrectionBreakFrequency();
+      defaultDesiredFootCorrectionBreakFrequency = quadrupedControllerParameters.getDefaultDesiredFootCorrectionBreakFrequency();
       swingDuration.set(quadrupedControllerParameters.getDefaultSwingDuration());
       swingHeight.set(quadrupedControllerParameters.getDefaultSwingHeight());
       subCircleRadius.set(quadrupedControllerParameters.getDefaultSubCircleRadius());
@@ -268,7 +274,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          }
       });
       
-      desiredFeetAlphaFilterBreakFrequency.set(INITIAL_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY);
+      desiredFeetAlphaFilterBreakFrequency.set(initialDesiredFootCorrectionBreakFrequency);
       desiredFeetAlphaFilterBreakFrequency.addVariableChangedListener(new VariableChangedListener()
       {
 
@@ -310,6 +316,10 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          footPosition.setZ(0.0);
          desiredFootLocation.set(footPosition);
          desiredFeetLocations.put(robotQuadrant, desiredFootLocation);
+         
+         
+         YoFrameVector footPositionInLegAttachementFrame = new YoFrameVector(prefix + "FootPositionInLegFrame", null, registry);
+         desiredFeetPositionsInLegAttachmentFrame.put(robotQuadrant, footPositionInLegAttachementFrame);
       }
       
       for (int i = 0; i < tripleSupportPolygons.length; i++)
@@ -522,9 +532,10 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
 
    private void alphaFilterDesiredFeet()
    {
-      if(robotTimestamp.getDoubleValue() > 1.0)
+      if(robotTimestamp.getDoubleValue() > 4.0 && !finishedStandPrep)
       {
-         desiredFeetAlphaFilterBreakFrequency.set(DEFAULT_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY);
+         desiredFeetAlphaFilterBreakFrequency.set(defaultDesiredFootCorrectionBreakFrequency);
+         finishedStandPrep = true;
       }
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -617,6 +628,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          Vector3d footPositionInLegAttachmentFrame = packFootPositionUsingDesiredBodyToBodyHack(robotQuadrant);
+         
+         desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(footPositionInLegAttachmentFrame);
          computeDesiredPositionsAndStoreInFullRobotModel(robotQuadrant, footPositionInLegAttachmentFrame);
       }
    }
