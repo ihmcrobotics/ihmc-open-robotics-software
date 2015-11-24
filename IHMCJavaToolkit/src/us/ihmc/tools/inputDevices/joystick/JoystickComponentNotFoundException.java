@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.joystick;
+package us.ihmc.tools.inputDevices.joystick;
 
 import net.java.games.input.Component.Identifier;
 

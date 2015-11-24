@@ -1,7 +1,7 @@
 <GraphGroup>
-	<Cols>3</Cols>
+	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.remotemain.tester.var2</Variables>
+		<Variables>root.DummyRobot.t</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.analogInput1</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.positionActualValue</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.auxiliaryPositionActualValue</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.digitalInputs</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.velocityActualValue</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -73,7 +73,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.TestBeastLLAModeOfOperation</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -85,7 +85,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.statusWord,root.remotemain.BeastLLAVisualizer.TestBeastLLA.TestBeastLLAControlWord</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -97,7 +97,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.torqueActaulValue</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -109,7 +109,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.positionFollowingError</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -121,7 +121,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.elmoStatusRegister</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -133,7 +133,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.analogInput2</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -145,81 +145,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.twitterTemperature</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config14</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config15</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config16</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config17</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config18</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -246,7 +174,7 @@ Tab1
 <Title>
 Tab2
 </Title>
-<Entry Boxes></Entry Boxes>
+<Entry Boxes>TestBeastLLAModeOfOperation,TestBeastLLAEnableDrive,maxTorque,targetPosition</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -266,8 +194,8 @@ Tab2
 <Current View>Normal View</Current View>
  <Canvas 1> 
  <Camera X>0.0</Camera X>
- <Camera Y>-49.45958136579704</Camera Y>
- <Camera Z>3.897305424386469</Camera Z>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
