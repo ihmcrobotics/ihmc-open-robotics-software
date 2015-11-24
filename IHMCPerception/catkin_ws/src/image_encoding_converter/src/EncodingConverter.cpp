@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
+#include <sensor_msgs/image_encodings.h>
 
 class EncodingConverter
 {
@@ -24,7 +25,16 @@ class EncodingConverter
 
 		void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 		{
-			pub.publish(msg);
+			sensor_msgs::Image converted_msg;
+			converted_msg.header = msg->header;
+			converted_msg.height = msg->height;
+			converted_msg.width = msg->width;
+			converted_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
+			converted_msg.is_bigendian = msg->is_bigendian;
+			converted_msg.step = msg->step;
+			converted_msg.data = msg->data;
+
+			pub.publish(converted_msg);
 		}
 };
 
