@@ -45,6 +45,10 @@ public class FourBarLinkageSimulation
          robot.addFunctionToIntegrate(fourBarLinkageConstraintToIntegrate);
          break;
       }
+      
+      // Controller
+      FourBarLinkageController controller = new FourBarLinkageController(robot, "fourBarLinkageController", fourBarLinkageParameters);
+      robot.setController(controller);
 
       // SCS
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);

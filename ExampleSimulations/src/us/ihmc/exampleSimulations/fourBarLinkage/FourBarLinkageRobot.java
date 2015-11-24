@@ -16,9 +16,7 @@ import us.ihmc.simulationconstructionset.Robot;
 public class FourBarLinkageRobot extends Robot
 {
    private static final boolean SHOW_CONTACT_GRAPHICS = true;
-
-   private final ExternalForcePoint efpJoint4;
-   private final ExternalForcePoint efpJoint1;
+   private final ExternalForcePoint efpJoint4, efpJoint1, efpJointFixJoint2;
 
    public FourBarLinkageRobot(String name, FourBarLinkageParameters fourBarLinkageParameters, Vector3d offsetWorld, YoVariableRegistry registry)
    {
@@ -62,23 +60,30 @@ public class FourBarLinkageRobot extends Robot
 
       efpJoint4 = new ExternalForcePoint(name + "efp_4", new Vector3d(0.0, 0.0, fourBarLinkageParameters.linkageLength_4), this);
       efpJoint1 = new ExternalForcePoint(name + "efp_1", new Vector3d(), this);
+      efpJointFixJoint2 = new ExternalForcePoint(name + "efpFixJoint2", new Vector3d(), this);
 
       pinJoint4.addExternalForcePoint(efpJoint4);
+      pinJoint2.addExternalForcePoint(efpJointFixJoint2);
       rootPinJoint.addExternalForcePoint(efpJoint1);
 
       if (SHOW_CONTACT_GRAPHICS)
       {
          double radius = 0.1;
 
-         Graphics3DObject joint2Graphics = rootPinJoint.getLink().getLinkGraphics();
-         joint2Graphics.identity();
-         joint2Graphics.translate(efpJoint1.getOffsetCopy());
-         joint2Graphics.addSphere(radius, YoAppearance.LemonChiffon());
+         Graphics3DObject joint1Graphics = rootPinJoint.getLink().getLinkGraphics();
+         joint1Graphics.identity();
+         joint1Graphics.translate(efpJoint1.getOffsetCopy());
+         joint1Graphics.addSphere(radius, YoAppearance.LemonChiffon());
 
          Graphics3DObject joint4Graphics = pinJoint4.getLink().getLinkGraphics();
          joint4Graphics.identity();
          joint4Graphics.translate(efpJoint4.getOffsetCopy());
          joint4Graphics.addSphere(2 * radius, YoAppearance.Glass());
+
+         Graphics3DObject joint4FixGraphics = pinJoint2.getLink().getLinkGraphics();
+         joint4FixGraphics.identity();
+         joint4FixGraphics.translate(efpJointFixJoint2.getOffsetCopy());
+         joint4FixGraphics.addSphere(radius, YoAppearance.Yellow());
       }
    }
 
@@ -105,6 +110,11 @@ public class FourBarLinkageRobot extends Robot
    public ExternalForcePoint getEfpJoint1to4()
    {
       return efpJoint4;
+   }
+
+   public ExternalForcePoint getEfpFixInWorld()
+   {
+      return efpJointFixJoint2;
    }
 
    private Matrix3d createInertiaMatrixCylinder(String linkName, double length, double radius, double mass)
