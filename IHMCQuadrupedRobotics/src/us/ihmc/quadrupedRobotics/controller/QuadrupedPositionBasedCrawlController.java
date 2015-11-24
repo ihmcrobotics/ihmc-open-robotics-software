@@ -66,13 +66,13 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 
 public class QuadrupedPositionBasedCrawlController extends State<QuadrupedControllerState>
 {
-   private static final double INITIAL_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY = 1.0 / 4.0;
-   private static final double DEFAULT_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY = 0.01;
    private static final double DEFAULT_HEADING_CORRECTION_BREAK_FREQUENCY = 1.0;
    private static final double DEFAULT_COM_PITCH_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_COM_ROLL_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT = 0.01;
+   private final double initialDesiredFootCorrectionBreakFrequency;
+   private final double defaultDesiredFootCorrectionBreakFrequency;
    private boolean finishedStandPrep = false;
    
    private final double dt;
@@ -207,6 +207,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    {
       super(QuadrupedControllerState.POSITION_CRAWL);
       QuadrupedControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedControllerParameters();
+      
+      initialDesiredFootCorrectionBreakFrequency = quadrupedControllerParameters.getInitialDesiredFootCorrectionBreakFrequency();
+      defaultDesiredFootCorrectionBreakFrequency = quadrupedControllerParameters.getDefaultDesiredFootCorrectionBreakFrequency();
       swingDuration.set(quadrupedControllerParameters.getDefaultSwingDuration());
       swingHeight.set(quadrupedControllerParameters.getDefaultSwingHeight());
       subCircleRadius.set(quadrupedControllerParameters.getDefaultSubCircleRadius());
@@ -271,7 +274,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          }
       });
       
-      desiredFeetAlphaFilterBreakFrequency.set(INITIAL_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY);
+      desiredFeetAlphaFilterBreakFrequency.set(initialDesiredFootCorrectionBreakFrequency);
       desiredFeetAlphaFilterBreakFrequency.addVariableChangedListener(new VariableChangedListener()
       {
 
@@ -548,7 +551,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    {
       if(robotTimestamp.getDoubleValue() > 4.0 && !finishedStandPrep)
       {
-         desiredFeetAlphaFilterBreakFrequency.set(DEFAULT_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY);
+         desiredFeetAlphaFilterBreakFrequency.set(defaultDesiredFootCorrectionBreakFrequency);
          finishedStandPrep = true;
       }
       
