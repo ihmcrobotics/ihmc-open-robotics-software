@@ -495,6 +495,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       updateLegsBasedOnDesiredCoM();
    }
 
+   /**
+    * tries to right the body by setting the desired body to the inverse of the actual
+    */
    FramePose bodyPose = new FramePose();
    private void counteractPitchAndRoll()
    {
@@ -526,6 +529,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    }
    
    FramePoint footLocation = new FramePoint();
+   /**
+    * uses feedback to update the CoM Velocity, ICP, and Actual Foot Positions
+    */
    private void updateEstimates()
    {
 	  // compute center of mass position and velocity
@@ -546,7 +552,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
 	  updateFeetLocations();
    }
    
-
+   /**
+    * Uses Feedback to pull the desireds back to the actuals
+    */
    private void alphaFilterDesiredFeet()
    {
       if(robotTimestamp.getDoubleValue() > 4.0 && !finishedStandPrep)
@@ -562,7 +570,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    }
 
    /**
-    * update feet locations and alpha filter the desireds towards the actuals
+    * update actual feet locations and the four foot polygon
     */
    private void updateFeetLocations()
    {
@@ -592,7 +600,10 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       drawSupportPolygon(fourFootSupportPolygon, supportPolygon);
    }
    
-   
+   /**
+    * sets the desired X and Y CoM positions to the current positions 
+    * along the trajectory in world and uses the desired CoM height for Z
+    */
    private void updateDesiredCoMTrajectory()
    {
       if(!comTrajectoryGenerator.isDone())
@@ -605,6 +616,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       }
    }
 
+   /**
+    * yaws the body based on the actual feet
+    */
    private void updateDesiredYaw()
    {
       FramePoint centroidFramePoint = fourFootSupportPolygon.getCentroidFramePoint();
@@ -620,6 +634,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       desiredYaw.set(nominalYaw.getDoubleValue());
    }
    
+   /**
+    * desired CoM height in world
+    */
    private void updateDesiredHeight()
    {
       filteredDesiredCoMHeight.update();
@@ -656,6 +673,10 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       inverseKinematicsCalculators.solveForEndEffectorLocationInBodyAndUpdateDesireds(robotQuadrant, footPositionInLegAttachmentFrame, fullRobotModel);
    }
    
+   /**
+    * currently uses the difference between the actual CoM and desired CoM to move the body, 
+    * This should be a feedforward psuedo actual, integrated from the desired, relating to the desiredBody 
+    */
    private Vector3d packFootPositionUsingDesiredBodyToBodyHack(RobotQuadrant robotQuadrant)
    {
       FramePoint desiredFootPosition = desiredFeetLocations.get(robotQuadrant).getFramePointCopy();
@@ -670,6 +691,10 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       return footPositionInLegAttachmentFrame;
    }
    
+   /**
+   * Calculates the next swing target in world using the actual feet,
+   * should create another method for feedforward then handle moving to body frame
+   */
    public void calculateSwingTarget(RobotQuadrant swingLeg, FramePoint framePointToPack)
    {
       FrameVector desiredVelocityVector = desiredVelocity.getFrameTuple();
@@ -692,6 +717,10 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       yoFramePolygon.setConvexPolygon2d(polygon);
    }
    
+   /**
+    * Uses the current CoM position to decide if it's safe to swing
+    *
+    */
    private class QuadrupleToTripleCondition implements StateTransitionCondition
    {
       private final QuadrupleSupportState quadrupleSupportState;
@@ -753,6 +782,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          this.minimumTimeInQuadSupport.set(minimumTimeInQuadSupport);
       }
 
+      /**
+       * uses actual CoM position to determine if we need to move the CoM before we can start the swing
+       */
       @Override
       public void doAction()
       {
@@ -785,6 +817,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          return true;
       }
 
+      /**
+       * uses actual to calculate the next three footsteps. Can use feedforward based on desireds instead of the fourFootSupportPolygon
+       */
       @Override
       public void doTransitionIntoAction()
       {
@@ -879,6 +914,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          circleCenter.setXY(comTargetToPack);
       }
       
+      /**
+       * uses desired CoM only
+       */
       private void initializeCoMTrajectory(Point2d target)
       {
          FramePoint desiredBodyCurrent = desiredCoMPose.getPosition().getFramePointCopy();
@@ -939,6 +977,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          return estimatedCommonTriangle.get(swingLeg.getSide()).isInside(centerOfMassPoint2d);
       }
       
+      /**
+       * uses actuals
+       */
       public boolean isCoMInsideTriangleForSwingLeg(RobotQuadrant swingLeg)
       {
          centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
