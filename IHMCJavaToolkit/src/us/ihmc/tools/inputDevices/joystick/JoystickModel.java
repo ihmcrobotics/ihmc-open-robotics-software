@@ -1,0 +1,31 @@
+package us.ihmc.tools.inputDevices.joystick;
+
+public enum JoystickModel
+{
+   LOGITECH_EXTREME_3D("Logitech Extreme 3D"), MAD_CATZ_V1_STICK("Mad Catz V.1 Stick"), SAITEK_X52("Saitek X52 Flight Control System"), UNKNOWN("Unknown");
+   
+   public static final JoystickModel[] values = values();
+   
+   private final String jinputName;
+   
+   private JoystickModel(String jinputName)
+   {
+      this.jinputName = jinputName;
+   }
+
+   public String getJinputName()
+   {
+      return jinputName;
+   }
+
+   public static JoystickModel getModelFromName(String name)
+   {
+      for (JoystickModel joystickModel : values)
+      {
+         if (name.equals(joystickModel.getJinputName()))
+            return joystickModel;
+      }
+      
+      return UNKNOWN;
+   }
+}

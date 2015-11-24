@@ -66,13 +66,14 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 
 public class QuadrupedPositionBasedCrawlController extends State<QuadrupedControllerState>
 {
-   private static final double INITIAL_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY = 1.0;
-   private static final double DEFAULT_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY = 0.15;
    private static final double DEFAULT_HEADING_CORRECTION_BREAK_FREQUENCY = 1.0;
    private static final double DEFAULT_COM_PITCH_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_COM_ROLL_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT = 0.01;
+   private final double initialDesiredFootCorrectionBreakFrequency;
+   private final double defaultDesiredFootCorrectionBreakFrequency;
+   private boolean finishedStandPrep = false;
    
    private final double dt;
    private final String name = getClass().getSimpleName();
@@ -143,6 +144,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private final QuadrantDependentList<DoubleYoVariable> desiredFeetLocationsAlpha = new QuadrantDependentList<DoubleYoVariable>();
    private final DoubleYoVariable desiredFeetAlphaFilterBreakFrequency = new DoubleYoVariable("desiredFeetAlphaFilterBreakFrequency", registry);
    
+   private final QuadrantDependentList<YoFrameVector> desiredFeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
+   
    private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoFrameConvexPolygon2d currentTriplePolygon = new YoFrameConvexPolygon2d("currentTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
    private final YoFrameConvexPolygon2d upcommingTriplePolygon = new YoFrameConvexPolygon2d("upcommingTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
@@ -204,6 +207,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    {
       super(QuadrupedControllerState.POSITION_CRAWL);
       QuadrupedControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedControllerParameters();
+      
+      initialDesiredFootCorrectionBreakFrequency = quadrupedControllerParameters.getInitialDesiredFootCorrectionBreakFrequency();
+      defaultDesiredFootCorrectionBreakFrequency = quadrupedControllerParameters.getDefaultDesiredFootCorrectionBreakFrequency();
       swingDuration.set(quadrupedControllerParameters.getDefaultSwingDuration());
       swingHeight.set(quadrupedControllerParameters.getDefaultSwingHeight());
       subCircleRadius.set(quadrupedControllerParameters.getDefaultSubCircleRadius());
@@ -268,7 +274,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          }
       });
       
-      desiredFeetAlphaFilterBreakFrequency.set(INITIAL_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY);
+      desiredFeetAlphaFilterBreakFrequency.set(initialDesiredFootCorrectionBreakFrequency);
       desiredFeetAlphaFilterBreakFrequency.addVariableChangedListener(new VariableChangedListener()
       {
 
@@ -310,6 +316,10 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          footPosition.setZ(0.0);
          desiredFootLocation.set(footPosition);
          desiredFeetLocations.put(robotQuadrant, desiredFootLocation);
+         
+         
+         YoFrameVector footPositionInLegAttachementFrame = new YoFrameVector(prefix + "FootPositionInLegFrame", null, registry);
+         desiredFeetPositionsInLegAttachmentFrame.put(robotQuadrant, footPositionInLegAttachementFrame);
       }
       
       for (int i = 0; i < tripleSupportPolygons.length; i++)
@@ -477,12 +487,32 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       walkingStateMachine.checkTransitionConditions();
       walkingStateMachine.doAction();
       updateDesiredCoMTrajectory();
-      updateDesiredYaw();
       updateDesiredHeight();
+      updateDesiredYaw();
+      counteractPitchAndRoll();
       alphaFilterDesiredBodyOrientation();
       updateDesiredCoMPose();
       updateLegsBasedOnDesiredCoM();
    }
+
+   /**
+    * tries to right the body by setting the desired body to the inverse of the actual
+    */
+   FramePose bodyPose = new FramePose();
+   private void counteractPitchAndRoll()
+   {
+      bodyPose.setToZero(bodyFrame);
+      bodyPose.changeFrame(desiredCoMPoseReferenceFrame);
+      
+      DoubleYoVariable desiredRoll = desiredCoMOrientation.getRoll();
+      double rollOffset = -bodyPose.getRoll();
+      desiredRoll.set(rollOffset);
+      
+      DoubleYoVariable desiredPitch = desiredCoMOrientation.getPitch();
+      double pitchOffset = -bodyPose.getPitch();
+      desiredPitch.set(pitchOffset);
+   }
+
 
    private void pollDataProviders()
    {
@@ -499,6 +529,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    }
    
    FramePoint footLocation = new FramePoint();
+   /**
+    * uses feedback to update the CoM Velocity, ICP, and Actual Foot Positions
+    */
    private void updateEstimates()
    {
 	  // compute center of mass position and velocity
@@ -519,12 +552,15 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
 	  updateFeetLocations();
    }
    
-
+   /**
+    * Uses Feedback to pull the desireds back to the actuals
+    */
    private void alphaFilterDesiredFeet()
    {
-      if(robotTimestamp.getDoubleValue() > 1.0)
+      if(robotTimestamp.getDoubleValue() > 4.0 && !finishedStandPrep)
       {
-         desiredFeetAlphaFilterBreakFrequency.set(DEFAULT_DESIRED_FOOT_CORRECTION_BREAK_FREQUENCY);
+         desiredFeetAlphaFilterBreakFrequency.set(defaultDesiredFootCorrectionBreakFrequency);
+         finishedStandPrep = true;
       }
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -534,7 +570,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    }
 
    /**
-    * update feet locations and alpha filter the desireds towards the actuals
+    * update actual feet locations and the four foot polygon
     */
    private void updateFeetLocations()
    {
@@ -564,7 +600,10 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       drawSupportPolygon(fourFootSupportPolygon, supportPolygon);
    }
    
-   
+   /**
+    * sets the desired X and Y CoM positions to the current positions 
+    * along the trajectory in world and uses the desired CoM height for Z
+    */
    private void updateDesiredCoMTrajectory()
    {
       if(!comTrajectoryGenerator.isDone())
@@ -577,6 +616,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       }
    }
 
+   /**
+    * yaws the body based on the actual feet
+    */
    private void updateDesiredYaw()
    {
       FramePoint centroidFramePoint = fourFootSupportPolygon.getCentroidFramePoint();
@@ -592,6 +634,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       desiredYaw.set(nominalYaw.getDoubleValue());
    }
    
+   /**
+    * desired CoM height in world
+    */
    private void updateDesiredHeight()
    {
       filteredDesiredCoMHeight.update();
@@ -617,6 +662,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          Vector3d footPositionInLegAttachmentFrame = packFootPositionUsingDesiredBodyToBodyHack(robotQuadrant);
+         
+         desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(footPositionInLegAttachmentFrame);
          computeDesiredPositionsAndStoreInFullRobotModel(robotQuadrant, footPositionInLegAttachmentFrame);
       }
    }
@@ -626,6 +673,10 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       inverseKinematicsCalculators.solveForEndEffectorLocationInBodyAndUpdateDesireds(robotQuadrant, footPositionInLegAttachmentFrame, fullRobotModel);
    }
    
+   /**
+    * currently uses the difference between the actual CoM and desired CoM to move the body, 
+    * This should be a feedforward psuedo actual, integrated from the desired, relating to the desiredBody 
+    */
    private Vector3d packFootPositionUsingDesiredBodyToBodyHack(RobotQuadrant robotQuadrant)
    {
       FramePoint desiredFootPosition = desiredFeetLocations.get(robotQuadrant).getFramePointCopy();
@@ -640,6 +691,10 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       return footPositionInLegAttachmentFrame;
    }
    
+   /**
+   * Calculates the next swing target in world using the actual feet,
+   * should create another method for feedforward then handle moving to body frame
+   */
    public void calculateSwingTarget(RobotQuadrant swingLeg, FramePoint framePointToPack)
    {
       FrameVector desiredVelocityVector = desiredVelocity.getFrameTuple();
@@ -662,6 +717,10 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       yoFramePolygon.setConvexPolygon2d(polygon);
    }
    
+   /**
+    * Uses the current CoM position to decide if it's safe to swing
+    *
+    */
    private class QuadrupleToTripleCondition implements StateTransitionCondition
    {
       private final QuadrupleSupportState quadrupleSupportState;
@@ -723,6 +782,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          this.minimumTimeInQuadSupport.set(minimumTimeInQuadSupport);
       }
 
+      /**
+       * uses actual CoM position to determine if we need to move the CoM before we can start the swing
+       */
       @Override
       public void doAction()
       {
@@ -755,6 +817,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          return true;
       }
 
+      /**
+       * uses actual to calculate the next three footsteps. Can use feedforward based on desireds instead of the fourFootSupportPolygon
+       */
       @Override
       public void doTransitionIntoAction()
       {
@@ -849,6 +914,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          circleCenter.setXY(comTargetToPack);
       }
       
+      /**
+       * uses desired CoM only
+       */
       private void initializeCoMTrajectory(Point2d target)
       {
          FramePoint desiredBodyCurrent = desiredCoMPose.getPosition().getFramePointCopy();
@@ -909,6 +977,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          return estimatedCommonTriangle.get(swingLeg.getSide()).isInside(centerOfMassPoint2d);
       }
       
+      /**
+       * uses actuals
+       */
       public boolean isCoMInsideTriangleForSwingLeg(RobotQuadrant swingLeg)
       {
          centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());

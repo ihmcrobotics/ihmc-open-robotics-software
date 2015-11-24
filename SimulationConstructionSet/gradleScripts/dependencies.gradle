@@ -11,7 +11,7 @@ dependencies {
 //	compile group: 'org.ejml', name: 'all', version: '0.28'
 	compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
 	compile group: 'org.georegression' , name: 'georegression', version: '0.8'
-   	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: 'internal-151119'
+   	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: 'internal-151123'
 	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.10'
 	compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
 	compile group: 'org.apache.xmlgraphics', name: 'batik-svggen', version: '1.7'

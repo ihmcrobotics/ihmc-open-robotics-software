@@ -122,8 +122,7 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
       private final PDController pdController;
       private final YoVariableRegistry pidRegistry;
       private final OneDoFJoint oneDofJoint;
-      private final DoubleYoVariable q_d, tau_d;
-      private final double maxTorque;
+      private final DoubleYoVariable q_d, tau_d, tau_d_notCapped, maxTorque;
       
       public PDPositionControllerForOneDoFJoint(OneDoFJoint oneDofJoint, double kp, double kd, double maxTorque)
       {
@@ -131,8 +130,9 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
          pidRegistry = new YoVariableRegistry(name);
          q_d = new DoubleYoVariable(name + "_q_d", pidRegistry);
          tau_d = new DoubleYoVariable(name + "_tau_d", pidRegistry);
-         
-         this.maxTorque = maxTorque;
+         tau_d_notCapped = new DoubleYoVariable(name + "_tau_d_notCapped", pidRegistry);
+         this.maxTorque = new DoubleYoVariable(name + "_tau_max", pidRegistry);
+         this.maxTorque.set(maxTorque);
          
          pdController = new PDController(oneDofJoint.getName(), pidRegistry);
          pdController.setProportionalGain(kp);
@@ -152,8 +152,9 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
          double desiredRate = oneDofJoint.getQdDesired();
          double desiredTau = pdController.compute(currentPosition, desiredPosition, currentRate, desiredRate);
          
+         tau_d_notCapped.set(desiredTau);
          // Clip the max torque to both better match the servos and also to prevent the simulation from blowing up when dt is fast.
-         desiredTau = MathTools.clipToMinMax(desiredTau, maxTorque);
+         desiredTau = MathTools.clipToMinMax(desiredTau, maxTorque.getDoubleValue());
          
          tau_d.set(desiredTau);
          oneDofJoint.setTau(desiredTau);

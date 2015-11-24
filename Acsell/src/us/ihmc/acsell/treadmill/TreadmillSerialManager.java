@@ -7,8 +7,7 @@ import java.io.OutputStream;
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
-import us.ihmc.simulationconstructionset.joystick.JoyStickNotFoundException;
-import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
+import us.ihmc.tools.inputDevices.joystick.Joystick;
 
 
 
@@ -118,28 +117,12 @@ public class TreadmillSerialManager {
 
     }
 
-	public static void setupJoyStick(final OutputStream out)
-    {
- 	  
- 	  final JoystickUpdater joystickUpdater;
- 	  try
- 	  {
- 		   joystickUpdater = new JoystickUpdater();
- 	  }
-       catch (JoyStickNotFoundException ex)
-       {
-     		  System.err.println("Joystick not found. Proceeding without joystick");
-     		  return;
-       }
-       Thread thread = new Thread(joystickUpdater);
-       thread.start();
+   public static void setupJoyStick(final OutputStream out)
+   {
+      final Joystick joystickUpdater = new Joystick();
 
-      // joystickUpdater.listComponents();       
-
-
-       joystickUpdater.addListener(new TreadmillJoystickEventListener(out));
-    }
-    
+      joystickUpdater.addJoystickEventListener(new TreadmillJoystickEventListener(out));
+   }
     
     
     /** */

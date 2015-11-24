@@ -9,6 +9,8 @@ public class DefaultSwingTargetGeneratorParameters implements QuadrupedControlle
    private final double maxForwardSkew = 0.29;
    private final double maxLateralSkew = 0.1;
    private final double maxYawPerStep = 0.25;
+   private final double initialDesiredFootCorrectionBreakFrequency = 1.0;
+   private final double defaultDesiredFootCorrectionBreakFrequency = 0.15;
    
    @Override
    public double getMinimumVelocityForFullSkew()
@@ -78,5 +80,17 @@ public class DefaultSwingTargetGeneratorParameters implements QuadrupedControlle
    {
       // TODO Auto-generated method stub
       return 0;
+   }
+
+   @Override
+   public double getInitialDesiredFootCorrectionBreakFrequency()
+   {
+      return initialDesiredFootCorrectionBreakFrequency;
+   }
+
+   @Override
+   public double getDefaultDesiredFootCorrectionBreakFrequency()
+   {
+      return defaultDesiredFootCorrectionBreakFrequency;
    }
 }
