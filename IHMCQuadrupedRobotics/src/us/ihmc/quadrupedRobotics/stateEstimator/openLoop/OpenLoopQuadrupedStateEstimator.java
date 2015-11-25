@@ -18,4 +18,11 @@ public class OpenLoopQuadrupedStateEstimator implements QuadrupedStateEstimator
       return false;
    }
 
+   @Override
+   public void doControl()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
 }
