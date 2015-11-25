@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased;
 
+import us.ihmc.quadrupedRobotics.sensorProcessing.simulatedSensors.FootSwitchUpdaterBasedOnGroundContactPoints;
 import us.ihmc.quadrupedRobotics.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
