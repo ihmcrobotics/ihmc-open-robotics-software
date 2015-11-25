@@ -480,6 +480,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    public void doAction()
    {
       referenceFrames.updateFrames();
+      stateEstimator.doControl();
       updateEstimates();
       alphaFilterDesiredFeet();
       updateGraphics();
