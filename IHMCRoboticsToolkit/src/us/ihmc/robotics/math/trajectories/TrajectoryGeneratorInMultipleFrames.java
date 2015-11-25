@@ -17,14 +17,7 @@ public abstract class TrajectoryGeneratorInMultipleFrames
       this.allowMultipleFrames = allowMultipleFrames;
       this.initialTrajectoryFrame = initialTrajectoryFrame;
 
-      if (allowMultipleFrames)
-      {
-         multipleFramesHolders = new ArrayList<>();
-      }
-      else
-      {
-         multipleFramesHolders = null;
-      }
+      multipleFramesHolders = new ArrayList<>();
    }
 
    protected void registerMultipleFramesHolders(YoMultipleFramesHolder... multipleFramesHolders)
