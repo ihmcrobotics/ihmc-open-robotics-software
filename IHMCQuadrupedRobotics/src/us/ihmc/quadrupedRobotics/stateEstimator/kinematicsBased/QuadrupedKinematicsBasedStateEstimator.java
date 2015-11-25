@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased;
 
-import us.ihmc.quadrupedRobotics.sensorProcessing.simulatedSensors.FootSwitchUpdaterBasedOnGroundContactPoints;
+import us.ihmc.quadrupedRobotics.sensorProcessing.sensorProcessors.FootContactStateInterface;
 import us.ihmc.quadrupedRobotics.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -14,10 +14,10 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    
    private final JointStateUpdater jointStateUpdater;
-   private final FootSwitchUpdaterBasedOnGroundContactPoints footSwitchUpdater;
+   private final FootContactStateInterface footSwitchUpdater;
 
 
-   public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SDFQuadrupedPerfectSimulatedSensor sensorOutputMapReadOnly, FootSwitchUpdaterBasedOnGroundContactPoints footSwitchUpdater)
+   public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SDFQuadrupedPerfectSimulatedSensor sensorOutputMapReadOnly, FootContactStateInterface footSwitchUpdater)
    {
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, null, registry);
       
@@ -34,12 +34,11 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    public void initialize()
    {
       jointStateUpdater.initialize();
-      footSwitchUpdater.initialize();
    }
    
+   @Override
    public void doControl()
    {
       jointStateUpdater.updateJointState();
-      footSwitchUpdater.updateFootSwitchState();
    }
 }
