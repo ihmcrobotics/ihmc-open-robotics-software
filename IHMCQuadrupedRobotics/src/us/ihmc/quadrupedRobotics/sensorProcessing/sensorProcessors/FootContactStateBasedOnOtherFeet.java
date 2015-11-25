@@ -1,5 +1,6 @@
-package us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased;
+package us.ihmc.quadrupedRobotics.sensorProcessing.sensorProcessors;
 
+import us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased.FootContactStateInterface;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
