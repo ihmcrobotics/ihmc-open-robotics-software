@@ -6,13 +6,13 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class FootSwitchUpdater
+public class FootSwitchUpdaterBasedOnGroundContactPoints
 {
 
    private final FootSwitchOutputReadOnly footSwitchOutput;
    private final QuadrantDependentList<BooleanYoVariable> footContactSwitches;
    
-   public FootSwitchUpdater(QuadrantDependentList<BooleanYoVariable> footContactSwitchesToBeUpdated, FootSwitchOutputReadOnly footSwitchOutputReadOnly, YoVariableRegistry parentRegistry)
+   public FootSwitchUpdaterBasedOnGroundContactPoints(QuadrantDependentList<BooleanYoVariable> footContactSwitchesToBeUpdated, FootSwitchOutputReadOnly footSwitchOutputReadOnly, YoVariableRegistry parentRegistry)
    {
       footSwitchOutput = footSwitchOutputReadOnly;
       footContactSwitches = footContactSwitchesToBeUpdated;
@@ -33,5 +33,9 @@ public class FootSwitchUpdater
       }
    }
    
+   public boolean isFootInContact(RobotQuadrant quadrant)
+   {
+      return footContactSwitches.get(quadrant).getBooleanValue();
+   }
    
 }
