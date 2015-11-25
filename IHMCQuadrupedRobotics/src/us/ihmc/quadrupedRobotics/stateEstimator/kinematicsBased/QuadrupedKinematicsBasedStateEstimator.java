@@ -3,8 +3,6 @@ package us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased;
 import us.ihmc.quadrupedRobotics.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdater;
@@ -15,28 +13,21 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    
    private final JointStateUpdater jointStateUpdater;
-   private final FootSwitchUpdater footSwitchUpdater;
-   private QuadrantDependentList<BooleanYoVariable> footContactSwitches = new QuadrantDependentList<>();
+   private final FootSwitchUpdaterBasedOnGroundContactPoints footSwitchUpdater;
 
-   public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SDFQuadrupedPerfectSimulatedSensor sensorOutputMapReadOnly)
+
+   public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SDFQuadrupedPerfectSimulatedSensor sensorOutputMapReadOnly, FootSwitchUpdaterBasedOnGroundContactPoints footSwitchUpdater)
    {
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, null, registry);
       
-      for(RobotQuadrant quadrant : RobotQuadrant.values())
-      {
-         String name = getClass().getSimpleName() + quadrant.getCamelCaseNameForMiddleOfExpression() + "footSwitch";
-         BooleanYoVariable footSwitch = new BooleanYoVariable(name, registry);
-         footContactSwitches.put(quadrant, footSwitch);
-      }
-      
-      footSwitchUpdater = new FootSwitchUpdater(footContactSwitches , sensorOutputMapReadOnly, registry);
+      this.footSwitchUpdater = footSwitchUpdater; 
 
    }
 
    @Override
    public boolean isFootInContact(RobotQuadrant quadrant)
    {
-      return footContactSwitches.get(quadrant).getBooleanValue();
+      return footSwitchUpdater.isFootInContact(quadrant);
    }
 
    public void initialize()
@@ -45,11 +36,9 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       footSwitchUpdater.initialize();
    }
    
-   
    public void doControl()
    {
       jointStateUpdater.updateJointState();
       footSwitchUpdater.updateFootSwitchState();
    }
-   
 }
