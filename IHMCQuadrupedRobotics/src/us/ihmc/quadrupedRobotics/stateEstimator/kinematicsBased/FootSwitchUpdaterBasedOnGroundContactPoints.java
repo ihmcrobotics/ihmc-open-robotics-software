@@ -6,7 +6,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class FootSwitchUpdaterBasedOnGroundContactPoints
+public class FootSwitchUpdaterBasedOnGroundContactPoints implements FootContactStateInterface
 {
 
    private final FootSwitchOutputReadOnly footSwitchOutput;
@@ -32,10 +32,11 @@ public class FootSwitchUpdaterBasedOnGroundContactPoints
          footContactSwitches.get(quadrant).set(footInContact);
       }
    }
-   
-   public boolean isFootInContact(RobotQuadrant quadrant)
+
+   @Override
+   public boolean isFootInContactWithGround(RobotQuadrant footToBeChecked)
    {
-      return footContactSwitches.get(quadrant).getBooleanValue();
+      return footContactSwitches.get(footToBeChecked).getBooleanValue();
    }
    
 }

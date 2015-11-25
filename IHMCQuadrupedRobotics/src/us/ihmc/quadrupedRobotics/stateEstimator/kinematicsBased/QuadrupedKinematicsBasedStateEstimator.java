@@ -27,7 +27,7 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    @Override
    public boolean isFootInContact(RobotQuadrant quadrant)
    {
-      return footSwitchUpdater.isFootInContact(quadrant);
+      return footSwitchUpdater.isFootInContactWithGround(quadrant);
    }
 
    public void initialize()
