@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased;
+package us.ihmc.quadrupedRobotics.sensorProcessing.sensorProcessors;
 
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 

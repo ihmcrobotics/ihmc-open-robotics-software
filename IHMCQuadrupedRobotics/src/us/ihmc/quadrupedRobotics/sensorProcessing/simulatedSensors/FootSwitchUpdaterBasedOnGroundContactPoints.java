@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.sensorProcessing.simulatedSensors;
 
+import us.ihmc.quadrupedRobotics.sensorProcessing.sensorProcessors.FootContactStateInterface;
 import us.ihmc.quadrupedRobotics.sensorProcessing.sensorProcessors.FootSwitchOutputReadOnly;
-import us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased.FootContactStateInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
