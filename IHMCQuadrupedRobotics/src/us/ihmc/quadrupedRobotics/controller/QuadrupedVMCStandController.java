@@ -51,7 +51,7 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
    private final double mass;
    private final double gravity;
    private final double startTime;
-   
+
    // Utilities
    private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame worldFrame;
@@ -95,7 +95,7 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(QuadrupedControllerState.VMC_STAND);
-      
+
       // Parameters
       this.fullRobotModel = fullRobotModel;
       this.robotTimestamp = robotTimestamp;
@@ -107,10 +107,10 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       this.mass = fullRobotModel.getTotalMass();
       this.gravity = 9.81;
       this.startTime = robotTimestamp.getDoubleValue();
-      
+
       // Utilities
       referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
-      comFrame = referenceFrames.getCenterOfMassFrame();
+      comFrame = referenceFrames.getCenterOfMassZUpFrame();
       bodyFrame = referenceFrames.getBodyFrame();
       worldFrame = QuadrupedReferenceFrames.getWorldFrame();
       supportPolygon = new QuadrupedSupportPolygon();
@@ -263,21 +263,24 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       FrameVector bodyTorqueFeedforwardSetpoint = pool.lease(FrameVector.class);
       yoBodyTorqueFeedforwardSetpoint.getFrameTupleIncludingFrame(bodyTorqueFeedforwardSetpoint);
       bodyTorqueFeedforwardSetpoint.changeFrame(bodyFrame);
-      
+
       FrameVector bodyTorqueSetpoint = pool.lease(FrameVector.class);
-      bodyOrientationController.compute(bodyTorqueSetpoint, bodyOrientationSetpoint, bodyAngularVelocitySetpoint, bodyAngularVelocityEstimate, bodyTorqueFeedforwardSetpoint);
+      bodyOrientationController.compute(bodyTorqueSetpoint, bodyOrientationSetpoint, bodyAngularVelocitySetpoint, bodyAngularVelocityEstimate,
+            bodyTorqueFeedforwardSetpoint);
       bodyTorqueSetpoint.changeFrame(worldFrame);
       yoBodyTorqueSetpoint.set(bodyTorqueSetpoint);
 
       // compute body force setpoints to track desired capture point and center of mass height
       FrameVector comForceSetpoint = pool.lease(FrameVector.class);
       double omega = yoIcpOmegaSetpoint.getDoubleValue();
-      double cmpX = yoIcpPositionEstimate.getX() - 1 / omega * icpForwardPIDController.compute(yoIcpPositionEstimate.getX(), yoIcpPositionSetpoint.getX(), 0, 0, dt);
-      double cmpY = yoIcpPositionEstimate.getY() - 1 / omega * icpLateralPIDController.compute(yoIcpPositionEstimate.getY(), yoIcpPositionSetpoint.getY(), 0, 0, dt);
+      double cmpX = yoIcpPositionEstimate.getX()
+            - 1 / omega * icpForwardPIDController.compute(yoIcpPositionEstimate.getX(), yoIcpPositionSetpoint.getX(), 0, 0, dt);
+      double cmpY = yoIcpPositionEstimate.getY()
+            - 1 / omega * icpLateralPIDController.compute(yoIcpPositionEstimate.getY(), yoIcpPositionSetpoint.getY(), 0, 0, dt);
       double cmpZ = yoIcpPositionSetpoint.getZ();
       double fX = mass * Math.pow(omega, 2) * (yoComPositionEstimate.getX() - cmpX);
       double fY = mass * Math.pow(omega, 2) * (yoComPositionEstimate.getY() - cmpY);
-      double fZ = 0.75 * mass * gravity
+      double fZ = parameters.getComHeightGravityFeedforwardConstant() * mass * gravity
             + comHeightPIDController.compute(yoComHeightEstimate.getDoubleValue(), yoComHeightSetpoint.getDoubleValue(), yoComVelocityEstimate.getZ(), 0, dt);
       yoCmpPositionSetpoint.set(cmpX, cmpY, cmpZ);
       yoComForceSetpoint.set(fX, fY, fZ);
@@ -286,7 +289,7 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       // compute joint torques using virtual model control
       virtualModelController.setDesiredComForce(comForceSetpoint);
       virtualModelController.setDesiredBodyTorque(bodyTorqueSetpoint);
-      virtualModelController.update();
+      virtualModelController.compute();
    }
 
    @Override
