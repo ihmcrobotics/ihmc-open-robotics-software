@@ -30,6 +30,8 @@ public abstract class CommonQuadrupedReferenceFrames
 
    public abstract ReferenceFrame getCenterOfMassFrame();
 
+   public abstract ReferenceFrame getCenterOfMassZUpFrame();
+
    public abstract QuadrantDependentList<ReferenceFrame> getFootReferenceFrames();
    
    private final QuadrantDependentList<Double> legLengths = new QuadrantDependentList<>();
