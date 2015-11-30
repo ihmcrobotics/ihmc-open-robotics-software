@@ -175,6 +175,21 @@ public class YoFramePose extends ReferenceFrameHolder
    {
       return position.distance(goalYoPose.getPosition());
    }
+
+   public void setX(double x)
+   {
+      position.setX(x);
+   }
+   
+   public void setY(double y)
+   {
+      position.setY(y);
+   }
+   
+   public void setZ(double z)
+   {
+      position.setZ(z);
+   }
 }
 
 
