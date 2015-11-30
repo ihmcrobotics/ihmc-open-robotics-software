@@ -58,7 +58,7 @@ public class FourBarLinkageConstraintToIntegrate implements FunctionToIntegrate
    private final FrameVector axialDamperForce;
    private final FrameVector totalForce = new FrameVector(worldFrame);
 
-   public FourBarLinkageConstraintToIntegrate(String name, ExternalForcePoint connectionPointA, ExternalForcePoint connectionPointB, Joint jointA,
+   public FourBarLinkageConstraintToIntegrate(String name, ExternalForcePoint connectionPointA, ExternalForcePoint connectionPointB, final Joint jointA,
          YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);

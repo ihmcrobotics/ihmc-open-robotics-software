@@ -257,6 +257,11 @@ public class ExternalForcePoint extends KinematicPoint
       return force;
    }
    
+   public YoFrameVector getYoMoment()
+   {
+	   return moment;
+   }
+   
    public YoFrameVector getYoImpulse()
    {
       return impulse;
