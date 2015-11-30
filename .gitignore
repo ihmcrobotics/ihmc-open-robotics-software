@@ -76,3 +76,6 @@
 **/Network Trash Folder
 **/Temporary Items
 **/.apdisk
+***REMOVED***/Configurations/
+***REMOVED***/Configurations/
+.gitignore
