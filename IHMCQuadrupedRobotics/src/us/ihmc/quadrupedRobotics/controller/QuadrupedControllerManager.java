@@ -22,6 +22,12 @@ public class QuadrupedControllerManager implements RobotController
    
    private final StateMachine<QuadrupedControllerState> stateMachine;
    private final EnumYoVariable<QuadrupedControllerState> requestedState;
+   private final EnumYoVariable<SliderBoardModes> sliderboardMode = new EnumYoVariable<>("sliderboardMode", registry, SliderBoardModes.class);
+   
+   public enum SliderBoardModes
+   {
+      POSITIONCRAWL_COM_SHIFT, POSITIONCRAWL_FOOTSTEP_CHOOSER, POSITIONCRAWL_ORIENTATION_TUNING
+   }
    
    public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters, SDFFullRobotModel sdfFullRobotModel,
          QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators, QuadrupedStateEstimator stateEstimator, QuadrupedDataProvider quadrupedDataProvider,
