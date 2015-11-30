@@ -47,4 +47,11 @@ public class SimpleSimulationQuadrupedStateEstimator implements QuadrupedStateEs
       return footSwitches.get(quadrant).isInContact();
    }
 
+   @Override
+   public void doControl()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
 }

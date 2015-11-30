@@ -16,7 +16,8 @@ public enum LogSettings
    EXO_HOPPER(false),
    ETHERCAT(false),
    HAND(false),
-   MINI_BEAST(false);
+   MINI_BEAST(false),
+   BABY_BEAST(false);
 
    private final boolean log;
    private final int[] cameras;
