@@ -100,6 +100,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private final FramePoint desiredCoMFramePosition = new FramePoint(ReferenceFrame.getWorldFrame());
    private final FramePose desiredCoMFramePose = new FramePose(ReferenceFrame.getWorldFrame());
    
+   private final BooleanYoVariable runOpenLoop = new BooleanYoVariable("runOpenLoop", "If true, runs in open loop mode. The leg motions will not depend on any feedback signals.", registry);
+
    private final DoubleYoVariable filteredDesiredCoMYawAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredCoMYawAlphaBreakFrequency", registry);
    private final DoubleYoVariable filteredDesiredCoMYawAlpha = new DoubleYoVariable("filteredDesiredCoMYawAlpha", registry);
    
@@ -215,6 +217,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       subCircleRadius.set(quadrupedControllerParameters.getDefaultSubCircleRadius());
       useSubCircleForBodyShiftTarget.set(true);
       swingLeg.set(RobotQuadrant.FRONT_RIGHT);
+      
+      runOpenLoop.set(true);
       
       this.robotTimestamp = yoTime;
       this.dt = dt;
@@ -754,8 +758,21 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       @Override
       public boolean checkCondition()
       {
-         RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
-         return swingTrajectoryGenerators.get(swingQuadrant).isDone() || stateEstimator.isFootInContact(swingQuadrant) && tripleSupportState.getTimeInCurrentState() > swingDuration.getDoubleValue() / 3.0;
+    	  RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
+    	  boolean swingTrajectoryIsDone = swingTrajectoryGenerators.get(swingQuadrant).isDone();
+    	  boolean swingFootHitGround = stateEstimator.isFootInContact(swingQuadrant);
+    	  boolean inSwingStateLongEnough = tripleSupportState.getTimeInCurrentState() > swingDuration.getDoubleValue() / 3.0;
+
+    	  if (runOpenLoop.getBooleanValue())
+    	  {
+        	  swingFootHitGround = false;
+    	  }
+    	  else
+    	  {
+        	  swingFootHitGround = stateEstimator.isFootInContact(swingQuadrant);
+    	  }
+    	  
+    	  return (swingTrajectoryIsDone || swingFootHitGround && inSwingStateLongEnough);
       }
    }
    
