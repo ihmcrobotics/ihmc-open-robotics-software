@@ -1,14 +1,29 @@
 package us.ihmc.quadrupedRobotics.stateEstimator.openLoop;
 
+import us.ihmc.quadrupedRobotics.sensorProcessing.SimulatedRobotTimeProvider;
+import us.ihmc.quadrupedRobotics.sensorProcessing.simulatedSensors.ControllerOutputMapReadOnly;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdater;
 
 public class OpenLoopQuadrupedStateEstimator implements QuadrupedStateEstimator
 {
+   private final String name = getClass().getSimpleName();
+   private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   public OpenLoopQuadrupedStateEstimator()
+   private final SimulatedRobotTimeProvider timeProvider;
+
+   private final JointStateUpdater jointStateUpdater;
+
+   public OpenLoopQuadrupedStateEstimator(SimulatedRobotTimeProvider timeProvider, FullInverseDynamicsStructure inverseDynamicsStructure,
+         ControllerOutputMapReadOnly controllerOutputReader, YoVariableRegistry registry)
    {
-      // TODO Auto-generated constructor stub
+      this.timeProvider = timeProvider;
+
+      jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, controllerOutputReader, null, this.registry);
+      registry.addChild(this.registry);
    }
    
    @Override
@@ -21,8 +36,8 @@ public class OpenLoopQuadrupedStateEstimator implements QuadrupedStateEstimator
    @Override
    public void doControl()
    {
-      // TODO Auto-generated method stub
-      
+      timeProvider.doControl();
+      jointStateUpdater.updateJointState();
    }
 
 }
