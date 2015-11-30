@@ -56,6 +56,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    
    private final QuadrantDependentList<ReferenceFrame> legAttachementFrames = new QuadrantDependentList<ReferenceFrame>();
 
+   private final SideDependentList<ReferenceFrame> sideDependentMidTrotLineZUpFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> sideDependentMidFeetZUpFrames = new SideDependentList<ReferenceFrame>();
    private final EndDependentList<ReferenceFrame> endDependentMidFeetZUpFrames = new EndDependentList<ReferenceFrame>();
    
@@ -107,9 +108,13 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       {
          RobotQuadrant hindSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.HIND, robotSide);
          RobotQuadrant frontSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide);
+         RobotQuadrant frontSoleQuadrantOppositeSide = RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide.getOppositeSide());
          
          MidFrameZUpFrame midFeetZUpFrame = new MidFrameZUpFrame(robotSide.getCamelCaseNameForStartOfExpression() + "MidFeetZUpFrame", worldFrame, soleFrames.get(hindSoleQuadrant), soleFrames.get(frontSoleQuadrant));
          sideDependentMidFeetZUpFrames.put(robotSide, midFeetZUpFrame);
+         
+         MidFrameZUpFrame midTrotLineZUpFrame = new MidFrameZUpFrame("hind" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Front" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "MidTrotLineZUpFrame", worldFrame, soleFrames.get(hindSoleQuadrant), soleFrames.get(frontSoleQuadrantOppositeSide));
+         sideDependentMidTrotLineZUpFrames.put(robotSide, midTrotLineZUpFrame);
       }
       
       for (RobotEnd robotEnd : RobotEnd.values)
@@ -169,6 +174,16 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    public ReferenceFrame getSideDependentMidFeetZUpFrame(RobotSide robotSide)
    {
       return sideDependentMidFeetZUpFrames.get(robotSide);
+   }
+
+   @Override
+   public ReferenceFrame getMidTrotLnieZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine)
+   {
+      if(quadrantAssocaitedWithTrotLine.isQuadrantInHind())
+      {
+         return sideDependentMidTrotLineZUpFrames.get(quadrantAssocaitedWithTrotLine.getSide());
+      }
+      return sideDependentMidTrotLineZUpFrames.get(quadrantAssocaitedWithTrotLine.getOppositeSide());
    }
    
    @Override
@@ -254,6 +269,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       for (RobotSide robotSide : RobotSide.values)
       {
          sideDependentMidFeetZUpFrames.get(robotSide).update();
+         sideDependentMidTrotLineZUpFrames.get(robotSide).update();
       }
       
       for (RobotEnd robotEnd : RobotEnd.values)
