@@ -13,7 +13,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.acsell.BonoFlatGroundWalkingKinematicFootSwitchTest.class
-   
 })
 
 public class AcsellAInDevelopmentTestSuite
