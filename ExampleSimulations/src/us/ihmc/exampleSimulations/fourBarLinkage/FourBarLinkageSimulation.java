@@ -3,6 +3,8 @@ package us.ihmc.exampleSimulations.fourBarLinkage;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class FourBarLinkageSimulation
@@ -18,11 +20,15 @@ public class FourBarLinkageSimulation
       // Robot
       FourBarLinkageRobot robot = new FourBarLinkageRobot("basicFourBar", fourBarLinkageParameters, offsetWorld, registry);
 
-      // Pinning joint 2 to world
-      FourBarLinkageController controller = new FourBarLinkageController(robot, "fourBarLinkageController", fourBarLinkageParameters);
+      // Pinning joint 1 to world
+      YoFramePoint desiredJoint1PositionInWorld = new YoFramePoint("framePointToPinJoint1To", ReferenceFrame.getWorldFrame(), registry);
+      desiredJoint1PositionInWorld.set(fourBarLinkageParameters.linkageLength_1, 0.0, 0.0);
+      PinFourBarJointInWorldController controller = new PinFourBarJointInWorldController(robot, "pinJoint1ToWorldController", 1, desiredJoint1PositionInWorld);
       controller.setGain(1000.0);
       controller.setDamping(100.0);
       robot.setController(controller);
+
+      // Controller
 
       // SCS
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
