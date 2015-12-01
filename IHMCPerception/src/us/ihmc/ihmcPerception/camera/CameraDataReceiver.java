@@ -60,7 +60,7 @@ public abstract class CameraDataReceiver extends Thread
       else
       {
          Vector3d point = new Vector3d();
-         cameraFrame.getTransformFromWorldFrame().getTranslation(point);
+         cameraFrame.getTransformToWorldFrame().getTranslation(point);
          PrintTools.info("Using camera frame: " + cameraFrame.getName() + " at " + point);
       }
 
