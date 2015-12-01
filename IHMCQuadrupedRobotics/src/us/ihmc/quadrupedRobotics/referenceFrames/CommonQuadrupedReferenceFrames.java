@@ -27,6 +27,8 @@ public abstract class CommonQuadrupedReferenceFrames
    public abstract ReferenceFrame getKneeFrame(RobotQuadrant robotQuadrant);
 
    public abstract ReferenceFrame getFootFrame(RobotQuadrant robotQuadrant);
+   
+   public abstract ReferenceFrame getCenterOfFourHipsFrame();
 
    public abstract ReferenceFrame getCenterOfMassFrame();
 
@@ -51,4 +53,6 @@ public abstract class CommonQuadrupedReferenceFrames
       
       return legLengths.get(robotQuadrant);
    }
+
+   public abstract ReferenceFrame getMidTrotLnieZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine);
 }

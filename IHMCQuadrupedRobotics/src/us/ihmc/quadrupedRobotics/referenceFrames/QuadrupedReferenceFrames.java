@@ -55,7 +55,9 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    private final QuadrantDependentList<ReferenceFrame> soleFrames = new QuadrantDependentList<ReferenceFrame>();
    
    private final QuadrantDependentList<ReferenceFrame> legAttachementFrames = new QuadrantDependentList<ReferenceFrame>();
+   private final QuadrantDependentList<FramePoint> legAttachementPoints= new QuadrantDependentList<FramePoint>();
 
+   private final SideDependentList<ReferenceFrame> sideDependentMidTrotLineZUpFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> sideDependentMidFeetZUpFrames = new SideDependentList<ReferenceFrame>();
    private final EndDependentList<ReferenceFrame> endDependentMidFeetZUpFrames = new EndDependentList<ReferenceFrame>();
    
@@ -63,6 +65,9 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    private final PoseReferenceFrame centerOfMassFrameWithRotation;
    private final ZUpFrame centerOfMassZUpFrame;
    private final FramePose centerOfMassPose;
+   private final PoseReferenceFrame centerOfFourHipsFrame;
+   private final FramePose centerOfFourHipsFramePose;
+   private final FramePoint centerOfFourHipsFramePoint = new FramePoint();
    
 
    public QuadrupedReferenceFrames(SDFFullRobotModel fullRobotModel, QuadrupedJointNameMap quadrupedJointNameMap, QuadrupedPhysicalProperties quadrupedPhysicalProperties)
@@ -102,15 +107,22 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
          soleFrame.update();
          
          soleFrames.put(robotQuadrant, soleFrame);
+         
+         FramePoint legAttachmentPoint = new FramePoint();
+         legAttachementPoints.put(robotQuadrant, legAttachmentPoint);
       }
       
       for (RobotSide robotSide : RobotSide.values)
       {
          RobotQuadrant hindSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.HIND, robotSide);
          RobotQuadrant frontSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide);
+         RobotQuadrant frontSoleQuadrantOppositeSide = RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide.getOppositeSide());
          
          MidFrameZUpFrame midFeetZUpFrame = new MidFrameZUpFrame(robotSide.getCamelCaseNameForStartOfExpression() + "MidFeetZUpFrame", worldFrame, soleFrames.get(hindSoleQuadrant), soleFrames.get(frontSoleQuadrant));
          sideDependentMidFeetZUpFrames.put(robotSide, midFeetZUpFrame);
+         
+         MidFrameZUpFrame midTrotLineZUpFrame = new MidFrameZUpFrame("hind" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Front" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "MidTrotLineZUpFrame", worldFrame, soleFrames.get(hindSoleQuadrant), soleFrames.get(frontSoleQuadrantOppositeSide));
+         sideDependentMidTrotLineZUpFrames.put(robotSide, midTrotLineZUpFrame);
       }
       
       for (RobotEnd robotEnd : RobotEnd.values)
@@ -147,7 +159,29 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       centerOfMassFrameWithRotation.setPoseAndUpdate(centerOfMassPose);
       centerOfMassZUpFrame = new ZUpFrame(worldFrame, centerOfMassFrameWithRotation, "centerOfMassZUpFrame");
       
+      centerOfFourHipsFramePose = new FramePose(bodyFrame);
+      centerOfFourHipsFrame = new PoseReferenceFrame("centerOfFourHipsFrame", bodyFrame);
+      updateHipsCentroid();
+      
       initializeCommonValues();
+   }
+
+   private void updateHipsCentroid()
+   {
+      centerOfFourHipsFramePose.setToZero(bodyFrame);
+      centerOfFourHipsFramePoint.setToZero(bodyFrame);
+      
+      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         FramePoint legAttachmentPoint = legAttachementPoints.get(quadrant);
+         legAttachmentPoint.setToZero(legAttachementFrames.get(quadrant));
+         legAttachmentPoint.changeFrame(bodyFrame);
+         centerOfFourHipsFramePoint.add(legAttachmentPoint);
+         
+      }
+      centerOfFourHipsFramePoint.scale(0.25);
+      centerOfFourHipsFramePose.setPosition(centerOfFourHipsFramePoint);
+      centerOfFourHipsFrame.setPoseAndUpdate(centerOfFourHipsFramePose);
    }
 
    public static ReferenceFrame getWorldFrame()
@@ -171,6 +205,16 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    public ReferenceFrame getSideDependentMidFeetZUpFrame(RobotSide robotSide)
    {
       return sideDependentMidFeetZUpFrames.get(robotSide);
+   }
+
+   @Override
+   public ReferenceFrame getMidTrotLnieZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine)
+   {
+      if(quadrantAssocaitedWithTrotLine.isQuadrantInHind())
+      {
+         return sideDependentMidTrotLineZUpFrames.get(quadrantAssocaitedWithTrotLine.getSide());
+      }
+      return sideDependentMidTrotLineZUpFrames.get(quadrantAssocaitedWithTrotLine.getOppositeSide());
    }
    
    @Override
@@ -262,6 +306,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       for (RobotSide robotSide : RobotSide.values)
       {
          sideDependentMidFeetZUpFrames.get(robotSide).update();
+         sideDependentMidTrotLineZUpFrames.get(robotSide).update();
       }
       
       for (RobotEnd robotEnd : RobotEnd.values)
@@ -277,5 +322,13 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       
       centerOfMassFrameWithRotation.setPoseAndUpdate(centerOfMassPose);
       centerOfMassZUpFrame.update();
+      
+      updateHipsCentroid();
+   }
+
+   @Override
+   public ReferenceFrame getCenterOfFourHipsFrame()
+   {
+      return centerOfFourHipsFrame;
    }
 }

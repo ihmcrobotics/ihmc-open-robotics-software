@@ -23,7 +23,10 @@ public class Joystick
       joystickController = getFirstJoystickFoundOnSystem();
 
       if (nullCheck())
+      {
+         PrintTools.error("Joystick not found!");
          return;
+      }
       
       model = JoystickModel.getModelFromName(joystickController.getName());
       
@@ -43,7 +46,6 @@ public class Joystick
    {
       if (joystickController == null)
       {
-         PrintTools.error("Joystick not found!");
          return true;
       }
       else
