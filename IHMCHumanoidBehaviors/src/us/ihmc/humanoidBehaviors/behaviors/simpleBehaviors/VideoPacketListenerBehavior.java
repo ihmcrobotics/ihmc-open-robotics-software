@@ -36,7 +36,7 @@ public abstract class VideoPacketListenerBehavior extends BehaviorInterface
       attachNetworkProcessorListeningQueue(cameraData, VideoPacket.class);
    }
 
-   public abstract void onNewImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParamaters);
+   public abstract void onNewImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParameters);
 
    @Override
    public void doControl()
