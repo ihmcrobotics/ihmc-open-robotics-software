@@ -63,6 +63,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    
    private final ReferenceFrame centerOfMassFrame;
    private final PoseReferenceFrame centerOfMassFrameWithRotation;
+   private final ZUpFrame centerOfMassZUpFrame;
    private final FramePose centerOfMassPose;
    private final PoseReferenceFrame centerOfFourHipsFrame;
    private final FramePose centerOfFourHipsFramePose;
@@ -156,6 +157,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       
       centerOfMassFrameWithRotation = new PoseReferenceFrame("centerOfMassFrameWithRotation", bodyFrame);
       centerOfMassFrameWithRotation.setPoseAndUpdate(centerOfMassPose);
+      centerOfMassZUpFrame = new ZUpFrame(worldFrame, centerOfMassFrameWithRotation, "centerOfMassZUpFrame");
       
       centerOfFourHipsFramePose = new FramePose(bodyFrame);
       centerOfFourHipsFrame = new PoseReferenceFrame("centerOfFourHipsFrame", bodyFrame);
@@ -278,7 +280,13 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       //return centerOfMassFrame;
       return centerOfMassFrameWithRotation;
    }
-   
+
+   public ReferenceFrame getCenterOfMassZUpFrame()
+   {
+      //return centerOfMassFrame;
+      return centerOfMassFrameWithRotation;
+   }
+
    @Override
    public QuadrantDependentList<ReferenceFrame> getFootReferenceFrames()
    {
@@ -313,6 +321,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       centerOfMassPose.setOrientation(new Quat4d());
       
       centerOfMassFrameWithRotation.setPoseAndUpdate(centerOfMassPose);
+      centerOfMassZUpFrame.update();
       
       updateHipsCentroid();
    }

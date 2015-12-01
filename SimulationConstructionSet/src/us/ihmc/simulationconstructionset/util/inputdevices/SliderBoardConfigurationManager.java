@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.util.inputdevices;
 import java.util.Hashtable;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class SliderBoardConfigurationManager extends MidiSliderBoard
 {
@@ -28,7 +29,7 @@ public class SliderBoardConfigurationManager extends MidiSliderBoard
 
    public void loadConfiguration(String name)
    {
-      System.out.println("LOADING SLIDERBOARD CONFIGURATION: " + name);
+      PrintTools.info(this, "LOADING SLIDERBOARD CONFIGURATION: " + name);
 
       if (configurations.containsKey(name))
       {
