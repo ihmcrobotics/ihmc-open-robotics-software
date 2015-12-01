@@ -2,9 +2,10 @@ package us.ihmc.quadrupedRobotics.sensorProcessing.simulatedSensors;
 
 import java.util.List;
 
-import us.ihmc.quadrupedRobotics.sensorProcessing.SimulatedRobotTimeProvider;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 
@@ -13,17 +14,18 @@ public class ControllerOutputMapReadOnly implements SensorOutputMapReadOnly
    /**
     * the purpose of this class is to read the q, qd and qdd desired of the oneDofJoints and to return it as the sensor output 
     */
-   SimulatedRobotTimeProvider timeProvider;
-
-   public ControllerOutputMapReadOnly(SimulatedRobotTimeProvider timeProvider)
+   private final DoubleYoVariable yoTime;
+   
+   
+   public ControllerOutputMapReadOnly(DoubleYoVariable yoTime)
    {
-      this.timeProvider = timeProvider;
+      this.yoTime = yoTime;
    }
 
    @Override
    public long getTimestamp()
    {
-      return timeProvider.getTimestamp();
+      return TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue());
    }
 
    @Override

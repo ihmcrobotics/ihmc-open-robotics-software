@@ -21,8 +21,8 @@ public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandPara
    private final double comHeightDerivativeGain = 1000;
    private final double comHeightIntegralGain = 0;
    private final double comHeightMaxIntegralError = 0;
-   
-   private final double comHeightSetpoint = 0.55;
+   private final double comHeightGravityFeedforwardConstant = 0.75;
+   private final double comHeightSetpoint = 0.5;
 
    @Override
    public double[] getBodyOrientationProportionalGains()
@@ -118,6 +118,12 @@ public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandPara
    public double getComHeightMaxIntegralError()
    {
       return comHeightMaxIntegralError;
+   }
+
+   @Override
+   public double getComHeightGravityFeedforwardConstant()
+   {
+      return comHeightGravityFeedforwardConstant;
    }
 
    @Override

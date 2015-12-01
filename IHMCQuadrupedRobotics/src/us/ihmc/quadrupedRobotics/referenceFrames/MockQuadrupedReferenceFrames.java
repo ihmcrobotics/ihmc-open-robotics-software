@@ -128,9 +128,16 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    {
       return endDependentMidFeetZUpFrames.get(robotEnd);
    }
-
+   
    @Override
    public ReferenceFrame getCenterOfMassFrame()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public ReferenceFrame getCenterOfMassZUpFrame()
    {
       // TODO Auto-generated method stub
       return null;
