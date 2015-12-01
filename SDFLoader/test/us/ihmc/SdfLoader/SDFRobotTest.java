@@ -1,6 +1,7 @@
 package us.ihmc.SdfLoader;
 
 import java.io.FileNotFoundException;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
@@ -14,7 +15,7 @@ public class SDFRobotTest
    @Test(timeout = 30000)
    public void testNullJointMap() throws FileNotFoundException, JAXBException
    {
-      JaxbSDFLoader loader = new JaxbSDFLoader(getClass().getClassLoader().getResourceAsStream("sdfRobotTest.sdf"), null, null);
+      JaxbSDFLoader loader = new JaxbSDFLoader(getClass().getClassLoader().getResourceAsStream("sdfRobotTest.sdf"), (List<String>) null, null);
       
       GeneralizedSDFRobotModel generalizedSDFRobotModel = loader.getGeneralizedSDFRobotModel("atlas");
       new SDFHumanoidRobot(generalizedSDFRobotModel, null, null, true);

@@ -5,6 +5,7 @@ import us.ihmc.quadrupedRobotics.sensorProcessing.simulatedSensors.ControllerOut
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdater;
 
@@ -38,6 +39,12 @@ public class OpenLoopQuadrupedStateEstimator implements QuadrupedStateEstimator
    {
       timeProvider.doControl();
       jointStateUpdater.updateJointState();
+   }
+
+   @Override
+   public double getCurrentTime()
+   {
+      return TimeTools.nanoSecondstoSeconds(timeProvider.getTimestamp());
    }
 
 }
