@@ -36,6 +36,8 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final DoubleYoVariable maxLateralSkew = new DoubleYoVariable("maxLateralSkew", registry);
    private final DoubleYoVariable maxYawPerStep = new DoubleYoVariable("maxYawPerStep", registry);
    private final DoubleYoVariable minimumDistanceFromSameSideFoot = new DoubleYoVariable("minimumDistanceFromSameSideFoot", registry);
+   private final DoubleYoVariable xOffsetFromCenterOfHips = new DoubleYoVariable("xOffsetFromCenterOfHips", registry);
+   private final DoubleYoVariable yOffsetFromCenterOfHips = new DoubleYoVariable("yOffsetFromCenterOfHips", registry);
    private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
    private final FramePoint centroid = new FramePoint(ReferenceFrame.getWorldFrame());
 
@@ -153,6 +155,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       
       swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);
       swingTargetToPack.add(desiredSwingFootPositionFromOppositeSideFoot);
+      swingTargetToPack.add(xOffsetFromCenterOfHips.getDoubleValue(), yOffsetFromCenterOfHips.getDoubleValue(), 0.0);
       
       //for debug
       //      swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);
