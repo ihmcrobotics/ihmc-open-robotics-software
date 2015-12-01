@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller;
 
 import us.ihmc.SdfLoader.OutputWriter;
+import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -13,14 +14,15 @@ public class QuadrupedSimulationController implements RobotController
    private final OutputWriter outputWriter;
    private final RobotController gaitControlManager;
    private RobotController headController; //not implemented yet
-   private RobotController stateEstimator; //not implemented yet
+   private QuadrupedStateEstimator stateEstimator; //not implemented yet
    
    
-   public QuadrupedSimulationController(RawSensorReader sensorReader, OutputWriter outputWriter, QuadrupedControllerManager gaitControlManager)
+   public QuadrupedSimulationController(RawSensorReader sensorReader, OutputWriter outputWriter, QuadrupedControllerManager gaitControlManager, QuadrupedStateEstimator stateEstimator)
    {
       this.sensorReader = sensorReader;
       this.outputWriter = outputWriter;
       this.gaitControlManager = gaitControlManager;
+      this.stateEstimator = stateEstimator;
       registry.addChild(gaitControlManager.getYoVariableRegistry());
    }
 
@@ -52,6 +54,7 @@ public class QuadrupedSimulationController implements RobotController
    public void doControl()
    {
       sensorReader.read();
+      stateEstimator.doControl();
       gaitControlManager.doControl();
       outputWriter.write();
    }
