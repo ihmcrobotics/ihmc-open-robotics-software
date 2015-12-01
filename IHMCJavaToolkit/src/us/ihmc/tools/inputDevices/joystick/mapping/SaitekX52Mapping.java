@@ -3,7 +3,6 @@ package us.ihmc.tools.inputDevices.joystick.mapping;
 import org.apache.commons.lang3.SystemUtils;
 
 import net.java.games.input.Component.Identifier;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public enum SaitekX52Mapping
 {
@@ -81,7 +80,6 @@ public enum SaitekX52Mapping
       else
       {
          identifier = null;
-         PrintTools.error("Unsupported OS.");
       }
    }
 
