@@ -156,4 +156,11 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       // TODO Auto-generated method stub
       return null;
    }
+
+   @Override
+   public ReferenceFrame getCenterOfFourHipsFrame()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
 }
