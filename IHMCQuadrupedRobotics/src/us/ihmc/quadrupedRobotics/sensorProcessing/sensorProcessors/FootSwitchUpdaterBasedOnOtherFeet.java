@@ -1,16 +1,16 @@
-package us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased;
+package us.ihmc.quadrupedRobotics.sensorProcessing.sensorProcessors;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class FootContactStateBasedOnOtherFeet implements FootContactStateInterface
+public class FootSwitchUpdaterBasedOnOtherFeet implements FootSwitchUpdater
 { 
    private static final double EPSILON = 1e-5;
    private QuadrantDependentList<FramePoint> footPositions = new QuadrantDependentList<FramePoint>();
    
-   public FootContactStateBasedOnOtherFeet(QuadrantDependentList<FramePoint> footPositions)
+   public FootSwitchUpdaterBasedOnOtherFeet(QuadrantDependentList<FramePoint> footPositions)
    {
       this.footPositions = footPositions;
    }

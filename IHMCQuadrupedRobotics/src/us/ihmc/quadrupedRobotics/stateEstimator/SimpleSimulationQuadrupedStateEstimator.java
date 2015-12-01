@@ -6,6 +6,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.ContactBasedFootSwitch;
@@ -18,10 +19,12 @@ public class SimpleSimulationQuadrupedStateEstimator implements QuadrupedStateEs
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final QuadrantDependentList<ContactBasedFootSwitch> footSwitches = new QuadrantDependentList<>();
-
+   private final DoubleYoVariable yoTime;
+   
    public SimpleSimulationQuadrupedStateEstimator(SDFRobot simulationRobot, QuadrupedRobotParameters robotParameters, YoVariableRegistry parentRegistry)
    {
       ArrayList<GroundContactPoint> groundContactPoints = simulationRobot.getAllGroundContactPoints();
+      this.yoTime = simulationRobot.getYoTime();
       
       QuadrupedJointNameMap jointMap = robotParameters.getJointMap();
       for(RobotQuadrant quadrant : RobotQuadrant.values)
@@ -45,6 +48,19 @@ public class SimpleSimulationQuadrupedStateEstimator implements QuadrupedStateEs
    public boolean isFootInContact(RobotQuadrant quadrant)
    {
       return footSwitches.get(quadrant).isInContact();
+   }
+
+   @Override
+   public void doControl()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   @Override
+   public double getCurrentTime()
+   {
+      return yoTime.getDoubleValue();
    }
 
 }

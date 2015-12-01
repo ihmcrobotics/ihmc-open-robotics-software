@@ -2,7 +2,13 @@ package us.ihmc.tools.inputDevices.joystick;
 
 public enum JoystickModel
 {
-   LOGITECH_EXTREME_3D("Logitech Extreme 3D"), MAD_CATZ_V1_STICK("Mad Catz V.1 Stick"), SAITEK_X52("Saitek X52 Flight Control System"), UNKNOWN("Unknown");
+   LOGITECH_EXTREME_3D("Logitech Extreme 3D"),
+   MAD_CATZ_V1_STICK("Mad Catz V.1 Stick"),
+   MAD_CATZ_FLY5_STICK("Mad Catz F.L.Y.5 Stick"),
+   SAITEK_X52("Saitek X52 Flight Control System"),
+   UNKNOWN("Unknown"),
+   
+   ;
    
    public static final JoystickModel[] values = values();
    
