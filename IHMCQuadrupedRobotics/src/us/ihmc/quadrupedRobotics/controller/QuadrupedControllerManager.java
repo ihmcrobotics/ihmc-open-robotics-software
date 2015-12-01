@@ -14,15 +14,15 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class QuadrupedControllerManager implements RobotController
 {
-   private final SDFFullRobotModel sdfFullRobotModel;
-   private final DoubleYoVariable robotTimestamp;
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
-   private final YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   
+   private final QuadrupedStateEstimator stateEstimator;
    
    private final StateMachine<QuadrupedControllerState> stateMachine;
    private final EnumYoVariable<QuadrupedControllerState> requestedState;
    private final EnumYoVariable<SliderBoardModes> sliderboardMode = new EnumYoVariable<>("sliderboardMode", registry, SliderBoardModes.class);
+   
+   private final DoubleYoVariable robotTimestamp = new DoubleYoVariable("robotTimestamp", registry);
    
    public enum SliderBoardModes
    {
@@ -31,14 +31,11 @@ public class QuadrupedControllerManager implements RobotController
    
    public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters, SDFFullRobotModel sdfFullRobotModel,
          QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators, QuadrupedStateEstimator stateEstimator, QuadrupedDataProvider quadrupedDataProvider,
-         DoubleYoVariable robotTimestamp, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
-      this.sdfFullRobotModel = sdfFullRobotModel;
-      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-      this.yoGraphicsListRegistryForDetachedOverhead = yoGraphicsListRegistryForDetachedOverhead;
-      this.robotTimestamp = robotTimestamp;
-      
       // configure state machine
+      this.stateEstimator = stateEstimator;
+      
       stateMachine = new StateMachine<>("QuadrupedControllerStateMachine", "QuadrupedControllerSwitchTime", QuadrupedControllerState.class, robotTimestamp, registry);
       requestedState = new EnumYoVariable<>("QuadrupedControllerStateMachineRequestedState", registry, QuadrupedControllerState.class, true);
       
@@ -81,6 +78,8 @@ public class QuadrupedControllerManager implements RobotController
    @Override
    public void doControl()
    {
+      robotTimestamp.set(stateEstimator.getCurrentTime());
+      
       if(requestedState.getEnumValue() != null)
       {
          stateMachine.setCurrentState(requestedState.getEnumValue());

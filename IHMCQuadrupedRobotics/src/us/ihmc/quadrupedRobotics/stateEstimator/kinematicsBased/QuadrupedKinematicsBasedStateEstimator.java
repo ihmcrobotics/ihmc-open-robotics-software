@@ -1,10 +1,11 @@
 package us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased;
 
 import us.ihmc.quadrupedRobotics.sensorProcessing.sensorProcessors.FootSwitchUpdater;
-import us.ihmc.quadrupedRobotics.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdater;
 
@@ -16,12 +17,14 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    private final JointStateUpdater jointStateUpdater;
    private final FootSwitchUpdater footSwitchUpdater;
 
+   private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
 
-   public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SDFQuadrupedPerfectSimulatedSensor sensorOutputMapReadOnly, FootSwitchUpdater footSwitchUpdater)
+   public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly, FootSwitchUpdater footSwitchUpdater)
    {
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, null, registry);
       
       this.footSwitchUpdater = footSwitchUpdater; 
+      this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
 
    }
 
@@ -40,5 +43,11 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    public void doControl()
    {
       jointStateUpdater.updateJointState();
+   }
+
+   @Override
+   public double getCurrentTime()
+   {
+      return TimeTools.nanoSecondstoSeconds(sensorOutputMapReadOnly.getTimestamp());
    }
 }

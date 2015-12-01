@@ -7,5 +7,7 @@ public interface QuadrupedStateEstimator
    public void doControl();
    
    public boolean isFootInContact(RobotQuadrant quadrant);
+   
+   public double getCurrentTime();
 
 }
