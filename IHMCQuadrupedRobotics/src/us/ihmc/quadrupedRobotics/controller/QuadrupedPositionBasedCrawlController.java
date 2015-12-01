@@ -6,9 +6,11 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedDataProvider;
+import us.ihmc.quadrupedRobotics.dataProviders.DesiredVelocityProvider;
+import us.ihmc.quadrupedRobotics.dataProviders.DesiredYawRateProvider;
 import us.ihmc.quadrupedRobotics.footstepChooser.MidFootZUpSwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.footstepChooser.SwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
@@ -223,7 +225,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private DoubleProvider desiredYawRateProvider;
    
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
-         QuadrupedStateEstimator stateEstimator, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final QuadrupedDataProvider dataProvider, DoubleYoVariable yoTime,
+         QuadrupedStateEstimator stateEstimator, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
       super(QuadrupedControllerState.POSITION_CRAWL);
@@ -274,8 +276,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
 //      this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, referenceFrames, registry);
       this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, feedForwardReferenceFrames, registry);
       this.stateEstimator = stateEstimator;
-      desiredVelocityProvider = dataProvider.getDesiredVelocityProvider();
-      desiredYawRateProvider = dataProvider.getDesiredYawRateProvider();
+      desiredVelocityProvider = new DesiredVelocityProvider(dataProducer);
+      desiredYawRateProvider = new DesiredYawRateProvider(dataProducer);
 
       desiredVelocity = new YoFrameVector("desiredVelocity", bodyFrame, registry);
       desiredVelocity.setX(0.0);
