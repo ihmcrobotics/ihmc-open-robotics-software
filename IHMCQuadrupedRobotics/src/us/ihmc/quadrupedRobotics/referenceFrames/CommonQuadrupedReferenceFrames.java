@@ -27,6 +27,8 @@ public abstract class CommonQuadrupedReferenceFrames
    public abstract ReferenceFrame getKneeFrame(RobotQuadrant robotQuadrant);
 
    public abstract ReferenceFrame getFootFrame(RobotQuadrant robotQuadrant);
+   
+   public abstract ReferenceFrame getCenterOfFourHipsFrame();
 
    public abstract ReferenceFrame getCenterOfMassFrame();
 
