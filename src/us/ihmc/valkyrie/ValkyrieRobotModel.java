@@ -245,7 +245,10 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private String getSdfFile()
    {
-      return ValkyrieConfigurationRoot.SDF_FILE;
+      if(this.target == RobotTarget.REAL_ROBOT)
+         return ValkyrieConfigurationRoot.REAL_ROBOT_SDF_FILE;
+      else
+         return ValkyrieConfigurationRoot.SIM_SDF_FILE;
    }
 
    private String[] getResourceDirectories()
