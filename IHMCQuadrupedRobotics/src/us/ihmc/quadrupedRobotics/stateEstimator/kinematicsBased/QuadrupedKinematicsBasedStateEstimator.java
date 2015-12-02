@@ -22,13 +22,37 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
-   
+
+   private final SDFFullRobotModel sdfFullRobotModelFromSensor; // hack for visualization
    private final SDFFullRobotModel sdfFullRobotModelForViz;
    
    private final JointStateUpdater jointStateUpdater;
    private final FootSwitchUpdater footSwitchUpdater;
 
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
+   
+   private final ArrayList<YoGraphicReferenceFrame> graphicReferenceFrames = new  ArrayList<>();
+   
+   //Hack constructor for visualization
+   public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
+         FootSwitchUpdater footSwitchUpdater, SDFFullRobotModel sdfFullRobotModelFromSensor, SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
+      
+      jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, null, registry);
+      
+      this.footSwitchUpdater = footSwitchUpdater;
+      this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
+      
+      this.sdfFullRobotModelForViz = sdfFullRobotModelForViz;
+      this.sdfFullRobotModelFromSensor = sdfFullRobotModelFromSensor;
+      
+      if(this.sdfFullRobotModelForViz != null)
+         initializeVisualization();
+      
+      parentRegistry.addChild(registry);
+      
+   }
    
    public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
          FootSwitchUpdater footSwitchUpdater, SDFFullRobotModel sdfFullRobotModelForViz, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -41,6 +65,7 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
 
       this.sdfFullRobotModelForViz = sdfFullRobotModelForViz;
+      this.sdfFullRobotModelFromSensor = null;
       
       if(this.sdfFullRobotModelForViz != null)
          initializeVisualization();
@@ -54,6 +79,7 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
          String prefix = "StateEstimator" + oneDoFJoints[i].getName();
          ReferenceFrame referenceFrame = oneDoFJoints[i].getFrameBeforeJoint();
          YoGraphicReferenceFrame vizReferenceFrame = new YoGraphicReferenceFrame(prefix, referenceFrame, registry, 0.2, YoAppearance.AliceBlue());
+         graphicReferenceFrames.add(vizReferenceFrame);
          yoGraphicsListRegistry.registerYoGraphic("KinematicsBasedStateEstimator", vizReferenceFrame);
       }
    }
@@ -80,7 +106,26 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
 
    private void updateViz()
    {
+      //very hackish, will need  to be deleted once the state estimator is working
+      OneDoFJoint[] oneDoFJointsFromSensor = sdfFullRobotModelFromSensor.getOneDoFJoints();
+      OneDoFJoint[] oneDoFJointsForViz = sdfFullRobotModelForViz.getOneDoFJoints();
+     
+     for (int i = 0; i < oneDoFJointsForViz.length; i++)
+     {
+        OneDoFJoint oneDoFJointFromSensor = oneDoFJointsFromSensor[i];
+        OneDoFJoint oneDoFJointForViz = oneDoFJointsForViz[i];
+
+        oneDoFJointForViz.setQ(oneDoFJointFromSensor.getQ());
+        oneDoFJointForViz.setQd(oneDoFJointFromSensor.getQd());
+        oneDoFJointForViz.setTau(oneDoFJointFromSensor.getTau());
+        oneDoFJointForViz.setTauMeasured(oneDoFJointFromSensor.getTauMeasured());
+        
+     }
+     
      sdfFullRobotModelForViz.updateFrames();
+     for(int i = 0; i < graphicReferenceFrames.size(); i++)
+        graphicReferenceFrames.get(i).update();
+     
    }
 
    @Override
