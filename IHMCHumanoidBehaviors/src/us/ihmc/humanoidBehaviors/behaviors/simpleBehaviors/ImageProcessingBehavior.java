@@ -14,12 +14,12 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import java.awt.image.BufferedImage;
 
-public abstract class UIVideoProviderBehavior extends VideoPacketListenerBehavior
+public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavior
 {
    private final CompressedVideoDataServer videoDataServer;
    private final PacketDestination videoPacketDestination;
 
-   public UIVideoProviderBehavior(String namePrefix, final BehaviorCommunicationBridge communicationBridge, PacketDestination videoPacketDestination)
+   public ImageProcessingBehavior(String namePrefix, final BehaviorCommunicationBridge communicationBridge, PacketDestination videoPacketDestination)
    {
       super(namePrefix, communicationBridge);
 
