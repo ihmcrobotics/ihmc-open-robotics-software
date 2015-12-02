@@ -5,6 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedVMCStandParameters;
@@ -321,9 +322,15 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       yoCmpPositionSetpoint.set(yoIcpPositionSetpoint);
       yoComForceSetpoint.setToZero();
 
-      for (OneDoFJoint oneDofJoint : fullRobotModel.getOneDoFJoints())
+      // initialize leg joint mode to force control
+      for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         oneDofJoint.setUnderPositionControl(false);
+         for (LegJointName legJointName : jointNameMap.getLegJointNames())
+         {
+            String jointName = jointNameMap.getLegJointName(robotQuadrant, legJointName);
+            OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
+            joint.setUnderPositionControl(false);
+         }
       }
    }
 
