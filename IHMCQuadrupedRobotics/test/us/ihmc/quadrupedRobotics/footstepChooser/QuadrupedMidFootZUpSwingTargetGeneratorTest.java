@@ -5,6 +5,7 @@ import java.awt.Color;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import org.ddogleg.clustering.kmeans.InitializeKMeans_F64;
 import org.junit.After;
 import org.junit.Before;
 
@@ -406,15 +407,15 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
          YoFramePoint footPosition = new YoFramePoint(prefix + "footPosition", ReferenceFrame.getWorldFrame(), registry);
          YoFramePoint footPositionBeforeSwing = new YoFramePoint(prefix + "footPositionBeforeSwing", ReferenceFrame.getWorldFrame(), registry);
 
-         FramePoint initialFootPosition = new FramePoint(referenceFrames.getFootFrame(robotQuadrant));
-         initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         FramePoint initialFootPosition = new FramePoint(ReferenceFrame.getWorldFrame());
          if(robotQuadrant.isQuadrantInFront())
-         {
-            initialFootPosition.setToZero(referenceFrames.getFootFrame(robotQuadrant.getSameSideQuadrant()));
-            initialFootPosition.add(initialFootPosition.getX() + quadrupedControllerParameters.getStanceLength(), 0.0, 0.0);
-            initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         }
-
+            initialFootPosition.setX(quadrupedControllerParameters.getStanceLength());
+         
+         if(robotQuadrant.isQuadrantOnRightSide())
+            initialFootPosition.setY(- quadrupedControllerParameters.getStanceWidth() / 2.0);
+         else
+            initialFootPosition.setY(quadrupedControllerParameters.getStanceWidth() / 2.0);
+         
          ReferenceFrame hipPitchFrame = referenceFrames.getHipPitchFrame(robotQuadrant);
          RigidBodyTransform currenthipPitchFrameTransform = hipPitchFrame.getTransformToRoot();
          Vector3d hipPitchFrameTranslation = new Vector3d();
