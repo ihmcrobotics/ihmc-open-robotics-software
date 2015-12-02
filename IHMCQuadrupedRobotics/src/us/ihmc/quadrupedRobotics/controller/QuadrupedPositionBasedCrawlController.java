@@ -628,9 +628,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          
          if (!providedDesiredVelocity.epsilonEquals(lastProvidedDesiredVelocity, 1e-7))
          {
+            lastProvidedDesiredVelocity.set(providedDesiredVelocity);
             providedDesiredVelocity.changeFrame(desiredVelocity.getReferenceFrame());
             desiredVelocity.set(providedDesiredVelocity);
-            lastProvidedDesiredVelocity = providedDesiredVelocity;
          }
       }
 
