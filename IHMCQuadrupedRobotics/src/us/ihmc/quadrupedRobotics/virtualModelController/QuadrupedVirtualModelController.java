@@ -64,7 +64,7 @@ public class QuadrupedVirtualModelController
       optimalBodyTorque = new FrameVector(comFrame);
       desiredToeForce = new QuadrantDependentList<FrameVector>();
       optimalToeForce = new QuadrantDependentList<FrameVector>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          desiredToeForce.set(robotQuadrant, new FrameVector(comFrame));
          optimalToeForce.set(robotQuadrant, new FrameVector(comFrame));
@@ -75,7 +75,7 @@ public class QuadrupedVirtualModelController
       toePosition = new QuadrantDependentList<FramePoint>();
       footJacobian = new QuadrantDependentList<GeometricJacobian>();
       toeJacobian = new QuadrantDependentList<PointJacobian>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String jointBeforeFootName = jointNameMap.getJointBeforeFootName(robotQuadrant);
          OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointByName(jointBeforeFootName);
@@ -94,7 +94,7 @@ public class QuadrupedVirtualModelController
       jointPositionLimitMax = new QuadrantDependentList<double[]>();
       jointPositionLimitStiffness = new QuadrantDependentList<double[]>();
       jointPositionLimitDamping = new QuadrantDependentList<double[]>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          jointTorqueLimitMin.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
          jointTorqueLimitMax.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
@@ -121,7 +121,7 @@ public class QuadrupedVirtualModelController
       toeForcesVector = new DenseMatrix64F(12, 1);
       toeForceVector = new DenseMatrix64F(3, 1);
       legTorqueVector = new QuadrantDependentList<DenseMatrix64F>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          legTorqueVector.set(robotQuadrant, new DenseMatrix64F(legJoints.get(robotQuadrant).length, 1));
       }
@@ -201,13 +201,13 @@ public class QuadrupedVirtualModelController
       // rotate desired forces and torques to center of mass frame
       desiredComForce.changeFrame(comFrame);
       desiredBodyTorque.changeFrame(comFrame);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          desiredToeForce.get(robotQuadrant).changeFrame(comFrame);
       }
 
       // compute toe positions and jacobians in center of mass frame
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          toePosition.get(robotQuadrant).setToZero(toeFrame.get(robotQuadrant));
          toePosition.get(robotQuadrant).changeFrame(comFrame);
