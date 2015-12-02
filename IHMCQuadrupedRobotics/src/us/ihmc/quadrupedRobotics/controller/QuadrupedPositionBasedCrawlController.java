@@ -616,19 +616,34 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       desiredPitch.set(pitchOffset);
    }
 
-
+   private FrameVector lastProvidedDesiredVelocity = new FrameVector();
+   private double lastProvidedDesiredYawRate = 0.0;
+   
    private void pollDataProviders()
    {
       if(desiredVelocityProvider != null)
       {
-         FrameVector velocity = new FrameVector();
-         desiredVelocityProvider.get(velocity);
-         velocity.changeFrame(desiredVelocity.getReferenceFrame());
-         desiredVelocity.set(velocity);
+         FrameVector providedDesiredVelocity = new FrameVector();
+         desiredVelocityProvider.get(providedDesiredVelocity);
+         
+         if (!providedDesiredVelocity.epsilonEquals(lastProvidedDesiredVelocity, 1e-7))
+         {
+            providedDesiredVelocity.changeFrame(desiredVelocity.getReferenceFrame());
+            desiredVelocity.set(providedDesiredVelocity);
+            lastProvidedDesiredVelocity = providedDesiredVelocity;
+         }
       }
 
       if(desiredYawRateProvider != null)
-         desiredYawRate.set(desiredYawRateProvider.getValue());
+      {
+         double providedDesiredYawRate = desiredYawRateProvider.getValue();
+         
+         if (providedDesiredYawRate != lastProvidedDesiredYawRate)
+         {
+            desiredYawRate.set(providedDesiredYawRate);
+            lastProvidedDesiredYawRate = providedDesiredYawRate;
+         }
+      }
    }
    
    FramePoint footLocation = new FramePoint();
