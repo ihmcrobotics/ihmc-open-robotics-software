@@ -58,7 +58,10 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
 {
    private static final boolean DEBUG = false;
 
-   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   {
+//      simulationTestingParameters.setKeepSCSUp(true);
+   }
    private BlockingSimulationRunner blockingSimulationRunner;
    
    private static final double simulateDT = 0.01;
@@ -405,6 +408,12 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
 
          FramePoint initialFootPosition = new FramePoint(referenceFrames.getFootFrame(robotQuadrant));
          initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         if(robotQuadrant.isQuadrantInFront())
+         {
+            initialFootPosition.setToZero(referenceFrames.getFootFrame(robotQuadrant.getSameSideQuadrant()));
+            initialFootPosition.add(initialFootPosition.getX() + quadrupedControllerParameters.getStanceLength(), 0.0, 0.0);
+            initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         }
 
          ReferenceFrame hipPitchFrame = referenceFrames.getHipPitchFrame(robotQuadrant);
          RigidBodyTransform currenthipPitchFrameTransform = hipPitchFrame.getTransformToRoot();
