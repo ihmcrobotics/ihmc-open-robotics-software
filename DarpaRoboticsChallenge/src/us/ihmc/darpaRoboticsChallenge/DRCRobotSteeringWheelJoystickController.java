@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.io.IOException;
+
 import net.java.games.input.Component;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -17,7 +19,7 @@ public class DRCRobotSteeringWheelJoystickController
 
    private final Joystick joystick;
 
-   public DRCRobotSteeringWheelJoystickController(YoVariableHolder holder)
+   public DRCRobotSteeringWheelJoystickController(YoVariableHolder holder) throws IOException
    {
       joystick = new Joystick();
       joystick.setPollInterval(pollIntervalMillis);
