@@ -31,12 +31,12 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
       videoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(new UIVideoHandler());
    }
 
-   public abstract void processImage(BufferedImage bufferedImageToPack, Point3d cameraPositionToPack, Quat4d cameraOrientationToPack, IntrinsicParameters intrinsicParametersToPack);
+   public abstract void processImageToSend(BufferedImage bufferedImageToPack, Point3d cameraPositionToPack, Quat4d cameraOrientationToPack, IntrinsicParameters intrinsicParametersToPack);
 
    @Override
    public void onNewImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParameters)
    {
-      processImage(bufferedImage, cameraPosition, cameraOrientation, intrinsicParameters);
+      processImageToSend(bufferedImage, cameraPosition, cameraOrientation, intrinsicParameters);
 
       videoDataServer.updateImage(null, bufferedImage, 0, cameraPosition, cameraOrientation, intrinsicParameters);
    }
