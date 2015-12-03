@@ -161,8 +161,13 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final HashMap<String, Integer> imuUSBSerialIds = new HashMap<>();
    static
    {
-      imuUSBSerialIds.put(rearPelvisIMUSensor, 623347094);
-      imuUSBSerialIds.put(middlePelvisIMUSensor, 623347092);
+	   
+      /* Unit B: imuUSBSerialIds.put(rearPelvisIMUSensor, 623347094); */
+      /* Unit B: imuUSBSerialIds.put(middlePelvisIMUSensor, 623347092); */
+	   
+	   /*Unit C:*/ imuUSBSerialIds.put(rearPelvisIMUSensor, 422047095);
+	   /*Unit C:*/ imuUSBSerialIds.put(middlePelvisIMUSensor, 422047093);
+      
       //imuUSBSerialIds.put(leftTrunkIMUSensor, 622730569);
       //imuUSBSerialIds.put(rightTrunkIMUSensor, 622709817);
    }

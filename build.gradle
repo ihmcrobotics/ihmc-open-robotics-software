@@ -75,7 +75,7 @@ remotes
 {
 	valkyrieRealtimeComputer
 	{
-		host = '10.7.4.221'
+		host = '10.3.0.10'
 		
 		// Set the username and password in ~/.gradle/gradle.properties.
         user = project.hasProperty('valkyrie_realtime_username')?"${valkyrie_realtime_username}":"invalid"
