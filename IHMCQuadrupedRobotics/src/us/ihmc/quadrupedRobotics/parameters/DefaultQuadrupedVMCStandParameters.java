@@ -3,26 +3,29 @@ package us.ihmc.quadrupedRobotics.parameters;
 public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandParameters
 {
    private final double[] bodyOrientationProportionalGains = {2000, 2000, 2000};
-   private final double[] bodyOrientationDerivativeGains = {300, 300, 300};
+   private final double[] bodyOrientationDerivativeGains = {400, 400, 400};
    private final double[] bodyOrientationIntegralGains = {0, 0, 0};
    private final double bodyOrientationMaxIntegralError = 0;
 
-   private final double icpForwardProportionalGain = 2.5;
+   private final double icpForwardProportionalGain = 1.0;
    private final double icpForwardDerivativeGain = 0;
    private final double icpForwardIntegralGain = 0;
    private final double icpForwardMaxIntegralError = 0;
 
-   private final double icpLateralProportionalGain = 2.5;
+   private final double icpLateralProportionalGain = 1.0;
    private final double icpLateralDerivativeGain = 0;
    private final double icpLateralIntegralGain = 0;
    private final double icpLateralMaxIntegralError = 0;
 
    private final double comHeightProportionalGain = 5000;
-   private final double comHeightDerivativeGain = 1000;
+   private final double comHeightDerivativeGain = 750;
    private final double comHeightIntegralGain = 0;
    private final double comHeightMaxIntegralError = 0;
-   private final double comHeightGravityFeedforwardConstant = 0.75;
-   private final double comHeightSetpoint = 0.5;
+   private final double comHeightGravityFeedforwardConstant = 0.85;
+   private final double comHeightSetpoint = 0.55;
+   
+   private final double jointPositionLimitStiffness = 1000;
+   private final double jointPositionLimitDamping = 100;
 
    @Override
    public double[] getBodyOrientationProportionalGains()
@@ -130,5 +133,17 @@ public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandPara
    public double getComHeightSetpoint()
    {
       return comHeightSetpoint;
+   }
+   
+   @Override
+   public double getJointPositionLimitStiffness()
+   {
+      return jointPositionLimitStiffness;
+   }
+
+   @Override
+   public double getJointPositionLimitDamping()
+   {
+      return jointPositionLimitDamping;
    }
 }
