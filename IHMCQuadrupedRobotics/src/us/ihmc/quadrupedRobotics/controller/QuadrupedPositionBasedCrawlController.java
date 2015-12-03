@@ -182,11 +182,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private final DoubleYoVariable subCircleRadius = new DoubleYoVariable("subCircleRadius", registry);
    
    private final YoFrameVector yoVectorToSubtract = new YoFrameVector("yoVectorToSubtract", ReferenceFrame.getWorldFrame(), registry);
-
    
    private final BooleanYoVariable isCoMInsideTriangleForSwingLeg = new BooleanYoVariable("isCoMInsideTriangleForSwingLeg", registry);
    private final BooleanYoVariable useCommonTriangleForSwingTransition = new BooleanYoVariable("useCommonTriangleForSwingTransition", registry);
-   
    
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final FrameVector comVelocity = new FrameVector();
@@ -273,10 +271,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
     	  
           yoGraphicsListRegistry.registerYoGraphic("AttachementFrames", desiredAttachmentFrame);
           yoGraphicsListRegistry.registerYoGraphic("AttachementFrames", actualAttachmentFrame);
-
       }
       
-//      this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, referenceFrames, registry);
       this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, feedForwardReferenceFrames, registry);
       this.stateEstimator = stateEstimator;
       desiredVelocityProvider = new DesiredVelocityProvider(dataProducer);
@@ -370,7 +366,6 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          desiredFootLocation.set(footPosition);
          desiredFeetLocations.put(robotQuadrant, desiredFootLocation);
          
-         
          YoFrameVector footPositionInLegAttachementFrame = new YoFrameVector(prefix + "FootPositionInLegFrame", null, registry);
          desiredFeetPositionsInLegAttachmentFrame.put(robotQuadrant, footPositionInLegAttachementFrame);
          
@@ -399,7 +394,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       updateFeetLocations();
 //      alphaFilterDesiredFeet();
       
-      FramePose centerOfMassPose = new FramePose(comFrame);
+      FramePose centerOfMassPose = new FramePose(referenceFrames.getCenterOfFourHipsFrame());
       centerOfMassPose.changeFrame(ReferenceFrame.getWorldFrame());
       desiredCoMHeight.set(quadrupedControllerParameters.getInitalCoMHeight());
       filteredDesiredCoMHeight.update();
@@ -1238,6 +1233,11 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       
       fullRobotModel.updateFrames();
       referenceFrames.updateFrames();
+
+      updateEstimates();
+//      comVelocity
+      
+      
       
       updateFeedForwardModelAndFrames();
    }
