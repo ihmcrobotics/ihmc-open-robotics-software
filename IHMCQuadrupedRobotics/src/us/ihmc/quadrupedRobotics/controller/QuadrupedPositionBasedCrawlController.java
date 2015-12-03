@@ -41,6 +41,7 @@ import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
@@ -107,6 +108,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private final FramePose desiredCoMFramePose = new FramePose(ReferenceFrame.getWorldFrame());
    
    private final BooleanYoVariable runOpenLoop = new BooleanYoVariable("runOpenLoop", "If true, runs in open loop mode. The leg motions will not depend on any feedback signals.", registry);
+   
+   private final YoFramePoint2d desiredCoMOffset = new YoFramePoint2d("desiredCoMOffset", ReferenceFrame.getWorldFrame(), registry);
 
    private final DoubleYoVariable filteredDesiredCoMYawAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredCoMYawAlphaBreakFrequency", registry);
    private final DoubleYoVariable filteredDesiredCoMYawAlpha = new DoubleYoVariable("filteredDesiredCoMYawAlpha", registry);
@@ -1071,7 +1074,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
             radius = commonSupportPolygon.getInCircle(comTargetToPack);
          }
          inscribedCircleRadius.set(radius);
-         
+         comTargetToPack.add(desiredCoMOffset.getPoint2dCopy());
          circleCenter.setXY(comTargetToPack);
       }
       
