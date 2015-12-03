@@ -405,6 +405,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       filteredDesiredCoMHeight.update();
       centerOfMassPose.setZ(filteredDesiredCoMHeight.getDoubleValue());
       desiredCoMPose.set(centerOfMassPose);
+      desiredCoM.set(centerOfMassPose.getFramePointCopy());
+      desiredCoMPoseReferenceFrame.setPoseAndUpdate(centerOfMassPose);
+      updateFeedForwardModelAndFrames();
       
       final QuadrupleSupportState quadrupleSupportState = new QuadrupleSupportState(CrawlGateWalkingState.QUADRUPLE_SUPPORT, DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT);
       TripleSupportState tripleSupportState = new TripleSupportState(CrawlGateWalkingState.TRIPLE_SUPPORT);
