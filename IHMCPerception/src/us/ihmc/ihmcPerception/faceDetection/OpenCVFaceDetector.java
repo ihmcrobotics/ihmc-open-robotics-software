@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception;
+package us.ihmc.ihmcPerception.faceDetection;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
