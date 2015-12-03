@@ -1,5 +1,7 @@
 package us.ihmc.valkyrie.controllers;
 
+import java.io.IOException;
+
 import net.java.games.input.Component;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
@@ -71,7 +73,16 @@ public class ValkyrieSliderBoard
 
    public static void setupJoyStickAndTreadmill(YoVariableRegistry registry)
    {
-      final Joystick joystickUpdater = new Joystick();
+      Joystick joystickUpdater;
+      try
+      {
+         joystickUpdater = new Joystick();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return;
+      }
 
       double deadZone = 0.02;
       final double desiredVelocityX_Bias = 0.0;
