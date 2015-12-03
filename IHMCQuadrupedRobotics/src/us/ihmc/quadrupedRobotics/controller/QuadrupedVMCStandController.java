@@ -1,11 +1,8 @@
 package us.ihmc.quadrupedRobotics.controller;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
-import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointLimits;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedVMCStandParameters;
@@ -19,7 +16,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -28,15 +24,10 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.PointJacobian;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
@@ -48,6 +39,7 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
    private final YoVariableRegistry registry;
    private final QuadrupedVMCStandParameters parameters;
    private final QuadrupedJointNameMap jointNameMap;
+   private final QuadrupedJointLimits jointLimits;
    private final double dt;
    private final double mass;
    private final double gravity;
@@ -104,6 +96,7 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
       this.parameters = robotParameters.getQuadrupedVMCStandParameters();
       this.jointNameMap = robotParameters.getJointMap();
+      this.jointLimits = robotParameters.getJointLimits();
       this.dt = dt;
       this.mass = fullRobotModel.getTotalMass();
       this.gravity = 9.81;
@@ -322,14 +315,24 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       yoCmpPositionSetpoint.set(yoIcpPositionSetpoint);
       yoComForceSetpoint.setToZero();
 
-      // initialize leg joint mode to force control
       for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          for (LegJointName legJointName : jointNameMap.getLegJointNames())
          {
             String jointName = jointNameMap.getLegJointName(robotQuadrant, legJointName);
+
+            // initialize leg joint mode to force control
             OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
             joint.setUnderPositionControl(false);
+
+            // initialize controller joint limits
+            double positionLowerLimit = jointLimits.getJointSoftPositionLowerLimit(jointName);
+            double positionUpperLimit = jointLimits.getJointSoftPositionUpperLimit(jointName);
+            double effortLimit = jointLimits.getJointEffortLimit(jointName);
+            virtualModelController.setJointEffortLimits(jointName,-effortLimit, effortLimit);
+            virtualModelController.setJointPositionLimits(jointName, positionLowerLimit, positionUpperLimit);
+            virtualModelController.setJointPositionLimitStiffness(jointName, parameters.getJointPositionLimitStiffness());
+            virtualModelController.setJointPositionLimitDamping(jointName, parameters.getJointPositionLimitDamping());
          }
       }
    }
