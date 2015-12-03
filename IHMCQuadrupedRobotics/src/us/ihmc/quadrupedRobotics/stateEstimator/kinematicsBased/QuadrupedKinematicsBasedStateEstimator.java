@@ -19,12 +19,14 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
 
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
 
-   public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly, FootSwitchUpdater footSwitchUpdater)
+   public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly, FootSwitchUpdater footSwitchUpdater, YoVariableRegistry parentRegistry)
    {
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, null, registry);
       
       this.footSwitchUpdater = footSwitchUpdater; 
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
+      
+      parentRegistry.addChild(registry);
 
    }
 

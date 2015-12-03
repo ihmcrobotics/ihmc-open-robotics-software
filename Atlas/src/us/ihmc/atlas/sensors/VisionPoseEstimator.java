@@ -232,7 +232,7 @@ public class VisionPoseEstimator implements DRCStereoListener
                   IntrinsicParameters intrinsicParameters = data.getLeft().intrinsicParameters;
                   chessboardDetector.setCameraMatrix(intrinsicParameters.fx, intrinsicParameters.fy, intrinsicParameters.cx, intrinsicParameters.cy);
 
-                  RigidBodyTransform targetToCameraOpticalFrame = chessboardDetector.detect(data.getLeft().image);
+                  RigidBodyTransform targetToCameraOpticalFrame = chessboardDetector.detect(data.getLeft().image, true);
                   if (targetToCameraOpticalFrame != null)
                   {
                      RigidBodyTransform cameraToWorld = data.getRight();

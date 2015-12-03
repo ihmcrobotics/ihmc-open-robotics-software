@@ -113,7 +113,7 @@ public class YoArtifactCircle extends Artifact implements RemoteYoGraphic
    }
 
    public RemoteGraphicType getRemoteGraphicType() {
-      return RemoteGraphicType.POSITION_ARTIFACT;
+      return RemoteGraphicType.CIRCLE_ARTIFACT;
    }
    
    public DoubleYoVariable[] getVariables() {

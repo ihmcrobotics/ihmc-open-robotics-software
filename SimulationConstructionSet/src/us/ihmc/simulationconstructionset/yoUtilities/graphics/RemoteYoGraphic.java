@@ -27,6 +27,7 @@ public interface RemoteYoGraphic
       LINE_SEGMENT_DGO,
       EMPTY_SLOT_4_DGO,
       POSITION_ARTIFACT,
+      CIRCLE_ARTIFACT,
       LINE_SEGMENT_2D_ARTIFACT,
       POLYGON_ARTIFACT
    }

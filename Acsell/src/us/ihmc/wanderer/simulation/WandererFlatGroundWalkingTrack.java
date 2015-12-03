@@ -1,5 +1,7 @@
 package us.ihmc.wanderer.simulation;
 
+import java.io.IOException;
+
 import net.java.games.input.Component;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
@@ -57,7 +59,16 @@ public class WandererFlatGroundWalkingTrack
 
    public static void setupJoyStick(YoVariableHolder registry)
    {
-      final Joystick joystickUpdater = new Joystick();
+      Joystick joystickUpdater;
+      try
+      {
+         joystickUpdater = new Joystick();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return;
+      }
       
       double deadZone = 0.02;
       double desiredVelocityX_Bias = 0.0;
