@@ -185,6 +185,7 @@ public class SDFSensor
       public static class Scan
       {
          private HorizontalScan horizontal;
+         private VerticalScan vertical;
 
          @XmlElement(name = "horizontal")
          public void setHorizontal(HorizontalScan horizontal)
@@ -195,6 +196,17 @@ public class SDFSensor
          public HorizontalScan getHorizontal()
          {
             return horizontal;
+         }
+
+         @XmlElement(name = "vertical")
+         public VerticalScan getVertical()
+         {
+            return vertical;
+         }
+
+         public void setVertical(VerticalScan vertical)
+         {
+            this.vertical = vertical;
          }
 
          public static class HorizontalScan
@@ -250,9 +262,62 @@ public class SDFSensor
             {
                return maxAngle;
             }
-
          }
+         
+         public static class VerticalScan
+         {
+            private String samples;
 
+            private String resolution;
+
+            private String minAngle;
+
+            private String maxAngle;
+
+            @XmlElement(name = "samples")
+            public void setSamples(String samples)
+            {
+               this.samples = samples;
+            }
+
+            @XmlElement(name = "resolution")
+            public void setResolution(String resolution)
+            {
+               this.resolution = resolution;
+            }
+
+            @XmlElement(name = "min_angle")
+            public void setMinAngle(String minAngle)
+            {
+               this.minAngle = minAngle;
+            }
+
+            @XmlElement(name = "max_angle")
+            public void setMaxAngle(String maxAngle)
+            {
+               this.maxAngle = maxAngle;
+            }
+
+            public String getSamples()
+            {
+               return samples;
+            }
+
+            public String getResolution()
+            {
+               return resolution;
+            }
+
+            public String getMinAngle()
+            {
+               return minAngle;
+            }
+
+            public String getMaxAngle()
+            {
+               return maxAngle;
+            }
+         }
       }
 
       public static class Noise

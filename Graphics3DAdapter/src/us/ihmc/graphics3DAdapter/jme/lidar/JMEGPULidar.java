@@ -43,8 +43,8 @@ public class JMEGPULidar implements GPULidar, AppState
 
    private final RigidBodyTransform lidarTransform = new RigidBodyTransform();
    private double time = Double.NaN;
-
-   public JMEGPULidar(JMERenderer jmeRenderer, int scansPerSweep, double fieldOfView, double minRange, double maxRange)
+   
+   public JMEGPULidar(JMERenderer jmeRenderer, int scansPerSweep, int scanHeight, double fieldOfView, double minRange, double maxRange)
    {
       this.jmeRenderer = jmeRenderer;
       
@@ -83,11 +83,11 @@ public class JMEGPULidar implements GPULidar, AppState
       LidarMaterial lidarMaterial = new LidarMaterial(jmeRenderer.getAssetManager());
       for (int i = 0; i < numberOfCameras; i++)
       {
-         lidarSceneViewPort[i] = new LidarSceneViewPort(jmeRenderer, lidarMaterial, numberOfCameras, scansPerSweep, 1,
+         lidarSceneViewPort[i] = new LidarSceneViewPort(jmeRenderer, lidarMaterial, numberOfCameras, scansPerSweep, scanHeight,
                (float) fieldOfView, (float) minRange, (float) maxRange);
       }
 
-      lidarDistortionProcessor = new LidarDistortionProcessor(jmeRenderer, scansPerSweep, 1,
+      lidarDistortionProcessor = new LidarDistortionProcessor(jmeRenderer, scansPerSweep, scanHeight,
             numberOfCameras, startAngle, (float) fieldOfView, lidarSceneViewPort);
 
       jmeRenderer.getStateManager().attach(this);

@@ -54,9 +54,9 @@ public interface Graphics3DAdapter
 
    public ContextManager getContextManager();
 
-   public GPULidar createGPULidar(int pointsPerSweep, double fieldOfView, double minRange, double maxRange);
+   public GPULidar createGPULidar(int pointsPerSweep, int scanHeight, double fieldOfView, double minRange, double maxRange);
 
-   public GPULidar createGPULidar(GPULidarListener listener, int pointsPerSweep, double fieldOfView, double minRange, double maxRange);
+   public GPULidar createGPULidar(GPULidarListener listener, int pointsPerSweep, int scanHeight, double fieldOfView, double minRange, double maxRange);
    
    public GPULidar createGPULidar(GPULidarListener listener, LidarScanParameters lidarScanParameters);
    
