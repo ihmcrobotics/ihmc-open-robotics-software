@@ -64,8 +64,8 @@ public class QuadrupedPositionBasedCrawlSliderBoardConfiguration
       sliderBoardConfigurationManager.setSliderEnum(8, selectedMode);
       
       sliderBoardConfigurationManager.setSlider(1, "desiredYawRate", scs, -Math.PI/2.0, Math.PI/2.0);
-      sliderBoardConfigurationManager.setSlider(2, "desiredCoMOrientationPitch", scs, 0.0, 0.5);
-      sliderBoardConfigurationManager.setSlider(3, "desiredCoMOrientationRoll", scs, 0.0, Math.PI/2.0);
+      sliderBoardConfigurationManager.setSlider(2, "desiredCoMOrientationPitch", scs, -0.5, 0.5);
+      sliderBoardConfigurationManager.setSlider(3, "desiredCoMOrientationRoll", scs, -0.5, 0.5);
       sliderBoardConfigurationManager.setSlider(4, "filteredDesiredCoMYawAlphaBreakFrequency", scs, 0.0, 1.0);
       sliderBoardConfigurationManager.setSlider(5, "filteredDesiredCoMPitchAlphaBreakFrequency", scs, 0.0, 1.5);
       sliderBoardConfigurationManager.setSlider(6, "filteredDesiredCoMRollAlphaBreakFrequency", scs, 0.0, 1.0);

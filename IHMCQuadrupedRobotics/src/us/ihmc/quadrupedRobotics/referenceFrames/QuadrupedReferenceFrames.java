@@ -283,8 +283,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
 
    public ReferenceFrame getCenterOfMassZUpFrame()
    {
-      //return centerOfMassFrame;
-      return centerOfMassFrameWithRotation;
+      return centerOfMassZUpFrame;
    }
 
    @Override
