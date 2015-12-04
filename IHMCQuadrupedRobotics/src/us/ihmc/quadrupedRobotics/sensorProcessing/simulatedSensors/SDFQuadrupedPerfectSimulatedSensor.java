@@ -8,6 +8,7 @@ import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.sensorProcessing.sensorProcessors.FootSwitchOutputReadOnly;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ContactBasedFootSwitch;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -18,9 +19,13 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
 {
    private final QuadrantDependentList<ContactBasedFootSwitch> footSwitches = new QuadrantDependentList<>();
    
+   private final OneDoFJoint[] sensorOneDoFJoints;
+   
    public SDFQuadrupedPerfectSimulatedSensor(SDFRobot sdfRobot, SDFFullRobotModel sdfFullRobotModel, QuadrupedJointNameMap jointMap)
    {
       super(sdfRobot, sdfFullRobotModel, null);
+      
+      sensorOneDoFJoints = sdfFullRobotModel.getOneDoFJoints();
       
       //FootSwitches
       ArrayList<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
@@ -45,5 +50,70 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    public boolean isFootInContact(RobotQuadrant quadrant)
    {
       return footSwitches.get(quadrant).isInContact();
+   }
+   
+   @Override
+   public double getJointPositionProcessedOutput(OneDoFJoint oneDoFJoint)
+   {
+      for(int i = 0; i < sensorOneDoFJoints.length; i++)
+      {
+         if(sensorOneDoFJoints[i].getName() == oneDoFJoint.getName())
+         {
+            return sensorOneDoFJoints[i].getQ();
+         }
+      }
+      return 0.0;
+   }
+
+   @Override
+   public double getJointVelocityProcessedOutput(OneDoFJoint oneDoFJoint)
+   {
+      for(int i = 0; i < sensorOneDoFJoints.length; i++)
+      {
+         if(sensorOneDoFJoints[i].getName() == oneDoFJoint.getName())
+         {
+            return sensorOneDoFJoints[i].getQd();
+         }
+      }
+      return 0.0;
+   }
+
+   @Override
+   public double getJointAccelerationProcessedOutput(OneDoFJoint oneDoFJoint)
+   {
+      for(int i = 0; i < sensorOneDoFJoints.length; i++)
+      {
+         if(sensorOneDoFJoints[i].getName() == oneDoFJoint.getName())
+         {
+            return sensorOneDoFJoints[i].getQdd();
+         }
+      }
+      return 0.0;
+   }
+
+   @Override
+   public double getJointTauProcessedOutput(OneDoFJoint oneDoFJoint)
+   {
+      for(int i = 0; i < sensorOneDoFJoints.length; i++)
+      {
+         if(sensorOneDoFJoints[i].getName() == oneDoFJoint.getName())
+         {
+            return sensorOneDoFJoints[i].getTau();
+         }
+      }
+      return 0.0;
+   }
+   
+   @Override
+   public boolean isJointEnabled(OneDoFJoint oneDoFJoint)
+   {
+      for(int i = 0; i < sensorOneDoFJoints.length; i++)
+      {
+         if(sensorOneDoFJoints[i] == oneDoFJoint)
+         {
+            return sensorOneDoFJoints[i].isEnabled();
+         }
+      }
+      return false;
    }
 }

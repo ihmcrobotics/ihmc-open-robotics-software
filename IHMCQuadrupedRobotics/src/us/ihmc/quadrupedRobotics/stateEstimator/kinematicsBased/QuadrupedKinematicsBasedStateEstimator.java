@@ -36,34 +36,34 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    private final ArrayList<YoGraphicReferenceFrame> graphicReferenceFrames = new  ArrayList<>();
    
    //Hack constructor for visualization
-   public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
-         FootSwitchUpdater footSwitchUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater, SDFFullRobotModel sdfFullRobotModelFromSensor, SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-      
-      jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, null, registry);
-      
-      this.footSwitchUpdater = footSwitchUpdater;
-      this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
-      
-      this.comLinearStateUpdater = comLinearStateUpdater;
-      
-      this.sdfFullRobotModelForViz = sdfFullRobotModelForViz;
-      this.sdfFullRobotModelFromSensor = sdfFullRobotModelFromSensor;
-      
-      if(this.sdfFullRobotModelForViz != null)
-         initializeVisualization();
-      
-      parentRegistry.addChild(registry);
-      
-   }
+//   public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
+//         FootSwitchUpdater footSwitchUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater, SDFFullRobotModel sdfFullRobotModelFromSensor, SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+//   {
+//      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
+//      
+//      jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, null, registry);
+//      
+//      this.footSwitchUpdater = footSwitchUpdater;
+//      this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
+//      
+//      this.comLinearStateUpdater = comLinearStateUpdater;
+//      
+//      this.sdfFullRobotModelForViz = sdfFullRobotModelForViz;
+//      this.sdfFullRobotModelFromSensor = sdfFullRobotModelFromSensor;
+//      
+//      if(this.sdfFullRobotModelForViz != null)
+//         initializeVisualization();
+//      
+//      parentRegistry.addChild(registry);
+//      
+//   }
    
    public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
-         FootSwitchUpdater footSwitchUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater, SDFFullRobotModel sdfFullRobotModelForViz, YoGraphicsListRegistry yoGraphicsListRegistry)
+         FootSwitchUpdater footSwitchUpdater, JointStateUpdater jointStateUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater, SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       
-      jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, null, registry);
+      this.jointStateUpdater = jointStateUpdater;
 
       this.footSwitchUpdater = footSwitchUpdater;
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
@@ -75,6 +75,8 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       
       if(this.sdfFullRobotModelForViz != null)
          initializeVisualization();
+      
+      parentRegistry.addChild(registry);
    }
 
   private void initializeVisualization()
@@ -84,7 +86,7 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       {
          String prefix = "StateEstimator" + oneDoFJoints[i].getName();
          ReferenceFrame referenceFrame = oneDoFJoints[i].getFrameBeforeJoint();
-         YoGraphicReferenceFrame vizReferenceFrame = new YoGraphicReferenceFrame(prefix, referenceFrame, registry, 0.2, YoAppearance.AliceBlue());
+         YoGraphicReferenceFrame vizReferenceFrame = new YoGraphicReferenceFrame(prefix, referenceFrame, registry, 0.4, YoAppearance.AliceBlue());
          graphicReferenceFrames.add(vizReferenceFrame);
          yoGraphicsListRegistry.registerYoGraphic("KinematicsBasedStateEstimator", vizReferenceFrame);
       }
@@ -108,8 +110,11 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       jointStateUpdater.updateJointState();
       comLinearStateUpdater.updateCenterOfMassLinearState();
       
-      if(sdfFullRobotModelForViz != null)
-         updateViz();
+      sdfFullRobotModelForViz.updateFrames();
+      for(int i = 0; i < graphicReferenceFrames.size(); i++)
+         graphicReferenceFrames.get(i).update();
+//      if(sdfFullRobotModelForViz != null)
+//         updateViz();
    }
 
    private void updateViz()
