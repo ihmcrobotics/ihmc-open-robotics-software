@@ -35,12 +35,12 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
@@ -74,9 +74,6 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private static final double DEFAULT_COM_ROLL_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT = 0.01;
-   private final double initialDesiredFootCorrectionBreakFrequency;
-   private final double defaultDesiredFootCorrectionBreakFrequency;
-   private boolean finishedStandPrep = false;
    
    private final double dt;
    private final String name = getClass().getSimpleName();
@@ -107,6 +104,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private final FramePose desiredCoMFramePose = new FramePose(ReferenceFrame.getWorldFrame());
    
    private final BooleanYoVariable runOpenLoop = new BooleanYoVariable("runOpenLoop", "If true, runs in open loop mode. The leg motions will not depend on any feedback signals.", registry);
+   
+   private final YoFramePoint2d desiredCoMOffset = new YoFramePoint2d("desiredCoMOffset", ReferenceFrame.getWorldFrame(), registry);
 
    private final DoubleYoVariable filteredDesiredCoMYawAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredCoMYawAlphaBreakFrequency", registry);
    private final DoubleYoVariable filteredDesiredCoMYawAlpha = new DoubleYoVariable("filteredDesiredCoMYawAlpha", registry);
@@ -150,9 +149,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    
    private final QuadrantDependentList<ReferenceFrame> legAttachmentFrames = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFramePoint> actualFeetLocations = new QuadrantDependentList<YoFramePoint>();
-   private final QuadrantDependentList<AlphaFilteredYoFramePoint> desiredFeetLocations = new QuadrantDependentList<AlphaFilteredYoFramePoint>();
-   private final QuadrantDependentList<DoubleYoVariable> desiredFeetLocationsAlpha = new QuadrantDependentList<DoubleYoVariable>();
-   private final DoubleYoVariable desiredFeetAlphaFilterBreakFrequency = new DoubleYoVariable("desiredFeetAlphaFilterBreakFrequency", registry);
+   private final QuadrantDependentList<YoFramePoint> desiredFeetLocations = new QuadrantDependentList<YoFramePoint>();
    
    private final QuadrantDependentList<YoFrameVector> desiredFeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
    private final QuadrantDependentList<YoFrameVector> actualFeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
@@ -179,11 +176,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private final DoubleYoVariable subCircleRadius = new DoubleYoVariable("subCircleRadius", registry);
    
    private final YoFrameVector yoVectorToSubtract = new YoFrameVector("yoVectorToSubtract", ReferenceFrame.getWorldFrame(), registry);
-
    
    private final BooleanYoVariable isCoMInsideTriangleForSwingLeg = new BooleanYoVariable("isCoMInsideTriangleForSwingLeg", registry);
    private final BooleanYoVariable useCommonTriangleForSwingTransition = new BooleanYoVariable("useCommonTriangleForSwingTransition", registry);
-   
    
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final FrameVector comVelocity = new FrameVector();
@@ -230,9 +225,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    {
       super(QuadrupedControllerState.POSITION_CRAWL);
       QuadrupedControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedControllerParameters();
-      
-      initialDesiredFootCorrectionBreakFrequency = quadrupedControllerParameters.getInitialDesiredFootCorrectionBreakFrequency();
-      defaultDesiredFootCorrectionBreakFrequency = quadrupedControllerParameters.getDefaultDesiredFootCorrectionBreakFrequency();
+
       swingDuration.set(quadrupedControllerParameters.getDefaultSwingDuration());
       swingHeight.set(quadrupedControllerParameters.getDefaultSwingHeight());
       subCircleRadius.set(quadrupedControllerParameters.getDefaultSubCircleRadius());
@@ -270,10 +263,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
     	  
           yoGraphicsListRegistry.registerYoGraphic("AttachementFrames", desiredAttachmentFrame);
           yoGraphicsListRegistry.registerYoGraphic("AttachementFrames", actualAttachmentFrame);
-
       }
       
-//      this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, referenceFrames, registry);
       this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, feedForwardReferenceFrames, registry);
       this.stateEstimator = stateEstimator;
       desiredVelocityProvider = new DesiredVelocityProvider(dataProducer);
@@ -324,25 +315,10 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          }
       });
       
-      desiredFeetAlphaFilterBreakFrequency.set(initialDesiredFootCorrectionBreakFrequency);
-      desiredFeetAlphaFilterBreakFrequency.addVariableChangedListener(new VariableChangedListener()
-      {
-
-         @Override
-         public void variableChanged(YoVariable<?> v)
-         {
-            double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(desiredFeetAlphaFilterBreakFrequency.getDoubleValue(), dt);
-            for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-            {
-               desiredFeetLocationsAlpha.get(robotQuadrant).set(alpha);
-            }
-         }
-      });
-      
       referenceFrames.updateFrames();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         swingTrajectoryGenerators.put(robotQuadrant, new QuadrupedSwingTrajectoryGenerator(referenceFrames, robotQuadrant, registry, yoGraphicsListRegistry, dt));
+         swingTrajectoryGenerators.put(robotQuadrant, new QuadrupedSwingTrajectoryGenerator(robotQuadrant, registry, yoGraphicsListRegistry, dt));
 
          ReferenceFrame footReferenceFrame = referenceFrames.getFootFrame(robotQuadrant);
          ReferenceFrame legAttachmentFrame = referenceFrames.getLegAttachmentFrame(robotQuadrant);
@@ -354,19 +330,13 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          YoFramePoint actualFootPosition = new YoFramePoint(prefix + "actualFootPosition", ReferenceFrame.getWorldFrame(), registry);
          actualFeetLocations.put(robotQuadrant, actualFootPosition);
          
-         DoubleYoVariable alpha = new DoubleYoVariable(prefix, registry);
-         alpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(desiredFeetAlphaFilterBreakFrequency.getDoubleValue(), dt));
-         desiredFeetLocationsAlpha.put(robotQuadrant, alpha);
-         
-         AlphaFilteredYoFramePoint desiredFootLocation = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint(prefix + "FootDesiredPosition", "", registry,
-               alpha, actualFootPosition);
+         YoFramePoint desiredFootLocation = new YoFramePoint(prefix + "FootDesiredPosition", ReferenceFrame.getWorldFrame(), registry);
          
          FramePoint footPosition = new FramePoint(footReferenceFrame);
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
          footPosition.setZ(0.0);
          desiredFootLocation.set(footPosition);
          desiredFeetLocations.put(robotQuadrant, desiredFootLocation);
-         
          
          YoFrameVector footPositionInLegAttachementFrame = new YoFrameVector(prefix + "FootPositionInLegFrame", null, registry);
          desiredFeetPositionsInLegAttachmentFrame.put(robotQuadrant, footPositionInLegAttachementFrame);
@@ -394,14 +364,16 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       
       referenceFrames.updateFrames();
       updateFeetLocations();
-//      alphaFilterDesiredFeet();
       
-      FramePose centerOfMassPose = new FramePose(comFrame);
+      FramePose centerOfMassPose = new FramePose(referenceFrames.getCenterOfFourHipsFrame());
       centerOfMassPose.changeFrame(ReferenceFrame.getWorldFrame());
       desiredCoMHeight.set(quadrupedControllerParameters.getInitalCoMHeight());
       filteredDesiredCoMHeight.update();
       centerOfMassPose.setZ(filteredDesiredCoMHeight.getDoubleValue());
       desiredCoMPose.set(centerOfMassPose);
+      desiredCoM.set(centerOfMassPose.getFramePointCopy());
+      desiredCoMPoseReferenceFrame.setPoseAndUpdate(centerOfMassPose);
+      updateFeedForwardModelAndFrames();
       
       final QuadrupleSupportState quadrupleSupportState = new QuadrupleSupportState(CrawlGateWalkingState.QUADRUPLE_SUPPORT, DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT);
       TripleSupportState tripleSupportState = new TripleSupportState(CrawlGateWalkingState.TRIPLE_SUPPORT);
@@ -537,7 +509,6 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    {
       referenceFrames.updateFrames();
       updateEstimates();
-//      alphaFilterDesiredFeet();
       updateGraphics();
       pollDataProviders();
       walkingStateMachine.checkTransitionConditions();
@@ -550,7 +521,6 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       updateDesiredCoMPose();
       updateLegsBasedOnDesiredCoM();
       computeDesiredPositionsAndStoreInFullRobotModel();
-      
       updateFeedForwardModelAndFrames();
    }
 
@@ -671,23 +641,6 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    }
    
    /**
-    * Uses Feedback to pull the desireds back to the actuals
-    */
-   private void alphaFilterDesiredFeet()
-   {
-      if(robotTimestamp.getDoubleValue() > 4.0 && !finishedStandPrep)
-      {
-         desiredFeetAlphaFilterBreakFrequency.set(defaultDesiredFootCorrectionBreakFrequency);
-         finishedStandPrep = true;
-      }
-      
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         desiredFeetLocations.get(robotQuadrant).update();
-      }
-   }
-
-   /**
     * update actual feet locations and the four foot polygon, using the desired locations
     */
    private void updateFeetLocations()
@@ -702,7 +655,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          yoFootLocation.set(footLocation);
 
          // Use the desired foot locations instead of the actual locations
-         AlphaFilteredYoFramePoint desiredFootLocation = desiredFeetLocations.get(robotQuadrant);
+         YoFramePoint desiredFootLocation = desiredFeetLocations.get(robotQuadrant);
          fourFootSupportPolygon.setFootstep(robotQuadrant, desiredFootLocation.getFramePointCopy());
       }
    }
@@ -1071,7 +1024,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
             radius = commonSupportPolygon.getInCircle(comTargetToPack);
          }
          inscribedCircleRadius.set(radius);
-         
+         comTargetToPack.add(desiredCoMOffset.getPoint2dCopy());
          circleCenter.setXY(comTargetToPack);
       }
       
@@ -1232,7 +1185,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       
       fullRobotModel.updateFrames();
       referenceFrames.updateFrames();
-      
+
+      updateEstimates();
       updateFeedForwardModelAndFrames();
    }
 

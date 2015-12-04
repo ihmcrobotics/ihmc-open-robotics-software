@@ -58,7 +58,10 @@ public class QuadrupedSimulationController implements RobotController
       sensorReader.read();
       stateEstimator.doControl();
       gaitControlManager.doControl();
-      poseCommunicator.write();
+      if(poseCommunicator != null)
+      {
+         poseCommunicator.write();
+      }
       outputWriter.write();
    }
 }
