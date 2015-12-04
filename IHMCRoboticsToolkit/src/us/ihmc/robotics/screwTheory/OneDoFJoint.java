@@ -55,6 +55,11 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 
    private boolean isUnderPositionControl = false;
    private boolean enabled = true;
+   
+   /**
+    * Describes if a joint is online
+    */
+   private boolean isOnline = true;
 
    public OneDoFJoint(String name, RigidBody predecessor, RigidBody successor, ReferenceFrame beforeJointFrame, OneDoFJointReferenceFrame afterJointFrame,
          FrameVector jointAxis)
@@ -460,5 +465,15 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    public void setEnabled(boolean enabled)
    {
       this.enabled = enabled;
+   }
+
+   public boolean isOnline()
+   {
+      return isOnline;
+   }
+
+   public void setOnline(boolean isOnline)
+   {
+      this.isOnline = isOnline;
    }
 }
