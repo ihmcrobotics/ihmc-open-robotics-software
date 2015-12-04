@@ -54,5 +54,5 @@ public abstract class CommonQuadrupedReferenceFrames
       return legLengths.get(robotQuadrant);
    }
 
-   public abstract ReferenceFrame getMidTrotLnieZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine);
+   public abstract ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine);
 }

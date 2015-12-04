@@ -208,7 +208,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    }
 
    @Override
-   public ReferenceFrame getMidTrotLnieZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine)
+   public ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine)
    {
       if(quadrantAssocaitedWithTrotLine.isQuadrantInHind())
       {
