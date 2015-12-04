@@ -10,6 +10,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -28,14 +29,15 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    
    private final JointStateUpdater jointStateUpdater;
    private final FootSwitchUpdater footSwitchUpdater;
-
+   private final CenterOfMassLinearStateUpdater comLinearStateUpdater;
+   
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    
    private final ArrayList<YoGraphicReferenceFrame> graphicReferenceFrames = new  ArrayList<>();
    
    //Hack constructor for visualization
    public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
-         FootSwitchUpdater footSwitchUpdater, SDFFullRobotModel sdfFullRobotModelFromSensor, SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         FootSwitchUpdater footSwitchUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater, SDFFullRobotModel sdfFullRobotModelFromSensor, SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       
@@ -43,6 +45,8 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       
       this.footSwitchUpdater = footSwitchUpdater;
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
+      
+      this.comLinearStateUpdater = comLinearStateUpdater;
       
       this.sdfFullRobotModelForViz = sdfFullRobotModelForViz;
       this.sdfFullRobotModelFromSensor = sdfFullRobotModelFromSensor;
@@ -55,7 +59,7 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    }
    
    public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
-         FootSwitchUpdater footSwitchUpdater, SDFFullRobotModel sdfFullRobotModelForViz, YoGraphicsListRegistry yoGraphicsListRegistry)
+         FootSwitchUpdater footSwitchUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater, SDFFullRobotModel sdfFullRobotModelForViz, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       
@@ -64,6 +68,8 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       this.footSwitchUpdater = footSwitchUpdater;
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
 
+      this.comLinearStateUpdater = comLinearStateUpdater;
+      
       this.sdfFullRobotModelForViz = sdfFullRobotModelForViz;
       this.sdfFullRobotModelFromSensor = null;
       
@@ -93,12 +99,14 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    public void initialize()
    {
       jointStateUpdater.initialize();
+      comLinearStateUpdater.initialize();
    }
    
    @Override
    public void doControl()
    {
       jointStateUpdater.updateJointState();
+      comLinearStateUpdater.updateCenterOfMassLinearState();
       
       if(sdfFullRobotModelForViz != null)
          updateViz();
@@ -121,6 +129,11 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
         oneDoFJointForViz.setTauMeasured(oneDoFJointFromSensor.getTauMeasured());
         
      }
+     
+     SixDoFJoint rootJointFromSensor = sdfFullRobotModelFromSensor.getRootJoint();
+     SixDoFJoint rootJointForViz = sdfFullRobotModelForViz.getRootJoint();
+     
+     rootJointForViz.setPositionAndRotation(rootJointFromSensor.getJointTransform3D());
      
      sdfFullRobotModelForViz.updateFrames();
      for(int i = 0; i < graphicReferenceFrames.size(); i++)
