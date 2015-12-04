@@ -136,16 +136,16 @@ public class QuadrupedVirtualModelController
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-          int index = 0;
-          for (OneDoFJoint joint : legJoints.get(robotQuadrant))
-          {
-             if (joint.getName().equals(jointName))
-             {
-                 jointEffortLowerLimit.get(robotQuadrant)[index] = lower;
-                 jointEffortUpperLimit.get(robotQuadrant)[index] = upper;
-             }
-             index++;
-          }
+         int index = 0;
+         for (OneDoFJoint joint : legJoints.get(robotQuadrant))
+         {
+            if (joint.getName().equals(jointName))
+            {
+               jointEffortLowerLimit.get(robotQuadrant)[index] = lower;
+               jointEffortUpperLimit.get(robotQuadrant)[index] = upper;
+            }
+            index++;
+         }
       }
    }
 
@@ -153,16 +153,16 @@ public class QuadrupedVirtualModelController
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-          int index = 0;
-          for (OneDoFJoint joint : legJoints.get(robotQuadrant))
-          {
-             if (joint.getName().equals(jointName))
-             {
-                 jointPositionLowerLimit.get(robotQuadrant)[index] = lower;
-                 jointPositionUpperLimit.get(robotQuadrant)[index] = upper;
-             }
-             index++;
-          }
+         int index = 0;
+         for (OneDoFJoint joint : legJoints.get(robotQuadrant))
+         {
+            if (joint.getName().equals(jointName))
+            {
+               jointPositionLowerLimit.get(robotQuadrant)[index] = lower;
+               jointPositionUpperLimit.get(robotQuadrant)[index] = upper;
+            }
+            index++;
+         }
       }
    }
 
@@ -170,15 +170,15 @@ public class QuadrupedVirtualModelController
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-          int index = 0;
-          for (OneDoFJoint joint : legJoints.get(robotQuadrant))
-          {
-             if (joint.getName().equals(jointName))
-             {
-                 jointPositionLimitStiffness.get(robotQuadrant)[index] = stiffness;
-             }
-             index++;
-          }
+         int index = 0;
+         for (OneDoFJoint joint : legJoints.get(robotQuadrant))
+         {
+            if (joint.getName().equals(jointName))
+            {
+               jointPositionLimitStiffness.get(robotQuadrant)[index] = stiffness;
+            }
+            index++;
+         }
       }
    }
 
@@ -186,15 +186,15 @@ public class QuadrupedVirtualModelController
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-          int index = 0;
-          for (OneDoFJoint joint : legJoints.get(robotQuadrant))
-          {
-             if (joint.getName().equals(jointName))
-             {
-                 jointPositionLimitDamping.get(robotQuadrant)[index] = damping;
-             }
-             index++;
-          }
+         int index = 0;
+         for (OneDoFJoint joint : legJoints.get(robotQuadrant))
+         {
+            if (joint.getName().equals(jointName))
+            {
+               jointPositionLimitDamping.get(robotQuadrant)[index] = damping;
+            }
+            index++;
+         }
       }
    }
 
@@ -273,7 +273,7 @@ public class QuadrupedVirtualModelController
       comWrenchVector.set(4, 0, desiredComForce.getY());
       comWrenchVector.set(5, 0, desiredComForce.getZ());
 
-      // compute optimal foot forces using least squares solution
+      // compute optimal toe forces using least squares solution
       try
       {
          CommonOps.pinv(comWrenchMap, comWrenchMapInverse);
@@ -355,7 +355,7 @@ public class QuadrupedVirtualModelController
       // compute joint torque inequality constraints
       // compute friction pyramid inequality constraints
       // compute min / max toe pressure constraints?
-      // compute foot forces using quadratic program
+      // compute toe forces using quadratic program
    }
 
 }

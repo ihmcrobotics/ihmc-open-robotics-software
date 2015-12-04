@@ -610,6 +610,10 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
             listener.controlAdded(midiControl);
          }
       }
+      else
+      {
+         PrintTools.error("Passed in null variable");
+      }
    }
 
    public synchronized void addListOfControlls(Collection<MidiControl> collection)
