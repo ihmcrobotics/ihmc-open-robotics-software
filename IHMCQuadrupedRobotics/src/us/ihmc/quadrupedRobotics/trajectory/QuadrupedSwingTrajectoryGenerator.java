@@ -26,8 +26,6 @@ public class QuadrupedSwingTrajectoryGenerator
    private final YoVariableRegistry registry;
    private final YoVariableDoubleProvider swingTimeDoubleProvider;
    
-   private final ReferenceFrame soleFrame;
-   private final FramePoint currentFootPosition = new FramePoint();
    private final FramePoint desiredEndEffectorPosition = new FramePoint();
    private final FramePoint initialPosition = new FramePoint();
    private final FrameVector finalDesiredVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
@@ -35,11 +33,10 @@ public class QuadrupedSwingTrajectoryGenerator
    private BagOfBalls bagOfBalls;
    private int ballCounter = 0;
    
-   public QuadrupedSwingTrajectoryGenerator(CommonQuadrupedReferenceFrames referenceFrames, RobotQuadrant robotQuadrant, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, double dt)
+   public QuadrupedSwingTrajectoryGenerator(RobotQuadrant robotQuadrant, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, double dt)
    {
       this.dt = dt;
       this.robotQuadrant = robotQuadrant;
-      soleFrame = referenceFrames.getFootFrame(robotQuadrant);
       String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
       registry = new YoVariableRegistry(prefix + "MiniBeastSwingTrajectoryGenerator");
       swingTimeDoubleProvider = new YoVariableDoubleProvider(prefix + "swingTime", registry);
@@ -56,8 +53,6 @@ public class QuadrupedSwingTrajectoryGenerator
       bagOfBalls.reset();
       
       swingTimeDoubleProvider.set(swingTime);
-      currentFootPosition.setToZero(soleFrame);
-      currentFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
       initialPosition.setIncludingFrame(swingInitial);
       finalDesiredVelocity.set(desiredFinalVelocity);
       

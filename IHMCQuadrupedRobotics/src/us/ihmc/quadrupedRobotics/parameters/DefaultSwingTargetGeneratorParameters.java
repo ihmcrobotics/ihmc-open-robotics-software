@@ -82,15 +82,4 @@ public class DefaultSwingTargetGeneratorParameters implements QuadrupedControlle
       return 0;
    }
 
-   @Override
-   public double getInitialDesiredFootCorrectionBreakFrequency()
-   {
-      return initialDesiredFootCorrectionBreakFrequency;
-   }
-
-   @Override
-   public double getDefaultDesiredFootCorrectionBreakFrequency()
-   {
-      return defaultDesiredFootCorrectionBreakFrequency;
-   }
 }
