@@ -8,6 +8,9 @@ public class LidarScanParameters
 
    public float sweepYawMax;
    public float sweepYawMin;
+   
+   public float heightPitchMax;
+   public float heightPitchMin;
 
    public float timeIncrement;
    // ROS scanTime - time it took the do the sweep
@@ -17,8 +20,7 @@ public class LidarScanParameters
    public float maxRange;
 
    public int pointsPerSweep;
-
-
+   public int scanHeight;
 
    // NEED this constructor for serialization
    public LidarScanParameters()
@@ -27,42 +29,51 @@ public class LidarScanParameters
 
    public LidarScanParameters(LidarScanParameters p, long timestamp)
    {
-      this(p.pointsPerSweep, p.sweepYawMin, p.sweepYawMax, p.timeIncrement, p.minRange, p.maxRange, p.scanTime, timestamp);
+      this(p.pointsPerSweep, p.scanHeight, p.sweepYawMin, p.sweepYawMax, p.heightPitchMin, p.heightPitchMax, p.timeIncrement, p.minRange, p.maxRange, p.scanTime, timestamp);
    }
 
    public LidarScanParameters(int pointsPerSweep, float sweepYawMin, float sweepYawMax, float timeIncrement, float minRange, float maxRange, float scanTime)
    {
-      this(pointsPerSweep, sweepYawMin, sweepYawMax, timeIncrement, minRange, maxRange, scanTime, 0l);
+      this(pointsPerSweep, 1, sweepYawMin, sweepYawMax, timeIncrement, minRange, maxRange, scanTime, 0l);
    }
 
    public LidarScanParameters(int pointsPerSweep, float sweepYawMin, float sweepYawMax, float minRange, float maxRange)
    {
-      this(pointsPerSweep, sweepYawMin, sweepYawMax, 0f, minRange, maxRange, 0f, 0l);
+      this(pointsPerSweep, 1, sweepYawMin, sweepYawMax, 0f, minRange, maxRange, 0f, 0l);
    }
 
    public LidarScanParameters(int pointsPerSweep, double sweepYawMin, double sweepYawMax, double timeIncrement, double minRange, double maxRange,
                               double scanTime)
    {
-      this(pointsPerSweep, (float) sweepYawMin, (float) sweepYawMax, (float) timeIncrement, (float) minRange, (float) maxRange, (float) scanTime, 0l);
+      this(pointsPerSweep, 1, (float) sweepYawMin, (float) sweepYawMax, (float) timeIncrement, (float) minRange, (float) maxRange, (float) scanTime, 0l);
    }
 
    public LidarScanParameters(int pointsPerSweep, double sweepYawMin, double sweepYawMax, double minRange, double maxRange)
    {
-      this(pointsPerSweep, (float) sweepYawMin, (float) sweepYawMax, 0, (float) minRange, (float) maxRange, 0, 0l);
+      this(pointsPerSweep, 1, (float) sweepYawMin, (float) sweepYawMax, 0, (float) minRange, (float) maxRange, 0, 0l);
    }
 
    public LidarScanParameters(int pointsPerSweep, double fieldOfView, double minRange, double maxRange)
    {
-      this(pointsPerSweep, (float) (-fieldOfView / 2), (float) (fieldOfView / 2), 0, (float) minRange, (float) maxRange, 0, 0l);
+      this(pointsPerSweep, 1, (float) (-fieldOfView / 2), (float) (fieldOfView / 2), 0, (float) minRange, (float) maxRange, 0, 0l);
    }
 
-   public LidarScanParameters(int pointsPerSweep, float sweepYawMin, float sweepYawMax, float timeIncrement, float minRange, float maxRange, float scanTime,
+   public LidarScanParameters(int pointsPerSweep, int scanHeight, float sweepYawMin, float sweepYawMax, float timeIncrement, float minRange, float maxRange, float scanTime,
+         long timestamp)
+   {
+      this(pointsPerSweep, scanHeight, sweepYawMin, sweepYawMax, 0.0f, 0.0f, timeIncrement, minRange, maxRange, scanTime, timestamp);
+   }
+   
+   public LidarScanParameters(int pointsPerSweep, int scanHeight, float sweepYawMin, float sweepYawMax, float heightPitchMin, float heightPitchMax, float timeIncrement, float minRange, float maxRange, float scanTime,
                               long timestamp)
    {
       this.timestamp = timestamp;
 
       this.sweepYawMax = sweepYawMax;
       this.sweepYawMin = sweepYawMin;
+      
+      this.heightPitchMax = heightPitchMax;
+      this.heightPitchMin = heightPitchMin;
 
       this.timeIncrement = timeIncrement;
       this.scanTime = scanTime;
@@ -71,7 +82,7 @@ public class LidarScanParameters
       this.maxRange = maxRange;
 
       this.pointsPerSweep = pointsPerSweep;
-
+      this.scanHeight = scanHeight;
    }
 
    public LidarScanParameters(Random random)
@@ -152,6 +163,11 @@ public class LidarScanParameters
       return pointsPerSweep;
    }
 
+   public int getScanHeight()
+   {
+      return scanHeight;
+   }
+
    @Override
    public int hashCode()
    {
@@ -196,5 +212,4 @@ public class LidarScanParameters
          return false;
       return true;
    }
-   
 }

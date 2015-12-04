@@ -43,7 +43,7 @@ public class LidarDistortionProcessor implements SceneProcessor
       ViewPort viewport = jmeRenderer.getRenderManager().createPostView("LidarDistortionViewport", new Camera(scansPerSweep, scanHeight));
       this.scansPerSweep = scansPerSweep;
       this.scanHeight = scanHeight;
-      this.scan = new float[scansPerSweep];
+      this.scan = new float[scanHeight * scansPerSweep];
       this.lidarOutFloatBuffer = BufferUtils.createFloatBuffer(scansPerSweep * scanHeight);
       
       FrameBuffer distortionFrameBuffer = new FrameBuffer(scansPerSweep, scanHeight, 1);
@@ -136,7 +136,11 @@ public class LidarDistortionProcessor implements SceneProcessor
       lidarOutFloatBuffer.clear();
       GL11.glReadPixels(0, 0, scansPerSweep, scanHeight, GL11.GL_RED, GL11.GL_FLOAT, lidarOutFloatBuffer);
       lidarOutFloatBuffer.rewind();
-      lidarOutFloatBuffer.get(scan);
+      
+      for (int i = 0; i < scanHeight; i++)
+      {
+         lidarOutFloatBuffer.get(scan, i * scansPerSweep, scansPerSweep);
+      }
 
       for (GPULidarListener listener : listeners)
       {
