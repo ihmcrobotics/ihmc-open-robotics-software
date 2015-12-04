@@ -26,62 +26,40 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
 
    private final SDFFullRobotModel sdfFullRobotModelFromSensor; // hack for visualization
    private final SDFFullRobotModel sdfFullRobotModelForViz;
-   
+
    private final JointStateUpdater jointStateUpdater;
    private final FootSwitchUpdater footSwitchUpdater;
    private final CenterOfMassLinearStateUpdater comLinearStateUpdater;
-   
+
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
-   
-   private final ArrayList<YoGraphicReferenceFrame> graphicReferenceFrames = new  ArrayList<>();
-   
-   //Hack constructor for visualization
-//   public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
-//         FootSwitchUpdater footSwitchUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater, SDFFullRobotModel sdfFullRobotModelFromSensor, SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
-//   {
-//      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-//      
-//      jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, null, registry);
-//      
-//      this.footSwitchUpdater = footSwitchUpdater;
-//      this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
-//      
-//      this.comLinearStateUpdater = comLinearStateUpdater;
-//      
-//      this.sdfFullRobotModelForViz = sdfFullRobotModelForViz;
-//      this.sdfFullRobotModelFromSensor = sdfFullRobotModelFromSensor;
-//      
-//      if(this.sdfFullRobotModelForViz != null)
-//         initializeVisualization();
-//      
-//      parentRegistry.addChild(registry);
-//      
-//   }
-   
+
+   private final ArrayList<YoGraphicReferenceFrame> graphicReferenceFrames = new ArrayList<>();
+
    public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
-         FootSwitchUpdater footSwitchUpdater, JointStateUpdater jointStateUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater, SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         FootSwitchUpdater footSwitchUpdater, JointStateUpdater jointStateUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater,
+         SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-      
+
       this.jointStateUpdater = jointStateUpdater;
 
       this.footSwitchUpdater = footSwitchUpdater;
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
 
       this.comLinearStateUpdater = comLinearStateUpdater;
-      
+
       this.sdfFullRobotModelForViz = sdfFullRobotModelForViz;
       this.sdfFullRobotModelFromSensor = null;
-      
-      if(this.sdfFullRobotModelForViz != null)
+
+      if (this.sdfFullRobotModelForViz != null)
          initializeVisualization();
-      
+
       parentRegistry.addChild(registry);
    }
 
-  private void initializeVisualization()
+   private void initializeVisualization()
    {
-     OneDoFJoint[] oneDoFJoints = sdfFullRobotModelForViz.getOneDoFJoints();
+      OneDoFJoint[] oneDoFJoints = sdfFullRobotModelForViz.getOneDoFJoints();
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          String prefix = "StateEstimator" + oneDoFJoints[i].getName();
@@ -92,7 +70,7 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       }
    }
 
- @Override
+   @Override
    public boolean isFootInContact(RobotQuadrant quadrant)
    {
       return footSwitchUpdater.isFootInContactWithGround(quadrant);
@@ -103,47 +81,22 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       jointStateUpdater.initialize();
       comLinearStateUpdater.initialize();
    }
-   
+
    @Override
    public void doControl()
    {
       jointStateUpdater.updateJointState();
       comLinearStateUpdater.updateCenterOfMassLinearState();
-      
+
       sdfFullRobotModelForViz.updateFrames();
-      for(int i = 0; i < graphicReferenceFrames.size(); i++)
-         graphicReferenceFrames.get(i).update();
-//      if(sdfFullRobotModelForViz != null)
-//         updateViz();
+      updateViz();
    }
 
    private void updateViz()
    {
-      //very hackish, will need  to be deleted once the state estimator is working
-      OneDoFJoint[] oneDoFJointsFromSensor = sdfFullRobotModelFromSensor.getOneDoFJoints();
-      OneDoFJoint[] oneDoFJointsForViz = sdfFullRobotModelForViz.getOneDoFJoints();
-     
-     for (int i = 0; i < oneDoFJointsForViz.length; i++)
-     {
-        OneDoFJoint oneDoFJointFromSensor = oneDoFJointsFromSensor[i];
-        OneDoFJoint oneDoFJointForViz = oneDoFJointsForViz[i];
+      for (int i = 0; i < graphicReferenceFrames.size(); i++)
+         graphicReferenceFrames.get(i).update();
 
-        oneDoFJointForViz.setQ(oneDoFJointFromSensor.getQ());
-        oneDoFJointForViz.setQd(oneDoFJointFromSensor.getQd());
-        oneDoFJointForViz.setTau(oneDoFJointFromSensor.getTau());
-        oneDoFJointForViz.setTauMeasured(oneDoFJointFromSensor.getTauMeasured());
-        
-     }
-     
-     SixDoFJoint rootJointFromSensor = sdfFullRobotModelFromSensor.getRootJoint();
-     SixDoFJoint rootJointForViz = sdfFullRobotModelForViz.getRootJoint();
-     
-     rootJointForViz.setPositionAndRotation(rootJointFromSensor.getJointTransform3D());
-     
-     sdfFullRobotModelForViz.updateFrames();
-     for(int i = 0; i < graphicReferenceFrames.size(); i++)
-        graphicReferenceFrames.get(i).update();
-     
    }
 
    @Override
@@ -151,7 +104,7 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    {
       return TimeTools.nanoSecondstoSeconds(sensorOutputMapReadOnly.getTimestamp());
    }
-   
+
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
