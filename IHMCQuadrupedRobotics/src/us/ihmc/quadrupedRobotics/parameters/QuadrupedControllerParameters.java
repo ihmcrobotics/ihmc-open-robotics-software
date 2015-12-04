@@ -11,8 +11,4 @@ public interface QuadrupedControllerParameters extends SwingTargetGeneratorParam
 
    public double getDefaultSubCircleRadius();
 
-   public double getInitialDesiredFootCorrectionBreakFrequency();
-
-   public double getDefaultDesiredFootCorrectionBreakFrequency();
-
 }
