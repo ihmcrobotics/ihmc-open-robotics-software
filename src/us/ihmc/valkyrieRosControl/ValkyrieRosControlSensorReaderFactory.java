@@ -110,10 +110,12 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
          }
          else
          {
-            if (imuHandles.containsKey(imuDefinition.getName()))
+            String name = imuDefinition.getName();
+            name = name.replace(imuDefinition.getRigidBody().getName() + "_", "");
+            if (imuHandles.containsKey(name))
             {
                stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinition);
-               YoIMUHandleHolder holder = new YoIMUHandleHolder(imuHandles.get(imuDefinition.getName()), imuDefinition, sensorReaderRegistry);
+               YoIMUHandleHolder holder = new YoIMUHandleHolder(imuHandles.get(name), imuDefinition, sensorReaderRegistry);
                yoIMUHandleHolders.add(holder);
             }
          }
