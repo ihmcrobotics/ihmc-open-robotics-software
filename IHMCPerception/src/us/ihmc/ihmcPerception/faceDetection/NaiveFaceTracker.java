@@ -15,6 +15,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class NaiveFaceTracker
 {
@@ -22,7 +24,7 @@ public class NaiveFaceTracker
 
    private final OpenCVFaceDetector faceDetector;
    private final ArrayList<Face> trackedFaces = new ArrayList<>();
-   private Rect[] lastDetectedFaces = new Rect[0];
+   private final Set<Face> unmatchedFaces = new HashSet<>();
 
    public NaiveFaceTracker(double scale)
    {
@@ -34,18 +36,20 @@ public class NaiveFaceTracker
       Rect[] faces = faceDetector.detect(bufferedImage);
       Graphics2D g2 = bufferedImage.createGraphics();
 
+      unmatchedFaces.clear();
+
       for(int i = 0; i < trackedFaces.size(); i++)
       {
          int oldFaceX = trackedFaces.get(i).facialBorder.x;
          int oldFaceY = trackedFaces.get(i).facialBorder.y;
-         boolean alreadyMatched = false;
+         boolean matched = false;
 
          g2.setColor(getColor(i));
          g2.drawRect(oldFaceX, oldFaceY, trackedFaces.get(i).facialBorder.width, trackedFaces.get(i).facialBorder.height);
 
          for(int j = 0; j < faces.length; j++)
          {
-            if(!alreadyMatched && faces[j] != null)
+            if(!matched && faces[j] != null)
             {
                int newFaceX = faces[j].x;
                int newFaceY = faces[j].y;
@@ -55,13 +59,20 @@ public class NaiveFaceTracker
                if(faceShift < SHIFT_DELTA)
                {
                   g2.drawRect(newFaceX, newFaceY, faces[j].width, faces[j].height);
-                  alreadyMatched = true;
+                  matched = true;
                   trackedFaces.get(i).updateCoordinates(faces[j]);
                   faces[j] = null;
                }
             }
          }
+
+         if(!matched)
+         {
+            unmatchedFaces.add(trackedFaces.get(i));
+         }
       }
+
+      trackedFaces.removeAll(unmatchedFaces);
 
       for(int j = 0; j < faces.length; j++)
       {
@@ -89,7 +100,6 @@ public class NaiveFaceTracker
    class Face
    {
       private final long id;
-      public int persistenceCount = 0;
       public Rect facialBorder;
 
       public Face(long id, Rect facialBorder)
@@ -101,12 +111,6 @@ public class NaiveFaceTracker
       public void updateCoordinates(Rect coordinates)
       {
          this.facialBorder.set(new double[]{coordinates.x, coordinates.y, coordinates.width, coordinates.height});
-         persistenceCount++;
-      }
-
-      public int getPersistenceCount()
-      {
-         return persistenceCount;
       }
    }
 
