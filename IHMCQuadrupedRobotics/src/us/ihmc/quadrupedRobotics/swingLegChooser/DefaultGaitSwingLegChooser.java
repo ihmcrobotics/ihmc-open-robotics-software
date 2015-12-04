@@ -9,8 +9,12 @@ public class DefaultGaitSwingLegChooser implements NextSwingLegChooser
    @Override
    public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepQuadrant, FrameVector desiredVelocity, double desiredYawRate)
    {
-      RobotQuadrant nextSwingLeg = lastStepQuadrant.getNextRegularGaitSwingQuadrant();
-      return nextSwingLeg;
+      if(desiredVelocity.getX() > 0)
+      {
+         return lastStepQuadrant.getNextRegularGaitSwingQuadrant();
+      }
+      
+      return lastStepQuadrant.getNextReversedRegularGaitSwingQuadrant();
    }
 
 }
