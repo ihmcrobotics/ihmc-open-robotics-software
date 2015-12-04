@@ -97,6 +97,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private final QuadrupedReferenceFrames referenceFrames;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final ReferenceFrame bodyFrame;
+   private final ReferenceFrame feedForwardBodyFrame;
    private final ReferenceFrame comFrame;
    private final PoseReferenceFrame desiredCoMPoseReferenceFrame = new PoseReferenceFrame("desiredCoMPoseReferenceFrame", ReferenceFrame.getWorldFrame());
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
@@ -250,6 +251,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       feedForwardFullRobotModel = robotParameters.createFullRobotModel();
       feedForwardReferenceFrames = new QuadrupedReferenceFrames(feedForwardFullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
       feedForwardReferenceFrames.updateFrames();
+      feedForwardBodyFrame = feedForwardReferenceFrames.getBodyFrame();
       
       updateFeedForwardModelAndFrames();
       
@@ -270,7 +272,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       desiredVelocityProvider = new DesiredVelocityProvider(dataProducer);
       desiredYawRateProvider = new DesiredYawRateProvider(dataProducer);
 
-      desiredVelocity = new YoFrameVector("desiredVelocity", bodyFrame, registry);
+      desiredVelocity = new YoFrameVector("desiredVelocity", feedForwardBodyFrame, registry);
       desiredVelocity.setX(0.0);
       comTrajectoryTimeDesired.set(1.0);
       
@@ -516,7 +518,6 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       updateDesiredCoMTrajectory();
       updateDesiredHeight();
       updateDesiredYaw();
-      counteractPitchAndRoll();
       alphaFilterDesiredBodyOrientation();
       updateDesiredCoMPose();
       updateLegsBasedOnDesiredCoM();
@@ -566,24 +567,6 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
 
 	   feedForwardFullRobotModel.updateFrames();
 	   feedForwardReferenceFrames.updateFrames();
-   }
-
-   /**
-    * tries to right the body by setting the desired body to the inverse of the actual
-    */
-   FramePose bodyPose = new FramePose();
-   private void counteractPitchAndRoll()
-   {
-      bodyPose.setToZero(bodyFrame);
-      bodyPose.changeFrame(desiredCoMPoseReferenceFrame);
-      
-      DoubleYoVariable desiredRoll = desiredCoMOrientation.getRoll();
-      double rollOffset = -bodyPose.getRoll();
-      desiredRoll.set(rollOffset);
-      
-      DoubleYoVariable desiredPitch = desiredCoMOrientation.getPitch();
-      double pitchOffset = -bodyPose.getPitch();
-      desiredPitch.set(pitchOffset);
    }
 
    private FrameVector lastProvidedDesiredVelocity = new FrameVector();
@@ -744,7 +727,6 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       {
          Vector3d footPositionInLegAttachmentFrame = packFootPositionUsingDesiredBodyToBodyHack(robotQuadrant);
          desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(footPositionInLegAttachmentFrame);
-         
          
          FramePoint actualFootPositionInLegAttachmentFrame = new FramePoint(referenceFrames.getFootFrame(robotQuadrant));
          actualFootPositionInLegAttachmentFrame.changeFrame(referenceFrames.getLegAttachmentFrame(robotQuadrant));
@@ -937,6 +919,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       @Override
       public void doTransitionIntoAction()
       {
+         desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
          RobotQuadrant lastSwingLeg = swingLeg.getEnumValue();
          RobotQuadrant currentSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(fourFootSupportPolygon, lastSwingLeg, desiredBodyVelocity, desiredYawRate.getDoubleValue()); 
          RobotQuadrant nextSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(fourFootSupportPolygon, currentSwingLeg, desiredBodyVelocity, desiredYawRate.getDoubleValue());
@@ -1125,11 +1108,10 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          computeFootPositionAlongSwingTrajectory(swingQuadrant, currentDesiredInTrajectory);
          currentDesiredInTrajectory.changeFrame(ReferenceFrame.getWorldFrame());
          currentSwingTarget.set(currentDesiredInTrajectory);
-         currentDesiredInTrajectory.changeFrame(bodyFrame);
          
          desiredFeetLocations.get(swingQuadrant).setAndMatchFrame(currentDesiredInTrajectory);
 
-         currentDesiredInTrajectory.changeFrame(referenceFrames.getLegAttachmentFrame(swingQuadrant));
+         currentDesiredInTrajectory.changeFrame(feedForwardReferenceFrames.getLegAttachmentFrame(swingQuadrant));
          currentDesiredInTrajectory.get(footPositionInLegAttachmentFrame);
          computeDesiredPositionsAndStoreInFullRobotModel(swingQuadrant, footPositionInLegAttachmentFrame);
       }
@@ -1159,6 +1141,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       {
          QuadrupedSwingTrajectoryGenerator swingTrajectoryGenerator = swingTrajectoryGenerators.get(swingLeg);
          speedMatchVelocity.setIncludingFrame(desiredBodyVelocity);
+         speedMatchVelocity.changeFrame(ReferenceFrame.getWorldFrame());
          speedMatchVelocity.scale(-1.0);
          swingTrajectoryGenerator.initializeSwing(swingTime, swingInitial, swingHeight.getDoubleValue(), swingTarget, speedMatchVelocity);
       }
