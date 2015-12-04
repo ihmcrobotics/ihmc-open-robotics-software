@@ -79,7 +79,8 @@ public class JointStateUpdater
       }
       else
       {
-         throw new RuntimeException("Could not find the given pelvis and/or chest IMUs: pelvisIMU = " + pelvisIMU + ", chestIMU = " + chestIMU);
+         enableIMUBasedPelvisToTorsoEncodersVelocityFilter.set(false);
+         System.err.println("Could not find the given pelvis and/or chest IMUs: pelvisIMU = " + pelvisIMU + ", chestIMU = " + chestIMU + ", disabling enableIMUBasedPelvisToTorsoEncodersVelocityFilter");
       }
    }
 
