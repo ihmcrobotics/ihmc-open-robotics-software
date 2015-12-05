@@ -73,6 +73,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    private final DoubleYoVariable ditherFrequency = new DoubleYoVariable("ditherFrequency", registry);
 
    private final DoubleYoVariable diagnosticsPDMasterGain = new DoubleYoVariable("diagnosticsPDMasterGain", registry);
+   private final DoubleYoVariable maximumTorqueOffset = new DoubleYoVariable("maximumTorqueOffset", registry);
 
    private final BooleanYoVariable adaptTorqueOffset = new BooleanYoVariable("adaptTorqueOffset", registry);
    private final BooleanYoVariable printTorqueOffsets = new BooleanYoVariable("printTorqueOffsets", registry);
@@ -113,6 +114,8 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       ditherFrequency.set(5.0);
 
       diagnosticsPDMasterGain.set(1.0);
+
+      maximumTorqueOffset.set(15.0);
 
       adaptTorqueOffset.set(false);
       transferTorqueOffsets.set(false);
@@ -567,7 +570,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       DiagnosticsWhenHangingHelper diagnosticsWhenHangingHelper = helpers.get(oneDoFJoint);
       if (diagnosticsWhenHangingHelper != null)
       {
-         tau = diagnosticsWhenHangingHelper.getTorqueToApply(tau, adaptTorqueOffset.getBooleanValue());
+         tau = diagnosticsWhenHangingHelper.getTorqueToApply(tau, adaptTorqueOffset.getBooleanValue(), maximumTorqueOffset.getDoubleValue());
       }
 
       double ditherTorque = ditherAmplitude.getDoubleValue() * Math.sin(2.0 * Math.PI * ditherFrequency.getDoubleValue() * timeInCurrentState);
