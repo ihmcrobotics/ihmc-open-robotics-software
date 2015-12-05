@@ -1017,6 +1017,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public boolean useICPPlannerHackN13()
    {
-      return true;
+      return false;
    }
 }
