@@ -50,39 +50,39 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
    private final ReferenceFrame worldFrame;
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame comFrame;
-   private PoseReferenceFrame supportFrame;
-   private QuadrupedSupportPolygon supportPolygon;
-   private CenterOfMassJacobian comJacobian;
-   private TwistCalculator twistCalculator;
-   private AxisAngleOrientationController bodyOrientationController;
-   private PIDController comHeightPIDController;
-   private PIDController icpForwardPIDController;
-   private PIDController icpLateralPIDController;
-   private QuadrupedVirtualModelController virtualModelController;
+   private final PoseReferenceFrame supportFrame;
+   private final QuadrupedSupportPolygon supportPolygon;
+   private final CenterOfMassJacobian comJacobian;
+   private final TwistCalculator twistCalculator;
+   private final AxisAngleOrientationController bodyOrientationController;
+   private final PIDController comHeightPIDController;
+   private final PIDController icpForwardPIDController;
+   private final PIDController icpLateralPIDController;
+   private final QuadrupedVirtualModelController virtualModelController;
 
    // Setpoints
-   private QuadrantDependentList<YoFrameVector> yoSoleForceSetpoint;
-   private YoFrameOrientation yoBodyOrientationSetpoint;
-   private YoFrameVector yoBodyAngularVelocitySetpoint;
-   private YoFrameVector yoBodyTorqueFeedforwardSetpoint;
-   private YoFrameVector yoBodyTorqueSetpoint;
-   private DoubleYoVariable yoComHeightSetpoint;
-   private DoubleYoVariable yoIcpOmegaSetpoint;
-   private YoFramePoint yoIcpPositionSetpoint;
-   private YoFramePoint yoCmpPositionSetpoint;
-   private YoFrameVector yoComForceSetpoint;
+   private final QuadrantDependentList<YoFrameVector> yoSoleForceSetpoint;
+   private final YoFrameOrientation yoBodyOrientationSetpoint;
+   private final YoFrameVector yoBodyAngularVelocitySetpoint;
+   private final YoFrameVector yoBodyTorqueFeedforwardSetpoint;
+   private final YoFrameVector yoBodyTorqueSetpoint;
+   private final DoubleYoVariable yoComHeightSetpoint;
+   private final DoubleYoVariable yoIcpOmegaSetpoint;
+   private final YoFramePoint yoIcpPositionSetpoint;
+   private final YoFramePoint yoCmpPositionSetpoint;
+   private final YoFrameVector yoComForceSetpoint;
 
    // Estimates
-   private QuadrantDependentList<YoFramePoint> yoSolePositionEstimate;
-   private YoFramePoint yoSupportCentroidEstimate;
-   private YoFrameOrientation yoSupportOrientationEstimate;
-   private YoFrameOrientation yoBodyOrientationEstimate;
-   private YoFramePoint yoBodyPositionEstimate;
-   private YoFrameVector yoBodyAngularVelocityEstimate;
-   private YoFramePoint yoComPositionEstimate;
-   private YoFrameVector yoComVelocityEstimate;
-   private DoubleYoVariable yoComHeightEstimate;
-   private YoFramePoint yoIcpPositionEstimate;
+   private final QuadrantDependentList<YoFramePoint> yoSolePositionEstimate;
+   private final YoFramePoint yoSupportCentroidEstimate;
+   private final YoFrameOrientation yoSupportOrientationEstimate;
+   private final YoFrameOrientation yoBodyOrientationEstimate;
+   private final YoFramePoint yoBodyPositionEstimate;
+   private final YoFrameVector yoBodyAngularVelocityEstimate;
+   private final YoFramePoint yoComPositionEstimate;
+   private final YoFrameVector yoComVelocityEstimate;
+   private final DoubleYoVariable yoComHeightEstimate;
+   private final YoFramePoint yoIcpPositionEstimate;
 
    private HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
 
@@ -342,13 +342,14 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       yoCmpPositionSetpoint.set(yoIcpPositionSetpoint);
       yoComForceSetpoint.setToZero();
 
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         for (LegJointName legJointName : jointNameMap.getLegJointNames())
+         for (int i = 0; i < jointNameMap.getLegJointNames().length; i++)
          {
-            String jointName = jointNameMap.getLegJointName(robotQuadrant, legJointName);
-
             // initialize leg joint mode to force control
+            LegJointName legJointName = jointNameMap.getLegJointNames()[i];
+            String jointName = jointNameMap.getLegJointName(robotQuadrant, legJointName);
             OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
             joint.setUnderPositionControl(false);
 
