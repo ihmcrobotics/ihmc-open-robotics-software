@@ -47,6 +47,9 @@ public class CenterOfMassKinematicBasedCalculator
 
    private final DoubleYoVariable alphaRootJointLinearVelocityNewTwist = new DoubleYoVariable("alphaRootJointLinearVelocityNewTwist", registry);
 
+   private final FramePoint previousRootJointPosition = new FramePoint(worldFrame);
+   private final FrameVector previousRootJointLinearVelocityNewTwist = new FrameVector(worldFrame);
+
    //Temporary Variables
    private final Twist tempRootBodyTwist = new Twist();
    private final FrameVector tempFrameVector = new FrameVector();
@@ -84,6 +87,8 @@ public class CenterOfMassKinematicBasedCalculator
    {
       updateKinematics();
       rootJointPosition.set(comPosition);
+      previousRootJointPosition.set(comPosition);
+      previousRootJointLinearVelocityNewTwist.setToZero();
 
       ArrayList<RobotQuadrant> allQuadrants = new ArrayList<>();
 
@@ -94,15 +99,15 @@ public class CenterOfMassKinematicBasedCalculator
 
    }
 
+   //for legs in contact => update CoM position
+   //for legs not in contact => update foot position
    public void estimateFeetAndComPosition(ArrayList<RobotQuadrant> feetInContact, ArrayList<RobotQuadrant> feetNotInContact,
          QuadrantDependentList<YoFramePoint> footPositionsToPack, FramePoint comPositionToPack)
    {
       updateKinematics();
 
-      //for legs in contact => update CoM position
       estimateCoMLinearPosition(feetInContact, footPositionsToPack);
 
-      //for legs not in contact => update foot position
       estimateFeetPosition(feetNotInContact, footPositionsToPack);
 
    }
@@ -154,22 +159,32 @@ public class CenterOfMassKinematicBasedCalculator
 
    private void estimateCoMLinearPosition(ArrayList<RobotQuadrant> feetInContact, QuadrantDependentList<YoFramePoint> footPositionsInWorld)
    {
-      double scaleFactor = 1.0 / feetInContact.size();
-
-      for (int i = 0; i < feetInContact.size(); i++)
+      if (feetInContact.size() == 0)
       {
-         RobotQuadrant quadrantInContact = feetInContact.get(i);
+         rootJointPosition.set(previousRootJointPosition);
+         rootJointLinearVelocityNewTwist.set(previousRootJointLinearVelocityNewTwist);
+      }
+      else
+      {
+         double scaleFactor = 1.0 / feetInContact.size();
 
-         footToRootJointPositions.get(quadrantInContact).getFrameTuple(tempPosition);
-         tempPosition.scale(scaleFactor);
-         rootJointPosition.add(tempPosition);
-         footPositionsInWorld.get(quadrantInContact).getFrameTuple(tempPosition);
-         tempPosition.scale(scaleFactor);
-         rootJointPosition.add(tempPosition);
+         for (int i = 0; i < feetInContact.size(); i++)
+         {
+            RobotQuadrant quadrantInContact = feetInContact.get(i);
 
-         footVelocitiesInWorld.get(quadrantInContact).getFrameTupleIncludingFrame(tempFrameVector);
-         tempFrameVector.scale(scaleFactor * alphaRootJointLinearVelocityNewTwist.getDoubleValue());
-         rootJointLinearVelocityNewTwist.sub(tempFrameVector);
+            footToRootJointPositions.get(quadrantInContact).getFrameTuple(tempPosition);
+            tempPosition.scale(scaleFactor);
+            rootJointPosition.add(tempPosition);
+            footPositionsInWorld.get(quadrantInContact).getFrameTuple(tempPosition);
+            tempPosition.scale(scaleFactor);
+            rootJointPosition.add(tempPosition);
+
+            footVelocitiesInWorld.get(quadrantInContact).getFrameTupleIncludingFrame(tempFrameVector);
+            tempFrameVector.scale(scaleFactor * alphaRootJointLinearVelocityNewTwist.getDoubleValue());
+            rootJointLinearVelocityNewTwist.sub(tempFrameVector);
+         }
+         previousRootJointPosition.set(rootJointPosition.getFrameTuple());
+         previousRootJointLinearVelocityNewTwist.set(rootJointLinearVelocityNewTwist.getFrameTuple());
       }
    }
 
