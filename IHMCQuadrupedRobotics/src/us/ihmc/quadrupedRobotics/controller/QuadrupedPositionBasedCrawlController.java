@@ -34,6 +34,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -106,7 +107,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    
    private final BooleanYoVariable runOpenLoop = new BooleanYoVariable("runOpenLoop", "If true, runs in open loop mode. The leg motions will not depend on any feedback signals.", registry);
    
-   private final YoFramePoint2d desiredCoMOffset = new YoFramePoint2d("desiredCoMOffset", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint2d desiredCoMOffset;
 
    private final DoubleYoVariable filteredDesiredCoMYawAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredCoMYawAlphaBreakFrequency", registry);
    private final DoubleYoVariable filteredDesiredCoMYawAlpha = new DoubleYoVariable("filteredDesiredCoMYawAlpha", registry);
@@ -253,6 +254,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       feedForwardReferenceFrames.updateFrames();
       feedForwardBodyFrame = feedForwardReferenceFrames.getBodyFrame();
       
+      desiredCoMOffset = new YoFramePoint2d("desiredCoMOffset", feedForwardReferenceFrames.getBodyZUpFrame(), registry);
+
       updateFeedForwardModelAndFrames();
       
       for (RobotQuadrant robotQuadrant: RobotQuadrant.values)
@@ -991,6 +994,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
             drawSupportPolygon(thirdAndFourthCommonPolygon, commonTriplePolygons.get(thirdSwingLeg.getSide()));
          }
       }
+       
+      private final FrameVector2d tempFrameVector = new FrameVector2d();
       
       private void calculateTrajectoryTarget(RobotQuadrant upcommingSwingLeg, QuadrupedSupportPolygon commonTriangle, Point2d comTargetToPack)
       {
@@ -1007,7 +1012,11 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
             radius = commonSupportPolygon.getInCircle(comTargetToPack);
          }
          inscribedCircleRadius.set(radius);
-         comTargetToPack.add(desiredCoMOffset.getPoint2dCopy());
+         
+         desiredCoMOffset.getFrameTuple2dIncludingFrame(tempFrameVector);
+         tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
+         
+         comTargetToPack.add(tempFrameVector.getVector());
          circleCenter.setXY(comTargetToPack);
       }
       
