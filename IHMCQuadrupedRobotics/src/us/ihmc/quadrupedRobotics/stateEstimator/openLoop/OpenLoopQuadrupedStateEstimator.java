@@ -45,4 +45,11 @@ public class OpenLoopQuadrupedStateEstimator implements QuadrupedStateEstimator
       return yoTime.getDoubleValue();
    }
 
+   @Override
+   public void initialize()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
 }
