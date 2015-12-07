@@ -1,5 +1,35 @@
 package us.ihmc.graphics3DAdapter.jme;
 
+import java.applet.Applet;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.Window;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.swing.JComponent;
+import javax.swing.RepaintManager;
+import javax.vecmath.Color3f;
+
+import org.jmonkeyengine.scene.plugins.ogre.MaterialLoader;
+
 import com.google.common.collect.HashBiMap;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -21,8 +51,8 @@ import com.jme3.system.NativeLibraryLoader;
 import com.jme3.system.awt.AwtPanelsContext;
 import com.jme3.texture.plugins.AWTLoader;
 import com.jme3.util.SkyFactory;
+
 import jme3dae.ColladaLoader;
-import org.jmonkeyengine.scene.plugins.ogre.MaterialLoader;
 import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
@@ -56,22 +86,6 @@ import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.time.Timer;
-
-import javax.swing.*;
-import javax.vecmath.Color3f;
-import java.applet.Applet;
-import java.awt.*;
-import java.awt.event.*;
-import java.io.File;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class JMERenderer extends SimpleApplication implements Graphics3DAdapter, PBOAwtPanelListener
 {
@@ -1202,9 +1216,9 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    }
 
    @Override
-   public JMEGPULidar createGPULidar(int pointsPerSweep, double fieldOfView, double minRange, double maxRange)
+   public JMEGPULidar createGPULidar(int pointsPerSweep, int scanHeight, double fieldOfView, double minRange, double maxRange)
    {
-      JMEGPULidar gpuLidar = new JMEGPULidar(this, pointsPerSweep, fieldOfView, minRange, maxRange);
+      JMEGPULidar gpuLidar = new JMEGPULidar(this, pointsPerSweep, scanHeight, fieldOfView, minRange, maxRange);
       
       gpuLidars.add(gpuLidar);
       updateGPULidarScenes();
@@ -1213,9 +1227,9 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    }
 
    @Override
-   public JMEGPULidar createGPULidar(GPULidarListener listener, int pointsPerSweep, double fieldOfView, double minRange, double maxRange)
+   public JMEGPULidar createGPULidar(GPULidarListener listener, int pointsPerSweep, int scanHeight, double fieldOfView, double minRange, double maxRange)
    {
-      JMEGPULidar gpuLidar = createGPULidar(pointsPerSweep, fieldOfView, minRange, maxRange);
+      JMEGPULidar gpuLidar = createGPULidar(pointsPerSweep, scanHeight, fieldOfView, minRange, maxRange);
       gpuLidar.addGPULidarListener(listener);
 
       return gpuLidar;
@@ -1224,7 +1238,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    @Override
    public JMEGPULidar createGPULidar(GPULidarListener listener, LidarScanParameters lidarScanParameters)
    {
-      JMEGPULidar gpuLidar = createGPULidar(listener, lidarScanParameters.getPointsPerSweep(), lidarScanParameters.getFieldOfView(),
+      JMEGPULidar gpuLidar = createGPULidar(listener, lidarScanParameters.getPointsPerSweep(), lidarScanParameters.getScanHeight(), lidarScanParameters.getFieldOfView(),
                                 lidarScanParameters.getMinRange(), lidarScanParameters.getMaxRange());    
 
       return gpuLidar;
@@ -1233,8 +1247,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    @Override
    public JMEGPULidar createGPULidar(LidarScanParameters lidarScanParameters)
    {
-      JMEGPULidar gpuLidar = createGPULidar(lidarScanParameters.getPointsPerSweep(), lidarScanParameters.getFieldOfView(), lidarScanParameters.getMinRange(),
-                                lidarScanParameters.getMaxRange());    
+      JMEGPULidar gpuLidar = createGPULidar(lidarScanParameters.getPointsPerSweep(), lidarScanParameters.getScanHeight(), lidarScanParameters.getFieldOfView(), lidarScanParameters.getMinRange(),
+                                lidarScanParameters.getMaxRange());
 
       return gpuLidar;
    }

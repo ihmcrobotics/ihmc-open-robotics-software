@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.io.IOException;
+
 import net.java.games.input.Component;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -23,7 +25,7 @@ public class DRCRobotPelvisJoystickController
 
    private final Joystick joystick;
 
-   public DRCRobotPelvisJoystickController(YoVariableHolder holder)
+   public DRCRobotPelvisJoystickController(YoVariableHolder holder) throws IOException
    {
       joystick = new Joystick();
       joystick.setPollInterval(pollIntervalMillis);
@@ -45,7 +47,7 @@ public class DRCRobotPelvisJoystickController
               deadZone, true));
    }
    
-   public static void main(String[] arg)
+   public static void main(String[] arg) throws IOException
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       VariableChangedListener listener = new VariableChangedListener()

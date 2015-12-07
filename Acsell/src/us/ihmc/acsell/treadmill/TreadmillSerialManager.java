@@ -119,9 +119,17 @@ public class TreadmillSerialManager {
 
    public static void setupJoyStick(final OutputStream out)
    {
-      final Joystick joystickUpdater = new Joystick();
+      Joystick joystickUpdater;
+      try
+      {
+         joystickUpdater = new Joystick();
+         joystickUpdater.addJoystickEventListener(new TreadmillJoystickEventListener(out));
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
 
-      joystickUpdater.addJoystickEventListener(new TreadmillJoystickEventListener(out));
    }
     
     

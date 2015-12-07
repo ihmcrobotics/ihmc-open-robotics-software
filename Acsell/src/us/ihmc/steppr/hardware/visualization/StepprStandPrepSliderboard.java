@@ -1,5 +1,6 @@
 package us.ihmc.steppr.hardware.visualization;
 
+import java.io.IOException;
 import java.util.EnumMap;
 
 import net.java.games.input.Component;
@@ -150,7 +151,16 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
    
   public void setupJoyStick(YoVariableHolder registry)
    {
-      final Joystick joystickUpdater = new Joystick();
+      Joystick joystickUpdater;
+      try
+      {
+         joystickUpdater = new Joystick();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return;
+      }
       
       final double deadZone = 0.02;
       //final double desiredVelocityX_Bias = 0.0;

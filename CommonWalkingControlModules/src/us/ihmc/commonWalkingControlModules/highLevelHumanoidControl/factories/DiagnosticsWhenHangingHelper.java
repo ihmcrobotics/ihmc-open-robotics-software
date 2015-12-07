@@ -113,7 +113,7 @@ public class DiagnosticsWhenHangingHelper
       return centerOfMassCalculator;
    }
 
-   public double getTorqueToApply(double feedbackCorrectionTorque, boolean adaptTorqueOffset)
+   public double getTorqueToApply(double feedbackCorrectionTorque, boolean adaptTorqueOffset, double maxTorqueOffset)
    {
       appliedTorque.set(feedbackCorrectionTorque + estimatedTorque.getDoubleValue()); 
       
@@ -121,8 +121,8 @@ public class DiagnosticsWhenHangingHelper
       {
          torqueOffset.sub(feedbackCorrectionTorque * torqueCorrectionAlpha.getDoubleValue());
          
-         if (torqueOffset.getDoubleValue() > 15.0) torqueOffset.set(15.0);
-         if (torqueOffset.getDoubleValue() < -15.0) torqueOffset.set(-15.0);
+         if (torqueOffset.getDoubleValue() > maxTorqueOffset) torqueOffset.set(maxTorqueOffset);
+         if (torqueOffset.getDoubleValue() < -maxTorqueOffset) torqueOffset.set(-maxTorqueOffset);
       }
       
       return appliedTorque.getDoubleValue() - torqueOffset.getDoubleValue();

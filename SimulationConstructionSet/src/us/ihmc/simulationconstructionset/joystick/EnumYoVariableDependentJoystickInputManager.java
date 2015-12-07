@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.joystick;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -17,7 +18,7 @@ public class EnumYoVariableDependentJoystickInputManager<T>
    private final EnumYoVariable<?> enumYoVariable;
    private final T[] enumValues;
    
-   public EnumYoVariableDependentJoystickInputManager(final EnumYoVariable<?> enumYoVariable, Class<T> enumType)
+   public EnumYoVariableDependentJoystickInputManager(final EnumYoVariable<?> enumYoVariable, Class<T> enumType) throws IOException
    {
       this.enumValues = enumType.getEnumConstants();
       this.enumYoVariable = enumYoVariable;

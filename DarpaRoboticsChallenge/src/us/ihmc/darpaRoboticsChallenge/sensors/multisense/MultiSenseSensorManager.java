@@ -8,6 +8,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.ihmcPerception.camera.CameraLogger;
 import us.ihmc.ihmcPerception.camera.RosCameraReceiver;
+import us.ihmc.ihmcPerception.camera.VideoPacketHandler;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
 import us.ihmc.ihmcPerception.depthData.PointCloudSource;
 import us.ihmc.ihmcPerception.depthData.RosPointCloudReceiver;
@@ -95,7 +96,7 @@ public class MultiSenseSensorManager
    private void registerCameraReceivers()
    {
       CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
-      cameraReceiver = new RosCameraReceiver(fullRobotModelFactory, cameraParamaters, robotConfigurationDataBuffer, rosMainNode, packetCommunicator,
+      cameraReceiver = new RosCameraReceiver(fullRobotModelFactory, cameraParamaters, robotConfigurationDataBuffer, rosMainNode, new VideoPacketHandler(packetCommunicator),
             ppsTimestampOffsetProvider, logger);
 
       cameraReceiver.start();

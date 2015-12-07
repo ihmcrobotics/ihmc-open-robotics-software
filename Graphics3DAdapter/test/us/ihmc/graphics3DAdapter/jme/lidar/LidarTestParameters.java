@@ -10,7 +10,10 @@ public class LidarTestParameters
    private double rotationSpeed;
    private double lidarSweepStartAngle;
    private double lidarSweepEndAngle;
+   private double lidarPitchMinAngle;
+   private double lidarPitchMaxAngle;
    private int scansPerSweep;
+   private int scanHeight;
    private double wallDistance;
    private double wallRotation;
    private double wallThickness;
@@ -43,6 +46,9 @@ public class LidarTestParameters
       this.lidarSweepStartAngle = -Math.PI / 4;
       this.lidarSweepEndAngle = Math.PI / 4;
       this.scansPerSweep = 720;
+      this.lidarPitchMinAngle = 0.0;
+      this.lidarPitchMaxAngle = 0.0;
+      this.scanHeight = 1;
       this.wallDistance = 3.0;
       this.wallRotation = Math.PI / 6;
       this.wallThickness = 0.001;
@@ -85,7 +91,7 @@ public class LidarTestParameters
    
    public LidarScanParameters getLidarScanParameters()
    {
-      return new LidarScanParameters(scansPerSweep, (float) lidarSweepStartAngle, (float) lidarSweepEndAngle, 0, (float) minRange, (float) maxRange, 0);
+      return new LidarScanParameters(scansPerSweep, scanHeight, (float) lidarSweepStartAngle, (float) lidarSweepEndAngle, (float) lidarPitchMinAngle, (float) lidarPitchMaxAngle, 0, (float) minRange, (float) maxRange, 0, 0l);
    }
 
    public double getCurrentRotation()
@@ -366,5 +372,35 @@ public class LidarTestParameters
    public void setRotationLimitEnabled(boolean rotationLimitEnabled)
    {
       this.rotationLimitEnabled = rotationLimitEnabled;
+   }
+
+   public double getLidarPitchMinAngle()
+   {
+      return lidarPitchMinAngle;
+   }
+
+   public void setLidarPitchMinAngle(double lidarPitchMinAngle)
+   {
+      this.lidarPitchMinAngle = lidarPitchMinAngle;
+   }
+
+   public double getLidarPitchMaxAngle()
+   {
+      return lidarPitchMaxAngle;
+   }
+
+   public void setLidarPitchMaxAngle(double lidarPitchMaxAngle)
+   {
+      this.lidarPitchMaxAngle = lidarPitchMaxAngle;
+   }
+
+   public int getScanHeight()
+   {
+      return scanHeight;
+   }
+
+   public void setScanHeight(int scanHeight)
+   {
+      this.scanHeight = scanHeight;
    }
 }

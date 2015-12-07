@@ -23,4 +23,7 @@ public interface QuadrupedVMCStandParameters
    public double getComHeightMaxIntegralError();
    public double getComHeightGravityFeedforwardConstant();
    public double getComHeightSetpoint();
+   
+   public double getJointPositionLimitStiffness();
+   public double getJointPositionLimitDamping();
 }

@@ -9,6 +9,7 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -2557,5 +2558,18 @@ public class QuadrupedSupportPolygon implements Serializable
       newQuadrupedSupportPolygon.setFootstep(quadrant, getFootstep(quadrant.getSameSideQuadrant()));
       newQuadrupedSupportPolygon.setFootstep(quadrant.getSameSideQuadrant(), getFootstep(quadrant));
       return newQuadrupedSupportPolygon;
+   }
+
+   FrameVector planeNormalInWorld = new FrameVector();
+   public void getIntersectionFromPointAcrossTrotLinePerpindicularToOutsideFeet(RobotQuadrant swingLeg, FramePoint pointAcrossTrotLine, FrameVector planeNormal, FramePoint pointToPack)
+   {
+      planeNormalInWorld.setIncludingFrame(planeNormal);
+      planeNormalInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+      planeNormalInWorld.normalize();
+      RobotQuadrant acrossBodyQuadrant = swingLeg.getAcrossBodyQuadrant();
+      RobotQuadrant sameSideQuadrant = swingLeg.getSameSideQuadrant();
+      FramePoint lineStart = getFootstep(acrossBodyQuadrant);
+      FramePoint lineEnd = getFootstep(sameSideQuadrant);
+      pointToPack.set(GeometryTools.getIntersectionBetweenLineAndPlane(pointAcrossTrotLine, planeNormal, lineStart, lineEnd));
    }
 }

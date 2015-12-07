@@ -1,5 +1,6 @@
 package us.ihmc.tools.inputDevices.joystick;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -15,17 +16,16 @@ public class Joystick
    private final ArrayList<JoystickGeneralListener> generalListeners = new ArrayList<JoystickGeneralListener>();
    private final HashSet<Identifier> identifiers = new HashSet<Identifier>();
    private final Controller joystickController;
-   private JoystickUpdater joystickUpdater;
-   private JoystickModel model;
+   private final JoystickUpdater joystickUpdater;
+   private final JoystickModel model;
 
-   public Joystick()
+   public Joystick() throws IOException
    {
       joystickController = getFirstJoystickFoundOnSystem();
 
-      if (nullCheck())
+      if (joystickController == null)
       {
-         PrintTools.error("Joystick not found!");
-         return;
+         throw new IOException("Joystick not found!");
       }
       
       model = JoystickModel.getModelFromName(joystickController.getName());
@@ -42,46 +42,28 @@ public class Joystick
       thread.start();
    }
 
-   private boolean nullCheck()
-   {
-      if (joystickController == null)
-      {
-         return true;
-      }
-      else
-      {
-         return false;
-      }
-   }
+
 
    public void addJoystickEventListener(JoystickEventListener joystickEventListener)
    {
-      if (nullCheck())
-         return;
       
       eventListeners.add(joystickEventListener);
    }
    
    public void addJoystickGeneralListener(JoystickGeneralListener joystickGeneralListener)
    {
-      if (nullCheck())
-         return;
       
       generalListeners.add(joystickGeneralListener);
    }
    
    public void clearEventListeners()
    {
-      if (nullCheck())
-         return;
       
       eventListeners.clear();
    }
 
    public Component findComponent(Identifier identifier) throws JoystickComponentNotFoundException
    {
-      if (nullCheck())
-         return null;
       
       if (hasComponent(identifier))
          return joystickController.getComponent(identifier);
@@ -91,16 +73,12 @@ public class Joystick
 
    public boolean hasComponent(Identifier identifier)
    {
-      if (nullCheck())
-         return false;
       
       return identifiers.contains(identifier);
    }
    
    public void setPollInterval(int pollIntervalMillis)
    {
-      if (nullCheck())
-         return;
       
       joystickUpdater.setPollIntervalMillis(pollIntervalMillis);
    }
