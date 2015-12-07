@@ -1,5 +1,6 @@
 package us.ihmc.wanderer.hardware.visualization;
 
+import java.io.IOException;
 import java.util.EnumMap;
 
 import net.java.games.input.Component;
@@ -21,9 +22,8 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.joystick.BooleanYoVariableJoystickEventListener;
 import us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
-import us.ihmc.simulationconstructionset.joystick.JoyStickNotFoundException;
-import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.wanderer.hardware.WandererDashboard;
 import us.ihmc.wanderer.hardware.WandererJoint;
 import us.ihmc.wanderer.hardware.controllers.WandererStandPrepSetpoints;
@@ -151,21 +151,16 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
    
   public void setupJoyStick(YoVariableHolder registry)
    {
-	  
-	  final JoystickUpdater joystickUpdater;
-	  try
-	  {
-		   joystickUpdater = new JoystickUpdater();
-	  }
-      catch (JoyStickNotFoundException ex)
+      Joystick joystickUpdater;
+      try
       {
-    		  System.err.println("Joystick not found.");
-    		  System.exit(-1);
-    		  return;
+         joystickUpdater = new Joystick();
       }
-      Thread thread = new Thread(joystickUpdater);
-      thread.start();
-
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return;
+      }
       
       final double deadZone = 0.02;
       //final double desiredVelocityX_Bias = 0.0;
@@ -181,9 +176,9 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
       if(desiredVelocityX==null || joystickUpdater==null)
          return;
 
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelX_Setpoint, joystickUpdater.findComponent(Component.Identifier.Axis.SLIDER),
+      joystickUpdater.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredVelX_Setpoint, joystickUpdater.findComponent(Component.Identifier.Axis.SLIDER),
             0.0, maxDesiredVelocityX_Setpoint, 0.0, true));
-       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelX_Adjust, joystickUpdater.findComponent(Component.Identifier.Axis.Y),
+       joystickUpdater.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredVelX_Adjust, joystickUpdater.findComponent(Component.Identifier.Axis.Y),
             -maxDesiredVelocityX_Adjust, maxDesiredVelocityX_Adjust, deadZone, true));
        desiredVelX_Adjust.addVariableChangedListener(new VariableChangedListener()
        {         
@@ -215,21 +210,19 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
       
       DoubleYoVariable desiredVelocityY = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
       desiredVelocityY.set(desiredVelocityY_Bias);
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X),
+      joystickUpdater.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X),
     		  -0.2+desiredVelocityY_Bias, 0.2+desiredVelocityY_Bias, deadZone, true));
 
       DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
       desiredHeadingDot.set(desiredHeadingDot_Bias);
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
+      joystickUpdater.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
     		  -0.1+desiredHeadingDot_Bias, 0.1+desiredHeadingDot_Bias, deadZone/2.0, true));
       
-      joystickUpdater.listComponents();
-      
       BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
-      joystickUpdater.addListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.TRIGGER), true));
+      joystickUpdater.addJoystickEventListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.TRIGGER), true));
       
       if (treadmillManager!=null)
-    	  joystickUpdater.addListener(new TreadmillJoystickEventListener(treadmillManager.getSerialOutputStream()));
+    	  joystickUpdater.addJoystickEventListener(new TreadmillJoystickEventListener(treadmillManager.getSerialOutputStream()));
    }
 
    private class StandPrepVariables

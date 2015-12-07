@@ -1,10 +1,7 @@
 package us.ihmc.ihmcPerception.camera;
 
-import java.awt.image.BufferedImage;
-
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -15,16 +12,18 @@ import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
 
+import java.awt.image.BufferedImage;
+
 public class RosCameraReceiver extends CameraDataReceiver
 {
    static final boolean DEBUG = false;
    private final RigidBodyTransform staticTransform = new RigidBodyTransform();
 
    public RosCameraReceiver(SDFFullRobotModelFactory fullRobotModelFactory, final DRCRobotCameraParameters cameraParameters,
-         RobotConfigurationDataBuffer robotConfigurationDataBuffer, final RosMainNode rosMainNode, final PacketCommunicator packetCommunicator,
+         RobotConfigurationDataBuffer robotConfigurationDataBuffer, final RosMainNode rosMainNode, VideoPacketHandler videoPacketHandler,
          final PPSTimestampOffsetProvider ppsTimestampOffsetProvider, final CameraLogger logger)
    {
-      super(fullRobotModelFactory, cameraParameters.getPoseFrameForSdf(), robotConfigurationDataBuffer, new VideoPacketHandler(packetCommunicator),
+      super(fullRobotModelFactory, cameraParameters.getPoseFrameForSdf(), robotConfigurationDataBuffer, videoPacketHandler,
             ppsTimestampOffsetProvider);
 
       if (cameraParameters.useRosForTransformFromPoseToSensor())

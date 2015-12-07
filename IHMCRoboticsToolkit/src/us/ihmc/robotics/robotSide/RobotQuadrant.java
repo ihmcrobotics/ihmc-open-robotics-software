@@ -294,6 +294,11 @@ public enum RobotQuadrant
    {
       return getNextRegularGaitSwingQuadrant(this);
    }
+   
+   public final RobotQuadrant getNextReversedRegularGaitSwingQuadrant()
+   {
+      return getNextReversedRegularGaitSwingQuadrant(this);
+   }
 
    public static final RobotQuadrant getNextRegularGaitSwingQuadrant(RobotQuadrant currentSwingQuadrant)
    {
@@ -323,6 +328,37 @@ public enum RobotQuadrant
          {
             throw new RuntimeException();
          }
+      }
+   }
+   
+   public static final RobotQuadrant getNextReversedRegularGaitSwingQuadrant(RobotQuadrant currentSwingQuadrant)
+   {
+      switch (currentSwingQuadrant)
+      {
+      case FRONT_LEFT:
+      {
+         return RobotQuadrant.HIND_LEFT;
+      }
+      
+      case FRONT_RIGHT:
+      {
+         return RobotQuadrant.HIND_RIGHT;
+      }
+      
+      case HIND_RIGHT:
+      {
+         return RobotQuadrant.FRONT_LEFT;
+      }
+      
+      case HIND_LEFT:
+      {
+         return RobotQuadrant.FRONT_RIGHT;
+      }
+      
+      default:
+      {
+         throw new RuntimeException();
+      }
       }
    }
 

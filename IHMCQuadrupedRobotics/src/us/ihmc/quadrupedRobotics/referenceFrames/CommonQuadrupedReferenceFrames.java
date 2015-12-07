@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.referenceFrames;
 
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -27,13 +28,19 @@ public abstract class CommonQuadrupedReferenceFrames
    public abstract ReferenceFrame getKneeFrame(RobotQuadrant robotQuadrant);
 
    public abstract ReferenceFrame getFootFrame(RobotQuadrant robotQuadrant);
+   
+   public abstract ReferenceFrame getCenterOfFourHipsFrame();
 
    public abstract ReferenceFrame getCenterOfMassFrame();
 
+   public abstract ReferenceFrame getCenterOfMassZUpFrame();
+
    public abstract QuadrantDependentList<ReferenceFrame> getFootReferenceFrames();
    
+   public abstract ReferenceFrame getFrameBeforeLegJoint(RobotQuadrant robotQuadrant, LegJointName legJointName);
+
    private final QuadrantDependentList<Double> legLengths = new QuadrantDependentList<>();
-   
+
    public void initializeCommonValues()
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -49,4 +56,7 @@ public abstract class CommonQuadrupedReferenceFrames
       
       return legLengths.get(robotQuadrant);
    }
+
+   public abstract ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine);
+
 }

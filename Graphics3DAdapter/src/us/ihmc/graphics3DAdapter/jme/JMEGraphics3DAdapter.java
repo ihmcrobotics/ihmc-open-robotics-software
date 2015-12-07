@@ -139,15 +139,15 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
    }
    
    @Override
-   public JMEGPULidar createGPULidar(int pointsPerSweep, double fieldOfView, double minRange, double maxRange)
+   public JMEGPULidar createGPULidar(int pointsPerSweep, int scanHeight, double fieldOfView, double minRange, double maxRange)
    {
-      return jmeRenderer.createGPULidar(pointsPerSweep, fieldOfView, minRange, maxRange);
+      return jmeRenderer.createGPULidar(pointsPerSweep, scanHeight, fieldOfView, minRange, maxRange);
    }
 
    @Override
-   public JMEGPULidar createGPULidar(GPULidarListener listener, int pointsPerSweep, double fieldOfView, double minRange, double maxRange)
+   public JMEGPULidar createGPULidar(GPULidarListener listener, int pointsPerSweep, int scanHeight, double fieldOfView, double minRange, double maxRange)
    {
-      return jmeRenderer.createGPULidar(listener, pointsPerSweep, fieldOfView, minRange, maxRange);
+      return jmeRenderer.createGPULidar(listener, pointsPerSweep, scanHeight, fieldOfView, minRange, maxRange);
    }
    
    @Override

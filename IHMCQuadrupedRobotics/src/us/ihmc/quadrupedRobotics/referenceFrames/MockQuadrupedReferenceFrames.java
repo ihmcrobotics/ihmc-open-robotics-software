@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.referenceFrames;
 
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
@@ -128,9 +129,16 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    {
       return endDependentMidFeetZUpFrames.get(robotEnd);
    }
-
+   
    @Override
    public ReferenceFrame getCenterOfMassFrame()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public ReferenceFrame getCenterOfMassZUpFrame()
    {
       // TODO Auto-generated method stub
       return null;
@@ -145,6 +153,27 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
 
    @Override
    public ReferenceFrame getBodyFrame()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public ReferenceFrame getCenterOfFourHipsFrame()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public ReferenceFrame getFrameBeforeLegJoint(RobotQuadrant robotQuadrant, LegJointName legJointName)
    {
       // TODO Auto-generated method stub
       return null;

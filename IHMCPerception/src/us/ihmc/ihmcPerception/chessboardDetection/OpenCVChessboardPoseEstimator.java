@@ -13,14 +13,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.opencv.calib3d.Calib3d;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfDouble;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.MatOfPoint3f;
-import org.opencv.core.Point3;
-import org.opencv.core.Size;
-import org.opencv.core.TermCriteria;
+import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -121,7 +114,7 @@ public class OpenCVChessboardPoseEstimator
       cameraMatrix.put(2, 2, 1);
    }
    
-   public boolean findChessCornerRobustForExtremePitch(Mat original, Size patternSize, MatOfPoint2f corners, int flags)
+   public boolean findChessCornerRobustForExtremePitch(Mat original, Size patternSize, MatOfPoint2f corners, int flags, boolean attemptExtremePitchDetection)
    {
       boolean success = Calib3d.findChessboardCorners(original, boardInnerCrossPattern, corners, flags);
       if (success)
@@ -129,28 +122,31 @@ public class OpenCVChessboardPoseEstimator
          return success;
       }
 
-//      //try stretch image vertically
-//      Mat resizeMat = new Mat();
-//      Imgproc.resize(original, resizeMat, new Size(original.width(), original.height() * 2));
-//      if (Calib3d.findChessboardCorners(resizeMat, boardInnerCrossPattern, corners, flags))
-//      {
-//         Point[] cornerArray = corners.toArray();
-//         for (Point p : cornerArray)
-//            p.y /= 2;
-//         corners.fromArray(cornerArray);
-//         return true;
-//      }
-      
+      if(attemptExtremePitchDetection)
+      {
+         //try stretch image vertically
+         Mat resizeMat = new Mat();
+         Imgproc.resize(original, resizeMat, new Size(original.width(), original.height() * 2));
+         if (Calib3d.findChessboardCorners(resizeMat, boardInnerCrossPattern, corners, flags))
+         {
+            Point[] cornerArray = corners.toArray();
+            for (Point p : cornerArray)
+               p.y /= 2;
+            corners.fromArray(cornerArray);
+            return true;
+         }
+      }
+
       return false;
    }
 
-   public RigidBodyTransform detect(BufferedImage image)
+   public RigidBodyTransform detect(BufferedImage image, boolean attemptExtremePitchDetection)
    {
       if (cameraMatrix == null)
          setDefaultCameraMatrix(image.getHeight(), image.getWidth(), Math.PI / 4);
       Mat imageMat = convertBufferedImageToMat(image);
       int flags = Calib3d.CALIB_CB_ADAPTIVE_THRESH + Calib3d.CALIB_CB_FAST_CHECK;
-      if (findChessCornerRobustForExtremePitch(imageMat, boardInnerCrossPattern, corners, flags))
+      if (findChessCornerRobustForExtremePitch(imageMat, boardInnerCrossPattern, corners, flags, attemptExtremePitchDetection))
       {
          Mat imageGray = new Mat(imageMat.rows(), imageMat.cols(), CvType.CV_8UC1);
          Imgproc.cvtColor(imageMat, imageGray, Imgproc.COLOR_BGRA2GRAY);

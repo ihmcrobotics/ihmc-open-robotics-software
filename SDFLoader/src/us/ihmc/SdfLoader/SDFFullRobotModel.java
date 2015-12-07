@@ -60,6 +60,7 @@ public class SDFFullRobotModel implements FullRobotModel
    private final HashMap<String, FrameVector> lidarAxis = new HashMap<String, FrameVector>();
    private final HashMap<String, OneDoFJoint> lidarJoints = new HashMap<>();
    private final HashMap<String, ReferenceFrame> sensorFrames = new HashMap<String, ReferenceFrame>();
+   private double totalMass = 0.0;
 
    public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
@@ -91,6 +92,7 @@ public class SDFFullRobotModel implements FullRobotModel
          head = pelvis;
       }
 
+      totalMass = rootLink.getMass();
       for (SDFJointHolder sdfJoint : rootLink.getChildren())
       {
          addJointsRecursively(sdfJoint, pelvis);
@@ -391,6 +393,7 @@ public class SDFFullRobotModel implements FullRobotModel
       checkLinkIsNeededForSensor(inverseDynamicsJoint, childLink);
       
       double mass = childLink.getMass();
+      totalMass += mass;
       Vector3d comOffset = new Vector3d(childLink.getCoMOffset());
       Matrix3d inertia = InertiaTools.rotate(visualTransform, childLink.getInertia());
       visualTransform.transform(comOffset);
@@ -471,6 +474,11 @@ public class SDFFullRobotModel implements FullRobotModel
       }
 
       Collections.reverse(oneDoFJointsToPack);
+   }
+
+   public double getTotalMass()
+   {
+      return totalMass;
    }
 
 }

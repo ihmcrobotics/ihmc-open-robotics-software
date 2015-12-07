@@ -11,7 +11,7 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
-public class SDFPerfectSimulatedOutputWriter 
+public class SDFPerfectSimulatedOutputWriter implements OutputWriter
 {
    private final String name;
    protected final SDFRobot robot;
