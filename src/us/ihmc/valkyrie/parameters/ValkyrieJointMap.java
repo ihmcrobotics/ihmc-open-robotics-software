@@ -2,6 +2,7 @@ package us.ihmc.valkyrie.parameters;
 
 import static us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap.jointNames;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -341,15 +342,28 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 
    public String[] getNamesOfJointsUsingOutputEncoder()
    {
-      String[] ret = new String[]
-      {
-            getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_PITCH),
-            getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_ROLL),
-            getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_PITCH),
-            getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_ROLL),
-            getSpineJointName(SpineJointName.SPINE_PITCH),
-            getSpineJointName(SpineJointName.SPINE_ROLL),
-      };
+      ArrayList<String> jointNameList = new ArrayList<>();
+//      for (RobotSide robotSide : RobotSide.values)
+//      {
+//         for (ArmJointName armJoint : armJoints)
+//            jointNameList.add(getArmJointName(robotSide, armJoint));
+//         for (LegJointName legJoint : legJoints)
+//            jointNameList.add(getLegJointName(robotSide, legJoint));
+//      }
+//      for (SpineJointName spineJoint : spineJoints)
+//         jointNameList.add(getSpineJointName(spineJoint));
+
+      String[] ret = jointNameList.toArray(new String[0]);
+      
+//      String[] ret = new String[]
+//      {
+//            getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_PITCH),
+//            getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_ROLL),
+//            getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_PITCH),
+//            getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_ROLL),
+//            getSpineJointName(SpineJointName.SPINE_PITCH),
+//            getSpineJointName(SpineJointName.SPINE_ROLL),
+//      };
       return ret;
    }
 
