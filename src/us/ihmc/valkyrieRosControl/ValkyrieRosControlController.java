@@ -35,9 +35,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
-import us.ihmc.valkyrie.ValkyrieAffinity;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.configuration.ValkyriePriorityParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
@@ -45,6 +43,7 @@ import us.ihmc.wholeBodyController.DRCOutputWriterWithAccelerationIntegration;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerFactory;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
 
 public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
@@ -90,7 +89,9 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
    {
       
    }
-   
+
+   private DiagnosticsWhenHangingControllerFactory diagnosticControllerFactory = null;
+
    private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel,
          HumanoidGlobalDataProducer dataProducer, DRCRobotSensorInformation sensorInformation)
    {
@@ -113,7 +114,12 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
       humanoidJointPoseList.createPoseSetters();
       humanoidJointPoseList.createPoseSettersJustArms();
       humanoidJointPoseList.createPoseSettersTuneWaist();
-                  
+
+      ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
+      diagnosticControllerFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, true, true, valkyrieTorqueOffsetPrinter);
+      diagnosticControllerFactory.setTransitionRequested(true);
+      controllerFactory.addHighLevelBehaviorFactory(diagnosticControllerFactory);
+
       VariousWalkingProviderFactory variousWalkingProviderFactory;
       switch(walkingProvider)
       {
@@ -138,6 +144,9 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
    protected void init()
    {
       
+      long maxMemory = Runtime.getRuntime().maxMemory();
+      
+      System.out.println("Partying hard with max memory of: " + maxMemory);
       /*
        * Create joints
        */
@@ -190,8 +199,6 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
        */
       MomentumBasedControllerFactory controllerFactory = createDRCControllerFactory(robotModel, dataProducer, sensorInformation);
       
-      
-      
       /*
        * Create output writer
        */
@@ -216,6 +223,8 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
       {
          outputWriterWithTorqueOffsets = new DRCOutputWriterWithTorqueOffsets(drcOutputWriter, robotModel.getControllerDT(), true);
          drcOutputWriter = outputWriterWithTorqueOffsets;
+         if (diagnosticControllerFactory != null)
+            diagnosticControllerFactory.attachOutputWriterWithTorqueOffsets(outputWriterWithTorqueOffsets);
       }
       
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = null;

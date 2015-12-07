@@ -6,12 +6,14 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 public class ValkyrieCapturePointPlannerParameters implements CapturePointPlannerParameters
 {
    private boolean runningOnRealRobot;
+   private final boolean useTwoCMPsPerSupport;
    private boolean useNewICPPlanner;
 
    public ValkyrieCapturePointPlannerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
-      useNewICPPlanner = false;
+      useTwoCMPsPerSupport = false;
+      useNewICPPlanner = true;
 
    }
 
@@ -82,28 +84,28 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    @Override
    public double getFreezeTimeFactor()
    {
-      return 0.9;
+      return 0.0; //0.9;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMaxInstantaneousCapturePointErrorForStartingSwing()
    {
-      return 0.025;
+      return 0.0; //0.025;
    }
 
    /** {@inheritDoc} */
    @Override
    public boolean getDoTimeFreezing()
    {
-      return true;
+      return false;
    }
 
    /** {@inheritDoc} */
    @Override
    public boolean getDoFootSlipCompensation()
    {
-      return true;
+      return false;
    }
 
    /** {@inheritDoc} */
@@ -152,7 +154,7 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    @Override
    public boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer()
    {
-      return true;
+      return false;
    }
 
    /** {@inheritDoc} */
@@ -166,7 +168,7 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    @Override
    public boolean useTwoCMPsPerSupport()
    {
-      return useNewICPPlanner;
+      return useTwoCMPsPerSupport;
    }
 
    /** {@inheritDoc} */

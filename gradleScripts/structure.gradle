@@ -9,7 +9,7 @@ new File(baseDir + File.separator + 'gradleScripts' + File.separator + 'dependen
 sourceSets {
     main {
         java {
-            srcDirs = ['src', 'generated']
+            srcDirs = ['src']
         }
 
         resources {

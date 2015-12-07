@@ -10,9 +10,9 @@ import com.esotericsoftware.minlog.Log;
 
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.rosControl.valkyrie.IMUHandle;
-import us.ihmc.valkyrie.configuration.ValkyriePriorityParameters;
 import us.ihmc.valkyrie.imu.MicroStrainData;
 import us.ihmc.valkyrie.imu.MicrostrainUDPPacketListener;
+import us.ihmc.valkyrieRosControl.ValkyriePriorityParameters;
 
 public class MicroStrainIMUHandle implements IMUHandle
 {
