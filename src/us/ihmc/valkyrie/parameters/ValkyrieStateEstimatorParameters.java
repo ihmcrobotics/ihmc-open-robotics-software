@@ -63,7 +63,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
 
       jointVelocitySlopTimeForBacklashCompensation = 0.03; //0.07; => Add a shit load of delay!!
 
-      doElasticityCompensation = runningOnRealRobot;
+      doElasticityCompensation = false; //runningOnRealRobot;
       defaultJointStiffness = 10000; //40000.0; //Double.POSITIVE_INFINITY;
 
       kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
@@ -97,6 +97,10 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       // For joints using input encoder: only one pass since one is done onboard at 20Hz
       DoubleYoVariable jointInputEncoderVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointInputEncoderVelocityAlphaFilter", jointVelocityFilterFrequencyHz);
       sensorProcessing.addJointVelocityAlphaFilterWithJointsToIgnore(jointInputEncoderVelocityAlphaFilter, false, namesOfJointsUsingOutputEncoder);
+
+      DoubleYoVariable jointVelocityAlphaFilterViz = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilterViz", jointVelocityFilterFrequencyHz);
+      DoubleYoVariable jointVelocitySlopTimeViz = new DoubleYoVariable("jointBacklashSlopTimeViz", registry);
+      sensorProcessing.computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(jointVelocityAlphaFilterViz, jointVelocitySlopTimeViz, true, namesOfJointsUsingOutputEncoder); 
 
       //imu
       sensorProcessing.addIMUOrientationAlphaFilter(orientationAlphaFilter, false);
