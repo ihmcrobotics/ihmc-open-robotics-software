@@ -29,6 +29,7 @@ public class DoubleYoVariableJoystickEventListener implements JoystickEventListe
       this.sign = signFlip ? -1 : 1;
    }
 
+   @Override
    public void processEvent(Event event)
    {
       if (event.getComponent() == component)
