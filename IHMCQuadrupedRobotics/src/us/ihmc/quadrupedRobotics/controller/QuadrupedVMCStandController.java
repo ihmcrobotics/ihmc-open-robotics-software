@@ -61,7 +61,7 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
    private QuadrupedVirtualModelController virtualModelController;
 
    // Setpoints
-   private QuadrantDependentList<YoFrameVector> yoFootForceSetpoint;
+   private QuadrantDependentList<YoFrameVector> yoSoleForceSetpoint;
    private YoFrameOrientation yoBodyOrientationSetpoint;
    private YoFrameVector yoBodyAngularVelocitySetpoint;
    private YoFrameVector yoBodyTorqueFeedforwardSetpoint;
@@ -73,7 +73,7 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
    private YoFrameVector yoComForceSetpoint;
 
    // Estimates
-   private QuadrantDependentList<YoFramePoint> yoFootPositionEstimate;
+   private QuadrantDependentList<YoFramePoint> yoSolePositionEstimate;
    private YoFramePoint yoSupportCentroidEstimate;
    private YoFrameOrientation yoSupportOrientationEstimate;
    private YoFrameOrientation yoBodyOrientationEstimate;
@@ -138,11 +138,11 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, jointNameMap);
 
       // Setpoints
-      yoFootForceSetpoint = new QuadrantDependentList<>();
+      yoSoleForceSetpoint = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         yoFootForceSetpoint.put(robotQuadrant, new YoFrameVector(prefix + "FootForceSetpoint", worldFrame, registry));
+         yoSoleForceSetpoint.put(robotQuadrant, new YoFrameVector(prefix + "SoleForceSetpoint", worldFrame, registry));
       }
       yoBodyOrientationSetpoint = new YoFrameOrientation("bodyOrientationSetpoint", supportFrame, registry);
       yoBodyAngularVelocitySetpoint = new YoFrameVector("bodyAngularVelocitySetpoint", supportFrame, registry);
@@ -155,11 +155,11 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       yoComForceSetpoint = new YoFrameVector("comForceSetpoint", worldFrame, registry);
 
       // Estimates
-      yoFootPositionEstimate = new QuadrantDependentList<>();
+      yoSolePositionEstimate = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         yoFootPositionEstimate.put(robotQuadrant, new YoFramePoint(prefix + "FootPositionEstimate", worldFrame, registry));
+         yoSolePositionEstimate.put(robotQuadrant, new YoFramePoint(prefix + "SolePositionEstimate", worldFrame, registry));
       }
       yoSupportCentroidEstimate = new YoFramePoint("supportCentroidEstimate", worldFrame, registry);
       yoSupportOrientationEstimate = new YoFrameOrientation("supportOrientationEstimate", worldFrame, registry);
@@ -181,20 +181,20 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
       twistCalculator.compute();
       comJacobian.compute();
 
-      // compute foot positions
-      FramePoint footPosition = pool.lease(FramePoint.class);
+      // compute sole positions
+      FramePoint solePosition = pool.lease(FramePoint.class);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         ReferenceFrame footFrame = referenceFrames.getFootFrame(robotQuadrant);
-         footPosition.setToZero(footFrame);
-         footPosition.changeFrame(supportPolygon.getReferenceFrame());
-         yoFootPositionEstimate.get(robotQuadrant).set(footPosition);
+         ReferenceFrame soleFrame = referenceFrames.getFootFrame(robotQuadrant);
+         solePosition.setToZero(soleFrame);
+         solePosition.changeFrame(supportPolygon.getReferenceFrame());
+         yoSolePositionEstimate.get(robotQuadrant).set(solePosition);
       }
 
       // compute support polygon
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         supportPolygon.setFootstep(robotQuadrant, yoFootPositionEstimate.get(robotQuadrant).getFrameTuple());
+         supportPolygon.setFootstep(robotQuadrant, yoSolePositionEstimate.get(robotQuadrant).getFrameTuple());
       }
 
       // compute support frame (centroid and nominal orientation)
