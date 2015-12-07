@@ -1,7 +1,12 @@
 package us.ihmc.valkyrieRosControl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
+
+import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
@@ -23,13 +28,25 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 {
 
-   private static final String[] controlledJoints = {"torsoYaw", "torsoPitch", "torsoRoll"};
+//   private static final String[] controlledJoints = {"torsoYaw", "torsoPitch", "torsoRoll"};
 
 //   private static final String[] controlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
 //       "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
 //       "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch", "lowerNeckPitch",
 //       "neckYaw", "upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll",
 //       "rightWristPitch" };
+
+   private static final String[] controlledJoints = {
+         "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
+         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll",
+         "torsoYaw", "torsoPitch", "torsoRoll",
+         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch",
+         "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"
+         };
+
+   public static final boolean LOAD_STAND_PREP_STEPOINTS = true;
+   public static final double KP_DEFAULT = 30.0;
+   public static final double KD_DEFAULT = 1.0;
    
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
    private final SDFFullHumanoidRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
@@ -39,6 +56,8 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName()),
          robotModel.getLogModelProvider(), LogSettings.SIMULATION, 0.001);
+
+   private final DoubleYoVariable masterScaleFactor = new DoubleYoVariable("masterScaleFactor", registry);
 
    private EnumYoVariable<?> selectedJoint;
    private final DoubleYoVariable qDesiredSelected = new DoubleYoVariable("qDesiredSelected", registry);
@@ -50,9 +69,18 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
    private final DoubleYoVariable qSelected = new DoubleYoVariable("qSelected", registry);
    private final DoubleYoVariable qdSelected = new DoubleYoVariable("qdSelected", registry);
 
+   private final DoubleYoVariable tauSelected = new DoubleYoVariable("tauSelected", registry);
+   private final DoubleYoVariable tauDesiredSelected = new DoubleYoVariable("tauDesiredSelected", registry);
+
    @Override
    protected void init()
    {
+      kpSelected.set(KP_DEFAULT);
+      kdSelected.set(KD_DEFAULT);
+
+      if (LOAD_STAND_PREP_STEPOINTS)
+         loadStandPrepSetPoints();
+
       ArrayList<String> jointNames = new ArrayList<>();
       for (String jointName : controlledJoints)
       {
@@ -85,9 +113,26 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
       yoVariableServer.start();
    }
 
+   private Map<String, Double> setPointMap = null;
+
+   private void loadStandPrepSetPoints()
+   {
+      Yaml yaml = new Yaml();
+      InputStream setpointsStream = getClass().getClassLoader().getResourceAsStream("configuration/standPrep/setpoints.yaml");
+      setPointMap = (Map<String, Double>) yaml.load(setpointsStream);
+      try
+      {
+         setpointsStream.close();
+      }
+      catch (IOException e)
+      {
+      }
+   }
+
    @Override
    protected void doControl(long time, long duration)
    {
+      masterScaleFactor.set(MathTools.clipToMinMax(masterScaleFactor.getDoubleValue(), 0.0, 1.0));
       JointHolder selected = jointHolders.get(selectedJoint.getOrdinal());
       selected.q_d.set(MathTools.clipToMinMax(qDesiredSelected.getDoubleValue(), selected.joint.getJointLimitLower(), selected.joint.getJointLimitUpper()));
       selected.qd_d.set(qdDesiredSelected.getDoubleValue());
@@ -102,6 +147,9 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 
       qSelected.set(selected.q.getDoubleValue());
       qdSelected.set(selected.qd.getDoubleValue());
+
+      tauSelected.set(selected.tau.getDoubleValue());
+      tauDesiredSelected.set(selected.tau_d.getDoubleValue());
 
       yoVariableServer.update(time);
    }
@@ -128,6 +176,8 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 
          this.registry = new YoVariableRegistry(joint.getName());
          this.pdController = new PDController(joint.getName(), registry);
+         pdController.setProportionalGain(KP_DEFAULT);
+         pdController.setDerivativeGain(KD_DEFAULT);
 
          q = new DoubleYoVariable(joint.getName() + "_q", registry);
          qd = new DoubleYoVariable(joint.getName() + "_qd", registry);
@@ -136,6 +186,9 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
          q_d = new DoubleYoVariable(joint.getName() + "_q_d", registry);
          qd_d = new DoubleYoVariable(joint.getName() + "_qd_d", registry);
          tau_d = new DoubleYoVariable(joint.getName() + "_tau_d", registry);
+
+         if (setPointMap != null && setPointMap.containsKey(joint.getName()))
+            q_d.set(setPointMap.get(joint.getName()));
 
          parentRegistry.addChild(registry);
       }
@@ -150,7 +203,8 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
          qd.set(joint.getQd());
          tau.set(joint.getTauMeasured());
 
-         tau_d.set(pdController.compute(q.getDoubleValue(), q_d.getDoubleValue(), qd.getDoubleValue(), qd_d.getDoubleValue()));
+         double pdOutput = pdController.compute(q.getDoubleValue(), q_d.getDoubleValue(), qd.getDoubleValue(), qd_d.getDoubleValue());
+         tau_d.set(masterScaleFactor.getDoubleValue() * pdOutput);
 
          handle.setDesiredEffort(tau_d.getDoubleValue());
 
