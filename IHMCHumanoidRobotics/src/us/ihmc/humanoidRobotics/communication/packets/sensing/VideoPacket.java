@@ -51,10 +51,16 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
       return orientation;
    }
 
-
    public VideoPacket(RobotSide robotSide, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
    {
-//      setDestination(PacketDestination.UI);
+      this(robotSide, timeStamp, data, position, orientation, intrinsicParameters, null);
+   }
+
+   public VideoPacket(RobotSide robotSide, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters,
+         PacketDestination packetDestination)
+   {
+      if(packetDestination != null)
+         setDestination(packetDestination);
       this.robotSide = robotSide;
       this.timeStamp = timeStamp;
       this.data = data;
