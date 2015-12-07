@@ -47,6 +47,8 @@ public class CenterOfMassLinearStateUpdater
    private final YoFramePoint yoRootJointPosition = new YoFramePoint("estimatedRootJointPosition", worldFrame, registry);
    private final YoFrameVector yoRootJointVelocity = new YoFrameVector("estimatedRootJointVelocity", worldFrame, registry);
    
+   private double initialHeight = 0.0;
+   
    //visualization variables
    private final ArrayList<YoGraphicPosition> feetPositionsVizs = new ArrayList<>();
    
@@ -92,7 +94,10 @@ public class CenterOfMassLinearStateUpdater
       
       //initialize the CoM to be at 0.0 0.0 0.0 in worldFrame
       //XXX: will need to do initialize that more smartly
-      comAndFeetCalculator.initialize(new FramePoint(worldFrame, 0.0, 0.0, 1.0), footPositions);
+      comAndFeetCalculator.initialize(new FramePoint(worldFrame, 0.0, 0.0, initialHeight), footPositions);
+      comAndFeetCalculator.getRootJointPositionAndVelocity(rootJointPosition, rootJointVelocity);
+      updateRootJoint();
+      updateViz();
    }
    
    public void updateCenterOfMassLinearState()
@@ -141,5 +146,10 @@ public class CenterOfMassLinearStateUpdater
    {
       for (int i = 0; i < feetPositionsVizs.size(); i++)
          feetPositionsVizs.get(i).update();
+   }
+   
+   public void setInitialHeight(double initialHeight)
+   {
+      this.initialHeight = initialHeight;
    }
 }

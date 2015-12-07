@@ -63,4 +63,11 @@ public class SimpleSimulationQuadrupedStateEstimator implements QuadrupedStateEs
       return yoTime.getDoubleValue();
    }
 
+   @Override
+   public void initialize()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
 }
