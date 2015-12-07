@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception;
+package us.ihmc.ihmcPerception.chessboardDetection;
 
 import java.awt.image.BufferedImage;
 

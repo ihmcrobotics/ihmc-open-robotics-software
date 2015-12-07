@@ -31,10 +31,10 @@ public class QuadrupedVirtualModelController
    private QuadrantDependentList<FrameVector> desiredToeForce;
    private QuadrantDependentList<FrameVector> optimalToeForce;
 
-   private QuadrantDependentList<double[]> jointTorqueLimitMin;
-   private QuadrantDependentList<double[]> jointTorqueLimitMax;
-   private QuadrantDependentList<double[]> jointPositionLimitMin;
-   private QuadrantDependentList<double[]> jointPositionLimitMax;
+   private QuadrantDependentList<double[]> jointEffortLowerLimit;
+   private QuadrantDependentList<double[]> jointEffortUpperLimit;
+   private QuadrantDependentList<double[]> jointPositionLowerLimit;
+   private QuadrantDependentList<double[]> jointPositionUpperLimit;
    private QuadrantDependentList<double[]> jointPositionLimitStiffness;
    private QuadrantDependentList<double[]> jointPositionLimitDamping;
    private double coefficientOfFriction;
@@ -49,7 +49,7 @@ public class QuadrupedVirtualModelController
    private DenseMatrix64F comWrenchVector;
    private DenseMatrix64F toeForcesVector;
    private DenseMatrix64F toeForceVector;
-   private QuadrantDependentList<DenseMatrix64F> legTorqueVector;
+   private QuadrantDependentList<DenseMatrix64F> legEffortVector;
 
    public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap)
    {
@@ -88,26 +88,26 @@ public class QuadrupedVirtualModelController
       }
 
       // initialize limits
-      jointTorqueLimitMin = new QuadrantDependentList<double[]>();
-      jointTorqueLimitMax = new QuadrantDependentList<double[]>();
-      jointPositionLimitMin = new QuadrantDependentList<double[]>();
-      jointPositionLimitMax = new QuadrantDependentList<double[]>();
+      jointEffortLowerLimit = new QuadrantDependentList<double[]>();
+      jointEffortUpperLimit = new QuadrantDependentList<double[]>();
+      jointPositionLowerLimit = new QuadrantDependentList<double[]>();
+      jointPositionUpperLimit = new QuadrantDependentList<double[]>();
       jointPositionLimitStiffness = new QuadrantDependentList<double[]>();
       jointPositionLimitDamping = new QuadrantDependentList<double[]>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         jointTorqueLimitMin.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
-         jointTorqueLimitMax.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
-         jointPositionLimitMin.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
-         jointPositionLimitMax.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
+         jointEffortLowerLimit.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
+         jointEffortUpperLimit.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
+         jointPositionLowerLimit.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
+         jointPositionUpperLimit.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
          jointPositionLimitStiffness.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
          jointPositionLimitDamping.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
-         for (int i = 0; i < legJoints.get(robotQuadrant).length; ++i)
+         for (int i = 0; i < legJoints.get(robotQuadrant).length; i++)
          {
-            jointTorqueLimitMin.get(robotQuadrant)[i] = -(Double.MAX_VALUE - 1);
-            jointTorqueLimitMax.get(robotQuadrant)[i] = Double.MAX_VALUE;
-            jointPositionLimitMin.get(robotQuadrant)[i] = -(Double.MAX_VALUE - 1);
-            jointPositionLimitMax.get(robotQuadrant)[i] = Double.MAX_VALUE;
+            jointEffortLowerLimit.get(robotQuadrant)[i] = -(Double.MAX_VALUE - 1);
+            jointEffortUpperLimit.get(robotQuadrant)[i] = Double.MAX_VALUE;
+            jointPositionLowerLimit.get(robotQuadrant)[i] = -(Double.MAX_VALUE - 1);
+            jointPositionUpperLimit.get(robotQuadrant)[i] = Double.MAX_VALUE;
             jointPositionLimitStiffness.get(robotQuadrant)[i] = 1000;
             jointPositionLimitDamping.get(robotQuadrant)[i] = 250;
          }
@@ -120,10 +120,10 @@ public class QuadrupedVirtualModelController
       comWrenchVector = new DenseMatrix64F(6, 1);
       toeForcesVector = new DenseMatrix64F(12, 1);
       toeForceVector = new DenseMatrix64F(3, 1);
-      legTorqueVector = new QuadrantDependentList<DenseMatrix64F>();
+      legEffortVector = new QuadrantDependentList<DenseMatrix64F>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         legTorqueVector.set(robotQuadrant, new DenseMatrix64F(legJoints.get(robotQuadrant).length, 1));
+         legEffortVector.set(robotQuadrant, new DenseMatrix64F(legJoints.get(robotQuadrant).length, 1));
       }
    }
 
@@ -132,37 +132,69 @@ public class QuadrupedVirtualModelController
       this.coefficientOfFriction = coefficientOfFriction;
    }
 
-   public void setLegTorqueHardLimits(RobotQuadrant robotQuadrant, double[] min, double[] max)
+   public void setJointEffortLimits(String jointName, double lower, double upper)
    {
-      for (int i = 0; i < legJoints.get(robotQuadrant).length; ++i)
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         jointTorqueLimitMin.get(robotQuadrant)[i] = min[i];
-         jointTorqueLimitMax.get(robotQuadrant)[i] = max[i];
+         int index = 0;
+         for (OneDoFJoint joint : legJoints.get(robotQuadrant))
+         {
+            if (joint.getName().equals(jointName))
+            {
+               jointEffortLowerLimit.get(robotQuadrant)[index] = lower;
+               jointEffortUpperLimit.get(robotQuadrant)[index] = upper;
+            }
+            index++;
+         }
       }
    }
 
-   public void setJointPositionSoftLimits(RobotQuadrant robotQuadrant, double[] min, double[] max)
+   public void setJointPositionLimits(String jointName, double lower, double upper)
    {
-      for (int i = 0; i < legJoints.get(robotQuadrant).length; ++i)
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         jointPositionLimitMin.get(robotQuadrant)[i] = min[i];
-         jointPositionLimitMax.get(robotQuadrant)[i] = max[i];
+         int index = 0;
+         for (OneDoFJoint joint : legJoints.get(robotQuadrant))
+         {
+            if (joint.getName().equals(jointName))
+            {
+               jointPositionLowerLimit.get(robotQuadrant)[index] = lower;
+               jointPositionUpperLimit.get(robotQuadrant)[index] = upper;
+            }
+            index++;
+         }
       }
    }
 
-   public void setJointPositionStiffness(RobotQuadrant robotQuadrant, double[] stiffness)
+   public void setJointPositionLimitStiffness(String jointName, double stiffness)
    {
-      for (int i = 0; i < legJoints.get(robotQuadrant).length; ++i)
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         jointPositionLimitStiffness.get(robotQuadrant)[i] = stiffness[i];
+         int index = 0;
+         for (OneDoFJoint joint : legJoints.get(robotQuadrant))
+         {
+            if (joint.getName().equals(jointName))
+            {
+               jointPositionLimitStiffness.get(robotQuadrant)[index] = stiffness;
+            }
+            index++;
+         }
       }
    }
 
-   public void setJointPositionDamping(RobotQuadrant robotQuadrant, double[] damping)
+   public void setJointPositionLimitDamping(String jointName, double damping)
    {
-      for (int i = 0; i < legJoints.get(robotQuadrant).length; ++i)
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         jointPositionLimitDamping.get(robotQuadrant)[i] = damping[i];
+         int index = 0;
+         for (OneDoFJoint joint : legJoints.get(robotQuadrant))
+         {
+            if (joint.getName().equals(jointName))
+            {
+               jointPositionLimitDamping.get(robotQuadrant)[index] = damping;
+            }
+            index++;
+         }
       }
    }
 
@@ -241,7 +273,7 @@ public class QuadrupedVirtualModelController
       comWrenchVector.set(4, 0, desiredComForce.getY());
       comWrenchVector.set(5, 0, desiredComForce.getZ());
 
-      // compute optimal foot forces using least squares solution
+      // compute optimal toe forces using least squares solution
       try
       {
          CommonOps.pinv(comWrenchMap, comWrenchMapInverse);
@@ -296,21 +328,21 @@ public class QuadrupedVirtualModelController
          toeForceVector.set(1, 0, -optimalToeForce.get(robotQuadrant).getY());
          toeForceVector.set(2, 0, -optimalToeForce.get(robotQuadrant).getZ());
          optimalToeForce.get(robotQuadrant).changeFrame(comFrame);
-         CommonOps.multTransA(jacobianMatrix, toeForceVector, legTorqueVector.get(robotQuadrant));
+         CommonOps.multTransA(jacobianMatrix, toeForceVector, legEffortVector.get(robotQuadrant));
 
          int index = 0;
          for (OneDoFJoint joint : legJoints.get(robotQuadrant))
          {
             // apply joint position and torque limits
-            double tauPositionLimitMin = jointPositionLimitStiffness.get(robotQuadrant)[index]
-                  * (jointPositionLimitMin.get(robotQuadrant)[index] - joint.getQ()) - jointPositionLimitDamping.get(robotQuadrant)[index] * joint.getQd();
-            double tauPositionLimitMax = jointPositionLimitStiffness.get(robotQuadrant)[index]
-                  * (jointPositionLimitMax.get(robotQuadrant)[index] - joint.getQ()) - jointPositionLimitDamping.get(robotQuadrant)[index] * joint.getQd();
-            double tauTorqueLimitMin = jointTorqueLimitMin.get(robotQuadrant)[index];
-            double tauTorqueLimitMax = jointTorqueLimitMax.get(robotQuadrant)[index];
-            double tau = legTorqueVector.get(robotQuadrant).get(index, 0);
-            tau = Math.min(Math.max(tau, tauPositionLimitMin), tauPositionLimitMax);
-            tau = Math.min(Math.max(tau, tauTorqueLimitMin), tauTorqueLimitMax);
+            double tauPositionLowerLimit = jointPositionLimitStiffness.get(robotQuadrant)[index]
+                  * (jointPositionLowerLimit.get(robotQuadrant)[index] - joint.getQ()) - jointPositionLimitDamping.get(robotQuadrant)[index] * joint.getQd();
+            double tauPositionUpperLimit = jointPositionLimitStiffness.get(robotQuadrant)[index]
+                  * (jointPositionUpperLimit.get(robotQuadrant)[index] - joint.getQ()) - jointPositionLimitDamping.get(robotQuadrant)[index] * joint.getQd();
+            double tauEffortLowerLimit = jointEffortLowerLimit.get(robotQuadrant)[index];
+            double tauEffortUpperLimit = jointEffortUpperLimit.get(robotQuadrant)[index];
+            double tau = legEffortVector.get(robotQuadrant).get(index, 0);
+            tau = Math.min(Math.max(tau, tauPositionLowerLimit), tauPositionUpperLimit);
+            tau = Math.min(Math.max(tau, tauEffortLowerLimit), tauEffortUpperLimit);
 
             // update joint torques in full robot model
             joint.setTau(tau);
@@ -323,7 +355,7 @@ public class QuadrupedVirtualModelController
       // compute joint torque inequality constraints
       // compute friction pyramid inequality constraints
       // compute min / max toe pressure constraints?
-      // compute foot forces using quadratic program
+      // compute toe forces using quadratic program
    }
 
 }
