@@ -22,14 +22,14 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 public class QuadrupedVirtualModelController
 {
    private ReferenceFrame comFrame;
-   private QuadrantDependentList<ReferenceFrame> toeFrame;
+   private QuadrantDependentList<ReferenceFrame> soleFrame;
 
    private FrameVector desiredComForce;
    private FrameVector optimalComForce;
    private FrameVector desiredBodyTorque;
    private FrameVector optimalBodyTorque;
-   private QuadrantDependentList<FrameVector> desiredToeForce;
-   private QuadrantDependentList<FrameVector> optimalToeForce;
+   private QuadrantDependentList<FrameVector> desiredSoleForce;
+   private QuadrantDependentList<FrameVector> optimalSoleForce;
 
    private QuadrantDependentList<double[]> jointEffortLowerLimit;
    private QuadrantDependentList<double[]> jointEffortUpperLimit;
@@ -40,41 +40,41 @@ public class QuadrupedVirtualModelController
    private double coefficientOfFriction;
 
    private QuadrantDependentList<OneDoFJoint[]> legJoints;
-   private QuadrantDependentList<FramePoint> toePosition;
+   private QuadrantDependentList<FramePoint> solePosition;
    private QuadrantDependentList<GeometricJacobian> footJacobian;
-   private QuadrantDependentList<PointJacobian> toeJacobian;
+   private QuadrantDependentList<PointJacobian> soleJacobian;
 
    private DenseMatrix64F comWrenchMap;
    private DenseMatrix64F comWrenchMapInverse;
    private DenseMatrix64F comWrenchVector;
-   private DenseMatrix64F toeForcesVector;
-   private DenseMatrix64F toeForceVector;
+   private DenseMatrix64F soleForcesVector;
+   private DenseMatrix64F soleForceVector;
    private QuadrantDependentList<DenseMatrix64F> legEffortVector;
 
    public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap)
    {
       // initialize reference frames
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
-      toeFrame = referenceFrames.getFootReferenceFrames();
+      soleFrame = referenceFrames.getFootReferenceFrames();
 
       // initialize desired and optimal values
       desiredComForce = new FrameVector(comFrame);
       optimalComForce = new FrameVector(comFrame);
       desiredBodyTorque = new FrameVector(comFrame);
       optimalBodyTorque = new FrameVector(comFrame);
-      desiredToeForce = new QuadrantDependentList<FrameVector>();
-      optimalToeForce = new QuadrantDependentList<FrameVector>();
+      desiredSoleForce = new QuadrantDependentList<FrameVector>();
+      optimalSoleForce = new QuadrantDependentList<FrameVector>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         desiredToeForce.set(robotQuadrant, new FrameVector(comFrame));
-         optimalToeForce.set(robotQuadrant, new FrameVector(comFrame));
+         desiredSoleForce.set(robotQuadrant, new FrameVector(comFrame));
+         optimalSoleForce.set(robotQuadrant, new FrameVector(comFrame));
       }
 
       // initialize jacobians
       legJoints = new QuadrantDependentList<OneDoFJoint[]>();
-      toePosition = new QuadrantDependentList<FramePoint>();
+      solePosition = new QuadrantDependentList<FramePoint>();
       footJacobian = new QuadrantDependentList<GeometricJacobian>();
-      toeJacobian = new QuadrantDependentList<PointJacobian>();
+      soleJacobian = new QuadrantDependentList<PointJacobian>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String jointBeforeFootName = jointNameMap.getJointBeforeFootName(robotQuadrant);
@@ -82,9 +82,9 @@ public class QuadrupedVirtualModelController
          RigidBody body = fullRobotModel.getRootJoint().getSuccessor();
          RigidBody foot = jointBeforeFoot.getSuccessor();
          legJoints.set(robotQuadrant, ScrewTools.filterJoints(ScrewTools.createJointPath(body, foot), OneDoFJoint.class));
-         toePosition.set(robotQuadrant, new FramePoint(foot.getBodyFixedFrame()));
+         solePosition.set(robotQuadrant, new FramePoint(foot.getBodyFixedFrame()));
          footJacobian.set(robotQuadrant, new GeometricJacobian(legJoints.get(robotQuadrant), body.getBodyFixedFrame()));
-         toeJacobian.set(robotQuadrant, new PointJacobian());
+         soleJacobian.set(robotQuadrant, new PointJacobian());
       }
 
       // initialize limits
@@ -118,8 +118,8 @@ public class QuadrupedVirtualModelController
       comWrenchMap = new DenseMatrix64F(6, 12);
       comWrenchMapInverse = new DenseMatrix64F(12, 6);
       comWrenchVector = new DenseMatrix64F(6, 1);
-      toeForcesVector = new DenseMatrix64F(12, 1);
-      toeForceVector = new DenseMatrix64F(3, 1);
+      soleForcesVector = new DenseMatrix64F(12, 1);
+      soleForceVector = new DenseMatrix64F(3, 1);
       legEffortVector = new QuadrantDependentList<DenseMatrix64F>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -208,9 +208,9 @@ public class QuadrupedVirtualModelController
       desiredBodyTorque.setIncludingFrame(bodyTorque);
    }
 
-   public void setDesiredToeForce(RobotQuadrant robotQuadrant, FrameVector toeForce)
+   public void setDesiredSoleForce(RobotQuadrant robotQuadrant, FrameVector soleForce)
    {
-      desiredToeForce.get(robotQuadrant).set(toeForce);
+      desiredSoleForce.get(robotQuadrant).set(soleForce);
    }
 
    public void getOptimalComForce(FrameVector comForce)
@@ -223,9 +223,9 @@ public class QuadrupedVirtualModelController
       bodyTorque.setIncludingFrame(optimalBodyTorque);
    }
 
-   public void getOptimalToeForce(RobotQuadrant robotQuadrant, FrameVector toeForce)
+   public void getOptimalSoleForce(RobotQuadrant robotQuadrant, FrameVector soleForce)
    {
-      toeForce.set(optimalToeForce.get(robotQuadrant));
+      soleForce.set(optimalSoleForce.get(robotQuadrant));
    }
 
    public void compute()
@@ -235,30 +235,30 @@ public class QuadrupedVirtualModelController
       desiredBodyTorque.changeFrame(comFrame);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         desiredToeForce.get(robotQuadrant).changeFrame(comFrame);
+         desiredSoleForce.get(robotQuadrant).changeFrame(comFrame);
       }
 
-      // compute toe positions and jacobians in center of mass frame
+      // compute sole positions and jacobians in center of mass frame
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         toePosition.get(robotQuadrant).setToZero(toeFrame.get(robotQuadrant));
-         toePosition.get(robotQuadrant).changeFrame(comFrame);
+         solePosition.get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
+         solePosition.get(robotQuadrant).changeFrame(comFrame);
          footJacobian.get(robotQuadrant).compute();
-         toeJacobian.get(robotQuadrant).set(footJacobian.get(robotQuadrant), toePosition.get(robotQuadrant));
-         toeJacobian.get(robotQuadrant).compute();
+         soleJacobian.get(robotQuadrant).set(footJacobian.get(robotQuadrant), solePosition.get(robotQuadrant));
+         soleJacobian.get(robotQuadrant).compute();
       }
 
-      // compute map from toe forces to centroidal forces and torques
+      // compute map from sole forces to centroidal forces and torques
       comWrenchMap.zero();
       int columnOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         comWrenchMap.set(0, 1 + columnOffset, -toePosition.get(robotQuadrant).getZ()); // mX row
-         comWrenchMap.set(0, 2 + columnOffset, toePosition.get(robotQuadrant).getY());
-         comWrenchMap.set(1, 0 + columnOffset, toePosition.get(robotQuadrant).getZ()); // mY row
-         comWrenchMap.set(1, 2 + columnOffset, -toePosition.get(robotQuadrant).getX());
-         comWrenchMap.set(2, 0 + columnOffset, -toePosition.get(robotQuadrant).getY()); // mZ row
-         comWrenchMap.set(2, 1 + columnOffset, toePosition.get(robotQuadrant).getX());
+         comWrenchMap.set(0, 1 + columnOffset, -solePosition.get(robotQuadrant).getZ()); // mX row
+         comWrenchMap.set(0, 2 + columnOffset, solePosition.get(robotQuadrant).getY());
+         comWrenchMap.set(1, 0 + columnOffset, solePosition.get(robotQuadrant).getZ()); // mY row
+         comWrenchMap.set(1, 2 + columnOffset, -solePosition.get(robotQuadrant).getX());
+         comWrenchMap.set(2, 0 + columnOffset, -solePosition.get(robotQuadrant).getY()); // mZ row
+         comWrenchMap.set(2, 1 + columnOffset, solePosition.get(robotQuadrant).getX());
          comWrenchMap.set(3, 0 + columnOffset, 1.0); // fX row
          comWrenchMap.set(4, 1 + columnOffset, 1.0); // fY row
          comWrenchMap.set(5, 2 + columnOffset, 1.0); // fZ row
@@ -273,7 +273,7 @@ public class QuadrupedVirtualModelController
       comWrenchVector.set(4, 0, desiredComForce.getY());
       comWrenchVector.set(5, 0, desiredComForce.getZ());
 
-      // compute optimal toe forces using least squares solution
+      // compute optimal sole forces using least squares solution
       try
       {
          CommonOps.pinv(comWrenchMap, comWrenchMapInverse);
@@ -282,33 +282,33 @@ public class QuadrupedVirtualModelController
       {
          return;
       }
-      CommonOps.mult(comWrenchMapInverse, comWrenchVector, toeForcesVector);
+      CommonOps.mult(comWrenchMapInverse, comWrenchVector, soleForcesVector);
       int rowOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         optimalToeForce.get(robotQuadrant).changeFrame(comFrame);
-         optimalToeForce.get(robotQuadrant).setX(toeForcesVector.get(0 + rowOffset, 0));
-         optimalToeForce.get(robotQuadrant).setY(toeForcesVector.get(1 + rowOffset, 0));
-         optimalToeForce.get(robotQuadrant).setZ(toeForcesVector.get(2 + rowOffset, 0));
+         optimalSoleForce.get(robotQuadrant).changeFrame(comFrame);
+         optimalSoleForce.get(robotQuadrant).setX(soleForcesVector.get(0 + rowOffset, 0));
+         optimalSoleForce.get(robotQuadrant).setY(soleForcesVector.get(1 + rowOffset, 0));
+         optimalSoleForce.get(robotQuadrant).setZ(soleForcesVector.get(2 + rowOffset, 0));
          rowOffset += 3;
       }
 
       // apply contact force limits
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         double fx = optimalToeForce.get(robotQuadrant).getX();
-         double fy = optimalToeForce.get(robotQuadrant).getY();
-         double fz = optimalToeForce.get(robotQuadrant).getZ();
+         double fx = optimalSoleForce.get(robotQuadrant).getX();
+         double fy = optimalSoleForce.get(robotQuadrant).getY();
+         double fz = optimalSoleForce.get(robotQuadrant).getZ();
          fz = Math.max(fz, 0);
          fx = Math.min(fx, coefficientOfFriction * fz / Math.sqrt(2));
          fy = Math.min(fy, coefficientOfFriction * fz / Math.sqrt(2));
-         optimalToeForce.get(robotQuadrant).setX(fx);
-         optimalToeForce.get(robotQuadrant).setY(fy);
-         optimalToeForce.get(robotQuadrant).setZ(fz);
+         optimalSoleForce.get(robotQuadrant).setX(fx);
+         optimalSoleForce.get(robotQuadrant).setY(fy);
+         optimalSoleForce.get(robotQuadrant).setZ(fz);
       }
 
       // compute optimal centroidal forces and torques
-      CommonOps.mult(comWrenchMap, toeForcesVector, comWrenchVector);
+      CommonOps.mult(comWrenchMap, soleForcesVector, comWrenchVector);
       optimalBodyTorque.changeFrame(comFrame);
       optimalBodyTorque.setX(comWrenchVector.get(0, 0));
       optimalBodyTorque.setY(comWrenchVector.get(1, 0));
@@ -321,14 +321,14 @@ public class QuadrupedVirtualModelController
       // compute joint torques using jacobian transpose
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         DenseMatrix64F jacobianMatrix = toeJacobian.get(robotQuadrant).getJacobianMatrix();
-         ReferenceFrame jacobianFrame = toeJacobian.get(robotQuadrant).getFrame();
-         optimalToeForce.get(robotQuadrant).changeFrame(jacobianFrame);
-         toeForceVector.set(0, 0, -optimalToeForce.get(robotQuadrant).getX());
-         toeForceVector.set(1, 0, -optimalToeForce.get(robotQuadrant).getY());
-         toeForceVector.set(2, 0, -optimalToeForce.get(robotQuadrant).getZ());
-         optimalToeForce.get(robotQuadrant).changeFrame(comFrame);
-         CommonOps.multTransA(jacobianMatrix, toeForceVector, legEffortVector.get(robotQuadrant));
+         DenseMatrix64F jacobianMatrix = soleJacobian.get(robotQuadrant).getJacobianMatrix();
+         ReferenceFrame jacobianFrame = soleJacobian.get(robotQuadrant).getFrame();
+         optimalSoleForce.get(robotQuadrant).changeFrame(jacobianFrame);
+         soleForceVector.set(0, 0, -optimalSoleForce.get(robotQuadrant).getX());
+         soleForceVector.set(1, 0, -optimalSoleForce.get(robotQuadrant).getY());
+         soleForceVector.set(2, 0, -optimalSoleForce.get(robotQuadrant).getZ());
+         optimalSoleForce.get(robotQuadrant).changeFrame(comFrame);
+         CommonOps.multTransA(jacobianMatrix, soleForceVector, legEffortVector.get(robotQuadrant));
 
          int index = 0;
          for (OneDoFJoint joint : legJoints.get(robotQuadrant))
@@ -354,8 +354,8 @@ public class QuadrupedVirtualModelController
       // compute quadratic cost terms (com wrench error, foot force error, force regularization)
       // compute joint torque inequality constraints
       // compute friction pyramid inequality constraints
-      // compute min / max toe pressure constraints?
-      // compute toe forces using quadratic program
+      // compute min / max sole pressure constraints?
+      // compute sole forces using quadratic program
    }
 
 }
