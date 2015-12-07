@@ -2,8 +2,6 @@ package us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Tuple3d;
-
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -14,8 +12,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJointReferenceFrame;
@@ -38,7 +34,7 @@ public class CenterOfMassKinematicBasedCalculator
    private final QuadrantDependentList<Twist> footTwistsInWorld = new QuadrantDependentList<Twist>(new Twist(), new Twist(), new Twist(), new Twist());
    private final QuadrantDependentList<RigidBody> shinRigidBodies;
    private final QuadrantDependentList<ReferenceFrame> footFrames;
-   
+
    private final YoFrameVector frontLeftFootVelocityInWorld = new YoFrameVector("frontLeftFootVelocityInWorld", worldFrame, registry);
    private final YoFrameVector frontRightFootVelocityInWorld = new YoFrameVector("frontRightFootVelocityInWorld", worldFrame, registry);
    private final YoFrameVector hindLeftFootVelocityInWorld = new YoFrameVector("hindLeftFootVelocityInWorld", worldFrame, registry);
@@ -48,15 +44,15 @@ public class CenterOfMassKinematicBasedCalculator
 
    private final DoubleYoVariable alphaFootToRootJointPosition = new DoubleYoVariable("alphaFootToRootJointPosition", registry);
    private final QuadrantDependentList<AlphaFilteredYoFrameVector> footToRootJointPositions = new QuadrantDependentList<AlphaFilteredYoFrameVector>();
-   
+
    private final DoubleYoVariable alphaRootJointLinearVelocityNewTwist = new DoubleYoVariable("alphaRootJointLinearVelocityNewTwist", registry);
-   
+
    //Temporary Variables
    private final Twist tempRootBodyTwist = new Twist();
    private final FrameVector tempFrameVector = new FrameVector();
    private final FramePoint tempFramePoint = new FramePoint();
    private final FramePoint tempPosition = new FramePoint();
-   
+
    public CenterOfMassKinematicBasedCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, QuadrantDependentList<RigidBody> shinRigidBodies,
          QuadrantDependentList<ReferenceFrame> footFrames, YoVariableRegistry parentRegistry)
    {
@@ -66,20 +62,21 @@ public class CenterOfMassKinematicBasedCalculator
 
       this.shinRigidBodies = shinRigidBodies;
       this.footFrames = footFrames;
-      
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          twistCalculator.changeTwistchangeBodyFrameNoRelativeTwist(shinRigidBodies.get(quadrant), footFrames.get(quadrant));
-         
+
          String quadrantPrefix = quadrant.getCamelCaseNameForStartOfExpression();
 
-         AlphaFilteredYoFrameVector footToRootJointPosition = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(quadrantPrefix + "FootToRootJointPosition", "", registry, alphaFootToRootJointPosition, worldFrame);
+         AlphaFilteredYoFrameVector footToRootJointPosition = AlphaFilteredYoFrameVector
+               .createAlphaFilteredYoFrameVector(quadrantPrefix + "FootToRootJointPosition", "", registry, alphaFootToRootJointPosition, worldFrame);
          footToRootJointPositions.put(quadrant, footToRootJointPosition);
       }
-      
+
       //XXX: to be added to the state estimator parameters (0.15 is what is used on Atlas)
       alphaRootJointLinearVelocityNewTwist.set(0.15);
-      
+
       parentRegistry.addChild(registry);
    }
 
@@ -87,21 +84,21 @@ public class CenterOfMassKinematicBasedCalculator
    {
       updateKinematics();
       rootJointPosition.set(comPosition);
-      
+
       ArrayList<RobotQuadrant> allQuadrants = new ArrayList<>();
-      
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
          allQuadrants.add(quadrant);
-      
+
       estimateFeetPosition(allQuadrants, footPositionsToPack);
-      
+
    }
 
    public void estimateFeetAndComPosition(ArrayList<RobotQuadrant> feetInContact, ArrayList<RobotQuadrant> feetNotInContact,
          QuadrantDependentList<YoFramePoint> footPositionsToPack, FramePoint comPositionToPack)
    {
       updateKinematics();
-      
+
       //for legs in contact => update CoM position
       estimateCoMLinearPosition(feetInContact, footPositionsToPack);
 
@@ -117,7 +114,7 @@ public class CenterOfMassKinematicBasedCalculator
       updateKinematicsNewTwist();
       twistCalculator.compute();
 
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          tempFramePoint.setToZero(rootJointFrame);
          tempFramePoint.changeFrame(footFrames.get(quadrant));
@@ -146,11 +143,10 @@ public class CenterOfMassKinematicBasedCalculator
       {
          Twist footTwistInWorld = footTwistsInWorld.get(robotquadrant);
          YoFrameVector footVelocityInWorld = footVelocitiesInWorld.get(robotquadrant);
-         
+
          twistCalculator.packTwistOfBody(footTwistInWorld, shinRigidBodies.get(robotquadrant));
          footTwistInWorld.packLinearPart(tempFrameVector);
-         
-         
+
          tempFrameVector.changeFrame(worldFrame);
          footVelocityInWorld.set(tempFrameVector);
       }
@@ -159,11 +155,11 @@ public class CenterOfMassKinematicBasedCalculator
    private void estimateCoMLinearPosition(ArrayList<RobotQuadrant> feetInContact, QuadrantDependentList<YoFramePoint> footPositionsInWorld)
    {
       double scaleFactor = 1.0 / feetInContact.size();
-      
-      for(int i = 0; i < feetInContact.size(); i++)
+
+      for (int i = 0; i < feetInContact.size(); i++)
       {
          RobotQuadrant quadrantInContact = feetInContact.get(i);
-         
+
          footToRootJointPositions.get(quadrantInContact).getFrameTuple(tempPosition);
          tempPosition.scale(scaleFactor);
          rootJointPosition.add(tempPosition);
@@ -179,7 +175,7 @@ public class CenterOfMassKinematicBasedCalculator
 
    private void estimateFeetPosition(ArrayList<RobotQuadrant> feetNotInContact, QuadrantDependentList<YoFramePoint> footPositionsInWorldToPack)
    {
-      for(int i = 0; i< feetNotInContact.size(); i++)
+      for (int i = 0; i < feetNotInContact.size(); i++)
       {
          RobotQuadrant quadrantNotInContact = feetNotInContact.get(i);
          YoFramePoint footPositionInWorld = footPositionsInWorldToPack.get(quadrantNotInContact);
@@ -187,5 +183,21 @@ public class CenterOfMassKinematicBasedCalculator
          footPositionInWorld.scale(-1.0);
          footPositionInWorld.add(rootJointPosition);
       }
+   }
+
+   public void getRootJointPositionAndVelocity(FramePoint positionToPack, FrameVector linearVelocityToPack)
+   {
+      getCoMPosition(positionToPack);
+      getCoMVelocity(linearVelocityToPack);
+   }
+
+   public void getCoMPosition(FramePoint positionToPack)
+   {
+      rootJointPosition.getFrameTupleIncludingFrame(positionToPack);
+   }
+
+   public void getCoMVelocity(FrameVector linearVelocityToPack)
+   {
+      rootJointLinearVelocityNewTwist.getFrameTupleIncludingFrame(linearVelocityToPack);
    }
 }
