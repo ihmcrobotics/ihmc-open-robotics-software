@@ -75,10 +75,10 @@ Tab0
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>1</Graph Array Window Size>
+<Graph Array Window Size>4</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
-<WindowLocation>5760.0, 74.0</WindowLocation>
+<WindowLocation>5760.0, 0.0</WindowLocation>
 <WindowSize>1920.0, 1080.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
@@ -107,7 +107,100 @@ Tab0
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-</Graph Array Window1>
+</Graph Array Window1><Graph Array Window2>
+<ScreenID>3</ScreenID>
+<WindowLocation>3839.0, 0.0</WindowLocation>
+<WindowSize>1922.0, 1201.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.leftAnklePitch.leftAnklePitch_tau,root.remotemain.ValkyrieRosControlSliderBoard.leftAnklePitch.leftAnklePitch_tau_d</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.leftAnkleRoll.leftAnkleRoll_tau,root.remotemain.ValkyrieRosControlSliderBoard.leftAnkleRoll.leftAnkleRoll_tau_d</Variables>
+		<GraphConfiguration>
+			<Name>config9</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window2><Graph Array Window3>
+<ScreenID>1</ScreenID>
+<WindowLocation>5759.0, 0.0</WindowLocation>
+<WindowSize>1922.0, 1081.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.rightAnklePitch.rightAnklePitch_tau,root.remotemain.ValkyrieRosControlSliderBoard.rightAnklePitch.rightAnklePitch_tau_d</Variables>
+		<GraphConfiguration>
+			<Name>config10</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>30.0</MaxScaling>
+			<MinScaling>-30.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.rightAnkleRoll.rightAnkleRoll_tau,root.remotemain.ValkyrieRosControlSliderBoard.rightAnkleRoll.rightAnkleRoll_tau_d</Variables>
+		<GraphConfiguration>
+			<Name>config11</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window3><Graph Array Window4>
+<ScreenID>1</ScreenID>
+<WindowLocation>5759.0, 0.0</WindowLocation>
+<WindowSize>1922.0, 1081.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.torsoPitch.torsoPitch_tau,root.remotemain.ValkyrieRosControlSliderBoard.torsoPitch.torsoPitch_tau_d</Variables>
+		<GraphConfiguration>
+			<Name>config12</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.torsoRoll.torsoRoll_tau,root.remotemain.ValkyrieRosControlSliderBoard.torsoRoll.torsoRoll_tau_d</Variables>
+		<GraphConfiguration>
+			<Name>config13</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window4>
 
 <Extra Panels>
 <Main Viewport>
@@ -116,9 +209,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>11.501666878152376</Camera X>
- <Camera Y>0.7984947652871658</Camera Y>
- <Camera Z>0.08742329099917309</Camera Z>
+ <Camera X>5.911583189984563</Camera X>
+ <Camera Y>-2.7685116536056715</Camera Y>
+ <Camera Z>0.036032933912628226</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -142,8 +235,8 @@ Tab0
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.016582449938250577</Fix X>
-<Fix Y>-0.004799499221802739</Fix Y>
-<Fix Z>0.02372033784404276</Fix Z>
+<Fix X>0.014575297505332563</Fix X>
+<Fix Y>-0.006825900896843887</Fix Y>
+<Fix Z>-0.11130433452923602</Fix Z>
 </Fix Position>
 </Canvas 1>
