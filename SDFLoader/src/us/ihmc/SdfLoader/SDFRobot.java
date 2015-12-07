@@ -24,6 +24,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Noise;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Range;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.HorizontalScan;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.VerticalScan;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -606,11 +607,15 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
          double sdfMaxRange = Double.parseDouble(sdfRange.getMax());
          double sdfMinRange = Double.parseDouble(sdfRange.getMin());
          HorizontalScan sdfHorizontalScan = sdfScan.getHorizontal();
-         double sdfMaxAngle = Double.parseDouble(sdfHorizontalScan.getMaxAngle());
-         double sdfMinAngle = Double.parseDouble(sdfHorizontalScan.getMinAngle());
+         VerticalScan sdfVerticalScan = sdfScan.getVertical();
+         double sdfMaxSweepAngle = Double.parseDouble(sdfHorizontalScan.getMaxAngle());
+         double sdfMinSweepAngle = Double.parseDouble(sdfHorizontalScan.getMinAngle());
+         double sdfMaxHeightAngle = sdfVerticalScan == null ? 0.0 : Double.parseDouble(sdfVerticalScan.getMaxAngle());
+         double sdfMinHeightAngle = sdfVerticalScan == null ? 0.0 : Double.parseDouble(sdfVerticalScan.getMinAngle());
    
          // double sdfAngularResolution = Double.parseDouble(sdfHorizontalScan.getSillyAndProbablyNotUsefulResolution());
          int sdfSamples = (Integer.parseInt(sdfHorizontalScan.getSamples()) / 3) * 3;
+         int sdfScanHeight = sdfVerticalScan == null ? 1 : Integer.parseInt(sdfVerticalScan.getSamples());
          double sdfRangeResolution = Double.parseDouble(sdfRay.getRange().getResolution());
    
          boolean sdfAlwaysOn = true;
@@ -637,8 +642,8 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
          //         sdfMinAngle = -Math.PI/4;
          //         sdfMaxAngle = Math.PI/4;
    
-         LidarScanParameters polarDefinition = new LidarScanParameters(sdfSamples, (float) sdfMinAngle, (float) sdfMaxAngle, 0.0f, (float) sdfMinRange,
-               (float) sdfMaxRange, 0.0f);
+         LidarScanParameters polarDefinition = new LidarScanParameters(sdfSamples, sdfScanHeight, (float) sdfMinSweepAngle, (float) sdfMaxSweepAngle, (float) sdfMinHeightAngle, (float) sdfMaxHeightAngle, 0.0f, (float) sdfMinRange,
+               (float) sdfMaxRange, 0.0f, 0l);
    
          // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
          RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());

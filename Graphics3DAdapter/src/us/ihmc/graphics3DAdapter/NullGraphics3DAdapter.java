@@ -17,11 +17,11 @@ import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.tools.inputDevices.keyboard.KeyListener;
 import us.ihmc.tools.inputDevices.mouse.MouseListener;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class NullGraphics3DAdapter implements Graphics3DAdapter
 {
@@ -238,13 +238,13 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
    }
 
    @Override
-   public GPULidar createGPULidar(int pointsPerSweep, double fieldOfView, double minRange, double maxRange)
+   public GPULidar createGPULidar(int pointsPerSweep, int scanHeight, double fieldOfView, double minRange, double maxRange)
    {
       return null;
    }
 
    @Override
-   public GPULidar createGPULidar(GPULidarListener listener, int pointsPerSweep, double fieldOfView, double minRange, double maxRange)
+   public GPULidar createGPULidar(GPULidarListener listener, int pointsPerSweep, int scanHeight, double fieldOfView, double minRange, double maxRange)
    {
       return null;
    }

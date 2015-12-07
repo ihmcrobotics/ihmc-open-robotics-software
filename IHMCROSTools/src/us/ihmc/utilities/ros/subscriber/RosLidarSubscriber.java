@@ -18,7 +18,7 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
 
    public void onNewMessage(LaserScan message)
    {
-      LidarScanParameters polarLidarScanParameters = new LidarScanParameters(message.getRanges().length, message.getAngleMin(), message.getAngleMax(),
+      LidarScanParameters polarLidarScanParameters = new LidarScanParameters(message.getRanges().length, 1, message.getAngleMin(), message.getAngleMax(),
             message.getTimeIncrement(), message.getRangeMin(), message.getRangeMax(), message.getScanTime(), message.getHeader().getStamp().totalNsecs());
 
       if (DEBUG)

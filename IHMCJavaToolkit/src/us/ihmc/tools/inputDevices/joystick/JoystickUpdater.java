@@ -16,8 +16,8 @@ public class JoystickUpdater implements Runnable
    private final ArrayList<JoystickGeneralListener> generalListenersList;
    
    private HashMap<String, Float> lastValues = new HashMap<String, Float>();
-   private int pollIntervalMillis = 20;
-   private float deadband = 0.2f;
+   private int pollIntervalMillis = 5;
+   private float deadband = 0.0f;
    private boolean connected;
 
    public JoystickUpdater(Controller joystickController, ArrayList<JoystickEventListener> listeners, ArrayList<JoystickGeneralListener> generalListenersList)
@@ -29,6 +29,7 @@ public class JoystickUpdater implements Runnable
       connected = true;
    }
 
+   @Override
    public void run()
    {
       while (true)

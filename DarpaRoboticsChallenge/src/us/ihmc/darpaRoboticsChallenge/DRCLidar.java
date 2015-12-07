@@ -51,12 +51,13 @@ public class DRCLidar
 
        LidarScanParameters lidarScanParameters = lidarMount.getLidarScanParameters();
        int horizontalRays = lidarScanParameters.pointsPerSweep;
+       int scanHeight = lidarScanParameters.scanHeight;
        float fov = lidarScanParameters.sweepYawMax - lidarScanParameters.sweepYawMin;
        float near = lidarScanParameters.minRange;
        float far = lidarScanParameters.maxRange;
 
        DRCLidarCallback callback = new DRCLidarCallback(objectCommunicator, lidarScanParameters, lidarParams.getSensorId());
-       GPULidar lidar = graphics3dAdapter.createGPULidar(callback, horizontalRays, fov, near, far);
+       GPULidar lidar = graphics3dAdapter.createGPULidar(callback, horizontalRays, scanHeight, fov, near, far);
        lidarMount.setLidar(lidar);
     }
  }
