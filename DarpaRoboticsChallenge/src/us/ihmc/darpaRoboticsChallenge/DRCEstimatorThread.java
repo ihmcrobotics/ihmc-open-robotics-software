@@ -313,7 +313,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(estimatorFullRobotModel.getElevator()) * gravityMagnitude;
 
       SideDependentList<FootSwitchInterface> footSwitchesForEstimator = new SideDependentList<>();
-      ForceSensorDataHolderReadOnly forceSensorDataHolder = sensorOutputMapReadOnly.getForceSensorProcessedOutputs();
 
       for (RobotSide robotSide : RobotSide.values)
       {
