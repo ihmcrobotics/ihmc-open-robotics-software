@@ -1,8 +1,6 @@
-package us.ihmc.valkyrie.configuration;
+package us.ihmc.valkyrieRosControl;
 
 import us.ihmc.realtime.PriorityParameters;
-import us.ihmc.valkyrie.roboNet.api.turbodriver_api.TurbodriverAPI_DRCv4_bench;
-import us.ihmc.valkyrie.roboNet.api.turbodriver_api.TurbodriverAPI_DRCv4_ihmc;
 
 public class ValkyriePriorityParameters
 {
@@ -12,9 +10,5 @@ public class ValkyriePriorityParameters
    public static final PriorityParameters LOGGER_PRIORITY = new PriorityParameters(40);
    public static final PriorityParameters POSECOMMUNICATOR_PRIORITY = new PriorityParameters(45);
 
-   // FQN of the turbodriver we use to test overall round trip time
-   public static final Class<?>[] timedTurbodrivers = {TurbodriverAPI_DRCv4_ihmc.class, TurbodriverAPI_DRCv4_bench.class};
-   public static final String timingWriteName = "LoopbackWrite";
-   public static final String timingReadName = "LoopbackRead";
    
 }

@@ -90,12 +90,12 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
          jointNames.add(joint.getName());
       }
 
+
       selectedJoint = new EnumYoVariable("selectedJoint", "", registry, false, jointNames.toArray(new String[jointNames.size()]));
       System.out.println(Arrays.toString(selectedJoint.getEnumValuesAsString()));
 
       selectedJoint.addVariableChangedListener(new VariableChangedListener()
       {
-
          @Override
          public void variableChanged(YoVariable<?> v)
          {
@@ -105,10 +105,12 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 
             kpSelected.set(selected.pdController.getProportionalGain());
             kdSelected.set(selected.pdController.getDerivativeGain());
-
          }
       });
 
+      loadStandPrepSetPoints();
+      selectedJoint.notifyVariableChangedListeners();
+      
       yoVariableServer.setMainRegistry(registry, sdfFullRobotModel, null);
       yoVariableServer.start();
    }

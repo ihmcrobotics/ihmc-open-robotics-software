@@ -73,9 +73,9 @@ public class ValkyrieRosControlSensorReader implements SensorReader
 
       Yaml yaml = new Yaml();
       
-      InputStream gainStream = getClass().getClassLoader().getResourceAsStream("configuration/standPrep/gains.yaml");
-      InputStream offsetsStream = getClass().getClassLoader().getResourceAsStream("configuration/standPrep/offsets.yaml");
-      InputStream setpointsStream = getClass().getClassLoader().getResourceAsStream("configuration/standPrep/setpoints.yaml");
+      InputStream gainStream = getClass().getClassLoader().getResourceAsStream("standPrep/gains.yaml");
+      InputStream offsetsStream = getClass().getClassLoader().getResourceAsStream("standPrep/offsets.yaml");
+      InputStream setpointsStream = getClass().getClassLoader().getResourceAsStream("standPrep/setpoints.yaml");
       
       Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) yaml.load(gainStream);
       Map<String, Map<String, Double>> offsetMap = (Map<String, Map<String, Double>>) yaml.load(offsetsStream);

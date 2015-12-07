@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.roboNet.schedule;
+package us.ihmc.valkyrie.configuration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,16 +10,14 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.Tag;
 
-import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
-
 public class YamlWithIncludesLoader
 {
-   public static Object load(Class<?> loader, String subDirectory, String filename)
+   public static Object load(String subDirectory, String filename)
    {
 
-      InputStream inputStream = loader.getResourceAsStream(subDirectory + "/" + filename);
+      InputStream inputStream = YamlWithIncludesLoader.class.getClassLoader().getResourceAsStream(subDirectory + "/" + filename);
 
-      Yaml yaml = new Yaml(new IncludeConstructor(loader, subDirectory));
+      Yaml yaml = new Yaml(new IncludeConstructor(subDirectory));
       Object object = yaml.load(inputStream);
       try
       {
@@ -34,12 +32,10 @@ public class YamlWithIncludesLoader
 
    static class IncludeConstructor extends SafeConstructor
    {
-      private final Class<?> loader;
       private final String subDirectory;
 
-      public IncludeConstructor(Class<?> loader, String subDirectory)
+      public IncludeConstructor(String subDirectory)
       {
-         this.loader = loader;
          this.subDirectory = subDirectory;
 
          this.yamlConstructors.put(new Tag("!include"), new IncludeYaml());
@@ -50,8 +46,8 @@ public class YamlWithIncludesLoader
          public Object construct(Node node)
          {
             String val = (String) constructScalar((ScalarNode) node);
-            Yaml yaml = new Yaml(new IncludeConstructor(loader, subDirectory));
-            InputStream inputStream = loader.getResourceAsStream(subDirectory + "/" + val);
+            Yaml yaml = new Yaml(new IncludeConstructor(subDirectory));
+            InputStream inputStream = YamlWithIncludesLoader.class.getClassLoader().getResourceAsStream(subDirectory + "/" + val);
             Object object = yaml.load(inputStream);
             try
             {
@@ -65,9 +61,5 @@ public class YamlWithIncludesLoader
       }
    }
 
-   public static void main(String[] args) throws IOException
-   {
-      System.out.println(YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "schedules", ValkyrieConfigurationRoot.SCHEDULE_FILE));
-   }
 
 }
