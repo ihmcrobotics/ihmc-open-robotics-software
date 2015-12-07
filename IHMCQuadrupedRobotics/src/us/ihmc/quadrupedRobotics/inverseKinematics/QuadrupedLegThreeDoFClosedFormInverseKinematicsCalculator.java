@@ -172,6 +172,11 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
 
       return valid;
    }
+   
+   public double getKneeAngleAtMaxLength()
+   {
+	   return  -hipThetaOffset - kneeThetaOffset;
+   }
 
    private double limitToPlusMinusOne(double input)
    {
