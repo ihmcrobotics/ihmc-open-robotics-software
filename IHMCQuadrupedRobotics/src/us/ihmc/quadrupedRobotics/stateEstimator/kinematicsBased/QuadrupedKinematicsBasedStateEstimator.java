@@ -33,6 +33,9 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
 
    private final ArrayList<YoGraphicReferenceFrame> graphicReferenceFrames = new ArrayList<>();
 
+ private final ArrayList<RobotQuadrant> feetInContact = new ArrayList<>();
+ private final ArrayList<RobotQuadrant> feetNotInContact = new ArrayList<>();
+   
    public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
          FootSwitchUpdater footSwitchUpdater, JointStateUpdater jointStateUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater,
          SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -75,6 +78,8 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
 
    public void initialize()
    {
+      updateFeetContactStatus();
+      
       jointStateUpdater.initialize();
       comLinearStateUpdater.initialize();
    }
@@ -82,8 +87,10 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    @Override
    public void doControl()
    {
+      updateFeetContactStatus();
+      
       jointStateUpdater.updateJointState();
-      comLinearStateUpdater.updateCenterOfMassLinearState();
+      comLinearStateUpdater.updateCenterOfMassLinearState(feetInContact, feetNotInContact);
 
       sdfFullRobotModelForViz.updateFrames();
       updateViz();
@@ -105,4 +112,17 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    {
       return registry;
    }
+   
+ private void updateFeetContactStatus()
+ {
+    feetInContact.clear();
+    feetNotInContact.clear();
+    for(RobotQuadrant quadrant : RobotQuadrant.values())
+    {
+       if(footSwitchUpdater.isFootInContactWithGround(quadrant))
+          feetInContact.add(quadrant);
+       else
+          feetNotInContact.add(quadrant);
+    }
+ }
 }
