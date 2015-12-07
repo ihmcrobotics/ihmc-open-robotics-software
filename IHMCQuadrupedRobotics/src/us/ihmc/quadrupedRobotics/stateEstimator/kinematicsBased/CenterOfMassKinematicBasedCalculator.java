@@ -47,8 +47,8 @@ public class CenterOfMassKinematicBasedCalculator
 
    private final DoubleYoVariable alphaRootJointLinearVelocityNewTwist = new DoubleYoVariable("alphaRootJointLinearVelocityNewTwist", registry);
 
-   private final FramePoint previousRootJointPosition = new FramePoint(worldFrame);
-   private final FrameVector previousRootJointLinearVelocityNewTwist = new FrameVector(worldFrame);
+   private final YoFramePoint previousRootJointPosition = new YoFramePoint("previousEstimatedRootJointPositionWithKinematics", worldFrame, registry);
+   private final YoFrameVector previousRootJointLinearVelocityNewTwist = new YoFrameVector("previousEstimatedRootJointVelocityNewTwist", worldFrame, registry);
 
    //Temporary Variables
    private final Twist tempRootBodyTwist = new Twist();
