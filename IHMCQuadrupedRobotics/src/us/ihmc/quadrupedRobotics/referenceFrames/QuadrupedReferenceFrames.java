@@ -208,7 +208,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    }
 
    @Override
-   public ReferenceFrame getMidTrotLnieZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine)
+   public ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine)
    {
       if(quadrantAssocaitedWithTrotLine.isQuadrantInHind())
       {
@@ -234,6 +234,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       return neckReferenceFrames.get(neckJointName);
    }
 
+   @Override
    public ReferenceFrame getFrameBeforeLegJoint(RobotQuadrant robotQuadrant, LegJointName legJointName)
    {
       return framesBeforeLegJoint.get(robotQuadrant).get(legJointName);

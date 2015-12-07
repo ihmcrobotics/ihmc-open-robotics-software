@@ -774,7 +774,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    {
       FrameVector desiredVelocityVector = desiredVelocity.getFrameTuple();
       double yawRate = desiredYawRate.getDoubleValue();
-      swingTargetGenerator.getSwingTarget(swingLeg, desiredVelocityVector, framePointToPack, yawRate);
+      swingTargetGenerator.getSwingTarget(swingLeg, feedForwardReferenceFrames.getLegAttachmentFrame(swingLeg), desiredVelocityVector, framePointToPack, yawRate);
    }
    
    private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
@@ -850,7 +850,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
         	  swingFootHitGround = stateEstimator.isFootInContact(swingQuadrant);
     	  }
     	  
-    	  return (swingTrajectoryIsDone || swingFootHitGround && inSwingStateLongEnough);
+    	  return ((swingTrajectoryIsDone || swingFootHitGround) && inSwingStateLongEnough);
       }
    }
    
@@ -1094,10 +1094,13 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       private final FramePoint swingTarget = new FramePoint(ReferenceFrame.getWorldFrame());
       private final FramePoint currentDesiredInTrajectory = new FramePoint();
       private final FrameVector speedMatchVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
+      private final DoubleYoVariable speedMatchScalar = new DoubleYoVariable("speedMatchScalar", registry);
       private final Vector3d footPositionInLegAttachmentFrame = new Vector3d();
+      
       public TripleSupportState(CrawlGateWalkingState stateEnum)
       {
          super(stateEnum);
+         speedMatchScalar.set(-1.0);
       }
 
       @Override
@@ -1142,7 +1145,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          QuadrupedSwingTrajectoryGenerator swingTrajectoryGenerator = swingTrajectoryGenerators.get(swingLeg);
          speedMatchVelocity.setIncludingFrame(desiredBodyVelocity);
          speedMatchVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-         speedMatchVelocity.scale(-1.0);
+         speedMatchVelocity.scale(speedMatchScalar.getDoubleValue());
          swingTrajectoryGenerator.initializeSwing(swingTime, swingInitial, swingHeight.getDoubleValue(), swingTarget, speedMatchVelocity);
       }
       
