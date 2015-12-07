@@ -1,8 +1,12 @@
 package us.ihmc.quadrupedRobotics.footstepChooser;
 
+import javax.vecmath.Vector2d;
+
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.quadrupedRobotics.parameters.SwingTargetGeneratorParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedRobotics.util.QuadrupedLinkLengths;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -36,6 +40,8 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final DoubleYoVariable maxLateralSkew = new DoubleYoVariable("maxLateralSkew", registry);
    private final DoubleYoVariable maxYawPerStep = new DoubleYoVariable("maxYawPerStep", registry);
    private final DoubleYoVariable minimumDistanceFromSameSideFoot = new DoubleYoVariable("minimumDistanceFromSameSideFoot", registry);
+   private final DoubleYoVariable xOffsetFromCenterOfHips = new DoubleYoVariable("xOffsetFromCenterOfHips", registry);
+   private final DoubleYoVariable yOffsetFromCenterOfHips = new DoubleYoVariable("yOffsetFromCenterOfHips", registry);
    private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
    private final FramePoint centroid = new FramePoint(ReferenceFrame.getWorldFrame());
 
@@ -45,10 +51,16 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final FramePoint desiredSwingFootPositionFromHalfStride = new FramePoint();
    private final FramePoint desiredSwingFootPositionFromOppositeSideFoot = new FramePoint();
 
+   private final FrameVector footDesiredVector= new FrameVector();
+   private final Vector2d footDesiredVector2d= new Vector2d();
+   
+   private final QuadrupedLinkLengths linkLengths;
+
    public MidFootZUpSwingTargetGenerator(SwingTargetGeneratorParameters footStepParameters, CommonQuadrupedReferenceFrames referenceFrames,
          YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
+      this.linkLengths = new QuadrupedLinkLengths(referenceFrames);
       parentRegistry.addChild(registry);
       
       if (footStepParameters != null)
@@ -84,6 +96,39 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private TranslationReferenceFrame hindFoot = new TranslationReferenceFrame("backFoot", ReferenceFrame.getWorldFrame());
    private TranslationReferenceFrame frontFoot = new TranslationReferenceFrame("frontFoot", ReferenceFrame.getWorldFrame());
    private MidFrameZUpFrame midFeetZUpFrame = new MidFrameZUpFrame("MidFeetZUpFrame", ReferenceFrame.getWorldFrame(), hindFoot, frontFoot);
+   FramePoint legAttachmentPoint = new FramePoint();
+   
+   @Override
+   public void getSwingTarget(RobotQuadrant swingLeg, ReferenceFrame swingLegAttachmentFrame, FrameVector desiredBodyVelocity, FramePoint swingTargetToPack,
+         double desiredYawRate)
+   {
+      getSwingTarget(swingLeg, desiredBodyVelocity, swingTargetToPack, desiredYawRate);
+      legAttachmentPoint.setToZero(swingLegAttachmentFrame);
+      
+      double lengthFromHipPitchToFoot = linkLengths.getThighLength(swingLeg) + linkLengths.getShinLength(swingLeg);
+      
+      ReferenceFrame hipPitchFrame = referenceFrames.getFrameBeforeLegJoint(swingLeg, LegJointName.HIP_PITCH);
+      swingTargetToPack.changeFrame(hipPitchFrame);
+      footDesiredVector.setIncludingFrame(swingTargetToPack);
+      
+      double hipPitchToDesiredFootLength = footDesiredVector.length();
+      if(hipPitchToDesiredFootLength > lengthFromHipPitchToFoot)
+      {
+         footDesiredVector2d.setX(footDesiredVector.getX());
+         footDesiredVector2d.setY(footDesiredVector.getY());
+         
+         //need to use the QuadrupedSupportPolygon to build the midZUpFrames
+         legAttachmentPoint.changeFrame(referenceFrames.getSideDependentMidFeetZUpFrame(swingLeg.getSide()));
+         double footToHipHeight = swingTargetToPack.getZ();
+         
+         double maxReach =  Math.sqrt(lengthFromHipPitchToFoot * lengthFromHipPitchToFoot - footToHipHeight * footToHipHeight); 
+         double scalar = maxReach / footDesiredVector2d.length();// * 0.95;
+         footDesiredVector2d.scale(scalar);
+         swingTargetToPack.setX(footDesiredVector2d.getX());
+         swingTargetToPack.setY(footDesiredVector2d.getY());
+      }      
+      swingTargetToPack.changeFrame(ReferenceFrame.getWorldFrame());
+   }
    
    @Override
    public void getSwingTarget(QuadrupedSupportPolygon footPostions, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, FramePoint swingTargetToPack,
@@ -116,13 +161,13 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       double swingLegHipPitchHeight = swingLegHipPitchPoint.getZ();
 
       //calculate hip Roll
-      swingLegHipRollOrientation.setToZero(referenceFrames.getHipRollFrame(swingLeg));
+      swingLegHipRollOrientation.setToZero(referenceFrames.getLegAttachmentFrame(swingLeg));
       swingLegHipRollOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       double stepDistanceRemovedBecauseOfRoll = referenceFrames.getLegLength(swingLeg) * Math.sin(Math.abs(swingLegHipRollOrientation.getRoll()));
 
       double maxStepDistance;
       double maxStepDistanceWithNoRoll = Math.sqrt(Math.pow(referenceFrames.getLegLength(swingLeg), 2) - Math.pow(swingLegHipPitchHeight, 2));
-      if (Double.isNaN(stepDistanceRemovedBecauseOfRoll))
+      if (Double.isNaN(maxStepDistanceWithNoRoll) || Double.isNaN(stepDistanceRemovedBecauseOfRoll))
       {
          maxStepDistance = 0.0;
       }
@@ -153,6 +198,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       
       swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);
       swingTargetToPack.add(desiredSwingFootPositionFromOppositeSideFoot);
+      swingTargetToPack.add(xOffsetFromCenterOfHips.getDoubleValue(), yOffsetFromCenterOfHips.getDoubleValue(), 0.0);
       
       //for debug
       //      swingTargetToPack.set(desiredSwingFootPositionFromHalfStride);

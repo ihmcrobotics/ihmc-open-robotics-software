@@ -33,7 +33,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.sensors.DetectedObjectId;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
-import us.ihmc.ihmcPerception.OpenCVFaceDetector;
+import us.ihmc.ihmcPerception.faceDetection.OpenCVFaceDetector;
 import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -232,7 +232,7 @@ public class VisionPoseEstimator implements DRCStereoListener
                   IntrinsicParameters intrinsicParameters = data.getLeft().intrinsicParameters;
                   chessboardDetector.setCameraMatrix(intrinsicParameters.fx, intrinsicParameters.fy, intrinsicParameters.cx, intrinsicParameters.cy);
 
-                  RigidBodyTransform targetToCameraOpticalFrame = chessboardDetector.detect(data.getLeft().image);
+                  RigidBodyTransform targetToCameraOpticalFrame = chessboardDetector.detect(data.getLeft().image, true);
                   if (targetToCameraOpticalFrame != null)
                   {
                      RigidBodyTransform cameraToWorld = data.getRight();

@@ -9,6 +9,8 @@ public interface QuadrupedRobotParameters
    public SDFRobot createSdfRobot();
 
    public QuadrupedJointNameMap getJointMap();
+   
+   public QuadrupedJointLimits getJointLimits();
 
    public SDFFullRobotModel createFullRobotModel();
 
@@ -19,5 +21,9 @@ public interface QuadrupedRobotParameters
    public QuadrupedPhysicalProperties getPhysicalProperties();
 
    public QuadrupedControllerParameters getQuadrupedControllerParameters();
+   
+   public QuadrupedVMCStandParameters getQuadrupedVMCStandParameters();
+
+   public QuadrupedActuatorParameters getActuatorParameters();
 
 }

@@ -1,51 +1,97 @@
 package us.ihmc.tools.inputDevices.joystick;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 
+import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
-import net.java.games.input.Event;
-import net.java.games.input.EventQueue;
-import us.ihmc.tools.inputDevices.JInputLibraryLoader;
+import net.java.games.input.Component.Identifier;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class Joystick
 {
-   private boolean DEBUG = false;
-   private final int pollIntervalMillis = 20;
-   private float deadband = 0.2f;
-   private boolean connected = false;
+   private final ArrayList<JoystickEventListener> eventListeners = new ArrayList<JoystickEventListener>();
+   private final ArrayList<JoystickGeneralListener> generalListeners = new ArrayList<JoystickGeneralListener>();
+   private final HashSet<Identifier> identifiers = new HashSet<Identifier>();
+   private final Controller joystickController;
+   private final JoystickUpdater joystickUpdater;
+   private final JoystickModel model;
 
-   private final ArrayList<JoystickEventListener> listeners = new ArrayList<JoystickEventListener>();
-   private final ArrayList<JoystickGeneralListener> generalListenersList = new ArrayList<JoystickGeneralListener>();
-
-   public Joystick() throws Exception
+   public Joystick() throws IOException
    {
-      Controller joystickController = getFirstJoystickFoundOnSystem();
+      joystickController = getFirstJoystickFoundOnSystem();
 
       if (joystickController == null)
       {
-         connected = false;
-
-         throw new Exception("joystick not found");
+         throw new IOException("Joystick not found!");
       }
-      else
+      
+      model = JoystickModel.getModelFromName(joystickController.getName());
+      
+      for (Component component : joystickController.getComponents())
       {
-         connected = true;
+         identifiers.add(component.getIdentifier());
       }
-
-      JoystickUpdater joystickUpdater = new JoystickUpdater(joystickController);
+      
+      joystickUpdater = new JoystickUpdater(joystickController, eventListeners, generalListeners);
 
       Thread thread = new Thread(joystickUpdater);
       thread.setPriority(Thread.NORM_PRIORITY);
       thread.start();
    }
 
-   private Controller getFirstJoystickFoundOnSystem()
-   {
-      JInputLibraryLoader.loadLibraries();
-      Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 
+
+   public void addJoystickEventListener(JoystickEventListener joystickEventListener)
+   {
+      
+      eventListeners.add(joystickEventListener);
+   }
+   
+   public void addJoystickGeneralListener(JoystickGeneralListener joystickGeneralListener)
+   {
+      
+      generalListeners.add(joystickGeneralListener);
+   }
+   
+   public void clearEventListeners()
+   {
+      
+      eventListeners.clear();
+   }
+
+   public Component findComponent(Identifier identifier) throws JoystickComponentNotFoundException
+   {
+      
+      if (hasComponent(identifier))
+         return joystickController.getComponent(identifier);
+      else
+         throw new JoystickComponentNotFoundException(identifier);
+   }
+
+   public boolean hasComponent(Identifier identifier)
+   {
+      
+      return identifiers.contains(identifier);
+   }
+   
+   public void setPollInterval(int pollIntervalMillis)
+   {
+      
+      joystickUpdater.setPollIntervalMillis(pollIntervalMillis);
+   }
+   
+   public JoystickModel getModel()
+   {
+      return model;
+   }
+
+   private static Controller getFirstJoystickFoundOnSystem()
+   {
+      Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
+   
       ArrayList<Controller> joystickControllers = new ArrayList<Controller>();
       for (Controller controller : controllers)
       {
@@ -54,146 +100,26 @@ public class Joystick
             joystickControllers.add(controller);
          }
       }
-
-      if (DEBUG)
+   
+      if (joystickControllers.size() > 1)
       {
-         System.out.println("Found " + joystickControllers.size() + " joystick controllers");
-
-         for (Controller controller : joystickControllers)
-         {
-            System.out.println("\t" + controller);
-         }
+         PrintTools.warn("More than one joystick found! " + joystickControllers);
       }
-
-      if (joystickControllers.size() > 0)
+   
+      if (!joystickControllers.isEmpty())
       {
-         Controller selectedController = joystickControllers.get(0);
-         if (DEBUG)
-         {
-            System.out.println("using " + selectedController.getName());
-         }
-
-         return selectedController;
+         PrintTools.info("Using joystick: " + joystickControllers.get(0));
+         return joystickControllers.get(0);
       }
-
-      return null;
+      else
+      {
+         return null;
+      }
    }
 
-   public void addJoystickEventListener(JoystickEventListener joystickEventListener)
+   public static boolean isAJoystickConnectedToSystem()
    {
-      listeners.add(joystickEventListener);
-   }
-
-   public void addJoystickGeneralListener(JoystickGeneralListener joystickGeneralListener)
-   {
-      generalListenersList.add(joystickGeneralListener);
-   }
-
-   public class JoystickUpdater implements Runnable
-   {
-      private final Controller joystickController;
-      HashMap<String, Float> lastValues = new HashMap<String, Float>();
-
-      public JoystickUpdater(Controller joystickController)
-      {
-         this.joystickController = joystickController;
-      }
-
-      public void run()
-      {
-         while (true)
-         {
-            joystickController.poll();
-            EventQueue queue = joystickController.getEventQueue();
-            Event event = new Event();
-
-            while (queue.getNextEvent(event))
-            {
-               if (isJoystickAxisEvent(event))
-               {
-                  if (isInDeadBand(event))
-                  {
-                     event.set(event.getComponent(), 0.0f, event.getNanos());
-                  }
-                  else
-                  {
-                     event.set(event.getComponent(), scaleValue(event), event.getNanos());
-                  }
-               }
-
-               if (isNewValue(event))
-               {
-                  if (DEBUG)
-                  {
-                     System.out.println("event = " + event);
-                  }
-
-                  for (JoystickEventListener listener : listeners)
-                  {
-                     listener.processEvent(event);
-
-                  }
-
-                  for (JoystickGeneralListener listener : generalListenersList)
-                  {
-                     listener.updateConnectivity(connected);
-
-                  }
-               }
-            }
-
-            try
-            {
-               Thread.sleep(pollIntervalMillis);
-            }
-            catch (InterruptedException e)
-            {
-               e.printStackTrace();
-            }
-         }
-      }
-
-      private boolean isNewValue(Event event)
-      {
-         Float value = lastValues.get(event.getComponent().getName());
-         if (value != null)
-         {
-            if (event.getValue() == value)
-            {
-               lastValues.put(event.getComponent().getName(), value);
-
-               return false;
-            }
-         }
-
-         lastValues.put(event.getComponent().getName(), event.getValue());
-
-         return true;
-      }
-
-      private float scaleValue(Event event)
-      {
-         if (event.getValue() > 0.0f)
-         {
-            return (event.getValue() - deadband) / (1.0f - deadband);
-         }
-         else
-         {
-            return (event.getValue() + deadband) / (1.0f - deadband);
-         }
-      }
-
-      private boolean isInDeadBand(Event event)
-      {
-         return (event.getValue() < deadband) && (event.getValue() > -deadband);
-      }
-
-      private boolean isJoystickAxisEvent(Event event)
-      {
-         String name = event.getComponent().getName();
-
-         return name.equals("X Axis") || name.equals("Y Axis") || name.equals("Z Rotation");
-      }
+      return getFirstJoystickFoundOnSystem() != null;
    }
 
    public static void main(String[] args)

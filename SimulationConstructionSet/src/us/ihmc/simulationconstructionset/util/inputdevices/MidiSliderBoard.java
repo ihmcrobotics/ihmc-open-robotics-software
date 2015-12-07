@@ -19,6 +19,7 @@ import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl.ControlType;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl.SliderType;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
@@ -62,6 +63,25 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    public MidiSliderBoard(SimulationConstructionSet scs, boolean showVirtualSliderBoard)
    {
+      this((YoVariableHolder) scs);
+      boolean showSCSWindows = scs != null && scs.getSimulationConstructionSetParameters().getShowWindows();
+      if (showSCSWindows && showVirtualSliderBoard && (preferedDevice.equals(Devices.VIRTUAL) || alwaysShowVirtualSliderBoard))
+      {
+         if ((scs == null) || (scs.getStandardSimulationGUI() != null))
+         {
+            PrintTools.info(this, "Setting Up Virtual Slider Board");
+            virtualSliderBoard = new VirtualSliderBoardGui(this, closeableAndDisposableRegistry);
+         }
+      }
+      
+      if (scs != null)
+      {
+         printIfDebug("Attaching exit action listener " + getClass().getSimpleName() + " to SCS");
+         scs.attachExitActionListener(this);
+      }
+   }
+   public MidiSliderBoard(YoVariableHolder scs)
+   {
       try
       {
          MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
@@ -79,16 +99,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
             this.holder = scs;
          }
 
-         boolean showSCSWindows = scs.getSimulationConstructionSetParameters().getShowWindows();
-         if (showSCSWindows && showVirtualSliderBoard && (preferedDevice.equals(Devices.VIRTUAL) || alwaysShowVirtualSliderBoard))
-         {
-            if ((scs == null) || (scs.getStandardSimulationGUI() != null))
-            {
-               System.out.println("Setting Up Virtual Slider Board");
-               virtualSliderBoard = new VirtualSliderBoardGui(this, closeableAndDisposableRegistry);
-            }
-
-         }
+         
 
          // if a motorized slider board is found
          if (preferedDevice.equals(Devices.MOTORIZED))
@@ -169,11 +180,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
       }
 
-      if (scs != null)
-      {
-         printIfDebug("Attaching exit action listener " + getClass().getSimpleName() + " to SCS");
-         scs.attachExitActionListener(this);
-      }
+
 
    }
 
@@ -602,6 +609,10 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          {
             listener.controlAdded(midiControl);
          }
+      }
+      else
+      {
+         PrintTools.error("Passed in null variable");
       }
    }
 

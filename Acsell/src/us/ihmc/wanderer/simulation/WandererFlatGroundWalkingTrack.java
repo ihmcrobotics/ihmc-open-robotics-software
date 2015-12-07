@@ -1,5 +1,7 @@
 package us.ihmc.wanderer.simulation;
 
+import java.io.IOException;
+
 import net.java.games.input.Component;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
@@ -14,16 +16,15 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.joystick.BooleanYoVariableJoystickEventListener;
 import us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
-import us.ihmc.simulationconstructionset.joystick.JoyStickNotFoundException;
-import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.wanderer.parameters.WandererRobotModel;
 
 public class WandererFlatGroundWalkingTrack
 {
    public static void main(String[] args)
    {
-      boolean USE_JOYSTICK_CONTROLLER = JoystickUpdater.isJoyStickConnected();
+      boolean USE_JOYSTICK_CONTROLLER = Joystick.isAJoystickConnectedToSystem();
 
       WandererRobotModel robotModel = new WandererRobotModel(false, false);
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
@@ -58,20 +59,16 @@ public class WandererFlatGroundWalkingTrack
 
    public static void setupJoyStick(YoVariableHolder registry)
    {
-	  
-	  final JoystickUpdater joystickUpdater;
-	  try
-	  {
-		   joystickUpdater = new JoystickUpdater();
-	  }
-      catch (JoyStickNotFoundException ex)
+      Joystick joystickUpdater;
+      try
       {
-    		  System.err.println("Joystick not found. Proceeding without joystick");
-    		  return;
+         joystickUpdater = new Joystick();
       }
-      Thread thread = new Thread(joystickUpdater);
-      thread.start();
-
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return;
+      }
       
       double deadZone = 0.02;
       double desiredVelocityX_Bias = 0.0;
@@ -86,7 +83,7 @@ public class WandererFlatGroundWalkingTrack
          return;
 
       desiredVelocityX.set(desiredVelocityX_Bias);
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y),
+      joystickUpdater.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y),
     		  -maxDesiredVelocityX+desiredVelocityX_Bias, maxDesiredVelocityX+desiredVelocityX_Bias, deadZone, true));
 /*      desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
       {
@@ -100,19 +97,15 @@ public class WandererFlatGroundWalkingTrack
 */      
       DoubleYoVariable desiredVelocityY = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
       desiredVelocityY.set(desiredVelocityY_Bias);
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X),
+      joystickUpdater.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X),
     		  -0.1+desiredVelocityY_Bias, 0.1+desiredVelocityY_Bias, deadZone, true));
 
       DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
       desiredHeadingDot.set(desiredHeadingDot_Bias);
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
+      joystickUpdater.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
     		  -0.1+desiredHeadingDot_Bias, 0.1+desiredHeadingDot_Bias, deadZone/2.0, true));
       
-      joystickUpdater.listComponents();
-      
       BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
-      joystickUpdater.addListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.TRIGGER), true));
-      
+      joystickUpdater.addJoystickEventListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.TRIGGER), true));
    }
-   
 }

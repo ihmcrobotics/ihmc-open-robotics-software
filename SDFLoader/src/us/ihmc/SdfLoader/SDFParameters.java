@@ -13,8 +13,6 @@ public interface SDFParameters
    String[] getResourceDirectories();
 
    String getResourceDirectory();
-
-   ArrayList<String> getResourceDirectoriesArrayList();
    
    InputStream getSdfAsInputStream();
 

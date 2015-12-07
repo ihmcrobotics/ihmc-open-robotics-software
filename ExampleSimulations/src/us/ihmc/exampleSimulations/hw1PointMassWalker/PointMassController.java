@@ -536,8 +536,8 @@ public class PointMassController implements RobotController
    public void doControl()
    {
       robot.updateIDRobot();
+      
       desiredWalkingVelocityFiltered.update();
-
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
 

@@ -11,6 +11,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations;
 
 public class ExecutionTimerTest
 {
+   private static final long RANDOM_SEED = 1976L;
+
    @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void test()
@@ -19,7 +21,7 @@ public class ExecutionTimerTest
       
       long max = 0;
       
-      Random random = new Random();
+      Random random = new Random(RANDOM_SEED);
       
       for (int i = 0; i < 10; i++)
       {
@@ -43,10 +45,10 @@ public class ExecutionTimerTest
          }
 
          executionTimer.stopMeasurement();
-         assertEquals(delay, executionTimer.getCurrentTime().getDoubleValue()*1000.0, 1);
+         assertEquals(delay, executionTimer.getCurrentTime().getDoubleValue()*1000.0, 10);
       }
       
-      assertEquals(max, executionTimer.getMaxTime().getDoubleValue()*1000.0, 1);
+      assertEquals(max, executionTimer.getMaxTime().getDoubleValue()*1000.0, 10);
 
    }
 

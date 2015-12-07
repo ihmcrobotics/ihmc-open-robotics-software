@@ -23,7 +23,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
    private final Vector3d offsetFromHipRollToHipPitch = new Vector3d();
    private final double thighLength;
    private final double shinLength;
-   private final double kneeThetaOffset;
+   private final double hipThetaOffset, kneeThetaOffset;
 
    private final RigidBodyTransform transformFromBeforeHipRollToAfterHipRoll = new RigidBodyTransform();
    private final Vector3d footPositionInFrameAfterHipRoll = new Vector3d();
@@ -49,6 +49,12 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
       FramePoint foot = new FramePoint(footFrame);
       
       kneePitch.changeFrame(hipPitchFrame);
+      
+      double hipToKneeTheta = Math.atan2(kneePitch.getX(), -kneePitch.getZ());
+      hipThetaOffset = hipToKneeTheta;
+
+//    System.out.println("hipThetaOffset = " + hipThetaOffset);
+    
       thighLength = kneePitch.distance(hipPitch);
       
       kneePitch.changeFrame(kneePitchFrame);
@@ -62,8 +68,11 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
       }
       else
       {
-         kneeThetaOffset = 0;
+         kneeThetaOffset = 0.0;
       }
+      
+//      System.out.println("kneeThetaOffset = " + kneeThetaOffset);
+
    }
    
    public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromLegAttachmentFrame(RobotQuadrant robotQuadrant, QuadrupedRobotParameters quadrupedRobotParams)
@@ -139,7 +148,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
 
       // kneeAngle will always be positive, between 0.0 and PI here since using acos. If you want the other solution, use a negative here.
       double kneeAngle = Math.acos(ratio);
-      
+
       if (bendKneesIn)
       {
          kneeAngle = -1.0 * kneeAngle;
@@ -158,8 +167,8 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
       double hipPitchAngle = theta0 + theta1;
 
       jointAnglesToPack[0] = hipRollAngle;
-      jointAnglesToPack[1] = hipPitchAngle;
-      jointAnglesToPack[2] = kneeAngle - kneeThetaOffset;
+      jointAnglesToPack[1] = hipPitchAngle + hipThetaOffset;
+      jointAnglesToPack[2] = kneeAngle - hipThetaOffset - kneeThetaOffset ;
 
       return valid;
    }

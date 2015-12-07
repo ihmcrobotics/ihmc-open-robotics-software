@@ -15,6 +15,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic.RemoteGraphicType;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactCircle;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
@@ -76,6 +77,10 @@ public class YoGraphicFactory
       case POSITION_ARTIFACT:
          return new YoArtifactPosition(name, (DoubleYoVariable) vars[0], (DoubleYoVariable) vars[1],
                YoGraphicPosition.GraphicType.values()[(int) (double) consts[1]], appearance.getColor().get(), consts[0]);
+
+      case CIRCLE_ARTIFACT:
+         return new YoArtifactCircle(name, (DoubleYoVariable) vars[0], (DoubleYoVariable) vars[1],
+               (DoubleYoVariable) vars[2], appearance.getColor().get());
 
       case LINE_SEGMENT_2D_ARTIFACT:
          

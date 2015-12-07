@@ -1,17 +1,20 @@
 package us.ihmc.robotics.lidar;
 
-import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
-import org.apache.commons.lang3.ArrayUtils;
-import us.ihmc.robotics.geometry.LineSegment3d;
-import us.ihmc.robotics.geometry.Ray3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Arrays;
+
+import org.apache.commons.lang3.ArrayUtils;
+
+import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
+
+import us.ihmc.robotics.geometry.LineSegment3d;
+import us.ihmc.robotics.geometry.Ray3d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
 
 public class LidarScan
 {
@@ -214,20 +217,24 @@ public class LidarScan
 
    public RigidBodyTransform getSweepTransform(int i)
    {
-      if (i >= params.pointsPerSweep)
+      if (i >= params.pointsPerSweep * params.scanHeight)
       {
-         throw new RuntimeException("Index " + i + " greater than or equal to pointsPerSweep " + params.pointsPerSweep);
+         throw new IndexOutOfBoundsException("Index " + i + " greater than or equal to pointsPerSweep " + params.pointsPerSweep + " * scanHeight " + params.scanHeight);
       }
 
       double yawPerIndex = (params.sweepYawMax - params.sweepYawMin) / (params.pointsPerSweep - 1);
-
-      if (Double.isNaN(yawPerIndex))
-      {
-         throw new RuntimeException("bad sweep parameters");
-      }
+      double pitchPerIndex = (params.heightPitchMax - params.heightPitchMin) / (params.scanHeight - 1);
 
       RigidBodyTransform sweepTransform = new RigidBodyTransform();
-      sweepTransform.rotZ(params.sweepYawMin + yawPerIndex * i);
+      if (params.pointsPerSweep > 1)
+      {
+         //sweepTransform.rotZ(params.sweepYawMin + yawPerIndex * i);
+         sweepTransform.rotZ(params.sweepYawMin + yawPerIndex * (i % params.pointsPerSweep));
+      }
+      if (params.scanHeight > 1)
+      {
+         sweepTransform.rotY(params.heightPitchMin + pitchPerIndex * (i / params.pointsPerSweep));
+      }
 
       return sweepTransform;
    }

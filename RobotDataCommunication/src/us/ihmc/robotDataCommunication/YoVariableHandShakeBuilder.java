@@ -225,7 +225,7 @@ public class YoVariableHandShakeBuilder
          Integer index = this.yoVariableIndices.get(yoVar);
          if (index == null)
          {
-            throw new RuntimeException("Backing YoVariableRegistry not added");
+            throw new RuntimeException("Backing YoVariableRegistry not added for " + obj.getName());
          }
          objectMessage.addYoIndex(index);
       }

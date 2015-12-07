@@ -1,9 +1,12 @@
 package us.ihmc.ihmcPerception.chessboardDetection;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.Ignore;
+import org.junit.Test;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-import java.awt.Color;
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
@@ -11,13 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.imageio.ImageIO;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import static org.junit.Assert.*;
 
 public class ChessboardPoseEstimatorTest
 {
@@ -36,29 +33,29 @@ public class ChessboardPoseEstimatorTest
 
       OpenCVChessboardPoseEstimator openCVDetector = new OpenCVChessboardPoseEstimator(squareNumRow, squareNumCol, gridWidth);
       BufferedImage image = ImageIO.read(is99Failed);
-      RigidBodyTransform transform = openCVDetector.detect(image);
-      assertTrue(transform != null);
+      RigidBodyTransform transform = openCVDetector.detect(image, true);
+      assertNotNull(transform);
 
    }
 
    @DeployableTestMethod(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testOpenCVRegression4x5() throws IOException
-   {
+         {
 
-      final double gridWidth = 0.05;
-      final int squareNumCol = 4;
-      final int squareNumRow = 5;
+            final double gridWidth = 0.05;
+            final int squareNumCol = 4;
+            final int squareNumRow = 5;
 
-      InputStream is20Failed = getClass().getClassLoader().getResourceAsStream("regression4x5/20_failed.png");
-      InputStream is7Failed = getClass().getClassLoader().getResourceAsStream("regression4x5/7_failed.png");
+            InputStream is20Failed = getClass().getClassLoader().getResourceAsStream("regression4x5/20_failed.png");
+            InputStream is7Failed = getClass().getClassLoader().getResourceAsStream("regression4x5/7_failed.png");
 
-      OpenCVChessboardPoseEstimator openCVDetector = new OpenCVChessboardPoseEstimator(squareNumRow, squareNumCol, gridWidth);
-      for (InputStream f : new InputStream[] { is20Failed, is7Failed })
-      {
-         BufferedImage image = ImageIO.read(f);
-         RigidBodyTransform transform = openCVDetector.detect(image);
-         assertTrue(transform != null);
+            OpenCVChessboardPoseEstimator openCVDetector = new OpenCVChessboardPoseEstimator(squareNumRow, squareNumCol, gridWidth);
+            for (InputStream f : new InputStream[] { is20Failed, is7Failed })
+            {
+               BufferedImage image = ImageIO.read(f);
+               RigidBodyTransform transform = openCVDetector.detect(image, true);
+               assertNotNull(transform);
       }
    }
 
@@ -127,7 +124,7 @@ public class ChessboardPoseEstimatorTest
       RigidBodyTransform boofCVTransform = boofCVDetector.detect(image);
 
       OpenCVChessboardPoseEstimator openCVDetector = new OpenCVChessboardPoseEstimator(squareNumRow, squareNumCol, gridWidth);
-      RigidBodyTransform openCVTransform = openCVDetector.detect(image);
+      RigidBodyTransform openCVTransform = openCVDetector.detect(image, false);
 
       if (DEBUG)
       {

@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception;
+package us.ihmc.ihmcPerception.chessboardDetection;
 
 import java.awt.image.BufferedImage;
 
@@ -29,7 +29,7 @@ public class ChessboardDetector
       intrinsicSet = true;
    }
 
-   public RigidBodyTransform detectChessboard(BufferedImage image)
+   public RigidBodyTransform detectChessboard(BufferedImage image, boolean attemptExtremePitchDetection)
    {
       if (!intrinsicSet)
       {
@@ -37,6 +37,6 @@ public class ChessboardDetector
          return null;
       }
 
-      return detector.detect(image);
+      return detector.detect(image, attemptExtremePitchDetection);
    }
 }

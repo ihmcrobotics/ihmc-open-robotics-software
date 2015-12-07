@@ -41,6 +41,11 @@ public class JaxbSDFLoader
    {
       this(new FileInputStream(file), Arrays.asList(resourceDirectory), mutator);
    }
+   
+   public JaxbSDFLoader(InputStream inputStream, String[] resourceDirectories, SDFDescriptionMutator mutator) throws JAXBException, FileNotFoundException
+   {
+      this(inputStream, Arrays.asList(resourceDirectories), mutator);
+   }
 
    public JaxbSDFLoader(InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator)
            throws JAXBException, FileNotFoundException

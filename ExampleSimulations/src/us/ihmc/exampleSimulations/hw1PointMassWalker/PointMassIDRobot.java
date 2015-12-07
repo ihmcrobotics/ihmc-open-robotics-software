@@ -106,7 +106,7 @@ public class PointMassIDRobot
    
    
    /**
-    * Joints and Viz
+    * Joints and Visualizers
     */
    public PointMassIDRobot(PointMassSCSRobot robot, YoVariableRegistry parentRegistry)
    {
