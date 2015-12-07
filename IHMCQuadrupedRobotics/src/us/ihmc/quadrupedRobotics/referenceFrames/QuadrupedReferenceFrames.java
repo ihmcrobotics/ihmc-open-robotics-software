@@ -103,7 +103,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
          ReferenceFrame frameAfterKnee = framesAfterLegJoint.get(robotQuadrant).get(LegJointName.KNEE);
 
          TranslationReferenceFrame soleFrame = new TranslationReferenceFrame(robotQuadrant.toString() + "SoleFrame", frameAfterKnee);
-         soleFrame.updateTranslation(quadrupedPhysicalProperties.getOffsetFromKneeToFoot());
+         soleFrame.updateTranslation(quadrupedPhysicalProperties.getOffsetFromKneeToFoot(robotQuadrant));
          soleFrame.update();
          
          soleFrames.put(robotQuadrant, soleFrame);
@@ -208,7 +208,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    }
 
    @Override
-   public ReferenceFrame getMidTrotLnieZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine)
+   public ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine)
    {
       if(quadrantAssocaitedWithTrotLine.isQuadrantInHind())
       {
@@ -234,6 +234,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       return neckReferenceFrames.get(neckJointName);
    }
 
+   @Override
    public ReferenceFrame getFrameBeforeLegJoint(RobotQuadrant robotQuadrant, LegJointName legJointName)
    {
       return framesBeforeLegJoint.get(robotQuadrant).get(legJointName);
