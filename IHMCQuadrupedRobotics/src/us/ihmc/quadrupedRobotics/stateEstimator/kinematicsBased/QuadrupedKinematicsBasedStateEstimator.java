@@ -10,7 +10,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -24,7 +23,6 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   private final SDFFullRobotModel sdfFullRobotModelFromSensor; // hack for visualization
    private final SDFFullRobotModel sdfFullRobotModelForViz;
 
    private final JointStateUpdater jointStateUpdater;
@@ -49,7 +47,6 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       this.comLinearStateUpdater = comLinearStateUpdater;
 
       this.sdfFullRobotModelForViz = sdfFullRobotModelForViz;
-      this.sdfFullRobotModelFromSensor = null;
 
       if (this.sdfFullRobotModelForViz != null)
          initializeVisualization();
@@ -96,7 +93,6 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    {
       for (int i = 0; i < graphicReferenceFrames.size(); i++)
          graphicReferenceFrames.get(i).update();
-
    }
 
    @Override
