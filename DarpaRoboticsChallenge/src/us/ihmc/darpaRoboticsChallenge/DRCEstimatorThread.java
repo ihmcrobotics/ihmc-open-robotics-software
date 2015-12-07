@@ -319,7 +319,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
          String footContactSensorName = sensorInformation.getFeetContactSensorNames().get(robotSide);
-         ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolder.getByName(footForceSensorName);
+         ForceSensorDataReadOnly footForceSensorForEstimator = estimatorForceSensorDataHolderToUpdate.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
          //         double footSwitchCoPThresholdFraction = 0.01;
