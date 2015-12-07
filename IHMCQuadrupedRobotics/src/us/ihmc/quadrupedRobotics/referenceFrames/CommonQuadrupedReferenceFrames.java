@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.referenceFrames;
 
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -36,8 +37,10 @@ public abstract class CommonQuadrupedReferenceFrames
 
    public abstract QuadrantDependentList<ReferenceFrame> getFootReferenceFrames();
    
+   public abstract ReferenceFrame getFrameBeforeLegJoint(RobotQuadrant robotQuadrant, LegJointName legJointName);
+
    private final QuadrantDependentList<Double> legLengths = new QuadrantDependentList<>();
-   
+
    public void initializeCommonValues()
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -55,4 +58,5 @@ public abstract class CommonQuadrupedReferenceFrames
    }
 
    public abstract ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine);
+
 }
