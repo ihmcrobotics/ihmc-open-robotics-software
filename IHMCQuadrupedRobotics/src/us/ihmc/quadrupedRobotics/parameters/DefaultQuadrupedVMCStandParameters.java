@@ -2,8 +2,8 @@ package us.ihmc.quadrupedRobotics.parameters;
 
 public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandParameters
 {
-   private final double[] bodyOrientationProportionalGains = {2000, 2000, 2000};
-   private final double[] bodyOrientationDerivativeGains = {400, 400, 400};
+   private final double[] bodyOrientationProportionalGains = {5000, 5000, 5000};
+   private final double[] bodyOrientationDerivativeGains = {750, 750, 750};
    private final double[] bodyOrientationIntegralGains = {0, 0, 0};
    private final double bodyOrientationMaxIntegralError = 0;
 
