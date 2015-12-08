@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.parameters;
 
+import javax.vecmath.Vector2d;
+
 public class DefaultSwingTargetGeneratorParameters implements QuadrupedControllerParameters 
 {
    private final double minimumVelocityForFullSkew = 0.1;
@@ -11,6 +13,9 @@ public class DefaultSwingTargetGeneratorParameters implements QuadrupedControlle
    private final double maxYawPerStep = 0.25;
    private final double initialDesiredFootCorrectionBreakFrequency = 1.0;
    private final double defaultDesiredFootCorrectionBreakFrequency = 0.15;
+   
+   private final double comCloseToFinalDesiredTransitionRadius = 0.10;
+   private final Vector2d desiredCoMOffset = new Vector2d(0.0, 0.0);
    
    @Override
    public double getMinimumVelocityForFullSkew()
@@ -80,6 +85,18 @@ public class DefaultSwingTargetGeneratorParameters implements QuadrupedControlle
    {
       // TODO Auto-generated method stub
       return 0;
+   }
+   
+   @Override
+   public double getDefaultCoMCloseToFinalDesiredTransitionRadius()
+   {
+      return comCloseToFinalDesiredTransitionRadius;
+   }
+
+   @Override
+   public Vector2d getDefaultDesiredCoMOffset()
+   {
+      return desiredCoMOffset;
    }
 
 }

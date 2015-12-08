@@ -176,12 +176,14 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    
    private final BooleanYoVariable useSubCircleForBodyShiftTarget = new BooleanYoVariable("useSubCircleForBodyShiftTarget", registry);
    private final DoubleYoVariable subCircleRadius = new DoubleYoVariable("subCircleRadius", registry);
-   
+   private final DoubleYoVariable comCloseRadius = new DoubleYoVariable("comCloseRadius", "Distance check from final desired circle to CoM for transitioning into swing state", registry);
+
    private final YoFrameVector yoVectorToSubtract = new YoFrameVector("yoVectorToSubtract", ReferenceFrame.getWorldFrame(), registry);
    
    private final BooleanYoVariable isCoMInsideTriangleForSwingLeg = new BooleanYoVariable("isCoMInsideTriangleForSwingLeg", registry);
+   private final BooleanYoVariable isCoMCloseToFinalDesired = new BooleanYoVariable("isCoMCloseToFinalDesired", registry);
    private final BooleanYoVariable useCommonTriangleForSwingTransition = new BooleanYoVariable("useCommonTriangleForSwingTransition", registry);
-   
+
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final FrameVector comVelocity = new FrameVector();
    private final FramePoint centerOfMassFramePoint = new FramePoint();
@@ -231,6 +233,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       swingDuration.set(quadrupedControllerParameters.getDefaultSwingDuration());
       swingHeight.set(quadrupedControllerParameters.getDefaultSwingHeight());
       subCircleRadius.set(quadrupedControllerParameters.getDefaultSubCircleRadius());
+      comCloseRadius.set(quadrupedControllerParameters.getDefaultCoMCloseToFinalDesiredTransitionRadius());
+      
       useSubCircleForBodyShiftTarget.set(true);
       swingLeg.set(RobotQuadrant.FRONT_RIGHT);
       
@@ -255,6 +259,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       feedForwardBodyFrame = feedForwardReferenceFrames.getBodyFrame();
       
       desiredCoMOffset = new YoFramePoint2d("desiredCoMOffset", feedForwardReferenceFrames.getBodyZUpFrame(), registry);
+      desiredCoMOffset.set(quadrupedControllerParameters.getDefaultDesiredCoMOffset());
 
       updateFeedForwardModelAndFrames();
       
@@ -815,6 +820,15 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
             return false;
          }
          
+         if (swingLeg.getEnumValue().isQuadrantInHind())
+         {
+            isCoMCloseToFinalDesired.set(quadrupleSupportState.isCoMCloseToFinalDesired(comCloseRadius.getDoubleValue()));
+         }
+         else
+         {
+            isCoMCloseToFinalDesired.set(true);
+         }
+         
          if (useCommonTriangleForSwingTransition.getBooleanValue())
          {
              isCoMInsideTriangleForSwingLeg.set(quadrupleSupportState.isCoMInsideCommonTriangleForSwingLeg(swingLeg.getEnumValue()));
@@ -824,7 +838,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
            isCoMInsideTriangleForSwingLeg.set(quadrupleSupportState.isCoMInsideTriangleForSwingLeg(swingLeg.getEnumValue()));
          }
          
-         return isCoMInsideTriangleForSwingLeg.getBooleanValue() && (desiredVelocity.length() != 0.0 || desiredYawRate.getDoubleValue() != 0); //bodyTrajectoryGenerator.isDone() &&
+         return isCoMCloseToFinalDesired.getBooleanValue() && isCoMInsideTriangleForSwingLeg.getBooleanValue() && (desiredVelocity.length() != 0.0 || desiredYawRate.getDoubleValue() != 0); //bodyTrajectoryGenerator.isDone() &&
       }
    }
    
@@ -1092,6 +1106,12 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          centerOfMassFramePoint.getPoint2d(centerOfMassPoint2d);
          QuadrupedSupportPolygon supportTriangleDuringStep = fourFootSupportPolygon.deleteLegCopy(swingLeg);
          return supportTriangleDuringStep.isInside(centerOfMassPoint2d);
+      }
+      
+      public boolean isCoMCloseToFinalDesired(double distanceToCheck)
+      {
+         double distanceFromDesiredToTarget = desiredCoMTarget.distance(desiredCoMFramePosition); 
+         return (distanceFromDesiredToTarget < distanceToCheck);
       }
    }
    
