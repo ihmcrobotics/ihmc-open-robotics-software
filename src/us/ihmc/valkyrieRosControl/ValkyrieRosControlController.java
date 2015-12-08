@@ -61,7 +61,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
 			"upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll",
 			"rightShoulderYaw", "rightElbowPitch" };
    
-   private static final String[] readIMUs = { };//"leftPelvisIMU", "rightPelvisIMU" };
+   private static final String[] readIMUs = { ValkyrieSensorInformation.getMiddlePelvisIMUSensor().replace("pelvis_", "") };
    
    private static final String[] readForceTorqueSensors = { "leftFootSixAxis", "rightFootSixAxis" };
    private static final String[] forceTorqueSensorModelNames = { "leftAnkleRoll", "rightAnkleRoll" };

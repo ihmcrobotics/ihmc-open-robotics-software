@@ -30,7 +30,7 @@ import us.ihmc.valkyrieRosControl.dataHolders.YoMicroStrainIMUHandleHolder;
 
 public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactory
 {
-   private final static boolean USE_USB_MICROSTRAIN_IMUS = true;
+   private final static boolean USE_USB_MICROSTRAIN_IMUS = false;
 
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private ValkyrieRosControlSensorReader sensorReader;
