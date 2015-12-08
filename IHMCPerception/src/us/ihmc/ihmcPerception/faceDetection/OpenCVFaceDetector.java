@@ -19,13 +19,13 @@ import java.nio.file.Paths;
 
 public class OpenCVFaceDetector
 {
-   private final boolean DEBUG = true;
+   private final boolean DEBUG = false;
 
    static
    {
       NativeLibraryLoader.loadLibrary("org.opencv", "opencv_java2411");
    }
-   CascadeClassifier faceDetector = new CascadeClassifier(Paths.get("..", "IHMCPerception", "resources", "faceDetection", "haarcascade_frontalface_alt.xml").toString());
+   CascadeClassifier faceDetector = new CascadeClassifier(ClassLoader.getSystemResource("faceDetection/haarcascade_frontalface_alt.xml").getFile());
    MatOfRect faces = new MatOfRect();
    Mat image= new Mat();
    final double scaleFactor;
