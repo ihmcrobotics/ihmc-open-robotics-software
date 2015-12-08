@@ -2,17 +2,17 @@ package us.ihmc.quadrupedRobotics.parameters;
 
 public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandParameters
 {
-   private final double[] bodyOrientationProportionalGains = {5000, 5000, 5000};
-   private final double[] bodyOrientationDerivativeGains = {750, 750, 750};
+   private final double[] bodyOrientationProportionalGains = {5000, 5000, 2500};
+   private final double[] bodyOrientationDerivativeGains = {750, 750, 500};
    private final double[] bodyOrientationIntegralGains = {0, 0, 0};
    private final double bodyOrientationMaxIntegralError = 0;
 
-   private final double icpForwardProportionalGain = 1.0;
+   private final double icpForwardProportionalGain = 2.0;
    private final double icpForwardDerivativeGain = 0;
    private final double icpForwardIntegralGain = 0;
    private final double icpForwardMaxIntegralError = 0;
 
-   private final double icpLateralProportionalGain = 1.0;
+   private final double icpLateralProportionalGain = 2.0;
    private final double icpLateralDerivativeGain = 0;
    private final double icpLateralIntegralGain = 0;
    private final double icpLateralMaxIntegralError = 0;
@@ -26,7 +26,7 @@ public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandPara
    
    private final double jointPositionLimitStiffness = 1000;
    private final double jointPositionLimitDamping = 100;
-   private final double coefficientOfFriction = 0.5;
+   private final double coefficientOfFriction = 0.8;
 
    @Override
    public double[] getBodyOrientationProportionalGains()
