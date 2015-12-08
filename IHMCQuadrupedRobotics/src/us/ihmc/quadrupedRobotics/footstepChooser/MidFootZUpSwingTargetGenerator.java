@@ -7,14 +7,17 @@ import us.ihmc.quadrupedRobotics.parameters.SwingTargetGeneratorParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.util.QuadrupedLinkLengths;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -95,39 +98,73 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 
    private TranslationReferenceFrame hindFoot = new TranslationReferenceFrame("backFoot", ReferenceFrame.getWorldFrame());
    private TranslationReferenceFrame frontFoot = new TranslationReferenceFrame("frontFoot", ReferenceFrame.getWorldFrame());
+   private PoseReferenceFrame projectedFrameBeforeLegPitch = new PoseReferenceFrame("projectedFrameBeforeLegPitch", ReferenceFrame.getWorldFrame());
    private MidFrameZUpFrame midFeetZUpFrame = new MidFrameZUpFrame("MidFeetZUpFrame", ReferenceFrame.getWorldFrame(), hindFoot, frontFoot);
-   FramePoint legAttachmentPoint = new FramePoint();
    
-   @Override
-   public void getSwingTarget(RobotQuadrant swingLeg, ReferenceFrame swingLegAttachmentFrame, FrameVector desiredBodyVelocity, FramePoint swingTargetToPack,
+   private final FramePose projectedLegPitchPose = new FramePose();
+   private final FramePoint projectedLegPitchPosition = new FramePoint();
+   private final FrameVector scaledVelocityVector = new FrameVector();
+   
+   public void getSwingTarget(RobotQuadrant swingLeg, ReferenceFrame swingLegAttachmentFrame, FrameVector desiredBodyVelocity, double swingDuration, FramePoint swingTargetToPack,
          double desiredYawRate)
    {
       getSwingTarget(swingLeg, desiredBodyVelocity, swingTargetToPack, desiredYawRate);
-      legAttachmentPoint.setToZero(swingLegAttachmentFrame);
       
-      double lengthFromHipPitchToFoot = linkLengths.getThighLength(swingLeg) + linkLengths.getShinLength(swingLeg);
+      ReferenceFrame frameBeforeHipPitch = referenceFrames.getFrameBeforeLegJoint(swingLeg, LegJointName.HIP_PITCH);
+      projectedLegPitchPosition.setToZero(frameBeforeHipPitch);
+      projectedLegPitchPose.setToZero(frameBeforeHipPitch);
       
-      ReferenceFrame hipPitchFrame = referenceFrames.getFrameBeforeLegJoint(swingLeg, LegJointName.HIP_PITCH);
-      swingTargetToPack.changeFrame(hipPitchFrame);
+      scaledVelocityVector.setIncludingFrame(desiredBodyVelocity);
+      scaledVelocityVector.scale(swingDuration);
+      
+      scaledVelocityVector.changeFrame(frameBeforeHipPitch);
+      projectedLegPitchPosition.add(scaledVelocityVector);
+      projectedLegPitchPose.setPosition(projectedLegPitchPosition);
+      
+//      double amountToYaw = desiredYawRate * swingDuration;
+//      projectedLegPitchPose.rotatePoseAboutAxis(hipPitchFrame, Axis.Z, amountToYaw);
+      
+      projectedLegPitchPose.changeFrame(ReferenceFrame.getWorldFrame());
+      projectedFrameBeforeLegPitch.setPoseAndUpdate(projectedLegPitchPose);
+      
+      swingTargetToPack.changeFrame(frameBeforeHipPitch);
       footDesiredVector.setIncludingFrame(swingTargetToPack);
       
-      double hipPitchToDesiredFootLength = footDesiredVector.length();
-      if(hipPitchToDesiredFootLength > lengthFromHipPitchToFoot)
+      double requestedFootOffset = footDesiredVector.length();
+      double maxFootOffset = getMaxSwingDistanceGivenBodyVelocity(swingLeg, swingTargetToPack, desiredBodyVelocity, swingDuration);
+      
+      if(requestedFootOffset > maxFootOffset)
       {
          footDesiredVector2d.setX(footDesiredVector.getX());
          footDesiredVector2d.setY(footDesiredVector.getY());
-         
-         //need to use the QuadrupedSupportPolygon to build the midZUpFrames
-         legAttachmentPoint.changeFrame(referenceFrames.getSideDependentMidFeetZUpFrame(swingLeg.getSide()));
-         double footToHipHeight = swingTargetToPack.getZ();
-         
-         double maxReach =  Math.sqrt(lengthFromHipPitchToFoot * lengthFromHipPitchToFoot - footToHipHeight * footToHipHeight); 
+         double zHeight = swingTargetToPack.getZ();
+         double maxReach =  Math.sqrt(maxFootOffset * maxFootOffset - zHeight * zHeight); 
          double scalar = maxReach / footDesiredVector2d.length();// * 0.95;
          footDesiredVector2d.scale(scalar);
          swingTargetToPack.setX(footDesiredVector2d.getX());
          swingTargetToPack.setY(footDesiredVector2d.getY());
       }      
       swingTargetToPack.changeFrame(ReferenceFrame.getWorldFrame());
+   }
+   
+   private double getMaxSwingDistanceGivenBodyVelocity(RobotQuadrant swingLeg, FramePoint swingTarget, FrameVector desiredBodyVelocity, double swingDuration)
+   {
+      double legLength = linkLengths.getThighLength(swingLeg) + linkLengths.getShinLength(swingLeg);
+      double zHeight = swingTarget.getZ();
+      double hipPitch = Math.acos(zHeight / legLength);
+      double theta =  Math.PI / 2.0 + hipPitch;
+      
+      scaledVelocityVector.setIncludingFrame(desiredBodyVelocity);
+      scaledVelocityVector.scale(swingDuration);
+      
+      double bodyShiftLength = scaledVelocityVector.length();
+      
+      //law of cosines used to get distance from current hip Pitch to foot at singularity given projected hip position and current z height 
+      double sidesSquared = bodyShiftLength * bodyShiftLength + legLength * legLength;
+      double maxSwingDistance = sidesSquared - 2 * legLength * bodyShiftLength * Math.cos(theta);
+      maxSwingDistance = Math.sqrt(maxSwingDistance);
+      
+      return maxSwingDistance;
    }
    
    @Override
