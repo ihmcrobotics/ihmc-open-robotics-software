@@ -331,7 +331,9 @@ public class QuadrupedVirtualModelController
          double fy = soleForceOptimal.get(robotQuadrant).getY();
          double fz = soleForceOptimal.get(robotQuadrant).getZ();
          fz = Math.max(fz, 0);
+         fx = Math.max(fx,-mu * fz / Math.sqrt(2));
          fx = Math.min(fx, mu * fz / Math.sqrt(2));
+         fy = Math.max(fy,-mu * fz / Math.sqrt(2));
          fy = Math.min(fy, mu * fz / Math.sqrt(2));
          soleForceOptimal.get(robotQuadrant).setX(fx);
          soleForceOptimal.get(robotQuadrant).setY(fy);

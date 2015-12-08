@@ -350,6 +350,8 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
             virtualModelController.setJointPositionLimitStiffness(jointName, parameters.getJointPositionLimitStiffness());
             virtualModelController.setJointPositionLimitDamping(jointName, parameters.getJointPositionLimitDamping());
          }
+         // initialize controller friction limits
+         virtualModelController.setCoefficientOfFriction(robotQuadrant, parameters.getCoefficientOfFriction());
       }
    }
 

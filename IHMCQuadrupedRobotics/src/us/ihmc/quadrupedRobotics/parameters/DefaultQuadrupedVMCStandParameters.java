@@ -26,6 +26,7 @@ public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandPara
    
    private final double jointPositionLimitStiffness = 1000;
    private final double jointPositionLimitDamping = 100;
+   private final double coefficientOfFriction = 0.5;
 
    @Override
    public double[] getBodyOrientationProportionalGains()
@@ -145,5 +146,11 @@ public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandPara
    public double getJointPositionLimitDamping()
    {
       return jointPositionLimitDamping;
+   }
+
+   @Override
+   public double getCoefficientOfFriction()
+   {
+      return coefficientOfFriction;
    }
 }
