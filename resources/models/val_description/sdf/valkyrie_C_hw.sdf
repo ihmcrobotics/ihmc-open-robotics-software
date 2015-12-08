@@ -52,7 +52,7 @@
             </accel>
           </noise>
         </imu>
-        <pose>0 0 -0.108184 3.14159 -0 0</pose>
+        <pose>0 0 -0.108184 3.14159 -0 3.14159</pose>
       </sensor>
       <gravity>1</gravity>
       <velocity_decay/>
