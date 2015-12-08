@@ -322,7 +322,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public boolean requestFootForceSensorCalibrationAtStart()
    {
-      return false;
+      return runningOnRealRobot;
    }
 
    @Override

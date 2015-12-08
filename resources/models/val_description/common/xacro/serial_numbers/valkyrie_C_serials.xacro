@@ -8,11 +8,11 @@
 	<xacro:property name="leftAnkleRightActuatorSerialNumber" value="v_e_010" />
 
 	<xacro:property name="rightLegJ1SerialNumber" value="v_a_014" />
-	<xacro:property name="rightLegJ2SerialNumber" value="v_b_010" />
-	<xacro:property name="rightLegJ3SerialNumber" value="v_c_006" />
-	<xacro:property name="rightLegJ4SerialNumber" value="v_d_006" />
-	<xacro:property name="rightAnkleRightActuatorSerialNumber" value="v_e_008" />
-	<xacro:property name="rightAnkleLeftActuatorSerialNumber" value="v_e_007" />
+	<xacro:property name="rightLegJ2SerialNumber" value="v_b_007" />
+	<xacro:property name="rightLegJ3SerialNumber" value="v_c_003" />
+	<xacro:property name="rightLegJ4SerialNumber" value="v_d_002" />
+	<xacro:property name="rightAnkleLeftActuatorSerialNumber" value="v_e_018" />
+	<xacro:property name="rightAnkleRightActuatorSerialNumber" value="v_e_017" />
 
 	<xacro:property name="leftArmJ1SerialNumber" value="v_a_013" />
 	<xacro:property name="leftArmJ2SerialNumber" value="v_b_009" />
@@ -38,13 +38,13 @@
 	<xacro:property name="waistRightActuatorSerialNumber" value="v_e_014" />
 	<xacro:property name="waistLeftActuatorSerialNumber" value="v_e_013" />
 
-	<xacro:property name="pelvis_imu1_serial" value="UNKNOWN" />
-	<xacro:property name="pelvis_imu2_serial" value="UNKNOWN" />
-	<xacro:property name="torso_imu1_serial" value="UNKNOWN" />
-	<xacro:property name="torso_imu2_serial" value="UNKNOWN" />
+	<xacro:property name="pelvis_middle_imu_serial" value="UNKNOWN" />
+	<xacro:property name="pelvis_rear_imu_serial" value="UNKNOWN" />
+	<xacro:property name="torso_left_imu_serial" value="UNKNOWN" />
+	<xacro:property name="torso_right_imu_serial" value="UNKNOWN" />
 
 	<xacro:property name="left_foot_ATI_serial" value="FT17213" />
-	<xacro:property name="right_foot_ATI_serial" value="FT17217" />
+	<xacro:property name="right_foot_ATI_serial" value="FT17215" />
 
 	<xacro:property name="sim_ATI_serial" value="FT001SIM" />
     

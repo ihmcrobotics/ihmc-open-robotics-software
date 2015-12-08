@@ -163,7 +163,7 @@
                         parentLink="${AnkleRollLinkName}"
                         joint_to_attach_sensor_to="${AnkleRollJointName}"
                         origin_xyz="0.0215646 0.0 -0.051054"
-                        origin_rpy="3.14 0.0 -1.047"
+                        origin_rpy="3.14 0.0 0.0"
                         sensor_number="${ATI_serial_number}" 
                         sensor_node="${ATI_node}"
                         sensor_api="${AtiSensorApi}" />

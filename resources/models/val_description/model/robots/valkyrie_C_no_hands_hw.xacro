@@ -5,5 +5,6 @@
     <xacro:include filename="$(find val_description)/model/robots/common/xacro/common_bodies.xacro" />
     <xacro:include filename="$(find val_description)/model/robots/common/xacro/valkyrie_no_hands_base_hw.xacro"/>
     <xacro:include filename="$(find val_description)/common/xacro/serial_numbers/valkyrie_C_serials.xacro"/>
+    <xacro:include filename="$(find val_description)/common/xacro/dev_ports/valkyrie_C_ports.xacro"/>
 
 </robot>
