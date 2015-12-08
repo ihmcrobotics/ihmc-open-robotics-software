@@ -9,24 +9,32 @@ import java.util.logging.Logger;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
+import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainPacketType;
 
 public class MicrostrainUDPPacketListener implements Runnable
 {
    private final static Logger log = Logger.getLogger(MicrostrainUDPPacketListener.class.getName());
 
    
-   private static final byte AHRS_DESCRIPTOR = (byte) 0x80;
+   private static final byte ADAPTIVE_KALMAN_FILTERED_IMU_PACKET = (byte) 0x82;
+   private static final byte ORIGINAL_MIP_IMU_PACKET = (byte) 0x80;
 
-   private static final byte SCALED_ACCELEROMETER_DESCRIPTOR = 0x04;
-   private static final byte SCALED_GYRO_DESCRIPTOR = 0x05;
-   private static final byte MATRIX_DESCRIPTOR = 0x09;
-   private static final byte QUATERNION_DESCRIPTOR = 0x0A;
+   private static final byte EKF_ESTIMATED_LINEAR_ACCELERATION_DESCRIPTOR = 0x0D;
+   private static final byte EKF_ESTIMATED_ANGULAR_RATE_DESCRIPTOR = 0x0E;
+   private static final byte EKF_MATRIX_DESCRIPTOR = 0x04;
+   private static final byte EKF_QUATERNION_DESCRIPTOR = 0x03;
+   
+   private static final byte ORIGINAL_ESTIMATED_LINEAR_ACCELERATION_DESCRIPTOR = 0x04;
+   private static final byte ORIGINAL_ESTIMATED_ANGULAR_RATE_DESCRIPTOR = 0x05;
+   private static final byte ORIGINAL_MATRIX_DESCRIPTOR = 0x09;
+   private static final byte ORIGINAL_QUATERNION_DESCRIPTOR = 0x0A;
 
    private DatagramChannel receiveChannel;
    private volatile boolean requestStop = false;
    private final ByteBuffer receiveBuffer = ByteBuffer.allocate(1024);
 
-   private final ConcurrentCopier<MicroStrainData> microstrainBuffer = new ConcurrentCopier<>(new MicroStrainData.MicroStrainDataBuilder());
+   private final ConcurrentCopier<MicroStrainData> adaptiveEKFMicrostrainBuffer = new ConcurrentCopier<>(new MicroStrainData.MicroStrainDataBuilder());
+   private final ConcurrentCopier<MicroStrainData> originalMIPMicrostrainBuffer = new ConcurrentCopier<>(new MicroStrainData.MicroStrainDataBuilder());
 
    public MicrostrainUDPPacketListener(int port) throws IOException
    {
@@ -55,9 +63,10 @@ public class MicrostrainUDPPacketListener implements Runnable
       return (A == checkA && B == checkB);
    }
 
-   public void readFields(ByteBuffer buffer)
+   private void readOriginalMIPPacketFields(ByteBuffer buffer)
    {
-      MicroStrainData data = microstrainBuffer.getCopyForWriting();
+      MicroStrainData data = originalMIPMicrostrainBuffer.getCopyForWriting();
+      data.setPacketType(MicrostrainPacketType.ORIGINAL);
 
       long time = RealtimeThread.getCurrentMonotonicClockTime();
       data.setReceiveTime(time);
@@ -68,30 +77,87 @@ public class MicrostrainUDPPacketListener implements Runnable
          int descriptor = buffer.get();
          switch (descriptor)
          {
-         case MATRIX_DESCRIPTOR:
-            data.setMatrix(buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
+         case ORIGINAL_MATRIX_DESCRIPTOR:
+            data.setOrientationMatrix(buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
             break;
-         case QUATERNION_DESCRIPTOR:
+         case ORIGINAL_QUATERNION_DESCRIPTOR:
             data.setQuaternion(buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
             break;
-         case SCALED_ACCELEROMETER_DESCRIPTOR:
-            data.setAcceleration(buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
+         case ORIGINAL_ESTIMATED_LINEAR_ACCELERATION_DESCRIPTOR:
+            data.setLinearAcceleration(buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
             break;
-         case SCALED_GYRO_DESCRIPTOR:
-            data.setGyro(buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
+         case ORIGINAL_ESTIMATED_ANGULAR_RATE_DESCRIPTOR:
+            data.setAngularRate(buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
             break;
          default:
-            log.warning("Unknown field " + descriptor);
+            log.warning("Unknown field " + Integer.toHexString(descriptor));
             buffer.position(buffer.position() + fieldLength);
             break;
          }
       }
-      microstrainBuffer.commit();
+      originalMIPMicrostrainBuffer.commit();
+   }
+   
+   private void readKalmanFilteredPacketFields(ByteBuffer buffer)
+   {
+      MicroStrainData data = adaptiveEKFMicrostrainBuffer.getCopyForWriting();
+      data.setPacketType(MicrostrainPacketType.ADAPTIVE_EKF);
+
+      long time = RealtimeThread.getCurrentMonotonicClockTime();
+      data.setReceiveTime(time);
+
+      while (buffer.position() < buffer.limit() - 2)
+      {
+         int fieldLength = buffer.get();
+         int descriptor = buffer.get();
+         short isValidBytes = 0;
+         switch (descriptor)
+         {
+         case EKF_MATRIX_DESCRIPTOR:
+            data.setOrientationMatrix(buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
+            isValidBytes = buffer.getShort();
+            data.setMatrixValid(isMeasurementValid(isValidBytes));
+            break;
+         case EKF_QUATERNION_DESCRIPTOR:
+            data.setQuaternion(buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
+            isValidBytes = buffer.getShort();
+            data.setQuaternionValid(isMeasurementValid(isValidBytes));
+            break;
+         case EKF_ESTIMATED_LINEAR_ACCELERATION_DESCRIPTOR:
+            data.setLinearAcceleration(buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
+            isValidBytes = buffer.getShort();
+            data.setAccelerationValid(isMeasurementValid(isValidBytes));
+            break;
+         case EKF_ESTIMATED_ANGULAR_RATE_DESCRIPTOR:
+            data.setAngularRate(buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
+            isValidBytes = buffer.getShort();
+            data.setAngularRateValid(isMeasurementValid(isValidBytes));
+            break;
+         default:
+            log.warning("Unknown field " + Integer.toHexString(descriptor));
+            buffer.position(buffer.position() + fieldLength);
+            break;
+         }
+      }
+      adaptiveEKFMicrostrainBuffer.commit();
    }
 
-   public MicroStrainData getLatestData()
+   private boolean isMeasurementValid(short isValid)
    {
-      return microstrainBuffer.getCopyForReading();
+      return isValid == 0x0001 ? true : false;
+   }
+
+   public MicroStrainData getLatestData(MicrostrainPacketType packetType)
+   {
+      switch(packetType)
+      {
+      case ADAPTIVE_EKF:
+         return adaptiveEKFMicrostrainBuffer.getCopyForReading();
+      case ORIGINAL:
+         return originalMIPMicrostrainBuffer.getCopyForReading();
+      default:
+         return null;
+      }
    }
 
    @Override
@@ -114,8 +180,11 @@ public class MicrostrainUDPPacketListener implements Runnable
             receiveBuffer.position(4);
             switch (descriptor)
             {
-            case AHRS_DESCRIPTOR:
-               readFields(receiveBuffer);
+            case ADAPTIVE_KALMAN_FILTERED_IMU_PACKET:
+               readKalmanFilteredPacketFields(receiveBuffer);
+               break;
+            case ORIGINAL_MIP_IMU_PACKET:
+               readOriginalMIPPacketFields(receiveBuffer);
                break;
             default:
                log.warning("Unknown packet type  " + (descriptor & 0xff));
