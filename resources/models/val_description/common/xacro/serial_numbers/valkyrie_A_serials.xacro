@@ -38,10 +38,10 @@
 	<xacro:property name="waistRightActuatorSerialNumber" value="v_e_005" />
 	<xacro:property name="waistLeftActuatorSerialNumber" value="v_e_006" />
 
-	<xacro:property name="pelvis_imu1_serial" value="UNKNOWN" />
-	<xacro:property name="pelvis_imu2_serial" value="UNKNOWN" />
-	<xacro:property name="torso_imu1_serial" value="UNKNOWN" />
-	<xacro:property name="torso_imu2_serial" value="UNKNOWN" />
+	<xacro:property name="pelvis_middle_imu_serial" value="UNKNOWN" />
+	<xacro:property name="pelvis_rear_imu_serial" value="UNKNOWN" />
+	<xacro:property name="torso_left_imu_serial" value="UNKNOWN" />
+	<xacro:property name="torso_right_imu_serial" value="UNKNOWN" />
 
 	<xacro:property name="left_foot_ATI_serial" value="FT14020" />
 	<xacro:property name="right_foot_ATI_serial" value="FT16592" />

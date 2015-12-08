@@ -30,21 +30,21 @@
     </Mechanism>
   </Mechanisms>
   <Devices>
-    <Device id="pelvis_imu1" type="imu">
+    <Device id="pelvis_middle_imu" type="imu">
       <SerialNumber id="UNKNOWN"/>
-      <Node id="/pelvis/sensors/imu1"/>
+      <Node id="/sensors/middlePelvisIMU"/>
     </Device>
-    <Device id="pelvis_imu2" type="imu">
+    <Device id="pelvis_rear_imu" type="imu">
       <SerialNumber id="UNKNOWN"/>
-      <Node id="/pelvis/sensors/imu2"/>
+      <Node id="/sensors/rearPelvisIMU"/>
     </Device>
-    <Device id="torso_imu1" type="imu">
+    <Device id="torso_left_imu" type="imu">
       <SerialNumber id="UNKNOWN"/>
-      <Node id="/torso/sensors/imu1"/>
+      <Node id="/sensors/leftTorsoIMU"/>
     </Device>
-    <Device id="torso_imu2" type="imu">
+    <Device id="torso_right_imu" type="imu">
       <SerialNumber id="UNKNOWN"/>
-      <Node id="/torso/sensors/imu2"/>
+      <Node id="/sensors/rightTorsoIMU"/>
     </Device>
     <Device id="left_foot_force_torque" type="force_torque">
       <SerialNumber id="FT14020"/>

@@ -24,6 +24,8 @@
 	<xacro:property name="WaistRightActuatorApi" value="robot_hardware_interface/TurbodriverAPI_DRCv4_linear" />
 
 	<xacro:property name="AtiSensorApi" value="TurbodriverForceTorqueSensor_v1" />
+	<xacro:property name="ImuSensorHardwareApi" value="val_imu_3dm_gx4_15_interface/Imu3dmGx415Interface" />
+	<xacro:property name="ImuSensorSimApi" value="val_imu_gazebo_interface/ImuGazeboInterface" />
 
 	<xacro:property name="SimApi" value="robot_hardware_interface/TurbodriverSimAPI_DRCv4" />
 
