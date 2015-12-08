@@ -139,7 +139,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
          footDesiredVector2d.setY(footDesiredVector.getY());
          double zHeight = swingTargetToPack.getZ();
          double maxReach =  Math.sqrt(maxFootOffset * maxFootOffset - zHeight * zHeight); 
-         double scalar = maxReach / footDesiredVector2d.length();// * 0.95;
+         double scalar = maxReach / footDesiredVector2d.length() * 0.96;
          footDesiredVector2d.scale(scalar);
          swingTargetToPack.setX(footDesiredVector2d.getX());
          swingTargetToPack.setY(footDesiredVector2d.getY());
