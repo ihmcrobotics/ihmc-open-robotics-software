@@ -10,12 +10,12 @@ import java.util.HashMap;
 
 public class PacketRouter<T extends Enum<T>> 
 {
-   private boolean DEBUG = false;
+   private boolean DEBUG = true;
 
    private final T[] destinationConstants;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
    private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all destinations
-   private String[] packetTypesToDebug = null; //set to null to debug all packets
+   private String[] packetTypesToDebug = new String[]{"VideoPacket"}; //set to null to debug all packets
    
    private final int BROADCAST = 0;
 
@@ -89,7 +89,7 @@ public class PacketRouter<T extends Enum<T>>
    {
       if (shouldPrintDebugStatement(source, packet.getDestination(), packet.getClass()))
       {
-         PrintTools.debug(this, "NP received " + packet.getClass().getSimpleName() + " heading for " + destinationConstants[packet.destination] + " from " + communicatorDestinations.get(source));
+         PrintTools.debug(this, "NP received " + packet.getClass().getSimpleName() + " heading for " + destinationConstants[packet.destination] + " from " + communicatorDestinations.get(source) + " at " + System.nanoTime());
       }
       
       T destination = getPacketDestination(source, packet);
@@ -103,7 +103,7 @@ public class PacketRouter<T extends Enum<T>>
       {
          if(shouldPrintDebugStatement(source, destination.ordinal(), packet.getClass()))
          {
-            PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination);
+            PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination + " at " + System.nanoTime());
          }
          
          forwardPacket(packet, destinationCommunicator);
@@ -161,7 +161,7 @@ public class PacketRouter<T extends Enum<T>>
             {
                if(shouldPrintDebugStatement(source, destination.ordinal(), packet.getClass()))
                {
-                  PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination);
+                  PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination + " at " + System.nanoTime());
                }
                forwardPacket(packet, destinationCommunicator);
             }
