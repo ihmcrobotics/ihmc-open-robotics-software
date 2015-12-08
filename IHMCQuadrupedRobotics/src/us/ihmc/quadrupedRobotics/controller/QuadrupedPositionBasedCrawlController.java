@@ -60,6 +60,7 @@ import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
@@ -68,7 +69,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 
-public class QuadrupedPositionBasedCrawlController extends State<QuadrupedControllerState>
+public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 {
    private static final double DEFAULT_HEADING_CORRECTION_BREAK_FREQUENCY = 1.0;
    private static final double DEFAULT_COM_PITCH_FILTER_BREAK_FREQUENCY = 0.5;
@@ -103,6 +104,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private final ReferenceFrame comFrame;
    private final PoseReferenceFrame desiredCoMPoseReferenceFrame = new PoseReferenceFrame("desiredCoMPoseReferenceFrame", ReferenceFrame.getWorldFrame());
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector desiredCoMVelocity = new YoFrameVector("desiredCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
+
    private final FramePoint desiredCoMFramePosition = new FramePoint(ReferenceFrame.getWorldFrame());
    private final FramePose desiredCoMFramePose = new FramePose(ReferenceFrame.getWorldFrame());
    
@@ -187,7 +190,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private final BooleanYoVariable useCommonTriangleForSwingTransition = new BooleanYoVariable("useCommonTriangleForSwingTransition", registry);
 
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
-   private final FrameVector comVelocity = new FrameVector();
+   private final YoFrameVector centerOfMassVelocity = new YoFrameVector("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
+
    private final FramePoint centerOfMassFramePoint = new FramePoint();
    private final Point2d centerOfMassPoint2d = new Point2d();
    private final YoGraphicPosition centerOfMassViz = new YoGraphicPosition("centerOfMass", centerOfMassPosition, 0.02, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
@@ -221,10 +225,16 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    /** body sway trajectory **/
    private final VelocityConstrainedPositionTrajectoryGenerator comTrajectoryGenerator = new VelocityConstrainedPositionTrajectoryGenerator("comTraj", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint initialCoMPosition = new YoFramePoint("initialCoMPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector initialCoMVelocity = new YoFrameVector("initialCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
+   
    private final DoubleYoVariable comTrajectoryTimeStart = new DoubleYoVariable("comTrajectoryTimeStart", registry);
    private final DoubleYoVariable comTrajectoryTimeCurrent = new DoubleYoVariable("comTrajectoryTimeCurrent", registry);
    private final DoubleYoVariable comTrajectoryTimeDesired = new DoubleYoVariable("comTrajectoryTimeDesired", registry);
 
+   private final DoubleYoVariable comTrajectoryDuration = new DoubleYoVariable("comTrajectoryDuration", registry);
+   private final DoubleYoVariable maximumCoMTrajectoryDuration = new DoubleYoVariable("maximumCoMTrajectoryDuration", registry);
+   private final DoubleYoVariable minimumCoMTrajectoryDuration = new DoubleYoVariable("minimumCoMTrajectoryDuration", registry);
+   
    private VectorProvider desiredVelocityProvider;
    private DoubleProvider desiredYawRateProvider;
    
@@ -290,7 +300,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       
       desiredVelocity.setX(0.0);
       comTrajectoryTimeDesired.set(1.0);
-      
+      maximumCoMTrajectoryDuration.set(6.0);
+      minimumCoMTrajectoryDuration.set(0.01);
+       
       shrunkenPolygonSize.set(0.02);
       
       comPoseYoGraphic = new YoGraphicReferenceFrame("rasta_", referenceFrames.getCenterOfMassFrame(), registry, 0.25, YoAppearance.Green());
@@ -629,7 +641,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       }
    }
    
-   FramePoint footLocation = new FramePoint();
+   private final FramePoint footLocation = new FramePoint();
+   private final FrameVector tempFrameVector = new FrameVector();
    /**
     * uses feedback to update the CoM Velocity, ICP, and Actual Foot Positions
     */
@@ -639,15 +652,16 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
 	  FramePoint comPosition = new FramePoint(comFrame);
 	  comPosition.changeFrame(ReferenceFrame.getWorldFrame());
 	  centerOfMassJacobian.compute();
-	  centerOfMassJacobian.packCenterOfMassVelocity(comVelocity);
-	  comVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+	  centerOfMassJacobian.packCenterOfMassVelocity(tempFrameVector);
+	  tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
+	  centerOfMassVelocity.set(tempFrameVector);
 	  
 	  // compute instantaneous capture point
 	  double zFoot = actualFeetLocations.get(fourFootSupportPolygon.getLowestFootstep()).getZ();
 	  double zDelta = comPosition.getZ() - zFoot;
 	  double omega = Math.sqrt(9.81/zDelta);
-	  currentICP.setX(comPosition.getX() + comVelocity.getX()/omega);
-	  currentICP.setY(comPosition.getY() + comVelocity.getY()/omega);
+	  currentICP.setX(comPosition.getX() + centerOfMassVelocity.getX()/omega);
+	  currentICP.setY(comPosition.getY() + centerOfMassVelocity.getY()/omega);
 	  currentICP.setZ(zFoot);
 	  
 	  updateFeetLocations();
@@ -705,7 +719,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          comTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - comTrajectoryTimeStart.getDoubleValue());
          comTrajectoryGenerator.compute(comTrajectoryTimeCurrent.getDoubleValue());
          comTrajectoryGenerator.get(desiredCoMFramePosition);
+         comTrajectoryGenerator.packVelocity(desiredCoMVelocity);
          desiredCoMFramePosition.setZ(desiredCoMPose.getPosition().getZ());
+         
          desiredCoMPose.setPosition(desiredCoMFramePosition);
       }
    }
@@ -1091,6 +1107,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          FramePoint desiredBodyCurrent = desiredCoMPose.getPosition().getFramePointCopy();
          initialCoMPosition.set(desiredBodyCurrent);
          
+         FrameVector desiredBodyVelocityCurrent = desiredCoMVelocity.getFrameVectorCopy();
+         initialCoMVelocity.set(desiredBodyVelocityCurrent);
+         
          desiredCoMTarget.setXY(target);
          desiredCoMTarget.setZ(desiredBodyCurrent.getZ());
          
@@ -1099,17 +1118,25 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          
          if (!MathTools.epsilonEquals(desiredBodyVelocity.length(), 0.0, 1e-5))
          {
-            comTrajectoryGenerator.setTrajectoryTime(distance / desiredBodyVelocity.length());
+            // Use average velocity to estimate how long it'll take.
+            // Otherwise, when going from fast to slow, it'll have a long duration but
+            // a large initial velocity and thereby overshoot a lot.
+            comTrajectoryDuration.set(distance / (0.5 * (desiredBodyVelocity.length() + initialCoMVelocity.length())));
          }
          else
          {
-            comTrajectoryGenerator.setTrajectoryTime(1.0);
+            comTrajectoryDuration.set(1.0);
          }
          
+         if (comTrajectoryDuration.getDoubleValue() > maximumCoMTrajectoryDuration.getDoubleValue()) comTrajectoryDuration.set(maximumCoMTrajectoryDuration.getDoubleValue());
+         if (comTrajectoryDuration.getDoubleValue() < minimumCoMTrajectoryDuration.getDoubleValue()) comTrajectoryDuration.set(minimumCoMTrajectoryDuration.getDoubleValue());
+         
+         comTrajectoryGenerator.setTrajectoryTime(comTrajectoryDuration.getDoubleValue());
+
          desiredBodyVelocity.changeFrame(ReferenceFrame.getWorldFrame());
          
          comTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
-         comTrajectoryGenerator.setInitialConditions(initialCoMPosition, comVelocity);
+         comTrajectoryGenerator.setInitialConditions(initialCoMPosition, initialCoMVelocity);
          comTrajectoryGenerator.setFinalConditions(desiredCoMTarget, desiredBodyVelocity);
          comTrajectoryGenerator.initialize();
       }
@@ -1260,5 +1287,12 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    public void doTransitionOutOfAction()
    {
       
+   }
+
+
+   @Override
+   public RobotMotionStatus getMotionStatus()
+   {
+      return RobotMotionStatus.IN_MOTION;
    }
 }

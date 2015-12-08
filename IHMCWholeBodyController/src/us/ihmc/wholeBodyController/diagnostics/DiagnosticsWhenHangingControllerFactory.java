@@ -10,13 +10,13 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ICPAndMomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
+import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
 public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehaviorFactory
 {
    private FullRobotModel fullRobotModel;
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
-   private DRCOutputWriterWithTorqueOffsets outputWriterWithTorqueOffsets;
+   private JointTorqueOffsetProcessor jointTorqueOffsetProcessor;
    private boolean transitionRequested = false;
 
    private final boolean useArms;
@@ -38,12 +38,12 @@ public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehavio
       return fullRobotModel;
    }
 
-   public void attachOutputWriterWithTorqueOffsets(DRCOutputWriterWithTorqueOffsets outputWriterWithTorqueOffsets)
+   public void attachJointTorqueOffsetProcessor(JointTorqueOffsetProcessor jointTorqueOffsetProcessor)
    {
       if (controller != null)
-         controller.attachOutputWriterWithTorqueOffsets(outputWriterWithTorqueOffsets);
+         controller.attachjointTorqueOffsetProcessor(jointTorqueOffsetProcessor);
       else
-         this.outputWriterWithTorqueOffsets = outputWriterWithTorqueOffsets;
+         this.jointTorqueOffsetProcessor = jointTorqueOffsetProcessor;
    }
 
    private DiagnosticsWhenHangingController controller;
@@ -61,8 +61,8 @@ public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehavio
 
       controller.addUpdatables(updatables);
 
-      if (outputWriterWithTorqueOffsets != null)
-         controller.attachOutputWriterWithTorqueOffsets(outputWriterWithTorqueOffsets);
+      if (jointTorqueOffsetProcessor != null)
+         controller.attachjointTorqueOffsetProcessor(jointTorqueOffsetProcessor);
 
       return controller;
    }
