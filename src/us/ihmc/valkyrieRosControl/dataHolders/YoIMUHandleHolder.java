@@ -3,10 +3,15 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.rosControl.valkyrie.IMUHandle;
+import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainPacketType;
 
 public class YoIMUHandleHolder
 {
@@ -16,7 +21,9 @@ public class YoIMUHandleHolder
    private final DoubleYoVariable xdd, ydd, zdd;
    private final DoubleYoVariable theta_x, theta_y, theta_z;
    private final DoubleYoVariable q_w, q_x, q_y, q_z;
+   private final BooleanYoVariable isLinearAccelerationValid, isAngularRateValid, isOrientationMeasurementValid;
    
+   private final EnumYoVariable<MicrostrainPacketType> packetTypeToUse;
 
    public YoIMUHandleHolder(IMUHandle handle, IMUDefinition imuDefinition, YoVariableRegistry parentRegistry)
    {
@@ -39,6 +46,24 @@ public class YoIMUHandleHolder
       q_y = new DoubleYoVariable(name + "_q_y", registry);
       q_z = new DoubleYoVariable(name + "_q_z", registry);
       
+      isLinearAccelerationValid = new BooleanYoVariable(name + "_isLinearAccelerationValid", registry);
+      isAngularRateValid = new BooleanYoVariable(name + "_isAngularRateValid", registry);
+      isOrientationMeasurementValid = new BooleanYoVariable(name + "_isOrientationMeasurementValid", registry);
+      
+      packetTypeToUse = new EnumYoVariable<>(name+ "_packetTypeToUse", registry, MicrostrainPacketType.class);
+      
+      packetTypeToUse.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if(YoIMUHandleHolder.this.handle instanceof MicroStrainIMUHandle)
+            {
+               ((MicroStrainIMUHandle) YoIMUHandleHolder.this.handle).setPacketTypeToReturn(packetTypeToUse.getEnumValue());
+            }
+         }
+      });
+      
       parentRegistry.addChild(registry);
       
    }
@@ -57,6 +82,13 @@ public class YoIMUHandleHolder
       this.q_x.set(handle.getQ_x());
       this.q_y.set(handle.getQ_y());
       this.q_z.set(handle.getQ_z());
+      
+      if(handle instanceof MicroStrainIMUHandle) // Q_Q
+      {
+         this.isAngularRateValid.set(((MicroStrainIMUHandle) handle).isAngularRateValid());
+         this.isLinearAccelerationValid.set(((MicroStrainIMUHandle) handle).isLinearAccelerationValid());
+         this.isOrientationMeasurementValid.set(((MicroStrainIMUHandle) handle).isOrientationQuaternionValid());
+      }
    }
 
    public IMUDefinition getImuDefinition()
@@ -75,8 +107,8 @@ public class YoIMUHandleHolder
    public void packAngularVelocity(Vector3d angularVelocityToPack)
    {
       angularVelocityToPack.setX(this.theta_x.getDoubleValue());
-      angularVelocityToPack.setX(this.theta_y.getDoubleValue());
-      angularVelocityToPack.setX(this.theta_z.getDoubleValue());
+      angularVelocityToPack.setY(this.theta_y.getDoubleValue());
+      angularVelocityToPack.setZ(this.theta_z.getDoubleValue());
    }
    
    public void packOrientation(Quat4d orientationToPack)

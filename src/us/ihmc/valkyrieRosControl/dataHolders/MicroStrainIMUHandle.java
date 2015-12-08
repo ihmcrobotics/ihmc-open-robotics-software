@@ -11,6 +11,7 @@ import com.esotericsoftware.minlog.Log;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.rosControl.valkyrie.IMUHandle;
 import us.ihmc.valkyrie.imu.MicroStrainData;
+import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainPacketType;
 import us.ihmc.valkyrie.imu.MicrostrainUDPPacketListener;
 import us.ihmc.valkyrieRosControl.ValkyriePriorityParameters;
 
@@ -23,11 +24,17 @@ public class MicroStrainIMUHandle implements IMUHandle
    private MicroStrainData microStrainData;
 
    private final Vector3d linearAcceleration = new Vector3d();
-   private final Vector3d angularVelocity = new Vector3d();
+   private final Vector3d angularRate = new Vector3d();
    private final Quat4d orientation = new Quat4d();
+   
+   private boolean isLinearAccelerationValid = false;
+   private boolean isAngularRateValid = false;
+   private boolean isOrientationQuaternionValid = false;
 
    private Matrix3d quaternionConversionMatrix = new Matrix3d();
    private final Matrix3d orientationMatrix = new Matrix3d();
+   
+   private MicrostrainPacketType packetTypeToReturn = MicrostrainPacketType.ADAPTIVE_EKF;
 
    /* package-private */ MicroStrainIMUHandle(String name, Integer id)
    {
@@ -44,19 +51,34 @@ public class MicroStrainIMUHandle implements IMUHandle
          throw new RuntimeException("Cannot create listener for IMU " + name, e);
       }
    }
+   
+   public MicrostrainPacketType getPacketTypeToReturn()
+   {
+      return packetTypeToReturn;
+   }
+
+   public void setPacketTypeToReturn(MicrostrainPacketType packetTypeToReturn)
+   {
+      this.packetTypeToReturn = packetTypeToReturn;
+   }
 
    public void update()
    {
-      microStrainData = imuListener.getLatestData();
+      microStrainData = imuListener.getLatestData(packetTypeToReturn);
 
       if(microStrainData != null)
       {
-	      linearAcceleration.set(microStrainData.getAcceleration());
-	      linearAcceleration.scale(MicroStrainData.MICROSTRAIN_GRAVITY);
+	      linearAcceleration.set(microStrainData.getLinearAcceleration());
+	      isLinearAccelerationValid = microStrainData.isLinearAccelerationValid();
+	      if (packetTypeToReturn == MicrostrainPacketType.ORIGINAL)
+	         linearAcceleration.scale(MicroStrainData.MICROSTRAIN_GRAVITY);
 	
-	      angularVelocity.set(microStrainData.getGyro());
-	
+	      angularRate.set(microStrainData.getAngularRate());
+//	      MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD.transform(angularRate);
+	      isAngularRateValid = microStrainData.isAngularRateValid();
+	      
 	      quaternionConversionMatrix.set(microStrainData.getQuaternion());
+	      isOrientationQuaternionValid = microStrainData.isQuaternionValid();
 	      orientationMatrix.mul(MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD, quaternionConversionMatrix);
 	      RotationTools.setQuaternionBasedOnMatrix3d(orientation, orientationMatrix);
 //	      orientation.set(microStrainData.getQuaternion());
@@ -96,19 +118,19 @@ public class MicroStrainIMUHandle implements IMUHandle
    @Override
    public double getTheta_z()
    {
-      return angularVelocity.getZ();
+      return angularRate.getZ();
    }
 
    @Override
    public double getTheta_y()
    {
-      return angularVelocity.getY();
+      return angularRate.getY();
    }
 
    @Override
    public double getTheta_x()
    {
-      return angularVelocity.getX();
+      return angularRate.getX();
    }
 
    @Override
@@ -138,6 +160,36 @@ public class MicroStrainIMUHandle implements IMUHandle
    public double getQ_x()
    {
       return orientation.getX();
+   }
+
+   public boolean isLinearAccelerationValid()
+   {
+      return isLinearAccelerationValid;
+   }
+
+   public void setLinearAccelerationValid(boolean isLinearAccelerationValid)
+   {
+      this.isLinearAccelerationValid = isLinearAccelerationValid;
+   }
+
+   public boolean isAngularRateValid()
+   {
+      return isAngularRateValid;
+   }
+
+   public void setAngularRateValid(boolean isAngularRateValid)
+   {
+      this.isAngularRateValid = isAngularRateValid;
+   }
+
+   public boolean isOrientationQuaternionValid()
+   {
+      return isOrientationQuaternionValid;
+   }
+
+   public void setOrientationQuaternionValid(boolean isOrientationQuaternionValid)
+   {
+      this.isOrientationQuaternionValid = isOrientationQuaternionValid;
    }
 
    @Override
