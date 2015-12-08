@@ -40,7 +40,6 @@ import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithAccelerationIntegration;
-import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerFactory;
@@ -72,7 +71,6 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
    private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
 
    private static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = false;
-   private static final boolean DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET = true;   
    
    private MultiThreadedRealTimeRobotController robotController;
    
@@ -208,8 +206,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
       
       if (INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {         
-         DRCOutputWriterWithAccelerationIntegration valkyrieOutputWriterWithAccelerationIntegration =
-               new DRCOutputWriterWithAccelerationIntegration(drcOutputWriter, robotModel.getControllerDT(), true);
+         DRCOutputWriterWithAccelerationIntegration valkyrieOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(drcOutputWriter, robotModel.getControllerDT(), true);
 
          valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.85, 0.85);
          valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
@@ -219,15 +216,6 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
          drcOutputWriter = valkyrieOutputWriterWithAccelerationIntegration;
       }
 
-      DRCOutputWriterWithTorqueOffsets outputWriterWithTorqueOffsets = null;
-      if (DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET)
-      {
-         outputWriterWithTorqueOffsets = new DRCOutputWriterWithTorqueOffsets(drcOutputWriter, robotModel.getControllerDT(), true);
-         drcOutputWriter = outputWriterWithTorqueOffsets;
-         if (diagnosticControllerFactory != null)
-            diagnosticControllerFactory.attachOutputWriterWithTorqueOffsets(outputWriterWithTorqueOffsets);
-      }
-      
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = null;
       externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(null);
       dataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
@@ -241,6 +229,9 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer, drcOutputWriter, dataProducer,
             yoVariableServer, gravity, robotModel.getEstimatorDT());
+
+      if (diagnosticControllerFactory != null)
+         diagnosticControllerFactory.attachJointTorqueOffsetProcessor(sensorReaderFactory.getSensorReader());
       
       /*
        * Connect all servers

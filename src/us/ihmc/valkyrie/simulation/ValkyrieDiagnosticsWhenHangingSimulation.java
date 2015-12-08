@@ -21,6 +21,7 @@ import us.ihmc.simulationconstructionset.util.virtualHoist.VirtualHoist;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
+import us.ihmc.valkyrieRosControl.ValkyrieTorqueOffsetPrinter;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingController;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
 
@@ -75,7 +76,8 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       @Override
       public void actionPerformed(ActionEvent e)
       {
-         printOffsetsForCoeffsForValkyrie();
+         new ValkyrieTorqueOffsetPrinter().printTorqueOffsets(diagnosticsWhenHangingController);
+//         printOffsetsForCoeffsForValkyrie();
       }
 
    }

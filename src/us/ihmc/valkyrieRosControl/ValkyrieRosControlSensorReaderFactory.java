@@ -2,7 +2,6 @@ package us.ihmc.valkyrieRosControl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import com.esotericsoftware.minlog.Log;
 
@@ -19,13 +18,11 @@ import us.ihmc.rosControl.valkyrie.ForceTorqueSensorHandle;
 import us.ihmc.rosControl.valkyrie.IMUHandle;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.valkyrieRosControl.dataHolders.MicroStrainIMUHandle;
 import us.ihmc.valkyrieRosControl.dataHolders.YoForceTorqueSensorHandle;
 import us.ihmc.valkyrieRosControl.dataHolders.YoIMUHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoJointHandleHolder;
@@ -141,7 +138,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
    }
 
    @Override
-   public SensorReader getSensorReader()
+   public ValkyrieRosControlSensorReader getSensorReader()
    {
       return sensorReader;
    }

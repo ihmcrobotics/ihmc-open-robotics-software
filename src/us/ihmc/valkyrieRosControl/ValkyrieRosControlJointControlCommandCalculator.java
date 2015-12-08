@@ -27,7 +27,7 @@ public class ValkyrieRosControlJointControlCommandCalculator
 
    private final double controlDT;
 
-   public ValkyrieRosControlJointControlCommandCalculator(YoJointHandleHolder yoJointHandleHolder, Map<String, Double> gains, Map<String, Double> offsets,
+   public ValkyrieRosControlJointControlCommandCalculator(YoJointHandleHolder yoJointHandleHolder, Map<String, Double> gains, double torqueOffset,
          double standPrepAngle, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.yoJointHandleHolder = yoJointHandleHolder;
@@ -42,7 +42,7 @@ public class ValkyrieRosControlJointControlCommandCalculator
       this.trajectoryTime = new DoubleYoVariable(pdControllerBaseName + "StandPrepTrajectoryTime", registry);
 
       pidController = new PIDController(pdControllerBaseName + "StandPrep", registry);
-      this.tauOff = new DoubleYoVariable(pdControllerBaseName + "StandPrep_tauOff", registry);
+      this.tauOff = new DoubleYoVariable("tau_offset_" + pdControllerBaseName, registry);
       this.functionGenerator = new YoFunctionGenerator(pdControllerBaseName + "StandPrep_", registry);
 
       this.desiredPosition = new DoubleYoVariable(pdControllerBaseName + "StandPrep_q_d", registry);
@@ -53,7 +53,8 @@ public class ValkyrieRosControlJointControlCommandCalculator
       pidController.setIntegralGain(gains.get("ki"));
       pidController.setMaxIntegralError(50.0);
       pidController.setCumulativeError(0.0);
-      this.tauOff.set(offsets.get("tauOff"));
+
+      tauOff.set(torqueOffset);
 
       this.standPrepAngle.set(standPrepAngle);
       this.trajectoryTime.set(standPrepTrajectoryTime);
@@ -96,8 +97,12 @@ public class ValkyrieRosControlJointControlCommandCalculator
       double standPrepTau = standPrepFactor * masterGain * pidController.compute(q, qDesired, qd, qdDesired, controlDT);
       double controllerTau = factor * yoJointHandleHolder.getControllerTauDesired();
 
-      double desiredEffort = standPrepTau + controllerTau;
+      double desiredEffort = standPrepTau + controllerTau + tauOff.getDoubleValue();
       yoJointHandleHolder.setDesiredEffort(desiredEffort);
+   }
 
+   public void subtractTorqueOffset(double torqueOffset)
+   {
+      tauOff.sub(torqueOffset);
    }
 }
