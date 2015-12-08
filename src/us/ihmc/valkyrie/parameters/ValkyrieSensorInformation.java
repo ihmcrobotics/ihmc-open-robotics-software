@@ -160,7 +160,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    // Use this until sim can handle multiple IMUs
 //    public static final String[] imuSensorsToUse = {leftPelvisIMUSensor, rightPelvisIMUSensor};
-   public static final String[] imuSensorsToUse = {rearPelvisIMUSensor};
+   public static final String[] imuSensorsToUse = {middlePelvisIMUSensor};
 //   public static final String[] imuSensorsToUse = {rightPelvisIMUSensor};
    
    public ValkyrieSensorInformation(DRCRobotModel.RobotTarget target)
