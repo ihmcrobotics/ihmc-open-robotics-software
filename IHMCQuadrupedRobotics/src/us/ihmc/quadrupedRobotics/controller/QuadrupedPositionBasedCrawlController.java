@@ -211,6 +211,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    private final YoGraphicReferenceFrame leftMidZUpFrameViz;
    private final YoGraphicReferenceFrame rightMidZUpFrameViz;
    
+   public final BooleanYoVariable isVelocityNegative = new BooleanYoVariable("isVelocityNegative", registry);
+   public final DoubleYoVariable velocitySign = new DoubleYoVariable("velocitySign", registry);
+   
    private final QuadrantDependentList<YoGraphicReferenceFrame> desiredAttachmentFrames = new QuadrantDependentList<YoGraphicReferenceFrame>();
    private final QuadrantDependentList<YoGraphicReferenceFrame> actualAttachmentFrames = new QuadrantDependentList<YoGraphicReferenceFrame>();
 
@@ -525,6 +528,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       updateEstimates();
       updateGraphics();
       pollDataProviders();
+      checkForReversedVelocity();
       walkingStateMachine.checkTransitionConditions();
       walkingStateMachine.doAction();
       updateDesiredCoMTrajectory();
@@ -536,6 +540,21 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       computeDesiredPositionsAndStoreInFullRobotModel();
       updateFeedForwardModelAndFrames();
    }
+
+   private void checkForReversedVelocity()
+   {
+      if(desiredVelocity.getX() < 0 && lastDesiredVelocity.getX() >= 0)
+      {
+         isVelocityNegative.set(true);
+         velocitySign.set(-1.0);
+      }
+      else if(desiredVelocity.getX() >= 0 && lastDesiredVelocity.getX() < 0)
+      {
+         isVelocityNegative.set(false);
+         velocitySign.set(1.0);
+      }
+   }
+
 
    private void updateFeedForwardModelAndFrames() 
    {
@@ -825,11 +844,25 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          
          if (swingLeg.getEnumValue().isQuadrantInHind())
          {
-            isCoMCloseToFinalDesired.set(quadrupleSupportState.isCoMCloseToFinalDesired(comCloseRadius.getDoubleValue()));
+            if(isVelocityNegative.getBooleanValue())
+            {
+               isCoMCloseToFinalDesired.set(true);
+            }
+            else
+            {
+               isCoMCloseToFinalDesired.set(quadrupleSupportState.isCoMCloseToFinalDesired(comCloseRadius.getDoubleValue()));
+            }
          }
          else
          {
-            isCoMCloseToFinalDesired.set(true);
+            if(isVelocityNegative.getBooleanValue())
+            {
+               isCoMCloseToFinalDesired.set(quadrupleSupportState.isCoMCloseToFinalDesired(comCloseRadius.getDoubleValue()));
+            }
+            else
+            {
+               isCoMCloseToFinalDesired.set(true);
+            }
          }
          
          if (useCommonTriangleForSwingTransition.getBooleanValue())
@@ -1043,6 +1076,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          inscribedCircleRadius.set(radius);
          
          desiredCoMOffset.getFrameTuple2dIncludingFrame(tempFrameVector);
+//         tempFrameVector.scale(velocitySign.getDoubleValue());
          tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
          
          comTargetToPack.add(tempFrameVector.getVector());
