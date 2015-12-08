@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -22,7 +22,8 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 public class QuadrupedVirtualModelController
 {
    private final YoVariableRegistry registry; 
-   
+
+   private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame comFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
    private final ReferenceFrame worldFrame;
@@ -61,8 +62,9 @@ public class QuadrupedVirtualModelController
    private final DenseMatrix64F soleForceVector;
    private final QuadrantDependentList<DenseMatrix64F> legEffortVector;
 
-   public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, YoVariableRegistry parentRegistry)
+   public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedRobotParameters robotParameters, YoVariableRegistry parentRegistry)
    {
+      referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
       registry = new YoVariableRegistry(getClass().getSimpleName());
       
       // initialize reference frames
@@ -103,7 +105,7 @@ public class QuadrupedVirtualModelController
       soleJacobian = new QuadrantDependentList<PointJacobian>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         String jointBeforeFootName = jointNameMap.getJointBeforeFootName(robotQuadrant);
+         String jointBeforeFootName = robotParameters.getJointMap().getJointBeforeFootName(robotQuadrant);
          OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointByName(jointBeforeFootName);
          RigidBody body = fullRobotModel.getRootJoint().getSuccessor();
          RigidBody foot = jointBeforeFoot.getSuccessor();
@@ -321,11 +323,8 @@ public class QuadrupedVirtualModelController
          soleForceOptimal.get(robotQuadrant).setY(soleForcesVector.get(1 + rowOffset, 0));
          soleForceOptimal.get(robotQuadrant).setZ(soleForcesVector.get(2 + rowOffset, 0));
          rowOffset += 3;
-      }
 
-      // apply contact force limits
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
+         // apply contact force limits
          double mu = coefficientOfFriction.get(robotQuadrant)[0];
          double fx = soleForceOptimal.get(robotQuadrant).getX();
          double fy = soleForceOptimal.get(robotQuadrant).getY();
@@ -340,7 +339,7 @@ public class QuadrupedVirtualModelController
          soleForceOptimal.get(robotQuadrant).setZ(fz);
       }
 
-      // compute optimal centroidal forces and torques
+      // compute optimal body torques and CoM forces (accounting for sole force limits)
       CommonOps.mult(comWrenchMap, soleForcesVector, comWrenchVector);
       bodyTorqueOptimal.changeFrame(comFrame);
       bodyTorqueOptimal.setX(comWrenchVector.get(0, 0));
@@ -411,5 +410,10 @@ public class QuadrupedVirtualModelController
    public YoVariableRegistry getRegistry()
    {
       return registry;
+   }
+  
+   public QuadrupedReferenceFrames getReferenceFrames()
+   {
+      return referenceFrames;
    }
 }
