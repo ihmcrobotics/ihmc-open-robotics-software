@@ -37,13 +37,13 @@ import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
+import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
 public class DiagnosticsWhenHangingController extends HighLevelBehavior implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private DRCOutputWriterWithTorqueOffsets outputWriterWithTorqueOffsets;
+   private JointTorqueOffsetProcessor jointTorqueOffsetProcessor;
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
@@ -841,14 +841,14 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    {
    }
 
-   public void attachOutputWriterWithTorqueOffsets(DRCOutputWriterWithTorqueOffsets outputWriterWithTorqueOffsets)
+   public void attachjointTorqueOffsetProcessor(JointTorqueOffsetProcessor jointTorqueOffsetProcessor)
    {
-      this.outputWriterWithTorqueOffsets = outputWriterWithTorqueOffsets;
+      this.jointTorqueOffsetProcessor = jointTorqueOffsetProcessor;
    }
 
    public void transferTorqueOffsetsToOutputWriter()
    {
-      if (outputWriterWithTorqueOffsets == null)
+      if (jointTorqueOffsetProcessor == null)
          return;
 
       for (int i = 0; i < oneDoFJoints.size(); i++)
@@ -858,7 +858,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          if (diagnosticsWhenHangingHelper != null)
          {
             double torqueOffset = diagnosticsWhenHangingHelper.getTorqueOffset();
-            outputWriterWithTorqueOffsets.subtractTorqueOffset(oneDoFJoints.get(i), torqueOffset);
+            jointTorqueOffsetProcessor.subtractTorqueOffset(oneDoFJoints.get(i), torqueOffset);
 
             diagnosticsWhenHangingHelper.setTorqueOffset(0.0);
          }

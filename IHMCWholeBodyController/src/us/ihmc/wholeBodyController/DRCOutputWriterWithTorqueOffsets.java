@@ -11,7 +11,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 
-public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter
+public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointTorqueOffsetProcessor
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DRCOutputWriter drcOutputWriter;
@@ -99,10 +99,11 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter
       return registry;
    }
 
-   public void subtractTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffsetToAdd)
+   @Override
+   public void subtractTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffset)
    {
       DoubleYoVariable torqueOffsetVariable = torqueOffsetMap.get(oneDoFJoint);
-      torqueOffsetVariable.sub(torqueOffsetToAdd);
+      torqueOffsetVariable.sub(torqueOffset);
    }
 }
 
