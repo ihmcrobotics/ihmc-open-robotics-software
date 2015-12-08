@@ -76,6 +76,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       masterGain = new DoubleYoVariable("StandPrepMasterGain", registry);
       timeInStandprep = new DoubleYoVariable("timeInStandprep", registry);
       startStandPrep = new BooleanYoVariable("startStandPrep", registry);
+      startStandPrep.set(true);
       masterGain.set(0.3);
 
       Yaml yaml = new Yaml();
