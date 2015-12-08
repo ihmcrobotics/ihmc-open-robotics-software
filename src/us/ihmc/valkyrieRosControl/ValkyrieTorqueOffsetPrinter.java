@@ -2,16 +2,21 @@ package us.ihmc.valkyrieRosControl;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+
+import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -33,6 +38,7 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
       this.robotName = robotName;
    }
 
+   @SuppressWarnings("unchecked")
    @Override
    public void printTorqueOffsets(DiagnosticsWhenHangingController diagnosticsWhenHangingController)
    {
@@ -81,11 +87,27 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
 
       if (WRITE_OFFSETS_TO_FILE_FOR_IHMC)
       {
+
+         Yaml yaml = new Yaml();
+         InputStream offsetsStream;
+         Map<String, Double> oldOffsetMap = null;
+         try
+         {
+            offsetsStream = new FileInputStream(new File(IHMC_TORQUE_OFFSET_FILE));
+            oldOffsetMap = (Map<String, Double>) yaml.load(offsetsStream);
+            if (offsetsStream != null) offsetsStream.close();
+         }
+         catch (Exception e)
+         {
+            offsetsStream = null;
+            oldOffsetMap = null;
+         }
+
          Path torqueOffsetFilePath = Paths.get(IHMC_TORQUE_OFFSET_FILE);
          try
          {
             Files.createDirectories(torqueOffsetFilePath.getParent());
-            writeTorqueOffsetForIHMC(diagnosticsWhenHangingController, torqueOffsetFilePath.toFile());
+            writeTorqueOffsetForIHMC(diagnosticsWhenHangingController, torqueOffsetFilePath.toFile(), oldOffsetMap);
          }
          catch (IOException e)
          {
@@ -142,8 +164,9 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
       marshaller.marshal(joints, file);
    }
 
-   private void writeTorqueOffsetForIHMC(DiagnosticsWhenHangingController diagnosticsWhenHangingController, File file) throws IOException
+   private void writeTorqueOffsetForIHMC(DiagnosticsWhenHangingController diagnosticsWhenHangingController, File file, Map<String, Double> oldOffsetMap) throws IOException
    {
+      
       FileWriter fileWriter = new FileWriter(file);
       BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
@@ -160,9 +183,12 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
 
          if (diagnosticsWhenHangingHelper != null)
          {
-            double torqueOffset = diagnosticsWhenHangingHelper.getTorqueOffset();
+            double oldTorqueOffset = 0.0;
+            if (oldOffsetMap != null && oldOffsetMap.containsKey(oneDoFJoint.getName()))
+               oldTorqueOffset = oldOffsetMap.get(oneDoFJoint.getName());
+            double newTorqueOffset = diagnosticsWhenHangingHelper.getTorqueOffset() + oldTorqueOffset;
 
-            String offsetString = doubleFormat.format(torqueOffset);
+            String offsetString = doubleFormat.format(newTorqueOffset);
             int nblankSpaces = maxNameLength - oneDoFJoint.getName().length() + 1;
             String blanks = String.format("%1$" + nblankSpaces + "s", "");
             bufferedWriter.write(oneDoFJoint.getName() + blanks + ": " + offsetString);
