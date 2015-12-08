@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jme3.math.Quaternion;
@@ -52,6 +53,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
+import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.configuration.YamlWithIncludesLoader;
@@ -457,11 +459,24 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return null;
    }
 
-   @Override public String getSimpleRobotName()
+   @Override
+   public String getSimpleRobotName()
    {
       return "Valkyrie";
    }
-   
+
+   public String getFullRobotName()
+   {
+      String fullRobotName = getSdfFile();
+      fullRobotName = fullRobotName.substring(fullRobotName.lastIndexOf("/") + 1, fullRobotName.length());
+      fullRobotName = StringUtils.capitalize(fullRobotName);
+      fullRobotName = StringUtils.remove(fullRobotName, "_hw");
+      fullRobotName = StringUtils.remove(fullRobotName, "_sim");
+      fullRobotName = StringUtils.remove(fullRobotName, ".sdf");
+
+      return fullRobotName;
+   }
+
    @Override
    public CollisionBoxProvider getCollisionBoxProvider()
    {
