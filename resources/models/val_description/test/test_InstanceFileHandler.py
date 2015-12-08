@@ -80,8 +80,8 @@ class instanceFileHandlerTests(unittest.TestCase):
         sampleInstanceFile = self.testDirectory + '/test_files/valkyrie_A.xml'
         instanceFileHandler = InstanceFileHandler(sampleInstanceFile)
         devices = instanceFileHandler.getDevices()
-        devicesToCheck = ['pelvis_imu1', 'pelvis_imu2', 'torso_imu1',
-                          'torso_imu2', 'left_foot_force_torque', 'right_foot_force_torque']
+        devicesToCheck = ['pelvis_middle_imu', 'pelvis_rear_imu', 'torso_left_imu',
+                          'torso_right_imu', 'left_foot_force_torque', 'right_foot_force_torque']
         for device in devices:
             assert device.tag == 'Device'
             assert device.get('id') in devicesToCheck

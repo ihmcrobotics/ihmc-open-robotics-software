@@ -1,0 +1,5 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="valkyrie_gazebo_ports">
+
+	<xacro:property name="pelvis_middle_imu_port" value="none" />
+
+</robot>

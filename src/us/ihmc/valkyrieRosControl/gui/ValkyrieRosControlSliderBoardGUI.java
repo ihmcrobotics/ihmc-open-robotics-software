@@ -30,7 +30,10 @@ public class ValkyrieRosControlSliderBoardGUI extends SCSVisualizer
       YoVariable<?> kp = registry.getVariable("ValkyrieRosControlSliderBoard", "kpSelected");
       YoVariable<?> kd = registry.getVariable("ValkyrieRosControlSliderBoard", "kdSelected");
 
-      YoVariable<?> masterGain = registry.getVariable("ValkyrieRosControlSliderBoard", "masterGain");
+      YoVariable<?> masterScaleFactor = registry.getVariable("ValkyrieRosControlSliderBoard", "masterScaleFactor");
+
+
+      
       
       
       sliderBoard.setKnob(1, selectedJoint, 0, selectedJoint.getEnumSize());
@@ -38,7 +41,7 @@ public class ValkyrieRosControlSliderBoardGUI extends SCSVisualizer
       sliderBoard.setSlider(2, qd_d, -Math.PI, Math.PI);
       sliderBoard.setSlider(3, kp, 0, 500);
       sliderBoard.setSlider(4, kd, 0, 10);
-      sliderBoard.setSlider(8, masterGain, 0, 1.0);
+      sliderBoard.setSlider(8, masterScaleFactor, 0.0, 1.0);
       
    }
    

@@ -1,9 +1,9 @@
 <sdf version='1.5'>
   <model name='valkyrie'>
     <link name='pelvis'>
-      <pose>0 0 0 0 -0 0</pose>
+      <pose frame=''>0 0 0 0 -0 0</pose>
       <inertial>
-        <pose>-0.00532 -0.003512 -0.0036 0 -0 0</pose>
+        <pose frame=''>-0.00532 -0.003512 -0.0036 0 -0 0</pose>
         <mass>8.22</mass>
         <inertia>
           <ixx>0.118664</ixx>
@@ -15,7 +15,7 @@
         </inertia>
       </inertial>
       <collision name='pelvis_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -24,7 +24,7 @@
         </geometry>
       </collision>
       <visual name='pelvis_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -52,7 +52,7 @@
             </accel>
           </noise>
         </imu>
-        <pose>0 0 -0.108184 3.14159 -0 0</pose>
+        <pose frame=''>0.012 0 -0.108184 3.14159 -0 -3.14159</pose>
       </sensor>
       <gravity>1</gravity>
       <velocity_decay/>
@@ -76,13 +76,13 @@
             </accel>
           </noise>
         </imu>
-        <pose>-0.0758449 0 -0.111056 -3.14159 0.476467 -3.14159</pose>
+        <pose frame=''>-0.0758449 0 -0.111056 -3.14159 0.476467 -3.14159</pose>
       </sensor>
     </link>
     <link name='leftHipYawLink'>
-      <pose>0 0.1016 -0.1853 0 -0 0</pose>
+      <pose frame=''>0 0.1016 -0.1853 0 -0 0</pose>
       <inertial>
-        <pose>0.02176 -0.00131 0.03867 0 -0 0</pose>
+        <pose frame=''>0.02176 -0.00131 0.03867 0 -0 0</pose>
         <mass>2.39</mass>
         <inertia>
           <ixx>0.017261</ixx>
@@ -94,7 +94,7 @@
         </inertia>
       </inertial>
       <collision name='leftHipYawLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -103,7 +103,7 @@
         </geometry>
       </collision>
       <visual name='leftHipYawLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -145,9 +145,9 @@
       </physics>
     </joint>
     <link name='leftHipRollLink'>
-      <pose>0 0.1016 -0.1853 0 -0 0</pose>
+      <pose frame=''>0 0.1016 -0.1853 0 -0 0</pose>
       <inertial>
-        <pose>0.012959 0.00755 -0.01595 0 -0 0</pose>
+        <pose frame=''>0.012959 0.00755 -0.01595 0 -0 0</pose>
         <mass>3.665</mass>
         <inertia>
           <ixx>0.00597896</ixx>
@@ -159,7 +159,7 @@
         </inertia>
       </inertial>
       <collision name='leftHipRollLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -168,7 +168,7 @@
         </geometry>
       </collision>
       <visual name='leftHipRollLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -210,9 +210,9 @@
       </physics>
     </joint>
     <link name='leftHipPitchLink'>
-      <pose>0 0.1016 -0.2462 0 -0 0</pose>
+      <pose frame=''>0 0.1016 -0.2462 0 -0 0</pose>
       <inertial>
-        <pose>0.016691 0.091397 -0.207875 0 -0 0</pose>
+        <pose frame=''>0.016691 0.091397 -0.207875 0 -0 0</pose>
         <mass>10.2</mass>
         <inertia>
           <ixx>0.240834</ixx>
@@ -224,7 +224,7 @@
         </inertia>
       </inertial>
       <collision name='leftHipPitchLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -233,7 +233,7 @@
         </geometry>
       </collision>
       <visual name='leftHipPitchLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -275,9 +275,9 @@
       </physics>
     </joint>
     <link name='leftKneePitchLink'>
-      <pose>0.000112225 0.137705 -0.677159 0 -0 0</pose>
+      <pose frame=''>0.000112225 0.137705 -0.677159 0 -0 0</pose>
       <inertial>
-        <pose>-0.022183 0.001703 -0.189418 0 -0 0</pose>
+        <pose frame=''>-0.022183 0.001703 -0.189418 0 -0 0</pose>
         <mass>6.2</mass>
         <inertia>
           <ixx>0.0869357</ixx>
@@ -289,7 +289,7 @@
         </inertia>
       </inertial>
       <collision name='leftKneePitchLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -298,7 +298,7 @@
         </geometry>
       </collision>
       <visual name='leftKneePitchLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -340,9 +340,9 @@
       </physics>
     </joint>
     <link name='leftAnklePitchLink'>
-      <pose>-0.0101259 0.137705 -1.08343 0 -0 0</pose>
+      <pose frame=''>-0.0101259 0.137705 -1.08343 0 -0 0</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <mass>0.03</mass>
         <inertia>
           <ixx>4.377e-06</ixx>
@@ -354,7 +354,7 @@
         </inertia>
       </inertial>
       <collision name='leftAnklePitchLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -363,7 +363,7 @@
         </geometry>
       </collision>
       <visual name='leftAnklePitchLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -405,9 +405,9 @@
       </physics>
     </joint>
     <link name='leftFoot'>
-      <pose>-0.0101259 0.137705 -1.08343 0 -0 0</pose>
+      <pose frame=''>-0.0101259 0.137705 -1.08343 0 -0 0</pose>
       <inertial>
-        <pose>0.0369087 0.00494324 -0.0489279 0 -0 0</pose>
+        <pose frame=''>0.0369087 0.00494324 -0.0489279 0 -0 0</pose>
         <mass>2.37</mass>
         <inertia>
           <ixx>0.00641532</ixx>
@@ -419,7 +419,7 @@
         </inertia>
       </inertial>
       <collision name='leftFoot_collision'>
-        <pose>0.066 0 -0.056 0 -0 0</pose>
+        <pose frame=''>0.066 0 -0.056 0 -0 0</pose>
         <geometry>
           <box>
             <size>0.27 0.16 0.064</size>
@@ -427,7 +427,7 @@
         </geometry>
       </collision>
       <visual name='leftFoot_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -468,7 +468,7 @@
         </ode>
       </physics>
       <sensor name='leftFootSixAxis' type='force_torque'>
-        <pose>0.0215646 0 -0.051054 3.14 -1.0842e-19 -1.047</pose>
+        <pose frame=''>0.0215646 0 -0.051054 3.14 -1.0842e-19 -1.047</pose>
         <always_on>1</always_on>
         <update_rate>1000</update_rate>
         <force_torque>
@@ -477,9 +477,9 @@
       </sensor>
     </joint>
     <link name='rightHipYawLink'>
-      <pose>0 -0.1016 -0.1853 0 -0 0</pose>
+      <pose frame=''>0 -0.1016 -0.1853 0 -0 0</pose>
       <inertial>
-        <pose>0.02176 0.00131 0.03867 0 -0 0</pose>
+        <pose frame=''>0.02176 0.00131 0.03867 0 -0 0</pose>
         <mass>2.39</mass>
         <inertia>
           <ixx>0.017261</ixx>
@@ -491,7 +491,7 @@
         </inertia>
       </inertial>
       <collision name='rightHipYawLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -500,7 +500,7 @@
         </geometry>
       </collision>
       <visual name='rightHipYawLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -542,9 +542,9 @@
       </physics>
     </joint>
     <link name='rightHipRollLink'>
-      <pose>0 -0.1016 -0.1853 0 -0 0</pose>
+      <pose frame=''>0 -0.1016 -0.1853 0 -0 0</pose>
       <inertial>
-        <pose>0.012959 -0.00755 -0.01595 0 -0 0</pose>
+        <pose frame=''>0.012959 -0.00755 -0.01595 0 -0 0</pose>
         <mass>3.665</mass>
         <inertia>
           <ixx>0.00597896</ixx>
@@ -556,7 +556,7 @@
         </inertia>
       </inertial>
       <collision name='rightHipRollLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -565,7 +565,7 @@
         </geometry>
       </collision>
       <visual name='rightHipRollLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -607,9 +607,9 @@
       </physics>
     </joint>
     <link name='rightHipPitchLink'>
-      <pose>0 -0.1016 -0.2462 0 -0 0</pose>
+      <pose frame=''>0 -0.1016 -0.2462 0 -0 0</pose>
       <inertial>
-        <pose>0.016691 -0.091397 -0.207875 0 -0 0</pose>
+        <pose frame=''>0.016691 -0.091397 -0.207875 0 -0 0</pose>
         <mass>10.2</mass>
         <inertia>
           <ixx>0.240834</ixx>
@@ -621,7 +621,7 @@
         </inertia>
       </inertial>
       <collision name='rightHipPitchLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -630,7 +630,7 @@
         </geometry>
       </collision>
       <visual name='rightHipPitchLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -672,9 +672,9 @@
       </physics>
     </joint>
     <link name='rightKneePitchLink'>
-      <pose>0.000112225 -0.137705 -0.677159 0 -0 0</pose>
+      <pose frame=''>0.000112225 -0.137705 -0.677159 0 -0 0</pose>
       <inertial>
-        <pose>-0.022183 0.001703 -0.189418 0 -0 0</pose>
+        <pose frame=''>-0.022183 0.001703 -0.189418 0 -0 0</pose>
         <mass>6.2</mass>
         <inertia>
           <ixx>0.0869357</ixx>
@@ -686,7 +686,7 @@
         </inertia>
       </inertial>
       <collision name='rightKneePitchLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -695,7 +695,7 @@
         </geometry>
       </collision>
       <visual name='rightKneePitchLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -737,9 +737,9 @@
       </physics>
     </joint>
     <link name='rightAnklePitchLink'>
-      <pose>-0.0101259 -0.137705 -1.08343 0 -0 0</pose>
+      <pose frame=''>-0.0101259 -0.137705 -1.08343 0 -0 0</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <mass>0.03</mass>
         <inertia>
           <ixx>4.377e-06</ixx>
@@ -751,7 +751,7 @@
         </inertia>
       </inertial>
       <collision name='rightAnklePitchLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -760,7 +760,7 @@
         </geometry>
       </collision>
       <visual name='rightAnklePitchLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -802,9 +802,9 @@
       </physics>
     </joint>
     <link name='rightFoot'>
-      <pose>-0.0101259 -0.137705 -1.08343 0 -0 0</pose>
+      <pose frame=''>-0.0101259 -0.137705 -1.08343 0 -0 0</pose>
       <inertial>
-        <pose>0.0369087 0.00494324 -0.0489279 0 -0 0</pose>
+        <pose frame=''>0.0369087 0.00494324 -0.0489279 0 -0 0</pose>
         <mass>2.37</mass>
         <inertia>
           <ixx>0.00641532</ixx>
@@ -816,7 +816,7 @@
         </inertia>
       </inertial>
       <collision name='rightFoot_collision'>
-        <pose>0.066 0 -0.056 0 -0 0</pose>
+        <pose frame=''>0.066 0 -0.056 0 -0 0</pose>
         <geometry>
           <box>
             <size>0.27 0.16 0.064</size>
@@ -824,7 +824,7 @@
         </geometry>
       </collision>
       <visual name='rightFoot_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -865,7 +865,7 @@
         </ode>
       </physics>
       <sensor name='rightFootSixAxis' type='force_torque'>
-        <pose>0.0215646 0 -0.051054 3.14 -1.0842e-19 -1.047</pose>
+        <pose frame=''>0.0215646 0 -0.051054 3.14 -1.0842e-19 -1.047</pose>
         <always_on>1</always_on>
         <update_rate>1000</update_rate>
         <force_torque>
@@ -874,9 +874,9 @@
       </sensor>
     </joint>
     <link name='torsoYawLink'>
-      <pose>0 0 0 0 -0 0</pose>
+      <pose frame=''>0 0 0 0 -0 0</pose>
       <inertial>
-        <pose>0 0 -0.01 0 -0 0</pose>
+        <pose frame=''>0 0 -0.01 0 -0 0</pose>
         <mass>0.5</mass>
         <inertia>
           <ixx>0.000608427</ixx>
@@ -888,7 +888,7 @@
         </inertia>
       </inertial>
       <collision name='torsoYawLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -897,7 +897,7 @@
         </geometry>
       </collision>
       <visual name='torsoYawLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -939,9 +939,9 @@
       </physics>
     </joint>
     <link name='torsoPitchLink'>
-      <pose>0.04191 0 0 0 -0 0</pose>
+      <pose frame=''>0.04191 0 0 0 -0 0</pose>
       <inertial>
-        <pose>0 0 0.005 0 -0 0</pose>
+        <pose frame=''>0 0 0.005 0 -0 0</pose>
         <mass>0.1</mass>
         <inertia>
           <ixx>3.032e-05</ixx>
@@ -953,7 +953,7 @@
         </inertia>
       </inertial>
       <collision name='torsoPitchLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -962,7 +962,7 @@
         </geometry>
       </collision>
       <visual name='torsoPitchLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1004,9 +1004,9 @@
       </physics>
     </joint>
     <link name='torso'>
-      <pose>0.04191 0 0.0203 0 -0 0</pose>
+      <pose frame=''>0.04191 0 0.0203 0 -0 0</pose>
       <inertial>
-        <pose>-0.095548 -0.003337 0.243098 0 -0 0</pose>
+        <pose frame=''>-0.095548 -0.003337 0.243098 0 -0 0</pose>
         <mass>39.47</mass>
         <inertia>
           <ixx>0.873269</ixx>
@@ -1018,7 +1018,7 @@
         </inertia>
       </inertial>
       <collision name='torso_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1027,7 +1027,7 @@
         </geometry>
       </collision>
       <visual name='torso_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1050,7 +1050,7 @@
           </clip>
         </camera>
         <update_rate>60</update_rate>
-        <pose>0.0345 0.0406 0.1135 1.57 -5.55112e-17 1.57</pose>
+        <pose frame=''>0.0345 0.0406 0.1135 1.57 -5.55112e-17 1.57</pose>
       </sensor>
       <velocity_decay/>
       <sensor name='leftTorsoIMU' type='imu'>
@@ -1072,7 +1072,7 @@
             </accel>
           </noise>
         </imu>
-        <pose>-0.046863 0.134239 0.363068 1.57 4.33681e-19 3.14</pose>
+        <pose frame=''>-0.046863 0.134239 0.363068 1.57 4.33681e-19 3.14</pose>
       </sensor>
       <gravity>1</gravity>
       <velocity_decay/>
@@ -1091,7 +1091,7 @@
           </clip>
         </camera>
         <update_rate>60</update_rate>
-        <pose>0.0345 -0.0406 0.1135 1.57 -5.55112e-17 1.57</pose>
+        <pose frame=''>0.0345 -0.0406 0.1135 1.57 -5.55112e-17 1.57</pose>
       </sensor>
     </link>
     <joint name='torsoRoll' type='revolute'>
@@ -1127,9 +1127,9 @@
       </physics>
     </joint>
     <link name='leftShoulderPitchLink'>
-      <pose>0.01031 0 0.3187 0 -0 0</pose>
+      <pose frame=''>0.01031 0 0.3187 0 -0 0</pose>
       <inertial>
-        <pose>-0.012 0.251 0 0 -0 0</pose>
+        <pose frame=''>-0.012 0.251 0 0 -0 0</pose>
         <mass>2.65</mass>
         <inertia>
           <ixx>0.0137182</ixx>
@@ -1141,7 +1141,7 @@
         </inertia>
       </inertial>
       <collision name='leftShoulderPitchLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1150,7 +1150,7 @@
         </geometry>
       </collision>
       <visual name='leftShoulderPitchLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1192,9 +1192,9 @@
       </physics>
     </joint>
     <link name='leftShoulderRollLink'>
-      <pose>0.01031 0.2499 0.3187 0 -0 0</pose>
+      <pose frame=''>0.01031 0.2499 0.3187 0 -0 0</pose>
       <inertial>
-        <pose>-0.008513 0.02068 -0.001088 0 -0 0</pose>
+        <pose frame=''>-0.008513 0.02068 -0.001088 0 -0 0</pose>
         <mass>3.97</mass>
         <inertia>
           <ixx>0.00949412</ixx>
@@ -1206,7 +1206,7 @@
         </inertia>
       </inertial>
       <collision name='leftShoulderRollLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1215,7 +1215,7 @@
         </geometry>
       </collision>
       <visual name='leftShoulderRollLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1257,9 +1257,9 @@
       </physics>
     </joint>
     <link name='leftShoulderYawLink'>
-      <pose>0.01031 0.2499 0.3187 0 -0 0</pose>
+      <pose frame=''>0.01031 0.2499 0.3187 0 -0 0</pose>
       <inertial>
-        <pose>-0.004304 0.209832 0.007295 0 -0 0</pose>
+        <pose frame=''>-0.004304 0.209832 0.007295 0 -0 0</pose>
         <mass>3.085</mass>
         <inertia>
           <ixx>0.0393552</ixx>
@@ -1271,7 +1271,7 @@
         </inertia>
       </inertial>
       <collision name='leftShoulderYawLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1280,7 +1280,7 @@
         </geometry>
       </collision>
       <visual name='leftShoulderYawLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1322,9 +1322,9 @@
       </physics>
     </joint>
     <link name='leftElbowPitchLink'>
-      <pose>0.03571 0.5799 0.3187 0 -0 0</pose>
+      <pose frame=''>0.03571 0.5799 0.3187 0 -0 0</pose>
       <inertial>
-        <pose>-0.020344 0.014722 0.0223 0 -0 0</pose>
+        <pose frame=''>-0.020344 0.014722 0.0223 0 -0 0</pose>
         <mass>1.83</mass>
         <inertia>
           <ixx>0.00331452</ixx>
@@ -1336,7 +1336,7 @@
         </inertia>
       </inertial>
       <collision name='leftElbowPitchLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1345,7 +1345,7 @@
         </geometry>
       </collision>
       <visual name='leftElbowPitchLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1387,9 +1387,9 @@
       </physics>
     </joint>
     <link name='leftForearmLink'>
-      <pose>0.01031 0.5799 0.3187 0 -0 0</pose>
+      <pose frame=''>0.01031 0.5799 0.3187 0 -0 0</pose>
       <inertial>
-        <pose>0.015 0.13 0.019564 0 -0 0</pose>
+        <pose frame=''>0.015 0.13 0.019564 0 -0 0</pose>
         <mass>2.476</mass>
         <inertia>
           <ixx>0.0117554</ixx>
@@ -1401,7 +1401,7 @@
         </inertia>
       </inertial>
       <collision name='leftForearmLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1410,7 +1410,7 @@
         </geometry>
       </collision>
       <visual name='leftForearmLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1452,9 +1452,9 @@
       </physics>
     </joint>
     <link name='leftWristRollLink'>
-      <pose>0.01031 0.867 0.3187 0 -0 0</pose>
+      <pose frame=''>0.01031 0.867 0.3187 0 -0 0</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <mass>0.14</mass>
         <inertia>
           <ixx>3.0251e-05</ixx>
@@ -1466,7 +1466,7 @@
         </inertia>
       </inertial>
       <collision name='leftWristRollLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1475,7 +1475,7 @@
         </geometry>
       </collision>
       <visual name='leftWristRollLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1517,9 +1517,9 @@
       </physics>
     </joint>
     <link name='leftPalm'>
-      <pose>0.01031 0.867 0.3187 0 -0 0</pose>
+      <pose frame=''>0.01031 0.867 0.3187 0 -0 0</pose>
       <inertial>
-        <pose>0.002954 0.052034 -0.000236 0 -0 0</pose>
+        <pose frame=''>0.002954 0.052034 -0.000236 0 -0 0</pose>
         <mass>0.712</mass>
         <inertia>
           <ixx>0.000943493</ixx>
@@ -1531,7 +1531,7 @@
         </inertia>
       </inertial>
       <collision name='leftPalm_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1540,7 +1540,7 @@
         </geometry>
       </collision>
       <visual name='leftPalm_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1582,9 +1582,9 @@
       </physics>
     </joint>
     <link name='leftIndexFingerPitch1Link'>
-      <pose>0.01251 0.9646 0.3422 0.1745 -0 0</pose>
+      <pose frame=''>0.01251 0.9646 0.3422 0.1745 -0 0</pose>
       <inertial>
-        <pose>0 0.02 0 0 -0 0</pose>
+        <pose frame=''>0 0.02 0 0 -0 0</pose>
         <mass>0.02</mass>
         <inertia>
           <ixx>4.232e-06</ixx>
@@ -1596,7 +1596,7 @@
         </inertia>
       </inertial>
       <collision name='leftIndexFingerPitch1Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1605,7 +1605,7 @@
         </geometry>
       </collision>
       <visual name='leftIndexFingerPitch1Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1647,9 +1647,9 @@
       </physics>
     </joint>
     <link name='leftIndexFingerPitch2Link'>
-      <pose>0.01251 1.00212 0.348815 0.1745 -0 0</pose>
+      <pose frame=''>0.01251 1.00212 0.348815 0.1745 -0 0</pose>
       <inertial>
-        <pose>0 0.013 0 0 -0 0</pose>
+        <pose frame=''>0 0.013 0 0 -0 0</pose>
         <mass>0.018</mass>
         <inertia>
           <ixx>1.562e-06</ixx>
@@ -1661,7 +1661,7 @@
         </inertia>
       </inertial>
       <collision name='leftIndexFingerPitch2Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1670,7 +1670,7 @@
         </geometry>
       </collision>
       <visual name='leftIndexFingerPitch2Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1712,9 +1712,9 @@
       </physics>
     </joint>
     <link name='leftIndexFingerPitch3Link'>
-      <pose>0.01251 1.02467 0.352791 0.1745 -0 0</pose>
+      <pose frame=''>0.01251 1.02467 0.352791 0.1745 -0 0</pose>
       <inertial>
-        <pose>0 0.01 0 0 -0 0</pose>
+        <pose frame=''>0 0.01 0 0 -0 0</pose>
         <mass>0.01</mass>
         <inertia>
           <ixx>6.02e-07</ixx>
@@ -1726,7 +1726,7 @@
         </inertia>
       </inertial>
       <collision name='leftIndexFingerPitch3Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1735,7 +1735,7 @@
         </geometry>
       </collision>
       <visual name='leftIndexFingerPitch3Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1777,9 +1777,9 @@
       </physics>
     </joint>
     <link name='leftMiddleFingerPitch1Link'>
-      <pose>0.01251 0.964 0.3068 -0.1222 0 0</pose>
+      <pose frame=''>0.01251 0.964 0.3068 -0.1222 0 0</pose>
       <inertial>
-        <pose>0 0.02 0 0 -0 0</pose>
+        <pose frame=''>0 0.02 0 0 -0 0</pose>
         <mass>0.02</mass>
         <inertia>
           <ixx>5.148e-06</ixx>
@@ -1791,7 +1791,7 @@
         </inertia>
       </inertial>
       <collision name='leftMiddleFingerPitch1Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1800,7 +1800,7 @@
         </geometry>
       </collision>
       <visual name='leftMiddleFingerPitch1Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1842,9 +1842,9 @@
       </physics>
     </joint>
     <link name='leftMiddleFingerPitch2Link'>
-      <pose>0.01251 1.00182 0.302156 -0.1222 0 0</pose>
+      <pose frame=''>0.01251 1.00182 0.302156 -0.1222 0 0</pose>
       <inertial>
-        <pose>0 0.013 0 0 -0 0</pose>
+        <pose frame=''>0 0.013 0 0 -0 0</pose>
         <mass>0.011</mass>
         <inertia>
           <ixx>1.97e-06</ixx>
@@ -1856,7 +1856,7 @@
         </inertia>
       </inertial>
       <collision name='leftMiddleFingerPitch2Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1865,7 +1865,7 @@
         </geometry>
       </collision>
       <visual name='leftMiddleFingerPitch2Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1907,9 +1907,9 @@
       </physics>
     </joint>
     <link name='leftMiddleFingerPitch3Link'>
-      <pose>0.01251 1.02455 0.299364 -0.1222 0 0</pose>
+      <pose frame=''>0.01251 1.02455 0.299364 -0.1222 0 0</pose>
       <inertial>
-        <pose>0 0.01 0 0 -0 0</pose>
+        <pose frame=''>0 0.01 0 0 -0 0</pose>
         <mass>0.006</mass>
         <inertia>
           <ixx>3.96e-07</ixx>
@@ -1921,7 +1921,7 @@
         </inertia>
       </inertial>
       <collision name='leftMiddleFingerPitch3Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1930,7 +1930,7 @@
         </geometry>
       </collision>
       <visual name='leftMiddleFingerPitch3Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1972,9 +1972,9 @@
       </physics>
     </joint>
     <link name='leftPinkyPitch1Link'>
-      <pose>0.01251 0.9508 0.2777 -0.1222 0 0</pose>
+      <pose frame=''>0.01251 0.9508 0.2777 -0.1222 0 0</pose>
       <inertial>
-        <pose>0 0.02 0 0 -0 0</pose>
+        <pose frame=''>0 0.02 0 0 -0 0</pose>
         <mass>0.02</mass>
         <inertia>
           <ixx>5.148e-06</ixx>
@@ -1986,7 +1986,7 @@
         </inertia>
       </inertial>
       <collision name='leftPinkyPitch1Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1995,7 +1995,7 @@
         </geometry>
       </collision>
       <visual name='leftPinkyPitch1Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2037,9 +2037,9 @@
       </physics>
     </joint>
     <link name='leftPinkyPitch2Link'>
-      <pose>0.01251 0.988616 0.273056 -0.1222 0 0</pose>
+      <pose frame=''>0.01251 0.988616 0.273056 -0.1222 0 0</pose>
       <inertial>
-        <pose>0 0.013 0 0 -0 0</pose>
+        <pose frame=''>0 0.013 0 0 -0 0</pose>
         <mass>0.011</mass>
         <inertia>
           <ixx>1.97e-06</ixx>
@@ -2051,7 +2051,7 @@
         </inertia>
       </inertial>
       <collision name='leftPinkyPitch2Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2060,7 +2060,7 @@
         </geometry>
       </collision>
       <visual name='leftPinkyPitch2Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2102,9 +2102,9 @@
       </physics>
     </joint>
     <link name='leftPinkyPitch3Link'>
-      <pose>0.01251 1.01135 0.270264 -0.1222 0 0</pose>
+      <pose frame=''>0.01251 1.01135 0.270264 -0.1222 0 0</pose>
       <inertial>
-        <pose>0 0.01 0 0 -0 0</pose>
+        <pose frame=''>0 0.01 0 0 -0 0</pose>
         <mass>0.006</mass>
         <inertia>
           <ixx>3.96e-07</ixx>
@@ -2116,7 +2116,7 @@
         </inertia>
       </inertial>
       <collision name='leftPinkyPitch3Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2125,7 +2125,7 @@
         </geometry>
       </collision>
       <visual name='leftPinkyPitch3Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2167,9 +2167,9 @@
       </physics>
     </joint>
     <link name='leftThumbRollLink'>
-      <pose>0.01521 0.9021 0.3415 -0.3491 0 0</pose>
+      <pose frame=''>0.01521 0.9021 0.3415 -0.3491 0 0</pose>
       <inertial>
-        <pose>0 0 0.01 0 -0 0</pose>
+        <pose frame=''>0 0 0.01 0 -0 0</pose>
         <mass>0.017</mass>
         <inertia>
           <ixx>2.77788e-06</ixx>
@@ -2181,7 +2181,7 @@
         </inertia>
       </inertial>
       <collision name='leftThumbRollLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2190,7 +2190,7 @@
         </geometry>
       </collision>
       <visual name='leftThumbRollLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2232,9 +2232,9 @@
       </physics>
     </joint>
     <link name='leftThumbPitch1Link'>
-      <pose>0.01521 0.909933 0.363019 0 -0 0</pose>
+      <pose frame=''>0.01521 0.909933 0.363019 0 -0 0</pose>
       <inertial>
-        <pose>0 0.005 0.02 0 -0 0</pose>
+        <pose frame=''>0 0.005 0.02 0 -0 0</pose>
         <mass>0.02</mass>
         <inertia>
           <ixx>4.239e-06</ixx>
@@ -2246,7 +2246,7 @@
         </inertia>
       </inertial>
       <collision name='leftThumbPitch1Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2255,7 +2255,7 @@
         </geometry>
       </collision>
       <visual name='leftThumbPitch1Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2297,9 +2297,9 @@
       </physics>
     </joint>
     <link name='leftThumbPitch2Link'>
-      <pose>0.01521 0.916533 0.400519 0 -0 0</pose>
+      <pose frame=''>0.01521 0.916533 0.400519 0 -0 0</pose>
       <inertial>
-        <pose>0 0.004 0.017 0 -0 0</pose>
+        <pose frame=''>0 0.004 0.017 0 -0 0</pose>
         <mass>0.013</mass>
         <inertia>
           <ixx>1.266e-06</ixx>
@@ -2311,7 +2311,7 @@
         </inertia>
       </inertial>
       <collision name='leftThumbPitch2Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2320,7 +2320,7 @@
         </geometry>
       </collision>
       <visual name='leftThumbPitch2Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2362,9 +2362,9 @@
       </physics>
     </joint>
     <link name='leftThumbPitch3Link'>
-      <pose>0.01521 0.921433 0.428019 0 -0 0</pose>
+      <pose frame=''>0.01521 0.921433 0.428019 0 -0 0</pose>
       <inertial>
-        <pose>0 0.004 0.01 0 -0 0</pose>
+        <pose frame=''>0 0.004 0.01 0 -0 0</pose>
         <mass>0.006</mass>
         <inertia>
           <ixx>3.22e-07</ixx>
@@ -2376,7 +2376,7 @@
         </inertia>
       </inertial>
       <collision name='leftThumbPitch3Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2385,7 +2385,7 @@
         </geometry>
       </collision>
       <visual name='leftThumbPitch3Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2427,9 +2427,9 @@
       </physics>
     </joint>
     <link name='lowerNeckPitchLink'>
-      <pose>0.0622618 0 0.35875 0 -0 0</pose>
+      <pose frame=''>0.0622618 0 0.35875 0 -0 0</pose>
       <inertial>
-        <pose>-0.02 0 0.04 0 -0 0</pose>
+        <pose frame=''>-0.02 0 0.04 0 -0 0</pose>
         <mass>1.05</mass>
         <inertia>
           <ixx>0.00147072</ixx>
@@ -2441,7 +2441,7 @@
         </inertia>
       </inertial>
       <collision name='lowerNeckPitchLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2450,7 +2450,7 @@
         </geometry>
       </collision>
       <visual name='lowerNeckPitchLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2492,9 +2492,9 @@
       </physics>
     </joint>
     <link name='neckYawLink'>
-      <pose>0.0103378 0 0.35875 0 -0 0</pose>
+      <pose frame=''>0.0103378 0 0.35875 0 -0 0</pose>
       <inertial>
-        <pose>-0.03 -0.01 0.15 0 -0 0</pose>
+        <pose frame=''>-0.03 -0.01 0.15 0 -0 0</pose>
         <mass>1.4</mass>
         <inertia>
           <ixx>0.0019977</ixx>
@@ -2506,7 +2506,7 @@
         </inertia>
       </inertial>
       <collision name='neckYawLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2515,7 +2515,7 @@
         </geometry>
       </collision>
       <visual name='neckYawLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2557,9 +2557,9 @@
       </physics>
     </joint>
     <link name='upperNeckPitchLink'>
-      <pose>-0.0496622 0 0.554747 0 -0 0</pose>
+      <pose frame=''>-0.0496622 0 0.554747 0 -0 0</pose>
       <inertial>
-        <pose>0.100912 0.005783 0.034787 0 -0 0</pose>
+        <pose frame=''>0.100912 0.005783 0.034787 0 -0 0</pose>
         <mass>3.89</mass>
         <inertia>
           <ixx>0.0398475</ixx>
@@ -2571,7 +2571,7 @@
         </inertia>
       </inertial>
       <collision name='upperNeckPitchLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2580,7 +2580,7 @@
         </geometry>
       </collision>
       <visual name='upperNeckPitchLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2622,9 +2622,9 @@
       </physics>
     </joint>
     <link name='rightShoulderPitchLink'>
-      <pose>0.01031 0 0.3187 0 -0 0</pose>
+      <pose frame=''>0.01031 0 0.3187 0 -0 0</pose>
       <inertial>
-        <pose>-0.012 -0.251 0 0 -0 0</pose>
+        <pose frame=''>-0.012 -0.251 0 0 -0 0</pose>
         <mass>2.65</mass>
         <inertia>
           <ixx>0.0137182</ixx>
@@ -2636,7 +2636,7 @@
         </inertia>
       </inertial>
       <collision name='rightShoulderPitchLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2645,7 +2645,7 @@
         </geometry>
       </collision>
       <visual name='rightShoulderPitchLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2687,9 +2687,9 @@
       </physics>
     </joint>
     <link name='rightShoulderRollLink'>
-      <pose>0.01031 -0.2499 0.3187 0 -0 0</pose>
+      <pose frame=''>0.01031 -0.2499 0.3187 0 -0 0</pose>
       <inertial>
-        <pose>-0.008513 -0.02068 0.001088 0 -0 0</pose>
+        <pose frame=''>-0.008513 -0.02068 0.001088 0 -0 0</pose>
         <mass>3.97</mass>
         <inertia>
           <ixx>0.00949412</ixx>
@@ -2701,7 +2701,7 @@
         </inertia>
       </inertial>
       <collision name='rightShoulderRollLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2710,7 +2710,7 @@
         </geometry>
       </collision>
       <visual name='rightShoulderRollLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2752,9 +2752,9 @@
       </physics>
     </joint>
     <link name='rightShoulderYawLink'>
-      <pose>0.01031 -0.2499 0.3187 0 -0 0</pose>
+      <pose frame=''>0.01031 -0.2499 0.3187 0 -0 0</pose>
       <inertial>
-        <pose>-0.004304 -0.209832 -0.007295 0 -0 0</pose>
+        <pose frame=''>-0.004304 -0.209832 -0.007295 0 -0 0</pose>
         <mass>3.085</mass>
         <inertia>
           <ixx>0.0393552</ixx>
@@ -2766,7 +2766,7 @@
         </inertia>
       </inertial>
       <collision name='rightShoulderYawLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2775,7 +2775,7 @@
         </geometry>
       </collision>
       <visual name='rightShoulderYawLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2817,9 +2817,9 @@
       </physics>
     </joint>
     <link name='rightElbowPitchLink'>
-      <pose>0.03571 -0.5799 0.3187 0 -0 0</pose>
+      <pose frame=''>0.03571 -0.5799 0.3187 0 -0 0</pose>
       <inertial>
-        <pose>-0.020344 -0.014722 -0.0223 0 -0 0</pose>
+        <pose frame=''>-0.020344 -0.014722 -0.0223 0 -0 0</pose>
         <mass>1.83</mass>
         <inertia>
           <ixx>0.00331452</ixx>
@@ -2831,7 +2831,7 @@
         </inertia>
       </inertial>
       <collision name='rightElbowPitchLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2840,7 +2840,7 @@
         </geometry>
       </collision>
       <visual name='rightElbowPitchLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2882,9 +2882,9 @@
       </physics>
     </joint>
     <link name='rightForearmLink'>
-      <pose>0.01031 -0.5799 0.3187 0 -0 0</pose>
+      <pose frame=''>0.01031 -0.5799 0.3187 0 -0 0</pose>
       <inertial>
-        <pose>0.015 -0.13 0.019564 0 -0 0</pose>
+        <pose frame=''>0.015 -0.13 0.019564 0 -0 0</pose>
         <mass>2.476</mass>
         <inertia>
           <ixx>0.0117554</ixx>
@@ -2896,7 +2896,7 @@
         </inertia>
       </inertial>
       <collision name='rightForearmLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2905,7 +2905,7 @@
         </geometry>
       </collision>
       <visual name='rightForearmLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2947,9 +2947,9 @@
       </physics>
     </joint>
     <link name='rightWristRollLink'>
-      <pose>0.01031 -0.867 0.3187 0 -0 0</pose>
+      <pose frame=''>0.01031 -0.867 0.3187 0 -0 0</pose>
       <inertial>
-        <pose>0 -0 0 0 -0 0</pose>
+        <pose frame=''>0 -0 0 0 -0 0</pose>
         <mass>0.14</mass>
         <inertia>
           <ixx>3.0251e-05</ixx>
@@ -2961,7 +2961,7 @@
         </inertia>
       </inertial>
       <collision name='rightWristRollLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2970,7 +2970,7 @@
         </geometry>
       </collision>
       <visual name='rightWristRollLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3012,9 +3012,9 @@
       </physics>
     </joint>
     <link name='rightPalm'>
-      <pose>0.01031 -0.867 0.3187 0 -0 0</pose>
+      <pose frame=''>0.01031 -0.867 0.3187 0 -0 0</pose>
       <inertial>
-        <pose>0.002954 -0.052034 -0.000236 0 -0 0</pose>
+        <pose frame=''>0.002954 -0.052034 -0.000236 0 -0 0</pose>
         <mass>0.712</mass>
         <inertia>
           <ixx>0.000943493</ixx>
@@ -3026,7 +3026,7 @@
         </inertia>
       </inertial>
       <collision name='rightPalm_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3035,7 +3035,7 @@
         </geometry>
       </collision>
       <visual name='rightPalm_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3077,9 +3077,9 @@
       </physics>
     </joint>
     <link name='rightIndexFingerPitch1Link'>
-      <pose>0.01251 -0.9646 0.3422 -0.1745 0 0</pose>
+      <pose frame=''>0.01251 -0.9646 0.3422 -0.1745 0 0</pose>
       <inertial>
-        <pose>0 -0.02 0 0 -0 0</pose>
+        <pose frame=''>0 -0.02 0 0 -0 0</pose>
         <mass>0.02</mass>
         <inertia>
           <ixx>4.232e-06</ixx>
@@ -3091,7 +3091,7 @@
         </inertia>
       </inertial>
       <collision name='rightIndexFingerPitch1Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3100,7 +3100,7 @@
         </geometry>
       </collision>
       <visual name='rightIndexFingerPitch1Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3142,9 +3142,9 @@
       </physics>
     </joint>
     <link name='rightIndexFingerPitch2Link'>
-      <pose>0.01251 -1.00212 0.348815 -0.1745 0 0</pose>
+      <pose frame=''>0.01251 -1.00212 0.348815 -0.1745 0 0</pose>
       <inertial>
-        <pose>0 -0.013 0 0 -0 0</pose>
+        <pose frame=''>0 -0.013 0 0 -0 0</pose>
         <mass>0.018</mass>
         <inertia>
           <ixx>1.562e-06</ixx>
@@ -3156,7 +3156,7 @@
         </inertia>
       </inertial>
       <collision name='rightIndexFingerPitch2Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3165,7 +3165,7 @@
         </geometry>
       </collision>
       <visual name='rightIndexFingerPitch2Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3207,9 +3207,9 @@
       </physics>
     </joint>
     <link name='rightIndexFingerPitch3Link'>
-      <pose>0.01251 -1.02467 0.352791 -0.1745 0 0</pose>
+      <pose frame=''>0.01251 -1.02467 0.352791 -0.1745 0 0</pose>
       <inertial>
-        <pose>0 -0.01 0 0 -0 0</pose>
+        <pose frame=''>0 -0.01 0 0 -0 0</pose>
         <mass>0.01</mass>
         <inertia>
           <ixx>6.02e-07</ixx>
@@ -3221,7 +3221,7 @@
         </inertia>
       </inertial>
       <collision name='rightIndexFingerPitch3Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3230,7 +3230,7 @@
         </geometry>
       </collision>
       <visual name='rightIndexFingerPitch3Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3272,9 +3272,9 @@
       </physics>
     </joint>
     <link name='rightMiddleFingerPitch1Link'>
-      <pose>0.01251 -0.964 0.3068 0.1222 -0 0</pose>
+      <pose frame=''>0.01251 -0.964 0.3068 0.1222 -0 0</pose>
       <inertial>
-        <pose>0 -0.02 0 0 -0 0</pose>
+        <pose frame=''>0 -0.02 0 0 -0 0</pose>
         <mass>0.02</mass>
         <inertia>
           <ixx>5.148e-06</ixx>
@@ -3286,7 +3286,7 @@
         </inertia>
       </inertial>
       <collision name='rightMiddleFingerPitch1Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3295,7 +3295,7 @@
         </geometry>
       </collision>
       <visual name='rightMiddleFingerPitch1Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3337,9 +3337,9 @@
       </physics>
     </joint>
     <link name='rightMiddleFingerPitch2Link'>
-      <pose>0.01251 -1.00182 0.302156 0.1222 -0 0</pose>
+      <pose frame=''>0.01251 -1.00182 0.302156 0.1222 -0 0</pose>
       <inertial>
-        <pose>0 -0.013 0 0 -0 0</pose>
+        <pose frame=''>0 -0.013 0 0 -0 0</pose>
         <mass>0.011</mass>
         <inertia>
           <ixx>1.97e-06</ixx>
@@ -3351,7 +3351,7 @@
         </inertia>
       </inertial>
       <collision name='rightMiddleFingerPitch2Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3360,7 +3360,7 @@
         </geometry>
       </collision>
       <visual name='rightMiddleFingerPitch2Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3402,9 +3402,9 @@
       </physics>
     </joint>
     <link name='rightMiddleFingerPitch3Link'>
-      <pose>0.01251 -1.02455 0.299364 0.1222 -0 0</pose>
+      <pose frame=''>0.01251 -1.02455 0.299364 0.1222 -0 0</pose>
       <inertial>
-        <pose>0 -0.01 0 0 -0 0</pose>
+        <pose frame=''>0 -0.01 0 0 -0 0</pose>
         <mass>0.006</mass>
         <inertia>
           <ixx>3.96e-07</ixx>
@@ -3416,7 +3416,7 @@
         </inertia>
       </inertial>
       <collision name='rightMiddleFingerPitch3Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3425,7 +3425,7 @@
         </geometry>
       </collision>
       <visual name='rightMiddleFingerPitch3Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3467,9 +3467,9 @@
       </physics>
     </joint>
     <link name='rightPinkyPitch1Link'>
-      <pose>0.01251 -0.9508 0.2777 0.1222 -0 0</pose>
+      <pose frame=''>0.01251 -0.9508 0.2777 0.1222 -0 0</pose>
       <inertial>
-        <pose>0 -0.02 0 0 -0 0</pose>
+        <pose frame=''>0 -0.02 0 0 -0 0</pose>
         <mass>0.02</mass>
         <inertia>
           <ixx>5.148e-06</ixx>
@@ -3481,7 +3481,7 @@
         </inertia>
       </inertial>
       <collision name='rightPinkyPitch1Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3490,7 +3490,7 @@
         </geometry>
       </collision>
       <visual name='rightPinkyPitch1Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3532,9 +3532,9 @@
       </physics>
     </joint>
     <link name='rightPinkyPitch2Link'>
-      <pose>0.01251 -0.988616 0.273056 0.1222 -0 0</pose>
+      <pose frame=''>0.01251 -0.988616 0.273056 0.1222 -0 0</pose>
       <inertial>
-        <pose>0 -0.013 0 0 -0 0</pose>
+        <pose frame=''>0 -0.013 0 0 -0 0</pose>
         <mass>0.011</mass>
         <inertia>
           <ixx>1.97e-06</ixx>
@@ -3546,7 +3546,7 @@
         </inertia>
       </inertial>
       <collision name='rightPinkyPitch2Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3555,7 +3555,7 @@
         </geometry>
       </collision>
       <visual name='rightPinkyPitch2Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3597,9 +3597,9 @@
       </physics>
     </joint>
     <link name='rightPinkyPitch3Link'>
-      <pose>0.01251 -1.01135 0.270264 0.1222 -0 0</pose>
+      <pose frame=''>0.01251 -1.01135 0.270264 0.1222 -0 0</pose>
       <inertial>
-        <pose>0 -0.01 0 0 -0 0</pose>
+        <pose frame=''>0 -0.01 0 0 -0 0</pose>
         <mass>0.006</mass>
         <inertia>
           <ixx>3.96e-07</ixx>
@@ -3611,7 +3611,7 @@
         </inertia>
       </inertial>
       <collision name='rightPinkyPitch3Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3620,7 +3620,7 @@
         </geometry>
       </collision>
       <visual name='rightPinkyPitch3Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3662,9 +3662,9 @@
       </physics>
     </joint>
     <link name='rightThumbRollLink'>
-      <pose>0.01521 -0.9021 0.3415 0.3491 -0 0</pose>
+      <pose frame=''>0.01521 -0.9021 0.3415 0.3491 -0 0</pose>
       <inertial>
-        <pose>0 -0 0.01 0 -0 0</pose>
+        <pose frame=''>0 -0 0.01 0 -0 0</pose>
         <mass>0.017</mass>
         <inertia>
           <ixx>2.77788e-06</ixx>
@@ -3676,7 +3676,7 @@
         </inertia>
       </inertial>
       <collision name='rightThumbRollLink_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3685,7 +3685,7 @@
         </geometry>
       </collision>
       <visual name='rightThumbRollLink_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3727,9 +3727,9 @@
       </physics>
     </joint>
     <link name='rightThumbPitch1Link'>
-      <pose>0.01521 -0.909933 0.363019 0 -0 0</pose>
+      <pose frame=''>0.01521 -0.909933 0.363019 0 -0 0</pose>
       <inertial>
-        <pose>0 -0.005 0.02 0 -0 0</pose>
+        <pose frame=''>0 -0.005 0.02 0 -0 0</pose>
         <mass>0.02</mass>
         <inertia>
           <ixx>4.239e-06</ixx>
@@ -3741,7 +3741,7 @@
         </inertia>
       </inertial>
       <collision name='rightThumbPitch1Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3750,7 +3750,7 @@
         </geometry>
       </collision>
       <visual name='rightThumbPitch1Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3792,9 +3792,9 @@
       </physics>
     </joint>
     <link name='rightThumbPitch2Link'>
-      <pose>0.01521 -0.916533 0.400519 0 -0 0</pose>
+      <pose frame=''>0.01521 -0.916533 0.400519 0 -0 0</pose>
       <inertial>
-        <pose>0 -0.004 0.017 0 -0 0</pose>
+        <pose frame=''>0 -0.004 0.017 0 -0 0</pose>
         <mass>0.013</mass>
         <inertia>
           <ixx>1.266e-06</ixx>
@@ -3806,7 +3806,7 @@
         </inertia>
       </inertial>
       <collision name='rightThumbPitch2Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3815,7 +3815,7 @@
         </geometry>
       </collision>
       <visual name='rightThumbPitch2Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3857,9 +3857,9 @@
       </physics>
     </joint>
     <link name='rightThumbPitch3Link'>
-      <pose>0.01521 -0.921433 0.428019 0 -0 0</pose>
+      <pose frame=''>0.01521 -0.921433 0.428019 0 -0 0</pose>
       <inertial>
-        <pose>0 -0.004 0.01 0 -0 0</pose>
+        <pose frame=''>0 -0.004 0.01 0 -0 0</pose>
         <mass>0.006</mass>
         <inertia>
           <ixx>3.22e-07</ixx>
@@ -3871,7 +3871,7 @@
         </inertia>
       </inertial>
       <collision name='rightThumbPitch3Link_collision'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3880,7 +3880,7 @@
         </geometry>
       </collision>
       <visual name='rightThumbPitch3Link_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3949,8 +3949,8 @@
       <gaussianNoise>0.0</gaussianNoise>
       <updateRate>1000.0</updateRate>
       <bodyName>pelvis</bodyName>
-      <xyzOffset>0 0 0.108184</xyzOffset>
-      <rpyOffset>-3.14159 0 0</rpyOffset>
+      <xyzOffset>-0.012 0 0.108184</xyzOffset>
+      <rpyOffset>3.14159 7.04154e-12 -3.14159</rpyOffset>
     </plugin>
   </model>
 </sdf>

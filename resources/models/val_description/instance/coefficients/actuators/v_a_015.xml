@@ -13,13 +13,13 @@
     <Coeffs>
         <Coeff description="" id="JointMaxValue" value="3.14" />
         <Coeff description="" id="JointMinValue" value="-3.14" />
-        <Coeff description="" id="JointKinematicDir" value="1" />
-        <Coeff description="" id="PositionOffset_Rad" value="-2.82635962168" />
-        <Coeff description="" id="TorqueOffset_Nm" value="0.0" />
+        <Coeff description="" id="JointKinematicDir" value="-1.0" />
+        <Coeff description="" id="PositionOffset_Rad" value="-2.83096157709" />
+        <Coeff description="" id="TorqueOffset_Nm" value="1.29" />
         <Coeff description="" id="JointSensors_MotorPosition" value="1" />
         <Coeff description="" id="JointSensors_OutputForce" value="2.0" />
         <Coeff description="" id="JointSensors_OutputPosition" value="2.0" />
-        <Coeff description="" id="JointSensors_OutputVelocity" value="3.0" />
+        <Coeff description="" id="JointSensors_OutputVelocity" value="4.0" />
         <Coeff description="Encoder Mounting Direction" id="EncMountingDir" value="1" />
         <Coeff description="Electrical angle offset from Index pulse of Encoder" id="EncoderIndexOffset" value="3.23455619812" />
         <Coeff description="" id="JointOutputAPS_MountingGain" value="1.0" />
