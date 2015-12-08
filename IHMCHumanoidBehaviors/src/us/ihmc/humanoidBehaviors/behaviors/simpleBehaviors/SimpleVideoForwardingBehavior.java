@@ -3,6 +3,8 @@ package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -72,7 +74,10 @@ public class SimpleVideoForwardingBehavior extends ImageProcessingBehavior
    @Override
    public void initialize()
    {
-
+      for(ConcurrentListeningQueue<VideoPacket> queue : listeningNetworkProcessorQueues.get(VideoPacket.class))
+      {
+         queue.clear();
+      }
    }
 
    @Override
