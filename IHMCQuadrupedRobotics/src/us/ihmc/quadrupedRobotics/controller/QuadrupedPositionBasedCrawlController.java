@@ -34,6 +34,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -106,7 +107,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    
    private final BooleanYoVariable runOpenLoop = new BooleanYoVariable("runOpenLoop", "If true, runs in open loop mode. The leg motions will not depend on any feedback signals.", registry);
    
-   private final YoFramePoint2d desiredCoMOffset = new YoFramePoint2d("desiredCoMOffset", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint2d desiredCoMOffset;
 
    private final DoubleYoVariable filteredDesiredCoMYawAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredCoMYawAlphaBreakFrequency", registry);
    private final DoubleYoVariable filteredDesiredCoMYawAlpha = new DoubleYoVariable("filteredDesiredCoMYawAlpha", registry);
@@ -175,12 +176,14 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    
    private final BooleanYoVariable useSubCircleForBodyShiftTarget = new BooleanYoVariable("useSubCircleForBodyShiftTarget", registry);
    private final DoubleYoVariable subCircleRadius = new DoubleYoVariable("subCircleRadius", registry);
-   
+   private final DoubleYoVariable comCloseRadius = new DoubleYoVariable("comCloseRadius", "Distance check from final desired circle to CoM for transitioning into swing state", registry);
+
    private final YoFrameVector yoVectorToSubtract = new YoFrameVector("yoVectorToSubtract", ReferenceFrame.getWorldFrame(), registry);
    
    private final BooleanYoVariable isCoMInsideTriangleForSwingLeg = new BooleanYoVariable("isCoMInsideTriangleForSwingLeg", registry);
+   private final BooleanYoVariable isCoMCloseToFinalDesired = new BooleanYoVariable("isCoMCloseToFinalDesired", registry);
    private final BooleanYoVariable useCommonTriangleForSwingTransition = new BooleanYoVariable("useCommonTriangleForSwingTransition", registry);
-   
+
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final FrameVector comVelocity = new FrameVector();
    private final FramePoint centerOfMassFramePoint = new FramePoint();
@@ -230,6 +233,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       swingDuration.set(quadrupedControllerParameters.getDefaultSwingDuration());
       swingHeight.set(quadrupedControllerParameters.getDefaultSwingHeight());
       subCircleRadius.set(quadrupedControllerParameters.getDefaultSubCircleRadius());
+      comCloseRadius.set(quadrupedControllerParameters.getDefaultCoMCloseToFinalDesiredTransitionRadius());
+      
       useSubCircleForBodyShiftTarget.set(true);
       swingLeg.set(RobotQuadrant.FRONT_RIGHT);
       
@@ -253,6 +258,9 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
       feedForwardReferenceFrames.updateFrames();
       feedForwardBodyFrame = feedForwardReferenceFrames.getBodyFrame();
       
+      desiredCoMOffset = new YoFramePoint2d("desiredCoMOffset", feedForwardReferenceFrames.getBodyZUpFrame(), registry);
+      desiredCoMOffset.set(quadrupedControllerParameters.getDefaultDesiredCoMOffset());
+
       updateFeedForwardModelAndFrames();
       
       for (RobotQuadrant robotQuadrant: RobotQuadrant.values)
@@ -812,6 +820,15 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
             return false;
          }
          
+         if (swingLeg.getEnumValue().isQuadrantInHind())
+         {
+            isCoMCloseToFinalDesired.set(quadrupleSupportState.isCoMCloseToFinalDesired(comCloseRadius.getDoubleValue()));
+         }
+         else
+         {
+            isCoMCloseToFinalDesired.set(true);
+         }
+         
          if (useCommonTriangleForSwingTransition.getBooleanValue())
          {
              isCoMInsideTriangleForSwingLeg.set(quadrupleSupportState.isCoMInsideCommonTriangleForSwingLeg(swingLeg.getEnumValue()));
@@ -821,7 +838,7 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
            isCoMInsideTriangleForSwingLeg.set(quadrupleSupportState.isCoMInsideTriangleForSwingLeg(swingLeg.getEnumValue()));
          }
          
-         return isCoMInsideTriangleForSwingLeg.getBooleanValue() && (desiredVelocity.length() != 0.0 || desiredYawRate.getDoubleValue() != 0); //bodyTrajectoryGenerator.isDone() &&
+         return isCoMCloseToFinalDesired.getBooleanValue() && isCoMInsideTriangleForSwingLeg.getBooleanValue() && (desiredVelocity.length() != 0.0 || desiredYawRate.getDoubleValue() != 0); //bodyTrajectoryGenerator.isDone() &&
       }
    }
    
@@ -991,6 +1008,8 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
             drawSupportPolygon(thirdAndFourthCommonPolygon, commonTriplePolygons.get(thirdSwingLeg.getSide()));
          }
       }
+       
+      private final FrameVector2d tempFrameVector = new FrameVector2d();
       
       private void calculateTrajectoryTarget(RobotQuadrant upcommingSwingLeg, QuadrupedSupportPolygon commonTriangle, Point2d comTargetToPack)
       {
@@ -1007,7 +1026,11 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
             radius = commonSupportPolygon.getInCircle(comTargetToPack);
          }
          inscribedCircleRadius.set(radius);
-         comTargetToPack.add(desiredCoMOffset.getPoint2dCopy());
+         
+         desiredCoMOffset.getFrameTuple2dIncludingFrame(tempFrameVector);
+         tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
+         
+         comTargetToPack.add(tempFrameVector.getVector());
          circleCenter.setXY(comTargetToPack);
       }
       
@@ -1083,6 +1106,12 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
          centerOfMassFramePoint.getPoint2d(centerOfMassPoint2d);
          QuadrupedSupportPolygon supportTriangleDuringStep = fourFootSupportPolygon.deleteLegCopy(swingLeg);
          return supportTriangleDuringStep.isInside(centerOfMassPoint2d);
+      }
+      
+      public boolean isCoMCloseToFinalDesired(double distanceToCheck)
+      {
+         double distanceFromDesiredToTarget = desiredCoMTarget.distance(desiredCoMFramePosition); 
+         return (distanceFromDesiredToTarget < distanceToCheck);
       }
    }
    
