@@ -60,6 +60,7 @@ import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
@@ -68,7 +69,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 
-public class QuadrupedPositionBasedCrawlController extends State<QuadrupedControllerState>
+public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 {
    private static final double DEFAULT_HEADING_CORRECTION_BREAK_FREQUENCY = 1.0;
    private static final double DEFAULT_COM_PITCH_FILTER_BREAK_FREQUENCY = 0.5;
@@ -1210,5 +1211,12 @@ public class QuadrupedPositionBasedCrawlController extends State<QuadrupedContro
    public void doTransitionOutOfAction()
    {
       
+   }
+
+
+   @Override
+   public RobotMotionStatus getMotionStatus()
+   {
+      return RobotMotionStatus.IN_MOTION;
    }
 }

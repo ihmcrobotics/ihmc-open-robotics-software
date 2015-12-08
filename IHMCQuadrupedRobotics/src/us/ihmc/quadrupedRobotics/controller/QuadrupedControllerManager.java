@@ -8,8 +8,7 @@ import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.stateMachines.StateMachine;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -17,42 +16,53 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 public class QuadrupedControllerManager implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   
+
    private final QuadrupedStateEstimator stateEstimator;
-   
-   private final StateMachine<QuadrupedControllerState> stateMachine;
+
+   private final GenericStateMachine<QuadrupedControllerState, QuadrupedController> stateMachine;
    private final EnumYoVariable<QuadrupedControllerState> requestedState;
    private final EnumYoVariable<SliderBoardModes> sliderboardMode = new EnumYoVariable<>("sliderboardMode", registry, SliderBoardModes.class);
-   
+
    private final DoubleYoVariable robotTimestamp = new DoubleYoVariable("robotTimestamp", registry);
-   
+
    private final RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
-   
+
    public enum SliderBoardModes
    {
       POSITIONCRAWL_COM_SHIFT, POSITIONCRAWL_FOOTSTEP_CHOOSER, POSITIONCRAWL_ORIENTATION_TUNING
    }
-   
+
    public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters, SDFFullRobotModel sdfFullRobotModel,
          QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators, QuadrupedStateEstimator stateEstimator, GlobalDataProducer globalDataProducer,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
-      // configure state machine
       this.stateEstimator = stateEstimator;
-      
-      stateMachine = new StateMachine<>("QuadrupedControllerStateMachine", "QuadrupedControllerSwitchTime", QuadrupedControllerState.class, robotTimestamp, registry);
+
+      // configure state machine
+      stateMachine = new GenericStateMachine<>("QuadrupedControllerStateMachine", "QuadrupedControllerSwitchTime", QuadrupedControllerState.class,
+            robotTimestamp, registry);
       requestedState = new EnumYoVariable<>("QuadrupedControllerStateMachineRequestedState", registry, QuadrupedControllerState.class, true);
-      
-      QuadrupedVMCStandController vmcStandController = new QuadrupedVMCStandController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, robotTimestamp, registry, yoGraphicsListRegistry);
-      
-      QuadrupedPositionBasedCrawlController positionBasedCrawlController = new QuadrupedPositionBasedCrawlController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel,
-            stateEstimator, inverseKinematicsCalculators, globalDataProducer, robotTimestamp, registry, yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead);
-      
+
+      QuadrupedVMCStandController vmcStandController = new QuadrupedVMCStandController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel,
+            robotTimestamp, registry, yoGraphicsListRegistry);
+
+      QuadrupedPositionBasedCrawlController positionBasedCrawlController = new QuadrupedPositionBasedCrawlController(simulationDT, quadrupedRobotParameters,
+            sdfFullRobotModel, stateEstimator, inverseKinematicsCalculators, globalDataProducer, robotTimestamp, registry, yoGraphicsListRegistry,
+            yoGraphicsListRegistryForDetachedOverhead);
+
       stateMachine.addState(vmcStandController);
       stateMachine.addState(positionBasedCrawlController);
 
+      // Add valid transitions from controller to controller.
+      // NOTE: More comprehensive transition conditions can be implemented. For
+      // instance, checking if the robot is stationary before the transition to
+      // a standing controller.
+      positionBasedCrawlController
+            .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.VMC_STAND));
+      vmcStandController
+            .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.POSITION_CRAWL));
+
       stateMachine.setCurrentState(QuadrupedControllerState.POSITION_CRAWL);
-      requestedState.set(null);
    }
 
    @Override
@@ -83,22 +93,9 @@ public class QuadrupedControllerManager implements RobotController
    public void doControl()
    {
       robotTimestamp.set(stateEstimator.getCurrentTime());
-      
-      if(requestedState.getEnumValue() != null)
-      {
-         stateMachine.setCurrentState(requestedState.getEnumValue());
-         requestedState.set(null);
-      }
-      
-      if(stateMachine.getCurrentState().getStateEnum() == QuadrupedControllerState.DO_NOTHING)
-      {
-         robotMotionStatusHolder.setCurrentRobotMotionStatus(RobotMotionStatus.STANDING);
-      }
-      else
-      {
-         robotMotionStatusHolder.setCurrentRobotMotionStatus(RobotMotionStatus.IN_MOTION);
-      }
-      
+
+      robotMotionStatusHolder.setCurrentRobotMotionStatus(stateMachine.getCurrentState().getMotionStatus());
+
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
    }

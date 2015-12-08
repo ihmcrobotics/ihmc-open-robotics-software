@@ -29,9 +29,10 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
+public class QuadrupedVMCStandController extends QuadrupedController
 {
    // parameters
    private final SDFFullRobotModel fullRobotModel;
@@ -316,7 +317,6 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
    {
       pool.evict();
 
-      // TODO Auto-generated method stub
       updateEstimates();
       updateSetpoints();
    }
@@ -358,12 +358,16 @@ public class QuadrupedVMCStandController extends State<QuadrupedControllerState>
    @Override
    public void doTransitionOutOfAction()
    {
-      // TODO Auto-generated method stub
-
    }
 
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
+   }
+
+   @Override
+   public RobotMotionStatus getMotionStatus()
+   {
+      return RobotMotionStatus.IN_MOTION;
    }
 }
