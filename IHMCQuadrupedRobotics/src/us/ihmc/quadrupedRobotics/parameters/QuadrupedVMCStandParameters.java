@@ -26,4 +26,5 @@ public interface QuadrupedVMCStandParameters
    
    public double getJointPositionLimitStiffness();
    public double getJointPositionLimitDamping();
+   public double getCoefficientOfFriction();
 }
