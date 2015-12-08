@@ -10,12 +10,12 @@ import java.util.HashMap;
 
 public class PacketRouter<T extends Enum<T>> 
 {
-   private boolean DEBUG = true;
+   private boolean DEBUG = false;
 
    private final T[] destinationConstants;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
    private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all destinations
-   private String[] packetTypesToDebug = new String[]{"VideoPacket"}; //set to null to debug all packets
+   private String[] packetTypesToDebug = null; //set to null to debug all packets
    
    private final int BROADCAST = 0;
 
