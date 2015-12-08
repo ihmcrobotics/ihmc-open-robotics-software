@@ -72,13 +72,61 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.controllerLeadsEstimatorTicks,root.remotemain.DRCControllerThread.controllerLagsEstimatorTicks</Variables>
+		<GraphConfiguration>
+			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.lastControllerClockTime</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.actualControlDT</Variables>
+		<GraphConfiguration>
+			<Name>config9</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.actualEstimatorDT</Variables>
+		<GraphConfiguration>
+			<Name>config10</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
 <Entry Boxes Tab Pane>
 <EntryBoxTab>
 <Title>
 Startup
 </Title>
-<Entry Boxes>requestedHighLevelState,startStandPrep,calibrateFootForceSensors</Entry Boxes>
+<Entry Boxes>requestedHighLevelState,startStandPrep,calibrateFootForceSensors,pelvis_pelvisMiddleImu_packetTypeToUse</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -90,7 +138,7 @@ Diagnostics
 <Title>
 PelvisGains
 </Title>
-<Entry Boxes>kpXYAngularpelvisOrientation,kpZAngularpelvisOrientation,zetaXYAngularpelvisOrientation,zetaZAngularpelvisOrientation</Entry Boxes>
+<Entry Boxes>kpXYAngularpelvisOrientation,kpZAngularpelvisOrientation,zetaXYAngularpelvisOrientation,zetaZAngularpelvisOrientation,kpCoMHeight</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -120,13 +168,13 @@ ArmGains
 <Title>
 IMUFilter
 </Title>
-<Entry Boxes>alphaIMUAgainstKinematicsForVelocity,alphaIMUAgainstKinematicsForPosition,useTwistToComputeRootJointLinearVelocity</Entry Boxes>
+<Entry Boxes>alphaIMUAgainstKinematicsForVelocity,alphaIMUAgainstKinematicsForPosition,useTwistToComputeRootJointLinearVelocity,linearAccelerationAlphaFilter,angularVelocityAlphaFilter,orientationAlphaFilter</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
 ManualICP
 </Title>
-<Entry Boxes>manualModeICPOffset,desiredICPOffsetX,desiredICPOffsetY</Entry Boxes>
+<Entry Boxes>manualModeICPOffset,desiredICPOffsetX,desiredICPOffsetY,keepCMPInsideSupportPolygon</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -138,7 +186,7 @@ HoldGains
 <Title>
 StateEstimator
 </Title>
-<Entry Boxes>alphaRootJointLinearVelocityNewTwist,useTwistToComputeRootJointLinearVelocity,jointInputEncoderVelocityAlphaFilter</Entry Boxes>
+<Entry Boxes>alphaRootJointLinearVelocityNewTwist,useTwistToComputeRootJointLinearVelocity,jointInputEncoderVelocityAlphaFilter,jointOutputEncoderVelocityAlphaFilter,jointOutputEncoderBacklashSlopTime,gravityEstimation</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -147,7 +195,7 @@ StateEstimator
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>5</Graph Array Window Size>
+<Graph Array Window Size>8</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>0</ScreenID>
 <WindowLocation>0.0, 27.0</WindowLocation>
@@ -156,54 +204,6 @@ StateEstimator
 	<Cols>2</Cols>
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipYaw.leftHipYawControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftHipYaw,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipYaw.leftHipYawTauDesired</Variables>
-		<GraphConfiguration>
-			<Name>config7</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipYaw.rightHipYawControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipYaw,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipYaw.rightHipYawTauDesired</Variables>
-		<GraphConfiguration>
-			<Name>config8</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftHipRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipRoll.leftHipRollTauDesired</Variables>
-		<GraphConfiguration>
-			<Name>config9</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipRoll.rightHipRollControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipRoll.rightHipRollTauDesired</Variables>
-		<GraphConfiguration>
-			<Name>config10</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipPitch.leftHipPitchControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftHipPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipPitch.leftHipPitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -215,7 +215,7 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipPitch.rightHipPitchControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipPitch.rightHipPitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipYaw.rightHipYawControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipYaw,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipYaw.rightHipYawTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -227,7 +227,7 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftKneePitch.leftKneePitchControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftKneePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftKneePitch.leftKneePitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftHipRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipRoll.leftHipRollTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -239,7 +239,7 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightKneePitch.rightKneePitchControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightKneePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightKneePitch.rightKneePitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipRoll.rightHipRollControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipRoll.rightHipRollTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -251,7 +251,7 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftAnklePitch.leftAnklePitchControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftAnklePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftAnklePitch.leftAnklePitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipPitch.leftHipPitchControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftHipPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipPitch.leftHipPitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -263,7 +263,7 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightAnklePitch.rightAnklePitchControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightAnklePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightAnklePitch.rightAnklePitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipPitch.rightHipPitchControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipPitch.rightHipPitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -275,7 +275,7 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftAnkleRoll.leftAnkleRollControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftAnkleRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftAnkleRoll.leftAnkleRollTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftKneePitch.leftKneePitchControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftKneePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftKneePitch.leftKneePitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -287,7 +287,7 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightAnkleRoll.rightAnkleRollControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightAnkleRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightAnkleRoll.rightAnkleRollTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightKneePitch.rightKneePitchControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightKneePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightKneePitch.rightKneePitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -299,7 +299,7 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoYaw.torsoYawControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoYaw,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoYaw.torsoYawTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftAnklePitch.leftAnklePitchControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftAnklePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftAnklePitch.leftAnklePitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -311,7 +311,7 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoPitch.torsoPitchControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoPitch.torsoPitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightAnklePitch.rightAnklePitchControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightAnklePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightAnklePitch.rightAnklePitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -323,9 +323,57 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoRoll.torsoRollControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoRoll.torsoRollTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftAnkleRoll.leftAnkleRollControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftAnkleRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftAnkleRoll.leftAnkleRollTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config21</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightAnkleRoll.rightAnkleRollControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightAnkleRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightAnkleRoll.rightAnkleRollTauDesired</Variables>
+		<GraphConfiguration>
+			<Name>config22</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoYaw,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoYaw.torsoYawTauDesired</Variables>
+		<GraphConfiguration>
+			<Name>config23</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoPitch.torsoPitchControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoPitch.torsoPitchTauDesired</Variables>
+		<GraphConfiguration>
+			<Name>config24</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoRoll.torsoRollControllerTauDesired,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoRoll.torsoRollTauDesired</Variables>
+		<GraphConfiguration>
+			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -344,7 +392,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.leftHipYawqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config22</Name>
+			<Name>config26</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -356,7 +404,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.rightHipYawqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config23</Name>
+			<Name>config27</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -368,7 +416,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.leftHipRollqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config24</Name>
+			<Name>config28</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -380,7 +428,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.rightHipRollqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config25</Name>
+			<Name>config29</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -392,7 +440,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.leftHipPitchqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config26</Name>
+			<Name>config30</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -404,7 +452,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.rightHipPitchqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config27</Name>
+			<Name>config31</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -416,7 +464,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.leftKneePitchqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config28</Name>
+			<Name>config32</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -428,7 +476,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.rightKneePitchqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config29</Name>
+			<Name>config33</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -440,7 +488,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.leftAnklePitchqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config30</Name>
+			<Name>config34</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -452,7 +500,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.rightAnklePitchqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config31</Name>
+			<Name>config35</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -464,7 +512,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.leftAnkleRollqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config32</Name>
+			<Name>config36</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -476,7 +524,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.rightAnkleRollqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config33</Name>
+			<Name>config37</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -488,7 +536,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.torsoYawqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config34</Name>
+			<Name>config38</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -500,7 +548,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.torsoPitchqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config35</Name>
+			<Name>config39</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -512,7 +560,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.torsoRollqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config36</Name>
+			<Name>config40</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -524,14 +572,14 @@ StateEstimator
 </GraphGroup>
 </Graph Array Window2><Graph Array Window3>
 <ScreenID>1</ScreenID>
-<WindowLocation>5760.0, 0.0</WindowLocation>
+<WindowLocation>5760.0, 120.0</WindowLocation>
 <WindowSize>1920.0, 1080.0</WindowSize>
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationX</Variables>
 		<GraphConfiguration>
-			<Name>config37</Name>
+			<Name>config41</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -543,7 +591,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationY</Variables>
 		<GraphConfiguration>
-			<Name>config38</Name>
+			<Name>config42</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -555,7 +603,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationZ</Variables>
 		<GraphConfiguration>
-			<Name>config39</Name>
+			<Name>config43</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -567,84 +615,36 @@ StateEstimator
 </GraphGroup>
 </Graph Array Window3><Graph Array Window4>
 <ScreenID>1</ScreenID>
-<WindowLocation>5760.0, 0.0</WindowLocation>
+<WindowLocation>5760.0, 120.0</WindowLocation>
 <WindowSize>1920.0, 1080.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_leftHipYaw,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_leftHipYaw_sp1</Variables>
-		<GraphConfiguration>
-			<Name>config40</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>0.2</MaxScaling>
-			<MinScaling>-0.2</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_rightHipYaw,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_rightHipYaw_sp1</Variables>
-		<GraphConfiguration>
-			<Name>config41</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>0.2</MaxScaling>
-			<MinScaling>-0.2</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_leftHipRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_leftHipRoll_sp1</Variables>
-		<GraphConfiguration>
-			<Name>config42</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_rightHipRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_rightHipRoll_sp1</Variables>
-		<GraphConfiguration>
-			<Name>config43</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>0.2</MaxScaling>
-			<MinScaling>-0.2</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_leftHipPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_leftHipPitch_sp1</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_leftHipYaw</Variables>
 		<GraphConfiguration>
 			<Name>config44</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
+			<MaxScaling>0.2</MaxScaling>
+			<MinScaling>-0.2</MinScaling>
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_rightHipPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_rightHipPitch_sp1</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_rightHipYaw</Variables>
 		<GraphConfiguration>
 			<Name>config45</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
+			<MaxScaling>0.2</MaxScaling>
+			<MinScaling>-0.2</MinScaling>
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_leftKneePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_leftKneePitch_sp1</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_leftHipRoll</Variables>
 		<GraphConfiguration>
 			<Name>config46</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -656,7 +656,7 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_rightKneePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_rightKneePitch_sp1</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_rightHipRoll</Variables>
 		<GraphConfiguration>
 			<Name>config47</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -668,43 +668,43 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_leftAnklePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_leftAnklePitch_sp1</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_leftHipPitch</Variables>
 		<GraphConfiguration>
 			<Name>config48</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>0.15</MaxScaling>
-			<MinScaling>-0.15</MinScaling>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_rightAnklePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_rightAnklePitch_sp1</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_rightHipPitch</Variables>
 		<GraphConfiguration>
 			<Name>config49</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>0.2</MaxScaling>
-			<MinScaling>-0.2</MinScaling>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_leftAnkleRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_leftAnkleRoll_sp1</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_leftKneePitch</Variables>
 		<GraphConfiguration>
 			<Name>config50</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>0.2</MaxScaling>
-			<MinScaling>-0.2</MinScaling>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_rightAnkleRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_rightAnkleRoll_sp1</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_rightKneePitch</Variables>
 		<GraphConfiguration>
 			<Name>config51</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -716,19 +716,19 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_torsoPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_torsoPitch_sp1</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_leftAnklePitch</Variables>
 		<GraphConfiguration>
 			<Name>config52</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
+			<MaxScaling>0.15</MaxScaling>
+			<MinScaling>-0.15</MinScaling>
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_torsoYaw,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_torsoYaw_sp1</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_rightAnklePitch</Variables>
 		<GraphConfiguration>
 			<Name>config53</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -740,9 +740,57 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_torsoRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.bl_qd_torsoRoll_sp1</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_leftAnkleRoll</Variables>
 		<GraphConfiguration>
 			<Name>config54</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.2</MaxScaling>
+			<MinScaling>-0.2</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_rightAnkleRoll</Variables>
+		<GraphConfiguration>
+			<Name>config55</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.2</MaxScaling>
+			<MinScaling>-0.2</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_torsoPitch</Variables>
+		<GraphConfiguration>
+			<Name>config56</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_torsoYaw</Variables>
+		<GraphConfiguration>
+			<Name>config57</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.2</MaxScaling>
+			<MinScaling>-0.2</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_qd_torsoRoll</Variables>
+		<GraphConfiguration>
+			<Name>config58</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -754,38 +802,14 @@ StateEstimator
 </GraphGroup>
 </Graph Array Window4><Graph Array Window5>
 <ScreenID>3</ScreenID>
-<WindowLocation>4800.0, 0.0</WindowLocation>
-<WindowSize>960.0, 1200.0</WindowSize>
+<WindowLocation>3840.0, 0.0</WindowLocation>
+<WindowSize>1920.0, 1200.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>valkyrie.qd_x,valkyrie.q_x</Variables>
-		<GraphConfiguration>
-			<Name>config55</Name>
-			<ScalingMethod>0</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>valkyrie.qd_y,valkyrie.q_y</Variables>
-		<GraphConfiguration>
-			<Name>config56</Name>
-			<ScalingMethod>0</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityX,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointPositionX</Variables>
 		<GraphConfiguration>
-			<Name>config57</Name>
+			<Name>config59</Name>
 			<ScalingMethod>0</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -797,7 +821,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityY,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointPositionY</Variables>
 		<GraphConfiguration>
-			<Name>config58</Name>
+			<Name>config60</Name>
 			<ScalingMethod>0</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -809,7 +833,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistX</Variables>
 		<GraphConfiguration>
-			<Name>config59</Name>
+			<Name>config61</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -821,31 +845,31 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistY</Variables>
 		<GraphConfiguration>
-			<Name>config60</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointLinearVelocityBacklashKinX</Variables>
-		<GraphConfiguration>
-			<Name>config61</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointLinearVelocityBacklashKinY</Variables>
-		<GraphConfiguration>
 			<Name>config62</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointLinearVelocityBacklashKinX,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistX</Variables>
+		<GraphConfiguration>
+			<Name>config63</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointLinearVelocityBacklashKinY,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistY</Variables>
+		<GraphConfiguration>
+			<Name>config64</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -857,7 +881,7 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedCenterOfMassVelocityX</Variables>
 		<GraphConfiguration>
-			<Name>config63</Name>
+			<Name>config65</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -869,7 +893,55 @@ StateEstimator
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedCenterOfMassVelocityY</Variables>
 		<GraphConfiguration>
-			<Name>config64</Name>
+			<Name>config66</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisRotationalStateUpdater.measFrameAngularVelocityX</Variables>
+		<GraphConfiguration>
+			<Name>config67</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisRotationalStateUpdater.measFrameAngularVelocityY</Variables>
+		<GraphConfiguration>
+			<Name>config68</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config69</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisRotationalStateUpdater.measFrameAngularVelocityZ</Variables>
+		<GraphConfiguration>
+			<Name>config70</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -879,7 +951,448 @@ StateEstimator
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-</Graph Array Window5>
+</Graph Array Window5><Graph Array Window6>
+<ScreenID>3</ScreenID>
+<WindowLocation>4338.0, 501.0</WindowLocation>
+<WindowSize>802.0, 535.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.CapturabilityBasedDesiredCoPVisualizer.desiredCMPX</Variables>
+		<GraphConfiguration>
+			<Name>config71</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.CapturabilityBasedDesiredCoPVisualizer.desiredCMPY</Variables>
+		<GraphConfiguration>
+			<Name>config72</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedCenterOfMassVelocityX</Variables>
+		<GraphConfiguration>
+			<Name>config73</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedCenterOfMassVelocityY</Variables>
+		<GraphConfiguration>
+			<Name>config74</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPAndMomentumBasedController.capturePointX</Variables>
+		<GraphConfiguration>
+			<Name>config75</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPAndMomentumBasedController.capturePointY</Variables>
+		<GraphConfiguration>
+			<Name>config76</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.icpVelocityX</Variables>
+		<GraphConfiguration>
+			<Name>config77</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.icpVelocityY</Variables>
+		<GraphConfiguration>
+			<Name>config78</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window6><Graph Array Window7>
+<ScreenID>0</ScreenID>
+<WindowLocation>1113.0, 325.0</WindowLocation>
+<WindowSize>802.0, 535.0</WindowSize>
+<GraphGroup>
+	<Cols>3</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCMPX</Variables>
+		<GraphConfiguration>
+			<Name>config79</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCMPY</Variables>
+		<GraphConfiguration>
+			<Name>config80</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config81</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPAndMomentumBasedController.desiredICPX</Variables>
+		<GraphConfiguration>
+			<Name>config82</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPAndMomentumBasedController.desiredICPY</Variables>
+		<GraphConfiguration>
+			<Name>config83</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config84</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPAndMomentumBasedController.desiredICPVelocityX</Variables>
+		<GraphConfiguration>
+			<Name>config85</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPAndMomentumBasedController.desiredICPVelocityY</Variables>
+		<GraphConfiguration>
+			<Name>config86</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.alphaICPVelocityFeedForward</Variables>
+		<GraphConfiguration>
+			<Name>config87</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPAndMomentumBasedController.capturePointX</Variables>
+		<GraphConfiguration>
+			<Name>config88</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPAndMomentumBasedController.capturePointY</Variables>
+		<GraphConfiguration>
+			<Name>config89</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPAndMomentumBasedController.capturePointZ</Variables>
+		<GraphConfiguration>
+			<Name>config90</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.SmartCMPProjectorTwo.cmpProjectedAlongRay</Variables>
+		<GraphConfiguration>
+			<Name>config91</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.SmartCMPProjectorTwo.cmpProjectedToPushTowardFinalDesiredICP</Variables>
+		<GraphConfiguration>
+			<Name>config92</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.SmartCMPProjectorTwo.cmpProjectedToVertex</Variables>
+		<GraphConfiguration>
+			<Name>config93</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.feedbackPartX</Variables>
+		<GraphConfiguration>
+			<Name>config94</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.feedbackPartY</Variables>
+		<GraphConfiguration>
+			<Name>config95</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config96</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.icpErrorX</Variables>
+		<GraphConfiguration>
+			<Name>config97</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.icpErrorY</Variables>
+		<GraphConfiguration>
+			<Name>config98</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config99</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.desiredCMPToICPX</Variables>
+		<GraphConfiguration>
+			<Name>config100</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.desiredCMPToICPY</Variables>
+		<GraphConfiguration>
+			<Name>config101</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.keepCMPInsideSupportPolygon</Variables>
+		<GraphConfiguration>
+			<Name>config102</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window7><Graph Array Window8>
+<ScreenID>0</ScreenID>
+<WindowLocation>248.0, 292.0</WindowLocation>
+<WindowSize>802.0, 535.0</WindowSize>
+<GraphGroup>
+	<Cols>3</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.rawCMPOutputX</Variables>
+		<GraphConfiguration>
+			<Name>config103</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.rawCMPOutputY</Variables>
+		<GraphConfiguration>
+			<Name>config104</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config105</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window8>
 
 <Extra Panels>
 <Main Viewport>
