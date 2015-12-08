@@ -92,7 +92,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
 
    private DiagnosticsWhenHangingControllerFactory diagnosticControllerFactory = null;
 
-   private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel,
+   private MomentumBasedControllerFactory createDRCControllerFactory(ValkyrieRobotModel robotModel,
          HumanoidGlobalDataProducer dataProducer, DRCRobotSensorInformation sensorInformation)
    {
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
@@ -116,6 +116,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
       humanoidJointPoseList.createPoseSettersTuneWaist();
 
       ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
+      valkyrieTorqueOffsetPrinter.setRobotName(robotModel.getFullRobotName());
       diagnosticControllerFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, true, true, valkyrieTorqueOffsetPrinter);
       diagnosticControllerFactory.setTransitionRequested(true);
       controllerFactory.addHighLevelBehaviorFactory(diagnosticControllerFactory);
