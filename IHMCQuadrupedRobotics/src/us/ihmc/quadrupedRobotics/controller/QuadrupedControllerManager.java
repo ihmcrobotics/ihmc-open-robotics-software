@@ -62,6 +62,7 @@ public class QuadrupedControllerManager implements RobotController
       vmcStandController
             .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.POSITION_CRAWL));
 
+      // TODO: Start in a "freeze" state.
       stateMachine.setCurrentState(QuadrupedControllerState.POSITION_CRAWL);
    }
 
