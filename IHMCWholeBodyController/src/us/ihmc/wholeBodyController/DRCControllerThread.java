@@ -60,7 +60,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private static final boolean SHOW_LEG_COM = false;
 
    private static final boolean CREATE_COM_CALIBRATION_TOOL = false;
-   private static final boolean ALLOW_MODEL_CORRUPTION = false;
+   private static final boolean ALLOW_MODEL_CORRUPTION = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCControllerThread");
    private final RobotVisualizer robotVisualizer;
