@@ -29,10 +29,10 @@
 	<xacro:property name="WaistPitchActuatorSimNode" value="/trunk/pitch_actuator" /> <!--pitch-->
 	<xacro:property name="WaistRollActuatorSimNode" value="/trunk/roll_actuator" /> <!--roll-->
 
-	<xacro:property name="pelvis_imu1_node" value="/pelvis/sensors/imu1" />
-	<xacro:property name="pelvis_imu2_node" value="/pelvis/sensors/imu2" />
-	<xacro:property name="torso_imu1_node" value="/torso/sensors/imu1" />
-	<xacro:property name="torso_imu2_node" value="/torso/sensors/imu2" />
+	<xacro:property name="pelvis_middle_imu_node" value="/sensors/middlePelvisIMU" />
+	<xacro:property name="pelvis_rear_imu_node" value="/sensors/rearPelvisIMU" />
+	<xacro:property name="torso_left_imu_node" value="/sensors/leftTorsoIMU" />
+	<xacro:property name="torso_right_imu_node" value="/sensors/rightTorsoIMU" />
 
 	<xacro:property name="left_foot_ATI_node" value="/left_leg/ankle/left_actuator" />
 	<xacro:property name="left_foot_Sim_ATI_node" value="/sensors/leftFootSixAxis" />

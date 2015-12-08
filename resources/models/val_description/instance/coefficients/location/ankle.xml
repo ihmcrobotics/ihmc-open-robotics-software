@@ -1,0 +1,11 @@
+<CoeffData>
+  <Properties>
+    <CalibrationDate/>
+    <FileGenDate date="2013-10-25" time="21:34:25.477992"/>
+  </Properties>
+  <Coeffs>
+    <!-- Just set the limits on the ankle to be far outside the bounds - they will rely on hardstops -->
+    <Coeff id="JointSafety_LowerLimit_m" value="-1.0"/>
+    <Coeff id="JointSafety_UpperLimit_m" value="1.0"/>
+  </Coeffs>
+</CoeffData>

@@ -17,7 +17,7 @@
   </asset>
   <library_images>
     <image id="Map #4-image" name="Map #4">
-      <init_from>../../materials/textures/drc_torso_head_diffuse.jpg</init_from>
+      <init_from>../../materials/textures/head_diffuse.jpg</init_from>
     </image>
   </library_images>
   <library_materials>
