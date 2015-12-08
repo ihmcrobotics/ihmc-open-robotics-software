@@ -1,8 +1,12 @@
 package us.ihmc.valkyrieRosControl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +19,7 @@ import org.yaml.snakeyaml.Yaml;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -27,10 +32,10 @@ import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrieRosControl.dataHolders.YoForceTorqueSensorHandle;
 import us.ihmc.valkyrieRosControl.dataHolders.YoIMUHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoJointHandleHolder;
+import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
-public class ValkyrieRosControlSensorReader implements SensorReader
+public class ValkyrieRosControlSensorReader implements SensorReader, JointTorqueOffsetProcessor
 {
-
    private final SensorProcessing sensorProcessing;
 
    private final TimestampProvider timestampProvider;
@@ -46,6 +51,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader
    private final DenseMatrix64F torqueForce = new DenseMatrix64F(6, 1);
 
    private final ArrayList<ValkyrieRosControlJointControlCommandCalculator> controlCommandCalculators = new ArrayList<>();
+   private final LinkedHashMap<OneDoFJoint, ValkyrieRosControlJointControlCommandCalculator> jointToControlCommandCalculatorMap = new LinkedHashMap<>();
 
    private final DoubleYoVariable doIHMCControlRatio;
    private final DoubleYoVariable timeInStandprep;
@@ -54,6 +60,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader
    private final BooleanYoVariable startStandPrep;
    private long standPrepStartTime = -1;
 
+   @SuppressWarnings("unchecked")
    public ValkyrieRosControlSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, StateEstimatorParameters stateEstimatorParameters,
          TimestampProvider timestampProvider, List<YoJointHandleHolder> yoJointHandleHolders, List<YoIMUHandleHolder> yoIMUHandleHolders,
          List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles, YoVariableRegistry registry)
@@ -72,41 +79,55 @@ public class ValkyrieRosControlSensorReader implements SensorReader
       masterGain.set(0.3);
 
       Yaml yaml = new Yaml();
-      
+
       InputStream gainStream = getClass().getClassLoader().getResourceAsStream("standPrep/gains.yaml");
-      InputStream offsetsStream = getClass().getClassLoader().getResourceAsStream("standPrep/offsets.yaml");
       InputStream setpointsStream = getClass().getClassLoader().getResourceAsStream("standPrep/setpoints.yaml");
-      
+      InputStream offsetsStream;
+      try
+      {
+         offsetsStream = new FileInputStream(new File(ValkyrieTorqueOffsetPrinter.IHMC_TORQUE_OFFSET_FILE));
+      }
+      catch (FileNotFoundException e1)
+      {
+         offsetsStream = null;
+      }
+
       Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) yaml.load(gainStream);
-      Map<String, Map<String, Double>> offsetMap = (Map<String, Map<String, Double>>) yaml.load(offsetsStream);
       Map<String, Double> setPointMap = (Map<String, Double>) yaml.load(setpointsStream);
-      
+      Map<String, Double> offsetMap = null;
+      if (offsetsStream != null)
+         offsetMap = (Map<String, Double>) yaml.load(offsetsStream);
+
       try
       {
          gainStream.close();
-         offsetsStream.close();
          setpointsStream.close();
+         if (offsetsStream != null)
+            offsetsStream.close();
       }
       catch (IOException e)
       {
       }
 
-      for (YoJointHandleHolder oneDoFJoint : yoJointHandleHolders)
+      for (YoJointHandleHolder jointHandleHolder : yoJointHandleHolders)
       {
-         Map<String, Double> standPrepGains = gainMap.get(oneDoFJoint.getName());
-         Map<String, Double> offsets = offsetMap.get(oneDoFJoint.getName());
+         String jointName = jointHandleHolder.getName();
+         Map<String, Double> standPrepGains = gainMap.get(jointName);
+         double torqueOffset = 0.0;
+         if (offsetMap != null && offsetMap.containsKey(jointName))
+            torqueOffset = offsetMap.get(jointName);
 
          double standPrepAngle = 0.0;
-         if (setPointMap.containsKey(oneDoFJoint.getName()))
+         if (setPointMap.containsKey(jointName))
          {
-            standPrepAngle = setPointMap.get(oneDoFJoint.getName());
+            standPrepAngle = setPointMap.get(jointName);
          }
-         ValkyrieRosControlJointControlCommandCalculator controlCommandCalculator = new ValkyrieRosControlJointControlCommandCalculator(oneDoFJoint,
-               standPrepGains, offsets, standPrepAngle, stateEstimatorParameters.getEstimatorDT(), registry);
+         ValkyrieRosControlJointControlCommandCalculator controlCommandCalculator = new ValkyrieRosControlJointControlCommandCalculator(jointHandleHolder,
+               standPrepGains, torqueOffset, standPrepAngle, stateEstimatorParameters.getEstimatorDT(), registry);
          controlCommandCalculators.add(controlCommandCalculator);
 
+         jointToControlCommandCalculatorMap.put(jointHandleHolder.getOneDoFJoint(), controlCommandCalculator);
       }
-
    }
 
    @Override
@@ -168,7 +189,6 @@ public class ValkyrieRosControlSensorReader implements SensorReader
             commandCalculator.initialize();
          }
       }
-
    }
 
    @Override
@@ -189,4 +209,9 @@ public class ValkyrieRosControlSensorReader implements SensorReader
       return null;
    }
 
+   @Override
+   public void subtractTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffset)
+   {
+      jointToControlCommandCalculatorMap.get(oneDoFJoint).subtractTorqueOffset(torqueOffset);
+   }
 }
