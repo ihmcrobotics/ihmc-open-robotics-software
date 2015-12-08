@@ -54,7 +54,7 @@ public class QuadrupedControllerManager implements RobotController
       stateMachine.addState(positionBasedCrawlController);
 
       // Add valid transitions from controller to controller.
-      // NOTE: More comprehensive transition conditions can be implemented. For
+      // TODO: More comprehensive transition conditions can be implemented. For
       // instance, checking if the robot is stationary before the transition to
       // a standing controller.
       positionBasedCrawlController
