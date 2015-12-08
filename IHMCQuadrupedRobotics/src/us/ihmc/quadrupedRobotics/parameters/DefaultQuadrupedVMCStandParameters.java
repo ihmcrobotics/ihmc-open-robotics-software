@@ -22,10 +22,11 @@ public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandPara
    private final double comHeightIntegralGain = 0;
    private final double comHeightMaxIntegralError = 0;
    private final double comHeightGravityFeedforwardConstant = 0.85;
-   private final double comHeightSetpoint = 0.55;
+   private final double comHeightNominal = 0.55;
    
    private final double jointPositionLimitStiffness = 1000;
    private final double jointPositionLimitDamping = 100;
+   private final double coefficientOfFriction = 0.5;
 
    @Override
    public double[] getBodyOrientationProportionalGains()
@@ -130,9 +131,9 @@ public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandPara
    }
 
    @Override
-   public double getComHeightSetpoint()
+   public double getComHeightNominal()
    {
-      return comHeightSetpoint;
+      return comHeightNominal;
    }
    
    @Override
@@ -145,5 +146,11 @@ public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandPara
    public double getJointPositionLimitDamping()
    {
       return jointPositionLimitDamping;
+   }
+
+   @Override
+   public double getCoefficientOfFriction()
+   {
+      return coefficientOfFriction;
    }
 }
