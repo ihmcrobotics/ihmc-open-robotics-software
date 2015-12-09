@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -19,6 +20,7 @@ import org.yaml.snakeyaml.Yaml;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
@@ -29,6 +31,8 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.valkyrie.imu.MicroStrainData;
 import us.ihmc.valkyrieRosControl.dataHolders.YoForceTorqueSensorHandle;
 import us.ihmc.valkyrieRosControl.dataHolders.YoIMUHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoJointHandleHolder;
@@ -51,7 +55,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    private final DenseMatrix64F torqueForce = new DenseMatrix64F(6, 1);
 
    private final ArrayList<ValkyrieRosControlJointControlCommandCalculator> controlCommandCalculators = new ArrayList<>();
-   private final LinkedHashMap<OneDoFJoint, ValkyrieRosControlJointControlCommandCalculator> jointToControlCommandCalculatorMap = new LinkedHashMap<>();
+   private final LinkedHashMap<String, ValkyrieRosControlJointControlCommandCalculator> jointToControlCommandCalculatorMap = new LinkedHashMap<>();
 
    private final DoubleYoVariable doIHMCControlRatio;
    private final DoubleYoVariable timeInStandprep;
@@ -59,6 +63,9 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
 
    private final BooleanYoVariable startStandPrep;
    private long standPrepStartTime = -1;
+
+   private final Matrix3d quaternionConversionMatrix = new Matrix3d();
+   private final Matrix3d orientationMatrix = new Matrix3d();
 
    @SuppressWarnings("unchecked")
    public ValkyrieRosControlSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, StateEstimatorParameters stateEstimatorParameters,
@@ -127,7 +134,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
                standPrepGains, torqueOffset, standPrepAngle, stateEstimatorParameters.getEstimatorDT(), registry);
          controlCommandCalculators.add(controlCommandCalculator);
 
-         jointToControlCommandCalculatorMap.put(jointHandleHolder.getOneDoFJoint(), controlCommandCalculator);
+         jointToControlCommandCalculatorMap.put(jointName, controlCommandCalculator);
       }
    }
 
@@ -152,6 +159,10 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
          yoIMUHandleHolder.packLinearAcceleration(linearAcceleration);
          yoIMUHandleHolder.packAngularVelocity(angularVelocity);
          yoIMUHandleHolder.packOrientation(orientation);
+
+         quaternionConversionMatrix.set(orientation);
+         orientationMatrix.mul(MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD, quaternionConversionMatrix);
+         RotationTools.setQuaternionBasedOnMatrix3d(orientation, orientationMatrix);
 
          sensorProcessing.setLinearAccelerationSensorValue(yoIMUHandleHolder.getImuDefinition(), linearAcceleration);
          sensorProcessing.setAngularVelocitySensorValue(yoIMUHandleHolder.getImuDefinition(), angularVelocity);
@@ -218,6 +229,10 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    @Override
    public void subtractTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffset)
    {
-      jointToControlCommandCalculatorMap.get(oneDoFJoint).subtractTorqueOffset(torqueOffset);
+      ValkyrieRosControlJointControlCommandCalculator jointCommandCalculator = jointToControlCommandCalculatorMap.get(oneDoFJoint.getName());
+      if (jointCommandCalculator != null)
+         jointCommandCalculator.subtractTorqueOffset(torqueOffset);
+      else
+         PrintTools.error("Command calculator is NULL for the joint: " + oneDoFJoint.getName());
    }
 }
