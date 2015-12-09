@@ -93,6 +93,9 @@ public class QuadrupedStandPrepController extends QuadrupedController
    }
 }
 
+/**
+ * A transition condition that transitions when the stand prep controller has completed its trajectory.
+ */
 class QuadrupedStandPrepControllerExitCondition implements StateTransitionCondition
 {
    private final QuadrupedStandPrepController controller;
