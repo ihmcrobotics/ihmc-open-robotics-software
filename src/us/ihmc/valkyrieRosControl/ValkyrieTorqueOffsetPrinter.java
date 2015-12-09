@@ -186,7 +186,7 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
             double oldTorqueOffset = 0.0;
             if (oldOffsetMap != null && oldOffsetMap.containsKey(oneDoFJoint.getName()))
                oldTorqueOffset = oldOffsetMap.get(oneDoFJoint.getName());
-            double newTorqueOffset = diagnosticsWhenHangingHelper.getTorqueOffset() + oldTorqueOffset;
+            double newTorqueOffset = oldTorqueOffset - diagnosticsWhenHangingHelper.getTorqueOffset();
 
             String offsetString = doubleFormat.format(newTorqueOffset);
             int nblankSpaces = maxNameLength - oneDoFJoint.getName().length() + 1;
