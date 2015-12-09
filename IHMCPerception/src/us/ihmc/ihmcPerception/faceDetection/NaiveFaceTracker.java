@@ -36,10 +36,8 @@ public class NaiveFaceTracker
       faceDetector = new OpenCVFaceDetector(scale);
    }
 
-   public void detect(BufferedImage bufferedImage)
+   public ArrayList<Face> detect(BufferedImage bufferedImage)
    {
-      long startTime = System.nanoTime();
-
       Rect[] faces = faceDetector.detect(bufferedImage);
       Graphics2D g2 = bufferedImage.createGraphics();
 
@@ -86,31 +84,7 @@ public class NaiveFaceTracker
             trackedFaces.add(new Face(System.nanoTime(), faces[j]));
       }
 
-      System.out.println("Detect run time: " + (System.nanoTime() - startTime));
-   }
-
-   public ArrayList<Face> getTrackedFaces()
-   {
       return trackedFaces;
-   }
-
-   class Face
-   {
-      private final long id;
-      public Rect facialBorder;
-      public Color borderColor;
-
-      public Face(long id, Rect facialBorder)
-      {
-         this.id = id;
-         this.facialBorder = facialBorder;
-         borderColor = new Color((int)id);
-      }
-
-      public void updateCoordinates(Rect coordinates)
-      {
-         this.facialBorder.set(new double[]{coordinates.x, coordinates.y, coordinates.width, coordinates.height});
-      }
    }
 
    public static void main(String[] arg) throws IOException
