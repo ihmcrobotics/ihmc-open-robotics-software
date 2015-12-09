@@ -4,7 +4,11 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointLimits;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedVirtualModelParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -23,6 +27,9 @@ public class QuadrupedVirtualModelController
 {
    private final YoVariableRegistry registry; 
 
+   private final QuadrupedVirtualModelParameters parameters;
+   private final QuadrupedJointNameMap jointMap;
+   private final QuadrupedJointLimits jointLimits;
    private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame comFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
@@ -34,6 +41,7 @@ public class QuadrupedVirtualModelController
    private final FrameVector bodyTorqueOptimal;
    private final QuadrantDependentList<FrameVector> soleForceSetpoint;
    private final QuadrantDependentList<FrameVector> soleForceOptimal;
+   private final QuadrantDependentList<double []> soleCoefficientOfFriction;
 
    private final YoFrameVector yoComForceSetpoint;
    private final YoFrameVector yoComForceOptimal;
@@ -48,7 +56,6 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<double[]> jointPositionUpperLimit;
    private final QuadrantDependentList<double[]> jointPositionLimitStiffness;
    private final QuadrantDependentList<double[]> jointPositionLimitDamping;
-   private final QuadrantDependentList<double[]> coefficientOfFriction;
 
    private final QuadrantDependentList<OneDoFJoint[]> legJoints;
    private final QuadrantDependentList<FramePoint> solePosition;
@@ -64,7 +71,10 @@ public class QuadrupedVirtualModelController
 
    public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedRobotParameters robotParameters, YoVariableRegistry parentRegistry)
    {
-      referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
+      parameters = robotParameters.getQuadrupedVirtualModelParameters();
+      jointMap = robotParameters.getJointMap();
+      jointLimits = robotParameters.getJointLimits();
+      referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointMap, robotParameters.getPhysicalProperties());
       registry = new YoVariableRegistry(getClass().getSimpleName());
       
       // initialize reference frames
@@ -79,11 +89,15 @@ public class QuadrupedVirtualModelController
       bodyTorqueOptimal = new FrameVector(comFrame);
       soleForceSetpoint = new QuadrantDependentList<FrameVector>();
       soleForceOptimal = new QuadrantDependentList<FrameVector>();
+      soleCoefficientOfFriction = new QuadrantDependentList<double[]>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          soleForceSetpoint.set(robotQuadrant, new FrameVector(comFrame));
          soleForceOptimal.set(robotQuadrant, new FrameVector(comFrame));
+         soleCoefficientOfFriction.set(robotQuadrant, new double[1]);
       }
+
+      // initialize yo variables
       yoComForceSetpoint = new YoFrameVector("comForceSetpoint", worldFrame, registry);
       yoComForceOptimal = new YoFrameVector("comForceOptimal", worldFrame, registry);
       yoBodyTorqueSetpoint = new YoFrameVector("bodyTorqueSetpoint", worldFrame, registry);
@@ -116,7 +130,6 @@ public class QuadrupedVirtualModelController
       }
 
       // initialize limits
-      coefficientOfFriction = new QuadrantDependentList<double[]>();
       jointEffortLowerLimit = new QuadrantDependentList<double[]>();
       jointEffortUpperLimit = new QuadrantDependentList<double[]>();
       jointPositionLowerLimit = new QuadrantDependentList<double[]>();
@@ -131,17 +144,6 @@ public class QuadrupedVirtualModelController
          jointPositionUpperLimit.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
          jointPositionLimitStiffness.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
          jointPositionLimitDamping.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
-         coefficientOfFriction.set(robotQuadrant, new double[1]);
-         for (int i = 0; i < legJoints.get(robotQuadrant).length; i++)
-         {
-            jointEffortLowerLimit.get(robotQuadrant)[i] = -(Double.MAX_VALUE - 1);
-            jointEffortUpperLimit.get(robotQuadrant)[i] = Double.MAX_VALUE;
-            jointPositionLowerLimit.get(robotQuadrant)[i] = -(Double.MAX_VALUE - 1);
-            jointPositionUpperLimit.get(robotQuadrant)[i] = Double.MAX_VALUE;
-            jointPositionLimitStiffness.get(robotQuadrant)[i] = 1000;
-            jointPositionLimitDamping.get(robotQuadrant)[i] = 250;
-         }
-         coefficientOfFriction.get(robotQuadrant)[0] = 0.6;
       }
 
       // initialize matrix terms
@@ -157,12 +159,32 @@ public class QuadrupedVirtualModelController
       }
 
       parentRegistry.addChild(registry);
+
+      this.reinitialize();
    }
 
-   public void setCoefficientOfFriction(RobotQuadrant robotQuadrant, double coefficientOfFriction)
+   public void reinitialize()
    {
-      this.coefficientOfFriction.get(robotQuadrant)[0] = coefficientOfFriction;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         for (int i = 0; i < jointMap.getLegJointNames().length; i++)
+         {
+            // initialize joint limits
+            LegJointName legJointName = jointMap.getLegJointNames()[i];
+            String jointName = jointMap.getLegJointName(robotQuadrant, legJointName);
+            double positionLowerLimit = jointLimits.getJointSoftPositionLowerLimit(jointName);
+            double positionUpperLimit = jointLimits.getJointSoftPositionUpperLimit(jointName);
+            double effortLimit = jointLimits.getJointEffortLimit(jointName);
+            setJointEffortLimits(jointName, -effortLimit, effortLimit);
+            setJointPositionLimits(jointName, positionLowerLimit, positionUpperLimit);
+            setJointPositionLimitStiffness(jointName, parameters.getDefaultJointPositionLimitStiffness());
+            setJointPositionLimitDamping(jointName, parameters.getDefaultJointPositionLimitDamping());
+         }
+         // initialize friction limits
+         setSoleCoefficientOfFriction(robotQuadrant, parameters.getDefaultSoleCoefficientOfFriction());
+      }
    }
+
 
    public void setJointEffortLimits(String jointName, double lower, double upper)
    {
@@ -230,34 +252,44 @@ public class QuadrupedVirtualModelController
       }
    }
 
-   public void setDesiredComForce(FrameVector comForce)
+   public void setComForceSetpoint(FrameVector comForce)
    {
       comForceSetpoint.setIncludingFrame(comForce);
    }
 
-   public void setDesiredBodyTorque(FrameVector bodyTorque)
+   public void setBodyTorqueSetpoint(FrameVector bodyTorque)
    {
       bodyTorqueSetpoint.setIncludingFrame(bodyTorque);
    }
 
-   public void setDesiredSoleForce(RobotQuadrant robotQuadrant, FrameVector soleForce)
+   public void setSoleForceSetpoint(RobotQuadrant robotQuadrant, FrameVector soleForce)
    {
       soleForceSetpoint.get(robotQuadrant).set(soleForce);
    }
 
-   public void getOptimalComForce(FrameVector comForce)
+   public void setSoleCoefficientOfFriction(RobotQuadrant robotQuadrant, double coefficientOfFriction)
+   {
+      this.soleCoefficientOfFriction.get(robotQuadrant)[0] = coefficientOfFriction;
+   }
+
+   public void getComForceOptimal(FrameVector comForce)
    {
       comForce.setIncludingFrame(comForceOptimal);
    }
 
-   public void getOptimalBodyTorque(FrameVector bodyTorque)
+   public void getBodyTorqueOptimal(FrameVector bodyTorque)
    {
       bodyTorque.setIncludingFrame(bodyTorqueOptimal);
    }
 
-   public void getOptimalSoleForce(RobotQuadrant robotQuadrant, FrameVector soleForce)
+   public void getSoleForceOptimal(RobotQuadrant robotQuadrant, FrameVector soleForce)
    {
       soleForce.set(soleForceOptimal.get(robotQuadrant));
+   }
+
+   public double getSoleCoefficientOfFriction(RobotQuadrant robotQuadrant)
+   {
+      return soleCoefficientOfFriction.get(robotQuadrant)[0];
    }
 
    public void compute()
@@ -325,7 +357,7 @@ public class QuadrupedVirtualModelController
          rowOffset += 3;
 
          // apply contact force limits
-         double mu = coefficientOfFriction.get(robotQuadrant)[0];
+         double mu = soleCoefficientOfFriction.get(robotQuadrant)[0];
          double fx = soleForceOptimal.get(robotQuadrant).getX();
          double fy = soleForceOptimal.get(robotQuadrant).getY();
          double fz = soleForceOptimal.get(robotQuadrant).getZ();

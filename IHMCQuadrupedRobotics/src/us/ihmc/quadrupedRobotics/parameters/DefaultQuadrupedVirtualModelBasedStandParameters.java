@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.parameters;
 
-public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandParameters
+public class DefaultQuadrupedVirtualModelBasedStandParameters implements QuadrupedVirtualModelBasedStandParameters
 {
    private final double[] bodyOrientationProportionalGains = {5000, 5000, 2500};
    private final double[] bodyOrientationDerivativeGains = {750, 750, 500};
@@ -24,10 +24,6 @@ public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandPara
    private final double comHeightGravityFeedforwardConstant = 0.85;
    private final double comHeightNominal = 0.55;
    
-   private final double jointPositionLimitStiffness = 1000;
-   private final double jointPositionLimitDamping = 100;
-   private final double coefficientOfFriction = 0.8;
-
    @Override
    public double[] getBodyOrientationProportionalGains()
    {
@@ -134,23 +130,5 @@ public class DefaultQuadrupedVMCStandParameters implements QuadrupedVMCStandPara
    public double getComHeightNominal()
    {
       return comHeightNominal;
-   }
-   
-   @Override
-   public double getJointPositionLimitStiffness()
-   {
-      return jointPositionLimitStiffness;
-   }
-
-   @Override
-   public double getJointPositionLimitDamping()
-   {
-      return jointPositionLimitDamping;
-   }
-
-   @Override
-   public double getCoefficientOfFriction()
-   {
-      return coefficientOfFriction;
    }
 }

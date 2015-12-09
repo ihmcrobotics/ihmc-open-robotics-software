@@ -2,10 +2,9 @@ package us.ihmc.quadrupedRobotics.controller;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointLimits;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedVMCStandParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedVirtualModelBasedStandParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.util.HeterogeneousMemoryPool;
@@ -32,16 +31,15 @@ import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public class QuadrupedVMCStandController extends QuadrupedController
+public class QuadrupedVirtualModelBasedStandController extends QuadrupedController
 {
    // parameters
    private final SDFFullRobotModel fullRobotModel;
    private final DoubleYoVariable robotTimestamp;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final YoVariableRegistry registry;
-   private final QuadrupedVMCStandParameters parameters;
+   private final QuadrupedVirtualModelBasedStandParameters parameters;
    private final QuadrupedJointNameMap jointNameMap;
-   private final QuadrupedJointLimits jointLimits;
    private final double controlDT;
    private final double gravityZ;
    private final double mass;
@@ -88,7 +86,7 @@ public class QuadrupedVMCStandController extends QuadrupedController
 
    private HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
 
-   public QuadrupedVMCStandController(double controlDT, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
+   public QuadrupedVirtualModelBasedStandController(double controlDT, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
          QuadrupedVirtualModelController virtualModelController, DoubleYoVariable robotTimestamp, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -101,7 +99,6 @@ public class QuadrupedVMCStandController extends QuadrupedController
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
       this.parameters = robotParameters.getQuadrupedVMCStandParameters();
       this.jointNameMap = robotParameters.getJointMap();
-      this.jointLimits = robotParameters.getJointLimits();
       this.controlDT = controlDT;
       this.gravityZ = 9.81;
       this.mass = fullRobotModel.getTotalMass();
@@ -309,8 +306,8 @@ public class QuadrupedVMCStandController extends QuadrupedController
       yoCmpPositionSetpoint.set(cmpPositionSetpoint);
 
       // compute joint torques using virtual model control
-      virtualModelController.setDesiredComForce(comForceSetpoint);
-      virtualModelController.setDesiredBodyTorque(bodyTorqueSetpoint);
+      virtualModelController.setComForceSetpoint(comForceSetpoint);
+      virtualModelController.setBodyTorqueSetpoint(bodyTorqueSetpoint);
       virtualModelController.compute();
    }
 
@@ -342,19 +339,11 @@ public class QuadrupedVMCStandController extends QuadrupedController
             String jointName = jointNameMap.getLegJointName(robotQuadrant, legJointName);
             OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
             joint.setUnderPositionControl(false);
-
-            // initialize controller joint limits
-            double positionLowerLimit = jointLimits.getJointSoftPositionLowerLimit(jointName);
-            double positionUpperLimit = jointLimits.getJointSoftPositionUpperLimit(jointName);
-            double effortLimit = jointLimits.getJointEffortLimit(jointName);
-            virtualModelController.setJointEffortLimits(jointName, -effortLimit, effortLimit);
-            virtualModelController.setJointPositionLimits(jointName, positionLowerLimit, positionUpperLimit);
-            virtualModelController.setJointPositionLimitStiffness(jointName, parameters.getJointPositionLimitStiffness());
-            virtualModelController.setJointPositionLimitDamping(jointName, parameters.getJointPositionLimitDamping());
          }
-         // initialize controller friction limits
-         virtualModelController.setCoefficientOfFriction(robotQuadrant, parameters.getCoefficientOfFriction());
       }
+
+      // initialize virtual model controller
+      this.virtualModelController.reinitialize();
    }
 
    @Override
