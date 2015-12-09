@@ -30,7 +30,7 @@ public class AcsellKneeActuatorCommand extends AcsellActuatorCommand
    {
       fourbar.update(jointCommand);
       
-      double currentRatio = ratio * fourbar.getFourbarRatio();
+      double currentRatio = ratio * fourbar.getFourbarRatioBasedOnCalculatedInputAngle();
 
       this.setQdd_d(jointCommand.getQdd_d()*currentRatio); //TODO: have fourbar calculate the change in ratio as well
       this.setTauDesired(jointCommand.getTauDesired() / currentRatio);

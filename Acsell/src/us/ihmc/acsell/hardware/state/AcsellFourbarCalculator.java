@@ -39,19 +39,16 @@ public class AcsellFourbarCalculator extends FourbarCalculator {
 	public void update(AcsellJointCommand joint)
 	{
 		q_out.set(joint.getQ()*getBeltRatio());
-		setOutputAngle(q_out.getDoubleValue() + beta0.getDoubleValue()); //External angle from GroundLink to OutputLink
-		updateFourbarKinematicEquationsFromOutputAngle();
-		q_in.set(getInputAngle());
-		N.set(getFourbarRatio());		
+		q_in.set(calculateInputAngleFromOutputAngle(q_out.getDoubleValue() + beta0.getDoubleValue())); //External angle from GroundLink to OutputLink
+
+		N.set(getFourbarRatioBasedOnCalculatedInputAngle());		
 	}
 	
 	public void update(OneDoFJoint joint)
 	{
 		q_out.set(joint.getQ()*getBeltRatio());
-		setOutputAngle(q_out.getDoubleValue() + beta0.getDoubleValue()); //External angle from GroundLink to OutputLink
-		updateFourbarKinematicEquationsFromOutputAngle();
-		q_in.set(getInputAngle());
-		N.set(getFourbarRatio());		
+		q_in.set(calculateInputAngleFromOutputAngle(q_out.getDoubleValue() + beta0.getDoubleValue())); //External angle from GroundLink to OutputLink
+		N.set(getFourbarRatioBasedOnCalculatedInputAngle());		
 	}
 	
 	public double getBeltRatio()
