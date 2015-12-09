@@ -34,7 +34,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
    public abstract void processImageToSend(BufferedImage bufferedImageToPack, Point3d cameraPositionToPack, Quat4d cameraOrientationToPack, IntrinsicParameters intrinsicParametersToPack);
 
    @Override
-   public void onNewImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParameters)
+   public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParameters)
    {
       processImageToSend(bufferedImage, cameraPosition, cameraOrientation, intrinsicParameters);
 
@@ -47,8 +47,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
       public void newVideoPacketAvailable(RobotSide robotSide, long timeStamp, byte[] data, Point3d position, Quat4d orientation,
             IntrinsicParameters intrinsicParameters)
       {
-         VideoPacket videoPacket = new VideoPacket(robotSide, timeStamp, data, position, orientation, intrinsicParameters);
-         videoPacket.setDestination(videoPacketDestination);
+         VideoPacket videoPacket = new VideoPacket(robotSide, timeStamp, data, position, orientation, intrinsicParameters, videoPacketDestination);
 
          if(videoPacketDestination.equals(PacketDestination.CONTROLLER))
             sendPacketToController(videoPacket);
