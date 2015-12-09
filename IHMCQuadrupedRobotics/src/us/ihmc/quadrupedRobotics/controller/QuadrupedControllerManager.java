@@ -3,7 +3,9 @@ package us.ihmc.quadrupedRobotics.controller;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
+import us.ihmc.quadrupedRobotics.parameters.DefaultQuadrupedStandPrepParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedStandPrepParameters;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedVirtualModelController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -48,7 +50,8 @@ public class QuadrupedControllerManager implements RobotController
             robotTimestamp, registry);
       requestedState = new EnumYoVariable<>("QuadrupedControllerStateMachineRequestedState", registry, QuadrupedControllerState.class, true);
 
-      QuadrupedStandPrepController standPrepController = new QuadrupedStandPrepController(sdfFullRobotModel, simulationDT);
+      QuadrupedStandPrepController standPrepController = new QuadrupedStandPrepController(new DefaultQuadrupedStandPrepParameters(), sdfFullRobotModel,
+            simulationDT);
 
       QuadrupedStandReadyController standReadyController = new QuadrupedStandReadyController(sdfFullRobotModel);
 
