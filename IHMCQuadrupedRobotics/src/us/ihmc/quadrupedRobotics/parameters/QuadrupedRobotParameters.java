@@ -22,8 +22,9 @@ public interface QuadrupedRobotParameters
 
    public QuadrupedControllerParameters getQuadrupedControllerParameters();
    
+   public QuadrupedStandPrepParameters getQuadrupedStandPrepParameters();
+   
    public QuadrupedVMCStandParameters getQuadrupedVMCStandParameters();
 
    public QuadrupedActuatorParameters getActuatorParameters();
-
 }
