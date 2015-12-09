@@ -1,6 +1,11 @@
-package us.ihmc.acsell.fourbar;
+/*
+ * This class is based on interface and control code for STEPPR and WANDERER, 
+ * two energy-efficient humanoid bipeds developed by the High Consequence Automation and Robotics Group at Sandia National Laboratories.
+ *
+ */
+package us.ihmc.robotics.kinematics.fourbar;
 
-public abstract class FourbarCalculator {
+ public class FourbarCalculator {
 	private final FourbarProperties Fourbar;	
 	private final double L1;
 	private final double L2;
@@ -20,7 +25,7 @@ public abstract class FourbarCalculator {
 	private double da2db;
 	private double N;
 		
-	protected FourbarCalculator(FourbarProperties fourbar)
+	public FourbarCalculator(FourbarProperties fourbar)
 	{
 		this.Fourbar = fourbar;
         L1 = this.Fourbar.getGroundLink().getLength();
@@ -34,7 +39,7 @@ public abstract class FourbarCalculator {
 		return Fourbar.isElbowDown() ? -1.0 : 1.0;		
 	}
 		
-	protected void updateFourbarKinematicEquationsFromOutputAngle()
+	public void updateFourbarKinematicEquationsFromOutputAngle()
 	{			
 		phi = Math.PI - beta; //Internal angle from GroundLink to OutputLink
 		x =  L1 - L4*Math.cos(phi); //Distance from L1-L2 joint to L4-L3 joint as measured parallel to L1
@@ -59,7 +64,7 @@ public abstract class FourbarCalculator {
 		return alpha;
 	}
 	
-	protected void setOutputAngle(double beta)
+	public void setOutputAngle(double beta)
 	{
 		this.beta = beta;
 	}
