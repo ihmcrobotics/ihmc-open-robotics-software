@@ -47,13 +47,13 @@ public class QuadrupedControllerManager implements RobotController
             robotTimestamp, registry);
       requestedState = new EnumYoVariable<>("QuadrupedControllerStateMachineRequestedState", registry, QuadrupedControllerState.class, true);
 
-      QuadrupedVMCStandController vmcStandController = new QuadrupedVMCStandController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, virtualModelController, robotTimestamp, registry, yoGraphicsListRegistry);
+      QuadrupedVirtualModelBasedStandController virtualModelBasedStandController = new QuadrupedVirtualModelBasedStandController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, virtualModelController, robotTimestamp, registry, yoGraphicsListRegistry);
 
       QuadrupedPositionBasedCrawlController positionBasedCrawlController = new QuadrupedPositionBasedCrawlController(simulationDT, quadrupedRobotParameters,
             sdfFullRobotModel, stateEstimator, inverseKinematicsCalculators, globalDataProducer, robotTimestamp, registry, yoGraphicsListRegistry,
             yoGraphicsListRegistryForDetachedOverhead);
 
-      stateMachine.addState(vmcStandController);
+      stateMachine.addState(virtualModelBasedStandController);
       stateMachine.addState(positionBasedCrawlController);
 
       // Add valid transitions from controller to controller.
@@ -62,7 +62,7 @@ public class QuadrupedControllerManager implements RobotController
       // a standing controller.
       positionBasedCrawlController
             .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.VMC_STAND));
-      vmcStandController
+      virtualModelBasedStandController
             .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.POSITION_CRAWL));
 
       // TODO: Start in a "freeze" state.
