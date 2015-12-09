@@ -180,9 +180,10 @@ public class PelvisLinearStateUpdater
       kinematicsBasedLinearStateCalculator.enableTwistEstimation(stateEstimatorParameters.useTwistForPelvisLinearStateEstimation());
 
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, imuProcessedOutputs, estimatorDT, gravitationalAcceleration, registry);
+      imuBasedLinearStateCalculator.cancelGravityFromAccelerationMeasurement(stateEstimatorParameters.cancelGravityFromAccelerationMeasurement());
       imuBasedLinearStateCalculator.enableEsimationModule(stateEstimatorParameters.useAccelerometerForEstimation());
-      imuBasedLinearStateCalculator.enableGravityEstimation(stateEstimatorParameters.estimateGravity());
-      imuBasedLinearStateCalculator.setAlphaGravityEstimation(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getGravityFilterFreqInHertz(), estimatorDT));
+      imuBasedLinearStateCalculator.enableAccelerationBiasEstimation(stateEstimatorParameters.estimateAccelerationBias());
+      imuBasedLinearStateCalculator.setAlphaAccelerationBiasEstimation(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getAccelerationBiasFilterFreqInHertz(), estimatorDT));
 
       alphaIMUAgainstKinematicsForVelocity.set(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getPelvisLinearVelocityFusingFrequency(), estimatorDT));
       alphaIMUAgainstKinematicsForPosition.set(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getPelvisPositionFusingFrequency(), estimatorDT));
