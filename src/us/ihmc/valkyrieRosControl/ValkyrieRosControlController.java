@@ -36,6 +36,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
@@ -71,7 +72,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
    private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
 
    private static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = false;
-   
+
    private MultiThreadedRealTimeRobotController robotController;
    
    private final SettableTimestampProvider timestampProvider = new SettableTimestampProvider();
@@ -182,7 +183,8 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
        * Create network servers/clients
        */
       PacketCommunicator drcNetworkProcessorServer = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
-      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.LOGGER_PRIORITY), robotModel.getLogModelProvider(), robotModel.getLogSettings(), robotModel.getEstimatorDT());
+      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.LOGGER_PRIORITY), robotModel.getLogModelProvider(), robotModel.getLogSettings(
+            ValkyrieConfigurationRoot.USE_CAMERAS_FOR_LOGGING), robotModel.getEstimatorDT());
       HumanoidGlobalDataProducer dataProducer = new HumanoidGlobalDataProducer(drcNetworkProcessorServer);
       
       /*

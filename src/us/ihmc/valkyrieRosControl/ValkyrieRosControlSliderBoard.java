@@ -11,7 +11,6 @@ import org.yaml.snakeyaml.Yaml;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.robotDataCommunication.YoVariableServer;
-import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -24,6 +23,7 @@ import us.ihmc.rosControl.JointHandle;
 import us.ihmc.rosControl.valkyrie.IHMCValkyrieControlJavaBridge;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 
 public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 {
@@ -47,7 +47,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
    public static final boolean LOAD_STAND_PREP_STEPOINTS = true;
    public static final double KP_DEFAULT = 30.0;
    public static final double KD_DEFAULT = 1.0;
-   
+
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
    private final SDFFullHumanoidRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
 
@@ -55,7 +55,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName()),
-         robotModel.getLogModelProvider(), LogSettings.SIMULATION, 0.001);
+         robotModel.getLogModelProvider(), robotModel.getLogSettings(ValkyrieConfigurationRoot.USE_CAMERAS_FOR_LOGGING), 0.001);
 
    private final DoubleYoVariable masterScaleFactor = new DoubleYoVariable("masterScaleFactor", registry);
 
