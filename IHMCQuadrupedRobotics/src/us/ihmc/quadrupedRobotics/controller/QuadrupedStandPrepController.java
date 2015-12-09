@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedStandPrepParameters;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
@@ -26,11 +27,11 @@ public class QuadrupedStandPrepController extends QuadrupedController
     */
    private double timeInTrajectory = 0.0;
 
-   public QuadrupedStandPrepController(final QuadrupedStandPrepParameters parameters, final SDFFullRobotModel fullRobotModel, final double dt)
+   public QuadrupedStandPrepController(final QuadrupedRobotParameters parameters, final SDFFullRobotModel fullRobotModel, final double dt)
    {
       super(QuadrupedControllerState.STAND_PREP);
 
-      this.parameters = parameters;
+      this.parameters = parameters.getQuadrupedStandPrepParameters();
       this.fullRobotModel = fullRobotModel;
       this.dt = dt;
 

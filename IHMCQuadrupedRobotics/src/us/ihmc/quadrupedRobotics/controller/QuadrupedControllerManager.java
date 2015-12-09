@@ -50,7 +50,7 @@ public class QuadrupedControllerManager implements RobotController
             robotTimestamp, registry);
       requestedState = new EnumYoVariable<>("QuadrupedControllerStateMachineRequestedState", registry, QuadrupedControllerState.class, true);
 
-      QuadrupedStandPrepController standPrepController = new QuadrupedStandPrepController(new DefaultQuadrupedStandPrepParameters(), sdfFullRobotModel,
+      QuadrupedStandPrepController standPrepController = new QuadrupedStandPrepController(quadrupedRobotParameters, sdfFullRobotModel,
             simulationDT);
 
       QuadrupedStandReadyController standReadyController = new QuadrupedStandReadyController(sdfFullRobotModel);
