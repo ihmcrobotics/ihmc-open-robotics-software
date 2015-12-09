@@ -2,7 +2,6 @@ package us.ihmc.steppr.hardware.command;
 
 import java.util.EnumMap;
 
-import us.ihmc.acsell.fourbar.FourbarProperties;
 import us.ihmc.acsell.hardware.command.AcsellActuatorCommand;
 import us.ihmc.acsell.hardware.command.AcsellAnkleActuatorCommand;
 import us.ihmc.acsell.hardware.command.AcsellCommand;
@@ -11,6 +10,7 @@ import us.ihmc.acsell.hardware.command.AcsellKneeActuatorCommand;
 import us.ihmc.acsell.hardware.command.AcsellLinearTransmissionActuatorCommand;
 import us.ihmc.acsell.hardware.configuration.AcsellAnkleKinematicParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.kinematics.fourbar.FourbarProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprJoint;
