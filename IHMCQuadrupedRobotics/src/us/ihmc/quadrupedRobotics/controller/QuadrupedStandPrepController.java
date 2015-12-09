@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedStandPrepParameters;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
@@ -14,11 +15,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
  */
 public class QuadrupedStandPrepController extends QuadrupedController
 {
-   /**
-    * The length of the strand preparation trajectory in seconds.
-    */
-   private static final double TRAJECTORY_TIME = 2.0;
-
+   private final QuadrupedStandPrepParameters parameters;
    private final SDFFullRobotModel fullRobotModel;
    private final double dt;
 
@@ -29,10 +26,11 @@ public class QuadrupedStandPrepController extends QuadrupedController
     */
    private double timeInTrajectory = 0.0;
 
-   public QuadrupedStandPrepController(final SDFFullRobotModel fullRobotModel, final double dt)
+   public QuadrupedStandPrepController(final QuadrupedStandPrepParameters parameters, final SDFFullRobotModel fullRobotModel, final double dt)
    {
       super(QuadrupedControllerState.STAND_PREP);
 
+      this.parameters = parameters;
       this.fullRobotModel = fullRobotModel;
       this.dt = dt;
 
@@ -68,7 +66,7 @@ public class QuadrupedStandPrepController extends QuadrupedController
 
          // Start the trajectory from the current pos/vel/acc.
          MinimumJerkTrajectory trajectory = trajectories.get(i);
-         trajectory.setMoveParameters(joint.getQ(), joint.getQd(), joint.getQdd(), 0.0, 0.0, 0.0, TRAJECTORY_TIME);
+         trajectory.setMoveParameters(joint.getQ(), joint.getQd(), joint.getQdd(), 0.0, 0.0, 0.0, parameters.getTrajectoryTime());
 
          // This is a new trajectory. We start at time 0.
          timeInTrajectory = 0.0;
@@ -84,7 +82,7 @@ public class QuadrupedStandPrepController extends QuadrupedController
    public RobotMotionStatus getMotionStatus()
    {
       // If the trajectory has been exhausted, then the robot is standing.
-      if (timeInTrajectory > TRAJECTORY_TIME)
+      if (timeInTrajectory > parameters.getTrajectoryTime())
       {
          return RobotMotionStatus.STANDING;
       }
