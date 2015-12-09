@@ -89,7 +89,7 @@ public class PacketRouter<T extends Enum<T>>
    {
       if (shouldPrintDebugStatement(source, packet.getDestination(), packet.getClass()))
       {
-         PrintTools.debug(this, "NP received " + packet.getClass().getSimpleName() + " heading for " + destinationConstants[packet.destination] + " from " + communicatorDestinations.get(source));
+         PrintTools.debug(this, "NP received " + packet.getClass().getSimpleName() + " heading for " + destinationConstants[packet.destination] + " from " + communicatorDestinations.get(source) + " at " + System.nanoTime());
       }
       
       T destination = getPacketDestination(source, packet);
@@ -103,7 +103,7 @@ public class PacketRouter<T extends Enum<T>>
       {
          if(shouldPrintDebugStatement(source, destination.ordinal(), packet.getClass()))
          {
-            PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination);
+            PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination + " at " + System.nanoTime());
          }
          
          forwardPacket(packet, destinationCommunicator);
@@ -161,7 +161,7 @@ public class PacketRouter<T extends Enum<T>>
             {
                if(shouldPrintDebugStatement(source, destination.ordinal(), packet.getClass()))
                {
-                  PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination);
+                  PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination + " at " + System.nanoTime());
                }
                forwardPacket(packet, destinationCommunicator);
             }
