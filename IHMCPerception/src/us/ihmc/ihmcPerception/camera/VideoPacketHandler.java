@@ -11,6 +11,7 @@ import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.time.Timer;
 
 public class VideoPacketHandler implements CompressedVideoHandler
 {
@@ -29,9 +30,19 @@ public class VideoPacketHandler implements CompressedVideoHandler
       this.packetDestination = packetDestination;
    }
 
+   private Timer timer;
+   {
+      if (DEBUG)
+         timer = new Timer().start();
+   }
+   
    public void newVideoPacketAvailable(RobotSide robotSide, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
    {
-      PrintTools.debug(DEBUG, this, getClass().getName() + " sending new VideoPacket");
+      if (DEBUG)
+      {
+         PrintTools.debug(DEBUG, this, "Sending new VideoPacket FPS: " + 1.0 / timer.averageLap());
+         timer.lap();
+      }
          
       packetCommunicator.send(new VideoPacket(robotSide, timeStamp, data, position, orientation, intrinsicParameters, packetDestination));
    }
