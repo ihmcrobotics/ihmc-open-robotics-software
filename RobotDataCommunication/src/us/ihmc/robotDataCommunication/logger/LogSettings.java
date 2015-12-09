@@ -9,6 +9,7 @@ public enum LogSettings
    ATLAS_IAN(true, "239.255.25.1", 5, 4, 0),
    ATLAS_NO_CAMERAS(true),
    VALKYRIE_IHMC(true, "239.255.25.2", 5, 4, 0),
+   VALKYRIE_NO_CAMERAS(true),
    STEPPR_IHMC(true, "239.255.25.3", 2, 3),
    SIMULATION(false, "239.255.25.4"),
    BEHAVIOR(false),
