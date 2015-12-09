@@ -47,6 +47,7 @@ public class QuadrupedVMCStandController extends QuadrupedController
    private final double mass;
 
    // utilities
+   private final QuadrupedVirtualModelController virtualModelController;
    private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame worldFrame;
    private final ReferenceFrame bodyFrame;
@@ -59,7 +60,6 @@ public class QuadrupedVMCStandController extends QuadrupedController
    private final PIDController comHeightPIDController;
    private final PIDController icpForwardPIDController;
    private final PIDController icpLateralPIDController;
-   private final QuadrupedVirtualModelController virtualModelController;
 
    // desireds (provider inputs)
    private final YoFrameOrientation yoBodyOrientationDesired;
@@ -89,7 +89,8 @@ public class QuadrupedVMCStandController extends QuadrupedController
    private HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
 
    public QuadrupedVMCStandController(double controlDT, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
-         DoubleYoVariable robotTimestamp, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         QuadrupedVirtualModelController virtualModelController, DoubleYoVariable robotTimestamp, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(QuadrupedControllerState.VMC_STAND);
 
@@ -106,7 +107,8 @@ public class QuadrupedVMCStandController extends QuadrupedController
       this.mass = fullRobotModel.getTotalMass();
 
       // utilities
-      referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
+      this.virtualModelController = virtualModelController;
+      referenceFrames = virtualModelController.getReferenceFrames();
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
       bodyFrame = referenceFrames.getBodyFrame();
       worldFrame = ReferenceFrame.getWorldFrame();
@@ -137,7 +139,6 @@ public class QuadrupedVMCStandController extends QuadrupedController
       icpLateralPIDController.setIntegralGain(parameters.getIcpForwardIntegralGain());
       icpLateralPIDController.setMaxIntegralError(parameters.getIcpForwardMaxIntegralError());
       icpLateralPIDController.setDerivativeGain(parameters.getIcpForwardDerivativeGain());
-      virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, jointNameMap, registry);
 
       // desireds (provider inputs)
       yoBodyOrientationDesired = new YoFrameOrientation("bodyOrientationDesired", supportFrame, registry);
@@ -288,7 +289,6 @@ public class QuadrupedVMCStandController extends QuadrupedController
       icpPositionEstimate.setIncludingFrame(yoIcpPositionEstimate.getFrameTuple());
       icpPositionSetpoint.changeFrame(comFrame);
       icpPositionEstimate.changeFrame(comFrame);
-      cmpPositionSetpoint.changeFrame(comFrame);
       double omega = yoIcpOmegaSetpoint.getDoubleValue();
       double cmpX = icpPositionEstimate.getX()
             - 1 / omega * icpForwardPIDController.compute(icpPositionEstimate.getX(), icpPositionSetpoint.getX(), 0, 0, controlDT);
@@ -299,7 +299,9 @@ public class QuadrupedVMCStandController extends QuadrupedController
       double fY = mass * Math.pow(omega, 2) * -cmpY;
       double fZ = parameters.getComHeightGravityFeedforwardConstant() * mass * gravityZ + comHeightPIDController.compute(yoComHeightEstimate.getDoubleValue(),
             yoComHeightSetpoint.getDoubleValue(), yoComVelocityEstimate.getZ(), 0, controlDT);
+      cmpPositionSetpoint.changeFrame(comFrame);
       cmpPositionSetpoint.set(cmpX, cmpY, cmpZ);
+      comForceSetpoint.changeFrame(comFrame);
       comForceSetpoint.set(fX, fY, fZ);
       icpPositionSetpoint.changeFrame(yoIcpPositionSetpoint.getReferenceFrame());
       cmpPositionSetpoint.changeFrame(yoCmpPositionSetpoint.getReferenceFrame());
