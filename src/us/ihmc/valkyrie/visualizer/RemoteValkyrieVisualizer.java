@@ -32,7 +32,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       scsVisualizer.addSCSVisualizerStateListener(this);
       scsVisualizer.setShowOverheadView(false);
 
-      YoVariableClient client = new YoVariableClient(scsVisualizer, "remote");
+      YoVariableClient client = new YoVariableClient(scsVisualizer, "remote", new ValkyrieIpToNiceNameRemapper());
       client.start();
    }
    
