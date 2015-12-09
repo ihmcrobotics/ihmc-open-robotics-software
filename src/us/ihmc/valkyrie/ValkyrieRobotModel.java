@@ -437,9 +437,17 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public LogSettings getLogSettings()
    {
+      return getLogSettings(true);
+   }
+
+   public LogSettings getLogSettings(boolean useCameras)
+   {
       if(target == RobotTarget.REAL_ROBOT)
       {
-         return LogSettings.VALKYRIE_IHMC;
+         if(useCameras)
+            return LogSettings.VALKYRIE_IHMC;
+         else
+            return LogSettings.VALKYRIE_NO_CAMERAS;
       }
       else
       {
