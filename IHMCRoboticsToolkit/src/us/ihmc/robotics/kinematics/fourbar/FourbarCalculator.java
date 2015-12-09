@@ -5,71 +5,74 @@
  */
 package us.ihmc.robotics.kinematics.fourbar;
 
- public class FourbarCalculator {
-	private final FourbarProperties Fourbar;	
-	private final double L1;
-	private final double L2;
-	private final double L3;
-	private final double L4;	
-	
-	private double phi;
-	private double x;
-	private double y;
-	private double D;
-	private double Dsqrd;
-	private double beta; //External angle from GroundLink to OutputLink
-	private double alpha;
-	private double a1;
-	private double a2;
-	private double da1db;
-	private double da2db;
-	private double N;
-		
-	public FourbarCalculator(FourbarProperties fourbar)
-	{
-		this.Fourbar = fourbar;
-        L1 = this.Fourbar.getGroundLink().getLength();
-        L2 = this.Fourbar.getInputLink().getLength();
-        L3 = this.Fourbar.getFloatingLink().getLength();
-        L4 = this.Fourbar.getOutputLink().getLength();
-	}
-	
-	private double getElbowSign()
-	{
-		return Fourbar.isElbowDown() ? -1.0 : 1.0;		
-	}
-		
-	public void updateFourbarKinematicEquationsFromOutputAngle()
-	{			
-		phi = Math.PI - beta; //Internal angle from GroundLink to OutputLink
-		x =  L1 - L4*Math.cos(phi); //Distance from L1-L2 joint to L4-L3 joint as measured parallel to L1
-		y = L4*Math.sin(phi); //Distance from L1-L2 joint to L4-L3 joint as measured perpendicular to L1
-		Dsqrd = x*x+y*y; //Distance squared from L1-L2 joint to L4-L3
-		D = Math.sqrt(Dsqrd); //Distance from L1-L2 joint to L4-L3
-		a1 = Math.atan2(y, x); //Angle from L1 to the L4-L3 joint
-		a2 = getElbowSign()*Math.acos((L2*L2 + Dsqrd - L3*L3)/(2*L2*D)); //Angle from L2 to the L4-L3 joint
-		da1db = 1-L1*x/Dsqrd; //Derivative of a1 wrt beta
-		da2db = L1*y*(D-L2*Math.cos(a2))/(L2*Dsqrd*Math.sin(a2)); //Derivative of a2 wrt beta
-		N = da1db+da2db;
-		alpha = a1+a2;
-	}
-	
-	public double getFourbarRatio()
-	{
-		return N;
-	}
-	
-	public double getInputAngle()
-	{
-		return alpha;
-	}
-	
-	public void setOutputAngle(double beta)
-	{
-		this.beta = beta;
-	}
-	
-	//TODO: updateDynamicEquations
-	
-	
+public class FourbarCalculator
+{
+   private final FourbarProperties fourbar;
+   private final double L1;
+   private final double L2;
+   private final double L3;
+   private final double L4;
+
+   private double tempRatio;
+   private double ratioBasedOnCalculatedInputAngle;
+   private double ratioBasedOnCalculatedOutputAngle;
+
+   public FourbarCalculator(FourbarProperties fourbar)
+   {
+      this.fourbar = fourbar;
+      L1 = this.fourbar.getGroundLink().getLength();
+      L2 = this.fourbar.getInputLink().getLength();
+      L3 = this.fourbar.getFloatingLink().getLength();
+      L4 = this.fourbar.getOutputLink().getLength();
+   }
+
+   private double getElbowSign()
+   {
+      return fourbar.isElbowDown() ? -1.0 : 1.0;
+   }
+
+   /**
+    * Calculated the input angle based on the output angle
+    * 
+    * @param beta External angle from GroundLink to OutputLink
+    */
+   public double calculateInputAngleFromOutputAngle(double beta)
+   {
+      double alpha = calculateInputAngleFromOutputAngle(beta, L1, L2, L3, L4);
+      ratioBasedOnCalculatedOutputAngle = tempRatio;
+      return alpha;
+   }
+
+   public double getFourbarRatioBasedOnCalculatedInputAngle()
+   {
+      return ratioBasedOnCalculatedInputAngle;
+   }
+   
+   public double getFourbarRatioBasedOnCalculatedOutputAngle()
+   {
+      return ratioBasedOnCalculatedOutputAngle;
+   }
+
+   public double calculateOutputAngleFromInputAngle(double beta)
+   {
+      // Flip input and output in the fourbar linkage and run the output to input calculator
+      double alpha = calculateInputAngleFromOutputAngle(Math.PI - beta, L1, L4, L3, L2);
+      ratioBasedOnCalculatedOutputAngle = tempRatio;
+      return Math.PI - alpha;
+   }
+
+   private double calculateInputAngleFromOutputAngle(double beta, double L1, double L2, double L3, double L4)
+   {
+      double phi = Math.PI - beta; //Internal angle from GroundLink to OutputLink
+      double x = L1 - L4 * Math.cos(phi); //Distance from L1-L2 joint to L4-L3 joint as measured parallel to L1
+      double y = L4 * Math.sin(phi); //Distance from L1-L2 joint to L4-L3 joint as measured perpendicular to L1
+      double Dsqrd = x * x + y * y; //Distance squared from L1-L2 joint to L4-L3
+      double D = Math.sqrt(Dsqrd); //Distance from L1-L2 joint to L4-L3
+      double a1 = Math.atan2(y, x); //Angle from L1 to the L4-L3 joint
+      double a2 = getElbowSign() * Math.acos((L2 * L2 + Dsqrd - L3 * L3) / (2 * L2 * D)); //Angle from L2 to the L4-L3 joint
+      double da1db = 1 - L1 * x / Dsqrd; //Derivative of a1 wrt beta
+      double da2db = L1 * y * (D - L2 * Math.cos(a2)) / (L2 * Dsqrd * Math.sin(a2)); //Derivative of a2 wrt beta
+      tempRatio = da1db + da2db;
+      return a1 + a2;
+   }
 }
