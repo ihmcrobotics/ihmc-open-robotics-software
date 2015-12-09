@@ -29,6 +29,11 @@ public class YoVariableClient
       this(LogSessionDisplay.getAnnounceRequest(), listener, registryPrefix);
    }
 
+   public YoVariableClient(YoVariablesUpdatedListener listener, String registryPrefix, LogSessionDisplay.RobotIPToNameRemapHandler remapHandler)
+   {
+      this(LogSessionDisplay.getAnnounceRequest(remapHandler), listener, registryPrefix);
+   }
+
    public YoVariableClient(AnnounceRequest request, YoVariablesUpdatedListener listener, String registryPrefix)
    {
       this.logControlClient = new LogControlClient(request.getControlIP(), request.getControlPort(), listener);
