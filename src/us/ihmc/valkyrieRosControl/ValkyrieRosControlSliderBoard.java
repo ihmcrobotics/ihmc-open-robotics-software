@@ -1,6 +1,7 @@
 package us.ihmc.valkyrieRosControl;
 
-import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,8 +21,11 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.rosControl.JointHandle;
 import us.ihmc.rosControl.valkyrie.IHMCValkyrieControlJavaBridge;
+import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -44,7 +48,8 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
          "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"
          };
 
-   public static final boolean LOAD_STAND_PREP_STEPOINTS = true;
+   public static final boolean LOAD_STAND_PREP_SETPOINTS = true;
+   public static final boolean LOAD_TORQUE_OFFSETS = true;
    public static final double KP_DEFAULT = 30.0;
    public static final double KD_DEFAULT = 1.0;
    
@@ -60,6 +65,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
    private final DoubleYoVariable masterScaleFactor = new DoubleYoVariable("masterScaleFactor", registry);
 
    private EnumYoVariable<?> selectedJoint;
+   private EnumYoVariable<?> previousSelectedJoint;
    private final DoubleYoVariable qDesiredSelected = new DoubleYoVariable("qDesiredSelected", registry);
    private final DoubleYoVariable qdDesiredSelected = new DoubleYoVariable("qdDesiredSelected", registry);
 
@@ -70,7 +76,14 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
    private final DoubleYoVariable qdSelected = new DoubleYoVariable("qdSelected", registry);
 
    private final DoubleYoVariable tauSelected = new DoubleYoVariable("tauSelected", registry);
+   private final DoubleYoVariable tauOffsetSelected = new DoubleYoVariable("tauOffsetSelected", registry);
+   private final DoubleYoVariable tauPDSelected = new DoubleYoVariable("tauPDSelected", registry);
+   private final DoubleYoVariable tauFunctionSelected = new DoubleYoVariable("tauFunctionSelected", registry);
    private final DoubleYoVariable tauDesiredSelected = new DoubleYoVariable("tauDesiredSelected", registry);
+
+   private long startTime = -1;
+   private final DoubleYoVariable yoTime = new DoubleYoVariable("time", registry);
+   private YoFunctionGenerator functionGenerator;
 
    @Override
    protected void init()
@@ -78,8 +91,17 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
       kpSelected.set(KP_DEFAULT);
       kdSelected.set(KD_DEFAULT);
 
-      if (LOAD_STAND_PREP_STEPOINTS)
+      double dt = robotModel.getEstimatorDT();
+      functionGenerator = new YoFunctionGenerator("FG", yoTime, registry, true, dt);
+      functionGenerator.setAmplitude(0.0);
+      functionGenerator.setFrequency(0.0);
+      functionGenerator.setOffset(0.0);
+
+      if (LOAD_STAND_PREP_SETPOINTS)
          loadStandPrepSetPoints();
+
+      if (LOAD_TORQUE_OFFSETS)
+         loadTorqueOffsets();
 
       ArrayList<String> jointNames = new ArrayList<>();
       for (String jointName : controlledJoints)
@@ -90,9 +112,11 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
          jointNames.add(joint.getName());
       }
 
-
-      selectedJoint = new EnumYoVariable("selectedJoint", "", registry, false, jointNames.toArray(new String[jointNames.size()]));
+      String[] jointNameArray = jointNames.toArray(new String[jointNames.size()]);
+      selectedJoint = new EnumYoVariable<>("selectedJoint", "", registry, false, jointNameArray);
       System.out.println(Arrays.toString(selectedJoint.getEnumValuesAsString()));
+      previousSelectedJoint = new EnumYoVariable<>("previousSelectedJoint", "", registry, true, jointNameArray);
+      previousSelectedJoint.set(EnumYoVariable.NULL_VALUE);
 
       selectedJoint.addVariableChangedListener(new VariableChangedListener()
       {
@@ -105,6 +129,13 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 
             kpSelected.set(selected.pdController.getProportionalGain());
             kdSelected.set(selected.pdController.getDerivativeGain());
+
+            tauOffsetSelected.set(selected.tau_offset.getDoubleValue());
+
+            if (previousSelectedJoint.getOrdinal() != EnumYoVariable.NULL_VALUE)
+               jointHolders.get(previousSelectedJoint.getOrdinal()).tau_function.set(0.0);
+
+            previousSelectedJoint.set(selectedJoint.getOrdinal());
          }
       });
 
@@ -117,29 +148,59 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 
    private Map<String, Double> setPointMap = null;
 
+   @SuppressWarnings("unchecked")
    private void loadStandPrepSetPoints()
    {
-      Yaml yaml = new Yaml();
-      InputStream setpointsStream = getClass().getClassLoader().getResourceAsStream("configuration/standPrep/setpoints.yaml");
-      setPointMap = (Map<String, Double>) yaml.load(setpointsStream);
       try
       {
+         Yaml yaml = new Yaml();
+         InputStream setpointsStream = getClass().getClassLoader().getResourceAsStream("standPrep/setpoints.yaml");
+         setPointMap = (Map<String, Double>) yaml.load(setpointsStream);
          setpointsStream.close();
       }
-      catch (IOException e)
+      catch (Exception e)
       {
+         PrintTools.error(this, "Could not load stand prep set points.");
+         setPointMap = null;
+      }
+   }
+
+   private Map<String, Double> torqueOffsetMap = null;
+
+   @SuppressWarnings("unchecked")
+   private void loadTorqueOffsets()
+   {
+      try
+      {
+         Yaml yaml = new Yaml();
+         FileInputStream offsetsStream = new FileInputStream(new File(ValkyrieTorqueOffsetPrinter.IHMC_TORQUE_OFFSET_FILE));
+         torqueOffsetMap = (Map<String, Double>) yaml.load(offsetsStream);
+         offsetsStream.close();
+      }
+      catch (Exception e)
+      {
+         PrintTools.error(this, "Could not load joint torque offsets.");
+         torqueOffsetMap = null;
       }
    }
 
    @Override
    protected void doControl(long time, long duration)
    {
+      if (startTime == -1)
+         startTime = time;
+      yoTime.set(TimeTools.nanoSecondstoSeconds(time - startTime));
+
+      tauFunctionSelected.set(functionGenerator.getValue());
+
       masterScaleFactor.set(MathTools.clipToMinMax(masterScaleFactor.getDoubleValue(), 0.0, 1.0));
       JointHolder selected = jointHolders.get(selectedJoint.getOrdinal());
       selected.q_d.set(MathTools.clipToMinMax(qDesiredSelected.getDoubleValue(), selected.joint.getJointLimitLower(), selected.joint.getJointLimitUpper()));
       selected.qd_d.set(qdDesiredSelected.getDoubleValue());
       selected.pdController.setProportionalGain(kpSelected.getDoubleValue());
       selected.pdController.setDerivativeGain(kdSelected.getDoubleValue());
+      selected.tau_function.set(tauFunctionSelected.getDoubleValue());
+      selected.tau_offset.set(tauOffsetSelected.getDoubleValue());
 
       for (int i = 0; i < jointHolders.size(); i++)
       {
@@ -151,6 +212,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
       qdSelected.set(selected.qd.getDoubleValue());
 
       tauSelected.set(selected.tau.getDoubleValue());
+      tauPDSelected.set(selected.tau_pd.getDoubleValue());
       tauDesiredSelected.set(selected.tau_d.getDoubleValue());
 
       yoVariableServer.update(time);
@@ -169,6 +231,9 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 
       private final DoubleYoVariable q_d;
       private final DoubleYoVariable qd_d;
+      private final DoubleYoVariable tau_offset;
+      private final DoubleYoVariable tau_pd;
+      private final DoubleYoVariable tau_function;
       private final DoubleYoVariable tau_d;
 
       public JointHolder(OneDoFJoint joint, JointHandle handle, YoVariableRegistry parentRegistry)
@@ -176,21 +241,29 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
          this.joint = joint;
          this.handle = handle;
 
-         this.registry = new YoVariableRegistry(joint.getName());
-         this.pdController = new PDController(joint.getName(), registry);
+         String jointName = joint.getName();
+         this.registry = new YoVariableRegistry(jointName);
+         this.pdController = new PDController(jointName, registry);
          pdController.setProportionalGain(KP_DEFAULT);
          pdController.setDerivativeGain(KD_DEFAULT);
 
-         q = new DoubleYoVariable(joint.getName() + "_q", registry);
-         qd = new DoubleYoVariable(joint.getName() + "_qd", registry);
-         tau = new DoubleYoVariable(joint.getName() + "_tau", registry);
+         q = new DoubleYoVariable(jointName + "_q", registry);
+         qd = new DoubleYoVariable(jointName + "_qd", registry);
+         tau = new DoubleYoVariable(jointName + "_tau", registry);
 
-         q_d = new DoubleYoVariable(joint.getName() + "_q_d", registry);
-         qd_d = new DoubleYoVariable(joint.getName() + "_qd_d", registry);
-         tau_d = new DoubleYoVariable(joint.getName() + "_tau_d", registry);
+         q_d = new DoubleYoVariable(jointName + "_q_d", registry);
+         qd_d = new DoubleYoVariable(jointName + "_qd_d", registry);
 
-         if (setPointMap != null && setPointMap.containsKey(joint.getName()))
-            q_d.set(setPointMap.get(joint.getName()));
+         tau_offset = new DoubleYoVariable(jointName + "_tau_offset", parentRegistry);
+         tau_d = new DoubleYoVariable(jointName + "_tau_d", registry);
+         tau_pd = new DoubleYoVariable(jointName + "_tau_pd", registry);
+         tau_function = new DoubleYoVariable(jointName + "_tau_function", registry);
+
+         if (setPointMap != null && setPointMap.containsKey(jointName))
+            q_d.set(setPointMap.get(jointName));
+
+         if (torqueOffsetMap != null && torqueOffsetMap.containsKey(jointName))
+            tau_offset.set(torqueOffsetMap.get(jointName));
 
          parentRegistry.addChild(registry);
       }
@@ -206,10 +279,10 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
          tau.set(joint.getTauMeasured());
 
          double pdOutput = pdController.compute(q.getDoubleValue(), q_d.getDoubleValue(), qd.getDoubleValue(), qd_d.getDoubleValue());
-         tau_d.set(masterScaleFactor.getDoubleValue() * pdOutput);
+         tau_pd.set(pdOutput);
+         tau_d.set(masterScaleFactor.getDoubleValue() * (tau_pd.getDoubleValue() + tau_function.getDoubleValue()) + tau_offset.getDoubleValue());
 
          handle.setDesiredEffort(tau_d.getDoubleValue());
-
       }
    }
 }
