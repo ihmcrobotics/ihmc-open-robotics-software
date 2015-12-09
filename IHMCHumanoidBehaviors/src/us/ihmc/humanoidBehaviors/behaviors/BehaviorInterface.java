@@ -30,9 +30,9 @@ public abstract class BehaviorInterface implements RobotController
    }
    
    protected final OutgoingCommunicationBridgeInterface outgoingCommunicationBridge;
-   private final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> listeningControllerQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
-   private final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> listeningNetworkProcessorQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
-   
+   protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> listeningControllerQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
+   protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> listeningNetworkProcessorQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
+
    private final ControllerGlobalObjectConsumer controllerObjectConsumer;
    private final NetworkProcessorGlobalObjectConsumer networkProcessorObjectConsumer;
    protected final String behaviorName;

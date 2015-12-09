@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.parameters;
 
-public interface QuadrupedVMCStandParameters
+public interface QuadrupedVirtualModelBasedStandParameters
 {
    public double[] getBodyOrientationProportionalGains();
    public double[] getBodyOrientationDerivativeGains();
@@ -22,8 +22,5 @@ public interface QuadrupedVMCStandParameters
    public double getComHeightIntegralGain();
    public double getComHeightMaxIntegralError();
    public double getComHeightGravityFeedforwardConstant();
-   public double getComHeightSetpoint();
-   
-   public double getJointPositionLimitStiffness();
-   public double getJointPositionLimitDamping();
+   public double getComHeightNominal();
 }

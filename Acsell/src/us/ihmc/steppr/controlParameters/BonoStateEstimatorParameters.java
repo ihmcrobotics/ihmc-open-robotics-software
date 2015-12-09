@@ -127,13 +127,19 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
-   public boolean estimateGravity()
+   public boolean estimateAccelerationBias()
    {
       return false;
    }
 
    @Override
-   public double getGravityFilterFreqInHertz()
+   public boolean cancelGravityFromAccelerationMeasurement()
+   {
+      return true;
+   }
+
+   @Override
+   public double getAccelerationBiasFilterFreqInHertz()
    {
       return 5.3052e-4;
    }

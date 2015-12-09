@@ -12,6 +12,6 @@ public interface SwingTargetGenerator
    
    public abstract void getSwingTarget(QuadrupedSupportPolygon footPostions, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, FramePoint swingTargetToPack, double desiredYawRate);
 
-   public abstract void getSwingTarget(RobotQuadrant swingLeg, ReferenceFrame swingLegAttachmentFrame, FrameVector desiredBodyVelocity, FramePoint swingTargetToPack,
+   public abstract void getSwingTarget(RobotQuadrant swingLeg, ReferenceFrame swingLegAttachmentFrame, FrameVector desiredBodyVelocity, double swingDuration, FramePoint swingTargetToPack,
          double desiredYawRate);
 }

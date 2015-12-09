@@ -3,7 +3,16 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.controlFlow.ControlFlowGraph;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
 import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
@@ -21,15 +30,6 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 
 public class ComposableStateEstimatorEvaluator
 {
@@ -162,12 +162,18 @@ public class ComposableStateEstimatorEvaluator
             return false;
          }
 
-         public boolean estimateGravity()
+         public boolean estimateAccelerationBias()
          {
             return false;
          }
 
-         public double getGravityFilterFreqInHertz()
+         @Override
+         public boolean cancelGravityFromAccelerationMeasurement()
+         {
+            return true;
+         }
+
+         public double getAccelerationBiasFilterFreqInHertz()
          {
             return 0;
          }
