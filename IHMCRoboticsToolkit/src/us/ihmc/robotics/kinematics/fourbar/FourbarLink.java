@@ -1,4 +1,10 @@
-package us.ihmc.acsell.fourbar;
+/*
+ * This class is based on interface and control code for STEPPR and WANDERER, 
+ * two energy-efficient humanoid bipeds developed by the High Consequence Automation and Robotics Group at Sandia National Laboratories.
+ *
+ */
+package us.ihmc.robotics.kinematics.fourbar;
+
 
 public class FourbarLink {
 	

@@ -1,9 +1,9 @@
 package us.ihmc.acsell.hardware.command;
 
-import us.ihmc.acsell.fourbar.FourbarProperties;
 import us.ihmc.acsell.hardware.AcsellActuator;
 import us.ihmc.acsell.hardware.state.AcsellFourbarCalculator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.kinematics.fourbar.FourbarProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class AcsellKneeActuatorCommand extends AcsellActuatorCommand
