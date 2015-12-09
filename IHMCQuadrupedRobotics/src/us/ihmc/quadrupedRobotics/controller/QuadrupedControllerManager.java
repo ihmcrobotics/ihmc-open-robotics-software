@@ -42,6 +42,10 @@ public class QuadrupedControllerManager implements RobotController
       stateMachine = new GenericStateMachine<>("QuadrupedControllerStateMachine", "QuadrupedControllerSwitchTime", QuadrupedControllerState.class,
             robotTimestamp, registry);
       requestedState = new EnumYoVariable<>("QuadrupedControllerStateMachineRequestedState", registry, QuadrupedControllerState.class, true);
+      
+      QuadrupedStandPrepController standPrepController = new QuadrupedStandPrepController(sdfFullRobotModel, simulationDT);
+
+      QuadrupedStandReadyController standReadyController = new QuadrupedStandReadyController(sdfFullRobotModel);
 
       QuadrupedVMCStandController vmcStandController = new QuadrupedVMCStandController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel,
             robotTimestamp, registry, yoGraphicsListRegistry);
@@ -50,6 +54,8 @@ public class QuadrupedControllerManager implements RobotController
             sdfFullRobotModel, stateEstimator, inverseKinematicsCalculators, globalDataProducer, robotTimestamp, registry, yoGraphicsListRegistry,
             yoGraphicsListRegistryForDetachedOverhead);
 
+      stateMachine.addState(standPrepController);
+      stateMachine.addState(standReadyController);
       stateMachine.addState(vmcStandController);
       stateMachine.addState(positionBasedCrawlController);
 
@@ -57,13 +63,17 @@ public class QuadrupedControllerManager implements RobotController
       // TODO: More comprehensive transition conditions can be implemented. For
       // instance, checking if the robot is stationary before the transition to
       // a standing controller.
+      standPrepController.addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.VMC_STAND));
+      standPrepController.addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.POSITION_CRAWL));
+
       positionBasedCrawlController
-            .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.VMC_STAND));
+            .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.STAND_PREP));
       vmcStandController
-            .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.POSITION_CRAWL));
+            .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.STAND_PREP));
 
       // TODO: Start in a "freeze" state.
-      stateMachine.setCurrentState(QuadrupedControllerState.POSITION_CRAWL);
+      stateMachine.setCurrentState(QuadrupedControllerState.STAND_PREP);
+      stateMachine.getCurrentState().doTransitionIntoAction();
    }
 
    @Override
