@@ -7,7 +7,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
@@ -22,10 +22,13 @@ public class PelvisIMUBasedLinearStateCalculator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
-   private final BooleanYoVariable enableEstimationOfGravity = new BooleanYoVariable("enableEstimationOfGravity", registry);
-   private final DoubleYoVariable alphaGravityEstimation = new DoubleYoVariable("alphaGravityEstimation", registry);
-   private final AlphaFilteredYoVariable gravityEstimation = new AlphaFilteredYoVariable("gravityEstimation", registry, alphaGravityEstimation);
-   private final FrameVector gravity = new FrameVector(worldFrame);
+   private final BooleanYoVariable enableAccelerationBiasEstimation = new BooleanYoVariable("enableAccelerationBiasEstimation", registry);
+   private final DoubleYoVariable alphaAccelerationBiasEstimation = new DoubleYoVariable("alphaAccelerationBiasEstimation", registry);
+   private final AlphaFilteredYoFrameVector accelerationBiasEstimation = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("accelerationBiasEstimation", "", registry, alphaAccelerationBiasEstimation, worldFrame);
+   private final BooleanYoVariable cancelGravityFromAccelerationMeasurement = new BooleanYoVariable("cancelGravityFromAccelerationMeasurement", registry);
+
+   private final FrameVector accelerationBias = new FrameVector(worldFrame);
+   private final FrameVector gravityVector = new FrameVector();
    
    private final YoFrameVector rootJointLinearVelocity = new YoFrameVector("imuRootJointLinearVelocity", worldFrame, registry);
    private final YoFrameVector rootJointPosition = new YoFrameVector("imuRootJointPosition", worldFrame, registry);
@@ -48,16 +51,16 @@ public class PelvisIMUBasedLinearStateCalculator
 
    private final IMUSensorReadOnly imuProcessedOutput;
 
+
    public PelvisIMUBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, double estimatorDT,
          double gravitationalAcceleration, YoVariableRegistry parentRegistry)
    {
       this.estimatorDT = estimatorDT;
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
 
-      enableEstimationOfGravity.set(false);
-      gravityEstimation.reset();
-      gravityEstimation.update(Math.abs(gravitationalAcceleration));
-      gravity.setIncludingFrame(worldFrame, 0.0, 0.0, gravityEstimation.getDoubleValue());
+      enableAccelerationBiasEstimation.set(false);
+      accelerationBiasEstimation.reset();
+      gravityVector.setIncludingFrame(worldFrame, 0.0, 0.0, -Math.abs(gravitationalAcceleration));
       
       if (imuProcessedOutputs.size() == 0)
       {
@@ -88,9 +91,9 @@ public class PelvisIMUBasedLinearStateCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void enableGravityEstimation(boolean enable)
+   public void enableAccelerationBiasEstimation(boolean enable)
    {
-      enableEstimationOfGravity.set(enable);
+      enableAccelerationBiasEstimation.set(enable);
    }
 
    public void enableEsimationModule(boolean enable)
@@ -98,16 +101,23 @@ public class PelvisIMUBasedLinearStateCalculator
       imuBasedStateEstimationEnabled.set(enable);
    }
 
+   public void cancelGravityFromAccelerationMeasurement(boolean cancel)
+   {
+      cancelGravityFromAccelerationMeasurement.set(cancel);
+   }
+
    public boolean isEstimationEnabled()
    {
       return imuBasedStateEstimationEnabled.getBooleanValue();
    }
    
-   public void setAlphaGravityEstimation(double alphaFilter)
+   public void setAlphaAccelerationBiasEstimation(double alphaFilter)
    {
-      alphaGravityEstimation.set(alphaFilter);
+      alphaAccelerationBiasEstimation.set(alphaFilter);
    }
-   
+
+   private final FrameVector tempVector = new FrameVector();
+
    private void updateLinearAccelerationMeasurement()
    {
       if (!isEstimationEnabled())
@@ -115,20 +125,38 @@ public class PelvisIMUBasedLinearStateCalculator
 
       linearAccelerationMeasurement.setToZero(measurementFrame);
       imuProcessedOutput.getLinearAccelerationMeasurement(linearAccelerationMeasurement.getVector());
-      if (enableEstimationOfGravity.getBooleanValue())
-         gravityEstimation.update(linearAccelerationMeasurement.length());
-      gravity.setIncludingFrame(worldFrame, 0.0, 0.0, gravityEstimation.getDoubleValue());
+      if (enableAccelerationBiasEstimation.getBooleanValue())
+      {
+         tempVector.setIncludingFrame(linearAccelerationMeasurement);
+         tempVector.changeFrame(worldFrame);
+         if (cancelGravityFromAccelerationMeasurement.getBooleanValue())
+            tempVector.add(gravityVector);
+         accelerationBiasEstimation.update(tempVector);
+      }
+      accelerationBiasEstimation.getFrameTupleIncludingFrame(accelerationBias);
 
       // Update acceleration in world (minus gravity)
       linearAccelerationMeasurement.changeFrame(worldFrame);
-      linearAccelerationMeasurement.sub(gravity);
+      linearAccelerationMeasurement.sub(accelerationBias);
+      if (cancelGravityFromAccelerationMeasurement.getBooleanValue())
+      {
+         tempVector.setIncludingFrame(gravityVector);
+         tempVector.changeFrame(linearAccelerationMeasurement.getReferenceFrame());
+         linearAccelerationMeasurement.add(tempVector);
+      }
       yoLinearAccelerationMeasurementInWorld.set(linearAccelerationMeasurement);
 
       // Update acceleration in local frame (minus gravity)
-      gravity.changeFrame(measurementFrame);
+      accelerationBias.changeFrame(measurementFrame);
       linearAccelerationMeasurement.setToZero(measurementFrame);
       imuProcessedOutput.getLinearAccelerationMeasurement(linearAccelerationMeasurement.getVector());
-      linearAccelerationMeasurement.sub(gravity);
+      linearAccelerationMeasurement.sub(accelerationBias);
+      if (cancelGravityFromAccelerationMeasurement.getBooleanValue())
+      {
+         tempVector.setIncludingFrame(gravityVector);
+         tempVector.changeFrame(linearAccelerationMeasurement.getReferenceFrame());
+         linearAccelerationMeasurement.add(tempVector);
+      }
       yoLinearAccelerationMeasurement.set(linearAccelerationMeasurement);
    }
 

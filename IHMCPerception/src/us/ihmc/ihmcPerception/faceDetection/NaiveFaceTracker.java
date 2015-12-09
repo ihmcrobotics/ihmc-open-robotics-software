@@ -20,6 +20,11 @@ import java.util.Set;
 
 public class NaiveFaceTracker
 {
+//   static
+//   {
+//      NativeLibraryLoader.loadLibrary("org.opencv", "opencv_java2411");
+//   }
+
    private final double SHIFT_DELTA = 200.0;
 
    private final OpenCVFaceDetector faceDetector;
@@ -31,7 +36,7 @@ public class NaiveFaceTracker
       faceDetector = new OpenCVFaceDetector(scale);
    }
 
-   public void detect(BufferedImage bufferedImage)
+   public ArrayList<Face> detect(BufferedImage bufferedImage)
    {
       Rect[] faces = faceDetector.detect(bufferedImage);
       Graphics2D g2 = bufferedImage.createGraphics();
@@ -44,7 +49,7 @@ public class NaiveFaceTracker
          int oldFaceY = trackedFaces.get(i).facialBorder.y;
          boolean matched = false;
 
-         g2.setColor(getColor(i));
+         g2.setColor(trackedFaces.get(i).borderColor);
          g2.drawRect(oldFaceX, oldFaceY, trackedFaces.get(i).facialBorder.width, trackedFaces.get(i).facialBorder.height);
 
          for(int j = 0; j < faces.length; j++)
@@ -58,7 +63,6 @@ public class NaiveFaceTracker
 
                if(faceShift < SHIFT_DELTA)
                {
-                  g2.drawRect(newFaceX, newFaceY, faces[j].width, faces[j].height);
                   matched = true;
                   trackedFaces.get(i).updateCoordinates(faces[j]);
                   faces[j] = null;
@@ -77,41 +81,10 @@ public class NaiveFaceTracker
       for(int j = 0; j < faces.length; j++)
       {
          if(faces[j] != null)
-            trackedFaces.add(new Face(System.currentTimeMillis(), faces[j]));
+            trackedFaces.add(new Face(System.nanoTime(), faces[j]));
       }
-   }
 
-   private Color getColor(int i)
-   {
-      switch (i)
-      {
-      case 0: return Color.CYAN;
-      case 1: return Color.YELLOW;
-      case 2: return Color.GREEN;
-      default: return Color.WHITE;
-      }
-   }
-
-   public ArrayList<Face> getTrackedFaces()
-   {
       return trackedFaces;
-   }
-
-   class Face
-   {
-      private final long id;
-      public Rect facialBorder;
-
-      public Face(long id, Rect facialBorder)
-      {
-         this.id = id;
-         this.facialBorder = facialBorder;
-      }
-
-      public void updateCoordinates(Rect coordinates)
-      {
-         this.facialBorder.set(new double[]{coordinates.x, coordinates.y, coordinates.width, coordinates.height});
-      }
    }
 
    public static void main(String[] arg) throws IOException
@@ -137,6 +110,5 @@ public class NaiveFaceTracker
             panel.setBufferedImageSafe(bufferedImage);
          }
       }
-
    }
 }
