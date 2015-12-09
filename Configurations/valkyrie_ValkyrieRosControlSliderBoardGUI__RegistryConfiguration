@@ -2,6 +2,7 @@ root*false*false
 root.valkyrie*false*false
 root.remotemain*false*false
 root.remotemain.ValkyrieRosControlSliderBoard*false*false
+root.remotemain.ValkyrieRosControlSliderBoard.FGYoFunGen*false*false
 root.remotemain.ValkyrieRosControlSliderBoard.leftHipYaw*false*false
 root.remotemain.ValkyrieRosControlSliderBoard.leftHipRoll*false*false
 root.remotemain.ValkyrieRosControlSliderBoard.leftHipPitch*false*false
@@ -21,9 +22,6 @@ root.remotemain.ValkyrieRosControlSliderBoard.leftShoulderPitch*false*false
 root.remotemain.ValkyrieRosControlSliderBoard.leftShoulderRoll*false*false
 root.remotemain.ValkyrieRosControlSliderBoard.leftShoulderYaw*false*false
 root.remotemain.ValkyrieRosControlSliderBoard.leftElbowPitch*false*false
-root.remotemain.ValkyrieRosControlSliderBoard.lowerNeckPitch*false*false
-root.remotemain.ValkyrieRosControlSliderBoard.neckYaw*false*false
-root.remotemain.ValkyrieRosControlSliderBoard.upperNeckPitch*false*false
 root.remotemain.ValkyrieRosControlSliderBoard.rightShoulderPitch*false*false
 root.remotemain.ValkyrieRosControlSliderBoard.rightShoulderRoll*false*false
 root.remotemain.ValkyrieRosControlSliderBoard.rightShoulderYaw*false*false
