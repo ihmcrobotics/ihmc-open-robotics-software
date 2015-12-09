@@ -5,9 +5,13 @@ import java.util.List;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
+/**
+ * A controller that will track the minimum jerk trajectory to bring joints to a preparatory pose.
+ */
 public class QuadrupedStandPrepController extends QuadrupedController
 {
    /**
@@ -80,11 +84,27 @@ public class QuadrupedStandPrepController extends QuadrupedController
    public RobotMotionStatus getMotionStatus()
    {
       // If the trajectory has been exhausted, then the robot is standing.
-      if(timeInTrajectory > TRAJECTORY_TIME)
+      if (timeInTrajectory > TRAJECTORY_TIME)
       {
          return RobotMotionStatus.STANDING;
       }
 
       return RobotMotionStatus.IN_MOTION;
+   }
+}
+
+class QuadrupedStandPrepControllerExitCondition implements StateTransitionCondition
+{
+   private final QuadrupedStandPrepController controller;
+
+   public QuadrupedStandPrepControllerExitCondition(QuadrupedStandPrepController controller)
+   {
+      this.controller = controller;
+   }
+
+   @Override
+   public boolean checkCondition()
+   {
+      return controller.getMotionStatus() == RobotMotionStatus.STANDING;
    }
 }
