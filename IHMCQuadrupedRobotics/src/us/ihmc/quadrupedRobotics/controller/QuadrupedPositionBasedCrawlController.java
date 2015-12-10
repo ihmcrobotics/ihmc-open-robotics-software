@@ -616,22 +616,15 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 	   feedForwardReferenceFrames.updateFrames();
    }
 
-   private FrameVector lastProvidedDesiredVelocity = new FrameVector();
    private double lastProvidedDesiredYawRate = 0.0;
    
    private void pollDataProviders()
    {
       if(desiredVelocityProvider != null)
       {
-         FrameVector providedDesiredVelocity = new FrameVector();
+         FrameVector providedDesiredVelocity = new FrameVector(desiredVelocity.getReferenceFrame());
          desiredVelocityProvider.get(providedDesiredVelocity);
-         
-         if (!providedDesiredVelocity.epsilonEquals(lastProvidedDesiredVelocity, 1e-7))
-         {
-            lastProvidedDesiredVelocity.set(providedDesiredVelocity);
-            providedDesiredVelocity.changeFrame(desiredVelocity.getReferenceFrame());
-            desiredVelocity.set(providedDesiredVelocity);
-         }
+         desiredVelocity.set(providedDesiredVelocity);
       }
 
       if(desiredYawRateProvider != null)
