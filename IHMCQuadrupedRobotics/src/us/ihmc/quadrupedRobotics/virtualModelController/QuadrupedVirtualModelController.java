@@ -5,6 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointLimits;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
@@ -13,6 +14,7 @@ import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -22,6 +24,9 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.PointJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedVirtualModelController
 {
@@ -30,6 +35,7 @@ public class QuadrupedVirtualModelController
    private final QuadrupedVirtualModelParameters parameters;
    private final QuadrupedJointNameMap jointMap;
    private final QuadrupedJointLimits jointLimits;
+
    private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame comFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
@@ -39,6 +45,7 @@ public class QuadrupedVirtualModelController
    private final FrameVector comForceOptimal;
    private final FrameVector bodyTorqueSetpoint;
    private final FrameVector bodyTorqueOptimal;
+   private final QuadrantDependentList<FramePoint> solePosition;
    private final QuadrantDependentList<FrameVector> soleForceSetpoint;
    private final QuadrantDependentList<FrameVector> soleForceOptimal;
    private final QuadrantDependentList<double []> soleCoefficientOfFriction;
@@ -47,8 +54,10 @@ public class QuadrupedVirtualModelController
    private final YoFrameVector yoComForceOptimal;
    private final YoFrameVector yoBodyTorqueSetpoint;
    private final YoFrameVector yoBodyTorqueOptimal;
+   private final QuadrantDependentList<YoFramePoint> yoSolePosition;
    private final QuadrantDependentList<YoFrameVector> yoSoleForceSetpoint;
    private final QuadrantDependentList<YoFrameVector> yoSoleForceOptimal;
+   private final QuadrantDependentList<YoGraphicVector> yoSoleForceOptimalViz;
 
    private final QuadrantDependentList<double[]> jointEffortLowerLimit;
    private final QuadrantDependentList<double[]> jointEffortUpperLimit;
@@ -58,7 +67,6 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<double[]> jointPositionLimitDamping;
 
    private final QuadrantDependentList<OneDoFJoint[]> legJoints;
-   private final QuadrantDependentList<FramePoint> solePosition;
    private final QuadrantDependentList<GeometricJacobian> footJacobian;
    private final QuadrantDependentList<PointJacobian> soleJacobian;
 
@@ -69,15 +77,19 @@ public class QuadrupedVirtualModelController
    private final DenseMatrix64F soleForceVector;
    private final QuadrantDependentList<DenseMatrix64F> legEffortVector;
 
-   public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedRobotParameters robotParameters, YoVariableRegistry parentRegistry)
+   private final YoGraphicsList yoGraphicsList;
+   private boolean soleForceIsVisible;
+
+   public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedRobotParameters robotParameters, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       parameters = robotParameters.getQuadrupedVirtualModelParameters();
       jointMap = robotParameters.getJointMap();
       jointLimits = robotParameters.getJointLimits();
-      referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointMap, robotParameters.getPhysicalProperties());
       registry = new YoVariableRegistry(getClass().getSimpleName());
       
       // initialize reference frames
+      referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointMap, robotParameters.getPhysicalProperties());
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
       soleFrame = referenceFrames.getFootReferenceFrames();
       worldFrame = ReferenceFrame.getWorldFrame();
@@ -87,11 +99,13 @@ public class QuadrupedVirtualModelController
       comForceOptimal = new FrameVector(comFrame);
       bodyTorqueSetpoint = new FrameVector(comFrame);
       bodyTorqueOptimal = new FrameVector(comFrame);
+      solePosition = new QuadrantDependentList<FramePoint>();
       soleForceSetpoint = new QuadrantDependentList<FrameVector>();
       soleForceOptimal = new QuadrantDependentList<FrameVector>();
       soleCoefficientOfFriction = new QuadrantDependentList<double[]>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         solePosition.set(robotQuadrant, new FramePoint(comFrame));
          soleForceSetpoint.set(robotQuadrant, new FrameVector(comFrame));
          soleForceOptimal.set(robotQuadrant, new FrameVector(comFrame));
          soleCoefficientOfFriction.set(robotQuadrant, new double[1]);
@@ -102,19 +116,24 @@ public class QuadrupedVirtualModelController
       yoComForceOptimal = new YoFrameVector("comForceOptimal", worldFrame, registry);
       yoBodyTorqueSetpoint = new YoFrameVector("bodyTorqueSetpoint", worldFrame, registry);
       yoBodyTorqueOptimal = new YoFrameVector("soleForceSetpoint", worldFrame, registry);
+      yoSolePosition = new QuadrantDependentList<YoFramePoint>();
       yoSoleForceSetpoint = new QuadrantDependentList<YoFrameVector>();
       yoSoleForceOptimal = new QuadrantDependentList<YoFrameVector>();
+      yoSoleForceOptimalViz = new QuadrantDependentList<YoGraphicVector>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         yoSolePosition.set(robotQuadrant,
+               new YoFramePoint(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SolePosition", worldFrame, registry));
          yoSoleForceSetpoint.set(robotQuadrant,
                new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleForceSetpoint", worldFrame, registry));
          yoSoleForceOptimal.set(robotQuadrant,
                new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleForceOptimal", worldFrame, registry));
+         yoSoleForceOptimalViz.set(robotQuadrant, new YoGraphicVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleForceOptimal",
+               yoSolePosition.get(robotQuadrant), yoSoleForceOptimal.get(robotQuadrant), 0.002, YoAppearance.Chartreuse()));
       }
 
       // initialize jacobians
       legJoints = new QuadrantDependentList<OneDoFJoint[]>();
-      solePosition = new QuadrantDependentList<FramePoint>();
       footJacobian = new QuadrantDependentList<GeometricJacobian>();
       soleJacobian = new QuadrantDependentList<PointJacobian>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -124,7 +143,6 @@ public class QuadrupedVirtualModelController
          RigidBody body = fullRobotModel.getRootJoint().getSuccessor();
          RigidBody foot = jointBeforeFoot.getSuccessor();
          legJoints.set(robotQuadrant, ScrewTools.filterJoints(ScrewTools.createJointPath(body, foot), OneDoFJoint.class));
-         solePosition.set(robotQuadrant, new FramePoint(foot.getBodyFixedFrame()));
          footJacobian.set(robotQuadrant, new GeometricJacobian(legJoints.get(robotQuadrant), body.getBodyFixedFrame()));
          soleJacobian.set(robotQuadrant, new PointJacobian());
       }
@@ -158,9 +176,18 @@ public class QuadrupedVirtualModelController
          legEffortVector.set(robotQuadrant, new DenseMatrix64F(legJoints.get(robotQuadrant).length, 1));
       }
 
-      parentRegistry.addChild(registry);
+      // initialize graphics
+      yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
+      {
+        yoGraphicsList.add(yoSoleForceOptimalViz.get(robotQuadrant));
+      }
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
 
+      // initialize limits
       this.reinitialize();
+
+      parentRegistry.addChild(registry);
    }
 
    public void reinitialize()
@@ -183,6 +210,9 @@ public class QuadrupedVirtualModelController
          // initialize friction limits
          setSoleCoefficientOfFriction(robotQuadrant, parameters.getDefaultSoleCoefficientOfFriction());
       }
+      
+      // initialize visualizers
+      setVisible(false);
    }
 
 
@@ -425,6 +455,8 @@ public class QuadrupedVirtualModelController
       yoBodyTorqueOptimal.set(bodyTorqueOptimal);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         solePosition.get(robotQuadrant).changeFrame(yoSolePosition.get(robotQuadrant).getReferenceFrame());
+         yoSolePosition.get(robotQuadrant).set(solePosition.get(robotQuadrant));
          soleForceSetpoint.get(robotQuadrant).changeFrame(yoSoleForceSetpoint.get(robotQuadrant).getReferenceFrame());
          yoSoleForceSetpoint.get(robotQuadrant).set(soleForceSetpoint.get(robotQuadrant));
          soleForceOptimal.get(robotQuadrant).changeFrame(yoSoleForceOptimal.get(robotQuadrant).getReferenceFrame());
@@ -437,6 +469,16 @@ public class QuadrupedVirtualModelController
       // compute friction pyramid inequality constraints
       // compute min / max sole pressure constraints
       // compute sole forces using quadratic program
+      
+      // update graphics
+      yoGraphicsList.setVisible(false);
+      if (soleForceIsVisible)
+      {
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            yoSoleForceOptimalViz.get(robotQuadrant).setVisible(true);
+         }
+      }
    }
    
    public YoVariableRegistry getRegistry()
@@ -447,5 +489,17 @@ public class QuadrupedVirtualModelController
    public QuadrupedReferenceFrames getReferenceFrames()
    {
       return referenceFrames;
+   }
+
+   public void setVisible(boolean visible)
+   {
+      setSoleForceVisible(visible);
+      yoGraphicsList.setVisible(false);
+   }
+
+   public void setSoleForceVisible(boolean visible)
+   {
+      soleForceIsVisible = visible;
+      yoGraphicsList.setVisible(false);
    }
 }
