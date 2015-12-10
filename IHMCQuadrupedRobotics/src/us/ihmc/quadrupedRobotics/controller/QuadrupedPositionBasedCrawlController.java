@@ -99,6 +99,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final SDFFullRobotModel fullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final CenterOfMassJacobian centerOfMassJacobian;
+   private final CenterOfMassJacobian feedForwardCenterOfMassJacobian;
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame feedForwardBodyFrame;
    private final ReferenceFrame comFrame;
@@ -189,6 +190,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final BooleanYoVariable isCoMCloseToFinalDesired = new BooleanYoVariable("isCoMCloseToFinalDesired", registry);
    private final BooleanYoVariable useCommonTriangleForSwingTransition = new BooleanYoVariable("useCommonTriangleForSwingTransition", registry);
 
+   private final YoFramePoint feedForwardCenterOfMassPosition = new YoFramePoint("feedForwardCenterOfMassPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector feedForwardCenterOfMassVelocity = new YoFrameVector("feedForwardCenterOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
+   
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector centerOfMassVelocity = new YoFrameVector("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
 
@@ -209,6 +213,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    
    private final YoFramePoint currentICP = new YoFramePoint("currentICP", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition currentICPViz = new YoGraphicPosition("currentICPViz", currentICP, 0.01, YoAppearance.DarkSlateBlue());
+   
+   private final YoFramePoint feedForwardICP = new YoFramePoint("feedForwardICP", ReferenceFrame.getWorldFrame(), registry);
+   private final YoGraphicPosition feedForwardICPViz = new YoGraphicPosition("feedForwardICPViz", feedForwardICP, 0.01, YoAppearance.DarkSlateBlue());
    
    private final YoGraphicReferenceFrame desiredCoMPoseYoGraphic = new YoGraphicReferenceFrame(desiredCoMPoseReferenceFrame, registry, 0.45);
    private final YoGraphicReferenceFrame comPoseYoGraphic, feedForwardCoMPoseYoGraphic;
@@ -268,6 +275,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       comFrame = referenceFrames.getCenterOfMassFrame();
       
       feedForwardFullRobotModel = robotParameters.createFullRobotModel();
+      this.feedForwardCenterOfMassJacobian = new CenterOfMassJacobian(feedForwardFullRobotModel.getElevator());
       feedForwardReferenceFrames = new QuadrupedReferenceFrames(feedForwardFullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
       feedForwardReferenceFrames.updateFrames();
       feedForwardBodyFrame = feedForwardReferenceFrames.getBodyFrame();
@@ -465,6 +473,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       yoGraphicsListRegistry.registerArtifact("desiredCoMTarget", desiredCoMTargetViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact("desiredCoMViz", desiredCoMViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact("currentICPViz", currentICPViz.createArtifact());
+      yoGraphicsListRegistry.registerArtifact("feedForwardICPViz", feedForwardICPViz.createArtifact());
       
       yoGraphicsListRegistryForDetachedOverhead.registerArtifact("inscribedCircle", inscribedCircle);
       yoGraphicsListRegistryForDetachedOverhead.registerArtifact("circleCenterViz", circleCenterGraphic.createArtifact());
@@ -584,8 +593,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 		   OneDoFJoint oneDoFJointFeedforward = oneDoFJointsFeedforward[i];
 
 //		   oneDoFJointFeedforward.setQ(oneDoFJoint.getQ());
+		   double qd = oneDoFJoint.getqDesired() - oneDoFJointFeedforward.getQ();
+		   oneDoFJointFeedforward.setQd(qd * 1.0 / dt);   	  
 		   oneDoFJointFeedforward.setQ(oneDoFJoint.getqDesired());
-		   oneDoFJointFeedforward.setQd(0.0);    	  
 	   }
 
 	   SixDoFJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
@@ -610,7 +620,11 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 	   
 	   FramePoint desiredRootJointPosition = desiredCoM.getFramePointCopy();
 	   desiredRootJointPosition.sub(vectorToSubtract);
+	   Vector3d linearVelocity = new Vector3d();
+      feedForwardRootJoint.packTranslation(linearVelocity);
 	   feedForwardRootJoint.setPosition(desiredRootJointPosition.getPoint());
+	   linearVelocity.sub(desiredRootJointPosition.getPoint(), linearVelocity);
+	   feedForwardRootJoint.setLinearVelocityInWorld(linearVelocity);
 
 	   feedForwardFullRobotModel.updateFrames();
 	   feedForwardReferenceFrames.updateFrames();
@@ -646,25 +660,42 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
     */
    private void updateEstimates()
    {
-	  // compute center of mass position and velocity
-	  FramePoint comPosition = new FramePoint(comFrame);
-	  comPosition.changeFrame(ReferenceFrame.getWorldFrame());
-	  centerOfMassJacobian.compute();
-	  centerOfMassJacobian.packCenterOfMassVelocity(tempFrameVector);
-	  tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
-	  centerOfMassVelocity.set(tempFrameVector);
-	  
-	  // compute instantaneous capture point
-	  double zFoot = actualFeetLocations.get(fourFootSupportPolygon.getLowestFootstep()).getZ();
-	  double zDelta = comPosition.getZ() - zFoot;
-	  double omega = Math.sqrt(9.81/zDelta);
-	  currentICP.setX(comPosition.getX() + centerOfMassVelocity.getX()/omega);
-	  currentICP.setY(comPosition.getY() + centerOfMassVelocity.getY()/omega);
-	  currentICP.setZ(zFoot);
-	  
-	  updateFeetLocations();
+
+      // compute center of mass position and velocity
+      FramePoint feedForwardCoMPosition = new FramePoint(feedForwardReferenceFrames.getCenterOfMassFrame());
+      feedForwardCoMPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      feedForwardCenterOfMassJacobian.compute();
+      feedForwardCenterOfMassJacobian.packCenterOfMassVelocity(tempFrameVector);
+      tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
+      feedForwardCenterOfMassVelocity.set(tempFrameVector);
+
+      // compute instantaneous capture point
+      double feedForwardZFoot = desiredFeetLocations.get(fourFootSupportPolygon.getLowestFootstep()).getZ();
+      double feedForwardZDelta = feedForwardCoMPosition.getZ() - feedForwardZFoot;
+      double feedForwardOmega = Math.sqrt(9.81 / feedForwardZDelta);
+      feedForwardICP.setX(feedForwardCoMPosition.getX() + feedForwardCenterOfMassVelocity.getX() / feedForwardOmega);
+      feedForwardICP.setY(feedForwardCoMPosition.getY() + feedForwardCenterOfMassVelocity.getY() / feedForwardOmega);
+      feedForwardICP.setZ(feedForwardZFoot);
+
+      // compute center of mass position and velocity
+      FramePoint comPosition = new FramePoint(comFrame);
+      comPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      centerOfMassJacobian.compute();
+      centerOfMassJacobian.packCenterOfMassVelocity(tempFrameVector);
+      tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
+      centerOfMassVelocity.set(tempFrameVector);
+
+      // compute instantaneous capture point
+      double zFoot = actualFeetLocations.get(fourFootSupportPolygon.getLowestFootstep()).getZ();
+      double zDelta = comPosition.getZ() - zFoot;
+      double omega = Math.sqrt(9.81 / zDelta);
+      currentICP.setX(comPosition.getX() + centerOfMassVelocity.getX() / omega);
+      currentICP.setY(comPosition.getY() + centerOfMassVelocity.getY() / omega);
+      currentICP.setZ(zFoot);
+
+      updateFeetLocations();
    }
-   
+
    /**
     * update actual feet locations and the four foot polygon, using the desired locations
     */
