@@ -1,11 +1,12 @@
 package us.ihmc.simulationconstructionset;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public enum SupportedGraphics3DAdapter
 {
-   JAVA_MONKEY_ENGINE, JAVA3D;
+   JAVA_MONKEY_ENGINE;
 
    public String getClassWithPackageName()
    {
@@ -13,14 +14,8 @@ public enum SupportedGraphics3DAdapter
       {
          case JAVA_MONKEY_ENGINE :
          {
-            return "us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter";
+            return JMEGraphics3DAdapter.class.getCanonicalName();
          }
-
-         case JAVA3D :
-         {
-            return "us.ihmc.graphics3DAdapter.java3D.Java3DGraphicsAdapter";
-         }
-
          default :
          {
             return null;
@@ -43,6 +38,7 @@ public enum SupportedGraphics3DAdapter
       catch (Exception e)
       {
          System.err.println(PrintTools.WARN + "Cannot find graphics adapter" + graphicsAdapter);
+         e.printStackTrace();
 
          return null;
       }
