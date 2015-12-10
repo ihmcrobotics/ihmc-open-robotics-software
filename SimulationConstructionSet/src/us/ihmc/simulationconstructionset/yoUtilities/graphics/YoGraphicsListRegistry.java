@@ -298,6 +298,17 @@ public class YoGraphicsListRegistry
       }
    }
 
+   public void hideArtifacts()
+   {
+      int numberOfElements = artifactLists.size();
+
+      for (int i = 0; i < numberOfElements; i++)
+      {
+         ArtifactList artifactList = artifactLists.get(i);
+         artifactList.hideArtifacts();
+      }
+   }
+
    public boolean checkAllYoGraphicsListAreShowing()
    {
       boolean ret = true;
