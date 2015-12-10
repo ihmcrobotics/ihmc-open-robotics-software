@@ -28,19 +28,22 @@ public class YoArtifactLine2d extends Artifact
 
    public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
-      graphics.setColor(color);
-      if (stroke != null)
-         ((Graphics2D) graphics).setStroke(stroke);
+      if (isVisible)
+      {
+         graphics.setColor(color);
+         if (stroke != null)
+            ((Graphics2D) graphics).setStroke(stroke);
 
-      double x0 = yoFrameLine2d.getX0();
-      double y0 = yoFrameLine2d.getY0();
-      double vx = yoFrameLine2d.getVx();
-      double vy = yoFrameLine2d.getVy();
+         double x0 = yoFrameLine2d.getX0();
+         double y0 = yoFrameLine2d.getY0();
+         double vx = yoFrameLine2d.getVx();
+         double vy = yoFrameLine2d.getVy();
 
-      plotterGraphics.setCenter(Xcenter, Ycenter);
-      plotterGraphics.setScale(scaleFactor);
+         plotterGraphics.setCenter(Xcenter, Ycenter);
+         plotterGraphics.setScale(scaleFactor);
 
-      plotterGraphics.drawLineGivenStartAndVector(graphics, x0, y0, vx, vy);
+         plotterGraphics.drawLineGivenStartAndVector(graphics, x0, y0, vx, vy);
+      }
    }
 
    public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)

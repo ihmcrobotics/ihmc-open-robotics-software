@@ -70,8 +70,11 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
 
    public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
-      getPosition(position);
-      draw(graphics, position.x, position.y, Xcenter, Ycenter, scaleFactor);
+      if (isVisible)
+      {
+         getPosition(position);
+         draw(graphics, position.x, position.y, Xcenter, Ycenter, scaleFactor);
+      }
    }
    
    public void getPosition(Point3d point3d)
