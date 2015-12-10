@@ -292,7 +292,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       
       this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, feedForwardReferenceFrames, registry);
       this.stateEstimator = stateEstimator;
-      desiredVelocityProvider = new DesiredVelocityProvider(dataProducer);
+      desiredVelocityProvider = new DesiredVelocityProvider(dataProducer, registry);
       desiredYawRateProvider = new DesiredYawRateProvider(dataProducer);
 
       desiredVelocity = new YoFrameVector("desiredVelocity", feedForwardBodyFrame, registry);
