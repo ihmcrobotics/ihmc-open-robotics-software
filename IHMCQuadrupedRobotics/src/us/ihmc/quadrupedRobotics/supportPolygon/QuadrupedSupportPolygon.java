@@ -4,14 +4,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -40,6 +40,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class QuadrupedSupportPolygon implements Serializable
 {
    protected final QuadrantDependentList<FramePoint> footsteps = new QuadrantDependentList<FramePoint>();
+   private final FrameConvexPolygon2d frameConvexPolygon2d = new FrameConvexPolygon2d();
 
    public QuadrupedSupportPolygon()
    {
@@ -2572,4 +2573,32 @@ public class QuadrupedSupportPolygon implements Serializable
       FramePoint lineEnd = getFootstep(sameSideQuadrant);
       pointToPack.set(GeometryTools.getIntersectionBetweenLineAndPlane(pointAcrossTrotLine, planeNormal, lineStart, lineEnd));
    }
+   
+   private void computeFramePolygonConvex2d()
+   {
+      frameConvexPolygon2d.clear();
+      frameConvexPolygon2d.changeFrame(getReferenceFrame());
+      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         FramePoint footstep = this.getFootstep(quadrant);
+         if(footstep != null)
+         {
+            frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(footstep);
+         }
+      }
+      frameConvexPolygon2d.update();
+   }
+
+   public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2d polygon)
+   {
+      computeFramePolygonConvex2d();
+      polygon.setFrameConvexPolygon2d(frameConvexPolygon2d);
+   }
+
+   public void packFrameConvexPolygon2d(FrameConvexPolygon2d polygon)
+   {
+      computeFramePolygonConvex2d();
+      polygon.setAndUpdate(frameConvexPolygon2d);
+   }
+
 }

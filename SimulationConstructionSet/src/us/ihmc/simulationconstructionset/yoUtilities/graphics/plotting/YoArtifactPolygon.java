@@ -47,38 +47,41 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
 
    public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
-      if (yoConvexPolygon2d.getNumberOfVertices() < 3)
-         return;
-
-      graphics.setColor(color);
-      if (stroke != null)
-         ((Graphics2D) graphics).setStroke(stroke);
-
-      plotterGraphics.setCenter(Xcenter, Ycenter);
-      plotterGraphics.setScale(scaleFactor);
-
-      try
+      if (isVisible)
       {
-         FrameConvexPolygon2d frameConvexPolygon2d = yoConvexPolygon2d.getFrameConvexPolygon2d();
-         ConvexPolygon2d convexPolygon2dFromYoConvexPolygon = frameConvexPolygon2d.getConvexPolygon2d();
-         convexPolygon2d.setAndUpdate(convexPolygon2dFromYoConvexPolygon);
-      }
-      catch (Exception e)
-      {
-         System.err.println("In YoArtifactPolygon.java: " + e.getClass().getSimpleName() + " while calling draw().");
-         return;
-      }
-      
-      if (convexPolygon2d.isEmpty())
+         if (yoConvexPolygon2d.getNumberOfVertices() < 3)
             return;
 
-      if (fill)
-      {
-         plotterGraphics.fillPolygon(graphics, convexPolygon2d);
-      }
-      else
-      {
-         plotterGraphics.drawPolygon(graphics, convexPolygon2d);
+         graphics.setColor(color);
+         if (stroke != null)
+            ((Graphics2D) graphics).setStroke(stroke);
+
+         plotterGraphics.setCenter(Xcenter, Ycenter);
+         plotterGraphics.setScale(scaleFactor);
+
+         try
+         {
+            FrameConvexPolygon2d frameConvexPolygon2d = yoConvexPolygon2d.getFrameConvexPolygon2d();
+            ConvexPolygon2d convexPolygon2dFromYoConvexPolygon = frameConvexPolygon2d.getConvexPolygon2d();
+            convexPolygon2d.setAndUpdate(convexPolygon2dFromYoConvexPolygon);
+         }
+         catch (Exception e)
+         {
+            System.err.println("In YoArtifactPolygon.java: " + e.getClass().getSimpleName() + " while calling draw().");
+            return;
+         }
+         
+         if (convexPolygon2d.isEmpty())
+               return;
+
+         if (fill)
+         {
+            plotterGraphics.fillPolygon(graphics, convexPolygon2d);
+         }
+         else
+         {
+            plotterGraphics.drawPolygon(graphics, convexPolygon2d);
+         }
       }
    }
 
