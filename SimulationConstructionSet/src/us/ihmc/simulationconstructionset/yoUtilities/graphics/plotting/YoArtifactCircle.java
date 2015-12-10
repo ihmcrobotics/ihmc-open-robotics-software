@@ -69,8 +69,11 @@ public class YoArtifactCircle extends Artifact implements RemoteYoGraphic
 
    public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
-      getPosition(position);
-      draw(graphics, position.x, position.y, Xcenter, Ycenter, radius.getDoubleValue(), scaleFactor);
+      if (isVisible)
+      {
+         getPosition(position);
+         draw(graphics, position.x, position.y, Xcenter, Ycenter, radius.getDoubleValue(), scaleFactor);
+      }
    }
    
    public void getPosition(Point3d point3d)
