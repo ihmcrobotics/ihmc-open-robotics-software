@@ -455,10 +455,17 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    public void setupSky()
    {
-      Spatial sky = SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", false);
-      sky.setLocalScale(1000);
-      rootNode.attachChild(sky);
-      notifyRepaint();
+      try
+      {
+         Spatial sky = SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", false);
+         sky.setLocalScale(1000);
+         rootNode.attachChild(sky);
+         notifyRepaint();
+      }
+      catch(Exception e)
+      {
+         e.printStackTrace();
+      }
    }
 
    @Override

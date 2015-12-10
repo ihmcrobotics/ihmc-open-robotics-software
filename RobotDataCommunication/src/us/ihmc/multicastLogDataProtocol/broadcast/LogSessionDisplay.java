@@ -1,7 +1,9 @@
 package us.ihmc.multicastLogDataProtocol.broadcast;
 
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -24,6 +26,8 @@ public class LogSessionDisplay extends JFrame
    private final DefaultTableModel model;
    private final ArrayList<LogSessionBroadcastClient> clients = new ArrayList<>();
 
+   private static RobotIPToNameRemapHandler remapHandler;
+
    public LogSessionDisplay() throws IOException
    {
       this(null);
@@ -32,6 +36,7 @@ public class LogSessionDisplay extends JFrame
    public LogSessionDisplay(MouseAdapter mouseAdapter) throws IOException
    {
       super("Control sessions");
+      setMinimumSize(new Dimension(1024, 320));
       setLocationRelativeTo(null);
       setLocationByPlatform(true);
 
@@ -99,6 +104,15 @@ public class LogSessionDisplay extends JFrame
 
    public static AnnounceRequest getAnnounceRequest()
    {
+      return getAnnounceRequest(null);
+   }
+
+   public static AnnounceRequest getAnnounceRequest(RobotIPToNameRemapHandler remapHandler)
+   {
+      if(remapHandler != null)
+      {
+         LogSessionDisplay.remapHandler = remapHandler;
+      }
       try
       {
          return selectLogSession();
@@ -193,7 +207,8 @@ public class LogSessionDisplay extends JFrame
 
          final String name = description.getName();
          final long sessionId = description.getSessionID();
-         final String controlIp = ipToString(description.getControlIP());
+         String controlIp = ipToString(description.getControlIP());
+         final String controlIpDisplay = remapHandler == null ? controlIp : remapHandler.getRemap(controlIp);
          final int port = description.getControlPort();
          final String group = ipToString(description.getDataIP());
          final int dataPort = description.getDataPort();
@@ -212,7 +227,7 @@ public class LogSessionDisplay extends JFrame
                   }
                }
                System.out.println(description);
-               model.addRow(new Object[] { name, description, iface, controlIp, port, group, dataPort });
+               model.addRow(new Object[] { name, description, iface, controlIpDisplay, port, group, dataPort });
 
             }
          });
@@ -240,6 +255,11 @@ public class LogSessionDisplay extends JFrame
             }
          });
       }
+   }
+
+   public interface RobotIPToNameRemapHandler
+   {
+      String getRemap(String ipAddress);
    }
 
    public static void main(String[] args)
