@@ -7,9 +7,10 @@ import java.awt.*;
 public class Face
 {
    private final long id;
-   public Rect facialBorder;
-   public Color borderColor;
 
+   public Rect facialBorder;
+
+   public Color borderColor;
    public Face(long id, Rect facialBorder)
    {
       this.id = id;
@@ -25,5 +26,11 @@ public class Face
    public long getId()
    {
       return id;
+   }
+
+   //Have a getter just for cleanness of code. Don't take advantage that the field has to be public for packet issues
+   public Rect getFacialBorder()
+   {
+      return facialBorder;
    }
 }
