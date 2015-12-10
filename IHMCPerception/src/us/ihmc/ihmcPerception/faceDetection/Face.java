@@ -21,4 +21,9 @@ public class Face
    {
       this.facialBorder.set(new double[]{coordinates.x, coordinates.y, coordinates.width, coordinates.height});
    }
+
+   public long getId()
+   {
+      return id;
+   }
 }
