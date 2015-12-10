@@ -388,6 +388,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
 //    yoGraphicsListRegistry.hideArtifacts();
       yoGraphicsList.setVisible(true);
       artifactList.setVisible(true);
+      virtualModelController.setVisible(true);
    }
 
    @Override
@@ -396,6 +397,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       // hide graphics
       yoGraphicsList.setVisible(false);
       artifactList.setVisible(false);
+      virtualModelController.setVisible(false);
    }
 
    public YoVariableRegistry getYoVariableRegistry()
