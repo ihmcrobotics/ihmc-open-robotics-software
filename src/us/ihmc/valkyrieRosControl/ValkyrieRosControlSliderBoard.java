@@ -19,6 +19,8 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.rosControl.JointHandle;
@@ -67,6 +69,9 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 
    private final DoubleYoVariable masterScaleFactor = new DoubleYoVariable("masterScaleFactor", registry);
 
+   private final DoubleYoVariable jointVelocityAlphaFilter = new DoubleYoVariable("jointVelocityAlphaFilter", registry);
+   private final DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointBacklashSlopTime", registry);
+
    private EnumYoVariable<?> selectedJoint;
    private EnumYoVariable<?> previousSelectedJoint;
    private final DoubleYoVariable qDesiredSelected = new DoubleYoVariable("qDesiredSelected", registry);
@@ -95,10 +100,13 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
    @Override
    protected void init()
    {
+      double dt = robotModel.getEstimatorDT();
+      jointVelocityAlphaFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(20.0, dt));
+      jointVelocitySlopTime.set(0.03);
+      
       kpSelected.set(KP_DEFAULT);
       kdSelected.set(KD_DEFAULT);
 
-      double dt = robotModel.getEstimatorDT();
       selectedFunctionGenerator = new YoFunctionGenerator("Selected", yoTime, registry, false, dt);
       selectedFunctionGenerator.setMode(YoFunctionGeneratorMode.SINE);
       selectedFunctionGenerator.setAmplitude(0.0);
@@ -122,7 +130,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
       {
          OneDoFJoint joint = sdfFullRobotModel.getOneDoFJointByName(jointName);
          JointHandle handle = createJointHandle(jointName);
-         jointHolders.add(new JointHolder(joint, handle, registry));
+         jointHolders.add(new JointHolder(joint, handle, registry, dt));
          jointNames.add(joint.getName());
       }
 
@@ -280,6 +288,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 
       private final DoubleYoVariable q;
       private final DoubleYoVariable qd;
+      private final RevisedBacklashCompensatingVelocityYoVariable bl_qd;
       private final DoubleYoVariable tau;
 
       private final DoubleYoVariable q_d;
@@ -289,7 +298,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
       private final DoubleYoVariable tau_function;
       private final DoubleYoVariable tau_d;
 
-      public JointHolder(OneDoFJoint joint, JointHandle handle, YoVariableRegistry parentRegistry)
+      public JointHolder(OneDoFJoint joint, JointHandle handle, YoVariableRegistry parentRegistry, double dt)
       {
          this.joint = joint;
          this.handle = handle;
@@ -302,6 +311,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 
          q = new DoubleYoVariable(jointName + "_q", registry);
          qd = new DoubleYoVariable(jointName + "_qd", registry);
+         bl_qd = new RevisedBacklashCompensatingVelocityYoVariable("bl_qd_" + jointName, "", jointVelocityAlphaFilter, q, dt, jointVelocitySlopTime, registry);
          tau = new DoubleYoVariable(jointName + "_tau", registry);
 
          q_d = new DoubleYoVariable(jointName + "_q_d", registry);
@@ -325,6 +335,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
       {
          joint.setQ(handle.getPosition());
          joint.setQd(handle.getVelocity());
+         bl_qd.update();
          joint.setTauMeasured(handle.getEffort());
 
          q.set(joint.getQ());
