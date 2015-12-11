@@ -140,6 +140,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final YoFrameVector lastDesiredVelocity;
    private final FrameVector desiredBodyVelocity = new FrameVector();
    private final DoubleYoVariable desiredYawRate = new DoubleYoVariable("desiredYawRate", registry);
+   private final DoubleYoVariable lastDesiredYawRate = new DoubleYoVariable("lastDesiredYawRate", registry);
 
    private final DoubleYoVariable shrunkenPolygonSize = new DoubleYoVariable("shrunkenPolygonSize", registry);
 
@@ -1010,12 +1011,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
             desiredCoMVelocity.setToZero();
          }
          
-         else if(isDesiredVelocityChanging())
+         else if(isDesiredVelocityOrYawRateChanging())
          {
             reinitializeCoMTrajectoryWithNewVelocity();
          }
          
          lastDesiredVelocity.set(desiredVelocity);
+         lastDesiredYawRate.set(desiredYawRate.getDoubleValue());
          
          if(isTransitioningToSafePosition() && comTrajectoryGenerator.isDone())
          {
@@ -1056,7 +1058,22 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 
       private boolean isDesiredVelocityChanging()
       {
-         return desiredVelocity.getX() - lastDesiredVelocity.getX() > 0.1e-3 || desiredVelocity.getY() - lastDesiredVelocity.getY() > 0.1e-3;
+         boolean isBodyVelocityXChanging = desiredVelocity.getX() - lastDesiredVelocity.getX() > 0.1e-3;
+         boolean isBodyVelocityYChanging = desiredVelocity.getY() - lastDesiredVelocity.getY() > 0.1e-3;
+         return isBodyVelocityXChanging || isBodyVelocityYChanging;
+      }
+      
+      private boolean isDesiredYawRateChanging()
+      {
+         boolean isYawRateChanging = desiredYawRate.getDoubleValue() - lastDesiredYawRate.getDoubleValue() > 0.1e-3;
+         return isYawRateChanging;
+      }
+      
+      private boolean isDesiredVelocityOrYawRateChanging()
+      {
+         boolean isDesiredVelocityChanging = isDesiredVelocityChanging();
+         boolean isDesiredYawRateChanging = isDesiredYawRateChanging();
+         return isDesiredVelocityChanging || isDesiredYawRateChanging;
       }
 
       private boolean isDesiredVelocityReversing()
@@ -1334,9 +1351,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       public void doTransitionIntoAction()
       {        
          RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
-         YoFramePoint yoDesiredFootPosition = desiredFeetLocations.get(swingQuadrant);
          swingTarget.setToZero(ReferenceFrame.getWorldFrame());
          calculateSwingTarget(swingQuadrant, swingTarget);
+         
+         YoFramePoint yoDesiredFootPosition = desiredFeetLocations.get(swingQuadrant);
          currentSwingTarget.set(swingTarget);
          finalSwingTarget.set(swingTarget);
          
