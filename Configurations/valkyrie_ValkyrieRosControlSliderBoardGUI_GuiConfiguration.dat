@@ -85,7 +85,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.FGYoFunGen.FGFreq,root.remotemain.ValkyrieRosControlSliderBoard.FGYoFunGen.frequencyFiltered</Variables>
+		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.FGYoFunGen.FGFreq</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -102,7 +102,7 @@
 <Title>
 Tab0
 </Title>
-<Entry Boxes>selectedJoint,kpSelected,kdSelected,qDesiredSelected,FGMode</Entry Boxes>
+<Entry Boxes>selectedJoint,kpSelected,kdSelected,qDesiredSelected,FGMode,FGFreq,FGAmp</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -114,8 +114,8 @@ Tab0
 <Graph Array Window Size>2</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
-<WindowLocation>5760.0, 0.0</WindowLocation>
-<WindowSize>1920.0, 1080.0</WindowSize>
+<WindowLocation>6720.0, 0.0</WindowLocation>
+<WindowSize>960.0, 1080.0</WindowSize>
 <GraphGroup>
 	<Cols>4</Cols>
 	<Graph>
@@ -408,9 +408,9 @@ Tab0
 	</Graph>
 </GraphGroup>
 </Graph Array Window1><Graph Array Window2>
-<ScreenID>0</ScreenID>
-<WindowLocation>985.0, 651.0</WindowLocation>
-<WindowSize>935.0, 549.0</WindowSize>
+<ScreenID>1</ScreenID>
+<WindowLocation>5760.0, 0.0</WindowLocation>
+<WindowSize>960.0, 1080.0</WindowSize>
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
@@ -420,19 +420,7 @@ Tab0
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.qSelected</Variables>
-		<GraphConfiguration>
-			<Name>config34</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
+			<BaseLines>2.7026087545404054,</BaseLines>
 			<MaxScaling>1.0</MaxScaling>
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
@@ -447,9 +435,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>1.7412486857684397</Camera X>
- <Camera Y>5.176920139331982</Camera Y>
- <Camera Z>-0.4626490450250581</Camera Z>
+ <Camera X>6.977364436396197</Camera X>
+ <Camera Y>-2.703248534759429</Camera Y>
+ <Camera Z>-0.3852982308558536</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -473,8 +461,8 @@ Tab0
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.04736628202347096</Fix X>
-<Fix Y>-0.013709339365285726</Fix Y>
-<Fix Z>-0.3061946593547219</Fix Z>
+<Fix X>-0.02399575747832786</Fix X>
+<Fix Y>0.009296704627519196</Fix Y>
+<Fix Z>-0.11509568838854466</Fix Z>
 </Fix Position>
 </Canvas 1>
