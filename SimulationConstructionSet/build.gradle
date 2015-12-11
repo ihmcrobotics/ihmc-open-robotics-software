@@ -18,7 +18,7 @@ jar {
       "Implementation-Title": project.name,
       "Implementation-Version": project.version,
       "Implementation-Vendor": "IHMC",
-      
+
       "Bundle-Name": project.name,
       "Bundle-Version": project.version,
       "Bundle-License": "http://www.apache.org/licenses/LICENSE-2.0.txt",
@@ -39,6 +39,8 @@ task fatJar(type: Jar) {
                 "Bundle-License": "http://www.apache.org/licenses/LICENSE-2.0.txt",
                 "Bundle-Vendor": "IHMC")
     }
+
+    from sourceSets.main.runtimeClasspath
 
     doFirst {
         delete "${buildDir}/tmp"
