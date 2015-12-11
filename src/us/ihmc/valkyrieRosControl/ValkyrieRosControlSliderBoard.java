@@ -24,6 +24,7 @@ import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.rosControl.JointHandle;
 import us.ihmc.rosControl.valkyrie.IHMCValkyrieControlJavaBridge;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
+import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -52,6 +53,8 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
    public static final boolean LOAD_TORQUE_OFFSETS = true;
    public static final double KP_DEFAULT = 30.0;
    public static final double KD_DEFAULT = 1.0;
+
+   private static final boolean RESET_FUNCTIONS_ON_JOINT_CHANGE = false;
 
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
    private final SDFFullHumanoidRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
@@ -83,7 +86,11 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 
    private long startTime = -1;
    private final DoubleYoVariable yoTime = new DoubleYoVariable("time", registry);
-   private YoFunctionGenerator functionGenerator;
+   private YoFunctionGenerator selectedFunctionGenerator;
+
+   private YoFunctionGenerator secondaryFunctionGenerator;
+   private EnumYoVariable<?> secondaryJoint;
+   private final DoubleYoVariable tauFunctionSecondary = new DoubleYoVariable("tauFunctionSecondary", registry);
 
    @Override
    protected void init()
@@ -92,10 +99,17 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
       kdSelected.set(KD_DEFAULT);
 
       double dt = robotModel.getEstimatorDT();
-      functionGenerator = new YoFunctionGenerator("FG", yoTime, registry, true, dt);
-      functionGenerator.setAmplitude(0.0);
-      functionGenerator.setFrequency(0.0);
-      functionGenerator.setOffset(0.0);
+      selectedFunctionGenerator = new YoFunctionGenerator("Selected", yoTime, registry, false, dt);
+      selectedFunctionGenerator.setMode(YoFunctionGeneratorMode.SINE);
+      selectedFunctionGenerator.setAmplitude(0.0);
+      selectedFunctionGenerator.setFrequency(0.0);
+      selectedFunctionGenerator.setOffset(0.0);
+
+      secondaryFunctionGenerator = new YoFunctionGenerator("Secondary", yoTime, registry, false, dt);
+      secondaryFunctionGenerator.setMode(YoFunctionGeneratorMode.SINE);
+      secondaryFunctionGenerator.setAmplitude(0.0);
+      secondaryFunctionGenerator.setFrequency(0.0);
+      secondaryFunctionGenerator.setOffset(0.0);
 
       if (LOAD_STAND_PREP_SETPOINTS)
          loadStandPrepSetPoints();
@@ -117,6 +131,8 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
       System.out.println(Arrays.toString(selectedJoint.getEnumValuesAsString()));
       previousSelectedJoint = new EnumYoVariable<>("previousSelectedJoint", "", registry, true, jointNameArray);
       previousSelectedJoint.set(EnumYoVariable.NULL_VALUE);
+      secondaryJoint = new EnumYoVariable<>("secondaryJoint", "", registry, true, jointNameArray);
+      secondaryJoint.set(EnumYoVariable.NULL_VALUE);
 
       selectedJoint.addVariableChangedListener(new VariableChangedListener()
       {
@@ -134,6 +150,35 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 
             if (previousSelectedJoint.getOrdinal() != EnumYoVariable.NULL_VALUE)
                jointHolders.get(previousSelectedJoint.getOrdinal()).tau_function.set(0.0);
+
+            if (RESET_FUNCTIONS_ON_JOINT_CHANGE || selectedJoint.getOrdinal() != secondaryJoint.getOrdinal() || previousSelectedJoint.getOrdinal() != EnumYoVariable.NULL_VALUE)
+            {
+               selectedFunctionGenerator.setAmplitude(0.0);
+               selectedFunctionGenerator.setFrequency(0.0);
+               selectedFunctionGenerator.setOffset(0.0);
+
+               secondaryFunctionGenerator.setAmplitude(0.0);
+               secondaryFunctionGenerator.setFrequency(0.0);
+               secondaryFunctionGenerator.setOffset(0.0);
+            }
+            else
+            {
+               secondaryJoint.set(previousSelectedJoint.getOrdinal());
+               double previousAmplitude = selectedFunctionGenerator.getAmplitude();
+               double previousFrequency = selectedFunctionGenerator.getFrequency();
+               double previousOffset = selectedFunctionGenerator.getOffset();
+               double previousPhase = selectedFunctionGenerator.getPhase();
+
+               selectedFunctionGenerator.setAmplitude(secondaryFunctionGenerator.getAmplitude());
+               selectedFunctionGenerator.setFrequency(secondaryFunctionGenerator.getFrequency());
+               selectedFunctionGenerator.setOffset(secondaryFunctionGenerator.getOffset());
+               selectedFunctionGenerator.setPhase(secondaryFunctionGenerator.getPhase());
+
+               secondaryFunctionGenerator.setAmplitude(previousAmplitude);
+               secondaryFunctionGenerator.setFrequency(previousFrequency);
+               secondaryFunctionGenerator.setOffset(previousOffset);
+               secondaryFunctionGenerator.setPhase(previousPhase);
+            }
 
             previousSelectedJoint.set(selectedJoint.getOrdinal());
          }
@@ -191,7 +236,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
          startTime = time;
       yoTime.set(TimeTools.nanoSecondstoSeconds(time - startTime));
 
-      tauFunctionSelected.set(functionGenerator.getValue());
+      tauFunctionSelected.set(selectedFunctionGenerator.getValue());
 
       masterScaleFactor.set(MathTools.clipToMinMax(masterScaleFactor.getDoubleValue(), 0.0, 1.0));
       JointHolder selected = jointHolders.get(selectedJoint.getOrdinal());
@@ -201,6 +246,14 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
       selected.pdController.setDerivativeGain(kdSelected.getDoubleValue());
       selected.tau_function.set(tauFunctionSelected.getDoubleValue());
       selected.tau_offset.set(tauOffsetSelected.getDoubleValue());
+
+      if (secondaryJoint.getOrdinal() != EnumYoVariable.NULL_VALUE)
+      {
+         JointHolder secondary = jointHolders.get(secondaryJoint.getOrdinal());
+         if (secondaryJoint.getEnumValue() != selectedJoint.getEnumValue())
+            secondary.tau_function.set(secondaryFunctionGenerator.getValue());
+         tauFunctionSecondary.set(secondary.tau_function.getDoubleValue());
+      }
 
       for (int i = 0; i < jointHolders.size(); i++)
       {
