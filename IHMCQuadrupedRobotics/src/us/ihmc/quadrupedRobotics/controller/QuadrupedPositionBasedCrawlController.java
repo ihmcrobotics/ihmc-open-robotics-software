@@ -1311,7 +1311,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       private final FramePoint currentDesiredInTrajectory = new FramePoint();
       private final FrameVector speedMatchVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
       private final DoubleYoVariable speedMatchScalar = new DoubleYoVariable("speedMatchScalar", registry);
-      private final Vector3d footPositionInLegAttachmentFrame = new Vector3d();
       
       public TripleSupportState(CrawlGateWalkingState stateEnum)
       {
@@ -1329,10 +1328,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          currentSwingTarget.set(currentDesiredInTrajectory);
          
          desiredFeetLocations.get(swingQuadrant).setAndMatchFrame(currentDesiredInTrajectory);
-
-         currentDesiredInTrajectory.changeFrame(feedForwardReferenceFrames.getLegAttachmentFrame(swingQuadrant));
-         currentDesiredInTrajectory.get(footPositionInLegAttachmentFrame);
-         computeDesiredPositionsAndStoreInFullRobotModel(swingQuadrant, footPositionInLegAttachmentFrame);
       }
 
       @Override
