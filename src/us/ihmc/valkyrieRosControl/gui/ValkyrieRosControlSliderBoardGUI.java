@@ -19,7 +19,6 @@ public class ValkyrieRosControlSliderBoardGUI extends SCSVisualizer
 
    @Override
    public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
-
    {
       MidiSliderBoard sliderBoard = new MidiSliderBoard(scs);
 
@@ -33,9 +32,13 @@ public class ValkyrieRosControlSliderBoardGUI extends SCSVisualizer
 
       YoVariable<?> masterScaleFactor = registry.getVariable("ValkyrieRosControlSliderBoard", "masterScaleFactor");
 
-      EnumYoVariable<?> functionGeneratorMode = (EnumYoVariable<?>) registry.getVariable("FGYoFunGen", "FGMode");
-      YoVariable<?> functionGeneratorAmplitude = registry.getVariable("FGYoFunGen", "FGAmp");
-      YoVariable<?> functionGeneratorFrequency = registry.getVariable("FGYoFunGen", "FGFreq");
+      YoVariable<?> functionGeneratorPhase = registry.getVariable("SelectedYoFunGen", "SelectedPhase");
+      YoVariable<?> functionGeneratorAmplitude = registry.getVariable("SelectedYoFunGen", "SelectedAmp");
+      YoVariable<?> functionGeneratorFrequency = registry.getVariable("SelectedYoFunGen", "SelectedFreq");
+
+      YoVariable<?> secondaryFunctionGeneratorPhase = registry.getVariable("SecondaryYoFunGen", "SecondaryPhase");
+      YoVariable<?> secondaryFunctionGeneratorAmplitude = registry.getVariable("SecondaryYoFunGen", "SecondaryAmp");
+      YoVariable<?> secondaryFunctionGeneratorFrequency = registry.getVariable("SecondaryYoFunGen", "SecondaryFreq");
       
 
       
@@ -48,9 +51,13 @@ public class ValkyrieRosControlSliderBoardGUI extends SCSVisualizer
       sliderBoard.setSlider(4, kd, 0, 10);
       sliderBoard.setSlider(8, masterScaleFactor, 0.0, 1.0);
       
-      sliderBoard.setKnob(6, functionGeneratorMode, 0, functionGeneratorMode.getEnumSize());
+      sliderBoard.setSlider(5, functionGeneratorPhase, 0.0, Math.PI);
       sliderBoard.setSlider(6, functionGeneratorAmplitude, 0.0, 10.0);
       sliderBoard.setSlider(7, functionGeneratorFrequency, 0.0, 20.0);
+
+      sliderBoard.setKnob(5, secondaryFunctionGeneratorPhase, 0.0, Math.PI);
+      sliderBoard.setKnob(6, secondaryFunctionGeneratorAmplitude, 0.0, 10.0);
+      sliderBoard.setKnob(7, secondaryFunctionGeneratorFrequency, 0.0, 20.0);
    }
    
    public static void main(String[] args)
