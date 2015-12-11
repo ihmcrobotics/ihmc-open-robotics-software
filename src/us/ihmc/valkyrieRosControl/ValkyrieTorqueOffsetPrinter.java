@@ -26,9 +26,11 @@ import us.ihmc.wholeBodyController.diagnostics.TorqueOffsetPrinter;
 
 public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
 {
+   private static final String NASA_TORQUE_OFFSET_FILE = System.getProperty("user.home") + File.separator + "valkyrie/ValkyrieJointTorqueOffsets.xml";
    public static final String IHMC_TORQUE_OFFSET_FILE = System.getProperty("user.home") + File.separator + ".ihmc/ControllerConfig/jointTorqueOffsets.yaml";
-   private final static boolean WRITE_OFFSETS_TO_FILE_FOR_NASA = true;
-   private final static boolean WRITE_OFFSETS_TO_FILE_FOR_IHMC = false;
+   
+   private static final boolean WRITE_OFFSETS_TO_FILE_FOR_NASA = true;
+   private static final boolean WRITE_OFFSETS_TO_FILE_FOR_IHMC = false;
 
    private final java.text.NumberFormat doubleFormat = new java.text.DecimalFormat(" 0.00;-0.00");
    private String robotName = "Valkyrie";
@@ -74,7 +76,7 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
 
       if (WRITE_OFFSETS_TO_FILE_FOR_NASA)
       {
-         File file = new File(System.getProperty("user.home") + "valkyrie/ValkyrieJointTorqueOffsets.xml");
+         File file = new File(NASA_TORQUE_OFFSET_FILE);
          try
          {
             writeTorqueOffsetsToFile(file, buildXMLJoints(diagnosticsWhenHangingController));
