@@ -4,8 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.nio.ByteBuffer;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point2d;
@@ -16,6 +14,7 @@ import org.opencv.calib3d.Calib3d;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
+import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
@@ -65,32 +64,6 @@ public class OpenCVChessboardPoseEstimator
             boardPoints[count++] = new Point3(x, y, 0.0);
          }
       }
-   }
-
-   static public Mat convertBufferedImageToMat(BufferedImage image)
-   {
-      Mat imageMat;
-      byte[] pixel;
-      switch (image.getType())
-      {
-      case BufferedImage.TYPE_3BYTE_BGR:
-         imageMat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
-         pixel = ((DataBufferByte) (image.getRaster().getDataBuffer())).getData();
-         break;
-      case BufferedImage.TYPE_4BYTE_ABGR:
-      case BufferedImage.TYPE_INT_ARGB:
-         //need to double check endianess
-         imageMat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC4);
-         pixel = new byte[image.getHeight() * image.getWidth() * 4];
-         ByteBuffer pixelBuf = ByteBuffer.wrap(pixel);
-         int[] intBuf = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
-         pixelBuf.asIntBuffer().put(intBuf);
-         break;
-      default:
-         throw new RuntimeException("unknown type " + image.getType());
-      }
-      imageMat.put(0, 0, pixel);
-      return imageMat;
    }
 
    public void setCameraMatrix(double fx, double fy, double cx, double cy)
@@ -144,7 +117,7 @@ public class OpenCVChessboardPoseEstimator
    {
       if (cameraMatrix == null)
          setDefaultCameraMatrix(image.getHeight(), image.getWidth(), Math.PI / 4);
-      Mat imageMat = convertBufferedImageToMat(image);
+      Mat imageMat = OpenCVTools.convertBufferedImageToMat(image);
       int flags = Calib3d.CALIB_CB_ADAPTIVE_THRESH + Calib3d.CALIB_CB_FAST_CHECK;
       if (findChessCornerRobustForExtremePitch(imageMat, boardInnerCrossPattern, corners, flags, attemptExtremePitchDetection))
       {
