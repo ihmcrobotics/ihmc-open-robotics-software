@@ -28,8 +28,8 @@ public class QuadrupedPositionBasedCrawlSliderBoardConfiguration
       });
       
       //CoM Shift tuning
-      sliderBoardConfigurationManager.setSlider(1, "desiredVelocityX", scs, 0.0, 0.55);
-      sliderBoardConfigurationManager.setSlider(2, "desiredVelocityY", scs, -0.5, 0.5);
+      sliderBoardConfigurationManager.setSlider(1, "desiredBodyVelocityX", scs, 0.0, 0.55);
+      sliderBoardConfigurationManager.setSlider(2, "desiredBodyVelocityY", scs, -0.5, 0.5);
       sliderBoardConfigurationManager.setSlider(3, "desiredYawRate", scs, -Math.PI/2.0, Math.PI/2.0);
       sliderBoardConfigurationManager.setSlider(4, "desiredCoMHeight", scs, 0.0, 1.0);
       sliderBoardConfigurationManager.setSlider(5, "filteredDesiredCoMHeightAlphaBreakFrequency", scs, 0.0, 1.0);
