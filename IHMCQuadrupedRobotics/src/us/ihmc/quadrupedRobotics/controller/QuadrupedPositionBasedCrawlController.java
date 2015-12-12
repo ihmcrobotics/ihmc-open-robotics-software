@@ -578,9 +578,11 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       }
    }
    
-   private boolean isDesiredVelocityZero()
+   private boolean isDesiredVelocityAndYawRateZero()
    {
-      return desiredVelocity.length() < 0.1e-3 && Math.abs(desiredYawRate.getDoubleValue()) < 0.1e-3 && Math.abs(desiredYawRate.getDoubleValue()) < 0.1e-3;
+      boolean isDesiredVelocityZero = desiredVelocity.length() < 0.1e-3;
+      boolean isDesiredYawRateZero = Math.abs(desiredYawRate.getDoubleValue()) < 0.1e-3;
+      return isDesiredVelocityZero && isDesiredYawRateZero;
    }
 
 
@@ -745,7 +747,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
     */
    private void updateDesiredCoMTrajectory()
    {
-      if(!comTrajectoryGenerator.isDone() && !comTrajectoryGeneratorRequiresReInitailization.getBooleanValue() && (walkingStateMachine.isCurrentState(CrawlGateWalkingState.TRIPLE_SUPPORT) || !isDesiredVelocityZero()))
+      if(!comTrajectoryGenerator.isDone() && !comTrajectoryGeneratorRequiresReInitailization.getBooleanValue() && (walkingStateMachine.isCurrentState(CrawlGateWalkingState.TRIPLE_SUPPORT) || !isDesiredVelocityAndYawRateZero()))
       {
          comTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - comTrajectoryTimeStart.getDoubleValue());
          comTrajectoryGenerator.compute(comTrajectoryTimeCurrent.getDoubleValue());
@@ -991,27 +993,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          this.minimumTimeInQuadSupportAfterReverseDirection.set(minimumTimeInQuadAfterReverseDirection);
       }
 
-      /**
-       * uses actual CoM position to determine if we need to move the CoM before we can start the swing
-       */
       @Override
       public void doAction()
       {
-         if(isDesiredVelocityReversing())
-         {
-            minimumTimeInQuadSupport.set(minimumTimeInQuadSupportAfterReverseDirection.getDoubleValue());
-            comTrajectoryGenerator.setToDone();
-            comTrajectoryGeneratorRequiresReInitailization.set(true);
-            desiredCoMVelocity.setToZero();
-         }
-         
-         else if(isDesiredVelocityZero())
-         {
-            comTrajectoryGeneratorRequiresReInitailization.set(true);
-            desiredCoMVelocity.setToZero();
-         }
-         
-         else if(isDesiredVelocityOrYawRateChanging())
+         if(isDesiredVelocityOrYawRateChanging())
          {
             reinitializeCoMTrajectoryWithNewVelocity();
          }
@@ -1120,13 +1105,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          calculateNextThreeFootSteps(currentSwingLeg);
          
          QuadrupedSupportPolygon quadrupedSupportPolygon = estimatedCommonTriangle.get(nextSwingLeg);
-         if(!isDesiredVelocityZero() && quadrupedSupportPolygon != null)
+         if(!isDesiredVelocityAndYawRateZero() && quadrupedSupportPolygon != null)
          {
             calculateTrajectoryTarget(nextSwingLeg, quadrupedSupportPolygon, circleCenter2d);
             initializeCoMTrajectory(circleCenter2d);
          }
          
-         if(isDesiredVelocityZero() && !comTrajectoryGenerator.isDone())
+         if(isDesiredVelocityAndYawRateZero() && !comTrajectoryGenerator.isDone())
          {
             comTrajectoryGenerator.setToDone();
             desiredCoMVelocity.setToZero();
