@@ -51,6 +51,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
    private final double controlDT;
    private final double gravityZ;
    private final double mass;
+   private double startTime;
 
    // utilities
    private final QuadrupedVirtualModelController virtualModelController;
@@ -393,6 +394,8 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       yoGraphicsList.setVisible(true);
       artifactList.setVisible(true);
       virtualModelController.setVisible(true);
+
+      startTime = robotTimestamp.getDoubleValue();
    }
 
    @Override

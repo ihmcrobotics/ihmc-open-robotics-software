@@ -410,6 +410,19 @@ public class QuadrupedVirtualModelController
    {
       contactForce.set(contactForceOptimal.get(robotQuadrant));
    }
+   
+   public int getNumberOfActiveContacts()
+   {
+     int numberOfActiveContacts = 0;
+     for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+     {
+        if (contactState.get(robotQuadrant)[0])
+        {
+           numberOfActiveContacts++;
+        }
+     }
+     return numberOfActiveContacts;
+   }
 
    public void compute()
    {
@@ -536,64 +549,99 @@ public class QuadrupedVirtualModelController
 
    private void computeVirtualForcesViaLeastSquares()
    {
-      // compute map from sole forces to centroidal forces and torques
-      comWrenchMap.zero();
-      int columnOffset = 0;
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      int numberOfActiveContacts = getNumberOfActiveContacts();
+
+      if (numberOfActiveContacts > 0)
       {
-         comWrenchMap.set(0, 1 + columnOffset, -solePosition.get(robotQuadrant).getZ()); // mX row
-         comWrenchMap.set(0, 2 + columnOffset, solePosition.get(robotQuadrant).getY());
-         comWrenchMap.set(1, 0 + columnOffset, solePosition.get(robotQuadrant).getZ()); // mY row
-         comWrenchMap.set(1, 2 + columnOffset, -solePosition.get(robotQuadrant).getX());
-         comWrenchMap.set(2, 0 + columnOffset, -solePosition.get(robotQuadrant).getY()); // mZ row
-         comWrenchMap.set(2, 1 + columnOffset, solePosition.get(robotQuadrant).getX());
-         comWrenchMap.set(3, 0 + columnOffset, 1.0); // fX row
-         comWrenchMap.set(4, 1 + columnOffset, 1.0); // fY row
-         comWrenchMap.set(5, 2 + columnOffset, 1.0); // fZ row
-         columnOffset += 3;
+         // compute map from contact forces to centroidal forces and torques
+         comWrenchMap.zero();
+         comWrenchMap.reshape(6, 3*numberOfActiveContacts);
+         int columnOffset = 0;
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            if (contactState.get(robotQuadrant)[0])
+            {
+               comWrenchMap.set(0, 1 + columnOffset, -solePosition.get(robotQuadrant).getZ()); // mX row
+               comWrenchMap.set(0, 2 + columnOffset, solePosition.get(robotQuadrant).getY());
+               comWrenchMap.set(1, 0 + columnOffset, solePosition.get(robotQuadrant).getZ()); // mY row
+               comWrenchMap.set(1, 2 + columnOffset, -solePosition.get(robotQuadrant).getX());
+               comWrenchMap.set(2, 0 + columnOffset, -solePosition.get(robotQuadrant).getY()); // mZ row
+               comWrenchMap.set(2, 1 + columnOffset, solePosition.get(robotQuadrant).getX());
+               comWrenchMap.set(3, 0 + columnOffset, 1.0); // fX row
+               comWrenchMap.set(4, 1 + columnOffset, 1.0); // fY row
+               comWrenchMap.set(5, 2 + columnOffset, 1.0); // fZ row
+               columnOffset += 3;
+            }
+         }
+
+         // compute centroidal wrench vector
+         comWrenchVector.set(0, 0, comTorqueCommand.getX());
+         comWrenchVector.set(1, 0, comTorqueCommand.getY());
+         comWrenchVector.set(2, 0, comTorqueCommand.getZ());
+         comWrenchVector.set(3, 0, comForceCommand.getX());
+         comWrenchVector.set(4, 0, comForceCommand.getY());
+         comWrenchVector.set(5, 0, comForceCommand.getZ());
+
+         // compute optimal contact forces using least squares solution
+         contactForcesVector.reshape(3*numberOfActiveContacts, 1);
+         try
+         {
+            CommonOps.pinv(comWrenchMap, comWrenchMapInverse);
+         }
+         catch (Exception e)
+         {
+            return;
+         }
+         CommonOps.mult(comWrenchMapInverse, comWrenchVector, contactForcesVector);
       }
 
-      // compute centroidal wrench vector
-      comWrenchVector.set(0, 0, comTorqueCommand.getX());
-      comWrenchVector.set(1, 0, comTorqueCommand.getY());
-      comWrenchVector.set(2, 0, comTorqueCommand.getZ());
-      comWrenchVector.set(3, 0, comForceCommand.getX());
-      comWrenchVector.set(4, 0, comForceCommand.getY());
-      comWrenchVector.set(5, 0, comForceCommand.getZ());
-
-      // compute optimal contact forces using least squares solution
-      try
-      {
-         CommonOps.pinv(comWrenchMap, comWrenchMapInverse);
-      }
-      catch (Exception e)
-      {
-         return;
-      }
-      CommonOps.mult(comWrenchMapInverse, comWrenchVector, contactForcesVector);
       int rowOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         contactForceOptimal.get(robotQuadrant).changeFrame(comFrame);
-         contactForceOptimal.get(robotQuadrant).setX(contactForcesVector.get(0 + rowOffset, 0));
-         contactForceOptimal.get(robotQuadrant).setY(contactForcesVector.get(1 + rowOffset, 0));
-         contactForceOptimal.get(robotQuadrant).setZ(contactForcesVector.get(2 + rowOffset, 0));
-         rowOffset += 3;
+         if (contactState.get(robotQuadrant)[0])
+         {
+            contactForceOptimal.get(robotQuadrant).changeFrame(comFrame);
+            contactForceOptimal.get(robotQuadrant).setX(contactForcesVector.get(0 + rowOffset, 0));
+            contactForceOptimal.get(robotQuadrant).setY(contactForcesVector.get(1 + rowOffset, 0));
+            contactForceOptimal.get(robotQuadrant).setZ(contactForcesVector.get(2 + rowOffset, 0));
 
-         // apply contact force limits
-         double mu = contactCoefficientOfFriction.get(robotQuadrant)[0];
-         double fx = contactForceOptimal.get(robotQuadrant).getX();
-         double fy = contactForceOptimal.get(robotQuadrant).getY();
-         double fz = contactForceOptimal.get(robotQuadrant).getZ();
-         fz = Math.max(fz, contactPressureLowerLimit.get(robotQuadrant)[0]);
-         fz = Math.min(fz, contactPressureUpperLimit.get(robotQuadrant)[0]);
-         fx = Math.max(fx, -mu * fz / Math.sqrt(2));
-         fx = Math.min(fx, mu * fz / Math.sqrt(2));
-         fy = Math.max(fy, -mu * fz / Math.sqrt(2));
-         fy = Math.min(fy, mu * fz / Math.sqrt(2));
-         contactForceOptimal.get(robotQuadrant).setX(fx);
-         contactForceOptimal.get(robotQuadrant).setY(fy);
-         contactForceOptimal.get(robotQuadrant).setZ(fz);
+            // apply contact force limits
+            double mu = contactCoefficientOfFriction.get(robotQuadrant)[0];
+            double fx = contactForceOptimal.get(robotQuadrant).getX();
+            double fy = contactForceOptimal.get(robotQuadrant).getY();
+            double fz = contactForceOptimal.get(robotQuadrant).getZ();
+            fz = Math.max(fz, contactPressureLowerLimit.get(robotQuadrant)[0]);
+            fz = Math.min(fz, contactPressureUpperLimit.get(robotQuadrant)[0]);
+            fx = Math.max(fx, -mu * fz / Math.sqrt(2));
+            fx = Math.min(fx, mu * fz / Math.sqrt(2));
+            fy = Math.max(fy, -mu * fz / Math.sqrt(2));
+            fy = Math.min(fy, mu * fz / Math.sqrt(2));
+            contactForceOptimal.get(robotQuadrant).setX(fx);
+            contactForceOptimal.get(robotQuadrant).setY(fy);
+            contactForceOptimal.get(robotQuadrant).setZ(fz);
+
+            rowOffset += 3;
+         }
+         else
+         {
+            contactForceOptimal.get(robotQuadrant).changeFrame(comFrame);
+            contactForceOptimal.get(robotQuadrant).setToZero();
+         }
+      }
+      
+      // compute swing forces
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (contactState.get(robotQuadrant)[0])
+         {
+            swingForceOptimal.get(robotQuadrant).setToZero();
+            swingForceOptimal.get(robotQuadrant).changeFrame(comFrame);
+         }
+         else
+         {
+            swingForceOptimal.get(robotQuadrant).setIncludingFrame(swingForceCommand.get(robotQuadrant));
+            swingForceOptimal.get(robotQuadrant).changeFrame(comFrame);
+         }
       }
    }
 
