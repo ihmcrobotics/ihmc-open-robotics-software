@@ -1077,7 +1077,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
                //Coming from zero to nonZero
                else
                {
-                  calculateNextCoMTarget(false);
+                  calculateNextCoMTarget(true);
                }
             }
          }
@@ -1099,7 +1099,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       {
          desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
          RobotQuadrant currentSwingLeg = swingLeg.getEnumValue();
-         
+         estimatedCommonTriangle.clear();
          if(recalculateCurrent)
          {
             RobotQuadrant previousSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(fourFootSupportPolygon, currentSwingLeg,
