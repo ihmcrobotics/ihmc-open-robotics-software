@@ -853,9 +853,34 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    */
    public void calculateSwingTarget(RobotQuadrant swingLeg, FramePoint framePointToPack)
    {
-      FrameVector desiredVelocityVector = desiredVelocity.getFrameTuple();
+      
+      FrameVector comTrajComputedVelocity = desiredCoMVelocity.getFrameVectorCopy();
+      FrameVector desiredVelocityVector = desiredVelocity.getFrameVectorCopy();
+      
+      comTrajComputedVelocity.changeFrame(feedForwardBodyFrame);
+      desiredVelocityVector.changeFrame(feedForwardBodyFrame);
+      
+      FrameVector expectedAverageVelocity = new FrameVector();
+      
+      if(desiredVelocityVector.length() < 1e-3)
+      {
+         expectedAverageVelocity.setIncludingFrame(desiredVelocityVector);
+      }
+      else if(comTrajComputedVelocity.getX() > 0 && desiredVelocityVector.getX() < 0 || comTrajComputedVelocity.getX() < 0 && desiredVelocityVector.getX() > 0)
+      {
+         expectedAverageVelocity.setIncludingFrame(desiredVelocityVector);
+         expectedAverageVelocity.scale(swingDuration.getDoubleValue() / 3.0);
+      } 
+      else
+      {
+         expectedAverageVelocity.setIncludingFrame(desiredVelocityVector);
+         expectedAverageVelocity.sub(desiredVelocityVector, comTrajComputedVelocity);
+         expectedAverageVelocity.scale(swingDuration.getDoubleValue() / 3.0);
+         expectedAverageVelocity.add(comTrajComputedVelocity);
+      }
+      
       double yawRate = desiredYawRate.getDoubleValue();
-      swingTargetGenerator.getSwingTarget(swingLeg, feedForwardReferenceFrames.getLegAttachmentFrame(swingLeg), desiredVelocityVector, swingDuration.getDoubleValue(), framePointToPack, yawRate);
+      swingTargetGenerator.getSwingTarget(swingLeg, feedForwardReferenceFrames.getLegAttachmentFrame(swingLeg), expectedAverageVelocity, swingDuration.getDoubleValue(), framePointToPack, yawRate);
    }
    
    private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
