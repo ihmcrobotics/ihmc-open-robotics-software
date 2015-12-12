@@ -344,8 +344,8 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       yoCmpPositionSetpoint.set(cmpPositionSetpoint);
 
       // compute joint torques using virtual model control
-      virtualModelController.setComForceSetpoint(comForceSetpoint);
-      virtualModelController.setBodyTorqueSetpoint(bodyTorqueSetpoint);
+      virtualModelController.setComForceCommand(comForceSetpoint);
+      virtualModelController.setComTorqueCommand(bodyTorqueSetpoint);
       virtualModelController.compute();
    }
 
@@ -381,11 +381,15 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       }
 
       // initialize virtual model controller
-      this.virtualModelController.reinitialize();
+      virtualModelController.reinitialize();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         virtualModelController.setContactState(robotQuadrant, true);
+      }
 
       // show graphics
-//    yoGraphicsListRegistry.hideYoGraphics();
-//    yoGraphicsListRegistry.hideArtifacts();
+      yoGraphicsListRegistry.hideYoGraphics();
+      yoGraphicsListRegistry.hideArtifacts();
       yoGraphicsList.setVisible(true);
       artifactList.setVisible(true);
       virtualModelController.setVisible(true);
