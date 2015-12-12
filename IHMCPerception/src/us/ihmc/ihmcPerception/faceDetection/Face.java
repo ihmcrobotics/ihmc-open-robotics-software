@@ -1,8 +1,8 @@
 package us.ihmc.ihmcPerception.faceDetection;
 
-import org.opencv.core.Rect;
+import java.awt.Color;
 
-import java.awt.*;
+import org.opencv.core.Rect;
 
 public class Face
 {
@@ -10,12 +10,21 @@ public class Face
 
    public Rect facialBorder;
 
-   public Color borderColor;
+//   public Color borderColor;
+   public int rgb;
+   
+   public Face()
+   {
+      id = 0;
+      rgb = Color.RED.getRGB();
+   }
+   
    public Face(long id, Rect facialBorder)
    {
       this.id = id;
       this.facialBorder = facialBorder;
-      borderColor = new Color((int)id);
+      
+      rgb = new Color((int) id).getRGB();
    }
 
    public void updateCoordinates(Rect coordinates)
@@ -32,5 +41,11 @@ public class Face
    public Rect getFacialBorder()
    {
       return facialBorder;
+   }
+   
+   //Have a getter just for cleanness of code. Don't take advantage that the field has to be public for packet issues
+   public Color getColor()
+   {
+      return new Color(rgb);
    }
 }

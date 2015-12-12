@@ -178,7 +178,7 @@ public class RosMainNode implements NodeMain
             }
             catch (ServiceNotFoundException e)
             {
-               PrintTools.error(this, "Waiting for service " + entry.getKey() + " (check spelling/service provider)...");
+               //lPrintTools.error(this, "Waiting for service " + entry.getKey() + " (check spelling/service provider)...");
                ThreadTools.sleep(2000);
             }
          }
