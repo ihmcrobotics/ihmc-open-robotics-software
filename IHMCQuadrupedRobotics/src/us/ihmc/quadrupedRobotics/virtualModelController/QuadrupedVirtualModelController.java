@@ -321,7 +321,7 @@ public class QuadrupedVirtualModelController
          {
             if (joint.getName().equals(jointName))
             {
-               jointPositionLimitStiffness.get(robotQuadrant)[index] = stiffness;
+               jointPositionLimitStiffness.get(robotQuadrant)[index] = Math.max(stiffness, 0);
             }
             index++;
          }
@@ -337,7 +337,7 @@ public class QuadrupedVirtualModelController
          {
             if (joint.getName().equals(jointName))
             {
-               jointPositionLimitDamping.get(robotQuadrant)[index] = damping;
+               jointPositionLimitDamping.get(robotQuadrant)[index] = Math.max(damping, 0);
             }
             index++;
          }
@@ -353,7 +353,7 @@ public class QuadrupedVirtualModelController
    {
       for (int i = 0; i < 3; i++)
       {
-         comForceCommandWeights[i] = weights[i];
+         comForceCommandWeights[i] = Math.max(weights[i], 0);
       }
    }
 
@@ -371,7 +371,7 @@ public class QuadrupedVirtualModelController
    {
       for (int i = 0; i < 3; i++)
       {
-         comTorqueCommandWeights[i] = weights[i];
+         comTorqueCommandWeights[i] = Math.max(weights[i], 0);
       }
    }
 
@@ -397,8 +397,8 @@ public class QuadrupedVirtualModelController
    
    public void setContactPressureLimits(RobotQuadrant robotQuadrant, double lower, double upper)
    {
-      contactPressureLowerLimit.get(robotQuadrant)[0] = lower;
-      contactPressureUpperLimit.get(robotQuadrant)[0] = upper;
+      contactPressureLowerLimit.get(robotQuadrant)[0] = Math.max(lower, 0);
+      contactPressureUpperLimit.get(robotQuadrant)[0] = Math.max(upper, 0);
    }
 
    public void setContactCoefficientOfFriction(RobotQuadrant robotQuadrant, double coefficientOfFriction)
@@ -585,7 +585,8 @@ public class QuadrupedVirtualModelController
          double fx = contactForceOptimal.get(robotQuadrant).getX();
          double fy = contactForceOptimal.get(robotQuadrant).getY();
          double fz = contactForceOptimal.get(robotQuadrant).getZ();
-         fz = Math.max(fz, 0);
+         fz = Math.max(fz, contactPressureLowerLimit.get(robotQuadrant)[0]);
+         fz = Math.min(fz, contactPressureUpperLimit.get(robotQuadrant)[0]);
          fx = Math.max(fx, -mu * fz / Math.sqrt(2));
          fx = Math.min(fx, mu * fz / Math.sqrt(2));
          fy = Math.max(fy, -mu * fz / Math.sqrt(2));
