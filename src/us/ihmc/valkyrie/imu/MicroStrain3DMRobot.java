@@ -152,7 +152,7 @@ public class MicroStrain3DMRobot extends Robot
          @Override
          public void doControl()
          {
-            MicroStrainData data = listener.getLatestData(MicrostrainPacketType.ORIGINAL);
+            MicroStrainData data = listener.getLatestData(MicrostrainPacketType.COMPLIMENTARY_FILTER);
             robot.set(data.getLinearAcceleration(), data.getAngularRate(), data.getQuaternion());
             ThreadTools.sleep(1);
          }

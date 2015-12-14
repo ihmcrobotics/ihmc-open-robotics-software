@@ -34,7 +34,7 @@ public class MicroStrainIMUHandle implements IMUHandle
    private Matrix3d quaternionConversionMatrix = new Matrix3d();
    private final Matrix3d orientationMatrix = new Matrix3d();
    
-   private MicrostrainPacketType packetTypeToReturn = MicrostrainPacketType.ADAPTIVE_EKF;
+   private MicrostrainPacketType packetTypeToReturn = MicrostrainPacketType.COMPLIMENTARY_FILTER;
 
    /* package-private */ MicroStrainIMUHandle(String name, Integer id)
    {
@@ -70,18 +70,18 @@ public class MicroStrainIMUHandle implements IMUHandle
       {
 	      linearAcceleration.set(microStrainData.getLinearAcceleration());
 	      isLinearAccelerationValid = microStrainData.isLinearAccelerationValid();
-	      if (packetTypeToReturn == MicrostrainPacketType.ORIGINAL)
+	      if (packetTypeToReturn == MicrostrainPacketType.COMPLIMENTARY_FILTER)
 	         linearAcceleration.scale(MicroStrainData.MICROSTRAIN_GRAVITY);
 	
 	      angularRate.set(microStrainData.getAngularRate());
 //	      MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD.transform(angularRate);
 	      isAngularRateValid = microStrainData.isAngularRateValid();
 	      
-	      quaternionConversionMatrix.set(microStrainData.getQuaternion());
+//	      quaternionConversionMatrix.set(microStrainData.getQuaternion());
 	      isOrientationQuaternionValid = microStrainData.isQuaternionValid();
-	      orientationMatrix.mul(MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD, quaternionConversionMatrix);
-	      RotationTools.setQuaternionBasedOnMatrix3d(orientation, orientationMatrix);
-//	      orientation.set(microStrainData.getQuaternion());
+//	      orientationMatrix.mul(MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD, quaternionConversionMatrix);
+//	      RotationTools.setQuaternionBasedOnMatrix3d(orientation, orientationMatrix);
+	      orientation.set(microStrainData.getQuaternion());
       }
    }
 
