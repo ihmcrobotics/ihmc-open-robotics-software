@@ -23,10 +23,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.valkyrieRosControl.dataHolders.YoForceTorqueSensorHandle;
-import us.ihmc.valkyrieRosControl.dataHolders.YoIMUHandleHolder;
-import us.ihmc.valkyrieRosControl.dataHolders.YoJointHandleHolder;
-import us.ihmc.valkyrieRosControl.dataHolders.YoMicroStrainIMUHandleHolder;
+import us.ihmc.valkyrieRosControl.dataHolders.*;
 
 public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactory
 {
@@ -101,6 +98,25 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
             {
                stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinition);
                System.err.println("Cannot create listener for IMU " + imuDefinition.getName() + ", cannot find corresponding serial in ValkyrieSensorNames");
+            }
+         }
+         else if(ValkyrieRosControlController.USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS)
+         {
+            String name = imuDefinition.getName();
+            name = name.replace(imuDefinition.getRigidBody().getName() + "_", "");
+
+            if(imuHandles.containsKey("CF" + name) && imuHandles.containsKey("EF" + name))
+            {
+               IMUHandle complimentaryFilterHandle =  imuHandles.get("CF" + name);
+               IMUHandle kalmanFilterHandle = imuHandles.get("EF" + name);
+
+               YoSwitchableFilterModeIMUHandleHolder holder = YoSwitchableFilterModeIMUHandleHolder.create(complimentaryFilterHandle, kalmanFilterHandle, imuDefinition, sensorReaderRegistry);
+               yoIMUHandleHolders.add(holder);
+               stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinition);
+            }
+            else
+            {
+               throw new RuntimeException("ValkyrieRosControlController.USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS set to true, but cannot find required CF and EF handle names required for this functionality.");
             }
          }
          else

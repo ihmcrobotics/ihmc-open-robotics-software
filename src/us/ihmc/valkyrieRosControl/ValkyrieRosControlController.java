@@ -63,6 +63,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
 			"rightShoulderYaw", "rightElbowPitch" };
    
 	public static final boolean USE_USB_MICROSTRAIN_IMUS = true;
+	public static final boolean USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS = false;
    private static final String[] readIMUs = USE_USB_MICROSTRAIN_IMUS ? new String[0] : new String[]{ ValkyrieSensorInformation.imuSensorsToUse[0].replace("pelvis_", "") };
    
    private static final String[] readForceTorqueSensors = { "leftFootSixAxis", "rightFootSixAxis" };
@@ -161,7 +162,17 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
       HashMap<String, IMUHandle> imuHandles = new HashMap<>();
       for(String imu : readIMUs)
       {
-         imuHandles.put(imu, createIMUHandle(imu));
+         if(USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS)
+         {
+            String complimentaryFilterHandleName = "CF" + imu;
+            String kalmanFilterHandleName = "EF" + imu;
+            imuHandles.put(complimentaryFilterHandleName, createIMUHandle(complimentaryFilterHandleName));
+            imuHandles.put(kalmanFilterHandleName, createIMUHandle(kalmanFilterHandleName));
+         }
+         else
+         {
+            imuHandles.put(imu, createIMUHandle(imu));
+         }
       }
       
       HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles = new HashMap<>();
