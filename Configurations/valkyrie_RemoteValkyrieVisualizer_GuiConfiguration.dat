@@ -126,7 +126,7 @@
 <Title>
 Startup
 </Title>
-<Entry Boxes>requestedHighLevelState,calibrateFootForceSensors</Entry Boxes>
+<Entry Boxes>requestedHighLevelState,calibrateFootForceSensors,alphaIMUAgainstKinematicsForVelocity,jointOutputEncoderVelocityAlphaFilter,jointInputEncoderVelocityAlphaFilter</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -176,6 +176,24 @@ HoldGains
 </Title>
 <Entry Boxes>kpXYLinearHoldFoot,kpXYAngularHoldFoot,kpZAngularHoldFoot</Entry Boxes>
 </EntryBoxTab>
+<EntryBoxTab>
+<Title>
+IMU
+</Title>
+<Entry Boxes>pelvis_pelvisRearImu_packetTypeToUse,cancelGravityFromAccelerationMeasurement,pelvis_pelvisMiddleImu_packetTypeToUse</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab10
+</Title>
+<Entry Boxes>kpXYLinearSwingFoot,kpZLinearSwingFoot,kpXYAngularSwingFoot,kpZAngularSwingFoot</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab11
+</Title>
+<Entry Boxes>userStepsToTake,userStepsTakeEm</Entry Boxes>
+</EntryBoxTab>
 </Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
@@ -183,11 +201,11 @@ HoldGains
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>2</Graph Array Window Size>
+<Graph Array Window Size>3</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
-<WindowLocation>5759.0, 0.0</WindowLocation>
-<WindowSize>1922.0, 1081.0</WindowSize>
+<WindowLocation>5760.0, 0.0</WindowLocation>
+<WindowSize>1920.0, 1080.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
@@ -373,8 +391,8 @@ HoldGains
 </GraphGroup>
 </Graph Array Window1><Graph Array Window2>
 <ScreenID>3</ScreenID>
-<WindowLocation>3840.0, 0.0</WindowLocation>
-<WindowSize>960.0, 1200.0</WindowSize>
+<WindowLocation>3843.0, 27.0</WindowLocation>
+<WindowSize>960.0, 1173.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
@@ -558,7 +576,98 @@ HoldGains
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-</Graph Array Window2>
+</Graph Array Window2><Graph Array Window3>
+<ScreenID>1</ScreenID>
+<WindowLocation>5760.0, 0.0</WindowLocation>
+<WindowSize>1920.0, 1080.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearAccelerationX</Variables>
+		<GraphConfiguration>
+			<Name>config41</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearAccelerationY</Variables>
+		<GraphConfiguration>
+			<Name>config42</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointPositionX,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityX</Variables>
+		<GraphConfiguration>
+			<Name>config43</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointPositionY,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityY</Variables>
+		<GraphConfiguration>
+			<Name>config44</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisRotationalStateUpdater.measFrameAngularVelocityX</Variables>
+		<GraphConfiguration>
+			<Name>config45</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisRotationalStateUpdater.measFrameAngularVelocityY</Variables>
+		<GraphConfiguration>
+			<Name>config46</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisRotationalStateUpdater.measFrameAngularVelocityZ</Variables>
+		<GraphConfiguration>
+			<Name>config47</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window3>
 
 <Extra Panels>
 <Main Viewport>

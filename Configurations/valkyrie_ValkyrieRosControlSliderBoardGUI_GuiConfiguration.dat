@@ -73,7 +73,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.FGYoFunGen.FGAmp</Variables>
+		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.SelectedYoFunGen.SelectedAmp,root.remotemain.ValkyrieRosControlSliderBoard.SecondaryYoFunGen.SecondaryAmp</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -85,9 +85,21 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.FGYoFunGen.FGFreq</Variables>
+		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.SelectedYoFunGen.SelectedFreq,root.remotemain.ValkyrieRosControlSliderBoard.SecondaryYoFunGen.SecondaryFreq</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.torsoPitch.torsoPitch_tau_d</Variables>
+		<GraphConfiguration>
+			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -102,7 +114,7 @@
 <Title>
 Tab0
 </Title>
-<Entry Boxes>selectedJoint,kpSelected,kdSelected,qDesiredSelected,FGMode,FGFreq,FGAmp</Entry Boxes>
+<Entry Boxes>selectedJoint,SelectedMode,secondaryJoint,SecondaryAmp,SelectedAmp,SecondaryMode</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -121,7 +133,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.leftShoulderPitch.leftShoulderPitch_tau,root.remotemain.ValkyrieRosControlSliderBoard.leftShoulderPitch.leftShoulderPitch_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config9</Name>
+			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -133,7 +145,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.leftHipYaw.leftHipYaw_tau,root.remotemain.ValkyrieRosControlSliderBoard.leftHipYaw.leftHipYaw_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config10</Name>
+			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -145,7 +157,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.rightHipYaw.rightHipYaw_tau,root.remotemain.ValkyrieRosControlSliderBoard.rightHipYaw.rightHipYaw_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config11</Name>
+			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -157,7 +169,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.rightShoulderPitch.rightShoulderPitch_tau,root.remotemain.ValkyrieRosControlSliderBoard.rightShoulderPitch.rightShoulderPitch_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config12</Name>
+			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -169,7 +181,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.leftShoulderRoll.leftShoulderRoll_tau,root.remotemain.ValkyrieRosControlSliderBoard.leftShoulderRoll.leftShoulderRoll_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config13</Name>
+			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -181,7 +193,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.leftHipRoll.leftHipRoll_tau,root.remotemain.ValkyrieRosControlSliderBoard.leftHipRoll.leftHipRoll_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config14</Name>
+			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -193,7 +205,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.rightHipRoll.rightHipRoll_tau,root.remotemain.ValkyrieRosControlSliderBoard.rightHipRoll.rightHipRoll_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config15</Name>
+			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -205,7 +217,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.rightShoulderRoll.rightShoulderRoll_tau,root.remotemain.ValkyrieRosControlSliderBoard.rightShoulderRoll.rightShoulderRoll_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config16</Name>
+			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -217,7 +229,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.leftShoulderYaw.leftShoulderYaw_tau,root.remotemain.ValkyrieRosControlSliderBoard.leftShoulderYaw.leftShoulderYaw_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config17</Name>
+			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -229,7 +241,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.leftHipPitch.leftHipPitch_tau,root.remotemain.ValkyrieRosControlSliderBoard.leftHipPitch.leftHipPitch_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config18</Name>
+			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -241,7 +253,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.rightHipPitch.rightHipPitch_tau,root.remotemain.ValkyrieRosControlSliderBoard.rightHipPitch.rightHipPitch_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config19</Name>
+			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -253,7 +265,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.rightShoulderYaw.rightShoulderYaw_tau,root.remotemain.ValkyrieRosControlSliderBoard.rightShoulderYaw.rightShoulderYaw_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config20</Name>
+			<Name>config21</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -265,7 +277,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.leftElbowPitch.leftElbowPitch_tau,root.remotemain.ValkyrieRosControlSliderBoard.leftElbowPitch.leftElbowPitch_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config21</Name>
+			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -277,7 +289,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.leftKneePitch.leftKneePitch_tau,root.remotemain.ValkyrieRosControlSliderBoard.leftKneePitch.leftKneePitch_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config22</Name>
+			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -289,7 +301,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.rightKneePitch.rightKneePitch_tau,root.remotemain.ValkyrieRosControlSliderBoard.rightKneePitch.rightKneePitch_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config23</Name>
+			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -301,7 +313,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.rightElbowPitch.rightElbowPitch_tau,root.remotemain.ValkyrieRosControlSliderBoard.rightElbowPitch.rightElbowPitch_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config24</Name>
+			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -313,7 +325,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.torsoYaw.torsoYaw_tau,root.remotemain.ValkyrieRosControlSliderBoard.torsoYaw.torsoYaw_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config25</Name>
+			<Name>config26</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -325,7 +337,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.leftAnklePitch.leftAnklePitch_tau,root.remotemain.ValkyrieRosControlSliderBoard.leftAnklePitch.leftAnklePitch_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config26</Name>
+			<Name>config27</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -337,7 +349,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.rightAnklePitch.rightAnklePitch_tau,root.remotemain.ValkyrieRosControlSliderBoard.rightAnklePitch.rightAnklePitch_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config27</Name>
+			<Name>config28</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -349,7 +361,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.torsoRoll.torsoRoll_tau,root.remotemain.ValkyrieRosControlSliderBoard.torsoRoll.torsoRoll_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config28</Name>
+			<Name>config29</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -361,7 +373,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.torsoPitch.torsoPitch_tau,root.remotemain.ValkyrieRosControlSliderBoard.torsoPitch.torsoPitch_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config29</Name>
+			<Name>config30</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -373,7 +385,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.leftAnkleRoll.leftAnkleRoll_tau,root.remotemain.ValkyrieRosControlSliderBoard.leftAnkleRoll.leftAnkleRoll_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config30</Name>
+			<Name>config31</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -385,7 +397,7 @@ Tab0
 	<Graph>
 		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.rightAnkleRoll.rightAnkleRoll_tau,root.remotemain.ValkyrieRosControlSliderBoard.rightAnkleRoll.rightAnkleRoll_tau_d</Variables>
 		<GraphConfiguration>
-			<Name>config31</Name>
+			<Name>config32</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -397,7 +409,7 @@ Tab0
 	<Graph>
 		<Variables></Variables>
 		<GraphConfiguration>
-			<Name>config32</Name>
+			<Name>config33</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -410,17 +422,53 @@ Tab0
 </Graph Array Window1><Graph Array Window2>
 <ScreenID>1</ScreenID>
 <WindowLocation>5760.0, 0.0</WindowLocation>
-<WindowSize>960.0, 1080.0</WindowSize>
+<WindowSize>1920.0, 1080.0</WindowSize>
 <GraphGroup>
-	<Cols>1</Cols>
+	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.remotemain.ValkyrieRosControlSliderBoard.tauSelected,root.remotemain.ValkyrieRosControlSliderBoard.tauDesiredSelected</Variables>
+		<Variables>valkyrie.qd_torsoPitch,root.remotemain.ValkyrieRosControlSliderBoard.torsoPitch.bl_qd_torsoPitchfiniteDifferenceVelocity</Variables>
 		<GraphConfiguration>
-			<Name>config33</Name>
+			<Name>config34</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>2.7026087545404054,</BaseLines>
+			<BaseLines>0.10184939903460405,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>valkyrie.qd_torsoRoll,root.remotemain.ValkyrieRosControlSliderBoard.torsoRoll.bl_qd_torsoRollfiniteDifferenceVelocity</Variables>
+		<GraphConfiguration>
+			<Name>config35</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.28707711594399626,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>valkyrie.q_torsoPitch</Variables>
+		<GraphConfiguration>
+			<Name>config36</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>-0.22999979896084105,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>valkyrie.q_torsoRoll</Variables>
+		<GraphConfiguration>
+			<Name>config37</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
 			<MaxScaling>1.0</MaxScaling>
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
@@ -435,9 +483,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>6.977364436396197</Camera X>
- <Camera Y>-2.703248534759429</Camera Y>
- <Camera Z>-0.3852982308558536</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -461,8 +509,8 @@ Tab0
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-0.02399575747832786</Fix X>
-<Fix Y>0.009296704627519196</Fix Y>
-<Fix Z>-0.11509568838854466</Fix Z>
+<Fix X>0.0</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.6</Fix Z>
 </Fix Position>
 </Canvas 1>
