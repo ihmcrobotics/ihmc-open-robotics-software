@@ -75,7 +75,18 @@ remotes
 {
 	valkyrieRealtimeComputer
 	{
-		host = '10.3.0.10'
+		host = '10.185.0.30'
+		
+		// Set the username and password in ~/.gradle/gradle.properties.
+        user = project.hasProperty('valkyrie_realtime_username')?"${valkyrie_realtime_username}":"invalid"
+        password = project.hasProperty('valkyrie_realtime_password')?"${valkyrie_realtime_password}":"invalid"
+        
+		knownHosts = allowAnyHosts
+	}
+	
+	valkyrieNonRealtimeComputer
+	{
+		host = '10.185.0.31'
 		
 		// Set the username and password in ~/.gradle/gradle.properties.
         user = project.hasProperty('valkyrie_realtime_username')?"${valkyrie_realtime_username}":"invalid"
@@ -198,7 +209,28 @@ task deploy(dependsOn: ['jar', 'mipsservermake']) {
 				{
 					execute 'chmod 777 ' + directory + '/' + it.name
 				}			
+			}
+			
+			session(remotes.valkyrieNonRealtimeComputer)
+			{
+				execute("mkdir -p " + directory + "/lib")
+				execute("mkdir -p " + directory + "/Configurations")
 				
+				configurations.runtime.each 
+				{
+					put it, directory + '/lib'
+				}
+				
+				put jar.archivePath, directory + '/ValkyrieController.jar'
+				
+				def scriptDir = new File(projectDir, "launchScripts/")
+				def scriptDirCollection = files { scriptDir.listFiles() }
+				put scriptDirCollection, directory
+				
+				scriptDirCollection.each
+				{
+					execute 'chmod 777 ' + directory + '/' + it.name
+				}
 			}
 			
 		}
