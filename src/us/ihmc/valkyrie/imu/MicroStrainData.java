@@ -8,7 +8,8 @@ import us.ihmc.concurrent.Builder;
 
 public class MicroStrainData
 {
-   public enum MicrostrainPacketType{ADAPTIVE_EKF, COMPLIMENTARY_FILTER}
+   public enum MicrostrainFilterType
+   {ADAPTIVE_EKF, COMPLIMENTARY_FILTER}
    
    public static final Matrix3d MICROSTRAIN_TO_ZUP_WORLD = new Matrix3d(1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0);
    public static final double MICROSTRAIN_GRAVITY = 9.80665; // MicroStrain's definition of g, as given on pg 64 of '3DM-GX3-15-25 MIP Data Communications Protocol'
@@ -24,16 +25,16 @@ public class MicroStrainData
    private boolean isQuaternionValid = false;
    private boolean isMatrixValid = false;
    
-   private MicrostrainPacketType packetType;
+   private MicrostrainFilterType filterType;
 
-   public MicrostrainPacketType getPacketType()
+   public MicrostrainFilterType getFilterType()
    {
-      return packetType;
+      return filterType;
    }
 
-   public void setPacketType(MicrostrainPacketType packetType)
+   public void setFilterType(MicrostrainFilterType filterType)
    {
-      this.packetType = packetType;
+      this.filterType = filterType;
    }
 
    public void setReceiveTime(long time)

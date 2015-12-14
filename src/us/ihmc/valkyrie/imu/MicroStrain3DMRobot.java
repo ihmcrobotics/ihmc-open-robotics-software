@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainPacketType;
+import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainFilterType;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 
 @SuppressWarnings("serial")
@@ -152,7 +152,7 @@ public class MicroStrain3DMRobot extends Robot
          @Override
          public void doControl()
          {
-            MicroStrainData data = listener.getLatestData(MicrostrainPacketType.COMPLIMENTARY_FILTER);
+            MicroStrainData data = listener.getLatestData(MicrostrainFilterType.COMPLIMENTARY_FILTER);
             robot.set(data.getLinearAcceleration(), data.getAngularRate(), data.getQuaternion());
             ThreadTools.sleep(1);
          }

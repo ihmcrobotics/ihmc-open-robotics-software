@@ -5,13 +5,13 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainPacketType;
+import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainFilterType;
 
 public class YoMicroStrainIMUHandleHolder extends YoIMUHandleHolder
 {
    private final MicroStrainIMUHandle microStrainIMUHandle;
 
-   private final EnumYoVariable<MicrostrainPacketType> packetTypeToUse;
+   private final EnumYoVariable<MicrostrainFilterType> filterTypeToUse;
 
    public static YoMicroStrainIMUHandleHolder create(int sensorId, IMUDefinition imuDefinition, YoVariableRegistry parentRegistry)
    {
@@ -23,17 +23,17 @@ public class YoMicroStrainIMUHandleHolder extends YoIMUHandleHolder
       super(handle, imuDefinition, parentRegistry);
       this.microStrainIMUHandle = handle;
 
-      packetTypeToUse = new EnumYoVariable<>(handle.getName() + "_packetTypeToUse", parentRegistry, MicrostrainPacketType.class);
+      filterTypeToUse = new EnumYoVariable<>(handle.getName() + "_filterTypeToUse", parentRegistry, MicrostrainFilterType.class);
 
-      packetTypeToUse.addVariableChangedListener(new VariableChangedListener()
+      filterTypeToUse.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            microStrainIMUHandle.setPacketTypeToReturn(packetTypeToUse.getEnumValue());
+            microStrainIMUHandle.setFilterTypeToReturn(filterTypeToUse.getEnumValue());
          }
       });
-      packetTypeToUse.set(MicrostrainPacketType.COMPLIMENTARY_FILTER);
+      filterTypeToUse.set(MicrostrainFilterType.COMPLIMENTARY_FILTER);
 
    }
 
