@@ -258,7 +258,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
       if (secondaryJoint.getOrdinal() != EnumYoVariable.NULL_VALUE)
       {
          JointHolder secondary = jointHolders.get(secondaryJoint.getOrdinal());
-         if (secondaryJoint.getEnumValue() != selectedJoint.getEnumValue())
+         if (secondaryJoint.getOrdinal() != selectedJoint.getOrdinal())
             secondary.tau_function.set(secondaryFunctionGenerator.getValue());
          tauFunctionSecondary.set(secondary.tau_function.getDoubleValue());
       }
