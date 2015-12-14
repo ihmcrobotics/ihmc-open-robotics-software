@@ -319,7 +319,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       return leftTrunkIMUSensor;
    }
 
-   public String getRearPelvisIMUSensor()
+   public static String getRearPelvisIMUSensor()
    {
       return rearPelvisIMUSensor;
    }
