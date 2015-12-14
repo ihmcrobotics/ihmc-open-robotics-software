@@ -30,8 +30,6 @@ import us.ihmc.valkyrieRosControl.dataHolders.YoMicroStrainIMUHandleHolder;
 
 public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactory
 {
-   private final static boolean USE_USB_MICROSTRAIN_IMUS = false;
-
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private ValkyrieRosControlSensorReader sensorReader;
 
@@ -88,7 +86,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
 
       for (IMUDefinition imuDefinition : imuDefinitions)
       {
-         if (USE_USB_MICROSTRAIN_IMUS)
+         if (ValkyrieRosControlController.USE_USB_MICROSTRAIN_IMUS)
          {
             HashMap<String, Integer> imuUSBSerialIds = sensorInformation.getImuUSBSerialIds();
             if (imuUSBSerialIds.containsKey(imuDefinition.getName()))
