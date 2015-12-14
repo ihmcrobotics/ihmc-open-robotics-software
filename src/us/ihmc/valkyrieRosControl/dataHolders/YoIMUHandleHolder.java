@@ -22,8 +22,6 @@ public class YoIMUHandleHolder
    private final DoubleYoVariable theta_x, theta_y, theta_z;
    private final DoubleYoVariable q_w, q_x, q_y, q_z;
    private final BooleanYoVariable isLinearAccelerationValid, isAngularRateValid, isOrientationMeasurementValid;
-   
-   private final EnumYoVariable<MicrostrainPacketType> packetTypeToUse;
 
    public YoIMUHandleHolder(IMUHandle handle, IMUDefinition imuDefinition, YoVariableRegistry parentRegistry)
    {
@@ -49,20 +47,6 @@ public class YoIMUHandleHolder
       isLinearAccelerationValid = new BooleanYoVariable(name + "_isLinearAccelerationValid", registry);
       isAngularRateValid = new BooleanYoVariable(name + "_isAngularRateValid", registry);
       isOrientationMeasurementValid = new BooleanYoVariable(name + "_isOrientationMeasurementValid", registry);
-      
-      packetTypeToUse = new EnumYoVariable<>(name+ "_packetTypeToUse", registry, MicrostrainPacketType.class);
-      
-      packetTypeToUse.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void variableChanged(YoVariable<?> v)
-         {
-            if(YoIMUHandleHolder.this.handle instanceof MicroStrainIMUHandle)
-            {
-               ((MicroStrainIMUHandle) YoIMUHandleHolder.this.handle).setPacketTypeToReturn(packetTypeToUse.getEnumValue());
-            }
-         }
-      });
       
       parentRegistry.addChild(registry);
       

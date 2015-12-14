@@ -66,7 +66,7 @@ public class MicrostrainUDPPacketListener implements Runnable
    private void readOriginalMIPPacketFields(ByteBuffer buffer)
    {
       MicroStrainData data = originalMIPMicrostrainBuffer.getCopyForWriting();
-      data.setPacketType(MicrostrainPacketType.ORIGINAL);
+      data.setPacketType(MicrostrainPacketType.COMPLIMENTARY_FILTER);
 
       long time = RealtimeThread.getCurrentMonotonicClockTime();
       data.setReceiveTime(time);
@@ -153,7 +153,7 @@ public class MicrostrainUDPPacketListener implements Runnable
       {
       case ADAPTIVE_EKF:
          return adaptiveEKFMicrostrainBuffer.getCopyForReading();
-      case ORIGINAL:
+      case COMPLIMENTARY_FILTER:
          return originalMIPMicrostrainBuffer.getCopyForReading();
       default:
          return null;

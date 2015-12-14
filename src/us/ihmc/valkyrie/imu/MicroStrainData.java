@@ -8,7 +8,7 @@ import us.ihmc.concurrent.Builder;
 
 public class MicroStrainData
 {
-   public enum MicrostrainPacketType{ADAPTIVE_EKF, ORIGINAL}
+   public enum MicrostrainPacketType{ADAPTIVE_EKF, COMPLIMENTARY_FILTER}
    
    public static final Matrix3d MICROSTRAIN_TO_ZUP_WORLD = new Matrix3d(1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0);
    public static final double MICROSTRAIN_GRAVITY = 9.80665; // MicroStrain's definition of g, as given on pg 64 of '3DM-GX3-15-25 MIP Data Communications Protocol'
