@@ -11,7 +11,6 @@ import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Point2f;
-import javax.vecmath.Point3d;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -25,7 +24,8 @@ import org.opencv.imgproc.Moments;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.ihmcPerception.OpenCVTools;
+import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 import us.ihmc.tools.time.Timer;
 
@@ -39,9 +39,9 @@ public class ColorBlobDetector
       NativeLibraryLoader.loadLibrary("org.opencv", "opencv_java2411");
    }
 
-   public static final Point3d TIGA_ORANGE_PING_PONG_BALL = new Point3d(55, 71, 95);
-   public static final HueSaturationValueRange TIGA_ORANGE_PING_PONG_BALL_HSV_RANGE = new HueSaturationValueRange(25, 50, 150, 255, 150, 255);
-   public static final int TIGA_ORANGE_PING_PONG_BALL_SIZE = 7;
+   public static final HueSaturationValueRange TIGA_ORANGE_PING_PONG_BALL_HSV_RANGE_MAC = new HueSaturationValueRange(21, 27, 130, 230, 180, 255);
+   public static final HueSaturationValueRange TIGA_ORANGE_PING_PONG_BALL_HSV_RANGE_KINECT = new HueSaturationValueRange(15, 50, 130, 230, 180, 255);
+   public static final int TIGA_ORANGE_PING_PONG_BALL_SIZE = 5;
    
    public static Mat convertBufferedImageToHSV(BufferedImage bufferedImage)
    {
@@ -144,11 +144,32 @@ public class ColorBlobDetector
    {
       VideoCapture videoCapture = new VideoCapture(0);
       ImagePanel imagePanel = null;
+      ImagePanel imagePanel2 = null;
+      ImagePanel imagePanel3 = null;
+      ImagePanel imagePanel4 = null;
       Mat image = new Mat();
       MatOfByte matOfByte = new MatOfByte();
       Timer blobTimer = new Timer().start();
-      HueSaturationValueRange hsvRange = ColorBlobDetector.TIGA_ORANGE_PING_PONG_BALL_HSV_RANGE;
+      HueSaturationValueRange hsvRange;
+      if (args.length > 1)
+      {
+         double minHue = Double.valueOf(args[1]);
+         double maxHue = Double.valueOf(args[2]);
+         double minSaturation = Double.valueOf(args[3]);
+         double maxSaturation = Double.valueOf(args[4]);
+         double minValue = Double.valueOf(args[5]);
+         double maxValue = Double.valueOf(args[6]);
+         hsvRange = new HueSaturationValueRange(minHue, maxHue, minSaturation, maxSaturation, minValue, maxValue);
+      }
+      else
+      {
+         hsvRange = TIGA_ORANGE_PING_PONG_BALL_HSV_RANGE_MAC;
+      }
       int size = ColorBlobDetector.TIGA_ORANGE_PING_PONG_BALL_SIZE;
+      BufferedImage bufferedImage2 = null;
+      BufferedImage bufferedImage3 = null;
+      BufferedImage bufferedImage4 = null;
+      long count = 0;
       
       while (true)
       {
@@ -158,28 +179,62 @@ public class ColorBlobDetector
          BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(matOfByte.toArray()));
          
          blobTimer.lap();
-         
+
+         OpenCVTools.resizeImage(image, 0.5);
          convertImageFromBGRToHSV(image, image);
+         bufferedImage3 = OpenCVTools.convertMatToBufferedImage(image);
          thresholdImage(image, image, hsvRange);
+         bufferedImage4 = OpenCVTools.convertMatToBufferedImage(image);
          morphologicallyOpen(image, size);
          morphologicallyClose(image, size);
+         bufferedImage2 = OpenCVTools.convertMatToBufferedImage(image);
          Point2f ballLocation = findBlobFromThresholdImage(image);
          
-         PrintTools.info("Blob time: " + blobTimer.lapElapsed() + " Blob location: " + ballLocation);
+         if (count++ % 10 == 0)
+         {
+            String timeStr = String.valueOf(FormattingTools.roundToSignificantFigures(blobTimer.lapElapsed(), 2));
+            String xStr = String.valueOf(FormattingTools.roundToSignificantFigures(ballLocation.x, 2));
+            String yStr = String.valueOf(FormattingTools.roundToSignificantFigures(ballLocation.y, 2));
+            System.out.println("imgx: " + bufferedImage.getWidth() + " imgy: " + bufferedImage.getHeight() + " time: " + timeStr + " x: " + xStr + " y: " + yStr);
+         }
          
          Graphics2D g2d = bufferedImage.createGraphics();
          g2d.setStroke(new BasicStroke(3));
          g2d.setColor(Color.BLUE);
-         g2d.drawOval((int) (ballLocation.x * bufferedImage.getWidth()), (int) (ballLocation.y * bufferedImage.getHeight()), 5, 5);
+         g2d.drawOval((int) (ballLocation.x * bufferedImage.getWidth()), (int) ((1.0 - ballLocation.y) * bufferedImage.getHeight()), 5, 5);
          g2d.dispose();
          
          if (imagePanel == null)
          {
-            imagePanel = ShowImages.showWindow(bufferedImage, "faces");
+            imagePanel = ShowImages.showWindow(bufferedImage, "video");
          }
          else
          {
             imagePanel.setBufferedImageSafe(bufferedImage);
+         }
+         if (imagePanel2 == null)
+         {
+            imagePanel2 = ShowImages.showWindow(bufferedImage2, "morph");
+         }
+         else if (bufferedImage2 != null)
+         {
+            imagePanel2.setBufferedImageSafe(bufferedImage2);
+         }
+         if (imagePanel3 == null)
+         {
+            imagePanel3 = ShowImages.showWindow(bufferedImage3, "hue");
+         }
+         else if (bufferedImage3 != null)
+         {
+            imagePanel3.setBufferedImageSafe(bufferedImage3);
+         }
+         if (imagePanel4 == null)
+         {
+            imagePanel4 = ShowImages.showWindow(bufferedImage4, "thres");
+         }
+         else if (bufferedImage4 != null)
+         {
+            imagePanel4.setBufferedImageSafe(bufferedImage4);
          }
       }
    }
