@@ -8,10 +8,9 @@ import javax.vecmath.Vector3d;
 
 import com.esotericsoftware.minlog.Log;
 
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.rosControl.valkyrie.IMUHandle;
 import us.ihmc.valkyrie.imu.MicroStrainData;
-import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainPacketType;
+import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainFilterType;
 import us.ihmc.valkyrie.imu.MicrostrainUDPPacketListener;
 import us.ihmc.valkyrieRosControl.ValkyriePriorityParameters;
 
@@ -34,7 +33,7 @@ public class MicroStrainIMUHandle implements IMUHandle
    private Matrix3d quaternionConversionMatrix = new Matrix3d();
    private final Matrix3d orientationMatrix = new Matrix3d();
    
-   private MicrostrainPacketType packetTypeToReturn = MicrostrainPacketType.COMPLIMENTARY_FILTER;
+   private MicrostrainFilterType filterTypeToReturn = MicrostrainFilterType.COMPLIMENTARY_FILTER;
 
    /* package-private */ MicroStrainIMUHandle(String name, Integer id)
    {
@@ -52,25 +51,25 @@ public class MicroStrainIMUHandle implements IMUHandle
       }
    }
    
-   public MicrostrainPacketType getPacketTypeToReturn()
+   public MicrostrainFilterType getFilterTypeToReturn()
    {
-      return packetTypeToReturn;
+      return filterTypeToReturn;
    }
 
-   public void setPacketTypeToReturn(MicrostrainPacketType packetTypeToReturn)
+   public void setFilterTypeToReturn(MicrostrainFilterType filterTypeToReturn)
    {
-      this.packetTypeToReturn = packetTypeToReturn;
+      this.filterTypeToReturn = filterTypeToReturn;
    }
 
    public void update()
    {
-      microStrainData = imuListener.getLatestData(packetTypeToReturn);
+      microStrainData = imuListener.getLatestData(filterTypeToReturn);
 
       if(microStrainData != null)
       {
 	      linearAcceleration.set(microStrainData.getLinearAcceleration());
 	      isLinearAccelerationValid = microStrainData.isLinearAccelerationValid();
-	      if (packetTypeToReturn == MicrostrainPacketType.COMPLIMENTARY_FILTER)
+	      if (filterTypeToReturn == MicrostrainFilterType.COMPLIMENTARY_FILTER)
 	         linearAcceleration.scale(MicroStrainData.MICROSTRAIN_GRAVITY);
 	
 	      angularRate.set(microStrainData.getAngularRate());

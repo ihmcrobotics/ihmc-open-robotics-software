@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
-import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainPacketType;
+import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainFilterType;
 
 public class MicrostrainUDPPacketListener implements Runnable
 {
@@ -66,7 +66,7 @@ public class MicrostrainUDPPacketListener implements Runnable
    private void readOriginalMIPPacketFields(ByteBuffer buffer)
    {
       MicroStrainData data = originalMIPMicrostrainBuffer.getCopyForWriting();
-      data.setPacketType(MicrostrainPacketType.COMPLIMENTARY_FILTER);
+      data.setFilterType(MicrostrainFilterType.COMPLIMENTARY_FILTER);
 
       long time = RealtimeThread.getCurrentMonotonicClockTime();
       data.setReceiveTime(time);
@@ -101,7 +101,7 @@ public class MicrostrainUDPPacketListener implements Runnable
    private void readKalmanFilteredPacketFields(ByteBuffer buffer)
    {
       MicroStrainData data = adaptiveEKFMicrostrainBuffer.getCopyForWriting();
-      data.setPacketType(MicrostrainPacketType.ADAPTIVE_EKF);
+      data.setFilterType(MicrostrainFilterType.ADAPTIVE_EKF);
 
       long time = RealtimeThread.getCurrentMonotonicClockTime();
       data.setReceiveTime(time);
@@ -147,7 +147,7 @@ public class MicrostrainUDPPacketListener implements Runnable
       return isValid == 0x0001 ? true : false;
    }
 
-   public MicroStrainData getLatestData(MicrostrainPacketType packetType)
+   public MicroStrainData getLatestData(MicrostrainFilterType packetType)
    {
       switch(packetType)
       {
