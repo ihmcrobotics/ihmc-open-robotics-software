@@ -28,7 +28,7 @@ public class QuadrupedPositionBasedCrawlSliderBoardConfiguration
       });
       
       //CoM Shift tuning
-      sliderBoardConfigurationManager.setSlider(1, "desiredBodyVelocityX", scs, 0.0, 0.55);
+      sliderBoardConfigurationManager.setSlider(1, "desiredBodyVelocityX", scs, -0.4, 0.4);
       sliderBoardConfigurationManager.setSlider(2, "desiredBodyVelocityY", scs, -0.5, 0.5);
       sliderBoardConfigurationManager.setSlider(3, "desiredYawRate", scs, -Math.PI/2.0, Math.PI/2.0);
       sliderBoardConfigurationManager.setSlider(4, "desiredCoMHeight", scs, 0.0, 1.0);
@@ -39,8 +39,8 @@ public class QuadrupedPositionBasedCrawlSliderBoardConfiguration
       
       
       //footstep chooser tuning
-      sliderBoardConfigurationManager.setKnob(1, "desiredVelocityX", scs, 0.0, 0.55);
-      sliderBoardConfigurationManager.setKnob(2, "desiredVelocityY", scs, -0.5, 0.5);
+      sliderBoardConfigurationManager.setKnob(1, "desiredBodyVelocityX", scs, 0.0, 0.55);
+      sliderBoardConfigurationManager.setKnob(2, "desiredBodyVelocityY", scs, -0.5, 0.5);
       sliderBoardConfigurationManager.setKnob(3, "desiredYawRate", scs, -Math.PI/2.0, Math.PI/2.0);
       sliderBoardConfigurationManager.setKnob(4, "desiredCoMHeight", scs, 0.0, 1.0);
       sliderBoardConfigurationManager.setKnob(5, "subCircleRadius", scs, 0.0, 0.3);
@@ -58,8 +58,8 @@ public class QuadrupedPositionBasedCrawlSliderBoardConfiguration
       sliderBoardConfigurationManager.saveConfiguration(positionCrawlFootstepChooser);
       
       //orientation tuning
-      sliderBoardConfigurationManager.setKnob(1, "desiredVelocityX", scs, 0.0, 0.55);
-      sliderBoardConfigurationManager.setKnob(2, "desiredVelocityY", scs, -0.5, 0.5);
+      sliderBoardConfigurationManager.setKnob(1, "desiredBodyVelocityX", scs, 0.0, 0.55);
+      sliderBoardConfigurationManager.setKnob(2, "desiredBodyVelocityY", scs, -0.5, 0.5);
       sliderBoardConfigurationManager.setKnob(4, "desiredCoMHeight", scs, 0.0, 1.0);
       sliderBoardConfigurationManager.setSliderEnum(8, selectedMode);
       
