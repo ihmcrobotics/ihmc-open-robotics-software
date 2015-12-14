@@ -1,9 +1,8 @@
 package us.ihmc.multicastLogDataProtocol.broadcast;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -18,6 +17,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
+
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class LogSessionDisplay extends JFrame
 {
@@ -84,10 +85,7 @@ public class LogSessionDisplay extends JFrame
       getContentPane().add(table.getTableHeader());
       getContentPane().add(scroller);
       pack();
-
    }
-
-
 
    private static String ipToString(byte[] address)
    {
@@ -161,6 +159,7 @@ public class LogSessionDisplay extends JFrame
          {
             display.start();
             display.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            PrintTools.info("Showing");
             display.setVisible(true);
          }
       });
@@ -197,7 +196,7 @@ public class LogSessionDisplay extends JFrame
       
       public LogSessionCallback(NetworkInterface iface)
       {
-         System.out.println("Listening on interface " + iface);
+         PrintTools.info(LogSessionCallback.class, "Listening on interface " + iface);
          this.iface = iface;
       }
 
@@ -226,7 +225,7 @@ public class LogSessionDisplay extends JFrame
                      return;
                   }
                }
-               System.out.println(description);
+               PrintTools.info(description.getName() + " came online");
                model.addRow(new Object[] { name, description, iface, controlIpDisplay, port, group, dataPort });
 
             }

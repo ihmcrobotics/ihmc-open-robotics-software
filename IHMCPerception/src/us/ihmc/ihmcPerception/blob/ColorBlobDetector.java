@@ -8,21 +8,14 @@ import java.awt.image.DataBufferByte;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.vecmath.Point2i;
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
+import javax.vecmath.Point2f;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
@@ -31,7 +24,8 @@ import org.opencv.imgproc.Moments;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.ihmcPerception.OpenCVTools;
+import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 import us.ihmc.tools.time.Timer;
 
@@ -45,26 +39,9 @@ public class ColorBlobDetector
       NativeLibraryLoader.loadLibrary("org.opencv", "opencv_java2411");
    }
 
-   public static final Point3d TIGA_ORANGE_PING_PONG_BALL = new Point3d(55, 71, 95);
-   public static final HueSaturationValueRange TIGA_ORANGE_PING_PONG_BALL_HSV_RANGE = new HueSaturationValueRange(25, 50, 150, 255, 150, 255);
+   public static final HueSaturationValueRange TIGA_ORANGE_PING_PONG_BALL_HSV_RANGE_MAC = new HueSaturationValueRange(21, 27, 130, 230, 180, 255);
+   public static final HueSaturationValueRange TIGA_ORANGE_PING_PONG_BALL_HSV_RANGE_KINECT = new HueSaturationValueRange(15, 50, 130, 230, 180, 255);
    public static final int TIGA_ORANGE_PING_PONG_BALL_SIZE = 5;
-   
-   // Lower and Upper bounds for range checking in HSV color space
-   private Scalar mLowerBound = new Scalar(0);
-   private Scalar mUpperBound = new Scalar(0);
-   // Minimum contour area in percent for contours filtering
-   private static double mMinContourArea = 0.1;
-   // Color radius for range checking in HSV color space
-   private Scalar mColorRadius = new Scalar(25, 50, 50, 0);
-   private Mat mSpectrum = new Mat();
-   private List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
-
-   // Cache
-   Mat mPyrDownMat = new Mat();
-   Mat mHsvMat = new Mat();
-   Mat mMask = new Mat();
-   Mat mDilatedMask = new Mat();
-   Mat mHierarchy = new Mat();
    
    public static Mat convertBufferedImageToHSV(BufferedImage bufferedImage)
    {
@@ -121,7 +98,7 @@ public class ColorBlobDetector
       Imgproc.erode(hsvImage, hsvImage, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(size, size)));
    }
    
-   public static Point2i findBlobFromThresholdImage(Mat thresholdedImage)
+   public static Point2f findBlobFromThresholdImage(Mat thresholdedImage)
    {
       Moments moments = Imgproc.moments(thresholdedImage);
       
@@ -129,7 +106,15 @@ public class ColorBlobDetector
       double m10 = moments.get_m10();
       double area = moments.get_m00();
       
-      Point2i blobPosition = new Point2i((int) (m10 / area), (int) (m01 / area));
+      Point2f blobPosition;
+      if (m01 != 0.0 && m10 != 0.0 && area != 0.0 && thresholdedImage.width() != 0 && thresholdedImage.height() != 0)
+      {
+         blobPosition = new Point2f((float) (m10 / area / (double) thresholdedImage.width()), (float) (1.0 - m01 / area / (double) thresholdedImage.height()));
+      }
+      else
+      {
+         blobPosition = new Point2f();
+      }
       
       return blobPosition;
    }
@@ -137,7 +122,7 @@ public class ColorBlobDetector
    /**
     * Taken from: http://opencv-srf.blogspot.com/2010/09/object-detection-using-color-seperation.html
     */
-   public static Point2i findBlob(BufferedImage bufferedImage, HueSaturationValueRange hsvRange, int size)
+   public static Point2f findBlob(BufferedImage bufferedImage, HueSaturationValueRange hsvRange, int size)
    {
       Mat image = convertBufferedImageToHSV(bufferedImage);
       thresholdImage(image, image, hsvRange);
@@ -146,7 +131,7 @@ public class ColorBlobDetector
       return findBlobFromThresholdImage(image);
    }
    
-   public static Point2i findBlob(Mat image, HueSaturationValueRange hsvRange, int size)
+   public static Point2f findBlob(Mat image, HueSaturationValueRange hsvRange, int size)
    {
       convertImageFromRGBToHSV(image, image);
       thresholdImage(image, image, hsvRange);
@@ -154,148 +139,102 @@ public class ColorBlobDetector
       morphologicallyClose(image, size);
       return findBlobFromThresholdImage(image);
    }
-
-   public void setColorRadius(Scalar radius)
-   {
-      mColorRadius = radius;
-   }
-
-   public void setHsvColor(Tuple3d hsvColor)
-   {
-      double minH = (hsvColor.getX() >= mColorRadius.val[0]) ? hsvColor.getX() - mColorRadius.val[0] : 0;
-      double maxH = (hsvColor.getX() + mColorRadius.val[0] <= 255) ? hsvColor.getX() + mColorRadius.val[0] : 255;
-
-      mLowerBound.val[0] = minH;
-      mUpperBound.val[0] = maxH;
-
-      mLowerBound.val[1] = hsvColor.getY() - mColorRadius.val[1];
-      mUpperBound.val[1] = hsvColor.getY() + mColorRadius.val[1];
-
-      mLowerBound.val[2] = hsvColor.getZ() - mColorRadius.val[2];
-      mUpperBound.val[2] = hsvColor.getZ() + mColorRadius.val[2];
-
-      mLowerBound.val[3] = 0;
-      mUpperBound.val[3] = 255;
-
-      Mat spectrumHsv = new Mat(1, (int) (maxH - minH), CvType.CV_8UC3);
-
-      for (int j = 0; j < maxH - minH; j++)
-      {
-         byte[] tmp = { (byte) (minH + j), (byte) 255, (byte) 255 };
-         spectrumHsv.put(0, j, tmp);
-      }
-
-      Imgproc.cvtColor(spectrumHsv, mSpectrum, Imgproc.COLOR_HSV2RGB_FULL, 4);
-   }
-
-   public Mat getSpectrum()
-   {
-      return mSpectrum;
-   }
-
-   public void setMinContourArea(double area)
-   {
-      mMinContourArea = area;
-   }
-
-   public List<MatOfPoint> process(Mat rgbaImage)
-   {
-      Imgproc.pyrDown(rgbaImage, mPyrDownMat);
-      Imgproc.pyrDown(mPyrDownMat, mPyrDownMat);
-
-      Imgproc.cvtColor(mPyrDownMat, mHsvMat, Imgproc.COLOR_RGB2HSV_FULL);
-
-      Core.inRange(mHsvMat, mLowerBound, mUpperBound, mMask);
-      Imgproc.dilate(mMask, mDilatedMask, new Mat());
-
-      List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-
-      Imgproc.findContours(mDilatedMask, contours, mHierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-
-      // Find max contour area
-      double maxArea = 0;
-      Iterator<MatOfPoint> each = contours.iterator();
-      while (each.hasNext())
-      {
-         MatOfPoint wrapper = each.next();
-         double area = Imgproc.contourArea(wrapper);
-         if (area > maxArea)
-            maxArea = area;
-      }
-
-      // Filter contours by area and resize to fit the original image size
-      mContours.clear();
-      each = contours.iterator();
-      while (each.hasNext())
-      {
-         MatOfPoint contour = each.next();
-         if (Imgproc.contourArea(contour) > mMinContourArea * maxArea)
-         {
-            Core.multiply(contour, new Scalar(4, 4), contour);
-            mContours.add(contour);
-         }
-      }
-      
-//      List<Point3d> pointList = new ArrayList<Point3d>();
-//      for (MatOfPoint points : mContours)
-//      {
-//         for (int i = 0; i < points.height(); i++)
-//         {
-//            pointList.add(new Point3d(points.get(i, 0),(double) points.get(i, 1),(double) points.get(i, 2)));
-//         }
-//      }
-      
-      PrintTools.info("mContours.size(): " + mContours.size());
-      
-      return mContours;
-   }
-
-   public List<MatOfPoint> getContours()
-   {
-      return mContours;
-   }
    
    public static void main(String[] args) throws IOException
    {
       VideoCapture videoCapture = new VideoCapture(0);
       ImagePanel imagePanel = null;
+      ImagePanel imagePanel2 = null;
+      ImagePanel imagePanel3 = null;
+      ImagePanel imagePanel4 = null;
       Mat image = new Mat();
       MatOfByte matOfByte = new MatOfByte();
       Timer blobTimer = new Timer().start();
-      HueSaturationValueRange hsvRange = ColorBlobDetector.TIGA_ORANGE_PING_PONG_BALL_HSV_RANGE;
+      HueSaturationValueRange hsvRange;
+      if (args.length > 1)
+      {
+         double minHue = Double.valueOf(args[1]);
+         double maxHue = Double.valueOf(args[2]);
+         double minSaturation = Double.valueOf(args[3]);
+         double maxSaturation = Double.valueOf(args[4]);
+         double minValue = Double.valueOf(args[5]);
+         double maxValue = Double.valueOf(args[6]);
+         hsvRange = new HueSaturationValueRange(minHue, maxHue, minSaturation, maxSaturation, minValue, maxValue);
+      }
+      else
+      {
+         hsvRange = TIGA_ORANGE_PING_PONG_BALL_HSV_RANGE_MAC;
+      }
       int size = ColorBlobDetector.TIGA_ORANGE_PING_PONG_BALL_SIZE;
+      BufferedImage bufferedImage2 = null;
+      BufferedImage bufferedImage3 = null;
+      BufferedImage bufferedImage4 = null;
+      long count = 0;
       
       while (true)
       {
          videoCapture.read(image);
 
-         
          Highgui.imencode(".bmp", image, matOfByte);
          BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(matOfByte.toArray()));
          
          blobTimer.lap();
-         
+
+         OpenCVTools.resizeImage(image, 0.5);
          convertImageFromBGRToHSV(image, image);
+         bufferedImage3 = OpenCVTools.convertMatToBufferedImage(image);
          thresholdImage(image, image, hsvRange);
+         bufferedImage4 = OpenCVTools.convertMatToBufferedImage(image);
          morphologicallyOpen(image, size);
          morphologicallyClose(image, size);
-         Point2i ballLocation = findBlobFromThresholdImage(image);
+         bufferedImage2 = OpenCVTools.convertMatToBufferedImage(image);
+         Point2f ballLocation = findBlobFromThresholdImage(image);
          
-         PrintTools.info("Blob time: " + blobTimer.lapElapsed() + " Blob location: " + ballLocation);
+         if (count++ % 10 == 0)
+         {
+            String timeStr = String.valueOf(FormattingTools.roundToSignificantFigures(blobTimer.lapElapsed(), 2));
+            String xStr = String.valueOf(FormattingTools.roundToSignificantFigures(ballLocation.x, 2));
+            String yStr = String.valueOf(FormattingTools.roundToSignificantFigures(ballLocation.y, 2));
+            System.out.println("imgx: " + bufferedImage.getWidth() + " imgy: " + bufferedImage.getHeight() + " time: " + timeStr + " x: " + xStr + " y: " + yStr);
+         }
          
          Graphics2D g2d = bufferedImage.createGraphics();
          g2d.setStroke(new BasicStroke(3));
          g2d.setColor(Color.BLUE);
-         g2d.drawOval(ballLocation.x, ballLocation.y, 5, 5);
+         g2d.drawOval((int) (ballLocation.x * bufferedImage.getWidth()), (int) ((1.0 - ballLocation.y) * bufferedImage.getHeight()), 5, 5);
          g2d.dispose();
          
          if (imagePanel == null)
          {
-            imagePanel = ShowImages.showWindow(bufferedImage, "faces");
+            imagePanel = ShowImages.showWindow(bufferedImage, "video");
          }
          else
          {
             imagePanel.setBufferedImageSafe(bufferedImage);
+         }
+         if (imagePanel2 == null)
+         {
+            imagePanel2 = ShowImages.showWindow(bufferedImage2, "morph");
+         }
+         else if (bufferedImage2 != null)
+         {
+            imagePanel2.setBufferedImageSafe(bufferedImage2);
+         }
+         if (imagePanel3 == null)
+         {
+            imagePanel3 = ShowImages.showWindow(bufferedImage3, "hue");
+         }
+         else if (bufferedImage3 != null)
+         {
+            imagePanel3.setBufferedImageSafe(bufferedImage3);
+         }
+         if (imagePanel4 == null)
+         {
+            imagePanel4 = ShowImages.showWindow(bufferedImage4, "thres");
+         }
+         else if (bufferedImage4 != null)
+         {
+            imagePanel4.setBufferedImageSafe(bufferedImage4);
          }
       }
    }

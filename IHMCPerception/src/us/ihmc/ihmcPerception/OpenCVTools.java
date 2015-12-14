@@ -11,7 +11,9 @@ import javax.imageio.ImageIO;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
+import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
 
 public class OpenCVTools
 {
@@ -56,5 +58,10 @@ public class OpenCVTools
       }
       
       return bufferedImage;
+   }
+   
+   public static void resizeImage(Mat image, double scaleFactor)
+   {
+      Imgproc.resize(image, image, new Size((int) (image.width() * scaleFactor), (int) (image.height() * scaleFactor)));
    }
 }
