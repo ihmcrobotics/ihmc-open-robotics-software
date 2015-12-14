@@ -3,15 +3,13 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.rosControl.valkyrie.IMUHandle;
-import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainPacketType;
+
 
 public class YoIMUHandleHolder
 {
