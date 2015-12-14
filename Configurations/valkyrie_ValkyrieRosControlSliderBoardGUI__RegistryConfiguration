@@ -2,7 +2,8 @@ root*false*false
 root.valkyrie*false*false
 root.remotemain*false*false
 root.remotemain.ValkyrieRosControlSliderBoard*false*false
-root.remotemain.ValkyrieRosControlSliderBoard.FGYoFunGen*false*false
+root.remotemain.ValkyrieRosControlSliderBoard.SelectedYoFunGen*false*false
+root.remotemain.ValkyrieRosControlSliderBoard.SecondaryYoFunGen*false*false
 root.remotemain.ValkyrieRosControlSliderBoard.leftHipYaw*false*false
 root.remotemain.ValkyrieRosControlSliderBoard.leftHipRoll*false*false
 root.remotemain.ValkyrieRosControlSliderBoard.leftHipPitch*false*false
