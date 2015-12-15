@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.roughTerrainWalking.AtlasFootExplorationTest.class
+   us.ihmc.atlas.behaviorTests.AtlasRotateHandAboutAxisBehaviorTest.class
 })
 
 public class AtlasIInDevelopmentTestSuite

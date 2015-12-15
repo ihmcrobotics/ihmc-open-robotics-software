@@ -9,13 +9,14 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Slow)
+@TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasRemoveMultipleDebrisBehaviorTest.class
+   us.ihmc.atlas.AtlasPushRecoveryMultiStepTest.class,
+   us.ihmc.atlas.posePlayback.AtlasPlaybackPoseSequenceTest.class
 })
 
-public class AtlasDSlowTestSuite
+public class AtlasNFastTestSuite
 {
    public static void main(String[] args)
    {
