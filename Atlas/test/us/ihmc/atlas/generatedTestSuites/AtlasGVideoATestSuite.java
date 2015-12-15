@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.VideoA)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseFlatTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRampsTest.class
 })
 
 public class AtlasGVideoATestSuite

@@ -12,7 +12,9 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasDrillPickUpBehaviorTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseWholeBodyTrajectoryTest.class
 })
 
 public class AtlasJInDevelopmentTestSuite
