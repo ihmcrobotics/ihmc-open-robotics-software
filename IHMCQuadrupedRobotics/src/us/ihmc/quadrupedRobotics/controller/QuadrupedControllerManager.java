@@ -59,7 +59,7 @@ public class QuadrupedControllerManager implements RobotController
             sdfFullRobotModel, stateEstimator, inverseKinematicsCalculators, globalDataProducer, robotTimestamp, registry, yoGraphicsListRegistry,
             yoGraphicsListRegistryForDetachedOverhead);
 
-      QuadrupedSliderBoardController sliderBoardController = new QuadrupedSliderBoardController(sdfFullRobotModel, registry);
+      QuadrupedLegJointSliderBoardController sliderBoardController = new QuadrupedLegJointSliderBoardController(sdfFullRobotModel, registry);
 
       stateMachine.addState(standPrepController);
       stateMachine.addState(standReadyController);

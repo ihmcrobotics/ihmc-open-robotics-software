@@ -11,18 +11,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QuadrupedSliderBoardController extends QuadrupedController
+public class QuadrupedLegJointSliderBoardController extends QuadrupedController
 {
    private final YoVariableRegistry sliderBoardRegistry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final SDFFullRobotModel fullRobotModel;
 
    private final Map<String, OneDoFJoint> jointMap;
    private final ArrayList<String> jointMapKeySet = new ArrayList<>();
 
    private final Map<String, AlphaFilteredYoVariable> alphaFilteredQDesiredMap = new HashMap<>();
 
-   public QuadrupedSliderBoardController(SDFFullRobotModel fullRobotModel, YoVariableRegistry registry)
+   public QuadrupedLegJointSliderBoardController(SDFFullRobotModel fullRobotModel, YoVariableRegistry registry)
    {
       super(QuadrupedControllerState.SLIDER_BOARD);
+      this.fullRobotModel = fullRobotModel;
       registry.addChild(sliderBoardRegistry);
 
       jointMap = fullRobotModel.getOneDoFJointsAsMap();
@@ -39,7 +42,7 @@ public class QuadrupedSliderBoardController extends QuadrupedController
 
    @Override public RobotMotionStatus getMotionStatus()
    {
-      return null;
+      return RobotMotionStatus.STANDING;
    }
 
    @Override public void doAction()
@@ -48,13 +51,17 @@ public class QuadrupedSliderBoardController extends QuadrupedController
       {
          AlphaFilteredYoVariable alphaFilteredYoVariable = alphaFilteredQDesiredMap.get(jointMapKeySet.get(i));
          alphaFilteredYoVariable.update();
-         jointMap.get(jointMapKeySet.get(i)).setQ(alphaFilteredYoVariable.getDoubleValue());
+         jointMap.get(jointMapKeySet.get(i)).setqDesired(alphaFilteredYoVariable.getDoubleValue());
       }
    }
 
    @Override public void doTransitionIntoAction()
    {
-
+      for(OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      {
+         joint.setUnderPositionControl(true);
+         joint.setqDesired(joint.getQ());
+      }
    }
 
    @Override public void doTransitionOutOfAction()
