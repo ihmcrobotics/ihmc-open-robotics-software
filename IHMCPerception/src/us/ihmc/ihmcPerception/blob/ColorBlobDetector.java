@@ -41,6 +41,9 @@ public class ColorBlobDetector
 
    public static final HueSaturationValueRange TIGA_ORANGE_PING_PONG_BALL_HSV_RANGE_MAC = new HueSaturationValueRange(21, 27, 130, 230, 180, 255);
    public static final HueSaturationValueRange TIGA_ORANGE_PING_PONG_BALL_HSV_RANGE_KINECT = new HueSaturationValueRange(15, 50, 130, 230, 180, 255);
+   public static final HueSaturationValueRange YELLOW_PAPER = new HueSaturationValueRange(70, 87, 15, 50, 100, 255);
+   public static final HueSaturationValueRange YELLOW_TAPE_BALL = new HueSaturationValueRange(30, 70, 50, 110, 150, 255);
+   public static final int YELLOW_TAPE_BALL_SIZE = 4;
    public static final int TIGA_ORANGE_PING_PONG_BALL_SIZE = 5;
    
    public static Mat convertBufferedImageToHSV(BufferedImage bufferedImage)
@@ -163,9 +166,9 @@ public class ColorBlobDetector
       }
       else
       {
-         hsvRange = TIGA_ORANGE_PING_PONG_BALL_HSV_RANGE_MAC;
+         hsvRange = YELLOW_TAPE_BALL;
       }
-      int size = ColorBlobDetector.TIGA_ORANGE_PING_PONG_BALL_SIZE;
+      int size = ColorBlobDetector.YELLOW_TAPE_BALL_SIZE;
       BufferedImage bufferedImage2 = null;
       BufferedImage bufferedImage3 = null;
       BufferedImage bufferedImage4 = null;
@@ -182,6 +185,9 @@ public class ColorBlobDetector
 
          OpenCVTools.resizeImage(image, 0.5);
          convertImageFromBGRToHSV(image, image);
+         double hue = image.get(image.height() / 2, image.width() / 2)[0];
+         double sat = image.get(image.height() / 2, image.width() / 2)[1];
+         double val = image.get(image.height() / 2, image.width() / 2)[2];
          bufferedImage3 = OpenCVTools.convertMatToBufferedImage(image);
          thresholdImage(image, image, hsvRange);
          bufferedImage4 = OpenCVTools.convertMatToBufferedImage(image);
@@ -195,7 +201,7 @@ public class ColorBlobDetector
             String timeStr = String.valueOf(FormattingTools.roundToSignificantFigures(blobTimer.lapElapsed(), 2));
             String xStr = String.valueOf(FormattingTools.roundToSignificantFigures(ballLocation.x, 2));
             String yStr = String.valueOf(FormattingTools.roundToSignificantFigures(ballLocation.y, 2));
-            System.out.println("imgx: " + bufferedImage.getWidth() + " imgy: " + bufferedImage.getHeight() + " time: " + timeStr + " x: " + xStr + " y: " + yStr);
+            System.out.println("imgx: " + bufferedImage.getWidth() + " imgy: " + bufferedImage.getHeight() + " hue: " + hue + " sat: " + sat + " val: " + val + " time: " + timeStr + " x: " + xStr + " y: " + yStr);
          }
          
          Graphics2D g2d = bufferedImage.createGraphics();
