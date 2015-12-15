@@ -19,6 +19,10 @@ public class FramePlane3d extends ReferenceFrameHolder
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
    private final Vector3d temporaryVector = new Vector3d();
    private final Point3d temporaryPoint = new Point3d();
+   
+   private final Point3d temporaryPointA = new Point3d();
+   private final Point3d temporaryPointB = new Point3d();
+   private final Point3d temporaryPointC = new Point3d();
 
    public FramePlane3d(ReferenceFrame referenceFrame, Plane3d plane3d)
    {
@@ -105,6 +109,19 @@ public class FramePlane3d extends ReferenceFrameHolder
       plane3d.setPoint(point);
    }
 
+   public void setPoints(FramePoint pointA, FramePoint pointB, FramePoint pointC)
+   {
+      pointA.checkReferenceFrameMatch(referenceFrame);
+      pointB.checkReferenceFrameMatch(referenceFrame);
+      pointC.checkReferenceFrameMatch(referenceFrame);
+
+      pointA.get(temporaryPointA);
+      pointB.get(temporaryPointB);
+      pointC.get(temporaryPointC);
+      
+      plane3d.setPoints(temporaryPointA, temporaryPointB, temporaryPointC);
+   }
+   
    public void changeFrame(ReferenceFrame desiredFrame)
    {
       if (desiredFrame != referenceFrame)
