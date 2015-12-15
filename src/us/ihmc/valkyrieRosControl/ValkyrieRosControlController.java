@@ -64,12 +64,12 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
    
 	public static final boolean USE_USB_MICROSTRAIN_IMUS = true;
 	public static final boolean USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS = false;
-   private static final String[] readIMUs = USE_USB_MICROSTRAIN_IMUS ? new String[0] : new String[]{ ValkyrieSensorInformation.imuSensorsToUse[0].replace("pelvis_", "") };
+   public static final String[] readIMUs = USE_USB_MICROSTRAIN_IMUS ? new String[0] : new String[]{ ValkyrieSensorInformation.imuSensorsToUse[0].replace("pelvis_", "") };
    
-   private static final String[] readForceTorqueSensors = { "leftFootSixAxis", "rightFootSixAxis" };
-   private static final String[] forceTorqueSensorModelNames = { "leftAnkleRoll", "rightAnkleRoll" };
+   public static final String[] readForceTorqueSensors = { "leftFootSixAxis", "rightFootSixAxis" };
+   public static final String[] forceTorqueSensorModelNames = { "leftAnkleRoll", "rightAnkleRoll" };
    
-   private static final double gravity = -9.792; //Tuned on Valkyrie 9.785; // Measured with IMUs on real robot
+   public static final double gravity = -9.792; //Tuned on Valkyrie 9.785; // Measured with IMUs on real robot
    
    private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
 
@@ -189,7 +189,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
        */
 
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.REAL_ROBOT, true);
-      DRCRobotSensorInformation sensorInformation = (ValkyrieSensorInformation) robotModel.getSensorInformation();
+      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       
       /*
        * Create network servers/clients
