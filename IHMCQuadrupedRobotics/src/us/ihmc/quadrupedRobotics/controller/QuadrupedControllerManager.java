@@ -3,9 +3,7 @@ package us.ihmc.quadrupedRobotics.controller;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
-import us.ihmc.quadrupedRobotics.parameters.DefaultQuadrupedStandPrepParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedStandPrepParameters;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedVirtualModelController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -61,10 +59,13 @@ public class QuadrupedControllerManager implements RobotController
             sdfFullRobotModel, stateEstimator, inverseKinematicsCalculators, globalDataProducer, robotTimestamp, registry, yoGraphicsListRegistry,
             yoGraphicsListRegistryForDetachedOverhead);
 
+      QuadrupedSliderBoardController sliderBoardController = new QuadrupedSliderBoardController(sdfFullRobotModel, registry);
+
       stateMachine.addState(standPrepController);
       stateMachine.addState(standReadyController);
       stateMachine.addState(virtualModelBasedStandController);
       stateMachine.addState(positionBasedCrawlController);
+      stateMachine.addState(sliderBoardController);
 
       // Add automatic state transition from stand prep to stand ready.
       standPrepController.addStateTransition(new StateTransition<QuadrupedControllerState>(QuadrupedControllerState.STAND_READY,
@@ -75,11 +76,15 @@ public class QuadrupedControllerManager implements RobotController
             .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.VMC_STAND));
       standReadyController
             .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.POSITION_CRAWL));
+      standReadyController
+            .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.SLIDER_BOARD));
 
       // Can only go back to stand prep.
       positionBasedCrawlController
             .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.STAND_PREP));
       virtualModelBasedStandController
+            .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.STAND_PREP));
+      sliderBoardController
             .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.STAND_PREP));
 
       // TODO: Start in a "freeze" state.

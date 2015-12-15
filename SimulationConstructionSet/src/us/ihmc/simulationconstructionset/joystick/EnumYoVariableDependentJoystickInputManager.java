@@ -13,7 +13,7 @@ import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 public class EnumYoVariableDependentJoystickInputManager<T>
 {
    private final int pollIntervalMillis = 20;
-   private final Joystick joystickUpdater;
+   private final Joystick joystick;
    private final HashMap<Enum<?>, ArrayList<JoystickEventListener>> eventListeners = new HashMap<>();
    private final EnumYoVariable<?> enumYoVariable;
    private final T[] enumValues;
@@ -23,8 +23,8 @@ public class EnumYoVariableDependentJoystickInputManager<T>
       this.enumValues = enumType.getEnumConstants();
       this.enumYoVariable = enumYoVariable;
       
-      joystickUpdater = new Joystick();
-      joystickUpdater.setPollInterval(pollIntervalMillis);
+      joystick = new Joystick();
+      joystick.setPollInterval(pollIntervalMillis);
       
       enumYoVariable.addVariableChangedListener(new VariableChangedListener()
       {
@@ -36,9 +36,9 @@ public class EnumYoVariableDependentJoystickInputManager<T>
       });
    }
    
-   public Joystick getComponentSelector()
+   public Joystick getJoystick()
    {
-      return joystickUpdater;
+      return joystick;
    }
    
    public void initialize()
@@ -48,15 +48,20 @@ public class EnumYoVariableDependentJoystickInputManager<T>
    
    private void updateListeners(final EnumYoVariable<?> enumYoVariable)
    {
-      joystickUpdater.clearEventListeners();
+      joystick.clearEventListeners();
       T enumValue = enumValues[enumYoVariable.getOrdinal()];
       if(eventListeners.containsKey(enumValue))
       {
          for(JoystickEventListener eventListener : eventListeners.get(enumValue))
          {
-            joystickUpdater.addJoystickEventListener(eventListener);
+            joystick.addJoystickEventListener(eventListener);
          }
       }
+   }
+   
+   public void disableJoystick()
+   {
+      joystick.clearEventListeners();
    }
    
    public void addJoystickMapping(EnumDependentJoystickMapping joystickMap)
