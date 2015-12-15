@@ -35,6 +35,7 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
       {
          DoubleYoVariable qDesired = new DoubleYoVariable(key + "_q_d", sliderBoardRegistry);
          DoubleYoVariable qDesiredAlpha = new DoubleYoVariable(key + "_q_d_alpha", sliderBoardRegistry);
+         qDesiredAlpha.set(1.0);
          AlphaFilteredYoVariable alphaFilteredQDesired = new AlphaFilteredYoVariable(key + "_alpha_filtered_q_d", sliderBoardRegistry, qDesiredAlpha, qDesired);
          alphaFilteredQDesiredMap.put(key, alphaFilteredQDesired);
       }
