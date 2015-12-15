@@ -59,6 +59,11 @@ public class EnumYoVariableDependentJoystickInputManager<T>
       }
    }
    
+   public void disableJoystick()
+   {
+      joystick.clearEventListeners();
+   }
+   
    public void addJoystickMapping(EnumDependentJoystickMapping joystickMap)
    {
       eventListeners.put(joystickMap.getEnum(), joystickMap.getEventListeners());
