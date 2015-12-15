@@ -20,15 +20,15 @@ public class QuadrupedLegJointSliderBoardConfiguration
          //TODO: figure out slider min/max
          String prefix = quadrant.toString().toLowerCase();
 
-         double min = 0.0;
-         double max = 1.0;
+         double min = -Math.PI/2;
+         double max = Math.PI/2;
 
          sliderBoardConfigurationManager.setKnob(1, sliderBoardMode, 0.0, 3.0);
-         sliderBoardConfigurationManager.setSlider(1, scs.getVariable("QuadrupedLegJointSliderBoardController", prefix + "_hip_roll_q_d"), 0.0, 1.0);
+         sliderBoardConfigurationManager.setSlider(1, scs.getVariable("QuadrupedLegJointSliderBoardController", prefix + "_hip_roll_q_d"), min, max);
          sliderBoardConfigurationManager.setSlider(2, scs.getVariable("QuadrupedLegJointSliderBoardController", prefix + "_hip_roll_q_d_alpha"), 0.9, 1.0);
-         sliderBoardConfigurationManager.setSlider(3, scs.getVariable("QuadrupedLegJointSliderBoardController", prefix + "_hip_pitch_q_d"), 0.0, 1.0);
+         sliderBoardConfigurationManager.setSlider(3, scs.getVariable("QuadrupedLegJointSliderBoardController", prefix + "_hip_pitch_q_d"), min, max);
          sliderBoardConfigurationManager.setSlider(4, scs.getVariable("QuadrupedLegJointSliderBoardController", prefix + "_hip_pitch_q_d_alpha"), 0.9, 1.0);
-         sliderBoardConfigurationManager.setSlider(5, scs.getVariable("QuadrupedLegJointSliderBoardController", prefix + "_knee_pitch_q_d"), 0.0, 1.0);
+         sliderBoardConfigurationManager.setSlider(5, scs.getVariable("QuadrupedLegJointSliderBoardController", prefix + "_knee_pitch_q_d"), min, max);
          sliderBoardConfigurationManager.setSlider(6, scs.getVariable("QuadrupedLegJointSliderBoardController", prefix + "_knee_pitch_q_d_alpha"), 0.9, 1.0);
          sliderBoardConfigurationManager.saveConfiguration(quadrant.getCamelCaseNameForStartOfExpression() + defaultConfiguration);
          sliderBoardConfigurationManager.clearControls();
