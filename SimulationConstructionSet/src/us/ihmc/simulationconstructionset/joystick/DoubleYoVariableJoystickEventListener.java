@@ -17,6 +17,8 @@ public class DoubleYoVariableJoystickEventListener implements JoystickEventListe
 
    public DoubleYoVariableJoystickEventListener(DoubleYoVariable variable, Component component, double min, double max, double deadZone, boolean signFlip)
    {
+      if (variable == null)
+         throw new RuntimeException("variable is null");
       if (min > max)
          throw new RuntimeException("min > max");
       if (deadZone < 0.0)
