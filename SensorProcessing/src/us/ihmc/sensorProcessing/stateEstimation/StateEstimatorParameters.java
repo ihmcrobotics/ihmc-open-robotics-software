@@ -16,6 +16,8 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
 
    public abstract boolean useIMUsForSpineJointVelocityEstimation();
 
+   /** @deprecated Need to switch to frequency */
+   @Deprecated
    public abstract double getAlphaIMUsForSpineJointVelocityEstimation();
 
    public abstract ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation();
