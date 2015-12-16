@@ -60,6 +60,7 @@ public class PelvisIMUBasedLinearStateCalculator
 
       enableAccelerationBiasEstimation.set(false);
       accelerationBiasEstimation.reset();
+      accelerationBiasEstimation.update(0.0, 0.0, 0.0);
       gravityVector.setIncludingFrame(worldFrame, 0.0, 0.0, -Math.abs(gravitationalAcceleration));
       
       if (imuProcessedOutputs.size() == 0)
