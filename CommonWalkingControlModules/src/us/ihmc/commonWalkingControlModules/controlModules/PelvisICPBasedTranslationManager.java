@@ -267,7 +267,7 @@ public class PelvisICPBasedTranslationManager
       
       originalICPToModify.setIncludingFrame(desiredICPToModify);
       
-      if (!isEnabled.getBooleanValue() || !isRunning.getBooleanValue())
+      if (!isEnabled.getBooleanValue() || (!isRunning.getBooleanValue() && !manualMode.getBooleanValue()))
       {
          desiredICPOffset.setToZero();
          icpOffsetForFreezing.setToZero();
