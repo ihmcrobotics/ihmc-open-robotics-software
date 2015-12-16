@@ -516,8 +516,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = runningOnRealRobot ? 160.0 : 100.0; // 120.0
-      double kpZ = runningOnRealRobot ? 120.0 : 100.0; // 120.0
+      double kpXY = runningOnRealRobot ? 100.0 : 100.0; // 160.0
+      double kpZ = runningOnRealRobot ? 80.0 : 100.0; // 120.0
       double zetaXY = runningOnRealRobot ? 0.5 : 0.8; // 0.7
       double zetaZ = runningOnRealRobot ? 0.5 : 0.8; // 0.7
       double maxAccel = runningOnRealRobot ? 18.0 : 18.0;
@@ -566,7 +566,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double[] getInitialHeadYawPitchRoll()
    {
-      return new double[] { 0.0, 0.0, 0.0 };//{ 0.0, 0.67, 0.0 };
+      return new double[] { 0.0, 0.0, 0.0 };
    }
 
    @Override
@@ -597,10 +597,10 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = runningOnRealRobot ? 80.0 : 100.0; // 60.0
-      double kpZ = runningOnRealRobot ? 40.0 : 100.0; // 60.0
-      double zetaXY = runningOnRealRobot ? 0.7 : 0.8; // 0.4
-      double zetaZ = runningOnRealRobot ? 0.5 : 0.8; // 0.4
+      double kpXY = runningOnRealRobot ? 80.0 : 100.0;
+      double kpZ = runningOnRealRobot ? 40.0 : 100.0;
+      double zetaXY = runningOnRealRobot ? 0.7 : 0.8;
+      double zetaZ = runningOnRealRobot ? 0.5 : 0.8;
       double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 180.0 : 270.0;
 
@@ -650,11 +650,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = 40.0;
+      double kpXY = 0.0; //40.0;
       double kpZ = 0.0;
       double zetaXYZ = runningOnRealRobot ? 0.7 : 1.0;
-      double kpXYOrientation = runningOnRealRobot ? 40.0 : 200.0;
-      double kpZOrientation = runningOnRealRobot ? 120.0 : 200.0;
+      double kpXYOrientation = runningOnRealRobot ? 0.0 : 200.0; // 40.0
+      double kpZOrientation = runningOnRealRobot ? 0.0 : 200.0; // 120.0
       double zetaOrientation = runningOnRealRobot ? 0.7 : 1.0;
       double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
