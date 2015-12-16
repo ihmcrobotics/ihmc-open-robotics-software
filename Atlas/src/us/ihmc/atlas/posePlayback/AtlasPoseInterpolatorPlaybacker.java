@@ -3,46 +3,23 @@ package us.ihmc.atlas.posePlayback;
 import java.io.Reader;
 import java.io.StringReader;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPoseInterpolatorDRCTest;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.darpaRoboticsChallenge.posePlayback.PoseCheckerCallback;
+import us.ihmc.darpaRoboticsChallenge.posePlayback.PoseInterpolatorPlaybacker;
 
-@DeployableTestClass(targets = {TestPlanTarget.UI})
-public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorDRCTest
+public class AtlasPoseInterpolatorPlaybacker
 {
-
-   @Override
-   public DRCRobotModel getRobotModel()
+   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
+   
+   public AtlasPoseInterpolatorPlaybacker()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
-   }
-
-   @Override
-   public String getSimpleRobotName()
-   {
-      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
-   }
-
-   //this is not a jUnit test. This is a playable pose sequence. Start the sim and press play. Remove @ignore and run locally. 
-   @Ignore
-
-	@DeployableTestMethod
-	@Test(timeout=300000)
-   public void testFromExample()
-   {
-      DRCRobotModel robotModel = getRobotModel();
       SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
       
@@ -61,7 +38,19 @@ public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorD
 
       //sequence.writeToOutputStream(fullRobotModel, System.out);
 
-      playASequence(sdfRobot, sequence);
+      boolean showGui = true;
+      PoseInterpolatorPlaybacker.playASequence(sdfRobot, sequence, showGui, new PoseCheckerCallback()
+      {
+         @Override
+         public void checkPose(PlaybackPose pose, PlaybackPose previousPose)
+         {
+            
+         }
+      });
    }
-
+   
+   public static void main(String[] args)
+   {
+      new AtlasPoseInterpolatorPlaybacker();
+   }
 }

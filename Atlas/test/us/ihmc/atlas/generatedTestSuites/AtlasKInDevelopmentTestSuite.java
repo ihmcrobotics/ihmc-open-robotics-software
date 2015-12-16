@@ -12,7 +12,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasInverseKinematicsPositionControlTest.class,
    us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class,
    us.ihmc.atlas.AtlasGFERosPacketTest.class,
    us.ihmc.atlas.HumanoidBehaviorsICPFaultDetectionTest.class

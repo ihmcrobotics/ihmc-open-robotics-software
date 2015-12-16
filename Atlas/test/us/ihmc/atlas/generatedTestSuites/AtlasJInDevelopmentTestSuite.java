@@ -14,7 +14,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 ({
    us.ihmc.atlas.behaviorTests.AtlasDrillPickUpBehaviorTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseWholeBodyTrajectoryTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseWholeBodyTrajectoryTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasInverseKinematicsPositionControlTest.class
 })
 
 public class AtlasJInDevelopmentTestSuite
