@@ -126,8 +126,8 @@ Tab0
 <Graph Array Window Size>2</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
-<WindowLocation>6720.0, 0.0</WindowLocation>
-<WindowSize>960.0, 1080.0</WindowSize>
+<WindowLocation>5759.0, 0.0</WindowLocation>
+<WindowSize>1922.0, 1081.0</WindowSize>
 <GraphGroup>
 	<Cols>4</Cols>
 	<Graph>
@@ -420,9 +420,9 @@ Tab0
 	</Graph>
 </GraphGroup>
 </Graph Array Window1><Graph Array Window2>
-<ScreenID>1</ScreenID>
-<WindowLocation>5760.0, 0.0</WindowLocation>
-<WindowSize>1920.0, 1080.0</WindowSize>
+<ScreenID>3</ScreenID>
+<WindowLocation>3840.0, 0.0</WindowLocation>
+<WindowSize>1920.0, 1200.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
@@ -432,7 +432,7 @@ Tab0
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.10184939903460405,</BaseLines>
+			<BaseLines>0.0,</BaseLines>
 			<MaxScaling>1.0</MaxScaling>
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
@@ -444,7 +444,7 @@ Tab0
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.28707711594399626,</BaseLines>
+			<BaseLines>0.0,</BaseLines>
 			<MaxScaling>1.0</MaxScaling>
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
@@ -456,7 +456,7 @@ Tab0
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>-0.22999979896084105,</BaseLines>
+			<BaseLines>0.0,</BaseLines>
 			<MaxScaling>1.0</MaxScaling>
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
@@ -483,9 +483,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
- <Camera Z>1.0</Camera Z>
+ <Camera X>5.2193420078437915</Camera X>
+ <Camera Y>2.981797886902379</Camera Y>
+ <Camera Z>0.7653794631193505</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
