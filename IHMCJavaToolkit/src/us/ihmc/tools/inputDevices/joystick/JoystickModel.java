@@ -1,5 +1,7 @@
 package us.ihmc.tools.inputDevices.joystick;
 
+import us.ihmc.tools.io.printing.PrintTools;
+
 public enum JoystickModel
 {
    LOGITECH_EXTREME_3D("Logitech Extreme 3D"),
@@ -28,9 +30,11 @@ public enum JoystickModel
    {
       for (JoystickModel joystickModel : values)
       {
-         if (name.equals(joystickModel.getJinputName()))
+         if (name.contains(joystickModel.getJinputName()))
             return joystickModel;
       }
+      
+      PrintTools.warn("Unknown joystick name: " + name);
       
       return UNKNOWN;
    }

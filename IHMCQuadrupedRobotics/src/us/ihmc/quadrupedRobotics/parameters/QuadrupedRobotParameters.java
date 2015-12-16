@@ -4,31 +4,44 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFParameters;
 import us.ihmc.SdfLoader.SDFRobot;
 
-public interface QuadrupedRobotParameters
+public abstract class QuadrupedRobotParameters
 {
-   public SDFRobot createSdfRobot();
+   private final QuadrupedStandPrepParameters standPrepParams = new DefaultQuadrupedStandPrepParameters();
+   private final QuadrupedVirtualModelParameters vmcParams = new DefaultQuadrupedVirtualModelParameters();
+   private final QuadrupedVirtualModelBasedStandParameters vmcStandParams = new DefaultQuadrupedVirtualModelBasedStandParameters();
 
-   public QuadrupedJointNameMap getJointMap();
+   public abstract SDFRobot createSdfRobot();
+
+   public abstract QuadrupedJointNameMap getJointMap();
    
-   public QuadrupedJointLimits getJointLimits();
+   public abstract QuadrupedJointLimits getJointLimits();
 
-   public SDFFullRobotModel createFullRobotModel();
+   public abstract SDFFullRobotModel createFullRobotModel();
 
-   public String getModelName();
+   public abstract String getModelName();
 
-   public SDFParameters getSdfParameters();
+   public abstract SDFParameters getSdfParameters();
 
-   public QuadrupedPhysicalProperties getPhysicalProperties();
+   public abstract QuadrupedPhysicalProperties getPhysicalProperties();
 
-   public QuadrupedInitialPositionParameters getQuadrupedInitialPositionParameters();
+   public abstract QuadrupedActuatorParameters getActuatorParameters();
 
-   public QuadrupedControllerParameters getQuadrupedControllerParameters();
+   public abstract QuadrupedInitialPositionParameters getQuadrupedInitialPositionParameters();
+
+   public abstract QuadrupedControllerParameters getQuadrupedControllerParameters();
    
-   public QuadrupedStandPrepParameters getQuadrupedStandPrepParameters();
+   public QuadrupedStandPrepParameters getQuadrupedStandPrepParameters()
+   {
+      return standPrepParams;
+   }
    
-   public QuadrupedVirtualModelParameters getQuadrupedVirtualModelParameters();
+   public QuadrupedVirtualModelParameters getQuadrupedVirtualModelParameters()
+   {
+      return vmcParams;
+   }
 
-   public QuadrupedVirtualModelBasedStandParameters getQuadrupedVMCStandParameters();
-
-   public QuadrupedActuatorParameters getActuatorParameters();
+   public QuadrupedVirtualModelBasedStandParameters getQuadrupedVMCStandParameters()
+   {
+      return vmcStandParams;
+   }
 }

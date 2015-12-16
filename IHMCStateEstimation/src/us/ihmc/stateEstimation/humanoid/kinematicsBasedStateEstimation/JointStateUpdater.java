@@ -12,6 +12,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * JointStateUpdater simply reads the joint position/velocity sensors and updates the FullInverseDynamicsStructure.
@@ -59,13 +60,16 @@ public class JointStateUpdater
       IMUSensorReadOnly pelvisIMU = null;
       IMUSensorReadOnly chestIMU = null;
 
+      String pelvisIMUName = stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().getLeft();
+      String chestIMUName = stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().getRight();
+
       for (int i = 0; i < sensorOutputMapReadOnly.getIMUProcessedOutputs().size(); i++)
       {
          IMUSensorReadOnly sensorReadOnly = sensorOutputMapReadOnly.getIMUProcessedOutputs().get(i);
-         if (sensorReadOnly.getSensorName().equals(stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().getLeft()))
+         if (sensorReadOnly.getSensorName().equals(pelvisIMUName))
             pelvisIMU = sensorReadOnly;
 
-         if (sensorReadOnly.getSensorName().equals(stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().getRight()))
+         if (sensorReadOnly.getSensorName().equals(chestIMUName))
             chestIMU = sensorReadOnly;
       }
 
@@ -79,7 +83,7 @@ public class JointStateUpdater
       }
       else
       {
-         throw new RuntimeException("Could not find the given pelvis and/or chest IMUs: pelvisIMU = " + pelvisIMU + ", chestIMU = " + chestIMU);
+         PrintTools.warn("Could not find the given pelvis and/or chest IMUs: pelvisIMU = " + pelvisIMUName + ", chestIMU = " + chestIMUName);
       }
    }
 

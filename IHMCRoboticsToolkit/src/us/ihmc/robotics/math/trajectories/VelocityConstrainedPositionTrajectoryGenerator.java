@@ -223,6 +223,11 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    {
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
    }
+   
+   public void setToDone()
+   {
+      currentTime.set(trajectoryTime.getDoubleValue() + 0.01);
+   }
 
    @Override
    public void get(FramePoint positionToPack)
@@ -280,6 +285,11 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       positionToPack.set(currentPosition);
       velocityToPack.set(currentVelocity);
       accelerationToPack.set(currentAcceleration);
+   }
+   
+   public void getFinalPosition(FramePoint finalPosition)
+   {
+      this.finalPosition.getFrameTuple(finalPosition);
    }
 
    @Override

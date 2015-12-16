@@ -12,11 +12,11 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
+   us.ihmc.utilities.parameterOptimization.IntegerParameterToOptimizeTest.class,
    us.ihmc.utilities.parameterOptimization.ExampleOptimizationProblemOneTest.class,
-   us.ihmc.utilities.parameterOptimization.geneticAlgorithm.GeneticAlgorithmTest.class,
    us.ihmc.utilities.parameterOptimization.geneticAlgorithm.GenotypeTest.class,
-   us.ihmc.utilities.parameterOptimization.geneticAlgorithm.PopulationTest.class,
-   us.ihmc.utilities.parameterOptimization.IntegerParameterToOptimizeTest.class
+   us.ihmc.utilities.parameterOptimization.geneticAlgorithm.GeneticAlgorithmTest.class,
+   us.ihmc.utilities.parameterOptimization.geneticAlgorithm.PopulationTest.class
 })
 
 public class ParameterOptimizationAFastTestSuite

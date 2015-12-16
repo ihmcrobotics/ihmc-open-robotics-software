@@ -49,7 +49,7 @@ public class NaiveFaceTracker
          int oldFaceY = trackedFaces.get(i).facialBorder.y;
          boolean matched = false;
 
-         g2.setColor(trackedFaces.get(i).borderColor);
+         g2.setColor(trackedFaces.get(i).getColor());
          g2.drawRect(oldFaceX, oldFaceY, trackedFaces.get(i).facialBorder.width, trackedFaces.get(i).facialBorder.height);
 
          for(int j = 0; j < faces.length; j++)
