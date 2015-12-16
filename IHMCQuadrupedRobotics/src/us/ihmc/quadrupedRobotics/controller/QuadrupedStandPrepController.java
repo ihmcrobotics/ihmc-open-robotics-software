@@ -3,18 +3,9 @@ package us.ihmc.quadrupedRobotics.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.partNames.JointRole;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedInitialPositionParameters;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedStandPrepParameters;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
@@ -54,6 +45,8 @@ public class QuadrupedStandPrepController extends QuadrupedController
    @Override
    public void doAction()
    {
+      fullRobotModel.updateFrames();
+
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
          OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
@@ -74,7 +67,8 @@ public class QuadrupedStandPrepController extends QuadrupedController
          OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
          joint.setUnderPositionControl(true);
 
-         double desiredPosition = getInitialJointPosition(joint.getName());
+         QuadrupedJointName jointId = parameters.getJointMap().getJointNameForSDFName(joint.getName());
+         double desiredPosition = parameters.getQuadrupedInitialPositionParameters().getInitialPosition(jointId);
 
          // Start the trajectory from the current pos/vel/acc.
          MinimumJerkTrajectory trajectory = trajectories.get(i);
@@ -101,26 +95,6 @@ public class QuadrupedStandPrepController extends QuadrupedController
       }
 
       return RobotMotionStatus.IN_MOTION;
-   }
-
-   private double getInitialJointPosition(String name)
-   {
-      final QuadrupedJointNameMap nameMap = parameters.getJointMap();
-      final QuadrupedInitialPositionParameters initials = parameters.getQuadrupedInitialPositionParameters();
-
-      if (parameters.getJointMap().getJointRole(name) == JointRole.LEG)
-      {
-         LegJointName legJointName = nameMap.getLegJointName(name).right;
-         return initials.getInitialLegPosition(legJointName);
-      }
-      else if (parameters.getJointMap().getJointRole(name) == JointRole.NECK)
-      {
-         NeckJointName legJointName = nameMap.getNeckJointName(name);
-         return initials.getInitialNeckPosition(legJointName);
-      }
-      
-//      throw new RuntimeException("Invalid joint name: " + name);
-      return 0.0;
    }
 }
 
