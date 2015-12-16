@@ -6,8 +6,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
-import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.valkyrieRosControl.dataHolders.YoJointHandleHolder;
 
 public class ValkyrieRosControlJointControlCommandCalculator
@@ -17,7 +15,6 @@ public class ValkyrieRosControlJointControlCommandCalculator
    private final PIDController pidController;
    private final DoubleYoVariable tauOff;
    private final DoubleYoVariable standPrepAngle;
-   private final YoFunctionGenerator functionGenerator;
 
    private final double controlDT;
 
@@ -35,7 +32,6 @@ public class ValkyrieRosControlJointControlCommandCalculator
 
       pidController = new PIDController(pdControllerBaseName + "StandPrep", registry);
       this.tauOff = new DoubleYoVariable("tau_offset_" + pdControllerBaseName, registry);
-      this.functionGenerator = new YoFunctionGenerator(pdControllerBaseName + "StandPrep_", registry);
 
       pidController.setProportionalGain(gains.get("kp"));
       pidController.setDerivativeGain(gains.get("kd"));
@@ -52,7 +48,6 @@ public class ValkyrieRosControlJointControlCommandCalculator
 
    public void initialize()
    {
-      functionGenerator.setMode(YoFunctionGeneratorMode.DC);
       pidController.setCumulativeError(0.0);
    }
 
