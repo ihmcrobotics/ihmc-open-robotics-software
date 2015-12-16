@@ -7,6 +7,5 @@ public interface QuadrupedInitialPositionParameters
 {
    public double getInitialHeight();
 
-   public double getInitialLegPosition(LegJointName joint);
-   public double getInitialNeckPosition(NeckJointName joint);
+   public double getInitialPosition(QuadrupedJointName joint);
 }

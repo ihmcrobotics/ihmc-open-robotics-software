@@ -47,11 +47,13 @@ public class QuadrupedControllerManager implements RobotController
       stateMachine = new GenericStateMachine<>("QuadrupedControllerStateMachine", "QuadrupedControllerSwitchTime", QuadrupedControllerState.class,
             robotTimestamp, registry);
       requestedState = new EnumYoVariable<>("QuadrupedControllerStateMachineRequestedState", registry, QuadrupedControllerState.class, true);
+      
+      QuadrupedDoNothingController doNothingController = new QuadrupedDoNothingController(sdfFullRobotModel);
 
       QuadrupedStandPrepController standPrepController = new QuadrupedStandPrepController(quadrupedRobotParameters, sdfFullRobotModel,
             simulationDT);
 
-      QuadrupedStandReadyController standReadyController = new QuadrupedStandReadyController(sdfFullRobotModel);
+      QuadrupedStandReadyController standReadyController = new QuadrupedStandReadyController();
 
       QuadrupedVirtualModelBasedStandController virtualModelBasedStandController = new QuadrupedVirtualModelBasedStandController(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, virtualModelController, robotTimestamp, registry, yoGraphicsListRegistry);
 
@@ -61,11 +63,16 @@ public class QuadrupedControllerManager implements RobotController
 
       QuadrupedLegJointSliderBoardController sliderBoardController = new QuadrupedLegJointSliderBoardController(sdfFullRobotModel, registry);
 
+      stateMachine.addState(doNothingController);
       stateMachine.addState(standPrepController);
       stateMachine.addState(standReadyController);
       stateMachine.addState(virtualModelBasedStandController);
       stateMachine.addState(positionBasedCrawlController);
       stateMachine.addState(sliderBoardController);
+      
+      // Can transition from do nothing to only stand prep
+      doNothingController
+            .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.STAND_PREP));
 
       // Add automatic state transition from stand prep to stand ready.
       standPrepController.addStateTransition(new StateTransition<QuadrupedControllerState>(QuadrupedControllerState.STAND_READY,
@@ -88,7 +95,7 @@ public class QuadrupedControllerManager implements RobotController
             .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.STAND_PREP));
 
       // TODO: Start in a "freeze" state.
-      stateMachine.setCurrentState(QuadrupedControllerState.SLIDER_BOARD);
+      stateMachine.setCurrentState(QuadrupedControllerState.DO_NOTHING);
       stateMachine.getCurrentState().doTransitionIntoAction();
    }
 
