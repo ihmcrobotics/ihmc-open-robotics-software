@@ -57,17 +57,17 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
 
       jointVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
 
-      orientationFilterFrequencyHz        = 50.0; //runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
-      angularVelocityFilterFrequencyHz    = 50.0; //30.0; //30.0; //runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
+      orientationFilterFrequencyHz        = 50.0;
+      angularVelocityFilterFrequencyHz    = 50.0;
       linearAccelerationFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
 
-      jointVelocitySlopTimeForBacklashCompensation = 0.03; //0.07; => Add a shit load of delay!!
+      jointVelocitySlopTimeForBacklashCompensation = 0.03;
 
-      doElasticityCompensation = false; //runningOnRealRobot;
-      defaultJointStiffness = 10000; //40000.0; //Double.POSITIVE_INFINITY;
+      doElasticityCompensation = runningOnRealRobot;
+      defaultJointStiffness = 1000000;
 
       kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
-      kinematicsPelvisLinearVelocityFilterFreqInHertz = 50.0; //16.0;
+      kinematicsPelvisLinearVelocityFilterFreqInHertz = 50.0;
    }
 
    @Override
@@ -111,9 +111,6 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       // Raw finite difference on all joint positions
       DoubleYoVariable dummyAlphaFilter = new DoubleYoVariable("dummyAlphaFilter", registry);
       sensorProcessing.computeJointVelocityFromFiniteDifference(dummyAlphaFilter, true);
-      
-      DoubleYoVariable tauAlphaFilter = sensorProcessing.createAlphaFilter("tauAlphaFilter", 1.0);
-      sensorProcessing.addJointTauAlphaFilter(tauAlphaFilter, true);
    }
 
    @Override
@@ -167,7 +164,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public boolean cancelGravityFromAccelerationMeasurement()
    {
-      return !runningOnRealRobot;
+      return true;
    }
 
    @Override
@@ -281,13 +278,13 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public boolean useIMUsForSpineJointVelocityEstimation()
    {
-      return false;
+      return runningOnRealRobot;
    }
 
    @Override
    public double getAlphaIMUsForSpineJointVelocityEstimation()
    {
-      return 0.8;
+      return 0.8; // 35 Hz
    }
 
    /**
@@ -297,8 +294,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
    {
-      return null;
-//      return new ImmutablePair<String, String>(sensorInformation.getMiddlePelvisIMUSensor(), sensorInformation.getLeftTrunkIMUSensor());
+      return new ImmutablePair<String, String>(sensorInformation.getRearPelvisIMUSensor(), sensorInformation.getLeftTrunkIMUSensor());
    }
    
    @Override
