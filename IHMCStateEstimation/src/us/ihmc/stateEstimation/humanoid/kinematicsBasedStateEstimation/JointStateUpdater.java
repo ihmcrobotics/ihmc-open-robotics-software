@@ -22,6 +22,8 @@ import us.ihmc.tools.io.printing.PrintTools;
  */
 public class JointStateUpdater
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
    private final TwistCalculator twistCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final RigidBody rootBody;
@@ -31,7 +33,6 @@ public class JointStateUpdater
    private IMUBasedPelvisToTorsoEncodersVelocityFilter iMUBasedPelvisToTorsoEncodersVelocityFilter;
 
    private BooleanYoVariable enableIMUBasedPelvisToTorsoEncodersVelocityFilter;
-   private double qd_filtered;
 
    public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
          StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
@@ -45,8 +46,10 @@ public class JointStateUpdater
       InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
 
-      enableIMUBasedPelvisToTorsoEncodersVelocityFilter = new BooleanYoVariable("enable_IMUBasedVelFilter", parentRegistry);
-      setupSpineJointVelocitiesSmoothener(sensorOutputMapReadOnly, stateEstimatorParameters, parentRegistry);
+      enableIMUBasedPelvisToTorsoEncodersVelocityFilter = new BooleanYoVariable("enable_IMUBasedVelFilter", registry);
+      setupSpineJointVelocitiesSmoothener(sensorOutputMapReadOnly, stateEstimatorParameters, registry);
+
+      parentRegistry.addChild(registry);
    }
 
    public void setupSpineJointVelocitiesSmoothener(SensorOutputMapReadOnly sensorOutputMapReadOnly, StateEstimatorParameters stateEstimatorParameters,
@@ -115,14 +118,10 @@ public class JointStateUpdater
          if (enableIMUBasedPelvisToTorsoEncodersVelocityFilter.getBooleanValue()
                && iMUBasedPelvisToTorsoEncodersVelocityFilter.getJointVelocities().get(oneDoFJoint) != null)
          {
-            qd_filtered = iMUBasedPelvisToTorsoEncodersVelocityFilter.getJointVelocities().get(oneDoFJoint).getDoubleValue();
-            oneDoFJoint.setQd(qd_filtered);
+            velocitySensorData = iMUBasedPelvisToTorsoEncodersVelocityFilter.getJointVelocities().get(oneDoFJoint).getDoubleValue();
          }
-         else
-         {
-            oneDoFJoint.setQd(velocitySensorData);
-         }
-         
+
+         oneDoFJoint.setQd(velocitySensorData);
          oneDoFJoint.setTauMeasured(torqueSensorData);
       }
 
