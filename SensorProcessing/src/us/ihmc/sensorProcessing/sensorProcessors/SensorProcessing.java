@@ -44,6 +44,68 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   public enum SensorType
+   {
+      JOINT_POSITION, JOINT_VELOCITY, JOINT_ACCELERATION, JOINT_TAU, TORQUE_SENSOR, FORCE_SENSOR, IMU_ORIENTATION, IMU_ANGULAR_VELOCITY, IMU_LINEAR_ACCELERATION;
+
+      public boolean isJointSensor()
+      {
+         switch (this)
+         {
+         case JOINT_POSITION:
+         case JOINT_VELOCITY:
+         case JOINT_ACCELERATION:
+         case JOINT_TAU:
+            return true;
+         default:
+            return false;
+         }
+      }
+
+      public boolean isWrenchSensor()
+      {
+         return this == SensorType.TORQUE_SENSOR || this == FORCE_SENSOR;
+      }
+
+      public boolean isIMUSensor()
+      {
+         switch (this)
+         {
+         case IMU_ORIENTATION:
+         case IMU_ANGULAR_VELOCITY:
+         case IMU_LINEAR_ACCELERATION:
+            return true;
+         default:
+            return false;
+         }
+      }
+
+      public String getPrefixForProcessorName(String filterNameLowerCaseNoTrailingUnderscore)
+      {
+         switch (this)
+         {
+         case JOINT_POSITION:
+         case IMU_ORIENTATION:
+            return filterNameLowerCaseNoTrailingUnderscore + "_q_";
+         case JOINT_VELOCITY:
+            return filterNameLowerCaseNoTrailingUnderscore + "_qd_";
+         case JOINT_ACCELERATION:
+         case IMU_LINEAR_ACCELERATION:
+            return filterNameLowerCaseNoTrailingUnderscore + "_qdd_";
+         case JOINT_TAU:
+            return filterNameLowerCaseNoTrailingUnderscore + "_tau_";
+         case IMU_ANGULAR_VELOCITY:
+            return filterNameLowerCaseNoTrailingUnderscore + "_qd_w";
+         case FORCE_SENSOR:
+            return filterNameLowerCaseNoTrailingUnderscore + "_force_";
+         case TORQUE_SENSOR:
+            return filterNameLowerCaseNoTrailingUnderscore + "_torque_";
+         default:
+            throw new RuntimeException("Should not get there.");
+         }
+      }
+   };
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final LongYoVariable timestamp = new LongYoVariable("timestamp", registry);
@@ -272,6 +334,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       {
          processors.get(j).update();
       }
+   }
+
+   public void addAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType)
+   {
+      
    }
 
    /**
