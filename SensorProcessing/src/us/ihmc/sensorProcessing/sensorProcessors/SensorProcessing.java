@@ -514,7 +514,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     */
    public void addJointVelocityBacklashFilter(DoubleYoVariable slopTime, boolean forVizOnly)
    {
-      addJointVelocityAlphaFilterWithJointsToIgnore(slopTime, forVizOnly);
+      addJointVelocityBacklashFilterWithJointsToIgnore(slopTime, forVizOnly);
    }
 
    /**
@@ -527,7 +527,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     */
    public void addJointVelocityBacklashFilterOnlyForSpecifiedJoints(DoubleYoVariable slopTime, boolean forVizOnly, String... jointsToBeProcessed)
    {
-      addJointVelocityAlphaFilterWithJointsToIgnore(slopTime, forVizOnly, invertJointSelection(jointsToBeProcessed));
+      addJointVelocityBacklashFilterWithJointsToIgnore(slopTime, forVizOnly, invertJointSelection(jointsToBeProcessed));
    }
 
    /**
