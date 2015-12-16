@@ -30,8 +30,7 @@ public abstract class VideoPacketListenerBehavior extends BehaviorInterface impl
       if (cameraData.isNewPacketAvailable())
       {
          VideoPacket packet = cameraData.getNewestPacket();
-          videoDataClient.consumeObject(packet.getData(), packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
+         videoDataClient.consumeObject(packet.getData(), packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
       }
    }
-
 }

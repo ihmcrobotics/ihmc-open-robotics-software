@@ -47,19 +47,22 @@ public class YoArtifactVector extends Artifact
 
    public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
-      graphics.setColor(new Color(color.getX(), color.getY(), color.getZ()));
+      if (isVisible)
+      {
+         graphics.setColor(new Color(color.getX(), color.getY(), color.getZ()));
 
-      basePoint.get(endPoint);
-      endPoint.x += vector.getX();
-      endPoint.y += vector.getY();
+         basePoint.get(endPoint);
+         endPoint.x += vector.getX();
+         endPoint.y += vector.getY();
 
-      arrowHeadPoints = getArrowHeadPoints(vector.getFrameVector2dCopy().getVectorCopy(), endPoint);
+         arrowHeadPoints = getArrowHeadPoints(vector.getFrameVector2dCopy().getVectorCopy(), endPoint);
 
-      plotterGraphics.setCenter(Xcenter, Ycenter);
-      plotterGraphics.setScale(scaleFactor);
+         plotterGraphics.setCenter(Xcenter, Ycenter);
+         plotterGraphics.setScale(scaleFactor);
 
-      plotterGraphics.drawLineSegment(graphics, basePoint.getX(), basePoint.getY(), endPoint.getX(), endPoint.getY());
-      plotterGraphics.fillPolygon(graphics, arrowHeadPoints);
+         plotterGraphics.drawLineSegment(graphics, basePoint.getX(), basePoint.getY(), endPoint.getX(), endPoint.getY());
+         plotterGraphics.fillPolygon(graphics, arrowHeadPoints);
+      }
    }
 
    private ArrayList<Point2d> getArrowHeadPoints(Vector2d vector, Point2d endPoint)

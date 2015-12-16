@@ -12,7 +12,8 @@ public class JoystickUpdater implements Runnable
    private static final boolean DEBUG = false;
    
    private final Controller joystickController;
-   private final ArrayList<JoystickEventListener> listeners;
+   private final Object listnerConch = new Object();
+   private final ArrayList<JoystickEventListener> listeners = new ArrayList<JoystickEventListener>();
    private final ArrayList<JoystickGeneralListener> generalListenersList;
    
    private HashMap<String, Float> lastValues = new HashMap<String, Float>();
@@ -20,13 +21,28 @@ public class JoystickUpdater implements Runnable
    private float deadband = 0.0f;
    private boolean connected;
 
-   public JoystickUpdater(Controller joystickController, ArrayList<JoystickEventListener> listeners, ArrayList<JoystickGeneralListener> generalListenersList)
+   public JoystickUpdater(Controller joystickController, ArrayList<JoystickGeneralListener> generalListenersList)
    {
       this.joystickController = joystickController;
-      this.listeners = listeners;
       this.generalListenersList = generalListenersList;
       
       connected = true;
+   }
+   
+   public void addListener(JoystickEventListener listener)
+   {
+      synchronized (listnerConch)
+      {
+         listeners.add(listener);
+      }
+   }
+   
+   public void clearListeners()
+   {
+      synchronized (listnerConch)
+      {
+         listeners.clear();
+      }
    }
 
    @Override
@@ -59,10 +75,12 @@ public class JoystickUpdater implements Runnable
                   System.out.println("event = " + event);
                }
 
-               for (JoystickEventListener listener : listeners)
+               synchronized (listnerConch)
                {
-                  listener.processEvent(event);
-
+                  for (JoystickEventListener listener : listeners)
+                  {
+                     listener.processEvent(event);
+                  }
                }
 
                for (JoystickGeneralListener listener : generalListenersList)

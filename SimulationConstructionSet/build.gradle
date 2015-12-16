@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'java-library-distribution'
 apply from: 'gradleScripts/util.gradle'
 
 sourceCompatibility = 1.7
@@ -17,10 +18,46 @@ jar {
       "Implementation-Title": project.name,
       "Implementation-Version": project.version,
       "Implementation-Vendor": "IHMC",
-      
+
       "Bundle-Name": project.name,
       "Bundle-Version": project.version,
       "Bundle-License": "http://www.apache.org/licenses/LICENSE-2.0.txt",
       "Bundle-Vendor": "IHMC")
    }
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes(
+                "Created-By": "IHMC Gradle Build Script",
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "IHMC",
+
+                "Bundle-Name": project.name,
+                "Bundle-Version": project.version,
+                "Bundle-License": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+                "Bundle-Vendor": "IHMC")
+    }
+
+    from sourceSets.main.runtimeClasspath
+
+    doFirst {
+        delete "${buildDir}/tmp"
+    }
+
+    baseName = "${project.name}-fat"
+
+    def deps = project.configurations.runtime
+    def depClasses = { deps.collect { it.isDirectory() ? it : project.zipTree(it) } }
+
+    from(depClasses) {
+        exclude 'META-INF/MANIFEST.MF', 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+    }
+}
+
+distributions {
+    main {
+        baseName = 'SimulationConstructionSet'
+    }
 }

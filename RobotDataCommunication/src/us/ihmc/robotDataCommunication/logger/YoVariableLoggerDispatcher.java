@@ -12,6 +12,7 @@ import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogBroadcastListener;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcastClient;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class YoVariableLoggerDispatcher implements LogBroadcastListener
 {
@@ -25,7 +26,7 @@ public class YoVariableLoggerDispatcher implements LogBroadcastListener
       InetAddress myIP = LogUtils.getMyIP(NetworkParameters.getHost(NetworkParameterKeys.logger));
       NetworkInterface iface = NetworkInterface.getByInetAddress(myIP);
 
-      System.out.println("Listening on interface " + iface);
+      PrintTools.info("Listening on interface " + iface);
       LogSessionBroadcastClient client = new LogSessionBroadcastClient(iface, this);
       client.start();
       System.out.println("Client started, waiting for announcements");

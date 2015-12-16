@@ -1,9 +1,9 @@
 package us.ihmc.acsell.hardware.command;
 
-import us.ihmc.acsell.fourbar.FourbarProperties;
 import us.ihmc.acsell.hardware.AcsellActuator;
 import us.ihmc.acsell.hardware.state.AcsellFourbarCalculator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.kinematics.fourbar.FourbarProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class AcsellKneeActuatorCommand extends AcsellActuatorCommand
@@ -30,7 +30,7 @@ public class AcsellKneeActuatorCommand extends AcsellActuatorCommand
    {
       fourbar.update(jointCommand);
       
-      double currentRatio = ratio * fourbar.getFourbarRatio();
+      double currentRatio = ratio * fourbar.getFourbarRatioBasedOnCalculatedInputAngle();
 
       this.setQdd_d(jointCommand.getQdd_d()*currentRatio); //TODO: have fourbar calculate the change in ratio as well
       this.setTauDesired(jointCommand.getTauDesired() / currentRatio);

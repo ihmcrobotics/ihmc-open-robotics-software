@@ -1,5 +1,6 @@
 package us.ihmc.multicastLogDataProtocol.broadcast;
 
+import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -17,12 +18,16 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
+import us.ihmc.tools.io.printing.PrintTools;
+
 public class LogSessionDisplay extends JFrame
 {
    private static final long serialVersionUID = -4663925866110757300L;
 
    private final DefaultTableModel model;
    private final ArrayList<LogSessionBroadcastClient> clients = new ArrayList<>();
+
+   private static RobotIPToNameRemapHandler remapHandler;
 
    public LogSessionDisplay() throws IOException
    {
@@ -32,6 +37,7 @@ public class LogSessionDisplay extends JFrame
    public LogSessionDisplay(MouseAdapter mouseAdapter) throws IOException
    {
       super("Control sessions");
+      setMinimumSize(new Dimension(1024, 320));
       setLocationRelativeTo(null);
       setLocationByPlatform(true);
 
@@ -79,10 +85,7 @@ public class LogSessionDisplay extends JFrame
       getContentPane().add(table.getTableHeader());
       getContentPane().add(scroller);
       pack();
-
    }
-
-
 
    private static String ipToString(byte[] address)
    {
@@ -99,6 +102,15 @@ public class LogSessionDisplay extends JFrame
 
    public static AnnounceRequest getAnnounceRequest()
    {
+      return getAnnounceRequest(null);
+   }
+
+   public static AnnounceRequest getAnnounceRequest(RobotIPToNameRemapHandler remapHandler)
+   {
+      if(remapHandler != null)
+      {
+         LogSessionDisplay.remapHandler = remapHandler;
+      }
       try
       {
          return selectLogSession();
@@ -147,6 +159,7 @@ public class LogSessionDisplay extends JFrame
          {
             display.start();
             display.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            PrintTools.info("Showing");
             display.setVisible(true);
          }
       });
@@ -183,7 +196,7 @@ public class LogSessionDisplay extends JFrame
       
       public LogSessionCallback(NetworkInterface iface)
       {
-         System.out.println("Listening on interface " + iface);
+         PrintTools.info(LogSessionCallback.class, "Listening on interface " + iface);
          this.iface = iface;
       }
 
@@ -193,7 +206,8 @@ public class LogSessionDisplay extends JFrame
 
          final String name = description.getName();
          final long sessionId = description.getSessionID();
-         final String controlIp = ipToString(description.getControlIP());
+         String controlIp = ipToString(description.getControlIP());
+         final String controlIpDisplay = remapHandler == null ? controlIp : remapHandler.getRemap(controlIp);
          final int port = description.getControlPort();
          final String group = ipToString(description.getDataIP());
          final int dataPort = description.getDataPort();
@@ -211,8 +225,8 @@ public class LogSessionDisplay extends JFrame
                      return;
                   }
                }
-               System.out.println(description);
-               model.addRow(new Object[] { name, description, iface, controlIp, port, group, dataPort });
+               PrintTools.info(description.getName() + " came online");
+               model.addRow(new Object[] { name, description, iface, controlIpDisplay, port, group, dataPort });
 
             }
          });
@@ -240,6 +254,11 @@ public class LogSessionDisplay extends JFrame
             }
          });
       }
+   }
+
+   public interface RobotIPToNameRemapHandler
+   {
+      String getRemap(String ipAddress);
    }
 
    public static void main(String[] args)
