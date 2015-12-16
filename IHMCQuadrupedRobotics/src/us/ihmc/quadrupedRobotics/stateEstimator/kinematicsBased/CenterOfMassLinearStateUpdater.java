@@ -34,7 +34,7 @@ public class CenterOfMassLinearStateUpdater
    private Twist rootJointTwist = new Twist();
    private final TwistCalculator twistCalculator;
 
-   private final QuadrantDependentList<YoFramePoint> footPositions = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoFramePoint> estimatedFeetPositions = new QuadrantDependentList<>();
 
    private final CenterOfMassKinematicBasedCalculator comAndFeetCalculator;
 
@@ -63,7 +63,7 @@ public class CenterOfMassLinearStateUpdater
       for (RobotQuadrant quadrant : RobotQuadrant.values())
       {
          YoFramePoint footPosition = new YoFramePoint(quadrant.getCamelCaseNameForStartOfExpression() + "EstimatedFootPositionInWorld", worldFrame, registry);
-         footPositions.set(quadrant, footPosition);
+         estimatedFeetPositions.set(quadrant, footPosition);
 
          YoGraphicPosition footPositionViz = new YoGraphicPosition(quadrant.getCamelCaseNameForStartOfExpression() + "EstimatedPosition", footPosition, 0.02,
                YoAppearance.Yellow());
@@ -71,7 +71,7 @@ public class CenterOfMassLinearStateUpdater
          graphicsListRegistry.registerYoGraphic("KinematicsBasedStateEstimator", footPositionViz);
       }
 
-      comAndFeetCalculator = new CenterOfMassKinematicBasedCalculator(inverseDynamicsStructure, shinRigidBodies, footFrames, registry);
+      comAndFeetCalculator = new CenterOfMassKinematicBasedCalculator(inverseDynamicsStructure, shinRigidBodies, footFrames, estimatedFeetPositions, registry, graphicsListRegistry);
 
       parentRegistry.addChild(registry);
    }
@@ -80,7 +80,7 @@ public class CenterOfMassLinearStateUpdater
    {
       //initialize the CoM to be at 0.0 0.0 0.0 in worldFrame
       //XXX: will need to do initialize that more smartly
-      comAndFeetCalculator.initialize(new FramePoint(worldFrame, 0.0, 0.0, initialHeight), footPositions);
+      comAndFeetCalculator.initialize(new FramePoint(worldFrame, 0.0, 0.0, initialHeight), estimatedFeetPositions);
       comAndFeetCalculator.getRootJointPositionAndVelocity(rootJointPosition, rootJointVelocity);
       updateRootJoint();
       updateViz();
@@ -88,7 +88,7 @@ public class CenterOfMassLinearStateUpdater
 
    public void updateCenterOfMassLinearState(ArrayList<RobotQuadrant> feetInContact, ArrayList<RobotQuadrant> feetNotInContact)
    {
-      comAndFeetCalculator.estimateFeetAndComPosition(feetInContact, feetNotInContact, footPositions, comPosition);
+      comAndFeetCalculator.estimateFeetAndComPosition(feetInContact, feetNotInContact, estimatedFeetPositions, comPosition);
       updateRootJoint();
       updateViz();
    }
