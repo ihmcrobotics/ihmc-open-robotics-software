@@ -73,6 +73,14 @@ public class FourbarCalculator
       double da1db = 1 - L1 * x / Dsqrd; //Derivative of a1 wrt beta
       double da2db = L1 * y * (D - L2 * Math.cos(a2)) / (L2 * Dsqrd * Math.sin(a2)); //Derivative of a2 wrt beta
       tempRatio = da1db + da2db;
-      return a1 + a2;
+      double inputAngle = a1 + a2;
+      if(Double.isNaN(inputAngle))
+      {
+         return 0.0;
+      }
+      else
+      {
+         return inputAngle;
+      }
    }
 }
