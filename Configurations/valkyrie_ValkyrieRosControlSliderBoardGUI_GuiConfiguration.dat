@@ -123,11 +123,11 @@ Tab0
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>2</Graph Array Window Size>
+<Graph Array Window Size>1</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
-<WindowLocation>5759.0, 0.0</WindowLocation>
-<WindowSize>1922.0, 1081.0</WindowSize>
+<WindowLocation>5760.0, 0.0</WindowLocation>
+<WindowSize>1920.0, 1080.0</WindowSize>
 <GraphGroup>
 	<Cols>4</Cols>
 	<Graph>
@@ -419,62 +419,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-</Graph Array Window1><Graph Array Window2>
-<ScreenID>3</ScreenID>
-<WindowLocation>3840.0, 0.0</WindowLocation>
-<WindowSize>1920.0, 1200.0</WindowSize>
-<GraphGroup>
-	<Cols>2</Cols>
-	<Graph>
-		<Variables>valkyrie.qd_torsoPitch,root.remotemain.ValkyrieRosControlSliderBoard.torsoPitch.bl_qd_torsoPitchfiniteDifferenceVelocity</Variables>
-		<GraphConfiguration>
-			<Name>config34</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>valkyrie.qd_torsoRoll,root.remotemain.ValkyrieRosControlSliderBoard.torsoRoll.bl_qd_torsoRollfiniteDifferenceVelocity</Variables>
-		<GraphConfiguration>
-			<Name>config35</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>valkyrie.q_torsoPitch</Variables>
-		<GraphConfiguration>
-			<Name>config36</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>valkyrie.q_torsoRoll</Variables>
-		<GraphConfiguration>
-			<Name>config37</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-</GraphGroup>
-</Graph Array Window2>
+</Graph Array Window1>
 
 <Extra Panels>
 <Main Viewport>
@@ -483,9 +428,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>5.2193420078437915</Camera X>
- <Camera Y>2.981797886902379</Camera Y>
- <Camera Z>0.7653794631193505</Camera Z>
+ <Camera X>5.8470072826370325</Camera X>
+ <Camera Y>-0.19628029905675248</Camera Y>
+ <Camera Z>1.1294147590281949</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -509,8 +454,8 @@ Tab0
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.0</Fix X>
-<Fix Y>0.0</Fix Y>
-<Fix Z>0.6</Fix Z>
+<Fix X>-0.05309884391670183</Fix X>
+<Fix Y>-0.08970127645815507</Fix Y>
+<Fix Z>-0.027040431346621978</Fix Z>
 </Fix Position>
 </Canvas 1>
