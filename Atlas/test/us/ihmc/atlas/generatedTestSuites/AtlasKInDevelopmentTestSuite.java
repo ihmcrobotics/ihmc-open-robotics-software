@@ -9,13 +9,15 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Slow)
+@TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasRemoveMultipleDebrisBehaviorTest.class
+   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class,
+   us.ihmc.atlas.AtlasGFERosPacketTest.class,
+   us.ihmc.atlas.HumanoidBehaviorsICPFaultDetectionTest.class
 })
 
-public class AtlasDSlowTestSuite
+public class AtlasKInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {

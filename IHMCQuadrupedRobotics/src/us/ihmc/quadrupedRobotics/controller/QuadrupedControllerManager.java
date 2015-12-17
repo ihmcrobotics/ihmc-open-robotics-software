@@ -59,7 +59,7 @@ public class QuadrupedControllerManager implements RobotController
             sdfFullRobotModel, stateEstimator, inverseKinematicsCalculators, globalDataProducer, robotTimestamp, registry, yoGraphicsListRegistry,
             yoGraphicsListRegistryForDetachedOverhead);
 
-      QuadrupedSliderBoardController sliderBoardController = new QuadrupedSliderBoardController(sdfFullRobotModel, registry);
+      QuadrupedLegJointSliderBoardController sliderBoardController = new QuadrupedLegJointSliderBoardController(sdfFullRobotModel, registry);
 
       stateMachine.addState(standPrepController);
       stateMachine.addState(standReadyController);
@@ -88,7 +88,7 @@ public class QuadrupedControllerManager implements RobotController
             .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.STAND_PREP));
 
       // TODO: Start in a "freeze" state.
-      stateMachine.setCurrentState(QuadrupedControllerState.POSITION_CRAWL);
+      stateMachine.setCurrentState(QuadrupedControllerState.SLIDER_BOARD);
       stateMachine.getCurrentState().doTransitionIntoAction();
    }
 

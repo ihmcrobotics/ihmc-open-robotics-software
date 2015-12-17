@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasDrillPickUpBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasPushButtonBehaviorTest.class
 })
 
 public class AtlasBInDevelopmentTestSuite

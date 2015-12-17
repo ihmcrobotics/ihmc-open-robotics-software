@@ -12,10 +12,14 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.roughTerrainWalking.AtlasSwingTrajectoryTest.class
+   us.ihmc.atlas.calib.KinematicCalibrationHeadLoopResidualTest.class,
+   us.ihmc.atlas.AtlasMultiContactTest.class,
+   us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class,
+   us.ihmc.atlas.utilities.kinematics.AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class,
+   us.ihmc.atlas.commonWalkingControlModules.sensors.AtlasProvidedMassMatrixToolRigidBodyTest.class
 })
 
-public class AtlasBFastTestSuite
+public class AtlasMFastTestSuite
 {
    public static void main(String[] args)
    {
