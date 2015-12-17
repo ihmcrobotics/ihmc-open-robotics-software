@@ -14,6 +14,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
 import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -77,7 +78,7 @@ public class ComposableStateEstimatorEvaluator
          {
             DoubleYoVariable alphaFilter = sensorProcessing.createAlphaFilter("defaultAlphaFilter", 12.0);
 
-            sensorProcessing.addJointPositionAlphaFilter(alphaFilter, false);
+            sensorProcessing.addSensorAlphaFilter(alphaFilter, false, SensorType.JOINT_POSITION);
             sensorProcessing.addJointVelocityAlphaFilter(alphaFilter, false);
             sensorProcessing.addIMUOrientationAlphaFilter(alphaFilter, false);
             sensorProcessing.addIMUAngularVelocityAlphaFilter(alphaFilter, false);
