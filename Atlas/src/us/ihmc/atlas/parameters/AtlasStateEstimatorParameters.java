@@ -1,9 +1,11 @@
 package us.ihmc.atlas.parameters;
 
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.FORCE_SENSOR;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ANGULAR_VELOCITY;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_LINEAR_ACCELERATION;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ORIENTATION;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_VELOCITY;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.TORQUE_SENSOR;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -114,8 +116,11 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, IMU_ANGULAR_VELOCITY);
       sensorProcessing.addSensorAlphaFilter(linearAccelerationAlphaFilter, false, IMU_LINEAR_ACCELERATION);
 
-      sensorProcessing.addForceSensorAlphaFilterOnlyForSpecifiedSensors(wristForceAlphaFilter, false, wristForceSensorNames.get(RobotSide.LEFT), wristForceSensorNames.get(RobotSide.RIGHT));
-      sensorProcessing.addForceSensorAlphaFilterOnlyForSpecifiedSensors(wristForceAlphaFilter, false, wristForceSensorNames.get(RobotSide.LEFT), wristForceSensorNames.get(RobotSide.RIGHT));
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(wristForceAlphaFilter, false, FORCE_SENSOR, wristForceSensorNames.get(robotSide));
+         sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(wristForceAlphaFilter, false, TORQUE_SENSOR, wristForceSensorNames.get(robotSide));
+      }
    }
 
    private String[] createArmJointNames()
