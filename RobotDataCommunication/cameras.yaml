@@ -34,4 +34,17 @@
         mode: 9
         interlaced: false
         videoIn: SDI
-        
+
+-
+        description: ValkyrieJSCA
+        device: 0
+        mode: 9
+        interlaced: false
+        videoIn: SDI
+
+-
+        description: ValkyrieJSCB
+        device: 1
+        mode: 9
+        interlaced: false
+        videoIn: SDI

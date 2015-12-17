@@ -22,6 +22,14 @@ public class Timer
       lastTime = cpu();
    }
 
+   public void reset()
+   {
+      start();
+      
+      deltaSum = 0.0;
+      numLaps = 0;
+   }
+
    public double lap()
    {
       currentTime = cpu();
@@ -42,12 +50,9 @@ public class Timer
       if (numLaps > 0)
          averageLap = deltaSum / numLaps;
       
-      deltaSum = 0.0;
-      numLaps = 0;
-      
       return averageLap;
    }
-
+   
    public double totalElapsed()
    {
       return cpu() - startTime;

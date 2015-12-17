@@ -21,45 +21,40 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 public class RosMainNode implements NodeMain
 {
-   private final LinkedHashMap<String, RosTopicSubscriberInterface<? extends Message>> subscribers = new LinkedHashMap<String,
-                                                                                                        RosTopicSubscriberInterface<? extends Message>>();
+   private final LinkedHashMap<String, RosTopicSubscriberInterface<? extends Message>> subscribers = new LinkedHashMap<String, RosTopicSubscriberInterface<? extends Message>>();
    private final LinkedHashMap<String, RosTopicPublisher<? extends Message>> publishers = new LinkedHashMap<String, RosTopicPublisher<? extends Message>>();
-   private final LinkedHashMap<String, RosServiceClient<? extends Message, ? extends Message>> clients = new LinkedHashMap<String,
-                                                                                                            RosServiceClient<? extends Message,
-                                                                                                               ? extends Message>>();
-   private final LinkedHashMap<String, RosServiceServer<? extends Message, ? extends Message>> servers = new LinkedHashMap<String,
-                                                                                                            RosServiceServer<? extends Message,
-                                                                                                               ? extends Message>>();
+   private final LinkedHashMap<String, RosServiceClient<? extends Message, ? extends Message>> clients = new LinkedHashMap<String, RosServiceClient<? extends Message, ? extends Message>>();
+   private final LinkedHashMap<String, RosServiceServer<? extends Message, ? extends Message>> servers = new LinkedHashMap<String, RosServiceServer<? extends Message, ? extends Message>>();
 
    private final LinkedHashMap<String, ParameterListener> parameterListeners = new LinkedHashMap<String, ParameterListener>();
    private final LinkedHashMap<RosTopicSubscriberInterface<? extends Message>, Subscriber<? extends Message>> rosSubscribers = new LinkedHashMap<RosTopicSubscriberInterface<? extends Message>, Subscriber<? extends Message>>();
-      
 
    private final URI masterURI;
    private boolean isStarted = false;
-   
+
    private boolean useTf2 = false;
 
    private final String graphName;
    private ParameterTree parameters;
-   
+
    private boolean isShutdownInProgress = false;
-   
+
    private NodeMainExecutor nodeMainExecutor = null;
-  
+
    private ConnectedNode connectedNode = null;
-  
+
    public RosMainNode(URI masterURI, String graphName)
    {
       this(masterURI, graphName, true);
    }
-   
+
    public RosMainNode(URI masterURI, String graphName, boolean useTf2)
    {
       this.masterURI = masterURI;
@@ -71,17 +66,17 @@ public class RosMainNode implements NodeMain
    {
       return isStarted;
    }
-   
+
    public ParameterTree getParameters()
    {
       return parameters;
    }
-   
+
    public boolean isUseTf2()
    {
       return useTf2;
    }
-   
+
    public void attachServiceClient(String topicName, RosServiceClient<? extends Message, ? extends Message> client)
    {
       checkNotStarted();
@@ -100,7 +95,6 @@ public class RosMainNode implements NodeMain
       checkNotStarted();
 
       publishers.put(topicName, publisher);
-
    }
 
    public void attachSubscriber(String topicName, RosTopicSubscriberInterface<? extends Message> subscriber)
@@ -120,7 +114,7 @@ public class RosMainNode implements NodeMain
          subscribers.remove(subscriber.getMessageType());
       }
    }
-   
+
    public void attachParameterListener(String topicName, ParameterListener listener)
    {
       checkNotStarted();
@@ -135,16 +129,16 @@ public class RosMainNode implements NodeMain
       }
    }
 
-   @SuppressWarnings({"unchecked", "rawtypes"})
+   @SuppressWarnings({ "unchecked", "rawtypes" })
    public void onStart(ConnectedNode connectedNode)
    {
       parameters = connectedNode.getParameterTree();
       for (Entry<String, RosTopicSubscriberInterface<? extends Message>> entry : subscribers.entrySet())
       {
          final RosTopicSubscriberInterface rosTopicSubscriber = entry.getValue();
-         if(entry.getKey() == null)
+         if (entry.getKey() == null)
          {
-            System.err.println("ROSMAINNODE.JAVA: Ros Topic was NULL! for msg type of " + rosTopicSubscriber.getMessageType());
+            PrintTools.error(this, "RosTopic was null! Message type: " + rosTopicSubscriber.getMessageType());
             continue;
          }
          Subscriber<? extends Message> subscriber = connectedNode.newSubscriber(entry.getKey(), rosTopicSubscriber.getMessageType());
@@ -154,7 +148,6 @@ public class RosMainNode implements NodeMain
          rosTopicSubscriber.connected();
       }
 
-
       for (Entry<String, RosTopicPublisher<? extends Message>> entry : publishers.entrySet())
       {
          final RosTopicPublisher rosTopicPublisher = entry.getValue();
@@ -163,55 +156,51 @@ public class RosMainNode implements NodeMain
          rosTopicPublisher.setConnectedNode(connectedNode);
          rosTopicPublisher.connected();
       }
-      
-      for(Entry<String, RosServiceServer<? extends Message, ? extends Message>> entry: servers.entrySet())
+
+      for (Entry<String, RosServiceServer<? extends Message, ? extends Message>> entry : servers.entrySet())
       {
-            final RosServiceServer<? extends Message, ? extends Message> rosServiceServer= entry.getValue();
-            ServiceServer server =connectedNode.newServiceServer(entry.getKey(), rosServiceServer.getRequestType(), rosServiceServer);
-            rosServiceServer.setServiceServer(server, connectedNode, entry.getKey());
+         final RosServiceServer<? extends Message, ? extends Message> rosServiceServer = entry.getValue();
+         ServiceServer server = connectedNode.newServiceServer(entry.getKey(), rosServiceServer.getRequestType(), rosServiceServer);
+         rosServiceServer.setServiceServer(server, connectedNode, entry.getKey());
       }
 
       for (Entry<String, RosServiceClient<? extends Message, ? extends Message>> entry : clients.entrySet())
       {
          final RosServiceClient<? extends Message, ? extends Message> rosServiceClient = entry.getValue();
-         
-         while(!isShutdownInProgress)
+
+         while (!isShutdownInProgress)
          {
-                 try
-                 {
-                    ServiceClient client = connectedNode.newServiceClient(entry.getKey(), rosServiceClient.getRequestType());
-                    rosServiceClient.setServiceClient(client,connectedNode, entry.getKey());
-                    break;
-                 }
-                 catch (ServiceNotFoundException e)
-                 {
-                    System.err.println(getClass().getSimpleName()+":Waiting for service "+ entry.getKey() + " (check spelling/service provider)...");
-                    ThreadTools.sleep(2000);
-                 }
+            try
+            {
+               ServiceClient client = connectedNode.newServiceClient(entry.getKey(), rosServiceClient.getRequestType());
+               rosServiceClient.setServiceClient(client, connectedNode, entry.getKey());
+               break;
+            }
+            catch (ServiceNotFoundException e)
+            {
+               //lPrintTools.error(this, "Waiting for service " + entry.getKey() + " (check spelling/service provider)...");
+               ThreadTools.sleep(2000);
+            }
          }
       }
-      
-   
-      
-      for(Entry<String, ParameterListener> entry : parameterListeners.entrySet())
+
+      for (Entry<String, ParameterListener> entry : parameterListeners.entrySet())
       {
          connectedNode.getParameterTree().addParameterListener(entry.getKey(), entry.getValue());
       }
-      
+
       this.connectedNode = connectedNode;
       isStarted = true;
-      
    }
-   
+
    public Time getCurrentTime()
    {
-      if(connectedNode == null)
+      if (connectedNode == null)
       {
          throw new RuntimeException("ROS Node is not connected");
       }
       return connectedNode.getCurrentTime();
    }
-   
 
    public void onShutdown(Node node)
    {
@@ -237,10 +226,9 @@ public class RosMainNode implements NodeMain
       nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
       nodeMainExecutor.execute(this, nodeConfiguration);
    }
-   
+
    public void shutdown()
    {
       nodeMainExecutor.shutdown();
    }
-
 }

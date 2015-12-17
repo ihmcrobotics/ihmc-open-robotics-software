@@ -13,10 +13,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.ihmcPerception.chessboardDetection.ChessboardPoseEstimatorTest.class,
-   us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBoxTest.class,
-   us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionCylinderTest.class,
+   us.ihmc.ihmcPerception.depthData.PointCloudWorldPacketGeneratorTest.class,
    us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionSphereTest.class,
-   us.ihmc.ihmcPerception.depthData.PointCloudWorldPacketGeneratorTest.class
+   us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBoxTest.class,
+   us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionCylinderTest.class
 })
 
 public class IHMCPerceptionAFastTestSuite
