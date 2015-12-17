@@ -343,16 +343,36 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       }
    }
 
+   /**
+    * Add a low-pass filter stage for the given sensor signal.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
    public void addSensorAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType)
    {
       addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, sensorType);
    }
 
+   /**
+    * Add a low-pass filter stage for the given sensor signal.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param sensorsToBeProcessed list of the names of the sensors that need to be processed.
+    */
    public void addSensorAlphaFilterOnlyForSpecifiedSensors(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType, String... sensorsToBeProcessed)
    {
       addSensorAlphaFilterOnlyForSpecifiedSensors(alphaFilter, forVizOnly, sensorType, invertSensorSelection(sensorType, sensorsToBeProcessed));
    }
 
+   /**
+    * Add a low-pass filter stage for the given sensor signal.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param sensorsToIgnore list of the names of the sensors to ignore.
+    */
    public void addSensorAlphaFilterWithSensorsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType, String... sensorsToIgnore)
    {
       List<String> sensorToIgnoreList = new ArrayList<>();
@@ -447,19 +467,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (!forVizOnly)
             outputJointSignals.put(oneDoFJoint, filteredJointPosition);
       }
-   }
-
-   /**
-    * Add a low-pass filter stage on the joint positions.
-    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
-    * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
-    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
-    */
-   @Deprecated
-   public void addJointPositionAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
-   {
-      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.JOINT_POSITION);
    }
 
    /**
