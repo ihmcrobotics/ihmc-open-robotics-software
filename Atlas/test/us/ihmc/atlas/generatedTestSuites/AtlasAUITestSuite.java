@@ -12,8 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.UI)
 @SuiteClasses
 ({
-   us.ihmc.atlas.networkProcessor.depthData.AtlasPointCloudDataReceiverTest.class,
-   us.ihmc.atlas.posePlayback.AtlasPlaybackPoseInterpolatorTest.class
+   us.ihmc.atlas.networkProcessor.depthData.AtlasPointCloudDataReceiverTest.class
 })
 
 public class AtlasAUITestSuite

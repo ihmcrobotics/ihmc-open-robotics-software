@@ -12,13 +12,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatusTest.class,
-   us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacketTest.class,
-   us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBufferTest.class,
-   us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepGeneratorsTest.class,
    us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPathTest.class,
+   us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepGeneratorsTest.class,
+   us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapperTest.class,
    us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapperTest.class,
-   us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapperTest.class
+   us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacketTest.class,
+   us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatusTest.class,
+   us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBufferTest.class
 })
 
 public class IHMCHumanoidRoboticsAFastTestSuite
