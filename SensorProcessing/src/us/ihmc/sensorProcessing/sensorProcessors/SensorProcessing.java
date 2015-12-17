@@ -749,36 +749,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
-    */
-   @Deprecated
-   public void addForceSensorAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
-   {
-      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.FORCE_SENSOR);
-      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.TORQUE_SENSOR);
-   }
-
-   /**
-    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
-    */
-   @Deprecated
-   public void addForceSensorAlphaFilterOnlyForSpecifiedSensors(DoubleYoVariable alphaFilter, boolean forVizOnly, String... sensorsToBeProcessed)
-   {
-      addSensorAlphaFilterOnlyForSpecifiedSensors(alphaFilter, forVizOnly, SensorType.FORCE_SENSOR, sensorsToBeProcessed);
-      addSensorAlphaFilterOnlyForSpecifiedSensors(alphaFilter, forVizOnly, SensorType.TORQUE_SENSOR, sensorsToBeProcessed);
-   }
-
-   /**
-    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
-    */
-   @Deprecated
-   public void addForceSensorAlphaFilterWithSensorsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, String... sensorsToIgnore)
-   {
-      addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, SensorType.FORCE_SENSOR, sensorsToIgnore);
-      addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, SensorType.TORQUE_SENSOR, sensorsToIgnore);
-   }
-
-   /**
     * Add a low-pass filter stage on the joint torques.
     * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
     * @param alphaFilter low-pass filter parameter.
