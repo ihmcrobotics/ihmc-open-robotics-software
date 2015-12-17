@@ -12,16 +12,6 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
-import us.ihmc.sensorProcessing.imu.IMUSensor;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
-import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
-import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -30,7 +20,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.BacklashCompensatingVelocityYoVariable;
+import us.ihmc.robotics.math.filters.BacklashProcessingYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.filters.ProcessingYoVariable;
 import us.ihmc.robotics.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
@@ -39,6 +29,16 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.sensorProcessing.imu.IMUSensor;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
+import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 
 public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutputMapReadOnly
 {
@@ -460,7 +460,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
    
    /**
-    * Compute the joint velocities by calculating finite-difference on joint positions and applying a backlash compensator (see {@link BacklashCompensatingVelocityYoVariable}). It is then automatically low-pass filtered.
+    * Compute the joint velocities by calculating finite-difference on joint positions and applying a backlash compensator (see {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then automatically low-pass filtered.
     * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
@@ -471,7 +471,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions and applying a backlash compensator (see {@link BacklashCompensatingVelocityYoVariable}). It is then automatically low-pass filtered.
+    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions and applying a backlash compensator (see {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then automatically low-pass filtered.
     * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
@@ -483,7 +483,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions and applying a backlash compensator (see {@link BacklashCompensatingVelocityYoVariable}). It is then automatically low-pass filtered.
+    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions and applying a backlash compensator (see {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then automatically low-pass filtered.
     * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
@@ -570,6 +570,64 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
             outputJointVelocities.put(oneDoFJoint, filteredJointVelocity);
       }
       
+   }
+
+   /**
+    * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to the joint velocity.
+    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the robot is at rest.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param slopTime every time the velocity changes sign, a slop is engaged during which a confidence factor is ramped up from 0 to 1.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
+   public void addJointVelocityBacklashFilter(DoubleYoVariable slopTime, boolean forVizOnly)
+   {
+      addJointVelocityAlphaFilterWithJointsToIgnore(slopTime, forVizOnly);
+   }
+
+   /**
+    * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to the joint velocity.
+    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the robot is at rest.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param slopTime every time the velocity changes sign, a slop is engaged during which a confidence factor is ramped up from 0 to 1.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
+    */
+   public void addJointVelocityBacklashFilterOnlyForSpecifiedJoints(DoubleYoVariable slopTime, boolean forVizOnly, String... jointsToBeProcessed)
+   {
+      addJointVelocityAlphaFilterWithJointsToIgnore(slopTime, forVizOnly, invertJointSelection(jointsToBeProcessed));
+   }
+
+   /**
+    * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to the joint velocity.
+    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the robot is at rest.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param slopTime every time the velocity changes sign, a slop is engaged during which a confidence factor is ramped up from 0 to 1.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToIgnore list of the names of the joints to ignore.
+    */
+   public void addJointVelocityBacklashFilterWithJointsToIgnore(DoubleYoVariable slopTime, boolean forVizOnly, String... jointsToIgnore)
+   {
+      List<String> jointToIgnoreList = new ArrayList<>();
+      if (jointsToIgnore != null && jointsToIgnore.length > 0)
+         jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
+         String jointName = oneDoFJoint.getName();
+
+         if (jointToIgnoreList.contains(jointName))
+            continue;
+
+         DoubleYoVariable intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
+         List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
+         String suffix = "_sp" + processors.size();
+         BacklashProcessingYoVariable filteredJointVelocity = new BacklashProcessingYoVariable("bl_qd_" + jointName + suffix, "", intermediateJointVelocity, updateDT, slopTime, registry);
+         processors.add(filteredJointVelocity);
+
+         if (!forVizOnly)
+            outputJointVelocities.put(oneDoFJoint, filteredJointVelocity);
+      }
    }
 
    /**

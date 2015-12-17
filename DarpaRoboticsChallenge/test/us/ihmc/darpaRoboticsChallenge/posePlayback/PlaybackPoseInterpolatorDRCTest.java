@@ -9,15 +9,11 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
-import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.thread.ThreadTools;
 
 
 //TODO: update this test class to access poses via resource directory and undelete old pose files from svn
@@ -38,7 +34,15 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       double trajectoryTime = 1.0;
       
       PlaybackPoseSequence sequence = PosePlaybackExampleSequence.createExamplePoseSequenceMoveArm(fullRobotModel, delay, trajectoryTime);
-      playASequence(sdfRobot, sequence);
+      
+      PoseInterpolatorPlaybacker.playASequence(sdfRobot, sequence, SHOW_GUI, new PoseCheckerCallback()
+      {
+         @Override
+         public void checkPose(PlaybackPose pose, PlaybackPose previousPose)
+         {
+            assertSmallPoseDifference(pose, previousPose);
+         }
+      });
    }
 
 	@DeployableTestMethod(estimatedDuration = 1.2)
@@ -58,8 +62,14 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
 
       //sequence.writeToOutputStream(fullRobotModel, System.out);
 
-      playASequence(sdfRobot, sequence);
-      
+      PoseInterpolatorPlaybacker.playASequence(sdfRobot, sequence, SHOW_GUI, new PoseCheckerCallback()
+      {
+         @Override
+         public void checkPose(PlaybackPose pose, PlaybackPose previousPose)
+         {
+            assertSmallPoseDifference(pose, previousPose);
+         }
+      });
    }
    
 //   @Test(timeout=300000)
@@ -85,7 +95,15 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
       PlaybackPoseSequenceReader.appendFromFile(sequence, getClass().getClassLoader().getResourceAsStream("testSequence2.poseSequence"));
-      playASequence(sdfRobot, sequence);
+      
+      PoseInterpolatorPlaybacker.playASequence(sdfRobot, sequence, SHOW_GUI, new PoseCheckerCallback()
+      {
+         @Override
+         public void checkPose(PlaybackPose pose, PlaybackPose previousPose)
+         {
+            assertSmallPoseDifference(pose, previousPose);
+         }
+      });
    }
 
 	@DeployableTestMethod(estimatedDuration = 4.6)
@@ -100,60 +118,16 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       PlaybackPoseSequenceReader.appendFromFile(sequence, getClass().getClassLoader().getResourceAsStream("tenPoses.poseSequence"));
 
       System.out.println(sequence);
-      playASequence(sdfRobot, sequence);
-   }
-
-
-   public void playASequence(SDFHumanoidRobot sdfRobot, PlaybackPoseSequence sequence)
-   {
-      YoVariableRegistry registry = new YoVariableRegistry("PosePlaybackSmoothPoseInterpolatorTest");
-      PlaybackPoseInterpolator interpolator = new PlaybackPoseInterpolator(registry);
-
-      double simulateDT = 0.005;
       
-      SimulationConstructionSet scs = null;
-      scs = new SimulationConstructionSet(sdfRobot);
-      if (SHOW_GUI)
+      PoseInterpolatorPlaybacker.playASequence(sdfRobot, sequence, SHOW_GUI, new PoseCheckerCallback()
       {
-         int recordFrequency = 1;
-         scs.setDT(simulateDT, recordFrequency);
-         scs.addYoVariableRegistry(registry);
-         scs.startOnAThread();
-      }
-
-      double startTime = 1.7;
-      double time = startTime;
-
-      interpolator.startSequencePlayback(sequence, startTime);
-
-
-      PlaybackPose previousPose = null;
-      while (!interpolator.isDone())
-      {
-         time = time + simulateDT;
-         scs.setTime(time);
-
-         PlaybackPose pose = interpolator.getPose(time);
-
-//         System.out.println(pose);
-
-         if (SHOW_GUI)
+         @Override
+         public void checkPose(PlaybackPose pose, PlaybackPose previousPose)
          {
-            pose.setRobotAtPose(sdfRobot);
-            scs.tickAndUpdate();
+            assertSmallPoseDifference(pose, previousPose);
          }
-
-         assertSmallPoseDifference(pose, previousPose);
-         previousPose = pose;
-      }
-
-
-      if (SHOW_GUI)
-      {
-         ThreadTools.sleepForever();
-      }
+      });
    }
-
 
    private void assertSmallPoseDifference(PlaybackPose pose, PlaybackPose previousPose)
    {
@@ -170,5 +144,4 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       }
       assertTrue(smallDifference);
    }
-
 }
