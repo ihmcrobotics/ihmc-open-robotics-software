@@ -80,9 +80,9 @@ public class ComposableStateEstimatorEvaluator
 
             sensorProcessing.addSensorAlphaFilter(alphaFilter, false, SensorType.JOINT_POSITION);
             sensorProcessing.addSensorAlphaFilter(alphaFilter, false, SensorType.JOINT_VELOCITY);
-            sensorProcessing.addIMUOrientationAlphaFilter(alphaFilter, false);
-            sensorProcessing.addIMUAngularVelocityAlphaFilter(alphaFilter, false);
-            sensorProcessing.addIMULinearAccelerationAlphaFilter(alphaFilter, false);
+            sensorProcessing.addSensorAlphaFilter(alphaFilter, false, SensorType.IMU_ORIENTATION);
+            sensorProcessing.addSensorAlphaFilter(alphaFilter, false, SensorType.IMU_ANGULAR_VELOCITY);
+            sensorProcessing.addSensorAlphaFilter(alphaFilter, false, SensorType.IMU_LINEAR_ACCELERATION);
          }
       };
       SensorReaderFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(robot,
