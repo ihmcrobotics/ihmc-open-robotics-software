@@ -749,47 +749,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Add a low-pass filter stage on the joint torques.
-    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
-    * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
-    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
-    */
-   @Deprecated
-   public void addJointTauAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
-   {
-      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.JOINT_TAU);
-   }
-
-   /**
-    * Add a low-pass filter stage on the joint torques for a specific subset of joints.
-    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
-    * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
-    * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
-    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
-    */
-   @Deprecated
-   public void addJointTauAlphaFilterOnlyForSpecifiedJoints(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToBeProcessed)
-   {
-      addSensorAlphaFilterOnlyForSpecifiedSensors(alphaFilter, forVizOnly, SensorType.JOINT_TAU, jointsToBeProcessed);
-   }
-
-   /**
-    * Add a low-pass filter stage on the joint torques for a specific subset of joints.
-    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
-    * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
-    * @param jointsToIgnore list of the names of the joints to ignore.
-    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
-    */
-   @Deprecated
-   public void addJointTauAlphaFilterWithJointsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToIgnore)
-   {
-      addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, SensorType.JOINT_TAU, jointsToIgnore);
-   }
-
-   /**
     * Create an alpha filter given a name and a break frequency (in Hertz) that will be registered in the {@code SensorProcessing}'s {@code YoVariableRegistry}.
     * @param name name of the variable.
     * @param breakFrequency break frequency in Hertz
