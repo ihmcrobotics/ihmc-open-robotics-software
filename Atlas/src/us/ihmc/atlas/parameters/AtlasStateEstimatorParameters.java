@@ -1,5 +1,8 @@
 package us.ihmc.atlas.parameters;
 
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ANGULAR_VELOCITY;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_LINEAR_ACCELERATION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ORIENTATION;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_VELOCITY;
 
 import java.util.ArrayList;
@@ -16,7 +19,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -108,9 +110,9 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
 
       sensorProcessing.computeJointAccelerationFromFiniteDifference(jointVelocityAlphaFilter, false);
 
-      sensorProcessing.addIMUOrientationAlphaFilter(orientationAlphaFilter, false);
-      sensorProcessing.addIMUAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
-      sensorProcessing.addIMULinearAccelerationAlphaFilter(linearAccelerationAlphaFilter, false);
+      sensorProcessing.addSensorAlphaFilter(orientationAlphaFilter, false, IMU_ORIENTATION);
+      sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, IMU_ANGULAR_VELOCITY);
+      sensorProcessing.addSensorAlphaFilter(linearAccelerationAlphaFilter, false, IMU_LINEAR_ACCELERATION);
 
       sensorProcessing.addForceSensorAlphaFilterOnlyForSpecifiedSensors(wristForceAlphaFilter, false, wristForceSensorNames.get(RobotSide.LEFT), wristForceSensorNames.get(RobotSide.RIGHT));
       sensorProcessing.addForceSensorAlphaFilterOnlyForSpecifiedSensors(wristForceAlphaFilter, false, wristForceSensorNames.get(RobotSide.LEFT), wristForceSensorNames.get(RobotSide.RIGHT));

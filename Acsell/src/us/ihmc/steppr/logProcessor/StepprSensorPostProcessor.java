@@ -1,5 +1,9 @@
 package us.ihmc.steppr.logProcessor;
 
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ANGULAR_VELOCITY;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_LINEAR_ACCELERATION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_VELOCITY;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -127,11 +131,11 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
             sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, false);
 
             sensorProcessing.computeJointVelocityFromFiniteDifference(jointVelocityAlphaFilter, true); //vizonly
-            sensorProcessing.addSensorAlphaFilter(jointVelocityAlphaFilter, false, SensorType.JOINT_VELOCITY);
+            sensorProcessing.addSensorAlphaFilter(jointVelocityAlphaFilter, false, JOINT_VELOCITY);
             sensorProcessing.computeJointAccelerationFromFiniteDifference(jointVelocityAlphaFilter, false);
 
-            sensorProcessing.addIMUAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
-            sensorProcessing.addIMULinearAccelerationAlphaFilter(linearAccelerationAlphaFilter, false);
+            sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, IMU_ANGULAR_VELOCITY);
+            sensorProcessing.addSensorAlphaFilter(linearAccelerationAlphaFilter, false, IMU_LINEAR_ACCELERATION);
          }
       };
 

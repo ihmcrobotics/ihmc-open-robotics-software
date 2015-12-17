@@ -71,7 +71,7 @@ public class WandererStateEstimatorParameters implements StateEstimatorParameter
       DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", 16.0);
       DoubleYoVariable linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", defaultFilterBreakFrequency);
 
-//      sensorProcessing.addJointPositionAlphaFilter(jointPositionAlphaFilter, false);
+//      sensorProcessing.addSensorAlphaFilter(jointPositionAlphaFilter, false, SensorType.JOINT_POSITION);
       if (doElasticityCompensation)
          sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, false);
 
@@ -79,9 +79,9 @@ public class WandererStateEstimatorParameters implements StateEstimatorParameter
       sensorProcessing.addSensorAlphaFilter(jointVelocityAlphaFilter, false, SensorType.JOINT_VELOCITY);
       sensorProcessing.computeJointAccelerationFromFiniteDifference(jointVelocityAlphaFilter, false);
 
-//      sensorProcessing.addIMUOrientationAlphaFilter(orientationAlphaFilter, false);
-      sensorProcessing.addIMUAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
-      sensorProcessing.addIMULinearAccelerationAlphaFilter(linearAccelerationAlphaFilter, false);
+//      sensorProcessing.addSensorAlphaFilter(orientationAlphaFilter, false, SensorType.IMU_ORIENTATION);
+      sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, SensorType.IMU_ANGULAR_VELOCITY);
+      sensorProcessing.addSensorAlphaFilter(linearAccelerationAlphaFilter, false, SensorType.IMU_LINEAR_ACCELERATION);
    }
 
    @Override

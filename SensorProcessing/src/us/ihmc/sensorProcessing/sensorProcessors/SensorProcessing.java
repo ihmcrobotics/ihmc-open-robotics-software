@@ -725,35 +725,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
-    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
-    */
-   @Deprecated
-   public void addIMUOrientationAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
-   {
-      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.IMU_ORIENTATION);
-   }
-
-   /**
-    * Add a low-pass filter stage on the orientations provided by the IMU sensors.
-    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
-    * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
-    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
-    */
-   @Deprecated
-   public void addIMUOrientationAlphaFilterOnlyForSpecifiedSensors(DoubleYoVariable alphaFilter, boolean forVizOnly, String... sensorsToBeProcessed)
-   {
-      addSensorAlphaFilterOnlyForSpecifiedSensors(alphaFilter, forVizOnly, SensorType.IMU_ORIENTATION, sensorsToBeProcessed);
-   }
-
-   /**
-    * Add a low-pass filter stage on the orientations provided by the IMU sensors.
-    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
-    * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the sensors to ignore.
     */
-   public void addIMUOrientationAlphaFilterWithSensorsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, List<String> sensorsToIgnore)
+   private void addIMUOrientationAlphaFilterWithSensorsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, List<String> sensorsToIgnore)
    {
       for (int i = 0; i < imuSensorDefinitions.size(); i++)
       {
