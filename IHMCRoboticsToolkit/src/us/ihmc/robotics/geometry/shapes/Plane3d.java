@@ -69,6 +69,25 @@ public class Plane3d
       point.set(x, y, z); 
    }
 
+   public void setPoints(Point3d pointA, Point3d pointB, Point3d pointC)
+   {
+      point.set(pointA);
+      double v1_x = pointB.x - pointA.x;
+      double v1_y = pointB.y - pointA.y;
+      double v1_z = pointB.z - pointA.z;
+      
+      double v2_x = pointC.x - pointA.x;
+      double v2_y = pointC.y - pointA.y;
+      double v2_z = pointC.z - pointA.z;
+
+      double x = v1_y*v2_z - v1_z*v2_y;
+      double y = v2_x*v1_z - v2_z*v1_x;
+      this.normal.z = v1_x*v2_y - v1_y*v2_x;
+      this.normal.x = x;
+      this.normal.y = y;
+      this.normal.normalize();
+   }
+   
    public void getNormal(Vector3d normalToPack)
    {
       normalToPack.set(normal);
