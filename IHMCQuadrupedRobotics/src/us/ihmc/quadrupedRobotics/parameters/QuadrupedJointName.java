@@ -2,15 +2,26 @@ package us.ihmc.quadrupedRobotics.parameters;
 
 public enum QuadrupedJointName
 {
+   // TODO: Use these new neck joint names:
+//   /* Neck joints */
+//   NEAR_NECK_YAW,
+//   NEAR_NECK_PITCH,
+//   NEAR_NECK_ROLL,
+//
+//   /* Head joints */
+//   FAR_NECK_YAW,
+//   FAR_NECK_PITCH,
+//   FAR_NECK_ROLL,
+
    /* Neck joints */
-   NEAR_NECK_YAW,
-   NEAR_NECK_PITCH,
-   NEAR_NECK_ROLL,
+   HEAD_YAW,
+   HEAD_PITCH,
+   HEAD_ROLL,
 
    /* Head joints */
-   FAR_NECK_YAW,
-   FAR_NECK_PITCH,
-   FAR_NECK_ROLL,
+   NECK_ROOT_YAW,
+   NECK_ROOT_PITCH,
+   NECK_ROOT_ROLL,
 
    /* Leg joints */
    FRONT_LEFT_HIP_ROLL,
