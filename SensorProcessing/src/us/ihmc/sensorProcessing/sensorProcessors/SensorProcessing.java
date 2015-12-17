@@ -622,47 +622,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Add a low-pass filter stage on the joint velocities.
-    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
-    * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
-    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
-    */
-   @Deprecated
-   public void addJointVelocityAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
-   {
-      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.JOINT_VELOCITY);
-   }
-
-   /**
-    * Add a low-pass filter stage on the joint velocities for a specific subset of joints.
-    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
-    * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
-    * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
-    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
-    */
-   @Deprecated
-   public void addJointVelocityAlphaFilterOnlyForSpecifiedJoints(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToBeProcessed)
-   {
-      addSensorAlphaFilterOnlyForSpecifiedSensors(alphaFilter, forVizOnly, SensorType.JOINT_VELOCITY, jointsToBeProcessed);
-   }
-
-   /**
-    * Add a low-pass filter stage on the joint velocities for a specific subset of joints.
-    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
-    * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
-    * @param jointsToIgnore list of the names of the joints to ignore.
-    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
-    */
-   @Deprecated
-   public void addJointVelocityAlphaFilterWithJointsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToIgnore)
-   {
-      addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, SensorType.JOINT_VELOCITY, jointsToIgnore);
-   }
-
-   /**
     * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to the joint velocity.
     * Useful when the robot has backlash in its joints or simply to calm down small shakies when the robot is at rest.
     * Implemented as a cumulative processor but should probably be called only once.
