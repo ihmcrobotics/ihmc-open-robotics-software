@@ -7,7 +7,9 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.sensorProcessing.sensorProcessors.FootSwitchUpdater;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.TimeTools;
@@ -33,8 +35,10 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
 
    private final ArrayList<YoGraphicReferenceFrame> graphicReferenceFrames = new ArrayList<>();
 
- private final ArrayList<RobotQuadrant> feetInContact = new ArrayList<>();
- private final ArrayList<RobotQuadrant> feetNotInContact = new ArrayList<>();
+   private final ArrayList<RobotQuadrant> feetInContact = new ArrayList<>();
+   private final ArrayList<RobotQuadrant> feetNotInContact = new ArrayList<>();
+
+   private final QuadrantDependentList<BooleanYoVariable> footContactBooleans = new QuadrantDependentList<>();
    
    public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
          FootSwitchUpdater footSwitchUpdater, JointStateUpdater jointStateUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater,
@@ -54,6 +58,13 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       if (this.sdfFullRobotModelForViz != null)
          initializeVisualization();
 
+      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         String name = quadrant.getCamelCaseNameForStartOfExpression() + "FootInContact";
+         BooleanYoVariable footContactBoolean = new BooleanYoVariable(name, registry);
+         footContactBooleans.put(quadrant, footContactBoolean);
+      }
+      
       parentRegistry.addChild(registry);
    }
 
@@ -79,7 +90,7 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    public void initialize()
    {
       updateFeetContactStatus();
-      
+
       jointStateUpdater.initialize();
       comLinearStateUpdater.initialize();
    }
@@ -88,7 +99,7 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    public void doControl()
    {
       updateFeetContactStatus();
-      
+
       jointStateUpdater.updateJointState();
       comLinearStateUpdater.updateCenterOfMassLinearState(feetInContact, feetNotInContact);
 
@@ -112,17 +123,23 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    {
       return registry;
    }
-   
- private void updateFeetContactStatus()
- {
-    feetInContact.clear();
-    feetNotInContact.clear();
-    for(RobotQuadrant quadrant : RobotQuadrant.values())
-    {
-       if(footSwitchUpdater.isFootInContactWithGround(quadrant))
-          feetInContact.add(quadrant);
-       else
-          feetNotInContact.add(quadrant);
-    }
- }
+
+   private void updateFeetContactStatus()
+   {
+      feetInContact.clear();
+      feetNotInContact.clear();
+      for (RobotQuadrant quadrant : RobotQuadrant.values())
+      {
+         if (footSwitchUpdater.isFootInContactWithGround(quadrant))
+         {
+            feetInContact.add(quadrant);
+            footContactBooleans.get(quadrant).set(true);
+         }
+         else
+         {
+            feetNotInContact.add(quadrant);
+            footContactBooleans.get(quadrant).set(false);
+         }
+      }
+   }
 }
