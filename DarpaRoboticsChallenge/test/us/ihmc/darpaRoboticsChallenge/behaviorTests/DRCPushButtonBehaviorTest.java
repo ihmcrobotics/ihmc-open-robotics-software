@@ -113,7 +113,6 @@ public abstract class DRCPushButtonBehaviorTest implements MultiRobotTestInterfa
 
    @DeployableTestMethod(estimatedDuration = 100.0)
    @Test(timeout = 500000)
-
    public void testPushButton() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
