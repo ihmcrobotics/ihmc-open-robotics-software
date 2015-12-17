@@ -59,6 +59,8 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    private ArrayList<OneDoFJoint> oneDoFJoints;
    private LinkedHashMap<OneDoFJoint, DoubleYoVariable> alphaDesiredVelocityMap;
    private LinkedHashMap<OneDoFJoint, DoubleYoVariable> alphaDesiredPositionMap;
+   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> velocityTorqueMap;
+   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> positionTorqueMap;
    private LinkedHashMap<OneDoFJoint, DoubleYoVariable> kVelJointTorqueMap;
    private LinkedHashMap<OneDoFJoint, DoubleYoVariable> kPosJointTorqueMap;
    private LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredVelocities;
@@ -176,6 +178,9 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
             double velocityTorque = kVel * (qd_d_joint.getDoubleValue() - oneDoFJoint.getQd());
             double positionTorque = kPos * (q_d_joint.getDoubleValue() - oneDoFJoint.getQ());
 
+            velocityTorqueMap.get(oneDoFJoint).set(velocityTorque);
+            positionTorqueMap.get(oneDoFJoint).set(positionTorque);
+
             oneDoFJoint.setTau(oneDoFJoint.getTau() + velocityTorque + positionTorque);
          }
          else
@@ -261,6 +266,9 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
       kVelJointTorqueMap = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
       kPosJointTorqueMap = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
+      velocityTorqueMap = new LinkedHashMap<>();
+      positionTorqueMap = new LinkedHashMap<>();
+
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
          final OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
@@ -270,6 +278,12 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
 
          desiredVelocities.put(oneDoFJoint, desiredVelocity);
          desiredPositions.put(oneDoFJoint, desiredPosition);
+
+         DoubleYoVariable velocityTorque = new DoubleYoVariable("tau_vel_" + oneDoFJoint.getName(), registry);
+         DoubleYoVariable positionTorque = new DoubleYoVariable("tau_pos_" + oneDoFJoint.getName(), registry);
+
+         velocityTorqueMap.put(oneDoFJoint, velocityTorque);
+         positionTorqueMap.put(oneDoFJoint, positionTorque);
 
          if (armOneDoFJoints.contains(oneDoFJoint))
          {

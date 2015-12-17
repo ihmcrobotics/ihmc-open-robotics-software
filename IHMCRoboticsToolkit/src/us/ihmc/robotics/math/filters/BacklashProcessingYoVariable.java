@@ -65,7 +65,7 @@ public class BacklashProcessingYoVariable extends DoubleYoVariable implements Pr
       update(velocity.getDoubleValue());
    }
 
-   public void update(double currentPosition)
+   public void update(double currentVelocity)
    {
       if (backlashState.getEnumValue() == null)
       {
@@ -75,7 +75,7 @@ public class BacklashProcessingYoVariable extends DoubleYoVariable implements Pr
       if (!hasBeenCalled.getBooleanValue())
       {
          hasBeenCalled.set(true);
-         set(0.0);
+         set(currentVelocity);
       }
 
       timeSinceSloppy.add(dt);
@@ -84,7 +84,7 @@ public class BacklashProcessingYoVariable extends DoubleYoVariable implements Pr
       {
       case BACKWARD_OK:
       {
-         if (velocity.getDoubleValue() > 0.0)
+         if (currentVelocity > 0.0)
          {
             timeSinceSloppy.set(0.0);
             backlashState.set(BacklashState.FORWARD_SLOP);
@@ -95,7 +95,7 @@ public class BacklashProcessingYoVariable extends DoubleYoVariable implements Pr
 
       case FORWARD_OK:
       {
-         if (velocity.getDoubleValue() < 0.0)
+         if (currentVelocity < 0.0)
          {
             timeSinceSloppy.set(0.0);
             backlashState.set(BacklashState.BACKWARD_SLOP);
@@ -106,7 +106,7 @@ public class BacklashProcessingYoVariable extends DoubleYoVariable implements Pr
 
       case BACKWARD_SLOP:
       {
-         if (velocity.getDoubleValue() > 0.0)
+         if (currentVelocity > 0.0)
          {
             timeSinceSloppy.set(0.0);
             backlashState.set(BacklashState.FORWARD_SLOP);
@@ -121,7 +121,7 @@ public class BacklashProcessingYoVariable extends DoubleYoVariable implements Pr
 
       case FORWARD_SLOP:
       {
-         if (velocity.getDoubleValue() < 0.0)
+         if (currentVelocity < 0.0)
          {
             timeSinceSloppy.set(0.0);
             backlashState.set(BacklashState.BACKWARD_SLOP);
@@ -137,10 +137,10 @@ public class BacklashProcessingYoVariable extends DoubleYoVariable implements Pr
 
       double percent = timeSinceSloppy.getDoubleValue() / slopTime.getDoubleValue();
       percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
-      if (Double.isNaN(percent))
+      if (Double.isNaN(percent) || slopTime.getDoubleValue() < dt)
          percent = 1.0;
 
-      this.set(percent * velocity.getDoubleValue());
+      this.set(percent * currentVelocity);
    }
 
    public void setSlopTime(double slopTime)
