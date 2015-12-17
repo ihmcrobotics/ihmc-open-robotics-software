@@ -158,6 +158,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final List<IMUDefinition> imuSensorDefinitions;
    private final List<ForceSensorDefinition> forceSensorDefinitions;
 
+   private final List<String> allJointSensorNames = new ArrayList<>();
+   private final List<String> allIMUSensorNames = new ArrayList<>();
+   private final List<String> allForceSensorNames = new ArrayList<>();
+
    private final LinkedHashMap<OneDoFJoint, BooleanYoVariable> jointEnabledIndicators = new LinkedHashMap<>();
 
    private final double updateDT;
@@ -186,6 +190,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       {
          OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
          String jointName = oneDoFJoint.getName();
+         allJointSensorNames.add(jointName);
          
          DoubleYoVariable rawJointPosition = new DoubleYoVariable("raw_q_" + jointName, registry);
          inputJointPositions.put(oneDoFJoint, rawJointPosition);
@@ -218,6 +223,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       {
          IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
          String imuName = imuDefinition.getName();
+         allIMUSensorNames.add(imuName);
 
          YoFrameQuaternion rawOrientation = new YoFrameQuaternion("raw_q_", imuName, worldFrame, registry);
          inputOrientations.put(imuDefinition, rawOrientation);
@@ -242,6 +248,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       {
          ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
          String sensorName = forceSensorDefinition.getSensorName();
+         allForceSensorNames.add(sensorName);
          ReferenceFrame sensorFrame = forceSensorDefinition.getSensorFrame();
 
          YoFrameVector rawForce = new YoFrameVector("raw_" + sensorName + "_force", sensorFrame, registry);
@@ -336,9 +343,110 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       }
    }
 
-   public void addAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType)
+   public void addSensorAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType)
    {
-      
+      addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, sensorType);
+   }
+
+   public void addSensorAlphaFilterOnlyForSpecifiedSensors(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType, String... sensorsToBeProcessed)
+   {
+      addSensorAlphaFilterOnlyForSpecifiedSensors(alphaFilter, forVizOnly, sensorType, invertSensorSelection(sensorType, sensorsToBeProcessed));
+   }
+
+   public void addSensorAlphaFilterWithSensorsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType, String... sensorsToIgnore)
+   {
+      List<String> sensorToIgnoreList = new ArrayList<>();
+      if (sensorsToIgnore != null && sensorsToIgnore.length > 0)
+         sensorToIgnoreList.addAll(Arrays.asList(sensorsToIgnore));
+
+      if (sensorType.isJointSensor())
+         addJointAlphaFilterWithJointsToIgnore(alphaFilter, forVizOnly, sensorType, sensorToIgnoreList);
+      else if (sensorType.isWrenchSensor())
+         addForceSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, sensorType, sensorToIgnoreList);
+      else if (sensorType.isIMUSensor())
+      {
+         if (sensorType == SensorType.IMU_ORIENTATION)
+            addIMUOrientationAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, sensorToIgnoreList);
+         else
+            addIMUVectorTypeDataAlphaFilter(alphaFilter, forVizOnly, sensorType, sensorToIgnoreList);
+      }
+      else
+         throw new RuntimeException("Unknown type of sensor.");
+   }
+
+   private void addIMUVectorTypeDataAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType, List<String> sensorsToIgnore)
+   {
+      LinkedHashMap<IMUDefinition, YoFrameVector> intermediateIMUVectorTypeSignals = getIntermediateIMUVectorTypeSignals(sensorType);
+      LinkedHashMap<IMUDefinition, List<ProcessingYoVariable>> processedIMUVectorTypeSignals = getProcessedIMUVectorTypeSignals(sensorType);
+
+      for (int i = 0; i < imuSensorDefinitions.size(); i++)
+      {
+         IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
+         String imuName = imuDefinition.getName();
+
+         if (sensorsToIgnore.contains(imuName))
+            continue;
+
+         YoFrameVector intermediateAngularVelocity = intermediateIMUVectorTypeSignals.get(imuDefinition);
+         List<ProcessingYoVariable> processors = processedIMUVectorTypeSignals.get(imuDefinition);
+         String suffix = "_sp" + processors.size();
+         String prefix = sensorType.getPrefixForProcessorName("filt_");
+         AlphaFilteredYoFrameVector filteredAngularVelocity = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix, imuName + suffix, registry, alphaFilter, intermediateAngularVelocity);
+         processors.add(filteredAngularVelocity);
+         
+         if (!forVizOnly)
+            intermediateIMUVectorTypeSignals.put(imuDefinition, filteredAngularVelocity);
+      }
+   }
+
+   private void addForceSensorAlphaFilterWithSensorsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType, List<String> sensorsToIgnore)
+   {
+      LinkedHashMap<ForceSensorDefinition, YoFrameVector> intermediateForceSensorSignals = getIntermediateForceSensorSignals(sensorType);
+      LinkedHashMap<ForceSensorDefinition, List<ProcessingYoVariable>> processedForceSensorSignals = getProcessedForceSensorSignals(sensorType);
+
+      for (int i = 0; i < forceSensorDefinitions.size(); i++)
+      {
+         ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
+         String sensorName = forceSensorDefinition.getSensorName();
+
+         if (sensorsToIgnore.contains(sensorName))
+            continue;
+
+         YoFrameVector intermediateForce = intermediateForceSensorSignals.get(forceSensorDefinition);
+         List<ProcessingYoVariable> forceProcessors = processedForceSensorSignals.get(forceSensorDefinition);
+         String suffix = "_sp" + forceProcessors.size();
+         String prefix = sensorType.getPrefixForProcessorName("filt_");
+         AlphaFilteredYoFrameVector filteredForce = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix, sensorName + suffix, registry, alphaFilter, intermediateForce);
+         forceProcessors.add(filteredForce);
+
+         if (!forVizOnly)
+            intermediateForceSensorSignals.put(forceSensorDefinition, filteredForce);
+      }
+   }
+
+   private void addJointAlphaFilterWithJointsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType, List<String> jointsToIgnore)
+   {
+      LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointSignals = getOutputJointSignals(sensorType);
+      LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> processedJointSignals = getProcessedJointSignals(sensorType);
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
+         String jointName = oneDoFJoint.getName();
+
+         if (jointsToIgnore.contains(jointName))
+            continue;
+
+         DoubleYoVariable intermediateJointSignal = outputJointSignals.get(oneDoFJoint);
+         List<ProcessingYoVariable> processors = processedJointSignals.get(oneDoFJoint);
+         String suffix = "_sp" + processors.size();
+         String prefix = sensorType.getPrefixForProcessorName("filt_");
+         AlphaFilteredYoVariable filteredJointPosition = new AlphaFilteredYoVariable(prefix + jointName + suffix, registry, alphaFilter, intermediateJointSignal);
+         processedJointSignals.get(oneDoFJoint).add(filteredJointPosition);
+         
+         if (!forVizOnly)
+            outputJointSignals.put(oneDoFJoint, filteredJointPosition);
+      }
    }
 
    /**
@@ -346,22 +454,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
     */
+   @Deprecated
    public void addJointPositionAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
    {
-      for (int i = 0; i < jointSensorDefinitions.size(); i++)
-      {
-         OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
-         String jointName = oneDoFJoint.getName();
-         DoubleYoVariable intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
-         List<ProcessingYoVariable> processors = processedJointPositions.get(oneDoFJoint);
-         String suffix = "_sp" + processors.size();
-         AlphaFilteredYoVariable filteredJointPosition = new AlphaFilteredYoVariable("filt_q_" + jointName + suffix, registry, alphaFilter, intermediateJointPosition);
-         processedJointPositions.get(oneDoFJoint).add(filteredJointPosition);
-         
-         if (!forVizOnly)
-            outputJointPositions.put(oneDoFJoint, filteredJointPosition);
-      }
+      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.JOINT_POSITION);
    }
 
    /**
@@ -423,7 +521,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     */
    public void computeJointVelocityFromFiniteDifferenceOnlyForSpecifiedJoints(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToBeProcessed)
    {
-      computeJointVelocityFromFiniteDifferenceWithJointsToIgnore(alphaFilter, forVizOnly, invertJointSelection(jointsToBeProcessed));
+      computeJointVelocityFromFiniteDifferenceWithJointsToIgnore(alphaFilter, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
    }
 
    /**
@@ -479,7 +577,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     */
    public void computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(DoubleYoVariable alphaFilter, DoubleYoVariable slopTime, boolean forVizOnly, String... jointsToBeProcessed)
    {
-      computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(alphaFilter, slopTime, forVizOnly, invertJointSelection(jointsToBeProcessed));
+      computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(alphaFilter, slopTime, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
    }
 
    /**
@@ -521,10 +619,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
     */
+   @Deprecated
    public void addJointVelocityAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
    {
-      addJointVelocityAlphaFilterWithJointsToIgnore(alphaFilter, forVizOnly);
+      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.JOINT_VELOCITY);
    }
 
    /**
@@ -533,10 +633,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
+    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
     */
+   @Deprecated
    public void addJointVelocityAlphaFilterOnlyForSpecifiedJoints(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToBeProcessed)
    {
-      addJointVelocityAlphaFilterWithJointsToIgnore(alphaFilter, forVizOnly, invertJointSelection(jointsToBeProcessed));
+      addSensorAlphaFilterOnlyForSpecifiedSensors(alphaFilter, forVizOnly, SensorType.JOINT_VELOCITY, jointsToBeProcessed);
    }
 
    /**
@@ -545,31 +647,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
+    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
     */
+   @Deprecated
    public void addJointVelocityAlphaFilterWithJointsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToIgnore)
    {
-      List<String> jointToIgnoreList = new ArrayList<>();
-      if (jointsToIgnore != null && jointsToIgnore.length > 0)
-         jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
-
-      for (int i = 0; i < jointSensorDefinitions.size(); i++)
-      {
-         OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
-         String jointName = oneDoFJoint.getName();
-
-         if (jointToIgnoreList.contains(jointName))
-            continue;
-
-         DoubleYoVariable intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
-         List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
-         String suffix = "_sp" + processors.size();
-         AlphaFilteredYoVariable filteredJointVelocity = new AlphaFilteredYoVariable("filt_qd_" + jointName + suffix, registry, alphaFilter, intermediateJointVelocity);
-         processors.add(filteredJointVelocity);
-
-         if (!forVizOnly)
-            outputJointVelocities.put(oneDoFJoint, filteredJointVelocity);
-      }
-      
+      addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, SensorType.JOINT_VELOCITY, jointsToIgnore);
    }
 
    /**
@@ -581,7 +664,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     */
    public void addJointVelocityBacklashFilter(DoubleYoVariable slopTime, boolean forVizOnly)
    {
-      addJointVelocityAlphaFilterWithJointsToIgnore(slopTime, forVizOnly);
+      addJointVelocityBacklashFilterWithJointsToIgnore(slopTime, forVizOnly);
    }
 
    /**
@@ -594,7 +677,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     */
    public void addJointVelocityBacklashFilterOnlyForSpecifiedJoints(DoubleYoVariable slopTime, boolean forVizOnly, String... jointsToBeProcessed)
    {
-      addJointVelocityAlphaFilterWithJointsToIgnore(slopTime, forVizOnly, invertJointSelection(jointsToBeProcessed));
+      addJointVelocityBacklashFilterWithJointsToIgnore(slopTime, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
    }
 
    /**
@@ -676,13 +759,44 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
     */
+   @Deprecated
    public void addIMUOrientationAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
+   {
+      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.IMU_ORIENTATION);
+   }
+
+   /**
+    * Add a low-pass filter stage on the orientations provided by the IMU sensors.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
+    */
+   @Deprecated
+   public void addIMUOrientationAlphaFilterOnlyForSpecifiedSensors(DoubleYoVariable alphaFilter, boolean forVizOnly, String... sensorsToBeProcessed)
+   {
+      addSensorAlphaFilterOnlyForSpecifiedSensors(alphaFilter, forVizOnly, SensorType.IMU_ORIENTATION, sensorsToBeProcessed);
+   }
+
+   /**
+    * Add a low-pass filter stage on the orientations provided by the IMU sensors.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToIgnore list of the names of the sensors to ignore.
+    */
+   public void addIMUOrientationAlphaFilterWithSensorsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, List<String> sensorsToIgnore)
    {
       for (int i = 0; i < imuSensorDefinitions.size(); i++)
       {
          IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
          String imuName = imuDefinition.getName();
+
+         if (sensorsToIgnore.contains(imuName))
+            continue;
+
          YoFrameQuaternion intermediateOrientation = intermediateOrientations.get(imuDefinition);
          List<ProcessingYoVariable> processors = processedOrientations.get(imuDefinition);
          String suffix = "_sp" + processors.size();
@@ -699,22 +813,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
     */
+   @Deprecated
    public void addIMUAngularVelocityAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
    {
-      for (int i = 0; i < imuSensorDefinitions.size(); i++)
-      {
-         IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
-         String imuName = imuDefinition.getName();
-         YoFrameVector intermediateAngularVelocity = intermediateAngularVelocities.get(imuDefinition);
-         List<ProcessingYoVariable> processors = processedAngularVelocities.get(imuDefinition);
-         String suffix = "_sp" + processors.size();
-         AlphaFilteredYoFrameVector filteredAngularVelocity = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filt_qd_w", imuName + suffix, registry, alphaFilter, intermediateAngularVelocity);
-         processors.add(filteredAngularVelocity);
-         
-         if (!forVizOnly)
-            intermediateAngularVelocities.put(imuDefinition, filteredAngularVelocity);
-      }
+      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.IMU_ANGULAR_VELOCITY);
    }
 
    /**
@@ -722,66 +826,42 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
     */
+   @Deprecated
    public void addIMULinearAccelerationAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
    {
-      for (int i = 0; i < imuSensorDefinitions.size(); i++)
-      {
-         IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
-         String imuName = imuDefinition.getName();
-         YoFrameVector intermediateLinearAcceleration = intermediateLinearAccelerations.get(imuDefinition);
-         List<ProcessingYoVariable> processors = processedLinearAccelerations.get(imuDefinition);
-         String suffix = "_sp" + processors.size();
-         AlphaFilteredYoFrameVector filteredLinearAcceleration = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filt_qdd_", imuName + suffix, registry, alphaFilter, intermediateLinearAcceleration);
-         processors.add(filteredLinearAcceleration);
-         
-         if (!forVizOnly)
-            intermediateLinearAccelerations.put(imuDefinition, filteredLinearAcceleration);
-      }
+      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.IMU_LINEAR_ACCELERATION);
    }
 
+   /**
+    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
+    */
+   @Deprecated
    public void addForceSensorAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
    {
-      addForceSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly);
+      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.FORCE_SENSOR);
+      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.TORQUE_SENSOR);
    }
 
+   /**
+    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
+    */
+   @Deprecated
    public void addForceSensorAlphaFilterOnlyForSpecifiedSensors(DoubleYoVariable alphaFilter, boolean forVizOnly, String... sensorsToBeProcessed)
    {
-      addForceSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, invertForceSensorsSelection(sensorsToBeProcessed));
+      addSensorAlphaFilterOnlyForSpecifiedSensors(alphaFilter, forVizOnly, SensorType.FORCE_SENSOR, sensorsToBeProcessed);
+      addSensorAlphaFilterOnlyForSpecifiedSensors(alphaFilter, forVizOnly, SensorType.TORQUE_SENSOR, sensorsToBeProcessed);
    }
 
+   /**
+    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
+    */
+   @Deprecated
    public void addForceSensorAlphaFilterWithSensorsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, String... sensorsToIgnore)
    {
-      List<String> sensorToIgnoreList = new ArrayList<>();
-      if (sensorsToIgnore != null && sensorsToIgnore.length > 0)
-         sensorToIgnoreList.addAll(Arrays.asList(sensorsToIgnore));
-
-      for (int i = 0; i < forceSensorDefinitions.size(); i++)
-      {
-         ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
-         String sensorName = forceSensorDefinition.getSensorName();
-
-         if (sensorToIgnoreList.contains(sensorName))
-            continue;
-
-         YoFrameVector intermediateForce = intermediateForces.get(forceSensorDefinition);
-         List<ProcessingYoVariable> forceProcessors = processedForces.get(forceSensorDefinition);
-         String forceSuffix = "_sp" + forceProcessors.size();
-         AlphaFilteredYoFrameVector filteredForce = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filt_" + sensorName + "_force", forceSuffix, registry, alphaFilter, intermediateForce);
-         forceProcessors.add(filteredForce);
-
-         YoFrameVector intermediateTorque = intermediateTorques.get(forceSensorDefinition);
-         List<ProcessingYoVariable> torqueProcessors = processedTorques.get(forceSensorDefinition);
-         String torqueSuffix = "_sp" + torqueProcessors.size();
-         AlphaFilteredYoFrameVector filteredTorque = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filt_" + sensorName + "_torque", torqueSuffix, registry, alphaFilter, intermediateTorque);
-         torqueProcessors.add(filteredTorque);
-         
-         if (!forVizOnly)
-         {
-            intermediateForces.put(forceSensorDefinition, filteredForce);
-            intermediateTorques.put(forceSensorDefinition, filteredTorque);
-         }
-      }
+      addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, SensorType.FORCE_SENSOR, sensorsToIgnore);
+      addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, SensorType.TORQUE_SENSOR, sensorsToIgnore);
    }
 
    /**
@@ -789,10 +869,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
     */
+   @Deprecated
    public void addJointTauAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
    {
-      addJointTauAlphaFilterWithJointsToIgnore(alphaFilter, forVizOnly);
+      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.JOINT_TAU);
    }
 
    /**
@@ -801,10 +883,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
+    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
     */
+   @Deprecated
    public void addJointTauAlphaFilterOnlyForSpecifiedJoints(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToBeProcessed)
    {
-      addJointTauAlphaFilterWithJointsToIgnore(alphaFilter, forVizOnly, invertJointSelection(jointsToBeProcessed));
+      addSensorAlphaFilterOnlyForSpecifiedSensors(alphaFilter, forVizOnly, SensorType.JOINT_TAU, jointsToBeProcessed);
    }
 
    /**
@@ -813,30 +897,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
+    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
     */
+   @Deprecated
    public void addJointTauAlphaFilterWithJointsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToIgnore)
    {
-      List<String> jointToIgnoreList = new ArrayList<>();
-      if (jointsToIgnore != null && jointsToIgnore.length > 0)
-         jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
-
-      for (int i = 0; i < jointSensorDefinitions.size(); i++)
-      {
-         OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
-         String jointName = oneDoFJoint.getName();
-
-         if (jointToIgnoreList.contains(jointName))
-            continue;
-
-         DoubleYoVariable intermediateJointTaus = outputJointTaus.get(oneDoFJoint);
-         List<ProcessingYoVariable> processors = processedJointTaus.get(oneDoFJoint);
-         String suffix = "_sp" + processors.size();
-         AlphaFilteredYoVariable filteredJointTaus = new AlphaFilteredYoVariable("filt_tau_" + jointName + suffix, registry, alphaFilter, intermediateJointTaus);
-         processors.add(filteredJointTaus);
-
-         if (!forVizOnly)
-            outputJointTaus.put(oneDoFJoint, filteredJointTaus);
-      }
+      addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, SensorType.JOINT_TAU, jointsToIgnore);
    }
 
    /**
@@ -892,36 +958,118 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return stiffesses;
    }
 
-   private String[] invertJointSelection(String... subSelection)
+   private String[] invertSensorSelection(SensorType sensorType, String... subSelection)
+   {
+      if (sensorType.isJointSensor())
+         return invertSensorSelection(allJointSensorNames, subSelection);
+      else if (sensorType.isIMUSensor())
+         return invertSensorSelection(allIMUSensorNames, subSelection);
+      else if (sensorType.isWrenchSensor())
+         return invertSensorSelection(allForceSensorNames, subSelection);
+      else
+         throw new RuntimeException("Invert selection is not implemented for this type of sensor: sensorType = " + sensorType);
+   }
+
+   private String[] invertSensorSelection(List<String> allSensorNames, String... subSelection)
    {
       List<String> invertSelection = new ArrayList<>();
       List<String> originalJointSensorSelectionList = new ArrayList<>();
       if (subSelection != null && subSelection.length > 0)
          originalJointSensorSelectionList.addAll(Arrays.asList(subSelection));
 
-      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      for (int i = 0; i < allSensorNames.size(); i++)
       {
-         String jointName = jointSensorDefinitions.get(i).getName();
+         String jointName = allSensorNames.get(i);
          if (!originalJointSensorSelectionList.contains(jointName))
             invertSelection.add(jointName);
       }
       return invertSelection.toArray(new String[0]);
    }
 
-   private String[] invertForceSensorsSelection(String... subSelection)
+   private LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> getProcessedJointSignals(SensorType sensorType)
    {
-      List<String> invertSelection = new ArrayList<>();
-      List<String> originalForceSensorSelectionList = new ArrayList<>();
-      if (subSelection != null && subSelection.length > 0)
-         originalForceSensorSelectionList.addAll(Arrays.asList(subSelection));
-
-      for (int i = 0; i < forceSensorDefinitions.size(); i++)
+      switch (sensorType)
       {
-         String forceSensorName = forceSensorDefinitions.get(i).getSensorName();
-         if (!originalForceSensorSelectionList.contains(forceSensorName))
-            invertSelection.add(forceSensorName);
+      case JOINT_POSITION:
+         return processedJointPositions;
+      case JOINT_VELOCITY:
+         return processedJointVelocities;
+      case JOINT_ACCELERATION:
+         return processedJointAccelerations;
+      case JOINT_TAU:
+         return processedJointTaus;
+      default:
+         throw new RuntimeException("Expected a joint sensor.");
       }
-      return invertSelection.toArray(new String[0]);
+   }
+
+   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> getOutputJointSignals(SensorType sensorType)
+   {
+      switch (sensorType)
+      {
+      case JOINT_POSITION:
+         return outputJointPositions;
+      case JOINT_VELOCITY:
+         return outputJointVelocities;
+      case JOINT_ACCELERATION:
+         return outputJointAccelerations;
+      case JOINT_TAU:
+         return outputJointTaus;
+      default:
+         throw new RuntimeException("Expected a joint sensor.");
+      }
+   }
+
+   private LinkedHashMap<ForceSensorDefinition, List<ProcessingYoVariable>> getProcessedForceSensorSignals(SensorType sensorType)
+   {
+      switch (sensorType)
+      {
+      case FORCE_SENSOR:
+         return processedForces;
+      case TORQUE_SENSOR:
+         return processedTorques;
+      default:
+         throw new RuntimeException("Expected a forcce/torque sensor.");
+      }
+   }
+
+   private LinkedHashMap<ForceSensorDefinition, YoFrameVector> getIntermediateForceSensorSignals(SensorType sensorType)
+   {
+      switch (sensorType)
+      {
+      case FORCE_SENSOR:
+         return intermediateForces;
+      case TORQUE_SENSOR:
+         return intermediateTorques;
+      default:
+         throw new RuntimeException("Expected a forcce/torque sensor.");
+      }
+   }
+
+   private LinkedHashMap<IMUDefinition, List<ProcessingYoVariable>> getProcessedIMUVectorTypeSignals(SensorType sensorType)
+   {
+      switch (sensorType)
+      {
+      case IMU_ANGULAR_VELOCITY:
+         return processedAngularVelocities;
+      case IMU_LINEAR_ACCELERATION:
+         return processedLinearAccelerations;
+      default:
+         throw new RuntimeException("Expected either: " + SensorType.IMU_ANGULAR_VELOCITY + " or " + SensorType.IMU_LINEAR_ACCELERATION);
+      }
+   }
+
+   private LinkedHashMap<IMUDefinition, YoFrameVector> getIntermediateIMUVectorTypeSignals(SensorType sensorType)
+   {
+      switch (sensorType)
+      {
+      case IMU_ANGULAR_VELOCITY:
+         return intermediateAngularVelocities;
+      case IMU_LINEAR_ACCELERATION:
+         return intermediateLinearAccelerations;
+      default:
+         throw new RuntimeException("Expected either: " + SensorType.IMU_ANGULAR_VELOCITY + " or " + SensorType.IMU_LINEAR_ACCELERATION);
+      }
    }
 
    @Override
