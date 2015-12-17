@@ -12,6 +12,7 @@ public class ArtifactList
 
    public ArtifactList(String label, ArrayList<Artifact> artifacts)
    {
+      // TODO: should a defensive copy be made of artifacts?
       this.label = label;
       this.artifacts = artifacts;
    }
@@ -72,6 +73,34 @@ public class ArtifactList
       for (Artifact artifact : artifacts)
       {
          plotter.addArtifact(artifact);
+      }
+   }
+
+   public void setVisible(boolean visible)
+   {
+      if (artifacts != null)
+      {
+         int numberOfElements = artifacts.size();
+
+         for (int i = 0; i < numberOfElements; i++)
+         {
+            Artifact artifact = artifacts.get(i);
+            artifact.setVisible(visible);
+         }
+      }
+   }
+
+   public void hideArtifacts()
+   {
+      if (artifacts != null)
+      {
+         int numberOfElements = artifacts.size();
+
+         for (int i = 0; i < numberOfElements; i++)
+         {
+            Artifact artifact = artifacts.get(i);
+            artifact.setVisible(false);
+         }
       }
    }
 }

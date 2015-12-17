@@ -9,6 +9,7 @@ import us.ihmc.multicastLogDataProtocol.control.LogControlClient.LogControlVaria
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.simulationconstructionset.Joint;
 
 public class YoVariableConsumer extends YoVariableDataReceiver
 {
@@ -16,7 +17,7 @@ public class YoVariableConsumer extends YoVariableDataReceiver
    private final List<JointState<?>> jointStates;
    private final YoVariablesUpdatedListener listener;
 
-   public YoVariableConsumer(byte[] dataIP, int port, List<YoVariable<?>> variables, List<JointState<?>> jointStates, YoVariablesUpdatedListener listener)
+   public YoVariableConsumer(byte[] dataIP, int port, List<YoVariable<?>> variables, List<JointState<? extends Joint>> jointStates, YoVariablesUpdatedListener listener)
    {
       super(dataIP, port, listener.getDisplayOneInNPackets());
 

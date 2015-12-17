@@ -109,10 +109,10 @@ public class WandererOutputProcessor implements OutputProcessor
       rightFourbar.update(oneDofRightKnee);
 
       predictedMotorPower.get(leftActuator).set(
-            calcPower(oneDofLeftKnee.getTau() / leftFourbar.getFourbarRatio() / leftJoint.getRatio(), leftActuator.getKm()));
+            calcPower(oneDofLeftKnee.getTau() / leftFourbar.getFourbarRatioBasedOnCalculatedInputAngle() / leftJoint.getRatio(), leftActuator.getKm()));
 
       predictedMotorPower.get(rightActuator).set(
-              calcPower(oneDofRightKnee.getTau() / rightFourbar.getFourbarRatio() / rightJoint.getRatio(), rightActuator.getKm()));
+              calcPower(oneDofRightKnee.getTau() / rightFourbar.getFourbarRatioBasedOnCalculatedInputAngle() / rightJoint.getRatio(), rightActuator.getKm()));
 
    }
    

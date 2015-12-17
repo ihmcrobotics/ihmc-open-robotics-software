@@ -53,28 +53,31 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
 
    public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
-      graphics.setColor(color);
-
-      if (stroke != null)
-         ((Graphics2D) graphics).setStroke(stroke);
-
-      plotterGraphics.setCenter(Xcenter, Ycenter);
-      plotterGraphics.setScale(scaleFactor);
-
-      double x0 = yoFrameLineSegment2d.getX0();
-      double x1 = yoFrameLineSegment2d.getX1();
-      double y0 = yoFrameLineSegment2d.getY0();
-      double y1 = yoFrameLineSegment2d.getY1();
-
-      if (yoFrameLineSegment2d.containsNaN())
-         return;
-
-      plotterGraphics.drawLineSegment(graphics, x0, y0, x1, y1);
-
-      if (drawAsAnArrow)
+      if (isVisible)
       {
-         computeArrowHeadPoints(arrowHeadPoints, x0, y0, x1, y1);
-         plotterGraphics.fillPolygon(graphics, arrowHeadPoints);
+         graphics.setColor(color);
+
+         if (stroke != null)
+            ((Graphics2D) graphics).setStroke(stroke);
+
+         plotterGraphics.setCenter(Xcenter, Ycenter);
+         plotterGraphics.setScale(scaleFactor);
+
+         double x0 = yoFrameLineSegment2d.getX0();
+         double x1 = yoFrameLineSegment2d.getX1();
+         double y0 = yoFrameLineSegment2d.getY0();
+         double y1 = yoFrameLineSegment2d.getY1();
+
+         if (yoFrameLineSegment2d.containsNaN())
+            return;
+
+         plotterGraphics.drawLineSegment(graphics, x0, y0, x1, y1);
+
+         if (drawAsAnArrow)
+         {
+            computeArrowHeadPoints(arrowHeadPoints, x0, y0, x1, y1);
+            plotterGraphics.fillPolygon(graphics, arrowHeadPoints);
+         }
       }
    }
 

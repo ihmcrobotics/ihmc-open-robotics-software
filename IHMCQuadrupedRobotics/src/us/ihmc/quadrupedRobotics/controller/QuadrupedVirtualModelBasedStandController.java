@@ -1,7 +1,10 @@
 package us.ihmc.quadrupedRobotics.controller;
 
+import java.awt.Color;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedVirtualModelBasedStandParameters;
@@ -16,6 +19,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -27,9 +31,13 @@ import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 
 public class QuadrupedVirtualModelBasedStandController extends QuadrupedController
 {
@@ -43,6 +51,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
    private final double controlDT;
    private final double gravityZ;
    private final double mass;
+   private double startTime;
 
    // utilities
    private final QuadrupedVirtualModelController virtualModelController;
@@ -52,6 +61,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
    private final ReferenceFrame comFrame;
    private final PoseReferenceFrame supportFrame;
    private final QuadrupedSupportPolygon supportPolygon;
+   private final YoFrameConvexPolygon2d yoSupportPolygon;
    private final CenterOfMassJacobian comJacobian;
    private final TwistCalculator twistCalculator;
    private final AxisAngleOrientationController bodyOrientationController;
@@ -84,6 +94,10 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
    private final DoubleYoVariable yoComHeightEstimate;
    private final YoFramePoint yoIcpPositionEstimate;
 
+   // graphics
+   private final YoGraphicsList yoGraphicsList;
+   private final ArtifactList artifactList;
+
    private HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
 
    public QuadrupedVirtualModelBasedStandController(double controlDT, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
@@ -115,6 +129,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       {
          supportPolygon.setFootstep(robotQuadrant, new FramePoint(worldFrame));
       }
+      yoSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon2d", "", ReferenceFrame.getWorldFrame(), 4, registry);
       comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       twistCalculator = new TwistCalculator(worldFrame, fullRobotModel.getElevator());
       bodyOrientationController = new AxisAngleOrientationController("bodyOrientation", bodyFrame, controlDT, registry);
@@ -167,6 +182,29 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       yoComHeightEstimate = new DoubleYoVariable("comHeightEstimate", registry);
       yoIcpPositionEstimate = new YoFramePoint("icpPositionEstimate", worldFrame, registry);
 
+      // graphics
+      YoGraphicPosition yoComPositionEstimateViz = new YoGraphicPosition("comPositionEstimate", yoComPositionEstimate, 0.025, YoAppearance.Black(),
+            GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition("icpPositionEstimate", yoIcpPositionEstimate, 0.025, YoAppearance.Chartreuse());
+      YoGraphicPosition yoIcpPositionSetpointViz = new YoGraphicPosition("icpPositionSetpoint", yoIcpPositionSetpoint, 0.025, YoAppearance.Blue());
+      YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition("cmpPositionSetpoint", yoCmpPositionSetpoint, 0.025, YoAppearance.Magenta());
+      yoGraphicsList = new YoGraphicsList(getClass().getSimpleName() + "Graphics");
+      yoGraphicsList.add(yoComPositionEstimateViz);
+      yoGraphicsList.add(yoIcpPositionEstimateViz);
+      yoGraphicsList.add(yoIcpPositionSetpointViz);
+      yoGraphicsList.add(yoCmpPositionSetpointViz);
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+
+      // artifacts
+      YoArtifactPolygon yoSupportPolygonArtifact = new YoArtifactPolygon("supportPolygon", yoSupportPolygon, Color.BLACK, false);
+      artifactList = new ArtifactList(getClass().getSimpleName() + "Artifacts");
+      artifactList.add(yoComPositionEstimateViz.createArtifact());
+      artifactList.add(yoIcpPositionEstimateViz.createArtifact());
+      artifactList.add(yoIcpPositionSetpointViz.createArtifact());
+      artifactList.add(yoCmpPositionSetpointViz.createArtifact());
+      artifactList.add(yoSupportPolygonArtifact);
+      yoGraphicsListRegistry.registerArtifactList(artifactList);
+
       parentRegistry.addChild(registry);
    }
 
@@ -192,6 +230,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       {
          supportPolygon.setFootstep(robotQuadrant, yoSolePositionEstimate.get(robotQuadrant).getFrameTuple());
       }
+      supportPolygon.packYoFrameConvexPolygon2d(yoSupportPolygon);
 
       // compute support frame (centroid and nominal orientation)
       FramePoint supportCentroid = pool.lease(FramePoint.class);
@@ -306,8 +345,8 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       yoCmpPositionSetpoint.set(cmpPositionSetpoint);
 
       // compute joint torques using virtual model control
-      virtualModelController.setComForceSetpoint(comForceSetpoint);
-      virtualModelController.setBodyTorqueSetpoint(bodyTorqueSetpoint);
+      virtualModelController.setComForceCommand(comForceSetpoint);
+      virtualModelController.setComTorqueCommand(bodyTorqueSetpoint);
       virtualModelController.compute();
    }
 
@@ -343,17 +382,44 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       }
 
       // initialize virtual model controller
-      this.virtualModelController.reinitialize();
+      virtualModelController.reinitialize();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         virtualModelController.setContactState(robotQuadrant, true);
+      }
+
+      // show graphics
+      yoGraphicsListRegistry.hideYoGraphics();
+      yoGraphicsListRegistry.hideArtifacts();
+      yoGraphicsList.setVisible(true);
+      artifactList.setVisible(true);
+      virtualModelController.setVisible(true);
+
+      startTime = robotTimestamp.getDoubleValue();
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
+      // hide graphics
+      yoGraphicsList.setVisible(false);
+      artifactList.setVisible(false);
+      virtualModelController.setVisible(false);
    }
 
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
+   }
+
+   public YoGraphicsList getYoGraphicsList()
+   {
+      return yoGraphicsList;
+   }
+
+   public ArtifactList getArtifactList()
+   {
+      return artifactList;
    }
 
    @Override

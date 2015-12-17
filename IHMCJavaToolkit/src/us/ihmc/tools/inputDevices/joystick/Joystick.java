@@ -12,7 +12,6 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class Joystick
 {
-   private final ArrayList<JoystickEventListener> eventListeners = new ArrayList<JoystickEventListener>();
    private final ArrayList<JoystickGeneralListener> generalListeners = new ArrayList<JoystickGeneralListener>();
    private final HashSet<Identifier> identifiers = new HashSet<Identifier>();
    private final Controller joystickController;
@@ -35,7 +34,7 @@ public class Joystick
          identifiers.add(component.getIdentifier());
       }
       
-      joystickUpdater = new JoystickUpdater(joystickController, eventListeners, generalListeners);
+      joystickUpdater = new JoystickUpdater(joystickController, generalListeners);
 
       Thread thread = new Thread(joystickUpdater);
       thread.setPriority(Thread.NORM_PRIORITY);
@@ -46,8 +45,7 @@ public class Joystick
 
    public void addJoystickEventListener(JoystickEventListener joystickEventListener)
    {
-      
-      eventListeners.add(joystickEventListener);
+      joystickUpdater.addListener(joystickEventListener);
    }
    
    public void addJoystickGeneralListener(JoystickGeneralListener joystickGeneralListener)
@@ -58,8 +56,7 @@ public class Joystick
    
    public void clearEventListeners()
    {
-      
-      eventListeners.clear();
+      joystickUpdater.clearListeners();
    }
 
    public Component findComponent(Identifier identifier) throws JoystickComponentNotFoundException
