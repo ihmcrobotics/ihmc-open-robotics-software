@@ -297,8 +297,16 @@ public class HandControlModule
       doPositionControl = armControlParameters.doLowLevelPositionControl();
       String stateNamePrefix = namePrefix + "Hand";
       jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, oneDoFJoints, doPositionControl, momentumBasedController, jointspaceGains, controlDT, registry);
-      taskspaceToJointspaceHandForcefeedbackControlState = new TaskspaceToJointspaceHandForcefeedbackControlState(stateNamePrefix,
-            HandControlState.TASK_SPACE_FORCE_FEEDBACK_CONTROL, robotSide, momentumBasedController, jacobianId, chest, hand, doPositionControl, jointspaceGains, registry);
+      if (momentumBasedController.getWristForceSensors() != null)
+      {
+         taskspaceToJointspaceHandForcefeedbackControlState = new TaskspaceToJointspaceHandForcefeedbackControlState(stateNamePrefix,
+               HandControlState.TASK_SPACE_FORCE_FEEDBACK_CONTROL, robotSide, momentumBasedController, jacobianId, chest, hand, doPositionControl, jointspaceGains, registry);
+      }
+      else
+      {
+         taskspaceToJointspaceHandForcefeedbackControlState = null;
+      }
+
       if (doPositionControl)
       {
          // TODO Not implemented for position control.
@@ -336,19 +344,23 @@ public class HandControlModule
    {
       addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, jointSpaceHandControlState);
       addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, taskSpacePositionControlState);
-      addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, taskspaceToJointspaceHandForcefeedbackControlState);
 
       addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, taskSpacePositionControlState);
       addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, jointSpaceHandControlState);
-      addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, taskspaceToJointspaceHandForcefeedbackControlState);
       
-      addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, taskSpacePositionControlState);
-      addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, jointSpaceHandControlState);
-      addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, taskspaceToJointspaceHandForcefeedbackControlState);
       
       stateMachine.addState(jointSpaceHandControlState);
       stateMachine.addState(taskSpacePositionControlState);
-      stateMachine.addState(taskspaceToJointspaceHandForcefeedbackControlState);
+
+      if (taskspaceToJointspaceHandForcefeedbackControlState != null)
+      {
+         addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, taskspaceToJointspaceHandForcefeedbackControlState);
+         addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, taskspaceToJointspaceHandForcefeedbackControlState);
+         addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, taskSpacePositionControlState);
+         addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, jointSpaceHandControlState);
+         addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, taskspaceToJointspaceHandForcefeedbackControlState);
+         stateMachine.addState(taskspaceToJointspaceHandForcefeedbackControlState);
+      }
 
       if (!doPositionControl)
       {
@@ -356,8 +368,11 @@ public class HandControlModule
          addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, loadBearingControlState);
          addRequestedStateTransition(requestedState, false, loadBearingControlState, taskSpacePositionControlState);
          addRequestedStateTransition(requestedState, false, loadBearingControlState, jointSpaceHandControlState);
-         addRequestedStateTransition(requestedState, false, loadBearingControlState, taskspaceToJointspaceHandForcefeedbackControlState);
-         addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, loadBearingControlState);
+         if (taskspaceToJointspaceHandForcefeedbackControlState != null)
+         {
+            addRequestedStateTransition(requestedState, false, loadBearingControlState, taskspaceToJointspaceHandForcefeedbackControlState);
+            addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, loadBearingControlState);
+         }
 
          setupTransitionToSupport(taskSpacePositionControlState);
          stateMachine.addState(loadBearingControlState);
@@ -489,6 +504,9 @@ public class HandControlModule
    
    public void executeForceControlledTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory, DenseMatrix64F selectionMatrix, Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld)
    {
+      if (taskspaceToJointspaceHandForcefeedbackControlState == null)
+         return;
+
 	   handSpatialAccelerationControlModule.setGains(taskspaceGains);
 	   taskspaceToJointspaceHandForcefeedbackControlState.initialize(rotationAxisOriginInWorld, rotationAxisInWorld);
 	   taskspaceToJointspaceHandForcefeedbackControlState.setTrajectoryWithAngularControlQuality(poseTrajectory, Double.NaN, Double.NaN);
@@ -602,6 +620,12 @@ public class HandControlModule
    public void moveInCircleForceControl(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean controlHandAngleAboutAxis, double graspOffsetFromControlFrame, double time,
 		   Vector3d forceConstraintVector, double desiredTangentialForce)
    {
+      if (taskspaceToJointspaceHandForcefeedbackControlState == null)
+      {
+         PrintTools.error(this, "The hand force control controller was not setup. Ignoring the command.");
+         return;
+      }
+
 	   optionalHandControlFrame.setX(graspOffsetFromControlFrame);
 	   optionalHandControlFrame.update();
 

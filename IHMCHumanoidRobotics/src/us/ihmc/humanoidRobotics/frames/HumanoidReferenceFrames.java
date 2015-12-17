@@ -136,17 +136,20 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       // this is a
       midFeetUnderPelvisWalkDirectionFrame = new ReferenceFrame("midFeetUnderPelvisWalkDirectionFrame", ReferenceFrame.getWorldFrame())
       {
+         private static final long serialVersionUID = -8209218692291863332L;
+         private final FramePose midFeetPose = new FramePose();
+         private final FramePose pelvisPose = new FramePose();
+
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            FramePose midFeetPose = new FramePose(midFeetZUpWalkDirectionFrame);
-            FramePose pelvisPose = new FramePose(getPelvisFrame());
+            midFeetPose.setToZero(midFeetZUpWalkDirectionFrame);
+            pelvisPose.setToZero(getPelvisFrame());
 
             pelvisPose.changeFrame(midFeetZUpWalkDirectionFrame);
             midFeetPose.setX(pelvisPose.getX());
             midFeetPose.changeFrame(ReferenceFrame.getWorldFrame());
             midFeetPose.getPose(transformToParent);
-            //            System.out.println(transformToParent);
          }
       };
 
