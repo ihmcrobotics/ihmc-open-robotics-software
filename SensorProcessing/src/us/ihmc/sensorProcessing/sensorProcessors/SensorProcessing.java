@@ -749,32 +749,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Add a low-pass filter stage on the angular velocities provided by the IMU sensors.
-    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
-    * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
-    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
-    */
-   @Deprecated
-   public void addIMUAngularVelocityAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
-   {
-      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.IMU_ANGULAR_VELOCITY);
-   }
-
-   /**
-    * Add a low-pass filter stage on the linear accelerations provided by the IMU sensors.
-    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
-    * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
-    * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
-    */
-   @Deprecated
-   public void addIMULinearAccelerationAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
-   {
-      addSensorAlphaFilter(alphaFilter, forVizOnly, SensorType.IMU_LINEAR_ACCELERATION);
-   }
-
-   /**
     * @deprecated Use {@link #addSensorAlphaFilter(DoubleYoVariable, boolean, SensorType)} instead.
     */
    @Deprecated
