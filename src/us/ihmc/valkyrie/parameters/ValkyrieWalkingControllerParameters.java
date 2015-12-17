@@ -1,6 +1,8 @@
 package us.ihmc.valkyrie.parameters;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -12,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
@@ -899,39 +902,37 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public String[] getJointsToIgnoreInController()
    {
-      String[] jointsToIgnore = new String[] {
-            "rightIndexFingerPitch1",
-            "rightIndexFingerPitch2",
-            "rightIndexFingerPitch3",
-            "rightMiddleFingerPitch1",
-            "rightMiddleFingerPitch2",
-            "rightMiddleFingerPitch3",
-            "rightPinkyPitch1",
-            "rightPinkyPitch2",
-            "rightPinkyPitch3",
-            "rightThumbRoll",
-            "rightThumbPitch1",
-            "rightThumbPitch2",
-            "rightThumbPitch3",
-            "leftIndexFingerPitch1",
-            "leftIndexFingerPitch2",
-            "leftIndexFingerPitch3",
-            "leftMiddleFingerPitch1",
-            "leftMiddleFingerPitch2",
-            "leftMiddleFingerPitch3",
-            "leftPinkyPitch1",
-            "leftPinkyPitch2",
-            "leftPinkyPitch3",
-            "leftThumbRoll",
-            "leftThumbPitch1",
-            "leftThumbPitch2",
-            "leftThumbPitch3",
-//            "upperNeckPitch",
-//            "LowerNeckPitch",
-//            "NeckYaw"
-             };
-            
-      return jointsToIgnore;
+      List<String> jointToIgnoreList = new ArrayList<>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String[] forcedSideJointNames = ValkyrieOrderedJointMap.forcedSideDependentJointNames.get(robotSide);
+         jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftIndexFingerPitch1]);
+         jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftIndexFingerPitch2]);
+         jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftIndexFingerPitch3]);
+         jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftMiddleFingerPitch1]);
+         jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftMiddleFingerPitch2]);
+         jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftMiddleFingerPitch3]);
+         jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftPinkyPitch1]);
+         jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftPinkyPitch2]);
+         jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftPinkyPitch3]);
+         jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftThumbRoll]);
+         jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftThumbPitch1]);
+         jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftThumbPitch2]);
+         jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftThumbPitch3]);
+
+         if (target == RobotTarget.REAL_ROBOT)
+         {
+            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.UpperNeckPitch]);
+            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LowerNeckPitch]);
+            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.NeckYaw]);
+            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw]);
+            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll]);
+            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch]);
+         }
+      }
+      
+      return jointToIgnoreList.toArray(new String[0]);
    }
 
    @Override
