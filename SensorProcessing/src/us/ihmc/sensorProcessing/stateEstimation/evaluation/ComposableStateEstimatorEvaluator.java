@@ -79,7 +79,7 @@ public class ComposableStateEstimatorEvaluator
             DoubleYoVariable alphaFilter = sensorProcessing.createAlphaFilter("defaultAlphaFilter", 12.0);
 
             sensorProcessing.addSensorAlphaFilter(alphaFilter, false, SensorType.JOINT_POSITION);
-            sensorProcessing.addJointVelocityAlphaFilter(alphaFilter, false);
+            sensorProcessing.addSensorAlphaFilter(alphaFilter, false, SensorType.JOINT_VELOCITY);
             sensorProcessing.addIMUOrientationAlphaFilter(alphaFilter, false);
             sensorProcessing.addIMUAngularVelocityAlphaFilter(alphaFilter, false);
             sensorProcessing.addIMULinearAccelerationAlphaFilter(alphaFilter, false);
