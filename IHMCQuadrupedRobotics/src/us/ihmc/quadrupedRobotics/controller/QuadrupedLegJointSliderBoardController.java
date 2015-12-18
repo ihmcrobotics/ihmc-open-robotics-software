@@ -7,7 +7,9 @@ import java.util.Map;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -25,6 +27,11 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
    private final Map<String, AlphaFilteredYoVariable> alphaFilteredQDesiredMap = new HashMap<>();
    private final Map<String, DoubleYoVariable> QDesiredMap = new HashMap<>();
    private final Map<String, MutableBoolean> jointInitialized = new HashMap<>();
+   private final Map<String, DoubleYoVariable> sineFrequencyMap = new HashMap<>();
+   private final Map<String, DoubleYoVariable> sineAmplitudeMap = new HashMap<>();
+   
+   private final BooleanYoVariable startChirp = new BooleanYoVariable("startChirp", sliderBoardRegistry);
+   private double chirpStartTime = -1;
 
    public QuadrupedLegJointSliderBoardController(SDFFullRobotModel fullRobotModel, YoVariableRegistry registry)
    {
@@ -44,6 +51,12 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
          alphaFilteredQDesiredMap.put(key, alphaFilteredQDesired);
          QDesiredMap.put(key, qDesired);
          jointInitialized.put(key, new MutableBoolean(false));
+         
+         DoubleYoVariable sineFrequency = new DoubleYoVariable(key + "_freq", registry);
+         DoubleYoVariable sineAmplitude = new DoubleYoVariable(key + "_amp", registry);
+         
+         sineFrequencyMap.put(key, sineFrequency);
+         sineAmplitudeMap.put(key, sineAmplitude);
       }
    }
 
@@ -54,6 +67,11 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
 
    @Override public void doAction()
    {
+      if(startChirp.getBooleanValue())
+      {
+         chirpStartTime = getTimeInCurrentState();
+         startChirp.set(false);
+      }
       for (int i = 0; i < jointMapKeySet.size(); i++)
       {
          String key = jointMapKeySet.get(i);
@@ -72,7 +90,20 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
          }
          
          alphaFilteredYoVariable.update();
-         oneDoFJoint.setqDesired(alphaFilteredYoVariable.getDoubleValue());
+
+         double sine = 0.0;
+         
+         if(chirpStartTime > 1.0)
+         {
+            double timeInChirp = getTimeInCurrentState() - chirpStartTime;
+            if(timeInChirp > 10.0)
+            {
+               chirpStartTime = -1;
+            }
+            
+            sine = sineAmplitudeMap.get(key).getDoubleValue() * Math.sin(Math.PI * sineFrequencyMap.get(key).getDoubleValue() * timeInChirp * timeInChirp);
+         } 
+         oneDoFJoint.setqDesired(alphaFilteredYoVariable.getDoubleValue() + sine);
       }
    }
 
