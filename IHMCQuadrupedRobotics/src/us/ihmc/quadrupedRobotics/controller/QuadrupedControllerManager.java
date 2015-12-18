@@ -40,6 +40,15 @@ public class QuadrupedControllerManager implements RobotController
          QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators, QuadrupedStateEstimator stateEstimator, GlobalDataProducer globalDataProducer,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
+      this(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, inverseKinematicsCalculators, stateEstimator, globalDataProducer, yoGraphicsListRegistry,
+            yoGraphicsListRegistryForDetachedOverhead, QuadrupedControllerState.DO_NOTHING);
+   }
+
+   public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters, SDFFullRobotModel sdfFullRobotModel,
+         QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators, QuadrupedStateEstimator stateEstimator, GlobalDataProducer globalDataProducer,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead,
+         QuadrupedControllerState startState)
+   {
       this.stateEstimator = stateEstimator;
       this.virtualModelController = new QuadrupedVirtualModelController(sdfFullRobotModel, quadrupedRobotParameters, registry, yoGraphicsListRegistry);
 
@@ -95,7 +104,7 @@ public class QuadrupedControllerManager implements RobotController
             .addStateTransition(new PermissiveRequestedStateTransition<QuadrupedControllerState>(requestedState, QuadrupedControllerState.STAND_PREP));
 
       // TODO: Start in a "freeze" state.
-      stateMachine.setCurrentState(QuadrupedControllerState.DO_NOTHING);
+      stateMachine.setCurrentState(startState);
       stateMachine.getCurrentState().doTransitionIntoAction();
    }
 
