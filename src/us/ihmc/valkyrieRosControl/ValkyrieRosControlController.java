@@ -3,6 +3,7 @@ package us.ihmc.valkyrieRosControl;
 import java.io.IOException;
 import java.util.HashMap;
 
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.affinity.Affinity;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -73,7 +74,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
    
    private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
 
-   private static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = false;
+   private static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
 
    private MultiThreadedRealTimeRobotController robotController;
    
@@ -219,14 +220,17 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
       DRCOutputWriter drcOutputWriter = valkyrieOutputWriter;
       
       if (INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
-      {         
-         DRCOutputWriterWithAccelerationIntegration valkyrieOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(drcOutputWriter, robotModel.getControllerDT(), true);
+      {
+         double controllerDT = robotModel.getControllerDT();
+         LegJointName[] legJointNames = new LegJointName[]{LegJointName.HIP_YAW, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL};
+         DRCOutputWriterWithAccelerationIntegration valkyrieOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(
+               drcOutputWriter, legJointNames, null, null, controllerDT, true);
 
-         valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.85, 0.85);
+         valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.9, 0.0);
          valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
-         valkyrieOutputWriterWithAccelerationIntegration.setVelocityGains(9.0, 0.0);
+         valkyrieOutputWriterWithAccelerationIntegration.setVelocityGains(4.75, 0.0);
          valkyrieOutputWriterWithAccelerationIntegration.setPositionGains(0.0, 0.0);
-         
+
          drcOutputWriter = valkyrieOutputWriterWithAccelerationIntegration;
       }
 
