@@ -159,6 +159,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final QuadrantDependentList<ReferenceFrame> legAttachmentFrames = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFramePoint> actualFeetLocations = new QuadrantDependentList<YoFramePoint>();
    private final QuadrantDependentList<YoFramePoint> desiredFeetLocations = new QuadrantDependentList<YoFramePoint>();
+   private final FramePoint desiredFootPosition = new FramePoint();
    
    private final QuadrantDependentList<YoFrameVector> desiredFeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
    private final QuadrantDependentList<YoFrameVector> actualFeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
@@ -835,7 +836,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
     */
    private Vector3d packFootPositionUsingDesiredBodyToBodyHack(RobotQuadrant robotQuadrant)
    {
-      FramePoint desiredFootPosition = desiredFeetLocations.get(robotQuadrant).getFramePointCopy();
+      desiredFootPosition.setIncludingFrame(desiredFeetLocations.get(robotQuadrant).getFrameTuple());
       desiredFootPosition.changeFrame(desiredCoMPoseReferenceFrame);
 
       // Fix this for feed forward!!!
