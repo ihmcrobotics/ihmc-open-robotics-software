@@ -189,6 +189,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final DoubleYoVariable comCloseRadius = new DoubleYoVariable("comCloseRadius", "Distance check from final desired circle to CoM for transitioning into swing state", registry);
 
    private final YoFrameVector yoVectorToSubtract = new YoFrameVector("yoVectorToSubtract", ReferenceFrame.getWorldFrame(), registry);
+   private final FramePoint centerOfMassInBody = new FramePoint();
+   private final FramePoint desiredRootJointPosition = new FramePoint();
+   private final FrameVector vectorToSubtractHolder = new FrameVector();
+   private final Vector3d linearVelocityHolder = new Vector3d();
    
    private final BooleanYoVariable isCoMInsideTriangleForSwingLeg = new BooleanYoVariable("isCoMInsideTriangleForSwingLeg", registry);
    private final BooleanYoVariable isCoMCloseToFinalDesired = new BooleanYoVariable("isCoMCloseToFinalDesired", registry);
@@ -587,7 +591,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       return isDesiredVelocityZero && isDesiredYawRateZero;
    }
 
-
    private void updateFeedForwardModelAndFrames() 
    {
 	   OneDoFJoint[] oneDoFJointsFeedforward = feedForwardFullRobotModel.getOneDoFJoints();
@@ -614,23 +617,21 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 //	   rootJoint.packTranslation(rootJointPosition);
 //	   feedForwardRootJoint.setPosition(rootJointPosition);
 	   
-	   FramePoint centerOfMassInBody = new FramePoint(comFrame);
+	   centerOfMassInBody.setIncludingFrame(comFrame, 0.0, 0.0, 0.0);
 	   centerOfMassInBody.changeFrame(rootJoint.getFrameAfterJoint());
 	   
-	   FrameVector vectorToSubtract = new FrameVector(feedForwardFullRobotModel.getRootJoint().getFrameAfterJoint(), centerOfMassInBody.getPoint());
-	   vectorToSubtract.changeFrame(ReferenceFrame.getWorldFrame());
+	   vectorToSubtractHolder.setIncludingFrame(feedForwardFullRobotModel.getRootJoint().getFrameAfterJoint(), centerOfMassInBody.getPoint());
+	   vectorToSubtractHolder.changeFrame(ReferenceFrame.getWorldFrame());
 
-	   yoVectorToSubtract.set(vectorToSubtract);
+	   yoVectorToSubtract.set(vectorToSubtractHolder);
 //	   System.out.println("VectorToSubtract = " + vectorToSubtract);
 	   
-	   
-	   FramePoint desiredRootJointPosition = desiredCoM.getFramePointCopy();
-	   desiredRootJointPosition.sub(vectorToSubtract);
-	   Vector3d linearVelocity = new Vector3d();
-      feedForwardRootJoint.packTranslation(linearVelocity);
+	   desiredRootJointPosition.setIncludingFrame(desiredCoM.getFrameTuple());
+	   desiredRootJointPosition.sub(vectorToSubtractHolder);
+      feedForwardRootJoint.packTranslation(linearVelocityHolder);
 	   feedForwardRootJoint.setPosition(desiredRootJointPosition.getPoint());
-	   linearVelocity.sub(desiredRootJointPosition.getPoint(), linearVelocity);
-	   feedForwardRootJoint.setLinearVelocityInWorld(linearVelocity);
+	   linearVelocityHolder.sub(desiredRootJointPosition.getPoint(), linearVelocityHolder);
+	   feedForwardRootJoint.setLinearVelocityInWorld(linearVelocityHolder);
 
 	   feedForwardFullRobotModel.updateFrames();
 	   feedForwardReferenceFrames.updateFrames();
