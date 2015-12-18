@@ -357,10 +357,10 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       
       String[] ret = new String[]
       {
-            getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_PITCH),
-            getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_ROLL),
-            getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_PITCH),
-            getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_ROLL),
+//            getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_PITCH),
+//            getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_ROLL),
+//            getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_PITCH),
+//            getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_ROLL),
             getSpineJointName(SpineJointName.SPINE_PITCH),
             getSpineJointName(SpineJointName.SPINE_ROLL),
       };
