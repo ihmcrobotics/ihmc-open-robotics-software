@@ -224,7 +224,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
          double controllerDT = robotModel.getControllerDT();
          LegJointName[] legJointNames = new LegJointName[]{LegJointName.HIP_YAW, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL};
          DRCOutputWriterWithAccelerationIntegration valkyrieOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(
-               drcOutputWriter, legJointNames, null, null, controllerDT, true);
+               drcOutputWriter, legJointNames, null, null, controllerDT, true, true);
 
          valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.9, 0.0);
          valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
