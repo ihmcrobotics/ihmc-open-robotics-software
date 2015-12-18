@@ -26,6 +26,8 @@ public abstract class QuadrupedRobotParameters
 
    public abstract QuadrupedActuatorParameters getActuatorParameters();
 
+   public abstract QuadrupedInitialPositionParameters getQuadrupedInitialPositionParameters();
+
    public abstract QuadrupedControllerParameters getQuadrupedControllerParameters();
    
    public QuadrupedStandPrepParameters getQuadrupedStandPrepParameters()

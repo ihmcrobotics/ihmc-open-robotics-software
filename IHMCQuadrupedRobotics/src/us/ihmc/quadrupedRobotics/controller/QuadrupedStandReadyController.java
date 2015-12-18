@@ -1,35 +1,27 @@
 package us.ihmc.quadrupedRobotics.controller;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
+/**
+ * A dummy controller that merely signifies that the robot is prepared to transition
+ * to another controller.
+ */
 public class QuadrupedStandReadyController extends QuadrupedController
 {
-   private final SDFFullRobotModel fullRobotModel;
-
-   public QuadrupedStandReadyController(SDFFullRobotModel fullRobotModel)
+   public QuadrupedStandReadyController()
    {
       super(QuadrupedControllerState.STAND_READY);
-
-      this.fullRobotModel = fullRobotModel;
    }
 
    @Override
    public void doAction()
    {
+      // Do nothing.
    }
 
    @Override
    public void doTransitionIntoAction()
    {
-      for(OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
-      {
-         joint.setUnderPositionControl(true);
-         
-         // Set the desired to the initial, then never touch it again.
-         joint.setqDesired(joint.getQ());
-      }
    }
 
    @Override
