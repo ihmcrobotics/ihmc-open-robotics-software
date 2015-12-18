@@ -25,25 +25,25 @@ public class QuadrupedContactForceOptimizationSettings
       contactForceRegularizationWeights = MINIMUM_REGULARIZATION_WEIGHTS;
    }
 
-   public void setComTorqueCommandWeights(double[] weight)
+   public void setComTorqueCommandWeights(double[] weights)
    {
       for (int i = 0; i < 3; i++)
       {
-         comTorqueCommandWeights[i] = Math.max(weight[i], 0.0);
+         comTorqueCommandWeights[i] = Math.max(weights[i], 0.0);
       }
    }
 
-   public void setComForceCommandWeights(double[] weight)
+   public void setComForceCommandWeights(double[] weights)
    {
       for (int i = 0; i < 3; i++)
       {
-         comForceCommandWeights[i] = Math.max(weight[i], 0.0);
+         comForceCommandWeights[i] = Math.max(weights[i], 0.0);
       }
    }
 
-   public void setContactForceRegularizationWeights(double weight)
+   public void setContactForceRegularizationWeights(double weights)
    {
-      contactForceRegularizationWeights = Math.max(weight, MINIMUM_REGULARIZATION_WEIGHTS);
+      contactForceRegularizationWeights = Math.max(weights, MINIMUM_REGULARIZATION_WEIGHTS);
    }
 
    public /* const */ double[] getComTorqueCommandWeights()

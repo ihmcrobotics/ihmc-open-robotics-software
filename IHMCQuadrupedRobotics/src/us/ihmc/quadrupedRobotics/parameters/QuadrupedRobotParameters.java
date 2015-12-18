@@ -3,19 +3,20 @@ package us.ihmc.quadrupedRobotics.parameters;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFParameters;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedContactForceLimits;
+import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedJointLimits;
 
 public abstract class QuadrupedRobotParameters
 {
-   private final QuadrupedStandPrepParameters standPrepParams = new DefaultQuadrupedStandPrepParameters();
-   private final QuadrupedVirtualModelParameters vmcParams = new DefaultQuadrupedVirtualModelParameters();
-   private final QuadrupedVirtualModelBasedStandParameters vmcStandParams = new DefaultQuadrupedVirtualModelBasedStandParameters();
+   private final QuadrupedJointLimits jointLimits = new QuadrupedJointLimits();
+   private final QuadrupedContactForceLimits contactForceLimits = new QuadrupedContactForceLimits();
+   private final QuadrupedStandPrepParameters standPrepParameters = new DefaultQuadrupedStandPrepParameters();
+   private final QuadrupedVirtualModelBasedStandParameters virtualModelBasedStandParameters = new DefaultQuadrupedVirtualModelBasedStandParameters();
 
    public abstract SDFRobot createSdfRobot();
 
    public abstract QuadrupedJointNameMap getJointMap();
    
-   public abstract QuadrupedJointLimits getJointLimits();
-
    public abstract SDFFullRobotModel createFullRobotModel();
 
    public abstract String getModelName();
@@ -30,18 +31,23 @@ public abstract class QuadrupedRobotParameters
 
    public abstract QuadrupedControllerParameters getQuadrupedControllerParameters();
    
-   public QuadrupedStandPrepParameters getQuadrupedStandPrepParameters()
+   public QuadrupedJointLimits getQuadrupedJointLimits()
    {
-      return standPrepParams;
+      return jointLimits;
    }
    
-   public QuadrupedVirtualModelParameters getQuadrupedVirtualModelParameters()
+   public QuadrupedContactForceLimits getQuadrupedContactForceLimits()
    {
-      return vmcParams;
+      return contactForceLimits;
    }
-
-   public QuadrupedVirtualModelBasedStandParameters getQuadrupedVMCStandParameters()
+   
+   public QuadrupedStandPrepParameters getQuadrupedStandPrepParameters()
    {
-      return vmcStandParams;
+      return standPrepParameters;
+   }
+   
+   public QuadrupedVirtualModelBasedStandParameters getQuadrupedVirtualModelBasedStandParameters()
+   {
+      return virtualModelBasedStandParameters;
    }
 }
