@@ -445,7 +445,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       if(target == RobotTarget.REAL_ROBOT)
       {
          if(useCameras)
-            return LogSettings.VALKYRIE_IHMC;
+            return LogSettings.VALKYRIE_JSC;
          else
             return LogSettings.VALKYRIE_NO_CAMERAS;
       }
