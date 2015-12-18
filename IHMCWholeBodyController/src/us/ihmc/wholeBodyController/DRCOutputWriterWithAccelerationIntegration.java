@@ -67,6 +67,7 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    private LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredPositions;
 
    private final double updateDT;
+   private final boolean conservative;
 
    // List of the joints for which we do integrate the desired accelerations by default
    private final LegJointName[] legJointsForIntegratingAcceleration;
@@ -76,7 +77,14 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    public DRCOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, LegJointName[] legJointToIntegrate,
          ArmJointName[] armJointToIntegrate, SpineJointName[] spineJointToIntegrate, double updateDT, boolean runningOnRealRobot)
    {
+      this(drcOutputWriter, legJointToIntegrate, armJointToIntegrate, spineJointToIntegrate, updateDT, runningOnRealRobot, false);
+   }
+
+   public DRCOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, LegJointName[] legJointToIntegrate,
+         ArmJointName[] armJointToIntegrate, SpineJointName[] spineJointToIntegrate, double updateDT, boolean runningOnRealRobot, boolean conservative)
+   {
       this.runningOnRealRobot = runningOnRealRobot;
+      this.conservative = conservative;
       this.drcOutputWriter = drcOutputWriter;
       this.updateDT = updateDT;
       registry.addChild(drcOutputWriter.getControllerYoVariableRegistry());
@@ -232,17 +240,25 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    {
       drcOutputWriter.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
 
-      // These are for hacking torques. Should make into a new
-      // Output writer instead...
-      //      waistLateralExtensorJoint = controllerModel.getSpineJoint(SpineJointName.SPINE_ROLL);
-      //      waistRotatorJoint = controllerModel.getSpineJoint(SpineJointName.SPINE_YAW);
-      //      leftKneeJoint = controllerModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE);
-      //      rightKneeJoint = controllerModel.getLegJoint(RobotSide.RIGHT, LegJointName.KNEE);
-      //      leftAnklePitchJoint = controllerModel.getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH);
-      //      rightAnklePitchJoint = controllerModel.getLegJoint(RobotSide.RIGHT, LegJointName.ANKLE_PITCH);
-
       oneDoFJoints = new ArrayList<OneDoFJoint>();
-      controllerModel.getOneDoFJoints(oneDoFJoints);
+
+      if (conservative)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            for (LegJointName jointName : legJointsForIntegratingAcceleration)
+               oneDoFJoints.add(controllerModel.getLegJoint(robotSide, jointName));
+            for (ArmJointName jointName : armJointsForIntegratingAcceleration)
+               oneDoFJoints.add(controllerModel.getArmJoint(robotSide, jointName));
+         }
+         
+         for (SpineJointName jointName : spineJointsForIntegratingAcceleration)
+            oneDoFJoints.add(controllerModel.getSpineJoint(jointName));
+      }
+      else
+      {
+         controllerModel.getOneDoFJoints(oneDoFJoints);
+      }
 
       ArrayList<OneDoFJoint> armOneDoFJoints = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
