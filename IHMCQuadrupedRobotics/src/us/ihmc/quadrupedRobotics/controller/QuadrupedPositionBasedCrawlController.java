@@ -100,7 +100,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final QuadrupedReferenceFrames referenceFrames;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final CenterOfMassJacobian feedForwardCenterOfMassJacobian;
-   private final ReferenceFrame bodyFrame;
    private final ReferenceFrame feedForwardBodyFrame;
    private final ReferenceFrame comFrame;
    private final PoseReferenceFrame desiredCoMPoseReferenceFrame = new PoseReferenceFrame("desiredCoMPoseReferenceFrame", ReferenceFrame.getWorldFrame());
@@ -151,6 +150,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    
    private final QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon commonSupportPolygon = new QuadrupedSupportPolygon();
+   private final ConvexPolygon2d supportPolygonHolder = new ConvexPolygon2d();
 
    private final QuadrantDependentList<QuadrupedSwingTrajectoryGenerator> swingTrajectoryGenerators = new QuadrantDependentList<>();
    private final DoubleYoVariable swingDuration = new DoubleYoVariable("swingDuration", registry);
@@ -194,7 +194,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final BooleanYoVariable isCoMCloseToFinalDesired = new BooleanYoVariable("isCoMCloseToFinalDesired", registry);
    private final BooleanYoVariable useCommonTriangleForSwingTransition = new BooleanYoVariable("useCommonTriangleForSwingTransition", registry);
 
-   private final YoFramePoint feedForwardCenterOfMassPosition = new YoFramePoint("feedForwardCenterOfMassPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector feedForwardCenterOfMassVelocity = new YoFrameVector("feedForwardCenterOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
    
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
@@ -276,7 +275,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
       
       referenceFrames.updateFrames();
-      bodyFrame = referenceFrames.getBodyFrame();
       comFrame = referenceFrames.getCenterOfMassFrame();
       
       feedForwardFullRobotModel = robotParameters.createFullRobotModel();
@@ -861,17 +859,17 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    
    private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
    {
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      supportPolygonHolder.clear();
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
          FramePoint footstep = supportPolygon.getFootstep(quadrant);
          if(footstep != null)
          {
-            polygon.addVertex(footstep.getX(), footstep.getY());
+            supportPolygonHolder.addVertex(footstep.getX(), footstep.getY());
          }
       }
-      polygon.update();
-      yoFramePolygon.setConvexPolygon2d(polygon);
+      supportPolygonHolder.update();
+      yoFramePolygon.setConvexPolygon2d(supportPolygonHolder);
    }
    
    /**
