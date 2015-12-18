@@ -21,7 +21,6 @@ import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.swingLegChooser.DefaultGaitSwingLegChooser;
 import us.ihmc.quadrupedRobotics.swingLegChooser.NextSwingLegChooser;
-import us.ihmc.quadrupedRobotics.swingLegChooser.QuadrupedGaitSwingLegChooser;
 import us.ihmc.quadrupedRobotics.trajectory.QuadrupedSwingTrajectoryGenerator;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -382,7 +381,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          YoFrameVector footPositionInLegAttachementFrame = new YoFrameVector(prefix + "FootPositionInLegFrame", null, registry);
          desiredFeetPositionsInLegAttachmentFrame.put(robotQuadrant, footPositionInLegAttachementFrame);
          
-         YoFrameVector actualFootPositionInLegAttachementFrame = new YoFrameVector(prefix + "ActualFootPositionInLegFrame", null, registry);
+         YoFrameVector actualFootPositionInLegAttachementFrame = new YoFrameVector(prefix + "ActualFootPositionInLegFrame", referenceFrames.getLegAttachmentFrame(robotQuadrant), registry);
          actualFeetPositionsInLegAttachmentFrame.put(robotQuadrant, actualFootPositionInLegAttachementFrame);
       }
       
@@ -802,6 +801,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       desiredCoMPoseReferenceFrame.setPoseAndUpdate(desiredCoMFramePose);
    }
    
+   private FramePoint actualFootPositionInLegAttachmentFrame = new FramePoint();
+   
    private void updateLegsBasedOnDesiredCoM()
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -809,9 +810,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          Vector3d footPositionInLegAttachmentFrame = packFootPositionUsingDesiredBodyToBodyHack(robotQuadrant);
          desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(footPositionInLegAttachmentFrame);
          
-         FramePoint actualFootPositionInLegAttachmentFrame = new FramePoint(referenceFrames.getFootFrame(robotQuadrant));
+         actualFootPositionInLegAttachmentFrame.setIncludingFrame(referenceFrames.getFootFrame(robotQuadrant), 0.0, 0.0, 0.0);
          actualFootPositionInLegAttachmentFrame.changeFrame(referenceFrames.getLegAttachmentFrame(robotQuadrant));
-         actualFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(actualFootPositionInLegAttachmentFrame.getVectorCopy());
+         actualFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(actualFootPositionInLegAttachmentFrame);
       }
    }
    
