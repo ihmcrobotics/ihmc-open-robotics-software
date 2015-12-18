@@ -32,14 +32,14 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       
       if (ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
       {
-         forceSensorNames = new String[] { "leftAnkleRoll", "rightAnkleRoll", "leftWristPitch", "rightWristPitch" };
+         forceSensorNames = new String[] { "leftAnkleRoll", "rightAnkleRoll" }; //, "leftWristPitch", "rightWristPitch" };
       }
       else
       {
          forceSensorNames = new String[] { "leftAnkleRoll", "rightAnkleRoll" };
       }
    }
-   private static final SideDependentList<String> wristForceSensorNames = new SideDependentList<String>("leftWristPitch", "rightWristPitch");
+   private static final SideDependentList<String> wristForceSensorNames = null; //new SideDependentList<String>("leftWristPitch", "rightWristPitch");
    private static final SideDependentList<String> urdfTekscanSensorNames = new SideDependentList<String>("leftCOP_Offset", "rightCOP_Offset");
    private static final SideDependentList<String> footContactSensorNames = new SideDependentList<String>("leftFootContactSensor","rightFootContactSensor");
    private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("leftFootSixAxis_Offset", "rightFootSixAxis_Offset");
@@ -153,14 +153,12 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 	   
 	   /*Unit C:*/ imuUSBSerialIds.put(rearPelvisIMUSensor, 422047095);
 	   /*Unit C:*/ imuUSBSerialIds.put(middlePelvisIMUSensor, 422047093);
-      
-      //imuUSBSerialIds.put(leftTrunkIMUSensor, 622730569);
-      //imuUSBSerialIds.put(rightTrunkIMUSensor, 622709817);
+	   /*Unit C:*/ imuUSBSerialIds.put(leftTrunkIMUSensor, 623347099);
    }
    
    // Use this until sim can handle multiple IMUs
 //    public static final String[] imuSensorsToUse = {leftPelvisIMUSensor, rightPelvisIMUSensor};
-   public static final String[] imuSensorsToUse = {middlePelvisIMUSensor};
+   public static final String[] imuSensorsToUse = {rearPelvisIMUSensor};
 //   public static final String[] imuSensorsToUse = {rightPelvisIMUSensor};
    
    public ValkyrieSensorInformation(DRCRobotModel.RobotTarget target)
