@@ -160,9 +160,11 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final QuadrantDependentList<YoFramePoint> actualFeetLocations = new QuadrantDependentList<YoFramePoint>();
    private final QuadrantDependentList<YoFramePoint> desiredFeetLocations = new QuadrantDependentList<YoFramePoint>();
    private final FramePoint desiredFootPosition = new FramePoint();
+   private final FramePoint desiredFootPositionInBody = new FramePoint();
    
    private final QuadrantDependentList<YoFrameVector> desiredFeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
    private final QuadrantDependentList<YoFrameVector> actualFeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
+   private final Vector3d desiredFootPositionForInverseKinematics = new Vector3d();
    
    private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoFrameConvexPolygon2d currentTriplePolygon = new YoFrameConvexPolygon2d("currentTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
@@ -379,7 +381,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          desiredFootLocation.set(footPosition);
          desiredFeetLocations.put(robotQuadrant, desiredFootLocation);
          
-         YoFrameVector footPositionInLegAttachementFrame = new YoFrameVector(prefix + "FootPositionInLegFrame", null, registry);
+         YoFrameVector footPositionInLegAttachementFrame = new YoFrameVector(prefix + "FootPositionInLegFrame", referenceFrames.getLegAttachmentFrame(robotQuadrant), registry);
          desiredFeetPositionsInLegAttachmentFrame.put(robotQuadrant, footPositionInLegAttachementFrame);
          
          YoFrameVector actualFootPositionInLegAttachementFrame = new YoFrameVector(prefix + "ActualFootPositionInLegFrame", referenceFrames.getLegAttachmentFrame(robotQuadrant), registry);
@@ -808,8 +810,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         Vector3d footPositionInLegAttachmentFrame = packFootPositionUsingDesiredBodyToBodyHack(robotQuadrant);
-         desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(footPositionInLegAttachmentFrame);
+         packFootPositionUsingDesiredBodyToBodyHack(robotQuadrant);
          
          actualFootPositionInLegAttachmentFrame.setIncludingFrame(referenceFrames.getFootFrame(robotQuadrant), 0.0, 0.0, 0.0);
          actualFootPositionInLegAttachmentFrame.changeFrame(referenceFrames.getLegAttachmentFrame(robotQuadrant));
@@ -821,7 +822,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {         
-         computeDesiredPositionsAndStoreInFullRobotModel(robotQuadrant, desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).getVector3dCopy());
+         desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).get(desiredFootPositionForInverseKinematics);
+         computeDesiredPositionsAndStoreInFullRobotModel(robotQuadrant, desiredFootPositionForInverseKinematics);
       }
    }
    
@@ -834,19 +836,16 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
     * currently uses the difference between the actual CoM and desired CoM to move the body, 
     * This should be a feedforward psuedo actual, integrated from the desired, relating to the desiredBody 
     */
-   private Vector3d packFootPositionUsingDesiredBodyToBodyHack(RobotQuadrant robotQuadrant)
+   private void packFootPositionUsingDesiredBodyToBodyHack(RobotQuadrant robotQuadrant)
    {
       desiredFootPosition.setIncludingFrame(desiredFeetLocations.get(robotQuadrant).getFrameTuple());
       desiredFootPosition.changeFrame(desiredCoMPoseReferenceFrame);
 
       // Fix this for feed forward!!!
-      FramePoint desiredFootPositionInBody = new FramePoint(comFrame, desiredFootPosition.getPoint());
+      desiredFootPositionInBody.setIncludingFrame(comFrame, desiredFootPosition.getPoint());
+      desiredFootPositionInBody.changeFrame(referenceFrames.getLegAttachmentFrame(robotQuadrant));
 
-      ReferenceFrame legAttachmentFrame = referenceFrames.getLegAttachmentFrame(robotQuadrant);
-      desiredFootPositionInBody.changeFrame(legAttachmentFrame);
-
-      Vector3d footPositionInLegAttachmentFrame = desiredFootPositionInBody.getVectorCopy();
-      return footPositionInLegAttachmentFrame;
+      desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(desiredFootPositionInBody.getPoint());
    }
    
    /**
