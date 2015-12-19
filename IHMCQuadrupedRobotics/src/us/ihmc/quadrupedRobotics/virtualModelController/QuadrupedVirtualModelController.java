@@ -5,6 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
@@ -288,7 +289,7 @@ public class QuadrupedVirtualModelController
          for (OneDoFJoint joint : legJoints.get(robotQuadrant))
          {
             // apply joint position and torque limits
-            String jointName = joint.getName();
+            QuadrupedJointName jointName = jointMap.getJointNameForSDFName(joint.getName());
             double tauPositionLowerLimit = jointLimits.getSoftPositionLimitStiffness(jointName)
                   * (jointLimits.getSoftPositionLowerLimit(jointName) - joint.getQ()) - jointLimits.getSoftPositionLimitDamping(jointName) * joint.getQd();
             double tauPositionUpperLimit = jointLimits.getSoftPositionLimitStiffness(jointName)
