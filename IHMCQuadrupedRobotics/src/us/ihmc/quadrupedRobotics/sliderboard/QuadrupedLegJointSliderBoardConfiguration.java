@@ -15,6 +15,7 @@ public class QuadrupedLegJointSliderBoardConfiguration
    {
       final EnumYoVariable<RobotQuadrant> sliderBoardMode = new EnumYoVariable<RobotQuadrant>("SliderBoardSelectedRobotQuadrant", scs.getRootRegistry(), RobotQuadrant.class);
 
+      
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
          //TODO: figure out slider min/max
