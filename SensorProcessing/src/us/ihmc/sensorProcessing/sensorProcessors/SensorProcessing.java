@@ -481,6 +481,14 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, forVizOnly);
    }
 
+   /**
+    * Apply an elasticity compensator to correct the joint positions according their torque and a given stiffness.
+    * Useful when the robot has a non negligible elasticity in the links or joints.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param stiffnesses estimated stiffness for each joint.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToIgnore list of the names of the joints to ignore.
+    */
    public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, boolean forVizOnly, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
