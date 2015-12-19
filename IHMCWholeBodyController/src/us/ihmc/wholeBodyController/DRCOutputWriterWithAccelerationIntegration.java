@@ -59,12 +59,15 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    private ArrayList<OneDoFJoint> oneDoFJoints;
    private LinkedHashMap<OneDoFJoint, DoubleYoVariable> alphaDesiredVelocityMap;
    private LinkedHashMap<OneDoFJoint, DoubleYoVariable> alphaDesiredPositionMap;
+   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> velocityTorqueMap;
+   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> positionTorqueMap;
    private LinkedHashMap<OneDoFJoint, DoubleYoVariable> kVelJointTorqueMap;
    private LinkedHashMap<OneDoFJoint, DoubleYoVariable> kPosJointTorqueMap;
    private LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredVelocities;
    private LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredPositions;
 
    private final double updateDT;
+   private final boolean conservative;
 
    // List of the joints for which we do integrate the desired accelerations by default
    private final LegJointName[] legJointsForIntegratingAcceleration;
@@ -74,7 +77,14 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    public DRCOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, LegJointName[] legJointToIntegrate,
          ArmJointName[] armJointToIntegrate, SpineJointName[] spineJointToIntegrate, double updateDT, boolean runningOnRealRobot)
    {
+      this(drcOutputWriter, legJointToIntegrate, armJointToIntegrate, spineJointToIntegrate, updateDT, runningOnRealRobot, false);
+   }
+
+   public DRCOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, LegJointName[] legJointToIntegrate,
+         ArmJointName[] armJointToIntegrate, SpineJointName[] spineJointToIntegrate, double updateDT, boolean runningOnRealRobot, boolean conservative)
+   {
       this.runningOnRealRobot = runningOnRealRobot;
+      this.conservative = conservative;
       this.drcOutputWriter = drcOutputWriter;
       this.updateDT = updateDT;
       registry.addChild(drcOutputWriter.getControllerYoVariableRegistry());
@@ -176,6 +186,9 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
             double velocityTorque = kVel * (qd_d_joint.getDoubleValue() - oneDoFJoint.getQd());
             double positionTorque = kPos * (q_d_joint.getDoubleValue() - oneDoFJoint.getQ());
 
+            velocityTorqueMap.get(oneDoFJoint).set(velocityTorque);
+            positionTorqueMap.get(oneDoFJoint).set(positionTorque);
+
             oneDoFJoint.setTau(oneDoFJoint.getTau() + velocityTorque + positionTorque);
          }
          else
@@ -227,17 +240,25 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    {
       drcOutputWriter.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
 
-      // These are for hacking torques. Should make into a new
-      // Output writer instead...
-      //      waistLateralExtensorJoint = controllerModel.getSpineJoint(SpineJointName.SPINE_ROLL);
-      //      waistRotatorJoint = controllerModel.getSpineJoint(SpineJointName.SPINE_YAW);
-      //      leftKneeJoint = controllerModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE);
-      //      rightKneeJoint = controllerModel.getLegJoint(RobotSide.RIGHT, LegJointName.KNEE);
-      //      leftAnklePitchJoint = controllerModel.getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH);
-      //      rightAnklePitchJoint = controllerModel.getLegJoint(RobotSide.RIGHT, LegJointName.ANKLE_PITCH);
-
       oneDoFJoints = new ArrayList<OneDoFJoint>();
-      controllerModel.getOneDoFJoints(oneDoFJoints);
+
+      if (conservative)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            for (LegJointName jointName : legJointsForIntegratingAcceleration)
+               oneDoFJoints.add(controllerModel.getLegJoint(robotSide, jointName));
+            for (ArmJointName jointName : armJointsForIntegratingAcceleration)
+               oneDoFJoints.add(controllerModel.getArmJoint(robotSide, jointName));
+         }
+         
+         for (SpineJointName jointName : spineJointsForIntegratingAcceleration)
+            oneDoFJoints.add(controllerModel.getSpineJoint(jointName));
+      }
+      else
+      {
+         controllerModel.getOneDoFJoints(oneDoFJoints);
+      }
 
       ArrayList<OneDoFJoint> armOneDoFJoints = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
@@ -261,6 +282,9 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
       kVelJointTorqueMap = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
       kPosJointTorqueMap = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
+      velocityTorqueMap = new LinkedHashMap<>();
+      positionTorqueMap = new LinkedHashMap<>();
+
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
          final OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
@@ -270,6 +294,12 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
 
          desiredVelocities.put(oneDoFJoint, desiredVelocity);
          desiredPositions.put(oneDoFJoint, desiredPosition);
+
+         DoubleYoVariable velocityTorque = new DoubleYoVariable("tau_vel_" + oneDoFJoint.getName(), registry);
+         DoubleYoVariable positionTorque = new DoubleYoVariable("tau_pos_" + oneDoFJoint.getName(), registry);
+
+         velocityTorqueMap.put(oneDoFJoint, velocityTorque);
+         positionTorqueMap.put(oneDoFJoint, positionTorque);
 
          if (armOneDoFJoints.contains(oneDoFJoint))
          {

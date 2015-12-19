@@ -12,10 +12,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.systemIdentification.frictionId.frictionModels.AsymmetricCoulombViscousFrictionModelTest.class,
    us.ihmc.systemIdentification.frictionId.frictionModels.AsymmetricCoulombViscousStribeckFrictionModelTest.class,
    us.ihmc.systemIdentification.frictionId.frictionModels.NoCompensationFrictionModelTest.class,
-   us.ihmc.systemIdentification.frictionId.frictionModels.PressureBasedFrictionModelTest.class
+   us.ihmc.systemIdentification.frictionId.frictionModels.PressureBasedFrictionModelTest.class,
+   us.ihmc.systemIdentification.frictionId.frictionModels.AsymmetricCoulombViscousFrictionModelTest.class
 })
 
 public class IHMCSystemIdentificationAFastTestSuite

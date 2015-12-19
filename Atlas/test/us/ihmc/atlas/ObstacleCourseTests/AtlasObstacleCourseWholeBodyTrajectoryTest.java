@@ -56,7 +56,7 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.InDevelopment)
+   @DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Flaky)
    @Test(timeout = 300000)
    public void testForMemoryLeaks() throws Exception
    {

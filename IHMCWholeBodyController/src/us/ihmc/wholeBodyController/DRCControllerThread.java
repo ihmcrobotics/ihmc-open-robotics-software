@@ -76,8 +76,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final OutputProcessor outputProcessor;
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
 
-   private final HumanoidReferenceFrames controllerReferenceFrames;
-
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ForceSensorDataHolderReadOnly forceSensorDataHolderForController;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
@@ -162,9 +160,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
       InverseDynamicsJoint[] arrayOfJointsToIgnore = listOfJointsToIgnore.toArray(new InverseDynamicsJoint[] {});
 
-      controllerReferenceFrames = new HumanoidReferenceFrames(controllerFullRobotModel);
-
-      robotController = createMomentumBasedController(controllerFullRobotModel, outputProcessor, controllerReferenceFrames, sensorInformation,
+      robotController = createMomentumBasedController(controllerFullRobotModel, outputProcessor,
             controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, threadDataSynchronizer.getControllerContactSensorHolder(),
             centerOfPressureDataHolderForEstimator, yoGraphicsListRegistry, registry, dataProducer, arrayOfJointsToIgnore);
 
@@ -204,8 +200,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    private RobotController createMomentumBasedController(SDFFullHumanoidRobotModel controllerModel, OutputProcessor outputProcessor,
-         HumanoidReferenceFrames referenceFramesForController, DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory,
-         DoubleYoVariable yoTime, double controlDT, double gravity, ForceSensorDataHolderReadOnly forceSensorDataHolderForController, ContactSensorHolder contactSensorHolder,
+         MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT, double gravity,
+         ForceSensorDataHolderReadOnly forceSensorDataHolderForController, ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
          HumanoidGlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
    {
@@ -240,10 +236,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          }
       }
 
+      HumanoidReferenceFrames referenceFramesForController = new HumanoidReferenceFrames(controllerFullRobotModel);
+
       RobotController robotController = controllerFactory.getController(controllerModel, referenceFramesForController, controlDT, gravity, yoTime,
-            yoGraphicsListRegistry, closeableAndDisposableRegistry, 
-            twistCalculator, centerOfMassJacobian, forceSensorDataHolderForController, contactSensorHolder, centerOfPressureDataHolderForEstimator,
-            dataProducer, jointsToIgnore);
+            yoGraphicsListRegistry, closeableAndDisposableRegistry, twistCalculator, centerOfMassJacobian, forceSensorDataHolderForController,
+            contactSensorHolder, centerOfPressureDataHolderForEstimator, dataProducer, jointsToIgnore);
       final ModularSensorProcessor sensorProcessor = createSensorProcessor(twistCalculator, centerOfMassJacobian, referenceFramesForController);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
