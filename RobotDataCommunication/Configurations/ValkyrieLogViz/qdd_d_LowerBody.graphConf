@@ -2,7 +2,7 @@
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.LeftHipYawtau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.LeftHipYaw_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.leftHipYawqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -14,7 +14,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.RightHipYawtau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.RightHipYaw_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.rightHipYawqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -26,7 +26,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.LeftHipRolltau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.LeftHipRoll_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.leftHipRollqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -38,7 +38,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.RightHipRolltau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.RightHipRoll_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.rightHipRollqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -50,7 +50,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.LeftHipPitchtau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.LeftHipPitch_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.leftHipPitchqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -62,7 +62,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.RightHipPitchtau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.RightHipPitch_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.rightHipPitchqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -74,7 +74,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.LeftKneePitchtau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.LeftKneePitch_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.leftKneePitchqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -86,7 +86,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.RightKneePitchtau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.RightKneePitch_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.rightKneePitchqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -98,7 +98,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.LeftAnklePitchtau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.LeftAnklePitch_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.leftAnklePitchqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -110,7 +110,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.RightAnklePitchtau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.RightAnklePitch_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.rightAnklePitchqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -122,7 +122,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.LeftAnkleRolltau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.LeftAnkleRoll_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.leftAnkleRollqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -134,7 +134,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.RightAnkleRolltau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.RightAnkleRoll_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.rightAnkleRollqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -146,7 +146,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.TorsoYawtau_d,root.loggedmain.DRCControllerThread.DRCOutputWriterWithTorqueOffsets.ValkyrieOutputWriter.ValkyrieWriter.TorsoYaw_tau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.TorsoYaw_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.torsoYawqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -158,7 +158,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.TorsoPitchtau_d,root.loggedmain.DRCControllerThread.DRCOutputWriterWithTorqueOffsets.ValkyrieOutputWriter.ValkyrieWriter.TorsoPitch_tau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.TorsoPitch_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.torsoPitchqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -170,7 +170,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.TorsoRolltau_d,root.loggedmain.DRCControllerThread.DRCOutputWriterWithTorqueOffsets.ValkyrieOutputWriter.ValkyrieWriter.TorsoRoll_tau_d,root.loggedmain.DRCEstimatorThread.Valkyrie.TorsoRoll_tau</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.torsoRollqdd_d</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>

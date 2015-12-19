@@ -12,8 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.AtlasGFERosPacketTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasBehaviorDispatcherTest.class
+   us.ihmc.atlas.roughTerrainWalking.AtlasFootExplorationTest.class
 })
 
 public class AtlasAInDevelopmentTestSuite

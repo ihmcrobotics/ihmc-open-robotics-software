@@ -5,6 +5,6 @@ public class DefaultQuadrupedStandPrepParameters implements QuadrupedStandPrepPa
    @Override
    public double getTrajectoryTime()
    {
-      return 2.0;
+      return 1.0;
    }
 }

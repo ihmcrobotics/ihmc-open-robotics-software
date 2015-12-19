@@ -299,7 +299,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public void addVertices(ConvexPolygon2d otherPolygon)
    {
-
       for (int i = 0; i < otherPolygon.getNumberOfVertices(); i++)
       {
          Point2d vertex = otherPolygon.getVertex(i);
