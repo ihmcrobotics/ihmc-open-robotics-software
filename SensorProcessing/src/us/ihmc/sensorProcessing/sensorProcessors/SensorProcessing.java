@@ -1,5 +1,15 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.FORCE_SENSOR;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ANGULAR_VELOCITY;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_LINEAR_ACCELERATION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ORIENTATION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_ACCELERATION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_POSITION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_TAU;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_VELOCITY;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.TORQUE_SENSOR;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -42,6 +52,12 @@ import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 
 public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutputMapReadOnly
 {
+   private static final String RAW = "raw";
+   private static final String BACKLASH = "bl";
+   private static final String ALPHA_FILTER = "filt";
+   private static final String FINITE_DIFFERENCE = "fd";
+   private static final String ELASTICITY_COMPENSATOR = "stiff";
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public enum SensorType
@@ -80,7 +96,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          }
       }
 
-      public String getPrefixForProcessorName(String filterNameLowerCaseNoTrailingUnderscore)
+      public String getProcessorNamePrefix(String filterNameLowerCaseNoTrailingUnderscore)
       {
          switch (this)
          {
@@ -100,6 +116,27 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
             return filterNameLowerCaseNoTrailingUnderscore + "_force_";
          case TORQUE_SENSOR:
             return filterNameLowerCaseNoTrailingUnderscore + "_torque_";
+         default:
+            throw new RuntimeException("Should not get there.");
+         }
+      }
+
+      public String getProcessorNameSuffix(String sensorName, int processorIndex)
+      {
+         String processorSignature = processorIndex >= 0 ? "_sp" + processorIndex : "";
+         switch (this)
+         {
+         case JOINT_POSITION:
+         case JOINT_VELOCITY:
+         case JOINT_ACCELERATION:
+         case JOINT_TAU:
+            return sensorName + processorSignature;
+         case IMU_ORIENTATION:
+         case IMU_LINEAR_ACCELERATION:
+         case IMU_ANGULAR_VELOCITY:
+         case FORCE_SENSOR:
+         case TORQUE_SENSOR:
+            return "_" + sensorName + processorSignature;
          default:
             throw new RuntimeException("Should not get there.");
          }
@@ -186,28 +223,39 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       forceSensorDefinitions = stateEstimatorSensorDefinitions.getForceSensorDefinitions();
       this.auxiliaryRobotData = null;
 
+      String prefix = null;
+      String suffix = null;
+
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
          OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
          String jointName = oneDoFJoint.getName();
          allJointSensorNames.add(jointName);
-         
-         DoubleYoVariable rawJointPosition = new DoubleYoVariable("raw_q_" + jointName, registry);
+
+         prefix = JOINT_POSITION.getProcessorNamePrefix(RAW);
+         suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, -1);
+         DoubleYoVariable rawJointPosition = new DoubleYoVariable(prefix + suffix, registry);
          inputJointPositions.put(oneDoFJoint, rawJointPosition);
          outputJointPositions.put(oneDoFJoint, rawJointPosition);
          processedJointPositions.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
 
-         DoubleYoVariable rawJointVelocity = new DoubleYoVariable("raw_qd_" + jointName, registry);
+         prefix = JOINT_VELOCITY.getProcessorNamePrefix(RAW);
+         suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, -1);
+         DoubleYoVariable rawJointVelocity = new DoubleYoVariable(prefix + suffix, registry);
          inputJointVelocities.put(oneDoFJoint, rawJointVelocity);
          outputJointVelocities.put(oneDoFJoint, rawJointVelocity);
          processedJointVelocities.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
-         
-         DoubleYoVariable rawJointAcceleration = new DoubleYoVariable("raw_qdd_" + jointName, registry);
+
+         prefix = JOINT_ACCELERATION.getProcessorNamePrefix(RAW);
+         suffix = JOINT_ACCELERATION.getProcessorNameSuffix(jointName, -1);
+         DoubleYoVariable rawJointAcceleration = new DoubleYoVariable(prefix + suffix, registry);
          inputJointAccelerations.put(oneDoFJoint, rawJointAcceleration);
          outputJointAccelerations.put(oneDoFJoint, rawJointAcceleration);
          processedJointAccelerations.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
 
-         DoubleYoVariable rawJointTau = new DoubleYoVariable("raw_tau_" + jointName, registry);
+         prefix = JOINT_TAU.getProcessorNamePrefix(RAW);
+         suffix = JOINT_TAU.getProcessorNameSuffix(jointName, -1);
+         DoubleYoVariable rawJointTau = new DoubleYoVariable(prefix + suffix, registry);
          inputJointTaus.put(oneDoFJoint, rawJointTau);
          outputJointTaus.put(oneDoFJoint, rawJointTau);
          processedJointTaus.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
@@ -225,17 +273,23 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          String imuName = imuDefinition.getName();
          allIMUSensorNames.add(imuName);
 
-         YoFrameQuaternion rawOrientation = new YoFrameQuaternion("raw_q_", imuName, worldFrame, registry);
+         prefix = IMU_ORIENTATION.getProcessorNamePrefix(RAW);
+         suffix = IMU_ORIENTATION.getProcessorNameSuffix(imuName, -1);
+         YoFrameQuaternion rawOrientation = new YoFrameQuaternion(prefix, suffix, worldFrame, registry);
          inputOrientations.put(imuDefinition, rawOrientation);
          intermediateOrientations.put(imuDefinition, rawOrientation);
          processedOrientations.put(imuDefinition, new ArrayList<ProcessingYoVariable>());
 
-         YoFrameVector rawAngularVelocity = new YoFrameVector("raw_qd_w", imuName, worldFrame, registry);
+         prefix = IMU_ANGULAR_VELOCITY.getProcessorNamePrefix(RAW);
+         suffix = IMU_ANGULAR_VELOCITY.getProcessorNameSuffix(imuName, -1);
+         YoFrameVector rawAngularVelocity = new YoFrameVector(prefix, suffix, worldFrame, registry);
          inputAngularVelocities.put(imuDefinition, rawAngularVelocity);
          intermediateAngularVelocities.put(imuDefinition, rawAngularVelocity);
          processedAngularVelocities.put(imuDefinition, new ArrayList<ProcessingYoVariable>());
-         
-         YoFrameVector rawLinearAcceleration = new YoFrameVector("raw_qdd_", imuName, worldFrame, registry);
+
+         prefix = IMU_LINEAR_ACCELERATION.getProcessorNamePrefix(RAW);
+         suffix = IMU_LINEAR_ACCELERATION.getProcessorNameSuffix(imuName, -1);
+         YoFrameVector rawLinearAcceleration = new YoFrameVector(prefix, suffix, worldFrame, registry);
          inputLinearAccelerations.put(imuDefinition, rawLinearAcceleration);
          intermediateLinearAccelerations.put(imuDefinition, rawLinearAcceleration);
          processedLinearAccelerations.put(imuDefinition, new ArrayList<ProcessingYoVariable>());
@@ -251,12 +305,16 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          allForceSensorNames.add(sensorName);
          ReferenceFrame sensorFrame = forceSensorDefinition.getSensorFrame();
 
-         YoFrameVector rawForce = new YoFrameVector("raw_" + sensorName + "_force", sensorFrame, registry);
+         prefix = FORCE_SENSOR.getProcessorNamePrefix(RAW);
+         suffix = FORCE_SENSOR.getProcessorNameSuffix(sensorName, -1);
+         YoFrameVector rawForce = new YoFrameVector(prefix, suffix, sensorFrame, registry);
          inputForces.put(forceSensorDefinition, rawForce);
          intermediateForces.put(forceSensorDefinition, rawForce);
          processedForces.put(forceSensorDefinition, new ArrayList<ProcessingYoVariable>());
 
-         YoFrameVector rawTorque = new YoFrameVector("raw_" + sensorName + "_torque", sensorFrame, registry);
+         prefix = TORQUE_SENSOR.getProcessorNamePrefix(RAW);
+         suffix = TORQUE_SENSOR.getProcessorNameSuffix(sensorName, -1);
+         YoFrameVector rawTorque = new YoFrameVector(prefix, suffix, sensorFrame, registry);
          inputTorques.put(forceSensorDefinition, rawTorque);
          intermediateTorques.put(forceSensorDefinition, rawTorque);
          processedTorques.put(forceSensorDefinition, new ArrayList<ProcessingYoVariable>());
@@ -407,15 +465,15 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (sensorsToIgnore.contains(imuName))
             continue;
 
-         YoFrameVector intermediateAngularVelocity = intermediateIMUVectorTypeSignals.get(imuDefinition);
+         YoFrameVector intermediateSignal = intermediateIMUVectorTypeSignals.get(imuDefinition);
          List<ProcessingYoVariable> processors = processedIMUVectorTypeSignals.get(imuDefinition);
-         String suffix = "_sp" + processors.size();
-         String prefix = sensorType.getPrefixForProcessorName("filt_");
-         AlphaFilteredYoFrameVector filteredAngularVelocity = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix, imuName + suffix, registry, alphaFilter, intermediateAngularVelocity);
-         processors.add(filteredAngularVelocity);
+         String prefix = sensorType.getProcessorNamePrefix(ALPHA_FILTER);
+         String suffix = sensorType.getProcessorNameSuffix(imuName, processors.size());
+         AlphaFilteredYoFrameVector filter = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix, suffix, registry, alphaFilter, intermediateSignal);
+         processors.add(filter);
          
          if (!forVizOnly)
-            intermediateIMUVectorTypeSignals.put(imuDefinition, filteredAngularVelocity);
+            intermediateIMUVectorTypeSignals.put(imuDefinition, filter);
       }
    }
 
@@ -432,15 +490,15 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (sensorsToIgnore.contains(sensorName))
             continue;
 
-         YoFrameVector intermediateForce = intermediateForceSensorSignals.get(forceSensorDefinition);
-         List<ProcessingYoVariable> forceProcessors = processedForceSensorSignals.get(forceSensorDefinition);
-         String suffix = "_sp" + forceProcessors.size();
-         String prefix = sensorType.getPrefixForProcessorName("filt_");
-         AlphaFilteredYoFrameVector filteredForce = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix, sensorName + suffix, registry, alphaFilter, intermediateForce);
-         forceProcessors.add(filteredForce);
+         YoFrameVector intermediateSignal = intermediateForceSensorSignals.get(forceSensorDefinition);
+         List<ProcessingYoVariable> processors = processedForceSensorSignals.get(forceSensorDefinition);
+         String prefix = sensorType.getProcessorNamePrefix(ALPHA_FILTER);
+         String suffix = sensorType.getProcessorNameSuffix(sensorName, processors.size());
+         AlphaFilteredYoFrameVector filter = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix, suffix, registry, alphaFilter, intermediateSignal);
+         processors.add(filter);
 
          if (!forVizOnly)
-            intermediateForceSensorSignals.put(forceSensorDefinition, filteredForce);
+            intermediateForceSensorSignals.put(forceSensorDefinition, filter);
       }
    }
 
@@ -459,13 +517,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
          DoubleYoVariable intermediateJointSignal = outputJointSignals.get(oneDoFJoint);
          List<ProcessingYoVariable> processors = processedJointSignals.get(oneDoFJoint);
-         String suffix = "_sp" + processors.size();
-         String prefix = sensorType.getPrefixForProcessorName("filt_");
-         AlphaFilteredYoVariable filteredJointPosition = new AlphaFilteredYoVariable(prefix + jointName + suffix, registry, alphaFilter, intermediateJointSignal);
-         processedJointSignals.get(oneDoFJoint).add(filteredJointPosition);
+         String prefix = sensorType.getProcessorNamePrefix(ALPHA_FILTER);
+         String suffix = sensorType.getProcessorNameSuffix(jointName, processors.size());
+         AlphaFilteredYoVariable filter = new AlphaFilteredYoVariable(prefix + suffix, registry, alphaFilter, intermediateJointSignal);
+         processedJointSignals.get(oneDoFJoint).add(filter);
          
          if (!forVizOnly)
-            outputJointSignals.put(oneDoFJoint, filteredJointPosition);
+            outputJointSignals.put(oneDoFJoint, filter);
       }
    }
 
@@ -517,8 +575,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          DoubleYoVariable intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
          DoubleYoVariable intermediateJointTau = outputJointTaus.get(oneDoFJoint);
          List<ProcessingYoVariable> processors = processedJointPositions.get(oneDoFJoint);
-         String suffix = "_sp" + processors.size();
-         ElasticityCompensatorYoVariable filteredJointPosition = new ElasticityCompensatorYoVariable("stiff_q_" + jointName + suffix, stiffness, intermediateJointPosition, intermediateJointTau, registry);
+         String prefix = JOINT_POSITION.getProcessorNamePrefix(ELASTICITY_COMPENSATOR);
+         String suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, processors.size());
+         ElasticityCompensatorYoVariable filteredJointPosition = new ElasticityCompensatorYoVariable(prefix + suffix, stiffness, intermediateJointPosition, intermediateJointTau, registry);
          filteredJointPosition.setMaximuDeflection(maximumDeflection);
          processors.add(filteredJointPosition);
          
@@ -573,8 +632,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
          DoubleYoVariable intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
-         String suffix = "_sp" + processors.size();
-         FilteredVelocityYoVariable jointVelocity = new FilteredVelocityYoVariable("fd_qd_" + jointName + suffix, "", alphaFilter, intermediateJointPosition, updateDT, registry);
+         String prefix = JOINT_VELOCITY.getProcessorNamePrefix(FINITE_DIFFERENCE);
+         String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
+         FilteredVelocityYoVariable jointVelocity = new FilteredVelocityYoVariable(prefix + suffix, "", alphaFilter, intermediateJointPosition, updateDT, registry);
          processors.add(jointVelocity);
          
          if (!forVizOnly)
@@ -630,8 +690,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          DoubleYoVariable intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
 
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
-         String suffix = "_sp" + processors.size();
-         RevisedBacklashCompensatingVelocityYoVariable jointVelocity = new RevisedBacklashCompensatingVelocityYoVariable("bl_qd_" + jointName + suffix, "", alphaFilter, intermediateJointPosition, updateDT, slopTime, registry);
+         String prefix = JOINT_VELOCITY.getProcessorNamePrefix(BACKLASH);
+         String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
+         RevisedBacklashCompensatingVelocityYoVariable jointVelocity = new RevisedBacklashCompensatingVelocityYoVariable(prefix + suffix, "", alphaFilter, intermediateJointPosition, updateDT, slopTime, registry);
          processors.add(jointVelocity);
 
          if (!forVizOnly)
@@ -689,8 +750,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
          DoubleYoVariable intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
-         String suffix = "_sp" + processors.size();
-         BacklashProcessingYoVariable filteredJointVelocity = new BacklashProcessingYoVariable("bl_qd_" + jointName + suffix, "", intermediateJointVelocity, updateDT, slopTime, registry);
+         String prefix = JOINT_VELOCITY.getProcessorNamePrefix(BACKLASH);
+         String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
+         BacklashProcessingYoVariable filteredJointVelocity = new BacklashProcessingYoVariable(prefix + suffix, "", intermediateJointVelocity, updateDT, slopTime, registry);
          processors.add(filteredJointVelocity);
 
          if (!forVizOnly)
@@ -730,8 +792,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
          DoubleYoVariable intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
          List<ProcessingYoVariable> processors = processedJointAccelerations.get(oneDoFJoint);
-         String suffix = "_sp" + processors.size();
-         FilteredVelocityYoVariable jointAcceleration = new FilteredVelocityYoVariable("filt_qdd_" + jointName + suffix, "", alphaFilter, intermediateJointVelocity, updateDT, registry);
+         String prefix = JOINT_ACCELERATION.getProcessorNamePrefix(FINITE_DIFFERENCE);
+         String suffix = JOINT_ACCELERATION.getProcessorNameSuffix(jointName, processors.size());
+         FilteredVelocityYoVariable jointAcceleration = new FilteredVelocityYoVariable(prefix + suffix, "", alphaFilter, intermediateJointVelocity, updateDT, registry);
          processors.add(jointAcceleration);
 
          if (!forVizOnly)
@@ -758,8 +821,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
          YoFrameQuaternion intermediateOrientation = intermediateOrientations.get(imuDefinition);
          List<ProcessingYoVariable> processors = processedOrientations.get(imuDefinition);
-         String suffix = "_sp" + processors.size();
-         AlphaFilteredYoFrameQuaternion filteredOrientation = new AlphaFilteredYoFrameQuaternion("filt_q_", imuName + suffix, intermediateOrientation, alphaFilter, registry);
+         String prefix = IMU_ORIENTATION.getProcessorNamePrefix(ALPHA_FILTER);
+         String suffix = IMU_ORIENTATION.getProcessorNameSuffix(imuName, processors.size());
+         AlphaFilteredYoFrameQuaternion filteredOrientation = new AlphaFilteredYoFrameQuaternion(prefix, suffix, intermediateOrientation, alphaFilter, registry);
          processors.add(filteredOrientation);
          
          if (!forVizOnly)
