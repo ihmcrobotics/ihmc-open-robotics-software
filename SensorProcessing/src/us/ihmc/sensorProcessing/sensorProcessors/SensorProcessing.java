@@ -533,31 +533,14 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * Implemented as a cumulative processor but should probably be called only once.
     * @param stiffnesses estimated stiffness for each joint.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
-    */
-   public void addJointPositionElasticyCompensator(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, boolean forVizOnly)
-   {
-      addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, forVizOnly);
-   }
-
-   /**
-    * Apply an elasticity compensator to correct the joint positions according their torque and a given stiffness.
-    * Useful when the robot has a non negligible elasticity in the links or joints.
-    * Implemented as a cumulative processor but should probably be called only once.
-    * @param stiffnesses estimated stiffness for each joint.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
-   public void addJointPositionElasticyCompensator(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, double maximumDeflection, boolean forVizOnly)
+   public void addJointPositionElasticyCompensator(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, DoubleYoVariable maximumDeflection, boolean forVizOnly)
    {
       addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, forVizOnly);
    }
 
-   public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, boolean forVizOnly, String... jointsToIgnore)
-   {
-      addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, 0.1, forVizOnly, jointsToIgnore);
-   }
-
-   public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, double maximumDeflection, boolean forVizOnly, String... jointsToIgnore)
+   public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, DoubleYoVariable maximumDeflection, boolean forVizOnly, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
@@ -577,8 +560,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          List<ProcessingYoVariable> processors = processedJointPositions.get(oneDoFJoint);
          String prefix = JOINT_POSITION.getProcessorNamePrefix(ELASTICITY_COMPENSATOR);
          String suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, processors.size());
-         ElasticityCompensatorYoVariable filteredJointPosition = new ElasticityCompensatorYoVariable(prefix + suffix, stiffness, intermediateJointPosition, intermediateJointTau, registry);
-         filteredJointPosition.setMaximuDeflection(maximumDeflection);
+         ElasticityCompensatorYoVariable filteredJointPosition = new ElasticityCompensatorYoVariable(prefix + suffix, stiffness, maximumDeflection, intermediateJointPosition, intermediateJointTau, registry);
          processors.add(filteredJointPosition);
          
          if (!forVizOnly)
@@ -882,6 +864,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       }
       
       return stiffesses;
+   }
+
+   public DoubleYoVariable createMaxDeflection(String name, double defaultValue)
+   {
+      DoubleYoVariable maxDeflection = new DoubleYoVariable(name, registry);
+      maxDeflection.set(defaultValue);
+      return maxDeflection;
    }
 
    private String[] invertSensorSelection(SensorType sensorType, String... subSelection)
