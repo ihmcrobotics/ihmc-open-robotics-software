@@ -9,10 +9,10 @@ import java.util.Map;
  * A memory pool capable of allocating and leasing objects of any type. Objects
  * are individually borrowed with the {@link #lease(Class)} method, and the
  * entire pool is returned with the {@link #evict()} method.
- * 
+ *
  * This is useful in a tight control loop where local variables cannot be
  * allocated and it is known that references will not be persisted across loop
- * iterations, so {@link evict()} can safely be called.
+ * iterations, so {@link #evict()} can safely be called.
  */
 public class HeterogeneousMemoryPool
 {
@@ -24,10 +24,10 @@ public class HeterogeneousMemoryPool
    /**
     * Borrow an object from the pool. An allocation will occur only if an object
     * of this type does not already exist in the pool.
-    * 
+    *
     * Note that leased objects are only valid until {@link #evict()} is called,
     * so references should not be held onto past that time.
-    * 
+    *
     * @param type
     *           the desired object type.
     * @return the borrowed object.
@@ -45,7 +45,7 @@ public class HeterogeneousMemoryPool
       pools.put(type, pool);
       values.add(pool);
 
-      return (T) pool.lease();
+      return pool.lease();
    }
 
    /**
