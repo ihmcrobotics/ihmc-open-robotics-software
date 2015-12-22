@@ -7,6 +7,7 @@ import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerStateMachin
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedCommonControllerParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
+import us.ihmc.quadrupedRobotics.sliderboard.SliderBoardModes;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedVirtualModelController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -27,7 +28,8 @@ public class QuadrupedControllerManager implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final GenericStateMachine<QuadrupedControllerState, QuadrupedController> stateMachine;
-   private final EnumYoVariable<QuadrupedControllerState> requestedState;
+   private final EnumYoVariable<QuadrupedControllerState> requestedState = new EnumYoVariable<>("QuadrupedControllerStateMachineRequestedState", registry,
+            QuadrupedControllerState.class, true);
 
    private final QuadrupedStateEstimator stateEstimator;
    private final DoubleYoVariable robotTimestamp = new DoubleYoVariable("robotTimestamp", registry);
@@ -35,11 +37,6 @@ public class QuadrupedControllerManager implements RobotController
 
    private final EnumYoVariable<SliderBoardModes> sliderboardMode = new EnumYoVariable<>("sliderboardMode", registry,
          SliderBoardModes.class);
-
-   public enum SliderBoardModes
-   {
-      POSITIONCRAWL_COM_SHIFT, POSITIONCRAWL_FOOTSTEP_CHOOSER, POSITIONCRAWL_ORIENTATION_TUNING
-   }
 
    public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters,
          SDFFullRobotModel sdfFullRobotModel, QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators,
@@ -60,8 +57,6 @@ public class QuadrupedControllerManager implements RobotController
          YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, QuadrupedControllerState startState)
    {
       this.stateEstimator = stateEstimator;
-      this.requestedState = new EnumYoVariable<>("QuadrupedControllerStateMachineRequestedState", registry,
-            QuadrupedControllerState.class, true);
 
       QuadrupedCommonControllerParameters commonControllerParameters = new QuadrupedCommonControllerParameters(
             simulationDT, robotTimestamp, sdfFullRobotModel, stateEstimator, registry, yoGraphicsListRegistry,

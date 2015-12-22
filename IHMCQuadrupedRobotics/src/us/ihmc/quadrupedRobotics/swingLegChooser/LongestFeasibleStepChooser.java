@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.swingLegChooser;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedControllerParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedGeometryTools;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
@@ -23,14 +23,14 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
 {
    private static final double ZERO_THRESHOLD = 1e-4;
    private static final double MYSTERIOUS_SCALAR = 1.0;
-   private final QuadrupedControllerParameters quadrupedControllerParameters;
+   private final QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters;
    private CommonQuadrupedReferenceFrames commonQuadrupedReferenceFrames;
    private final QuadrantDependentList<FrameEllipsoid3d> actualFootstepWorkspaces = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoGraphicEllipsoid> footstepWorkspaceYoEllipsoids = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFramePoint> footstepWorkspaceCenterFramePoints = new QuadrantDependentList<>();
    private RobotQuadrant greatestDistanceFeasibleFootstep;
 
-   public LongestFeasibleStepChooser(QuadrupedControllerParameters quadrupedControllerParameters, CommonQuadrupedReferenceFrames commonQuadrupedReferenceFrames, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public LongestFeasibleStepChooser(QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters, CommonQuadrupedReferenceFrames commonQuadrupedReferenceFrames, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.quadrupedControllerParameters = quadrupedControllerParameters;
       this.commonQuadrupedReferenceFrames = commonQuadrupedReferenceFrames;
