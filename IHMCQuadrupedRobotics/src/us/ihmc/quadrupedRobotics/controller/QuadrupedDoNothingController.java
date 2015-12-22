@@ -15,7 +15,7 @@ public class QuadrupedDoNothingController extends QuadrupedController implements
 
    /**
     * A map specifying which joints have been come online and had their desired positions set. Indices align with the
-    * #{@link FullRobotModel#getOneDoFJoints()} array.
+    * {@link FullRobotModel#getOneDoFJoints()} array.
     */
    private final boolean initialized[];
 

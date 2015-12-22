@@ -5,7 +5,7 @@ import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
 /**
- * A transition condition that transitions when the target controller's motion status becomes #{@link
+ * A transition condition that transitions when the target controller's motion status becomes {@link
  * RobotMotionStatus#STANDING}.
  */
 public class QuadrupedControllerStandingTransitionCondition implements StateTransitionCondition
