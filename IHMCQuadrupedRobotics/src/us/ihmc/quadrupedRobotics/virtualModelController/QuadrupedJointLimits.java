@@ -5,15 +5,15 @@ import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 
 public class QuadrupedJointLimits
 {
-   private final TObjectDoubleHashMap<QuadrupedJointName> positionLowerLimit = new TObjectDoubleHashMap<QuadrupedJointName>();
-   private final TObjectDoubleHashMap<QuadrupedJointName> positionUpperLimit = new TObjectDoubleHashMap<QuadrupedJointName>();
-   private final TObjectDoubleHashMap<QuadrupedJointName> softPositionLowerLimit = new TObjectDoubleHashMap<QuadrupedJointName>();
-   private final TObjectDoubleHashMap<QuadrupedJointName> softPositionUpperLimit = new TObjectDoubleHashMap<QuadrupedJointName>();
-   private final TObjectDoubleHashMap<QuadrupedJointName> softPositionLimitStiffness = new TObjectDoubleHashMap<QuadrupedJointName>();
-   private final TObjectDoubleHashMap<QuadrupedJointName> softPositionLimitDamping = new TObjectDoubleHashMap<QuadrupedJointName>();
-   private final TObjectDoubleHashMap<QuadrupedJointName> effortLimit = new TObjectDoubleHashMap<QuadrupedJointName>();
-   private final TObjectDoubleHashMap<QuadrupedJointName> velocityLimit = new TObjectDoubleHashMap<QuadrupedJointName>();
-   private final TObjectDoubleHashMap<QuadrupedJointName> accelerationLimit = new TObjectDoubleHashMap<QuadrupedJointName>();
+   private final TObjectDoubleHashMap<QuadrupedJointName> positionLowerLimit = new TObjectDoubleHashMap<>();
+   private final TObjectDoubleHashMap<QuadrupedJointName> positionUpperLimit = new TObjectDoubleHashMap<>();
+   private final TObjectDoubleHashMap<QuadrupedJointName> softPositionLowerLimit = new TObjectDoubleHashMap<>();
+   private final TObjectDoubleHashMap<QuadrupedJointName> softPositionUpperLimit = new TObjectDoubleHashMap<>();
+   private final TObjectDoubleHashMap<QuadrupedJointName> softPositionLimitStiffness = new TObjectDoubleHashMap<>();
+   private final TObjectDoubleHashMap<QuadrupedJointName> softPositionLimitDamping = new TObjectDoubleHashMap<>();
+   private final TObjectDoubleHashMap<QuadrupedJointName> effortLimit = new TObjectDoubleHashMap<>();
+   private final TObjectDoubleHashMap<QuadrupedJointName> velocityLimit = new TObjectDoubleHashMap<>();
+   private final TObjectDoubleHashMap<QuadrupedJointName> accelerationLimit = new TObjectDoubleHashMap<>();
 
    public QuadrupedJointLimits()
    {

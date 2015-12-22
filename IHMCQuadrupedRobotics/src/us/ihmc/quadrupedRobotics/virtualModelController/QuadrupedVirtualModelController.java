@@ -90,16 +90,16 @@ public class QuadrupedVirtualModelController
       yoComTorqueCommand = new YoFrameVector("comTorqueCommand", worldFrame, registry);
       comTorqueSolution = new FrameVector(comFrame);
       yoComTorqueSolution = new YoFrameVector("comTorqueSolution", worldFrame, registry);
-      swingForceCommand = new QuadrantDependentList<FrameVector>();
-      yoSwingForceCommand = new QuadrantDependentList<YoFrameVector>();
-      swingForceSolution = new QuadrantDependentList<FrameVector>();
-      yoSwingForceSolution = new QuadrantDependentList<YoFrameVector>();
-      contactForceSolution = new QuadrantDependentList<FrameVector>();
-      yoContactForceSolution = new QuadrantDependentList<YoFrameVector>();
-      contactState = new QuadrantDependentList<boolean[]>();
-      yoContactState = new QuadrantDependentList<BooleanYoVariable>();
-      solePosition = new QuadrantDependentList<FramePoint>();
-      yoSolePosition = new QuadrantDependentList<YoFramePoint>();
+      swingForceCommand = new QuadrantDependentList<>();
+      yoSwingForceCommand = new QuadrantDependentList<>();
+      swingForceSolution = new QuadrantDependentList<>();
+      yoSwingForceSolution = new QuadrantDependentList<>();
+      contactForceSolution = new QuadrantDependentList<>();
+      yoContactForceSolution = new QuadrantDependentList<>();
+      contactState = new QuadrantDependentList<>();
+      yoContactState = new QuadrantDependentList<>();
+      solePosition = new QuadrantDependentList<>();
+      yoSolePosition = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          swingForceCommand.set(robotQuadrant, new FrameVector(comFrame));
@@ -122,10 +122,10 @@ public class QuadrupedVirtualModelController
       contactForceOptimizationSettings = new QuadrupedContactForceOptimizationSettings();
 
       // initialize jacobian variables
-      legJoints = new QuadrantDependentList<OneDoFJoint[]>();
-      footJacobian = new QuadrantDependentList<GeometricJacobian>();
-      soleJacobian = new QuadrantDependentList<PointJacobian>();
-      legEffortVector = new QuadrantDependentList<DenseMatrix64F>();
+      legJoints = new QuadrantDependentList<>();
+      footJacobian = new QuadrantDependentList<>();
+      soleJacobian = new QuadrantDependentList<>();
+      legEffortVector = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String jointBeforeFootName = robotParameters.getJointMap().getJointBeforeFootName(robotQuadrant);
@@ -141,7 +141,7 @@ public class QuadrupedVirtualModelController
 
       // initialize graphics
       yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
-      yoContactForceSolutionViz = new QuadrantDependentList<YoGraphicVector>();
+      yoContactForceSolutionViz = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
       {
          yoContactForceSolutionViz.set(robotQuadrant, new YoGraphicVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleForceSolution",
