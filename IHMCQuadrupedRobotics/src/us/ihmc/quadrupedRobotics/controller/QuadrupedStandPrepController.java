@@ -3,11 +3,10 @@ package us.ihmc.quadrupedRobotics.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
@@ -17,7 +16,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 public class QuadrupedStandPrepController extends QuadrupedController
 {
    private final QuadrupedRobotParameters parameters;
-   private final SDFFullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
    private final double dt;
 
    private final List<MinimumJerkTrajectory> trajectories;
@@ -27,7 +26,8 @@ public class QuadrupedStandPrepController extends QuadrupedController
     */
    private double timeInTrajectory = 0.0;
 
-   public QuadrupedStandPrepController(final QuadrupedRobotParameters parameters, final SDFFullRobotModel fullRobotModel, final double dt)
+   public QuadrupedStandPrepController(final QuadrupedRobotParameters parameters, final FullRobotModel fullRobotModel,
+         final double dt)
    {
       super(QuadrupedControllerState.STAND_PREP);
 
@@ -35,7 +35,7 @@ public class QuadrupedStandPrepController extends QuadrupedController
       this.fullRobotModel = fullRobotModel;
       this.dt = dt;
 
-      this.trajectories = new ArrayList<MinimumJerkTrajectory>(fullRobotModel.getOneDoFJoints().length);
+      this.trajectories = new ArrayList<>(fullRobotModel.getOneDoFJoints().length);
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
          trajectories.add(new MinimumJerkTrajectory());
@@ -98,21 +98,3 @@ public class QuadrupedStandPrepController extends QuadrupedController
    }
 }
 
-/**
- * A transition condition that transitions when the stand prep controller has completed its trajectory.
- */
-class QuadrupedStandPrepControllerExitCondition implements StateTransitionCondition
-{
-   private final QuadrupedStandPrepController controller;
-
-   public QuadrupedStandPrepControllerExitCondition(QuadrupedStandPrepController controller)
-   {
-      this.controller = controller;
-   }
-
-   @Override
-   public boolean checkCondition()
-   {
-      return controller.getMotionStatus() == RobotMotionStatus.STANDING;
-   }
-}
