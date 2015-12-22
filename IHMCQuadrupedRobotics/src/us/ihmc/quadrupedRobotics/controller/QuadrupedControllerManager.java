@@ -91,8 +91,12 @@ public class QuadrupedControllerManager implements RobotController
 
       this.stateMachine = builder.build();
 
+      // Transition to the start state. The entry action must be triggered manually.
       stateMachine.setCurrentState(startState);
       stateMachine.getCurrentState().doTransitionIntoAction();
+
+      // Set the initial requested state to the actual start state.
+      requestedState.set(startState);
    }
 
    @Override
