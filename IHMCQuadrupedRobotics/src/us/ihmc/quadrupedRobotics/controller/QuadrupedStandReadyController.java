@@ -3,8 +3,7 @@ package us.ihmc.quadrupedRobotics.controller;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
 /**
- * A dummy controller that merely signifies that the robot is prepared to transition
- * to another controller.
+ * A dummy controller that merely signifies that the robot is prepared to transition to another controller.
  */
 public class QuadrupedStandReadyController extends QuadrupedController
 {
