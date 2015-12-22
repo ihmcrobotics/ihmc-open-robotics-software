@@ -1,5 +1,6 @@
-package us.ihmc.quadrupedRobotics.controller;
+package us.ihmc.quadrupedRobotics.controller.state;
 
+import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 

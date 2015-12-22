@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.controller;
+package us.ihmc.quadrupedRobotics.controller.state;
 
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.stateMachines.StateTransition;
@@ -10,12 +10,12 @@ import us.ihmc.robotics.stateMachines.StateTransitionCondition;
  * 
  * @param <E> The enum defining the state domain.
  */
-public class PermissiveRequestedStateTransition<E extends Enum<E>> implements StateTransitionCondition
+public class PermissiveRequestedStateTransitionCondition<E extends Enum<E>> implements StateTransitionCondition
 {
    private final EnumYoVariable<E> requestedState;
    private final E nextStateEnum;
 
-   public PermissiveRequestedStateTransition(final EnumYoVariable<E> requestedState,
+   public PermissiveRequestedStateTransitionCondition(final EnumYoVariable<E> requestedState,
          final E nextStateEnum)
    {
       this.requestedState = requestedState;

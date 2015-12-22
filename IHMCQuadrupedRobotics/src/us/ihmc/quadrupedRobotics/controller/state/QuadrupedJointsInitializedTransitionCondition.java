@@ -1,5 +1,6 @@
-package us.ihmc.quadrupedRobotics.controller;
+package us.ihmc.quadrupedRobotics.controller.state;
 
+import us.ihmc.quadrupedRobotics.controller.QuadrupedJointInitializer;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 
 public class QuadrupedJointsInitializedTransitionCondition implements StateTransitionCondition
