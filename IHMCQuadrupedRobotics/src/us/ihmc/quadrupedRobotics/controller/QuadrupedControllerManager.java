@@ -19,7 +19,7 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
- * A #{@link RobotController} for switching between quadruped control states. The manager will ensure that the robot is
+ * A {@link RobotController} for switching between quadruped control states. The manager will ensure that the robot is
  * always in a valid control state by disallowing dangerous transitions between states (e.g. transitioning from a run to
  * a stand controller in mid stride).
  */
