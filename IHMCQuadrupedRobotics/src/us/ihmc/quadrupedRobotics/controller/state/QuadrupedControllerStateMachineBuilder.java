@@ -1,9 +1,17 @@
-package us.ihmc.quadrupedRobotics.controller;
+package us.ihmc.quadrupedRobotics.controller.state;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedDoNothingController;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedJointInitializer;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedLegJointSliderBoardController;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionBasedCrawlController;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedStandPrepController;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedStandReadyController;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedVirtualModelBasedStandController;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedCommonControllerParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
@@ -80,7 +88,7 @@ public class QuadrupedControllerStateMachineBuilder
 
    public void addPermissibleTransition(QuadrupedControllerState from, QuadrupedControllerState to)
    {
-      StateTransitionCondition condition = new PermissiveRequestedStateTransition<>(requestedState, to);
+      StateTransitionCondition condition = new PermissiveRequestedStateTransitionCondition<>(requestedState, to);
       StateTransition<QuadrupedControllerState> transition = new StateTransition<>(to, condition);
 
       addTransition(from, transition);
@@ -92,7 +100,7 @@ public class QuadrupedControllerStateMachineBuilder
 
       ArrayList<StateTransitionCondition> conditions = new ArrayList<>();
       conditions.add(new QuadrupedJointsInitializedTransitionCondition(controller));
-      conditions.add(new PermissiveRequestedStateTransition<>(requestedState, to));
+      conditions.add(new PermissiveRequestedStateTransitionCondition<>(requestedState, to));
 
       addTransition(from, new StateTransition<>(to, conditions));
    }

@@ -2,9 +2,8 @@ package us.ihmc.quadrupedRobotics.controller;
 
 import com.google.common.primitives.Booleans;
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
 /**
