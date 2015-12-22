@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller;
 
+import com.google.common.primitives.Booleans;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -12,6 +13,11 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 public class QuadrupedDoNothingController extends QuadrupedController implements QuadrupedJointInitializer
 {
    private final FullRobotModel fullRobotModel;
+
+   /**
+    * A map specifying which joints have been come online and had their desired positions set. Indices align with the
+    * #{@link FullRobotModel#getOneDoFJoints()} array.
+    */
    private final boolean initialized[];
 
    public QuadrupedDoNothingController(FullRobotModel fullRobotModel)
@@ -61,15 +67,7 @@ public class QuadrupedDoNothingController extends QuadrupedController implements
    @Override
    public boolean allJointsInitialized()
    {
-      for (boolean init : initialized)
-      {
-         if (!init)
-         {
-            return false;
-         }
-      }
-
-      return true;
+      return !Booleans.contains(initialized, false);
    }
 }
 

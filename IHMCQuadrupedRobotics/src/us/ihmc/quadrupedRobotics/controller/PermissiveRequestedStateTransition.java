@@ -10,19 +10,22 @@ import us.ihmc.robotics.stateMachines.StateTransitionCondition;
  * 
  * @param <E> The enum defining the state domain.
  */
-public class PermissiveRequestedStateTransition<E extends Enum<E>> extends StateTransition<E>
+public class PermissiveRequestedStateTransition<E extends Enum<E>> implements StateTransitionCondition
 {
+   private final EnumYoVariable<E> requestedState;
+   private final E nextStateEnum;
+
    public PermissiveRequestedStateTransition(final EnumYoVariable<E> requestedState,
          final E nextStateEnum)
    {
-      super(nextStateEnum, new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            E req = requestedState.getEnumValue();
-            return req != null && req == nextStateEnum;
-         }
-      });
+      this.requestedState = requestedState;
+      this.nextStateEnum = nextStateEnum;
+   }
+
+   @Override
+   public boolean checkCondition()
+   {
+      E req = requestedState.getEnumValue();
+      return req != null && req == nextStateEnum;
    }
 }
