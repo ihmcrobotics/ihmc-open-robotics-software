@@ -93,7 +93,7 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
       
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
       DesiredHighLevelStateProvider highLevelStateProvider = null;
-      HeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry);
+      HeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), walkingControllerParameters.getTrajectoryTimeHeadOrientation(), registry);
       DesiredComHeightProvider desiredComHeightProvider = footstepProvider.getDesiredComHeightProvider();
       PelvisPoseProvider pelvisPoseProvider = footstepProvider.getDesiredPelvisPoseProvider();
       ChestOrientationProvider chestOrientationProvider = null;

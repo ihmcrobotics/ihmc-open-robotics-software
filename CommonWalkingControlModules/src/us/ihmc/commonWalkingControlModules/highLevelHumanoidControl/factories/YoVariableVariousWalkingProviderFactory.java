@@ -68,10 +68,11 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
       FootstepProvider footstepPovider = new UserDesiredFootstepProvider(feet, referenceFrames.getAnkleZUpReferenceFrames(), walkingControllerParameters, registry);
 
       DesiredHighLevelStateProvider highLevelStateProvider = null;
-      HeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry);
+      double trajectoryTimeHeadOrientation = walkingControllerParameters.getTrajectoryTimeHeadOrientation();
+      HeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), trajectoryTimeHeadOrientation, registry);
       DesiredComHeightProvider desiredComHeightProvider = null;
       PelvisPoseProvider pelvisPoseProvider = new UserDesiredPelvisPoseProvider(registry);
-      ChestOrientationProvider chestOrientationProvider = new UserDesiredChestOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry);
+      ChestOrientationProvider chestOrientationProvider = new UserDesiredChestOrientationProvider(referenceFrames.getPelvisZUpFrame(), trajectoryTimeHeadOrientation, registry);
 
       FootPoseProvider footPoseProvider = new UserDesiredFootPoseProvider(fullRobotModel, walkingControllerParameters.getDefaultSwingTime(), registry);
 
