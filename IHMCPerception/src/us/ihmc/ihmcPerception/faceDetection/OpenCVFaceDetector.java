@@ -12,10 +12,10 @@ import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
-import org.opencv.highgui.Highgui;
-import org.opencv.highgui.VideoCapture;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
+import org.opencv.videoio.VideoCapture;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
@@ -30,7 +30,7 @@ public class OpenCVFaceDetector
 
    static
    {
-      NativeLibraryLoader.loadLibrary("org.opencv", "opencv_java2411");
+      NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
    }
 
    public static final String HAAR_CASCADE = ClassLoader.getSystemResource("faceDetection/haarcascade_frontalface_alt.xml").getFile();
@@ -74,7 +74,7 @@ public class OpenCVFaceDetector
 
          if (count++ % 100 == 0)
          {
-            PrintTools.info("Writing image: " + Highgui.imwrite("/home/shadylady/image.jpeg", image));
+            PrintTools.info("Writing image: " + Imgcodecs.imwrite("/home/shadylady/image.jpeg", image));
 
             for (Rect rect : faces.toArray())
             {
@@ -124,7 +124,7 @@ public class OpenCVFaceDetector
       while (true)
       {
          cap.read(image);
-         Highgui.imencode(".bmp", image, mem);
+         Imgcodecs.imencode(".bmp", image, mem);
          BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(mem.toArray()));
          detector.detectAndOutline(bufferedImage);
          if (panel == null)
