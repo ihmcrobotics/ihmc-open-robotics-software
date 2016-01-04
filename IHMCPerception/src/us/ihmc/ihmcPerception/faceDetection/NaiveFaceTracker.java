@@ -1,22 +1,25 @@
 package us.ihmc.ihmcPerception.faceDetection;
 
-import boofcv.gui.image.ImagePanel;
-import boofcv.gui.image.ShowImages;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.Rect;
-import org.opencv.highgui.Highgui;
-import org.opencv.highgui.VideoCapture;
-import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
-
-import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
+
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.core.Rect;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.videoio.VideoCapture;
+
+import boofcv.gui.image.ImagePanel;
+import boofcv.gui.image.ShowImages;
+import us.ihmc.ihmcPerception.OpenCVTools;
+import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 public class NaiveFaceTracker
 {
@@ -89,7 +92,7 @@ public class NaiveFaceTracker
 
    public static void main(String[] arg) throws IOException
    {
-      NativeLibraryLoader.loadLibrary("org.opencv", "opencv_java2411");
+      NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
       VideoCapture cap = new VideoCapture(0);
       NaiveFaceTracker faceTracker = new NaiveFaceTracker(0.5);
       ImagePanel panel = null;
@@ -98,7 +101,8 @@ public class NaiveFaceTracker
       while (true)
       {
          cap.read(image);
-         Highgui.imencode(".bmp", image, mem);
+//         Imgcodecs.imdecode(buf, flags)
+         Imgcodecs.imencode(".bmp", image, mem);
          BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(mem.toArray()));
          faceTracker.detect(bufferedImage);
          if (panel == null)
