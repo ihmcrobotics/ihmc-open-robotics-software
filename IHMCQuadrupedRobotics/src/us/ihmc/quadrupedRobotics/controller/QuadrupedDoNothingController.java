@@ -1,13 +1,22 @@
 package us.ihmc.quadrupedRobotics.controller;
 
+import com.google.common.primitives.Booleans;
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
-public class QuadrupedDoNothingController extends QuadrupedController
+/**
+ * This controller sets desired joint angles to their actual values when the joint comes online.
+ */
+public class QuadrupedDoNothingController extends QuadrupedController implements QuadrupedJointInitializer
 {
    private final FullRobotModel fullRobotModel;
+
+   /**
+    * A map specifying which joints have been come online and had their desired positions set. Indices align with the
+    * {@link FullRobotModel#getOneDoFJoints()} array.
+    */
    private final boolean initialized[];
 
    public QuadrupedDoNothingController(FullRobotModel fullRobotModel)
@@ -53,22 +62,11 @@ public class QuadrupedDoNothingController extends QuadrupedController
    {
       return RobotMotionStatus.STANDING;
    }
-}
 
-class QuadrupedDoNothingControllerExitCondition extends PermissiveRequestedStateTransition<QuadrupedControllerState>
-{
-   private final QuadrupedDoNothingController controller;
-
-   public QuadrupedDoNothingControllerExitCondition(EnumYoVariable<QuadrupedControllerState> requestedState, QuadrupedDoNothingController controller)
+   @Override
+   public boolean allJointsInitialized()
    {
-      super(requestedState, QuadrupedControllerState.STAND_PREP);
-      this.controller = controller;
+      return !Booleans.contains(initialized, false);
    }
-
-   //   @Override
-   //   public boolean checkCondition()
-   //   {
-   //      // TODO: Return whether or not the actuators are online.
-   //      return true;
-   //   }
 }
+
