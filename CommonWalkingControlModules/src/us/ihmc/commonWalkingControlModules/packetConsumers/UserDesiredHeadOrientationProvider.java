@@ -14,18 +14,21 @@ public class UserDesiredHeadOrientationProvider implements HeadOrientationProvid
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable userDesiredHeadYaw, userDesiredHeadPitch, userDesiredHeadRoll;
+   private final DoubleYoVariable trajectoryTime = new DoubleYoVariable("userHeadOrientationTrajectoryTime", registry);
    private final ReferenceFrame headOrientationFrame;
 
    private final AtomicBoolean isNewHeadOrientationInformationAvailable = new AtomicBoolean(true);
    private final FrameOrientation desiredHeadOrientation = new FrameOrientation();
 
-   public UserDesiredHeadOrientationProvider(ReferenceFrame headOrientationFrame, YoVariableRegistry parentRegistry)
+   public UserDesiredHeadOrientationProvider(ReferenceFrame headOrientationFrame, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
    {
       this.headOrientationFrame = headOrientationFrame;
 
       userDesiredHeadYaw = new DoubleYoVariable("userDesiredHeadYaw", registry);
       userDesiredHeadPitch = new DoubleYoVariable("userDesiredHeadPitch", registry);
       userDesiredHeadRoll = new DoubleYoVariable("userDesiredHeadRoll", registry);
+
+      trajectoryTime.set(defaultTrajectoryTime);
 
       setupListeners();
 
@@ -74,6 +77,12 @@ public class UserDesiredHeadOrientationProvider implements HeadOrientationProvid
    public FramePoint getLookAtPoint()
    {
       return null;
+   }
+
+   @Override
+   public double getTrajectoryTime()
+   {
+      return trajectoryTime.getDoubleValue();
    }
 
    @Override

@@ -5,6 +5,7 @@ import java.util.Random;
 import javax.vecmath.Point3d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
+import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
@@ -17,16 +18,19 @@ import us.ihmc.robotics.random.RandomTools;
 public class LookAtPacket extends IHMCRosApiPacket<LookAtPacket>
 {
    public Point3d lookAtPoint;
+   @FieldDocumentation("trajectoryTime specifies how fast or how slow to move to the desired pose")
+   public double trajectoryTime;
    public int index;
 
    public LookAtPacket()
    {
    }
 
-   public LookAtPacket(Point3d lookAtPoint, int index)
+   public LookAtPacket(Point3d lookAtPoint, double trajectoryTime, int index)
    {
       super();
       this.lookAtPoint = lookAtPoint;
+      this.trajectoryTime = trajectoryTime;
       this.index = index;
    }
 
@@ -35,11 +39,16 @@ public class LookAtPacket extends IHMCRosApiPacket<LookAtPacket>
       return lookAtPoint;
    }
 
+   public double getTrajectoryTime()
+   {
+      return trajectoryTime;
+   }
+
    public LookAtPacket transform(RigidBodyTransform transform, int index)
    {
       Point3d lookAtPoint = new Point3d(this.getLookAtPoint());
       transform.transform(lookAtPoint);
-      LookAtPacket ret = new LookAtPacket(lookAtPoint, index);
+      LookAtPacket ret = new LookAtPacket(lookAtPoint, this.getTrajectoryTime(), index);
 
       return ret;
    }
@@ -51,7 +60,7 @@ public class LookAtPacket extends IHMCRosApiPacket<LookAtPacket>
 
    public LookAtPacket(Random random)
    {
-      this(RandomTools.generateRandomPoint(random, -0.5, -1.0, -1.0, 0.75, 1.0, 1.0), random.nextInt());
+      this(RandomTools.generateRandomPoint(random, -0.5, -1.0, -1.0, 0.75, 1.0, 1.0), RandomTools.generateRandomDouble(random, 0.0, 10.0), random.nextInt());
    }
 
    public int getIndex()
