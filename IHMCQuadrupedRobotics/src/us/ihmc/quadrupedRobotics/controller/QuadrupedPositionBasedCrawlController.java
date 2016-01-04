@@ -9,12 +9,13 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.quadrupedRobotics.dataProviders.DesiredVelocityProvider;
 import us.ihmc.quadrupedRobotics.dataProviders.DesiredYawRateProvider;
 import us.ihmc.quadrupedRobotics.footstepChooser.MidFootZUpSwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.footstepChooser.SwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedControllerParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
@@ -258,7 +259,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
       super(QuadrupedControllerState.POSITION_CRAWL);
-      QuadrupedControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedControllerParameters();
+      QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedPositionBasedCrawlControllerParameters();
 
       swingDuration.set(quadrupedControllerParameters.getDefaultSwingDuration());
       swingHeight.set(quadrupedControllerParameters.getDefaultSwingHeight());

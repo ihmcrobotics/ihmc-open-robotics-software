@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.parameters;
 
 import javax.vecmath.Vector2d;
 
-public class DefaultSwingTargetGeneratorParameters implements QuadrupedControllerParameters 
+public class DefaultSwingTargetGeneratorParameters implements QuadrupedPositionBasedCrawlControllerParameters
 {
    private final double minimumVelocityForFullSkew = 0.1;
    private final double minimumDistanceFromSameSideFoot = 0.04;
