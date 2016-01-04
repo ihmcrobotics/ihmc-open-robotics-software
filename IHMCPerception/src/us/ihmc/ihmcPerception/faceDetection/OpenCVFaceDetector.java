@@ -4,6 +4,9 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 
@@ -26,15 +29,15 @@ import us.ihmc.tools.time.Timer;
 
 public class OpenCVFaceDetector
 {
-   private static final boolean DEBUG = false;
-
    static
    {
       NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
    }
+   
+   private static final boolean DEBUG = false;
+   private static final String HAARCASCADE_FRONTALFACE_ALT_XML = "faceDetection/haarcascade_frontalface_alt.xml";
 
-   public static final String HAAR_CASCADE = ClassLoader.getSystemResource("faceDetection/haarcascade_frontalface_alt.xml").getFile();
-   private final CascadeClassifier cascadeClassifierForFaces = new CascadeClassifier(HAAR_CASCADE);
+   private CascadeClassifier cascadeClassifierForFaces;
    private final MatOfRect faces = new MatOfRect();
    private final double scaleFactor;
 
@@ -44,6 +47,22 @@ public class OpenCVFaceDetector
    public OpenCVFaceDetector(double scaleFactor)
    {
       this.scaleFactor = scaleFactor;
+      
+      try
+      {
+         Path xmlPath = Paths.get(ClassLoader.getSystemResource(HAARCASCADE_FRONTALFACE_ALT_XML).toURI());
+         cascadeClassifierForFaces = new CascadeClassifier(xmlPath.toString());
+         
+         if (cascadeClassifierForFaces.empty())
+         {
+            throw new RuntimeException("cascadeClassifier is empty");
+         }
+      }
+      catch (URISyntaxException e)
+      {
+         cascadeClassifierForFaces = null;
+         e.printStackTrace();
+      }
    }
    
    int count = 0;
@@ -114,7 +133,7 @@ public class OpenCVFaceDetector
    }
 
    public static void main(String[] arg) throws IOException
-   {
+   {      
       VideoCapture cap = new VideoCapture(0);
       OpenCVFaceDetector detector = new OpenCVFaceDetector(0.5);
       ImagePanel panel = null;
