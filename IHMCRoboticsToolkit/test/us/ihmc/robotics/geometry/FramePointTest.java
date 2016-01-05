@@ -542,7 +542,8 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       FramePoint point = new FramePoint(theFrame, 1, 1, 1);
       double yaw = Math.PI;
 
-      FramePoint result = point.yawAboutPoint(pointToYawAbout, yaw);
+      FramePoint result = new FramePoint();
+      point.yawAboutPoint(pointToYawAbout, result, yaw);
       //      System.out.println(result);
       assertEquals("These should be equal", -1.0, result.getX(), epsilon);
       assertEquals("These should be equal", -1.0, result.getY(), epsilon);
@@ -550,7 +551,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
 
       //Check for reference frame mismatch
       FramePoint point2 = new FramePoint(aFrame, 1, 1, 1);
-      point2.yawAboutPoint(pointToYawAbout, yaw);
+      point2.yawAboutPoint(pointToYawAbout, point2, yaw);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -561,7 +562,8 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       FramePoint point = new FramePoint(theFrame, 1, 1, 1);
       double pitch = Math.PI;
 
-      FramePoint result = point.pitchAboutPoint(pointToPitchAbout, pitch);
+      FramePoint result = new FramePoint();
+      point.pitchAboutPoint(pointToPitchAbout, result, pitch);
       //      System.out.println(result);
       assertEquals("These should be equal", -1.0, result.getX(), epsilon);
       assertEquals("These should be equal", 1.0, result.getY(), epsilon);
@@ -569,7 +571,7 @@ public class FramePointTest extends FrameTupleTest<Point3d>
 
       //Check for reference frame mismatch
       FramePoint point2 = new FramePoint(aFrame, 1, 1, 1);
-      point2.pitchAboutPoint(pointToPitchAbout, pitch);
+      point2.pitchAboutPoint(pointToPitchAbout, point2, pitch);
    }
 
    public static void assertFramePointEquals(FramePoint expected, FramePoint actual, double delta)
