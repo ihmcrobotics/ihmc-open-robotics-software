@@ -11,9 +11,9 @@ public class QuadrupedContactForceLimits
 
    public QuadrupedContactForceLimits()
    {
-      coefficientOfFriction = new QuadrantDependentList<double[]>();
-      pressureLowerLimit = new QuadrantDependentList<double[]>();
-      pressureUpperLimit = new QuadrantDependentList<double[]>();
+      coefficientOfFriction = new QuadrantDependentList<>();
+      pressureLowerLimit = new QuadrantDependentList<>();
+      pressureUpperLimit = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          coefficientOfFriction.set(robotQuadrant, new double[1]);
@@ -31,9 +31,9 @@ public class QuadrupedContactForceLimits
 
    public QuadrupedContactForceLimits(QuadrupedContactForceLimits contactForceLimits)
    {
-      coefficientOfFriction = new QuadrantDependentList<double[]>();
-      pressureLowerLimit = new QuadrantDependentList<double[]>();
-      pressureUpperLimit = new QuadrantDependentList<double[]>();
+      coefficientOfFriction = new QuadrantDependentList<>();
+      pressureLowerLimit = new QuadrantDependentList<>();
+      pressureUpperLimit = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          coefficientOfFriction.set(robotQuadrant, new double[1]);

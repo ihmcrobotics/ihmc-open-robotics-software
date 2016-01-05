@@ -9,7 +9,7 @@ public interface QuadrupedInitialPositionParameters
 
    /**
     * Maps joint names to initial positions.
-    * 
+    *
     * @param joint
     *           the joint name to lookup.
     * @return the initial angle in radians.

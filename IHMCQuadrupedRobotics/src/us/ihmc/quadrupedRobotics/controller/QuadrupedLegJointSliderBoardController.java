@@ -7,7 +7,7 @@ import java.util.Map;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
