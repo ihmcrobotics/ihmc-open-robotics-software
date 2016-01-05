@@ -411,15 +411,14 @@ public class QuadrupedSupportPolygon implements Serializable
       return ret;
    }
 
-
    /**
     * getCentroid
     *
-    * @param centroid FramePoint
+    * @param centroidToPack FramePoint
     */
-   public void getCentroid(FramePoint centroid)
+   public void getCentroid(FramePoint centroidToPack)
    {
-      centroid.set(0.0, 0.0, 0.0);
+      centroidToPack.set(0.0, 0.0, 0.0);
 
       int numberOfFootsteps = 0;
       for (RobotQuadrant quadrant: RobotQuadrant.values)
@@ -427,12 +426,12 @@ public class QuadrupedSupportPolygon implements Serializable
          FramePoint footstep = footsteps.get(quadrant);
          if (useThisLeg(footstep))
          {
-            centroid.add(footstep);
+            centroidToPack.add(footstep);
             numberOfFootsteps++;
          }
       }
 
-      centroid.scale(1.0 / ((double) numberOfFootsteps));
+      centroidToPack.scale(1.0 / ((double) numberOfFootsteps));
    }
 
    /**
@@ -1049,6 +1048,7 @@ public class QuadrupedSupportPolygon implements Serializable
     *
     * @param removeSwingLeg boolean
     * @return FramePoint
+    * @deprecated Creates garbage. Use getCentroid().
     */
    public FramePoint getCentroidFramePoint()
    {
@@ -1388,7 +1388,8 @@ public class QuadrupedSupportPolygon implements Serializable
          FramePoint footstep = footsteps.get(quadrant);
          if (useThisLeg(footstep))
          {
-            FramePoint rotatedPoint = footstep.yawAboutPoint(centroid, yaw);
+            FramePoint rotatedPoint = new FramePoint();
+            footstep.yawAboutPoint(centroid, rotatedPoint, yaw);
             footstep.set(rotatedPoint);
          }
       }

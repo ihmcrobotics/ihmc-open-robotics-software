@@ -20,6 +20,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class FramePoint extends FrameTuple<Point3d>
 {
    private static final long serialVersionUID = -4831948077397801540L;
+   
+   private FramePoint temporaryFramePointForMath;
 
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
    public FramePoint(ReferenceFrame referenceFrame, Tuple3d position)
@@ -283,35 +285,39 @@ public class FramePoint extends FrameTuple<Point3d>
     * @param yaw             double
     * @return CartesianPositionFootstep
     */
-   public FramePoint yawAboutPoint(FramePoint pointToYawAbout, double yaw)
+   public void yawAboutPoint(FramePoint pointToYawAbout, FramePoint resultToPack, double yaw)
    {
-      FrameVector v0 = new FrameVector(this);
-      v0.sub(pointToYawAbout);
+      if (temporaryFramePointForMath == null)
+         temporaryFramePointForMath = new FramePoint(this);
+      else
+         temporaryFramePointForMath.setIncludingFrame(this);
+      
+      temporaryFramePointForMath.sub(pointToYawAbout);
 
       RigidBodyTransform transform3D = new RigidBodyTransform();
       transform3D.rotZ(yaw);
 
-      v0.applyTransform(transform3D);
+      temporaryFramePointForMath.applyTransform(transform3D);
 
-      FramePoint ret = new FramePoint(pointToYawAbout);
-      ret.add(v0);
-
-      return ret;
+      resultToPack.setIncludingFrame(pointToYawAbout);
+      resultToPack.add(temporaryFramePointForMath);
    }
 
-   public FramePoint pitchAboutPoint(FramePoint pointToPitchAbout, double pitch)
+   public void pitchAboutPoint(FramePoint pointToPitchAbout, FramePoint resultToPack, double pitch)
    {
-      FrameVector v0 = new FrameVector(this);
-      v0.sub(pointToPitchAbout);
+      if (temporaryFramePointForMath == null)
+         temporaryFramePointForMath = new FramePoint(this);
+      else
+         temporaryFramePointForMath.setIncludingFrame(this);
+      
+      temporaryFramePointForMath.sub(pointToPitchAbout);
 
       RigidBodyTransform transform3D = new RigidBodyTransform();
       transform3D.rotY(pitch);
 
-      v0.applyTransform(transform3D);
+      temporaryFramePointForMath.applyTransform(transform3D);
 
-      FramePoint ret = new FramePoint(pointToPitchAbout);
-      ret.add(v0);
-
-      return ret;
+      resultToPack.setIncludingFrame(pointToPitchAbout);
+      resultToPack.add(temporaryFramePointForMath);
    }
 }
