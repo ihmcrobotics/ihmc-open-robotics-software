@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.sliderboard;
 
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager.SliderBoardModes;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;

@@ -39,8 +39,8 @@ public class QuadrupedContactForceOptimization
       comForceCommand = new FrameVector(comFrame);
       comTorqueSolution = new FrameVector(comFrame);
       comForceSolution = new FrameVector(comFrame);
-      contactForceSolution = new QuadrantDependentList<FrameVector>();
-      contactPosition = new QuadrantDependentList<FramePoint>();
+      contactForceSolution = new QuadrantDependentList<>();
+      contactPosition = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          contactForceSolution.set(robotQuadrant, new FrameVector(comFrame));

@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LookAtPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
@@ -22,15 +24,17 @@ public class DesiredHeadOrientationProvider implements HeadOrientationProvider
    private final ReferenceFrame lookAtFrame = ReferenceFrame.getWorldFrame();
    private final FramePoint pointToTrack = new FramePoint(lookAtFrame);
    private final FrameOrientation headOrientation;
+   private final AtomicDouble trajectoryTime = new AtomicDouble();
    private final HumanoidGlobalDataProducer globalDataProducer;
 
-   public DesiredHeadOrientationProvider(ReferenceFrame headOrientationFrame, HumanoidGlobalDataProducer globalDataProducer)
+   public DesiredHeadOrientationProvider(ReferenceFrame headOrientationFrame, double defaultTrajectoryTime, HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
       headOrientationPacketConsumer = new HeadOrientationPacketConsumer();
       lookAtPacketConsumer = new LookAtPacketConsumer();
       this.headOrientationFrame = headOrientationFrame;
       headOrientation = new FrameOrientation(headOrientationFrame);
+      trajectoryTime.set(defaultTrajectoryTime);
    }
 
    public PacketConsumer<HeadOrientationPacket> getHeadOrientationPacketConsumer()
@@ -75,6 +79,7 @@ public class DesiredHeadOrientationProvider implements HeadOrientationProvider
       if (object != null)
       {
          pointToTrack.setIncludingFrame(lookAtFrame, object.getLookAtPoint());
+         trajectoryTime.set(object.getTrajectoryTime());
          return true;
       }
       else
@@ -90,6 +95,7 @@ public class DesiredHeadOrientationProvider implements HeadOrientationProvider
       if (packet != null)
       {
          headOrientation.set(packet.getOrientation());
+         trajectoryTime.set(packet.getTrajectoryTime());
          return true;
       }
       else
@@ -109,6 +115,12 @@ public class DesiredHeadOrientationProvider implements HeadOrientationProvider
    public FramePoint getLookAtPoint()
    {
       return pointToTrack;
+   }
+
+   @Override
+   public double getTrajectoryTime()
+   {
+      return trajectoryTime.get();
    }
 
    @Override
