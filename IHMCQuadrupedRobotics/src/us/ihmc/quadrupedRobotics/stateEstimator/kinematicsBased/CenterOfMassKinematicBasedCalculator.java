@@ -41,8 +41,10 @@ public class CenterOfMassKinematicBasedCalculator
 
    private final YoFramePoint rootJointPosition = new YoFramePoint("estimatedRootJointPositionWithKinematics", worldFrame, registry);
    private final YoFrameVector rootJointLinearVelocityNewTwist = new YoFrameVector("estimatedRootJointVelocityNewTwist", worldFrame, registry);
-   private final YoFrameQuaternion rootJointOrientation = new YoFrameQuaternion("estimatedRootJointOrientationWithKinematics", worldFrame, registry);
-
+   private final YoFrameQuaternion rootJointYoOrientation = new YoFrameQuaternion("estimatedRootJointOrientationWithKinematics", worldFrame, registry);
+   private final FrameOrientation rootJointOrientation = new FrameOrientation(worldFrame);
+   
+   
    private final YoFramePoint previousRootJointPosition = new YoFramePoint("previousEstimatedRootJointPositionWithKinematics", worldFrame, registry);
    private final YoFrameVector previousRootJointLinearVelocityNewTwist = new YoFrameVector("previousEstimatedRootJointVelocityNewTwist", worldFrame, registry);
    private final YoFrameQuaternion previousRootJointOrientation = new YoFrameQuaternion("previousEstimatedRootJointOrientationWithKinematics", worldFrame,
@@ -72,17 +74,18 @@ public class CenterOfMassKinematicBasedCalculator
    private final QuadrantDependentList<YoFramePoint> yoCalculatedFeetPositions = new QuadrantDependentList<>();
    private final QuadrantDependentList<ThreePointsAverageReferenceFrame> calculatedFeetAverageReferenceFrames = new QuadrantDependentList<>();
 
-   private final FrameOrientation orientationError = new FrameOrientation();
-   private final YoFrameQuaternion yoOrientationError = new YoFrameQuaternion("KinematicsBasedStateEstimatorOrientationError", worldFrame, registry);
-
-   //Visualization Variables
-   private final ArrayList<YoGraphicReferenceFrame> estimatedFeetAverageReferenceFrameVizs = new ArrayList<>();
-   private final ArrayList<YoGraphicReferenceFrame> calculatedFeetAverageReferenceFrameVizs = new ArrayList<>();
-
    private final EnumYoVariable<RobotQuadrant> yoUsedQuadrant = new EnumYoVariable<RobotQuadrant>("usedQuadrantForOrientationEstimation", registry,
          RobotQuadrant.class, true);
-   
+
    private final ArrayList<RobotQuadrant> allQuadrants = new ArrayList<>();
+
+   private final RootJointOrientationCorrectorHelper rootJointOrientationCorrectorHelper = new RootJointOrientationCorrectorHelper("stateEstimator", registry); 
+   
+   private final FrameOrientation orientationError = new FrameOrientation();
+   
+    //Visualization Variables
+   private final ArrayList<YoGraphicReferenceFrame> estimatedFeetAverageReferenceFrameVizs = new ArrayList<>();
+   private final ArrayList<YoGraphicReferenceFrame> calculatedFeetAverageReferenceFrameVizs = new ArrayList<>();
    
    //Temporary Variables
    private final Twist tempRootBodyTwist = new Twist();
@@ -109,7 +112,7 @@ public class CenterOfMassKinematicBasedCalculator
 
       for (RobotQuadrant quadrant : RobotQuadrant.values)
          allQuadrants.add(quadrant);
-      
+
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          twistCalculator.changeTwistchangeBodyFrameNoRelativeTwist(shinRigidBodies.get(quadrant), footFrames.get(quadrant));
@@ -131,68 +134,72 @@ public class CenterOfMassKinematicBasedCalculator
 
          YoGraphicPosition calculatedFootPositionViz = new YoGraphicPosition(quadrant.getCamelCaseNameForStartOfExpression() + "CalculatedPosition",
                yoCalculatedFootPosition, 0.02, YoAppearance.Green());
-         graphicsListRegistry.registerYoGraphic("KinematicsBasedStateEstimator", calculatedFootPositionViz);
+         graphicsListRegistry.registerYoGraphic("KinematicsBasedStateEstimatorCalculated", calculatedFootPositionViz);
 
       }
 
       //this one needs to be in a difference for loop because all the feetPosition FramePoints have to be previously created
-      for (RobotQuadrant quadrant : RobotQuadrant.values())
-      {
-         String prefix = quadrant.getCamelCaseNameForStartOfExpression();
-
-         RobotQuadrant quadrantNotUsed = quadrant.getNextRegularGaitSwingQuadrant().getNextRegularGaitSwingQuadrant().getNextRegularGaitSwingQuadrant();
-
-         //construction of the estimated related variables
-         FramePoint estimatedP1 = estimatedFeetPositions.get(quadrant);
-         FramePoint estimatedP2 = estimatedFeetPositions.get(quadrant.getNextRegularGaitSwingQuadrant());
-         FramePoint estimatedP3 = estimatedFeetPositions.get(quadrant.getNextRegularGaitSwingQuadrant().getNextRegularGaitSwingQuadrant());
-
-         ThreePointsAverageReferenceFrame estimatedFootAverageReferenceFrame = new ThreePointsAverageReferenceFrame(
-               prefix + "EstimatedFootAverageReferenceFrame", estimatedP1, estimatedP2, estimatedP3, worldFrame);
-         estimatedFeetAverageReferenceFrames.put(quadrantNotUsed, estimatedFootAverageReferenceFrame);
-
-         YoGraphicReferenceFrame estimatedFootAverageRefViz = new YoGraphicReferenceFrame(estimatedFootAverageReferenceFrame, registry, 0.15,
-               YoAppearance.Yellow());
-         graphicsListRegistry.registerYoGraphic("KinematicsBasedStateEstimatorEstimated", estimatedFootAverageRefViz);
-         estimatedFeetAverageReferenceFrameVizs.add(estimatedFootAverageRefViz);
-
-         //construction of the calculated related variables
-         FramePoint calculatedP1 = calculatedFeetPositions.get(quadrant);
-         FramePoint calculatedP2 = calculatedFeetPositions.get(quadrant.getNextRegularGaitSwingQuadrant());
-         FramePoint calculatedP3 = calculatedFeetPositions.get(quadrant.getNextRegularGaitSwingQuadrant().getNextRegularGaitSwingQuadrant());
-
-         ThreePointsAverageReferenceFrame calculatedFootAverageReferenceFrame = new ThreePointsAverageReferenceFrame(
-               prefix + "CalculatedFootAverageReferenceFrame", calculatedP1, calculatedP2, calculatedP3, worldFrame);
-         calculatedFeetAverageReferenceFrames.put(quadrantNotUsed, calculatedFootAverageReferenceFrame);
-
-         YoGraphicReferenceFrame calculatedFootAverageRefViz = new YoGraphicReferenceFrame(calculatedFootAverageReferenceFrame, registry, 0.2,
-               YoAppearance.Green());
-         graphicsListRegistry.registerYoGraphic("KinematicsBasedStateEstimatorCalculated", calculatedFootAverageRefViz);
-         calculatedFeetAverageReferenceFrameVizs.add(calculatedFootAverageRefViz);
-      }
+      constructAverageFrame(RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT, graphicsListRegistry);
+      constructAverageFrame(RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT, graphicsListRegistry);
+      constructAverageFrame(RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT, graphicsListRegistry);
+      constructAverageFrame(RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT, graphicsListRegistry);
 
       //XXX: to be added to the state estimator parameters (0.15 is what is used on Atlas)
       alphaRootJointLinearVelocityNewTwist.set(0.15);
 
       parentRegistry.addChild(registry);
    }
-   
 
-      
+   private void constructAverageFrame(RobotQuadrant quadrant1, RobotQuadrant quadrant2, RobotQuadrant quadrant3, RobotQuadrant quadrantNotUsed,
+         YoGraphicsListRegistry graphicsListRegistry)
+   {
+      String prefix = quadrantNotUsed.getCamelCaseNameForStartOfExpression();
+
+      //construction of the estimated related variables
+      FramePoint estimatedP1 = estimatedFeetPositions.get(quadrant1);
+      FramePoint estimatedP2 = estimatedFeetPositions.get(quadrant2);
+      FramePoint estimatedP3 = estimatedFeetPositions.get(quadrant3);
+
+      ThreePointsAverageReferenceFrame estimatedFootAverageReferenceFrame = new ThreePointsAverageReferenceFrame(prefix + "EstimatedFootAverageReferenceFrame",
+            estimatedP1, estimatedP2, estimatedP3, worldFrame);
+      estimatedFeetAverageReferenceFrames.put(quadrantNotUsed, estimatedFootAverageReferenceFrame);
+
+      YoGraphicReferenceFrame estimatedFootAverageRefViz = new YoGraphicReferenceFrame(estimatedFootAverageReferenceFrame, registry, 0.15,
+            YoAppearance.Yellow());
+      graphicsListRegistry.registerYoGraphic(prefix + "KinematicsBasedStateEstimatorEstimated", estimatedFootAverageRefViz);
+      estimatedFeetAverageReferenceFrameVizs.add(estimatedFootAverageRefViz);
+
+      //construction of the calculated related variables
+      FramePoint calculatedP1 = calculatedFeetPositions.get(quadrant1);
+      FramePoint calculatedP2 = calculatedFeetPositions.get(quadrant2);
+      FramePoint calculatedP3 = calculatedFeetPositions.get(quadrant3);
+
+      ThreePointsAverageReferenceFrame calculatedFootAverageReferenceFrame = new ThreePointsAverageReferenceFrame(
+            prefix + "CalculatedFootAverageReferenceFrame", calculatedP1, calculatedP2, calculatedP3, worldFrame);
+      calculatedFeetAverageReferenceFrames.put(quadrantNotUsed, calculatedFootAverageReferenceFrame);
+
+      YoGraphicReferenceFrame calculatedFootAverageRefViz = new YoGraphicReferenceFrame(calculatedFootAverageReferenceFrame, registry, 0.2,
+            YoAppearance.Green());
+      graphicsListRegistry.registerYoGraphic(prefix + "KinematicsBasedStateEstimatorCalculated", calculatedFootAverageRefViz);
+      calculatedFeetAverageReferenceFrameVizs.add(calculatedFootAverageRefViz);
+   }
+
    public void initialize(FramePoint comInitialPosition, FrameOrientation comInitialOrientation)//, QuadrantDependentList<YoFramePoint> footPositionsToPack)
    {
+      rootJointOrientationCorrectorHelper.setCorrectionAlpha(0.1);
+      
       rootJointPosition.set(comInitialPosition);
       previousRootJointPosition.set(comInitialPosition);
       previousRootJointLinearVelocityNewTwist.setToZero();
 
-      rootJointOrientation.set(comInitialOrientation);
-      previousRootJointOrientation.set(rootJointOrientation);
+      rootJointYoOrientation.set(comInitialOrientation);
+      previousRootJointOrientation.set(rootJointYoOrientation);
 
       yoUsedQuadrant.set(usedQuadrant);
 
       updateKinematics();
 
-      estimateFeetPosition(rootJointPosition, rootJointOrientation, allQuadrants, yoEstimatedFeetPositions);
+      estimateFeetPosition(rootJointPosition, rootJointYoOrientation, allQuadrants, yoEstimatedFeetPositions);
 
       for (RobotQuadrant quadrant : RobotQuadrant.values)
          yoCalculatedFeetPositions.get(quadrant).set(yoEstimatedFeetPositions.get(quadrant));
@@ -226,35 +233,14 @@ public class CenterOfMassKinematicBasedCalculator
    {
       updateKinematics();
 
-      //estimate feet position with the previous estimate and the current joint angles, and store them in an array of calculated feet position
-//      estimateFeetPosition(previousRootJointPosition, previousRootJointOrientation, feetInContact, yoCalculatedFeetPositions);
-      estimateFeetPosition(previousRootJointPosition, previousRootJointOrientation, allQuadrants, yoCalculatedFeetPositions);
-      updateAverageFrames();
-
-      //compare orientation
-      if (feetNotInContact.size() == 0)
-      {
-         calculateOrientationError(usedQuadrant);
-      }
-      else if (feetNotInContact.size() == 1)
-      {
-         usedQuadrant = feetNotInContact.get(0);
-         yoUsedQuadrant.set(usedQuadrant);
-         calculateOrientationError(usedQuadrant);
-      }
-      else
-      {
-         orientationError.setToZero(worldFrame);
-      }
-
-      //estimate Orientation
-      estimateCoMOrientation(feetInContact);
-
       //estimate linear position
       estimateCoMLinearPosition(feetInContact);
 
+      //estimate Orientation 
+      estimateCoMOrientation(feetNotInContact);
+
       //estimate the position of the swing foot
-      estimateFeetPosition(rootJointPosition, rootJointOrientation, feetNotInContact, yoEstimatedFeetPositions);
+      estimateFeetPosition(rootJointPosition, rootJointYoOrientation, feetNotInContact, yoEstimatedFeetPositions);
 
       updateViz();
    }
@@ -262,7 +248,7 @@ public class CenterOfMassKinematicBasedCalculator
    private void updateKinematics()
    {
       rootJointPosition.setToZero();
-      rootJointOrientation.set(0.0, 0.0, 0.0);
+      rootJointYoOrientation.set(0.0, 0.0, 0.0);
 
       updateKinematicsNewTwist();
       twistCalculator.compute();
@@ -304,34 +290,31 @@ public class CenterOfMassKinematicBasedCalculator
       }
    }
 
-   private void estimateCoMOrientation(ArrayList<RobotQuadrant> feetInContact)
+   private void estimateCoMOrientation(ArrayList<RobotQuadrant> feetNotInContact)
    {
-      //we can determine the orientation of the body if we have at least 3 feet on the ground
-      if (feetInContact.size() < 3)
-      {
-         rootJointOrientation.set(previousRootJointOrientation);
-      }
-      else
-      {
-         orientationError.getAxisAngle(tempAxisAngle);
-         double angle = 0.015 * tempAxisAngle.getAngle();
-         tempAxisAngle.setAngle(angle);
-         tempTransform.setRotationAndZeroTranslation(tempAxisAngle);
+      //estimate feet position with the previous estimate and the current joint angles, and store them in an array of calculated feet position
+      estimateFeetPosition(previousRootJointPosition, previousRootJointOrientation, allQuadrants, yoCalculatedFeetPositions);
+      updateAverageFrames();
 
-         previousRootJointOrientation.getFrameOrientationIncludingFrame(tempOrientation);
-         tempOrientation.applyTransform(tempTransform);
-         rootJointOrientation.set(tempOrientation);
-         previousRootJointOrientation.set(rootJointOrientation);
+      //compare orientation
+      if (feetNotInContact.size() == 0)
+      {
+         calculateOrientationError(usedQuadrant);
+      }
+      else if (feetNotInContact.size() == 1)
+      {
+         usedQuadrant = feetNotInContact.get(0);
+         yoUsedQuadrant.set(usedQuadrant);
+         calculateOrientationError(usedQuadrant);
       }
    }
 
    private void calculateOrientationError(RobotQuadrant quadrant)
    {
-      orientationError.setToZero(calculatedFeetAverageReferenceFrames.get(quadrant));
-      orientationError.changeFrame(estimatedFeetAverageReferenceFrames.get(quadrant));
-
-      orientationError.getQuaternion(tempQuaternion);
-      yoOrientationError.set(tempQuaternion);
+      orientationError.setToZero(estimatedFeetAverageReferenceFrames.get(quadrant));
+      orientationError.changeFrame(calculatedFeetAverageReferenceFrames.get(quadrant));
+      rootJointOrientationCorrectorHelper.compensateOrientationError(rootJointOrientation, orientationError);
+      rootJointYoOrientation.set(rootJointOrientation);
    }
 
    private void estimateCoMLinearPosition(ArrayList<RobotQuadrant> feetInContact)//, QuadrantDependentList<YoFramePoint> footPositionsInWorld)
@@ -400,7 +383,7 @@ public class CenterOfMassKinematicBasedCalculator
 
    public void getCoMOrientation(FrameOrientation orientationToPack)
    {
-      rootJointOrientation.getFrameOrientationIncludingFrame(orientationToPack);
+      rootJointYoOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
    private void updateViz()
