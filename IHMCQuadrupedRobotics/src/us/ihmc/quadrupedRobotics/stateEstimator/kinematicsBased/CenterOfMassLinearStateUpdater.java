@@ -68,7 +68,7 @@ public class CenterOfMassLinearStateUpdater
 
          YoGraphicPosition footPositionViz = new YoGraphicPosition(quadrant.getCamelCaseNameForStartOfExpression() + "EstimatedPosition", footPosition, 0.02,
                YoAppearance.Yellow());
-         graphicsListRegistry.registerYoGraphic("KinematicsBasedStateEstimator", footPositionViz);
+         graphicsListRegistry.registerYoGraphic("KinematicsBasedStateEstimatorEstimated", footPositionViz);
       }
 
       comAndFeetCalculator = new CenterOfMassKinematicBasedCalculator(inverseDynamicsStructure, shinRigidBodies, footFrames, estimatedFeetPositions, registry,
