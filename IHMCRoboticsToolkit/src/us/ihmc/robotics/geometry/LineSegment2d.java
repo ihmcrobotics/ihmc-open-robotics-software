@@ -696,4 +696,14 @@ public class LineSegment2d implements Geometry2d
 
       return false;
    }
+
+   public void getPerpendicularBisector(Vector2d perpendicularBisectorToPack, double bisectorLengthDesired)
+   {
+      double x = endpoints[0].x - endpoints[1].x;
+      double y = endpoints[0].y - endpoints[1].y;
+      
+      perpendicularBisectorToPack.set(-y, x);
+      perpendicularBisectorToPack.normalize();
+      perpendicularBisectorToPack.scale(bisectorLengthDesired);
+   }
 }
