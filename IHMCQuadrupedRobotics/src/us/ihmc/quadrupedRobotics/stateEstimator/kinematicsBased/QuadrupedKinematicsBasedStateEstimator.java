@@ -40,6 +40,8 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
 
    private final QuadrantDependentList<BooleanYoVariable> footContactBooleans = new QuadrantDependentList<>();
    
+   private final BooleanYoVariable isEnabled = new BooleanYoVariable(name + "IsEnabled", registry);
+   
    public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
          FootSwitchUpdater footSwitchUpdater, JointStateUpdater jointStateUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater,
          SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -58,6 +60,8 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       if (this.sdfFullRobotModelForViz != null)
          initializeVisualization();
 
+      isEnabled.set(true); //TODO initialize to false
+      
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
          String name = quadrant.getCamelCaseNameForStartOfExpression() + "FootInContact";
@@ -98,13 +102,16 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    @Override
    public void doControl()
    {
-      updateFeetContactStatus();
-
-      jointStateUpdater.updateJointState();
-      comLinearStateUpdater.updateCenterOfMassLinearState(feetInContact, feetNotInContact);
-
-      sdfFullRobotModelForViz.updateFrames();
-      updateViz();
+      if(isEnabled.getBooleanValue())
+      {
+         updateFeetContactStatus();
+         
+         jointStateUpdater.updateJointState();
+         comLinearStateUpdater.updateCenterOfMassLinearState(feetInContact, feetNotInContact);
+         
+         sdfFullRobotModelForViz.updateFrames();
+         updateViz();
+      }
    }
 
    private void updateViz()
@@ -141,5 +148,11 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
             footContactBooleans.get(quadrant).set(false);
          }
       }
+   }
+
+   @Override
+   public void enable()
+   {
+      isEnabled.set(true);
    }
 }
