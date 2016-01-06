@@ -2602,4 +2602,9 @@ public class QuadrupedSupportPolygon implements Serializable
       polygon.setAndUpdate(frameConvexPolygon2d);
    }
 
+   public void clear()
+   {
+      footsteps.clear();
+   }
+
 }
