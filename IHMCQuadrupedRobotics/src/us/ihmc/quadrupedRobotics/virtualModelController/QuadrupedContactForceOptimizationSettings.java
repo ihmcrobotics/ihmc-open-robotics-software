@@ -2,11 +2,17 @@ package us.ihmc.quadrupedRobotics.virtualModelController;
 
 public class QuadrupedContactForceOptimizationSettings
 {
-   private final double MINIMUM_REGULARIZATION_WEIGHTS = 0.001;
+   public enum Solver
+   {
+      CONSTRAINED_QP,
+      LINEAR
+   }
 
+   private final double MINIMUM_REGULARIZATION_WEIGHTS = 0.001;
    private final double[] comTorqueCommandWeights;
    private final double[] comForceCommandWeights;
    private double contactForceRegularizationWeights;
+   private Solver solver;
 
    public QuadrupedContactForceOptimizationSettings()
    {
@@ -23,6 +29,12 @@ public class QuadrupedContactForceOptimizationSettings
          comForceCommandWeights[i] = 1.0;
       }
       contactForceRegularizationWeights = MINIMUM_REGULARIZATION_WEIGHTS;
+      setSolver(Solver.CONSTRAINED_QP);
+   }
+
+   public void setSolver(Solver solver)
+   {
+      this.solver = solver;
    }
 
    public void setComTorqueCommandWeights(double[] weights)
@@ -59,5 +71,10 @@ public class QuadrupedContactForceOptimizationSettings
    public double getContactForceRegularizationWeights()
    {
       return contactForceRegularizationWeights;
+   }
+
+   public Solver getSolver()
+   {
+      return solver;
    }
 }
