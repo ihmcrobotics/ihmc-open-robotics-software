@@ -5,12 +5,15 @@ import java.awt.Color;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedVirtualModelBasedStandParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.util.HeterogeneousMemoryPool;
+import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedContactForceLimits;
+import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedJointLimits;
 import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedVirtualModelController;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.controllers.PIDController;
@@ -55,6 +58,8 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
 
    // utilities
    private final QuadrupedVirtualModelController virtualModelController;
+   private final QuadrupedJointLimits jointLimits;
+   private final QuadrupedContactForceLimits contactForceLimits;
    private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame worldFrame;
    private final ReferenceFrame bodyFrame;
@@ -111,7 +116,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       this.robotTimestamp = robotTimestamp;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
-      this.parameters = robotParameters.getQuadrupedVMCStandParameters();
+      this.parameters = robotParameters.getQuadrupedVirtualModelBasedStandParameters();
       this.jointNameMap = robotParameters.getJointMap();
       this.controlDT = controlDT;
       this.gravityZ = 9.81;
@@ -119,6 +124,8 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
 
       // utilities
       this.virtualModelController = virtualModelController;
+      jointLimits = new QuadrupedJointLimits(robotParameters.getQuadrupedJointLimits());
+      contactForceLimits = new QuadrupedContactForceLimits(robotParameters.getQuadrupedContactForceLimits());
       referenceFrames = virtualModelController.getReferenceFrames();
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
       bodyFrame = referenceFrames.getBodyFrame();
@@ -347,7 +354,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       // compute joint torques using virtual model control
       virtualModelController.setComForceCommand(comForceSetpoint);
       virtualModelController.setComTorqueCommand(bodyTorqueSetpoint);
-      virtualModelController.compute();
+      virtualModelController.compute(jointLimits, contactForceLimits);
    }
 
    @Override

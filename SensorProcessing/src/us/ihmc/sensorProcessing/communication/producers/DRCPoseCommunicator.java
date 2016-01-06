@@ -73,14 +73,14 @@ public class DRCPoseCommunicator implements RawOutputWriter
       this.scheduler = scheduler;
       this.netClassList = netClassList;
 
-      SideDependentList<String> wristForceSensorNames = null;
-      
-      if(sensorInformation != null)
-         wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
-      if(sensorInformation != null && wristForceSensorNames != null && !wristForceSensorNames.isEmpty())
+      if(sensorInformation != null)
       {
-         setupForceSensorMassCompensators(estimatorModel, wristForceSensorNames);         
+         SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
+         if(wristForceSensorNames != null && !wristForceSensorNames.isEmpty())
+         {
+            setupForceSensorMassCompensators(estimatorModel, wristForceSensorNames);         
+         }
       }
 
       IMUDefinition[] imuDefinitions = estimatorModel.getIMUDefinitions();

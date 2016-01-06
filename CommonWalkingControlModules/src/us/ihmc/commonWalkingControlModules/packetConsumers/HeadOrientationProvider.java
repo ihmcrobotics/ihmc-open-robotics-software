@@ -15,4 +15,6 @@ public interface HeadOrientationProvider
    public abstract FramePoint getLookAtPoint();
 
    public abstract ReferenceFrame getHeadOrientationExpressedInFrame();
+
+   public abstract double getTrajectoryTime();
 }

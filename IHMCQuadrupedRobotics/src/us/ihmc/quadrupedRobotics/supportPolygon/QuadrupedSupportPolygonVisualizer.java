@@ -81,7 +81,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
             YoFramePoint vertex = new YoFramePoint(quadrant.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry);
             vertex.set(point);
             vertices.put(quadrant, vertex);
-            point = point.yawAboutPoint(origin, 2 * Math.PI / 3);
+            point.yawAboutPoint(origin, point, 2 * Math.PI / 3);
          }
       }
       

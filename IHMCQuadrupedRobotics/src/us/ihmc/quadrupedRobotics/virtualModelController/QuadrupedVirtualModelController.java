@@ -4,16 +4,13 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointLimits;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedVirtualModelParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -32,150 +29,103 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class QuadrupedVirtualModelController
 {
-   public enum VirtualForceSolver
-   {
-      LEAST_SQUARES, QUAD_PROG
-   };
-
-   private final VirtualForceSolver virtualForceSolver;
    private final YoVariableRegistry registry;
-   private final QuadrupedVirtualModelParameters parameters;
    private final QuadrupedJointNameMap jointMap;
-   private final QuadrupedJointLimits jointLimits;
 
    private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame comFrame;
-   private final QuadrantDependentList<ReferenceFrame> soleFrame;
    private final ReferenceFrame worldFrame;
+   private final QuadrantDependentList<ReferenceFrame> soleFrame;
 
-   private final double[] comForceCommandWeights;
-   private final double[] comTorqueCommandWeights;
    private final FrameVector comForceCommand;
-   private final FrameVector comForceOptimal;
-   private final FrameVector comTorqueCommand;
-   private final FrameVector comTorqueOptimal;
-   private final QuadrantDependentList<FramePoint> solePosition;
-   private final QuadrantDependentList<FrameVector> swingForceCommand;
-   private final QuadrantDependentList<FrameVector> swingForceOptimal;
-   private final QuadrantDependentList<boolean[]> contactState;
-   private final QuadrantDependentList<double[]> contactPressureLowerLimit;
-   private final QuadrantDependentList<double[]> contactPressureUpperLimit;
-   private final QuadrantDependentList<double[]> contactCoefficientOfFriction;
-   private final QuadrantDependentList<FrameVector> contactForceOptimal;
-
    private final YoFrameVector yoComForceCommand;
-   private final YoFrameVector yoComForceOptimal;
+   private final FrameVector comForceSolution;
+   private final YoFrameVector yoComForceSolution;
+   private final FrameVector comTorqueCommand;
    private final YoFrameVector yoComTorqueCommand;
-   private final YoFrameVector yoComTorqueOptimal;
-   private final QuadrantDependentList<YoFramePoint> yoSolePosition;
+   private final FrameVector comTorqueSolution;
+   private final YoFrameVector yoComTorqueSolution;
+   private final QuadrantDependentList<FrameVector> swingForceCommand;
    private final QuadrantDependentList<YoFrameVector> yoSwingForceCommand;
-   private final QuadrantDependentList<YoFrameVector> yoSwingForceOptimal;
+   private final QuadrantDependentList<FrameVector> swingForceSolution;
+   private final QuadrantDependentList<YoFrameVector> yoSwingForceSolution;
+   private final QuadrantDependentList<FrameVector> contactForceSolution;
+   private final QuadrantDependentList<YoFrameVector> yoContactForceSolution;
+   private final QuadrantDependentList<boolean[]> contactState;
    private final QuadrantDependentList<BooleanYoVariable> yoContactState;
-   private final QuadrantDependentList<DoubleYoVariable> yoContactPressureLowerLimit;
-   private final QuadrantDependentList<DoubleYoVariable> yoContactPressureUpperLimit;
-   private final QuadrantDependentList<DoubleYoVariable> yoContactCoefficientOfFriction;
-   private final QuadrantDependentList<YoFrameVector> yoContactForceOptimal;
+   private final QuadrantDependentList<FramePoint> solePosition;
+   private final QuadrantDependentList<YoFramePoint> yoSolePosition;
 
-   private final QuadrantDependentList<double[]> jointEffortLowerLimit;
-   private final QuadrantDependentList<double[]> jointEffortUpperLimit;
-   private final QuadrantDependentList<double[]> jointPositionLowerLimit;
-   private final QuadrantDependentList<double[]> jointPositionUpperLimit;
-   private final QuadrantDependentList<double[]> jointPositionLimitStiffness;
-   private final QuadrantDependentList<double[]> jointPositionLimitDamping;
+   private final QuadrupedContactForceOptimization contactForceOptimization;
+   private final QuadrupedContactForceOptimizationSettings contactForceOptimizationSettings;
 
    private final QuadrantDependentList<OneDoFJoint[]> legJoints;
    private final QuadrantDependentList<GeometricJacobian> footJacobian;
    private final QuadrantDependentList<PointJacobian> soleJacobian;
-
-   private final DenseMatrix64F comWrenchMap;
-   private final DenseMatrix64F comWrenchMapInverse;
-   private final DenseMatrix64F comWrenchVector;
-   private final DenseMatrix64F contactForcesVector;
-   private final DenseMatrix64F virtualForceVector;
    private final QuadrantDependentList<DenseMatrix64F> legEffortVector;
+   private final DenseMatrix64F virtualForceVector;
 
    private final YoGraphicsList yoGraphicsList;
-   private final QuadrantDependentList<YoGraphicVector> yoContactForceOptimalViz;
+   private final QuadrantDependentList<YoGraphicVector> yoContactForceSolutionViz;
    private boolean contactForceIsVisible;
 
    public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedRobotParameters robotParameters, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      virtualForceSolver = VirtualForceSolver.LEAST_SQUARES;
-      parameters = robotParameters.getQuadrupedVirtualModelParameters();
       jointMap = robotParameters.getJointMap();
-      jointLimits = robotParameters.getJointLimits();
       registry = new YoVariableRegistry(getClass().getSimpleName());
 
       // initialize reference frames
       referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointMap, robotParameters.getPhysicalProperties());
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
-      soleFrame = referenceFrames.getFootReferenceFrames();
       worldFrame = ReferenceFrame.getWorldFrame();
+      soleFrame = referenceFrames.getFootReferenceFrames();
 
       // initialize control variables
-      comForceCommandWeights = new double[3];
-      comTorqueCommandWeights = new double[3];
       comForceCommand = new FrameVector(comFrame);
-      comForceOptimal = new FrameVector(comFrame);
-      comTorqueCommand = new FrameVector(comFrame);
-      comTorqueOptimal = new FrameVector(comFrame);
-      solePosition = new QuadrantDependentList<FramePoint>();
-      swingForceCommand = new QuadrantDependentList<FrameVector>();
-      swingForceOptimal = new QuadrantDependentList<FrameVector>();
-      contactState = new QuadrantDependentList<boolean[]>();
-      contactPressureLowerLimit = new QuadrantDependentList<double[]>();
-      contactPressureUpperLimit = new QuadrantDependentList<double[]>();
-      contactCoefficientOfFriction = new QuadrantDependentList<double[]>();
-      contactForceOptimal = new QuadrantDependentList<FrameVector>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         solePosition.set(robotQuadrant, new FramePoint(comFrame));
-         swingForceCommand.set(robotQuadrant, new FrameVector(comFrame));
-         swingForceOptimal.set(robotQuadrant, new FrameVector(comFrame));
-         contactState.set(robotQuadrant, new boolean[1]);
-         contactPressureLowerLimit.set(robotQuadrant, new double[1]);
-         contactPressureUpperLimit.set(robotQuadrant, new double[1]);
-         contactCoefficientOfFriction.set(robotQuadrant, new double[1]);
-         contactForceOptimal.set(robotQuadrant, new FrameVector(comFrame));
-      }
-
-      // initialize yo variables
       yoComForceCommand = new YoFrameVector("comForceCommand", worldFrame, registry);
-      yoComForceOptimal = new YoFrameVector("comForceOptimal", worldFrame, registry);
+      comForceSolution = new FrameVector(comFrame);
+      yoComForceSolution = new YoFrameVector("comForceSolution", worldFrame, registry);
+      comTorqueCommand = new FrameVector(comFrame);
       yoComTorqueCommand = new YoFrameVector("comTorqueCommand", worldFrame, registry);
-      yoComTorqueOptimal = new YoFrameVector("comTorqueOptimal", worldFrame, registry);
-      yoSolePosition = new QuadrantDependentList<YoFramePoint>();
-      yoSwingForceCommand = new QuadrantDependentList<YoFrameVector>();
-      yoSwingForceOptimal = new QuadrantDependentList<YoFrameVector>();
-      yoContactState = new QuadrantDependentList<BooleanYoVariable>();
-      yoContactPressureLowerLimit = new QuadrantDependentList<DoubleYoVariable>();
-      yoContactPressureUpperLimit = new QuadrantDependentList<DoubleYoVariable>();
-      yoContactCoefficientOfFriction = new QuadrantDependentList<DoubleYoVariable>();
-      yoContactForceOptimal = new QuadrantDependentList<YoFrameVector>();
+      comTorqueSolution = new FrameVector(comFrame);
+      yoComTorqueSolution = new YoFrameVector("comTorqueSolution", worldFrame, registry);
+      swingForceCommand = new QuadrantDependentList<>();
+      yoSwingForceCommand = new QuadrantDependentList<>();
+      swingForceSolution = new QuadrantDependentList<>();
+      yoSwingForceSolution = new QuadrantDependentList<>();
+      contactForceSolution = new QuadrantDependentList<>();
+      yoContactForceSolution = new QuadrantDependentList<>();
+      contactState = new QuadrantDependentList<>();
+      yoContactState = new QuadrantDependentList<>();
+      solePosition = new QuadrantDependentList<>();
+      yoSolePosition = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         yoSolePosition.set(robotQuadrant, new YoFramePoint(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SolePosition", worldFrame, registry));
+         swingForceCommand.set(robotQuadrant, new FrameVector(comFrame));
          yoSwingForceCommand.set(robotQuadrant,
                new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SwingForceCommand", worldFrame, registry));
-         yoSwingForceOptimal.set(robotQuadrant,
-               new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SwingForceOptimal", worldFrame, registry));
-         yoContactState.set(robotQuadrant,
-               new BooleanYoVariable(robotQuadrant.getCamelCaseNameForStartOfExpression() + "ContactState", registry));
-         yoContactPressureLowerLimit.set(robotQuadrant,
-               new DoubleYoVariable(robotQuadrant.getCamelCaseNameForStartOfExpression() + "ContactPressureLowerLimit", registry));
-         yoContactPressureUpperLimit.set(robotQuadrant,
-               new DoubleYoVariable(robotQuadrant.getCamelCaseNameForStartOfExpression() + "ContactPressureUpperLimit", registry));
-         yoContactCoefficientOfFriction.set(robotQuadrant,
-               new DoubleYoVariable(robotQuadrant.getCamelCaseNameForStartOfExpression() + "ContactCoefficientOfFriction", registry));
-         yoContactForceOptimal.set(robotQuadrant,
-               new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "ContactForceOptimal", worldFrame, registry));
+         swingForceSolution.set(robotQuadrant, new FrameVector(comFrame));
+         yoSwingForceSolution.set(robotQuadrant,
+               new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SwingForceSolution", worldFrame, registry));
+         contactForceSolution.set(robotQuadrant, new FrameVector(comFrame));
+         yoContactForceSolution.set(robotQuadrant,
+               new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "ContactForceSolution", worldFrame, registry));
+         contactState.set(robotQuadrant, new boolean[1]);
+         yoContactState.set(robotQuadrant, new BooleanYoVariable(robotQuadrant.getCamelCaseNameForStartOfExpression() + "ContactState", registry));
+         solePosition.set(robotQuadrant, new FramePoint(comFrame));
+         yoSolePosition.set(robotQuadrant, new YoFramePoint(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SolePosition", worldFrame, registry));
       }
 
-      // initialize jacobians
-      legJoints = new QuadrantDependentList<OneDoFJoint[]>();
-      footJacobian = new QuadrantDependentList<GeometricJacobian>();
-      soleJacobian = new QuadrantDependentList<PointJacobian>();
+      // initialize contact force optimization
+      contactForceOptimization = new QuadrupedContactForceOptimization(referenceFrames);
+      contactForceOptimizationSettings = new QuadrupedContactForceOptimizationSettings();
+
+      // initialize jacobian variables
+      legJoints = new QuadrantDependentList<>();
+      footJacobian = new QuadrantDependentList<>();
+      soleJacobian = new QuadrantDependentList<>();
+      legEffortVector = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String jointBeforeFootName = robotParameters.getJointMap().getJointBeforeFootName(robotQuadrant);
@@ -185,88 +135,34 @@ public class QuadrupedVirtualModelController
          legJoints.set(robotQuadrant, ScrewTools.filterJoints(ScrewTools.createJointPath(body, foot), OneDoFJoint.class));
          footJacobian.set(robotQuadrant, new GeometricJacobian(legJoints.get(robotQuadrant), body.getBodyFixedFrame()));
          soleJacobian.set(robotQuadrant, new PointJacobian());
-      }
-
-      // initialize joint limits
-      jointEffortLowerLimit = new QuadrantDependentList<double[]>();
-      jointEffortUpperLimit = new QuadrantDependentList<double[]>();
-      jointPositionLowerLimit = new QuadrantDependentList<double[]>();
-      jointPositionUpperLimit = new QuadrantDependentList<double[]>();
-      jointPositionLimitStiffness = new QuadrantDependentList<double[]>();
-      jointPositionLimitDamping = new QuadrantDependentList<double[]>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         jointEffortLowerLimit.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
-         jointEffortUpperLimit.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
-         jointPositionLowerLimit.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
-         jointPositionUpperLimit.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
-         jointPositionLimitStiffness.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
-         jointPositionLimitDamping.set(robotQuadrant, new double[legJoints.get(robotQuadrant).length]);
-      }
-
-      // initialize matrix terms
-      comWrenchMap = new DenseMatrix64F(6, 12);
-      comWrenchMapInverse = new DenseMatrix64F(12, 6);
-      comWrenchVector = new DenseMatrix64F(6, 1);
-      contactForcesVector = new DenseMatrix64F(12, 1);
-      virtualForceVector = new DenseMatrix64F(3, 1);
-      legEffortVector = new QuadrantDependentList<DenseMatrix64F>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
          legEffortVector.set(robotQuadrant, new DenseMatrix64F(legJoints.get(robotQuadrant).length, 1));
       }
+      virtualForceVector = new DenseMatrix64F(3, 1);
 
       // initialize graphics
       yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
-      yoContactForceOptimalViz = new QuadrantDependentList<YoGraphicVector>();
+      yoContactForceSolutionViz = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
       {
-         yoContactForceOptimalViz.set(robotQuadrant, new YoGraphicVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleForceOptimal",
-               yoSolePosition.get(robotQuadrant), yoContactForceOptimal.get(robotQuadrant), 0.002, YoAppearance.Chartreuse()));
-         yoGraphicsList.add(yoContactForceOptimalViz.get(robotQuadrant));
+         yoContactForceSolutionViz.set(robotQuadrant, new YoGraphicVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleForceSolution",
+               yoSolePosition.get(robotQuadrant), yoContactForceSolution.get(robotQuadrant), 0.002, YoAppearance.Chartreuse()));
+         yoGraphicsList.add(yoContactForceSolutionViz.get(robotQuadrant));
       }
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
 
-      // initialize limits
-      this.reinitialize();
-
       parentRegistry.addChild(registry);
+      this.reinitialize();
    }
 
    public void reinitialize()
    {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         for (int i = 0; i < jointMap.getLegJointNames().length; i++)
-         {
-            // initialize joint limits
-            LegJointName legJointName = jointMap.getLegJointNames()[i];
-            String jointName = jointMap.getLegJointName(robotQuadrant, legJointName);
-            double positionLowerLimit = jointLimits.getJointSoftPositionLowerLimit(jointName);
-            double positionUpperLimit = jointLimits.getJointSoftPositionUpperLimit(jointName);
-            double effortLimit = jointLimits.getJointEffortLimit(jointName);
-            setJointEffortLimits(jointName, -effortLimit, effortLimit);
-            setJointPositionLimits(jointName, positionLowerLimit, positionUpperLimit);
-            setJointPositionLimitStiffness(jointName, parameters.getDefaultJointPositionLimitStiffness());
-            setJointPositionLimitDamping(jointName, parameters.getDefaultJointPositionLimitDamping());
-         }
-         // initialize contact state
-         setContactState(robotQuadrant, true);
-         setContactPressureLimits(robotQuadrant, 0, Double.MAX_VALUE);
-         setContactCoefficientOfFriction(robotQuadrant, parameters.getDefaultSoleCoefficientOfFriction());
-      }
-
       // initialize commands
       comForceCommand.setToZero();
       comTorqueCommand.setToZero();
-      for (int i = 0; i < 3; i++)
-      {
-         comForceCommandWeights[i] = 1.0;
-         comTorqueCommandWeights[i] = 1.0;
-      }
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          swingForceCommand.get(robotQuadrant).setToZero();
+         contactState.get(robotQuadrant)[0] = true;
       }
 
       // initialize visualizers
@@ -278,162 +174,63 @@ public class QuadrupedVirtualModelController
       return referenceFrames;
    }
 
-   public void setJointEffortLimits(String jointName, double lower, double upper)
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         int index = 0;
-         for (OneDoFJoint joint : legJoints.get(robotQuadrant))
-         {
-            if (joint.getName().equals(jointName))
-            {
-               jointEffortLowerLimit.get(robotQuadrant)[index] = lower;
-               jointEffortUpperLimit.get(robotQuadrant)[index] = upper;
-            }
-            index++;
-         }
-      }
-   }
-
-   public void setJointPositionLimits(String jointName, double lower, double upper)
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         int index = 0;
-         for (OneDoFJoint joint : legJoints.get(robotQuadrant))
-         {
-            if (joint.getName().equals(jointName))
-            {
-               jointPositionLowerLimit.get(robotQuadrant)[index] = lower;
-               jointPositionUpperLimit.get(robotQuadrant)[index] = upper;
-            }
-            index++;
-         }
-      }
-   }
-
-   public void setJointPositionLimitStiffness(String jointName, double stiffness)
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         int index = 0;
-         for (OneDoFJoint joint : legJoints.get(robotQuadrant))
-         {
-            if (joint.getName().equals(jointName))
-            {
-               jointPositionLimitStiffness.get(robotQuadrant)[index] = Math.max(stiffness, 0);
-            }
-            index++;
-         }
-      }
-   }
-
-   public void setJointPositionLimitDamping(String jointName, double damping)
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         int index = 0;
-         for (OneDoFJoint joint : legJoints.get(robotQuadrant))
-         {
-            if (joint.getName().equals(jointName))
-            {
-               jointPositionLimitDamping.get(robotQuadrant)[index] = Math.max(damping, 0);
-            }
-            index++;
-         }
-      }
-   }
-
    public void setComForceCommand(FrameVector comForce)
    {
       comForceCommand.setIncludingFrame(comForce);
    }
-   
-   public void setComForceCommandWeights(double weights[])
-   {
-      for (int i = 0; i < 3; i++)
-      {
-         comForceCommandWeights[i] = Math.max(weights[i], 0);
-      }
-   }
 
-   public void getComForceOptimal(FrameVector comForce)
+   public void setComForceCommandWeights(double[] weights)
    {
-      comForce.setIncludingFrame(comForceOptimal);
+      contactForceOptimizationSettings.setComForceCommandWeights(weights);
    }
 
    public void setComTorqueCommand(FrameVector comTorque)
    {
       comTorqueCommand.setIncludingFrame(comTorque);
    }
-   
-   public void setComTorqueCommandWeights(double weights[])
+
+   public void setComTorqueCommandWeights(double[] weights)
    {
-      for (int i = 0; i < 3; i++)
-      {
-         comTorqueCommandWeights[i] = Math.max(weights[i], 0);
-      }
+      contactForceOptimizationSettings.setComTorqueCommandWeights(weights);
    }
 
-   public void getComTorqueOptimal(FrameVector comTorque)
-   {
-      comTorque.setIncludingFrame(comTorqueOptimal);
-   }
-   
    public void setSwingForceCommand(RobotQuadrant robotQuadrant, FrameVector swingForce)
    {
       swingForceCommand.get(robotQuadrant).set(swingForce);
    }
 
-   public void getSwingForceOptimal(RobotQuadrant robotQuadrant, FrameVector swingForce)
-   {
-      swingForce.set(swingForceOptimal.get(robotQuadrant));
-   }
-   
    public void setContactState(RobotQuadrant robotQuadrant, boolean inContact)
    {
       contactState.get(robotQuadrant)[0] = inContact;
    }
-   
-   public void setContactPressureLimits(RobotQuadrant robotQuadrant, double lower, double upper)
+
+   public void setContactForceRegularizationWeights(double weights)
    {
-      contactPressureLowerLimit.get(robotQuadrant)[0] = Math.max(lower, 0);
-      contactPressureUpperLimit.get(robotQuadrant)[0] = Math.max(upper, 0);
+      contactForceOptimizationSettings.setContactForceRegularizationWeights(weights);
    }
 
-   public void setContactCoefficientOfFriction(RobotQuadrant robotQuadrant, double coefficientOfFriction)
+   public void getComForceSolution(FrameVector comForce)
    {
-      contactCoefficientOfFriction.get(robotQuadrant)[0] = coefficientOfFriction;
+      comForce.setIncludingFrame(comForceSolution);
    }
 
-   public void getContactForceOptimal(RobotQuadrant robotQuadrant, FrameVector contactForce)
+   public void getComTorqueSolution(FrameVector comTorque)
    {
-      contactForce.set(contactForceOptimal.get(robotQuadrant));
-   }
-   
-   public int getNumberOfActiveContacts()
-   {
-     int numberOfActiveContacts = 0;
-     for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-     {
-        if (contactState.get(robotQuadrant)[0])
-        {
-           numberOfActiveContacts++;
-        }
-     }
-     return numberOfActiveContacts;
+      comTorque.setIncludingFrame(comTorqueSolution);
    }
 
-   public void compute()
+   public void getSwingForceSolution(RobotQuadrant robotQuadrant, FrameVector swingForce)
    {
-      // rotate desired forces and torques to center of mass frame
-      comForceCommand.changeFrame(comFrame);
-      comTorqueCommand.changeFrame(comFrame);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         swingForceCommand.get(robotQuadrant).changeFrame(comFrame);
-      }
+      swingForce.set(swingForceSolution.get(robotQuadrant));
+   }
 
+   public void getContactForceSolution(RobotQuadrant robotQuadrant, FrameVector contactForce)
+   {
+      contactForce.set(contactForceSolution.get(robotQuadrant));
+   }
+
+   public void compute(QuadrupedJointLimits jointLimits, QuadrupedContactForceLimits contactForceLimits)
+   {
       // compute sole positions and jacobians in center of mass frame
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -444,26 +241,26 @@ public class QuadrupedVirtualModelController
          soleJacobian.get(robotQuadrant).compute();
       }
 
-      // compute optimal virtual forces
-      if (virtualForceSolver == VirtualForceSolver.LEAST_SQUARES)
-      {
-         computeVirtualForcesViaLeastSquares();
-      }
-      else
-      {
-         computeVirtualForcesViaQuadraticProgram();
-      }
+      // compute optimal contact forces
+      contactForceOptimization.setComTorqueCommand(comTorqueCommand);
+      contactForceOptimization.setComForceCommand(comForceCommand);
+      contactForceOptimization.solve(solePosition, contactState, contactForceLimits, contactForceOptimizationSettings);
+      contactForceOptimization.getComTorqueSolution(comTorqueSolution);
+      contactForceOptimization.getComForceSolution(comForceSolution);
+      contactForceOptimization.getContactForceSolution(contactForceSolution);
 
-      // compute optimal CoM forces and torques
-      CommonOps.mult(comWrenchMap, contactForcesVector, comWrenchVector);
-      comTorqueOptimal.changeFrame(comFrame);
-      comTorqueOptimal.setX(comWrenchVector.get(0, 0));
-      comTorqueOptimal.setY(comWrenchVector.get(1, 0));
-      comTorqueOptimal.setZ(comWrenchVector.get(2, 0));
-      comForceOptimal.changeFrame(comFrame);
-      comForceOptimal.setX(comWrenchVector.get(3, 0));
-      comForceOptimal.setY(comWrenchVector.get(4, 0));
-      comForceOptimal.setZ(comWrenchVector.get(5, 0));
+      // compute optimal swing forces
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (contactState.get(robotQuadrant)[0])
+         {
+            swingForceSolution.get(robotQuadrant).setToZero();
+         }
+         else
+         {
+            swingForceSolution.get(robotQuadrant).setIncludingFrame(swingForceCommand.get(robotQuadrant));
+         }
+      }
 
       // compute joint torques using jacobian transpose
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -472,19 +269,19 @@ public class QuadrupedVirtualModelController
          ReferenceFrame jacobianFrame = soleJacobian.get(robotQuadrant).getFrame();
          if (contactState.get(robotQuadrant)[0])
          {
-            contactForceOptimal.get(robotQuadrant).changeFrame(jacobianFrame);
-            virtualForceVector.set(0, 0, -contactForceOptimal.get(robotQuadrant).getX());
-            virtualForceVector.set(1, 0, -contactForceOptimal.get(robotQuadrant).getY());
-            virtualForceVector.set(2, 0, -contactForceOptimal.get(robotQuadrant).getZ());
-            contactForceOptimal.get(robotQuadrant).changeFrame(comFrame);
+            contactForceSolution.get(robotQuadrant).changeFrame(jacobianFrame);
+            virtualForceVector.set(0, 0, -contactForceSolution.get(robotQuadrant).getX());
+            virtualForceVector.set(1, 0, -contactForceSolution.get(robotQuadrant).getY());
+            virtualForceVector.set(2, 0, -contactForceSolution.get(robotQuadrant).getZ());
+            contactForceSolution.get(robotQuadrant).changeFrame(comFrame);
          }
          else
          {
-            swingForceOptimal.get(robotQuadrant).changeFrame(jacobianFrame);
-            virtualForceVector.set(0, 0, swingForceOptimal.get(robotQuadrant).getX());
-            virtualForceVector.set(1, 0, swingForceOptimal.get(robotQuadrant).getY());
-            virtualForceVector.set(2, 0, swingForceOptimal.get(robotQuadrant).getZ());
-            swingForceOptimal.get(robotQuadrant).changeFrame(comFrame);
+            swingForceSolution.get(robotQuadrant).changeFrame(jacobianFrame);
+            virtualForceVector.set(0, 0, swingForceSolution.get(robotQuadrant).getX());
+            virtualForceVector.set(1, 0, swingForceSolution.get(robotQuadrant).getY());
+            virtualForceVector.set(2, 0, swingForceSolution.get(robotQuadrant).getZ());
+            swingForceSolution.get(robotQuadrant).changeFrame(comFrame);
          }
          CommonOps.multTransA(jacobianMatrix, virtualForceVector, legEffortVector.get(robotQuadrant));
 
@@ -492,12 +289,13 @@ public class QuadrupedVirtualModelController
          for (OneDoFJoint joint : legJoints.get(robotQuadrant))
          {
             // apply joint position and torque limits
-            double tauPositionLowerLimit = jointPositionLimitStiffness.get(robotQuadrant)[index]
-                  * (jointPositionLowerLimit.get(robotQuadrant)[index] - joint.getQ()) - jointPositionLimitDamping.get(robotQuadrant)[index] * joint.getQd();
-            double tauPositionUpperLimit = jointPositionLimitStiffness.get(robotQuadrant)[index]
-                  * (jointPositionUpperLimit.get(robotQuadrant)[index] - joint.getQ()) - jointPositionLimitDamping.get(robotQuadrant)[index] * joint.getQd();
-            double tauEffortLowerLimit = jointEffortLowerLimit.get(robotQuadrant)[index];
-            double tauEffortUpperLimit = jointEffortUpperLimit.get(robotQuadrant)[index];
+            QuadrupedJointName jointName = jointMap.getJointNameForSDFName(joint.getName());
+            double tauPositionLowerLimit = jointLimits.getSoftPositionLimitStiffness(jointName)
+                  * (jointLimits.getSoftPositionLowerLimit(jointName) - joint.getQ()) - jointLimits.getSoftPositionLimitDamping(jointName) * joint.getQd();
+            double tauPositionUpperLimit = jointLimits.getSoftPositionLimitStiffness(jointName)
+                  * (jointLimits.getSoftPositionUpperLimit(jointName) - joint.getQ()) - jointLimits.getSoftPositionLimitDamping(jointName) * joint.getQd();
+            double tauEffortLowerLimit = -jointLimits.getEffortLimit(jointName);
+            double tauEffortUpperLimit = jointLimits.getEffortLimit(jointName);
             double tau = legEffortVector.get(robotQuadrant).get(index, 0);
             tau = Math.min(Math.max(tau, tauPositionLowerLimit), tauPositionUpperLimit);
             tau = Math.min(Math.max(tau, tauEffortLowerLimit), tauEffortUpperLimit);
@@ -511,26 +309,23 @@ public class QuadrupedVirtualModelController
       // update yo variables
       comForceCommand.changeFrame(yoComForceCommand.getReferenceFrame());
       yoComForceCommand.set(comForceCommand);
-      comForceOptimal.changeFrame(yoComForceOptimal.getReferenceFrame());
-      yoComForceOptimal.set(comForceOptimal);
+      comForceSolution.changeFrame(yoComForceSolution.getReferenceFrame());
+      yoComForceSolution.set(comForceSolution);
       comTorqueCommand.changeFrame(yoComTorqueCommand.getReferenceFrame());
       yoComTorqueCommand.set(comTorqueCommand);
-      comTorqueOptimal.changeFrame(yoComTorqueOptimal.getReferenceFrame());
-      yoComTorqueOptimal.set(comTorqueOptimal);
+      comTorqueSolution.changeFrame(yoComTorqueSolution.getReferenceFrame());
+      yoComTorqueSolution.set(comTorqueSolution);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         solePosition.get(robotQuadrant).changeFrame(yoSolePosition.get(robotQuadrant).getReferenceFrame());
-         yoSolePosition.get(robotQuadrant).set(solePosition.get(robotQuadrant));
          swingForceCommand.get(robotQuadrant).changeFrame(yoSwingForceCommand.get(robotQuadrant).getReferenceFrame());
          yoSwingForceCommand.get(robotQuadrant).set(swingForceCommand.get(robotQuadrant));
-         swingForceOptimal.get(robotQuadrant).changeFrame(yoSwingForceOptimal.get(robotQuadrant).getReferenceFrame());
-         yoSwingForceOptimal.get(robotQuadrant).set(swingForceOptimal.get(robotQuadrant));
+         swingForceSolution.get(robotQuadrant).changeFrame(yoSwingForceSolution.get(robotQuadrant).getReferenceFrame());
+         yoSwingForceSolution.get(robotQuadrant).set(swingForceSolution.get(robotQuadrant));
          yoContactState.get(robotQuadrant).set(contactState.get(robotQuadrant)[0]);
-         yoContactPressureLowerLimit.get(robotQuadrant).set(contactPressureLowerLimit.get(robotQuadrant)[0]);
-         yoContactPressureUpperLimit.get(robotQuadrant).set(contactPressureUpperLimit.get(robotQuadrant)[0]);
-         yoContactCoefficientOfFriction.get(robotQuadrant).set(contactCoefficientOfFriction.get(robotQuadrant)[0]);
-         contactForceOptimal.get(robotQuadrant).changeFrame(yoContactForceOptimal.get(robotQuadrant).getReferenceFrame());
-         yoContactForceOptimal.get(robotQuadrant).set(contactForceOptimal.get(robotQuadrant));
+         contactForceSolution.get(robotQuadrant).changeFrame(yoContactForceSolution.get(robotQuadrant).getReferenceFrame());
+         yoContactForceSolution.get(robotQuadrant).set(contactForceSolution.get(robotQuadrant));
+         solePosition.get(robotQuadrant).changeFrame(yoSolePosition.get(robotQuadrant).getReferenceFrame());
+         yoSolePosition.get(robotQuadrant).set(solePosition.get(robotQuadrant));
       }
 
       // update graphics
@@ -541,118 +336,10 @@ public class QuadrupedVirtualModelController
          {
             if (contactState.get(robotQuadrant)[0])
             {
-               yoContactForceOptimalViz.get(robotQuadrant).setVisible(true);
+               yoContactForceSolutionViz.get(robotQuadrant).setVisible(true);
             }
          }
       }
-   }
-
-   private void computeVirtualForcesViaLeastSquares()
-   {
-      int numberOfActiveContacts = getNumberOfActiveContacts();
-
-      if (numberOfActiveContacts > 0)
-      {
-         // compute map from contact forces to centroidal forces and torques
-         comWrenchMap.zero();
-         comWrenchMap.reshape(6, 3*numberOfActiveContacts);
-         int columnOffset = 0;
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         {
-            if (contactState.get(robotQuadrant)[0])
-            {
-               comWrenchMap.set(0, 1 + columnOffset, -solePosition.get(robotQuadrant).getZ()); // mX row
-               comWrenchMap.set(0, 2 + columnOffset, solePosition.get(robotQuadrant).getY());
-               comWrenchMap.set(1, 0 + columnOffset, solePosition.get(robotQuadrant).getZ()); // mY row
-               comWrenchMap.set(1, 2 + columnOffset, -solePosition.get(robotQuadrant).getX());
-               comWrenchMap.set(2, 0 + columnOffset, -solePosition.get(robotQuadrant).getY()); // mZ row
-               comWrenchMap.set(2, 1 + columnOffset, solePosition.get(robotQuadrant).getX());
-               comWrenchMap.set(3, 0 + columnOffset, 1.0); // fX row
-               comWrenchMap.set(4, 1 + columnOffset, 1.0); // fY row
-               comWrenchMap.set(5, 2 + columnOffset, 1.0); // fZ row
-               columnOffset += 3;
-            }
-         }
-
-         // compute centroidal wrench vector
-         comWrenchVector.set(0, 0, comTorqueCommand.getX());
-         comWrenchVector.set(1, 0, comTorqueCommand.getY());
-         comWrenchVector.set(2, 0, comTorqueCommand.getZ());
-         comWrenchVector.set(3, 0, comForceCommand.getX());
-         comWrenchVector.set(4, 0, comForceCommand.getY());
-         comWrenchVector.set(5, 0, comForceCommand.getZ());
-
-         // compute optimal contact forces using least squares solution
-         contactForcesVector.reshape(3*numberOfActiveContacts, 1);
-         try
-         {
-            CommonOps.pinv(comWrenchMap, comWrenchMapInverse);
-         }
-         catch (Exception e)
-         {
-            return;
-         }
-         CommonOps.mult(comWrenchMapInverse, comWrenchVector, contactForcesVector);
-      }
-
-      int rowOffset = 0;
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if (contactState.get(robotQuadrant)[0])
-         {
-            contactForceOptimal.get(robotQuadrant).changeFrame(comFrame);
-            contactForceOptimal.get(robotQuadrant).setX(contactForcesVector.get(0 + rowOffset, 0));
-            contactForceOptimal.get(robotQuadrant).setY(contactForcesVector.get(1 + rowOffset, 0));
-            contactForceOptimal.get(robotQuadrant).setZ(contactForcesVector.get(2 + rowOffset, 0));
-
-            // apply contact force limits
-            double mu = contactCoefficientOfFriction.get(robotQuadrant)[0];
-            double fx = contactForceOptimal.get(robotQuadrant).getX();
-            double fy = contactForceOptimal.get(robotQuadrant).getY();
-            double fz = contactForceOptimal.get(robotQuadrant).getZ();
-            fz = Math.max(fz, contactPressureLowerLimit.get(robotQuadrant)[0]);
-            fz = Math.min(fz, contactPressureUpperLimit.get(robotQuadrant)[0]);
-            fx = Math.max(fx, -mu * fz / Math.sqrt(2));
-            fx = Math.min(fx, mu * fz / Math.sqrt(2));
-            fy = Math.max(fy, -mu * fz / Math.sqrt(2));
-            fy = Math.min(fy, mu * fz / Math.sqrt(2));
-            contactForceOptimal.get(robotQuadrant).setX(fx);
-            contactForceOptimal.get(robotQuadrant).setY(fy);
-            contactForceOptimal.get(robotQuadrant).setZ(fz);
-
-            rowOffset += 3;
-         }
-         else
-         {
-            contactForceOptimal.get(robotQuadrant).changeFrame(comFrame);
-            contactForceOptimal.get(robotQuadrant).setToZero();
-         }
-      }
-      
-      // compute swing forces
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if (contactState.get(robotQuadrant)[0])
-         {
-            swingForceOptimal.get(robotQuadrant).setToZero();
-            swingForceOptimal.get(robotQuadrant).changeFrame(comFrame);
-         }
-         else
-         {
-            swingForceOptimal.get(robotQuadrant).setIncludingFrame(swingForceCommand.get(robotQuadrant));
-            swingForceOptimal.get(robotQuadrant).changeFrame(comFrame);
-         }
-      }
-   }
-
-   private void computeVirtualForcesViaQuadraticProgram()
-   {
-      // TODO
-      // compute quadratic cost terms (com wrench error, force regularization)
-      // compute joint torque inequality constraints
-      // compute friction pyramid inequality constraints
-      // compute min / max sole pressure constraints
-      // compute sole forces using quadratic program
    }
 
    public void setVisible(boolean visible)

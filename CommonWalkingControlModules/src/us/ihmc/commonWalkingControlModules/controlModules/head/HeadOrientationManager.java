@@ -126,6 +126,7 @@ public class HeadOrientationManager
          orientationTrajectoryGenerator.get(desiredOrientation);
          initialOrientationProvider.setOrientation(desiredOrientation);
          finalOrientationProvider.setOrientation(desiredHeadOrientationProvider.getDesiredHeadOrientation());
+         headOrientationTrajectoryTime.set(desiredHeadOrientationProvider.getTrajectoryTime());
          receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
          orientationTrajectoryGenerator.initialize();
          isTrackingOrientation.set(true);
@@ -138,6 +139,7 @@ public class HeadOrientationManager
          headOrientationControlModule.packDesiredFrameOrientation(desiredOrientation);
          desiredOrientation.changeFrame(headOrientationExpressedInFrame);
          finalOrientationProvider.setOrientation(desiredOrientation);
+         headOrientationTrajectoryTime.set(desiredHeadOrientationProvider.getTrajectoryTime());
          receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
          orientationTrajectoryGenerator.initialize();
          isTrackingOrientation.set(true);
