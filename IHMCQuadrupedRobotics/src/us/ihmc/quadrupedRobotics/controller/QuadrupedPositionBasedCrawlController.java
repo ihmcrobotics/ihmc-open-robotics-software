@@ -139,6 +139,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final YoFrameVector desiredVelocity;
    private final YoFrameVector lastDesiredVelocity;
    private final FrameVector desiredBodyVelocity = new FrameVector();
+   private final DoubleYoVariable maxYawRate = new DoubleYoVariable("maxYawRate", registry);
+   private final DoubleYoVariable minYawRate = new DoubleYoVariable("minYawRate", registry);
    private final DoubleYoVariable desiredYawRate = new DoubleYoVariable("desiredYawRate", registry);
    private final DoubleYoVariable lastDesiredYawRate = new DoubleYoVariable("lastDesiredYawRate", registry);
 
@@ -265,6 +267,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       swingHeight.set(quadrupedControllerParameters.getDefaultSwingHeight());
       subCircleRadius.set(quadrupedControllerParameters.getDefaultSubCircleRadius());
       comCloseRadius.set(quadrupedControllerParameters.getDefaultCoMCloseToFinalDesiredTransitionRadius());
+      minYawRate.set(quadrupedControllerParameters.getMaxYawRate() * -1.0);
+      maxYawRate.set(quadrupedControllerParameters.getMaxYawRate());
       
       useSubCircleForBodyShiftTarget.set(true);
       swingLeg.set(RobotQuadrant.HIND_LEFT);
@@ -309,8 +313,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       
       this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, feedForwardReferenceFrames, registry);
       this.stateEstimator = stateEstimator;
-      desiredVelocityProvider = new DesiredVelocityProvider(dataProducer, registry);
-      desiredYawRateProvider = new DesiredYawRateProvider(dataProducer);
+      desiredVelocityProvider = new DesiredVelocityProvider(dataProducer, "userProvided", registry);
+      desiredYawRateProvider = new DesiredYawRateProvider(dataProducer, "userProvided", registry);
 
       desiredVelocity = new YoFrameVector("desiredVelocity", feedForwardBodyFrame, registry);
       lastDesiredVelocity = new YoFrameVector("lastDesiredVelocity", feedForwardBodyFrame, registry); 
@@ -652,7 +656,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       if(desiredYawRateProvider != null)
       {
          double providedDesiredYawRate = desiredYawRateProvider.getValue();
-         
+         providedDesiredYawRate = MathTools.clipToMinMax(providedDesiredYawRate, minYawRate.getDoubleValue(), maxYawRate.getDoubleValue());
          if (providedDesiredYawRate != lastProvidedDesiredYawRate)
          {
             desiredYawRate.set(providedDesiredYawRate);
