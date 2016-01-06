@@ -59,7 +59,6 @@ root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEs
 root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits*false*false
 root.remotemain.DRCEstimatorThread.EstimatorController.DRCPoseCommunicator*false*false
 root.remotemain.DRCControllerThread*false*false
-root.remotemain.DRCControllerThread.FullRobotModelCorruptor*false*false
 root.remotemain.DRCControllerThread.DRCMomentumBasedController*false*false
 root.remotemain.DRCControllerThread.DRCMomentumBasedController.ModularSensorProcessor*false*false
 root.remotemain.DRCControllerThread.DRCMomentumBasedController.ModularSensorProcessor.ReferenceFrameUpdater*false*false
