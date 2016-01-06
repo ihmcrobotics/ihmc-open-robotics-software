@@ -3,16 +3,22 @@ package us.ihmc.quadrupedRobotics.virtualModelController;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CompositeActiveSetQPSolver;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolver;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.QuadProgSolver;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class QuadrupedContactForceOptimization
 {
    private final ReferenceFrame comFrame;
+   private final ConstrainedQPSolver qpSolver;
 
    private final FrameVector comTorqueCommand;
    private final FrameVector comForceCommand;
@@ -26,14 +32,19 @@ public class QuadrupedContactForceOptimization
    private final DenseMatrix64F comWrenchWeightMatrix;
    private final DenseMatrix64F contactForceVector;
    private final DenseMatrix64F contactForceRegularizationWeightMatrix;
-   private final DenseMatrix64F constraintVector;
-   private final DenseMatrix64F constraintMatrix;
+   private final DenseMatrix64F qpCostVector;
+   private final DenseMatrix64F qpCostMatrix;
+   private final DenseMatrix64F qpEqualityVector;
+   private final DenseMatrix64F qpEqualityMatrix;
+   private final DenseMatrix64F qpInequalityVector;
+   private final DenseMatrix64F qpInequalityMatrix;
    private final DenseMatrix64F temporaryMatrixA;
    private final DenseMatrix64F temporaryMatrixB;
 
    public QuadrupedContactForceOptimization(QuadrupedReferenceFrames referenceFrames)
    {
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
+      qpSolver = new QuadProgSolver(null);
 
       comTorqueCommand = new FrameVector(comFrame);
       comForceCommand = new FrameVector(comFrame);
@@ -52,8 +63,12 @@ public class QuadrupedContactForceOptimization
       comWrenchWeightMatrix = new DenseMatrix64F(6, 6);
       contactForceVector = new DenseMatrix64F(12, 1);
       contactForceRegularizationWeightMatrix = new DenseMatrix64F(12, 12);
-      constraintVector = new DenseMatrix64F(12, 1);
-      constraintMatrix = new DenseMatrix64F(12, 12);
+      qpCostVector = new DenseMatrix64F(12, 1);
+      qpCostMatrix = new DenseMatrix64F(12, 12);
+      qpEqualityVector = new DenseMatrix64F(0, 1);
+      qpEqualityMatrix = new DenseMatrix64F(0, 12);
+      qpInequalityVector = new DenseMatrix64F(24, 1);
+      qpInequalityMatrix = new DenseMatrix64F(24, 12);
       temporaryMatrixA = new DenseMatrix64F(12, 12);
       temporaryMatrixB = new DenseMatrix64F(12, 12);
    }
@@ -72,14 +87,25 @@ public class QuadrupedContactForceOptimization
          QuadrupedContactForceLimits contactForceLimits, QuadrupedContactForceOptimizationSettings optimizationSettings)
    {
       int numberOfContacts = getNumberOfContacts(contactState);
+
+      // initialize optimization variables
       initializeComWrenchMapMatrix(solePosition, contactState);
       initializeComWrenchVector(comTorqueCommand, comForceCommand);
       initializeContactForceVector(contactState);
-      initializeContactForceOptimizationWeights(optimizationSettings, numberOfContacts);
-      computeUnconstrainedContactForceSolution();
-      limitContactForceSolution(contactForceLimits, contactState);
-      computeComWrenchSolution();
+      initializeOptimizationWeights(optimizationSettings, numberOfContacts);
+      initializeOptimizationCostTerms();
+      initializeOptimizationConstraints(contactForceLimits, contactState);
 
+      // compute contact force solution
+      if (optimizationSettings.getSolver() == QuadrupedContactForceOptimizationSettings.Solver.CONSTRAINED_QP)
+      {
+         computeConstrainedContactForceSolution();
+      }
+      else
+      {
+         computeUnconstrainedContactForceSolution();
+         constrainContactForceSolution(contactForceLimits, contactState);
+      }
       int rowOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -98,6 +124,9 @@ public class QuadrupedContactForceOptimization
             contactForceSolution.get(robotQuadrant).setToZero();
          }
       }
+
+      // compute com wrench solution
+      computeComWrenchSolution();
       comTorqueSolution.changeFrame(comFrame);
       comTorqueSolution.setX(comWrenchVector.get(0, 0));
       comTorqueSolution.setY(comWrenchVector.get(1, 0));
@@ -178,7 +207,13 @@ public class QuadrupedContactForceOptimization
       comWrenchVector.set(5, 0, comForceCommand.getZ());
    }
 
-   private void initializeContactForceOptimizationWeights(QuadrupedContactForceOptimizationSettings optimizationSettings, int numberOfContacts)
+   private void initializeContactForceVector(QuadrantDependentList<boolean[]> contactState)
+   {
+      int numberOfContacts = getNumberOfContacts(contactState);
+      contactForceVector.reshape(3 * numberOfContacts, 1);
+   }
+
+   private void initializeOptimizationWeights(QuadrupedContactForceOptimizationSettings optimizationSettings, int numberOfContacts)
    {
       double[] comTorqueCommandWeights = optimizationSettings.getComTorqueCommandWeights();
       double[] comForceCommandWeights = optimizationSettings.getComForceCommandWeights();
@@ -201,13 +236,7 @@ public class QuadrupedContactForceOptimization
       }
    }
 
-   private void initializeContactForceVector(QuadrantDependentList<boolean[]> contactState)
-   {
-      int numberOfContacts = getNumberOfContacts(contactState);
-      contactForceVector.reshape(3 * numberOfContacts, 1);
-   }
-
-   private void computeUnconstrainedContactForceSolution()
+   private void initializeOptimizationCostTerms()
    {
       // min_u 1/2 * (Mu - w)'Q(Mu - w) + 1/2 * u'Ru
 
@@ -220,48 +249,142 @@ public class QuadrupedContactForceOptimization
       DenseMatrix64F Q = comWrenchWeightMatrix;
       DenseMatrix64F R = contactForceRegularizationWeightMatrix;
 
-      // temporary
-      DenseMatrix64F b = constraintVector;
-      DenseMatrix64F A = constraintMatrix;
-      DenseMatrix64F MtQM = temporaryMatrixA;
-      DenseMatrix64F MtQ = temporaryMatrixB;
-
       int n = w.getNumRows();
       int m = u.getNumRows();
 
-      // b = M'Qw
+      // min_u 1/2 * u'Au + b'u
+
+      // temporary
+      DenseMatrix64F MtQM = temporaryMatrixA;
+      DenseMatrix64F MtQ = temporaryMatrixB;
+
+      // cost terms
+      DenseMatrix64F b = qpCostVector;
+      DenseMatrix64F A = qpCostMatrix;
+
+      // b = -M'Qw
       MtQ.reshape(m, n);
       CommonOps.multTransA(M, Q, MtQ);
       b.reshape(m, 1);
       CommonOps.mult(MtQ, w, b);
+      CommonOps.scale(-1, b);
 
       // A = M'QM + R
       MtQM.reshape(m, m);
       CommonOps.mult(MtQ, M, MtQM);
       A.reshape(m, m);
       CommonOps.add(MtQM, R, A);
+   }
 
-      // u = inverse(A)*b
-      CommonOps.invert(A);
-      CommonOps.mult(A, b, u);
+   private void initializeOptimizationConstraints(QuadrupedContactForceLimits contactForceLimits, QuadrantDependentList<boolean[]> contactState)
+   {
+      DenseMatrix64F u = contactForceVector;
+      DenseMatrix64F beq = qpEqualityVector;
+      DenseMatrix64F Aeq = qpEqualityMatrix;
+      DenseMatrix64F bin = qpInequalityVector;
+      DenseMatrix64F Ain = qpInequalityMatrix;
+
+      int m = u.getNumRows();
+
+      // equality constraints:
+      // Aeq u + beq = 0
+      beq.reshape(0, 1);
+      Aeq.reshape(0, m);
+
+      // inequality constraints:
+      // Ain u + bin >= 0
+      bin.reshape(2 * m, 1);
+      Ain.reshape(2 * m, m);
+      bin.zero();
+      Ain.zero();
+
+      int rowOffset = 0;
+      int columnOffset = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (contactState.get(robotQuadrant)[0])
+         {
+            // compute inequality constraints to enforce pressure limits and friction pyramids
+            double mu = contactForceLimits.getCoefficientOfFriction(robotQuadrant);
+
+            // fx lower limit
+            Ain.set(rowOffset, 0 + columnOffset, -1);
+            Ain.set(rowOffset, 2 + columnOffset, -mu / Math.sqrt(2));
+            bin.set(rowOffset, 0, 0);
+            rowOffset++;
+
+            // fx upper limit
+            Ain.set(rowOffset, 0 + columnOffset, 1);
+            Ain.set(rowOffset, 2 + columnOffset, -mu / Math.sqrt(2));
+            bin.set(rowOffset, 0, 0);
+            rowOffset++;
+
+            // fy lower limit
+            Ain.set(rowOffset, 1 + columnOffset, -1);
+            Ain.set(rowOffset, 2 + columnOffset, -mu / Math.sqrt(2));
+            bin.set(rowOffset, 0, 0);
+            rowOffset++;
+
+            // fy upper limit
+            Ain.set(rowOffset, 1 + columnOffset, 1);
+            Ain.set(rowOffset, 2 + columnOffset, -mu / Math.sqrt(2));
+            bin.set(rowOffset, 0, 0);
+            rowOffset++;
+
+            // fz lower limit
+            Ain.set(rowOffset, 2 + columnOffset, -1);
+            bin.set(rowOffset, 0, -contactForceLimits.getPressureLowerLimit(robotQuadrant));
+            rowOffset++;
+
+            // fz upper limit
+            Ain.set(rowOffset, 2 + columnOffset, 1);
+            bin.set(rowOffset, 0, contactForceLimits.getPressureUpperLimit(robotQuadrant));
+            rowOffset++;
+
+            columnOffset += 3;
+         }
+      }
    }
 
    private void computeConstrainedContactForceSolution()
    {
-      // TODO
-      // compute joint torque inequality constraints
-      // compute friction pyramid inequality constraints
-      // compute min / max contact pressure constraints
-      // compute contact forces using linear constrained quadratic program
+      // min_u 1/2 * u'Au + b'u
+      // s.t. Ain u + bin >= 0
+      DenseMatrix64F u = contactForceVector;
+      DenseMatrix64F b = qpCostVector;
+      DenseMatrix64F A = qpCostMatrix;
+      DenseMatrix64F beq = qpEqualityVector;
+      DenseMatrix64F Aeq = qpEqualityMatrix;
+      DenseMatrix64F bin = qpInequalityVector;
+      DenseMatrix64F Ain = qpInequalityMatrix;
 
+      // solve constrained quadratic program
+      try
+      {
+         qpSolver.solve(A, b, Aeq, beq, Ain, bin, u, false);
+      }
+      catch (NoConvergenceException e)
+      {
+         System.err.println("NoConvergenceException: " + e.getMessage());
+      }
    }
 
-   private void computeComWrenchSolution()
+   private void computeUnconstrainedContactForceSolution()
    {
-      CommonOps.mult(comWrenchMapMatrix, contactForceVector, comWrenchVector);
+      // min_u 1/2 * u'Au + b'u
+      DenseMatrix64F u = contactForceVector;
+      DenseMatrix64F b = qpCostVector;
+      DenseMatrix64F A = qpCostMatrix;
+
+      // compute least squares solution:
+      // u = inverse(A) * -b (where A > 0)
+      CommonOps.invert(A);
+      CommonOps.scale(-1, b);
+      CommonOps.mult(A, b, u);
+      CommonOps.scale(-1, b);
    }
 
-   private void limitContactForceSolution(QuadrupedContactForceLimits contactForceLimits, QuadrantDependentList<boolean[]> contactState)
+   private void constrainContactForceSolution(QuadrupedContactForceLimits contactForceLimits, QuadrantDependentList<boolean[]> contactState)
    {
       int rowOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -288,5 +411,10 @@ public class QuadrupedContactForceOptimization
             rowOffset += 3;
          }
       }
+   }
+
+   private void computeComWrenchSolution()
+   {
+      CommonOps.mult(comWrenchMapMatrix, contactForceVector, comWrenchVector);
    }
 }
