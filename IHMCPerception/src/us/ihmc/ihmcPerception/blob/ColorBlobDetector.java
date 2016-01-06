@@ -17,10 +17,10 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.Size;
-import org.opencv.highgui.Highgui;
-import org.opencv.highgui.VideoCapture;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
+import org.opencv.videoio.VideoCapture;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
@@ -36,7 +36,7 @@ public class ColorBlobDetector
 {
    static
    {
-      NativeLibraryLoader.loadLibrary("org.opencv", "opencv_java2411");
+      NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
    }
 
    public static final HueSaturationValueRange TIGA_ORANGE_PING_PONG_BALL_HSV_RANGE_MAC = new HueSaturationValueRange(21, 27, 130, 230, 180, 255);
@@ -178,7 +178,7 @@ public class ColorBlobDetector
       {
          videoCapture.read(image);
 
-         Highgui.imencode(".bmp", image, matOfByte);
+         Imgcodecs.imencode(".bmp", image, matOfByte);
          BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(matOfByte.toArray()));
          
          blobTimer.lap();

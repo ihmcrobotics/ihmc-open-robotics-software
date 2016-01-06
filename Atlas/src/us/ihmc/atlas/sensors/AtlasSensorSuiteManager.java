@@ -110,25 +110,25 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
             rosMainNode, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosCoreURI, multisenseLeftEyeCameraParameters, multisenseLidarParameters,
             multisenseStereoParameters, sensorInformation.setupROSParameterSetters());
 
-//      DRCRobotCameraParameters leftFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_LEFT_CAMERA_ID);
-//      DRCRobotCameraParameters rightFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_RIGHT_CAMERA_ID);
-//
-//      FisheyeCameraReceiver leftFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory, leftFishEyeCameraParameters, robotConfigurationDataBuffer,
-//            sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosMainNode);
-//      FisheyeCameraReceiver rightFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory, rightFishEyeCameraParameters, robotConfigurationDataBuffer,
-//            sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosMainNode);
-//
-//      leftFishEyeCameraReceiver.start();
-//      rightFishEyeCameraReceiver.start();
+      DRCRobotCameraParameters leftFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_LEFT_CAMERA_ID);
+      DRCRobotCameraParameters rightFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_RIGHT_CAMERA_ID);
+
+      FisheyeCameraReceiver leftFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory, leftFishEyeCameraParameters, robotConfigurationDataBuffer,
+            sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosMainNode);
+      FisheyeCameraReceiver rightFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory, rightFishEyeCameraParameters, robotConfigurationDataBuffer,
+            sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosMainNode);
+
+      leftFishEyeCameraReceiver.start();
+      rightFishEyeCameraReceiver.start();
 
       VisionPoseEstimator visionPoseEstimator = new VisionPoseEstimator(sensorSuitePacketCommunicator, pointCloudDataReceiver, modelFactory,
             robotConfigurationDataBuffer, true);
       multiSenseSensorManager.registerCameraListener(visionPoseEstimator);
 
-//      blackFlyParameterSetters = new SideDependentList<BlackFlyParameterSetter>();
-//      for (RobotSide side : RobotSide.values)
-//         blackFlyParameterSetters.put(side, new BlackFlyParameterSetter(rosMainNode, side, "/" + side.getLowerCaseName() + "/camera/camera_nodelet",
-//               sensorSuitePacketCommunicator));
+      blackFlyParameterSetters = new SideDependentList<BlackFlyParameterSetter>();
+      for (RobotSide side : RobotSide.values)
+         blackFlyParameterSetters.put(side, new BlackFlyParameterSetter(rosMainNode, side, "/" + side.getLowerCaseName() + "/camera/camera_nodelet",
+               sensorSuitePacketCommunicator));
 
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
 

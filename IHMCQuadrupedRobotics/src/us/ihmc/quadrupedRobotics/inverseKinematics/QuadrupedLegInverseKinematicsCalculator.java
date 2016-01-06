@@ -7,7 +7,5 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public interface QuadrupedLegInverseKinematicsCalculator
 {
-
    boolean solveForEndEffectorLocationInBodyAndUpdateDesireds(RobotQuadrant robotQuadrant, Vector3d footPositionInFrameBeforeHipRoll, SDFFullRobotModel fullRobotModel);
-
 }

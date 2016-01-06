@@ -111,7 +111,9 @@ public class CartesianQuadrupedFootstep implements QuadrupedFootstep, Serializab
 
    public CartesianQuadrupedFootstep yawAboutPointCopy(FramePoint pointToYawAbout, double yaw)
    {
-      return new CartesianQuadrupedFootstep(this.footPosition.yawAboutPoint(pointToYawAbout, yaw), this.legName);
+      FramePoint yawedPoint = new FramePoint();
+      footPosition.yawAboutPoint(pointToYawAbout, yawedPoint, yaw);
+      return new CartesianQuadrupedFootstep(yawedPoint, this.legName);
    }
 
    public CartesianQuadrupedFootstep applyTransformCopy(RigidBodyTransform transform3D)

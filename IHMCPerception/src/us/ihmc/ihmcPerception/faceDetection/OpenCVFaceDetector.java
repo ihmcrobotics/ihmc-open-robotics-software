@@ -4,6 +4,9 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 
@@ -12,10 +15,10 @@ import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
-import org.opencv.highgui.Highgui;
-import org.opencv.highgui.VideoCapture;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
+import org.opencv.videoio.VideoCapture;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
@@ -26,15 +29,15 @@ import us.ihmc.tools.time.Timer;
 
 public class OpenCVFaceDetector
 {
-   private static final boolean DEBUG = false;
-
    static
    {
-      NativeLibraryLoader.loadLibrary("org.opencv", "opencv_java2411");
+      NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
    }
+   
+   private static final boolean DEBUG = false;
+   private static final String HAARCASCADE_FRONTALFACE_ALT_XML = "faceDetection/haarcascade_frontalface_alt.xml";
 
-   public static final String HAAR_CASCADE = ClassLoader.getSystemResource("faceDetection/haarcascade_frontalface_alt.xml").getFile();
-   private final CascadeClassifier cascadeClassifierForFaces = new CascadeClassifier(HAAR_CASCADE);
+   private CascadeClassifier cascadeClassifierForFaces;
    private final MatOfRect faces = new MatOfRect();
    private final double scaleFactor;
 
@@ -44,6 +47,22 @@ public class OpenCVFaceDetector
    public OpenCVFaceDetector(double scaleFactor)
    {
       this.scaleFactor = scaleFactor;
+      
+      try
+      {
+         Path xmlPath = Paths.get(ClassLoader.getSystemResource(HAARCASCADE_FRONTALFACE_ALT_XML).toURI());
+         cascadeClassifierForFaces = new CascadeClassifier(xmlPath.toString());
+         
+         if (cascadeClassifierForFaces.empty())
+         {
+            throw new RuntimeException("cascadeClassifier is empty");
+         }
+      }
+      catch (URISyntaxException e)
+      {
+         cascadeClassifierForFaces = null;
+         e.printStackTrace();
+      }
    }
    
    int count = 0;
@@ -74,7 +93,7 @@ public class OpenCVFaceDetector
 
          if (count++ % 100 == 0)
          {
-            PrintTools.info("Writing image: " + Highgui.imwrite("/home/shadylady/image.jpeg", image));
+            PrintTools.info("Writing image: " + Imgcodecs.imwrite("/home/shadylady/image.jpeg", image));
 
             for (Rect rect : faces.toArray())
             {
@@ -114,7 +133,7 @@ public class OpenCVFaceDetector
    }
 
    public static void main(String[] arg) throws IOException
-   {
+   {      
       VideoCapture cap = new VideoCapture(0);
       OpenCVFaceDetector detector = new OpenCVFaceDetector(0.5);
       ImagePanel panel = null;
@@ -124,7 +143,7 @@ public class OpenCVFaceDetector
       while (true)
       {
          cap.read(image);
-         Highgui.imencode(".bmp", image, mem);
+         Imgcodecs.imencode(".bmp", image, mem);
          BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(mem.toArray()));
          detector.detectAndOutline(bufferedImage);
          if (panel == null)

@@ -12,11 +12,13 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.Size;
-import org.opencv.highgui.Highgui;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 public class OpenCVTools
 {
+   public static final String OPEN_CV_LIBRARY_NAME = "opencv_java310";
+   
    public static Mat convertBufferedImageToMat(BufferedImage image)
    {
       Mat imageMat;
@@ -46,7 +48,7 @@ public class OpenCVTools
    public static BufferedImage convertMatToBufferedImage(Mat image)
    {
       MatOfByte matOfByte = new MatOfByte();
-      Highgui.imencode(".bmp", image, matOfByte);
+      Imgcodecs.imencode(".bmp", image, matOfByte);
       BufferedImage bufferedImage = null;
       try
       {
