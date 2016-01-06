@@ -29,6 +29,7 @@ public class FramePoint2d extends FrameTuple2d<Point2d>
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
    private final Point3d temporaryTransformedPoint = new Point3d();
    private final Vector3d temporaryTranslation = new Vector3d();
+   private FrameVector2d temporaryPointForYawing;
 
    /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
    public FramePoint2d(ReferenceFrame referenceFrame, double x, double y, String name)
@@ -148,11 +149,13 @@ public class FramePoint2d extends FrameTuple2d<Point2d>
       this.tuple.set(temporaryTransformedPoint.x, temporaryTransformedPoint.y);
    }
 
+   @Override
    public void applyTransform(RigidBodyTransform transform)
    {
       applyTransform(transform, true);
    }
 
+   @Override
    public FramePoint2d applyTransformCopy(RigidBodyTransform transform3D)
    {
       FramePoint2d ret = new FramePoint2d(this);
@@ -160,6 +163,7 @@ public class FramePoint2d extends FrameTuple2d<Point2d>
       return ret;
    }
 
+   @Override
    public void changeFrame(ReferenceFrame desiredFrame)
    {
       // this is in the correct frame already
@@ -207,6 +211,7 @@ public class FramePoint2d extends FrameTuple2d<Point2d>
     * @param transformToNewFrame Transform3D from the current frame to the new desiredFrame
     * @return Copied FramePoint2d in the new reference frame.
     */
+   @Override
    public FramePoint2d changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
    {
       FramePoint2d ret = new FramePoint2d(this);
@@ -228,20 +233,22 @@ public class FramePoint2d extends FrameTuple2d<Point2d>
     * @param yaw double
     * @return CartesianPositionFootstep
     */
-   public FramePoint2d yawAboutPoint(FramePoint2d pointToYawAbout, double yaw)
+   public void yawAboutPoint(FramePoint2d pointToYawAbout, FramePoint2d pointToPack, double yaw)
    {
-      FrameVector2d v0 = new FrameVector2d(this);
-      v0.sub(pointToYawAbout);
+      if (temporaryPointForYawing == null)
+         temporaryPointForYawing = new FrameVector2d(this);
+      else
+         temporaryPointForYawing.setIncludingFrame(this);
+      
+      temporaryPointForYawing.sub(pointToYawAbout);
 
       temporaryTransformToDesiredFrame.setIdentity();
       temporaryTransformToDesiredFrame.rotZ(yaw);
 
-      v0.applyTransform(temporaryTransformToDesiredFrame);
+      temporaryPointForYawing.applyTransform(temporaryTransformToDesiredFrame);
 
-      FramePoint2d ret = new FramePoint2d(pointToYawAbout);
-      ret.add(v0);
-
-      return ret;
+      pointToPack.setIncludingFrame(pointToYawAbout);
+      pointToPack.add(temporaryPointForYawing);
    }
 
    private void checkIsTransformationInPlane(RigidBodyTransform transformToNewFrame, Point3d transformedPoint)
