@@ -24,9 +24,9 @@ import us.ihmc.tools.time.DateTools;
 public class BambooTools
 {
    private final static String[] possibleRootDirectoriesForBambooDataAndVideos = new String[]{"C:/BambooDataAndVideos/", "D:/BambooDataAndVideos/",
-         "../BambooDataAndVideos/"};
+         "../BambooDataAndVideos/", "~/BambooVideos"};
 
-   private final static String eraseableBambooDataAndVideosDirectoryLinux = "/media/GoFlex/EraseableBambooDataAndVideos/";
+   private final static String eraseableBambooDataAndVideosDirectoryLinux = "~/BambooVideos";
    private final static String eraseableBambooDataAndVideosDirectoryWindows = "X:/EraseableBambooDataAndVideos/";
 
    private static final String UPLOADED_VIDEOS_LOG = "uploaded-videos.log";
