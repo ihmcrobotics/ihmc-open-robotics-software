@@ -63,9 +63,19 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
 			"upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll",
 			"rightShoulderYaw", "rightElbowPitch" };
    
-	public static final boolean USE_USB_MICROSTRAIN_IMUS = true;
+	public static final boolean USE_USB_MICROSTRAIN_IMUS = false;
 	public static final boolean USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS = false;
-   public static final String[] readIMUs = USE_USB_MICROSTRAIN_IMUS ? new String[0] : new String[]{ ValkyrieSensorInformation.imuSensorsToUse[0].replace("pelvis_", "") };
+   public static final String[] readIMUs = USE_USB_MICROSTRAIN_IMUS ? new String[0] : new String[ValkyrieSensorInformation.imuSensorsToUse.length];
+   static
+   {
+      if(!USE_USB_MICROSTRAIN_IMUS)
+      {
+         for(int i = 0; i < ValkyrieSensorInformation.imuSensorsToUse.length; i++)
+         {
+            readIMUs[i] = ValkyrieSensorInformation.imuSensorsToUse[i].replace("pelvis_", "").replace("torso_", "");
+         }
+      }
+   }
    
    public static final String[] readForceTorqueSensors = { "leftFootSixAxis", "rightFootSixAxis" };
    public static final String[] forceTorqueSensorModelNames = { "leftAnkleRoll", "rightAnkleRoll" };

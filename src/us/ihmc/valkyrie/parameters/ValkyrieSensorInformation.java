@@ -133,8 +133,8 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String multisense_height_map = multisense_namespace+"/height_map";
    private static final String multisenseHandoffFrame = "multisense_root_link";
    
-   private static final String rightTrunkIMUSensor = "torso_rightTorsoIMU";
-   private static final String leftTrunkIMUSensor = "torso_leftTorsoIMU";
+   private static final String rightTrunkIMUSensor = "torso_rightTorsoImu";
+   private static final String leftTrunkIMUSensor = "torso_leftTorsoImu";
    private static final String rearPelvisIMUSensor = "pelvis_pelvisRearImu";
    private static final String middlePelvisIMUSensor = "pelvis_pelvisMiddleImu";
    private static final RigidBodyTransform transformFromHeadToCamera = new RigidBodyTransform();
@@ -158,7 +158,8 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    // Use this until sim can handle multiple IMUs
 //    public static final String[] imuSensorsToUse = {leftPelvisIMUSensor, rightPelvisIMUSensor};
-   public static final String[] imuSensorsToUse = {rearPelvisIMUSensor};
+//   public static final String[] imuSensorsToUse = {rearPelvisIMUSensor};
+    public static final String[] imuSensorsToUse = {rearPelvisIMUSensor, leftTrunkIMUSensor};
 //   public static final String[] imuSensorsToUse = {rightPelvisIMUSensor};
    
    public ValkyrieSensorInformation(DRCRobotModel.RobotTarget target)
@@ -222,7 +223,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    @Override
    public String getPrimaryBodyImu()
    {
-      return rearPelvisIMUSensor;
+      return rearPelvisIMUSensor;//rearPelvisIMUSensor;
    }
    
    @Override
