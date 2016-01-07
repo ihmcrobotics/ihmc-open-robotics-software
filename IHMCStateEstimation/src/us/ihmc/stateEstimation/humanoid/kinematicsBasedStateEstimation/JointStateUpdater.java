@@ -88,6 +88,16 @@ public class JointStateUpdater
       else
       {
          PrintTools.warn("Could not find the given pelvis and/or chest IMUs: pelvisIMU = " + pelvisIMUName + ", chestIMU = " + chestIMUName);
+         if(pelvisIMU == null)
+         {
+            PrintTools.warn("Pelvis IMU is null.");
+         }
+         
+         if(chestIMU == null)
+         {
+            PrintTools.warn("Pelvis IMU is null.");
+         }
+         
          return null;
       }
    }
