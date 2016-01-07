@@ -16,6 +16,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -76,8 +77,11 @@ public class LogDataProcessorHelper
          String copName = copNamePrefix + "ResolvedCoP";
          DoubleYoVariable copx = (DoubleYoVariable) scs.getVariable(copNameSpace, copName + "X");
          DoubleYoVariable copy = (DoubleYoVariable) scs.getVariable(copNameSpace, copName + "Y");
-         YoFramePoint2d cop = new YoFramePoint2d(copx, copy, soleFrame);
-         cops.put(robotSide, cop);
+         if (copx != null && copy != null)
+         {
+            YoFramePoint2d cop = new YoFramePoint2d(copx, copy, soleFrame);
+            cops.put(robotSide, cop);
+         }
 
          String desiredCoPNameSpace = PlaneContactWrenchProcessor.class.getSimpleName();
          String desiredCoPName = side + "SoleCoP2d";
@@ -229,6 +233,14 @@ public class LogDataProcessorHelper
    public YoVariableHolder getLogYoVariableHolder()
    {
       return scs;
+   }
+
+   public YoFramePoint findYoFramePoint(String pointName, ReferenceFrame pointFrame)
+   {
+      DoubleYoVariable x = (DoubleYoVariable) scs.getVariable(pointName + "X");
+      DoubleYoVariable y = (DoubleYoVariable) scs.getVariable(pointName + "Y");
+      DoubleYoVariable z = (DoubleYoVariable) scs.getVariable(pointName + "Z");
+      return new YoFramePoint(x, y, z, pointFrame);
    }
 
    public YoFrameVector findYoFrameVector(String vectorName, ReferenceFrame vectorFrame)
