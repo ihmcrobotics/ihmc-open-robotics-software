@@ -34,6 +34,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicFactory;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class YoVariableHandshakeParser
 {
@@ -217,7 +218,14 @@ public class YoVariableHandshakeParser
             dgoListMap.put(listName, dgoList);
          }
 
-         dgoList.add((YoGraphic) getRemoteGraphic(yoProtoHandshake.getGraphicObject(i)));
+         try
+         {
+            dgoList.add((YoGraphic) getRemoteGraphic(yoProtoHandshake.getGraphicObject(i)));
+         }
+         catch (Exception e)
+         {
+            PrintTools.error(this, "Got exception: " + e.getClass().getSimpleName() + " when loading a YoGraphic.");
+         }
       }
 
       for (String list : dgoListMap.keySet())
@@ -228,7 +236,14 @@ public class YoVariableHandshakeParser
       ArtifactList artifactList = new ArtifactList("remote");
       for (int i = 0; i < yoProtoHandshake.getArtifactCount(); i++)
       {
-         artifactList.add((Artifact) getRemoteGraphic(yoProtoHandshake.getArtifact(i)));
+         try
+         {
+            artifactList.add((Artifact) getRemoteGraphic(yoProtoHandshake.getArtifact(i)));
+         }
+         catch (Exception e)
+         {
+            PrintTools.error(this, "Got exception: " + e.getClass().getSimpleName() + " when loading a Artifact.");
+         }
       }
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
