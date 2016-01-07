@@ -114,9 +114,12 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       for(RobotSide robotSide : RobotSide.values())
       {
          footForceSensorPublishers.put(robotSide, new RosWrenchPublisher(latched));
-         wristForceSensorPublishers.put(robotSide, new RosWrenchPublisher(latched));
          feetForceSensorIndexes.put(robotSide, getForceSensorIndex(feetForceSensorNames.get(robotSide), forceSensorDefinitions));
-         handForceSensorIndexes.put(robotSide, getForceSensorIndex(handForceSensorNames.get(robotSide), forceSensorDefinitions));
+         if(handForceSensorNames != null && !handForceSensorNames.isEmpty())
+         {
+            handForceSensorIndexes.put(robotSide, getForceSensorIndex(handForceSensorNames.get(robotSide), forceSensorDefinitions));
+            wristForceSensorPublishers.put(robotSide, new RosWrenchPublisher(latched));
+         }
       }
 
       OneDoFJoint[] joints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
@@ -133,9 +136,14 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       rosMainNode.attachPublisher(rosNameSpace + "/output/behavior", robotBehaviorPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/left", footForceSensorPublishers.get(RobotSide.LEFT));
       rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/right", footForceSensorPublishers.get(RobotSide.RIGHT));
-      rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/left", wristForceSensorPublishers.get(RobotSide.LEFT));
-      rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/right", wristForceSensorPublishers.get(RobotSide.RIGHT));
       rosMainNode.attachPublisher(rosNameSpace + "/output/last_received_message", lastReceivedMessagePublisher);
+      
+      if(!wristForceSensorPublishers.isEmpty())
+      {
+         rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/left", wristForceSensorPublishers.get(RobotSide.LEFT));
+         rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/right", wristForceSensorPublishers.get(RobotSide.RIGHT));  
+      }
+      
       rosModulePacketCommunicator.attachListener(RobotConfigurationData.class, this);
 
       Thread t = new Thread(this, "RosRobotJointStatePublisher");
@@ -225,8 +233,11 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                footForceSensorWrenches.put(robotSide, robotConfigurationData.getMomentAndForceVectorForSensor(feetForceSensorIndexes.get(robotSide)));
                footForceSensorPublishers.get(robotSide).publish(timeStamp, footForceSensorWrenches.get(robotSide));
 
-               wristForceSensorWrenches.put(robotSide, robotConfigurationData.getMomentAndForceVectorForSensor(handForceSensorIndexes.get(robotSide)));
-               wristForceSensorPublishers.get(robotSide).publish(timeStamp, wristForceSensorWrenches.get(robotSide));
+               if(!handForceSensorIndexes.isEmpty())
+               {
+                  wristForceSensorWrenches.put(robotSide, robotConfigurationData.getMomentAndForceVectorForSensor(handForceSensorIndexes.get(robotSide)));
+                  wristForceSensorPublishers.get(robotSide).publish(timeStamp, wristForceSensorWrenches.get(robotSide));  
+               }
             }
 
             for (int sensorNumber = 0; sensorNumber < imuDefinitions.length; sensorNumber++)
