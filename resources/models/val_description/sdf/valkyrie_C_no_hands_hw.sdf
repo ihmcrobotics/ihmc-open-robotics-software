@@ -1053,7 +1053,7 @@
         <pose frame=''>0.0345 0.0406 0.1135 1.57 -5.55112e-17 1.57</pose>
       </sensor>
       <velocity_decay/>
-      <sensor name='leftTorsoIMU' type='imu'>
+      <sensor name='leftTorsoImu' type='imu'>
         <always_on>1</always_on>
         <imu>
           <noise>
@@ -1843,8 +1843,8 @@
     </joint>
     <plugin name='imu_plugin_ros' filename='libgazebo_ros_imu.so'>
       <alwaysOn>true</alwaysOn>
-      <topicName>leftTorsoIMU/imu</topicName>
-      <serviceName>leftTorsoIMU/imu_service</serviceName>
+      <topicName>leftTorsoImu/imu</topicName>
+      <serviceName>leftTorsoImu/imu_service</serviceName>
       <gaussianNoise>0.0</gaussianNoise>
       <updateRate>1000.0</updateRate>
       <bodyName>torso</bodyName>
