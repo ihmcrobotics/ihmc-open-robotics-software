@@ -23,7 +23,7 @@ public class OpenCVChessboardPoseEstimator
    private static final boolean DEBUG = true;
    static
    {
-      NativeLibraryLoader.loadLibrary("org.opencv", "opencv_java2411");
+      NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
    }
 
    private Size boardInnerCrossPattern;

@@ -23,7 +23,7 @@ public class UserDesiredChestOrientationProvider implements ChestOrientationProv
 
    private final ReferenceFrame chestOrientationFrame;
 
-   public UserDesiredChestOrientationProvider(ReferenceFrame chestOrientationFrame, YoVariableRegistry parentRegistry)
+   public UserDesiredChestOrientationProvider(ReferenceFrame chestOrientationFrame, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
    {
       this.chestOrientationFrame = chestOrientationFrame;
       userChest = new YoFrameOrientation("userDesiredChest", chestOrientationFrame, registry);
@@ -48,6 +48,8 @@ public class UserDesiredChestOrientationProvider implements ChestOrientationProv
                userChest.setYawPitchRoll(0.0, 0.0, 0.0, false);
          }
       });
+
+      chestTrajectoryTime.set(defaultTrajectoryTime);
 
       parentRegistry.addChild(registry);
    }
