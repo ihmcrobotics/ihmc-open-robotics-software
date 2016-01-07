@@ -86,7 +86,7 @@ public class LookAtBehavior extends BehaviorInterface
    public void setLookAtLocation(Point3d pointToLookAt)
    {
       lookAtPacketIndex++;
-      packetToSend = new LookAtPacket(pointToLookAt, lookAtPacketIndex);
+      packetToSend = new LookAtPacket(pointToLookAt, trajectoryTime, lookAtPacketIndex);
       inputsHaveBeenSupplied.set(true);
    }
 

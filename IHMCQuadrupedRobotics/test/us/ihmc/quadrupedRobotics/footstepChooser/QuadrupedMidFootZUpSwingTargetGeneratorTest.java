@@ -5,13 +5,12 @@ import java.awt.Color;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import org.ddogleg.clustering.kmeans.InitializeKMeans_F64;
 import org.junit.After;
 import org.junit.Before;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedControllerParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
@@ -145,7 +144,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   protected boolean setupAndTestForwardWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters) throws SimulationExceededMaximumTimeException, ControllerFailureException
+   protected boolean setupAndTestForwardWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       boolean success = true;
       
@@ -200,7 +199,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       return success;
    }
 
-   protected boolean setupAndTestBackwardWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters) throws SimulationExceededMaximumTimeException, ControllerFailureException
+   protected boolean setupAndTestBackwardWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       boolean success = true;
       
@@ -255,7 +254,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       return success;
    }
    
-   protected boolean setupAndTestSidewaysLeftWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters) throws SimulationExceededMaximumTimeException, ControllerFailureException
+   protected boolean setupAndTestSidewaysLeftWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       boolean success = true;
       
@@ -310,7 +309,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       return success;
    }
    
-   protected boolean setupAndTestSidewaysRightWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters) throws SimulationExceededMaximumTimeException, ControllerFailureException
+   protected boolean setupAndTestSidewaysRightWalking(QuadrupedReferenceFrames referenceFrames, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       boolean success = true;
       
@@ -386,7 +385,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       scs.startOnAThread();
    }
 
-   private void setupRobot(CommonQuadrupedReferenceFrames referenceFrames, QuadrupedControllerParameters quadrupedControllerParameters)
+   private void setupRobot(CommonQuadrupedReferenceFrames referenceFrames, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters)
    {
       robot = new Robot("testRobot");
       rootJoint = new FloatingJoint("floating", new Vector3d(), robot);
@@ -586,7 +585,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       
       FramePoint endPoint = new FramePoint(centroidFramePoint);
       endPoint.add(0.4,0.0,0.0);
-      endPoint.set(endPoint.yawAboutPoint(centroidFramePoint, nominalYaw.getDoubleValue()));
+      endPoint.yawAboutPoint(centroidFramePoint, endPoint, nominalYaw.getDoubleValue());
       nominalYawEndpoint.set(endPoint);
       
       FramePoint2d endpointTwoD = new FramePoint2d();

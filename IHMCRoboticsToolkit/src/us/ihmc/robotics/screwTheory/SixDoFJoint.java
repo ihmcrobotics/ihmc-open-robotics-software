@@ -32,37 +32,31 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       this.jointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
       this.jointAccelerationDesired = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
    }
-
    
    public SixDoFJointReferenceFrame getFrameAfterJoint()
    {
       return afterJointFrame;
    }
-
    
    public void packJointTwist(Twist twistToPack)
    {
       twistToPack.set(jointTwist);
    }
-
    
    public void packJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.set(jointAcceleration);
    }
-
    
    public void packDesiredJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.set(jointAccelerationDesired);
    }
-
    
    public void packTauMatrix(DenseMatrix64F matrix)
    {
       successorWrench.packMatrix(matrix);
    }
-
    
    public void packVelocityMatrix(DenseMatrix64F matrix, int rowStart)
    {
@@ -78,19 +72,16 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
    {
       jointTwist.packLinearPart(linearVelocityToPack);
    }
-
    
    public void packDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       jointAccelerationDesired.packMatrix(matrix, rowStart);
    }
-
    
    public void setDesiredAccelerationToZero()
    {
       jointAccelerationDesired.setToZero();
    }
-
    
    public void setSuccessor(RigidBody successor)
    {
@@ -101,19 +92,16 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
 
       this.successorWrench = new Wrench(successorFrame, successorFrame);
    }
-
    
    public void setTorqueFromWrench(Wrench jointWrench)
    {
       this.successorWrench.checkAndSet(jointWrench);
    }
-
    
    public int getDegreesOfFreedom()
    {
       return 6;
    }
-
    
    public void setDesiredAcceleration(DenseMatrix64F matrix, int rowStart)
    {
@@ -261,13 +249,11 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       this.motionSubspace = new GeometricJacobian(this, unitTwistsInBodyFrame, afterJointFrame);
       this.motionSubspace.compute();
    }
-
    
    public void updateMotionSubspace()
    {
       // empty
    }
-
    
    public void packConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
@@ -279,7 +265,6 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       matrix.set(index++, 0, jointTranslation.getY());
       matrix.set(index++, 0, jointTranslation.getZ());
    }
-
    
    public void setConfiguration(DenseMatrix64F matrix, int rowStart)
    {
@@ -293,7 +278,6 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       this.afterJointFrame.setRotation(jointRotation);
       this.afterJointFrame.setTranslation(jointTranslation);
    }
-
    
    public void setVelocity(DenseMatrix64F matrix, int rowStart)
    {
@@ -310,7 +294,6 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       
       jointTwist.set(newTwist);
    }
-
    
    public int getConfigurationMatrixSize()
    {
@@ -330,7 +313,6 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
          throw new RuntimeException("Cannot set " + getClass().getSimpleName() + " to " + originalJoint.getClass().getSimpleName());
       }
    }
-
    
    public void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint)
    {
@@ -343,9 +325,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
 
       jointAcceleration.setAngularPart(sixDoFOriginalJoint.jointAcceleration.getAngularPart());
       jointAcceleration.setLinearPart(sixDoFOriginalJoint.jointAcceleration.getLinearPart());
-
    }
-
    
    public void setQddDesired(InverseDynamicsJoint originalJoint)
    {
@@ -353,7 +333,6 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       jointAccelerationDesired.setAngularPart(sixDoFOriginalJoint.jointAccelerationDesired.getAngularPart());
       jointAccelerationDesired.setLinearPart(sixDoFOriginalJoint.jointAccelerationDesired.getLinearPart());
    }
-
    
    public void calculateJointStateChecksum(GenericCRC32 checksum)
    {
@@ -363,9 +342,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       checksum.update(jointTwist.getLinearPart());
       checksum.update(jointAcceleration.getAngularPart());
       checksum.update(jointAcceleration.getLinearPart());
-      
    }
-
    
    public void calculateJointDesiredChecksum(GenericCRC32 checksum)
    {
@@ -373,12 +350,10 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       checksum.update(jointAccelerationDesired.getLinearPart());
    }
 
-
    public void getLinearAcceleration(Vector3d linearAccelerationToPack)
    {
       linearAccelerationToPack.setX(jointAcceleration.getLinearPartX());
       linearAccelerationToPack.setY(jointAcceleration.getLinearPartY());
       linearAccelerationToPack.setZ(jointAcceleration.getLinearPartZ());
-      
    }
 }

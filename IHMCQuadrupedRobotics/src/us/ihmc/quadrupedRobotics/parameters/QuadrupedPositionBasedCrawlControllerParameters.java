@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.parameters;
 
 import javax.vecmath.Vector2d;
 
-public interface QuadrupedControllerParameters extends SwingTargetGeneratorParameters
+public interface QuadrupedPositionBasedCrawlControllerParameters extends SwingTargetGeneratorParameters
 {
    public abstract double getInitalCoMHeight();
    
@@ -11,6 +11,8 @@ public interface QuadrupedControllerParameters extends SwingTargetGeneratorParam
    public abstract double getDefaultSwingDuration();
 
    public abstract double getDefaultSubCircleRadius();
+
+   public abstract double getMaxYawRate();
 
    public abstract double getDefaultCoMCloseToFinalDesiredTransitionRadius();
    
