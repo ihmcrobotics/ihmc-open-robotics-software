@@ -2,9 +2,6 @@ root*false*false
 root.valkyrie*false*false
 root.remotemain*false*false
 root.remotemain.DRCEstimatorThread*false*false
-root.remotemain.DRCEstimatorThread.pelvis_pelvisMiddleImu*false*false
-root.remotemain.DRCEstimatorThread.pelvis_pelvisRearImu*false*false
-root.remotemain.DRCEstimatorThread.torso_leftTorsoIMU*false*false
 root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader*false*false
 root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipYaw*false*false
 root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipYaw*false*false
@@ -32,6 +29,8 @@ root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.upperNeckPitch
 root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightShoulderYaw*false*false
 root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftElbowPitch*false*false
 root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightElbowPitch*false*false
+root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.pelvisRearImu*false*false
+root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftTorsoImu*false*false
 root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing*false*false
 root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipYawCommand*false*false
 root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipYawCommand*false*false
