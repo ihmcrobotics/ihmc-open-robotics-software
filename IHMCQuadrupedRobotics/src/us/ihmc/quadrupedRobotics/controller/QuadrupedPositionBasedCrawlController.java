@@ -1018,6 +1018,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       private QuadrupedSupportPolygon trippleStateAfterFirstStepWithSecondSwinging;
       private QuadrupedSupportPolygon trippleStateAfterSecondStepWithThirdSwinging;
       private QuadrupedSupportPolygon trippleStateAfterThirdStepWithFourthSwinging;
+      private final QuadrupedSupportPolygon temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg = new QuadrupedSupportPolygon();
       
       private final QuadrantDependentList<QuadrupedSupportPolygon> estimatedCommonTriangle = new QuadrantDependentList<>();
       private final DoubleYoVariable minimumTimeInQuadSupport;
@@ -1480,8 +1481,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       {
          centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
          centerOfMassFramePoint.getPoint2d(centerOfMassPoint2d);
-         QuadrupedSupportPolygon supportTriangleDuringStep = fourFootSupportPolygon.deleteLegCopy(swingLeg);
-         return supportTriangleDuringStep.isInside(centerOfMassPoint2d);
+         fourFootSupportPolygon.packPolygonWithoutLeg(swingLeg, temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg);
+         return temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg.isInside(centerOfMassPoint2d);
       }
       
       public boolean isCoMCloseToFinalDesired(double distanceToCheck)

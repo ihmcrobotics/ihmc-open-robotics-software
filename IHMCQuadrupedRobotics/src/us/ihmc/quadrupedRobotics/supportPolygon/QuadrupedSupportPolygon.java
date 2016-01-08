@@ -309,7 +309,7 @@ public class QuadrupedSupportPolygon implements Serializable
       }
       return null;
    }
-   
+    
    public void set(QuadrupedSupportPolygon polygon)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -1811,6 +1811,17 @@ public class QuadrupedSupportPolygon implements Serializable
       newPolygon.deleteLeg(legName);
       return newPolygon;
    }
+   
+   public void packPolygonWithoutLeg(RobotQuadrant legToDelete, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (robotQuadrant != legToDelete)
+         {
+            quadrupedSupportPolygonToPack.setFootstep(robotQuadrant, getFootstep(robotQuadrant));
+         }
+      }
+   }
 
    public void deleteLeg(RobotQuadrant legName)
    {
@@ -2532,8 +2543,6 @@ public class QuadrupedSupportPolygon implements Serializable
       }
       
       return false;
-      
-      
    }
 
    public RobotQuadrant getClosestFootStep(FramePoint midPoint)
