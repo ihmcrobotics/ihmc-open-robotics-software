@@ -12,8 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.kalman.YoKalmanFilterTest.class,
-   us.ihmc.kalman.imu.testCases.KalmanFilterComparisonTest.class
+   us.ihmc.kalman.imu.testCases.KalmanFilterComparisonTest.class,
+   us.ihmc.kalman.YoKalmanFilterTest.class
 })
 
 public class KalmanProjectAFastTestSuite

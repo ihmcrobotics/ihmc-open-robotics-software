@@ -12,10 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.VideoA)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasWalkToGoalBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasChestOrientationBehaviorTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseStandingYawedTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasFinalsWorldStairsTest.class
+   us.ihmc.atlas.AtlasFlatGroundWalkingTest.class,
+   us.ihmc.atlas.AtlasMultiContactTest.class
 })
 
 public class AtlasBVideoATestSuite
