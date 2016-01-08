@@ -2,6 +2,7 @@ package us.ihmc.valkyrie.kinematics.transmissions;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -43,6 +44,7 @@ public class InefficientPushrodTransmissionJacobianTest
 
    }
 
+	@Ignore
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInefficientPushrodTransmissionJacobianForWaistAtZero()
