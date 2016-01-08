@@ -33,6 +33,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 public class CenterOfMassKinematicBasedCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private SixDoFJoint rootJoint;
@@ -43,7 +44,7 @@ public class CenterOfMassKinematicBasedCalculator
    private final YoFrameVector rootJointLinearVelocityNewTwist = new YoFrameVector("estimatedRootJointVelocityNewTwist", worldFrame, registry);
    private final YoFrameQuaternion rootJointYoOrientation = new YoFrameQuaternion("estimatedRootJointOrientationWithKinematics", worldFrame, registry);
    private final FrameOrientation rootJointOrientation = new FrameOrientation(worldFrame);
-   
+
    
    private final YoFramePoint previousRootJointPosition = new YoFramePoint("previousEstimatedRootJointPositionWithKinematics", worldFrame, registry);
    private final YoFrameVector previousRootJointLinearVelocityNewTwist = new YoFrameVector("previousEstimatedRootJointVelocityNewTwist", worldFrame, registry);
@@ -232,12 +233,12 @@ public class CenterOfMassKinematicBasedCalculator
    public void estimateFeetAndComPositionAndOrientation(ArrayList<RobotQuadrant> feetInContact, ArrayList<RobotQuadrant> feetNotInContact)
    {
       updateKinematics();
+      
+      //estimate Orientation 
+      estimateCoMOrientation(feetNotInContact);
 
       //estimate linear position
       estimateCoMLinearPosition(feetInContact);
-
-      //estimate Orientation 
-      estimateCoMOrientation(feetNotInContact);
 
       //estimate the position of the swing foot
       estimateFeetPosition(rootJointPosition, rootJointYoOrientation, feetNotInContact, yoEstimatedFeetPositions);
@@ -292,20 +293,30 @@ public class CenterOfMassKinematicBasedCalculator
 
    private void estimateCoMOrientation(ArrayList<RobotQuadrant> feetNotInContact)
    {
-      //estimate feet position with the previous estimate and the current joint angles, and store them in an array of calculated feet position
-      estimateFeetPosition(previousRootJointPosition, previousRootJointOrientation, allQuadrants, yoCalculatedFeetPositions);
-      updateAverageFrames();
+//      //estimate feet position with the previous estimate and the current joint angles, and store them in an array of calculated feet position
+//      estimateFeetPosition(previousRootJointPosition, previousRootJointOrientation, allQuadrants, yoCalculatedFeetPositions);
+//      updateAverageFrames();
 
       //compare orientation
       if (feetNotInContact.size() == 0)
       {
+         //estimate feet position with the previous estimate and the current joint angles, and store them in an array of calculated feet position
+         estimateFeetPosition(previousRootJointPosition, previousRootJointOrientation, allQuadrants, yoCalculatedFeetPositions);
+         updateAverageFrames();
          calculateOrientationError(usedQuadrant);
       }
       else if (feetNotInContact.size() == 1)
       {
-         usedQuadrant = feetNotInContact.get(0);
+         //estimate feet position with the previous estimate and the current joint angles, and store them in an array of calculated feet position
+         estimateFeetPosition(previousRootJointPosition, previousRootJointOrientation, allQuadrants, yoCalculatedFeetPositions);
+         updateAverageFrames();
+         //         usedQuadrant = feetNotInContact.get(0); XXX uncomment that line to make things work
          yoUsedQuadrant.set(usedQuadrant);
          calculateOrientationError(usedQuadrant);
+      }
+      else
+      {
+         rootJointYoOrientation.set(previousRootJointOrientation);
       }
    }
 
@@ -315,6 +326,7 @@ public class CenterOfMassKinematicBasedCalculator
       orientationError.changeFrame(calculatedFeetAverageReferenceFrames.get(quadrant));
       rootJointOrientationCorrectorHelper.compensateOrientationError(rootJointOrientation, orientationError);
       rootJointYoOrientation.set(rootJointOrientation);
+      previousRootJointOrientation.set(rootJointOrientation);
    }
 
    private void estimateCoMLinearPosition(ArrayList<RobotQuadrant> feetInContact)//, QuadrantDependentList<YoFramePoint> footPositionsInWorld)
