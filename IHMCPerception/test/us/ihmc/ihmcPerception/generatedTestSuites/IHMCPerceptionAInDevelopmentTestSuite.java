@@ -1,4 +1,4 @@
-package us.ihmc.atlas.generatedTestSuites;
+package us.ihmc.ihmcPerception.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
@@ -12,12 +12,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class,
-   us.ihmc.atlas.AtlasGFERosPacketTest.class,
-   us.ihmc.atlas.HumanoidBehaviorsICPFaultDetectionTest.class
+   us.ihmc.ihmcPerception.chessboardDetection.ChessboardPoseEstimatorTest.class
 })
 
-public class AtlasKInDevelopmentTestSuite
+public class IHMCPerceptionAInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {

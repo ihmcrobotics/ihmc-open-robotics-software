@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Slow)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasPelvisPoseBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasRemoveMultipleDebrisBehaviorTest.class
 })
 
 public class AtlasISlowTestSuite

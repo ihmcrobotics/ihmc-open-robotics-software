@@ -12,8 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Manual)
 @SuiteClasses
 ({
-   us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationDispatcherClientTest.class,
-   us.ihmc.simulationconstructionset.SimulationConstructionSetTest.class
+   us.ihmc.simulationconstructionset.SimulationConstructionSetTest.class,
+   us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationDispatcherClientTest.class
 })
 
 public class SimulationConstructionSetManualTestSuite

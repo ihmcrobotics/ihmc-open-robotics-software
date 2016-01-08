@@ -12,7 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Slow)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasHandPoseBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasHandPoseListBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasHighLevelStateBehaviorTest.class
 })
 
 public class AtlasGSlowTestSuite
