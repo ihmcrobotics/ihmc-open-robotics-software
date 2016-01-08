@@ -30,7 +30,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public class CenterOfMassKinematicBasedCalculator
+public class CenterOfMassKinematicBasedLinearStateCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    
@@ -98,7 +98,7 @@ public class CenterOfMassKinematicBasedCalculator
    private final AxisAngle4d tempAxisAngle = new AxisAngle4d();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   public CenterOfMassKinematicBasedCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, QuadrantDependentList<RigidBody> shinRigidBodies,
+   public CenterOfMassKinematicBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, QuadrantDependentList<RigidBody> shinRigidBodies,
          QuadrantDependentList<ReferenceFrame> footFrames, QuadrantDependentList<YoFramePoint> yoEstimatedFootPositions, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry graphicsListRegistry)
    {
