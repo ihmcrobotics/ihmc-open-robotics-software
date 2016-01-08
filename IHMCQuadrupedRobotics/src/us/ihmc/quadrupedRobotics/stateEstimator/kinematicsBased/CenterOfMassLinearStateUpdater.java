@@ -37,7 +37,7 @@ public class CenterOfMassLinearStateUpdater
 
    private final QuadrantDependentList<YoFramePoint> estimatedFeetPositions = new QuadrantDependentList<>();
 
-   private final CenterOfMassKinematicBasedCalculator comAndFeetCalculator;
+   private final CenterOfMassKinematicBasedLinearStateCalculator comAndFeetCalculator;
 
    private final YoFramePoint yoRootJointPosition = new YoFramePoint("estimatedRootJointPosition", worldFrame, registry);
    private final YoFrameVector yoRootJointVelocity = new YoFrameVector("estimatedRootJointVelocity", worldFrame, registry);
@@ -71,7 +71,7 @@ public class CenterOfMassLinearStateUpdater
          graphicsListRegistry.registerYoGraphic("KinematicsBasedStateEstimatorEstimated", footPositionViz);
       }
 
-      comAndFeetCalculator = new CenterOfMassKinematicBasedCalculator(inverseDynamicsStructure, shinRigidBodies, footFrames, estimatedFeetPositions, registry,
+      comAndFeetCalculator = new CenterOfMassKinematicBasedLinearStateCalculator(inverseDynamicsStructure, shinRigidBodies, footFrames, estimatedFeetPositions, registry,
             graphicsListRegistry);
 
       parentRegistry.addChild(registry);
