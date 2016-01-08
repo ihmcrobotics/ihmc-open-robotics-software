@@ -38,9 +38,9 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 @DeployableTestClass(targets = TestPlanTarget.Fast)
@@ -132,7 +132,7 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.5)
+	@DeployableTestMethod(estimatedDuration = 1.5, targets = TestPlanTarget.Flaky)
    @Test(timeout = 30000)
    public void testPassingPauseCommand() throws IOException
    {
