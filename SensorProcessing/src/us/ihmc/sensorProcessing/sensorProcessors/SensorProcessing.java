@@ -44,6 +44,12 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.sensorProcessing.diagnostic.DiagnosticUpdatable;
+import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
+import us.ihmc.sensorProcessing.diagnostic.OneDoFJointForceTrackingDelayEstimator;
+import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
+import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
+import us.ihmc.sensorProcessing.diagnostic.WrenchSensorValidityChecker;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
@@ -184,6 +190,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointVelocities = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointAccelerations = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointTaus = new LinkedHashMap<>();
+
+   private final ArrayList<DiagnosticUpdatable> diagnosticModules = new ArrayList<>();
 
    private final ArrayList<IMUSensor> inputIMUs = new ArrayList<IMUSensor>();
    private final ArrayList<IMUSensor> outputIMUs = new ArrayList<IMUSensor>();
@@ -391,6 +399,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          tempWrench.set(tempForce, tempTorque);
          outputForceSensors.setForceSensorValue(forceSensorDefinition, tempWrench);
       }
+
+      for (int i = 0; i < diagnosticModules.size(); i++)
+         diagnosticModules.get(i).update();
    }
 
    private void updateProcessors(List<ProcessingYoVariable> processors)
@@ -811,6 +822,113 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (!forVizOnly)
             intermediateOrientations.put(imuDefinition, filteredOrientation);
       }
+   }
+
+   /**
+    * Call this method to setup validity checkers on all the joint sensors.
+    * Each validity checker will check if the sensor measurement signal is NaN, infinite, dead, etc.
+    * Use only for diagnostics.
+    * @return The map with all the validity checkers.
+    */
+   public Map<OneDoFJoint, OneDoFJointSensorValidityChecker> addJointSensorValidityCheckers(boolean enableLogging, List<String> jointsToIgnore)
+   {
+      LinkedHashMap<OneDoFJoint, OneDoFJointSensorValidityChecker> validityCheckerMap = new LinkedHashMap<>();
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJoint jointToCheck = jointSensorDefinitions.get(i);
+
+         if (jointsToIgnore.contains(jointToCheck.getName()))
+            continue;
+
+         DoubleYoVariable position = outputJointPositions.get(jointToCheck);
+         DoubleYoVariable velocity = outputJointVelocities.get(jointToCheck);
+         DoubleYoVariable tau = outputJointTaus.get(jointToCheck);
+         OneDoFJointSensorValidityChecker validityChecker = new OneDoFJointSensorValidityChecker(jointToCheck, position, velocity, tau, registry);
+         if (enableLogging)
+            validityChecker.setupForLogging();
+         validityCheckerMap.put(jointToCheck, validityChecker);
+         diagnosticModules.add(validityChecker);
+      }
+
+      return validityCheckerMap;
+   }
+
+   public Map<IMUDefinition, IMUSensorValidityChecker> addIMUSensorValidityCheckers(boolean enableLogging)
+   {
+      LinkedHashMap<IMUDefinition, IMUSensorValidityChecker> validityCheckerMap = new LinkedHashMap<>();
+
+      for (int i = 0; i < imuSensorDefinitions.size(); i++)
+      {
+         IMUDefinition imuToCheck = imuSensorDefinitions.get(i);
+         YoFrameQuaternion orientation = intermediateOrientations.get(imuToCheck);
+         YoFrameVector angularVelocity = intermediateAngularVelocities.get(imuToCheck);
+         YoFrameVector linearAcceleration = intermediateLinearAccelerations.get(imuToCheck);
+         IMUSensorValidityChecker validityChecker = new IMUSensorValidityChecker(imuToCheck, orientation, angularVelocity, linearAcceleration, registry);
+         if (enableLogging)
+            validityChecker.setupForLogging();
+         validityCheckerMap.put(imuToCheck, validityChecker);
+         diagnosticModules.add(validityChecker);
+      }
+
+      return validityCheckerMap;
+   }
+
+   public Map<ForceSensorDefinition, WrenchSensorValidityChecker> addWrenchSensorValidityCheckers()
+   {
+      LinkedHashMap<ForceSensorDefinition, WrenchSensorValidityChecker> validityCheckerMap = new LinkedHashMap<>();
+
+      for (int i = 0; i < forceSensorDefinitions.size(); i++)
+      {
+         ForceSensorDefinition wrenchSensorToCheck = forceSensorDefinitions.get(i);
+         YoFrameVector forceMeasurement = intermediateForces.get(wrenchSensorToCheck);
+         YoFrameVector torqueMeasurement = intermediateTorques.get(wrenchSensorToCheck);
+         WrenchSensorValidityChecker validityChecker = new WrenchSensorValidityChecker(wrenchSensorToCheck, forceMeasurement, torqueMeasurement, registry);
+         validityCheckerMap.put(wrenchSensorToCheck, validityChecker);
+         diagnosticModules.add(validityChecker);
+      }
+
+      return validityCheckerMap;
+   }
+
+   public Map<OneDoFJoint, PositionVelocity1DConsistencyChecker> addJointPositionVelocityConsistencyCheckers(List<String> jointsToIgnore)
+   {
+      LinkedHashMap<OneDoFJoint, PositionVelocity1DConsistencyChecker> consistencyCheckerMap = new LinkedHashMap<>();
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJoint jointToCheck = jointSensorDefinitions.get(i);
+
+         if (jointsToIgnore.contains(jointToCheck.getName()))
+            continue;
+
+         DoubleYoVariable position = outputJointPositions.get(jointToCheck);
+         DoubleYoVariable velocity = outputJointVelocities.get(jointToCheck);
+         PositionVelocity1DConsistencyChecker consistencyChecker = new PositionVelocity1DConsistencyChecker(jointToCheck.getName(), position, velocity, updateDT, registry);
+         consistencyCheckerMap.put(jointToCheck, consistencyChecker);
+         diagnosticModules.add(consistencyChecker);
+      }
+
+      return consistencyCheckerMap;
+   }
+
+   public Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> addJointForceTrackingDelayEstimators(List<String> jointsToIgnore)
+   {
+      LinkedHashMap<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> delayEstimatorMap = new LinkedHashMap<>();
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJoint jointToCheck = jointSensorDefinitions.get(i);
+
+         if (jointsToIgnore.contains(jointToCheck.getName()))
+            continue;
+
+         OneDoFJointForceTrackingDelayEstimator delayEstimator = new OneDoFJointForceTrackingDelayEstimator(jointToCheck, updateDT, registry);
+         delayEstimatorMap.put(jointToCheck, delayEstimator);
+         diagnosticModules.add(delayEstimator);
+      }
+
+      return delayEstimatorMap;
    }
 
    /**
