@@ -1,6 +1,11 @@
 package us.ihmc.robotics.math.frames;
 
-import javax.vecmath.*;
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Matrix3f;
+import javax.vecmath.Quat4d;
+
+import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -8,11 +13,15 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.ReferenceFrameHolder;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.FormattingTools;
 
 public class YoFrameQuaternion extends ReferenceFrameHolder
 {
+   private final String namePrefix;
+   private final String nameSuffix;
+
    private final DoubleYoVariable qx, qy, qz, qs;
    private final Quat4d quaternion = new Quat4d();
    private final Quat4d tempQuaternion2 = new Quat4d();
@@ -25,6 +34,9 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
 
    public YoFrameQuaternion(String namePrefix, String nameSuffix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
+      this.namePrefix = namePrefix;
+      this.nameSuffix = nameSuffix;
+
       this.qx = new DoubleYoVariable(namePrefix + "Qx" + nameSuffix, registry);
       this.qy = new DoubleYoVariable(namePrefix + "Qy" + nameSuffix, registry);
       this.qz = new DoubleYoVariable(namePrefix + "Qz" + nameSuffix, registry);
@@ -36,6 +48,9 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
 
    public YoFrameQuaternion(DoubleYoVariable qx, DoubleYoVariable qy, DoubleYoVariable qz, DoubleYoVariable qs, ReferenceFrame referenceFrame)
    {
+      this.namePrefix = StringUtils.getCommonPrefix(qx.getName(), qy.getName(), qz.getName(), qs.getName());
+      this.nameSuffix = FormattingTools.getCommonSuffix(qx.getName(), qy.getName(), qz.getName(), qs.getName());
+
       this.qx = qx;
       this.qy = qy;
       this.qz = qz;
@@ -127,6 +142,26 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
    {
       putYoValuesIntoQuat4d();
       frameOrientation.setIncludingFrame(getReferenceFrame(), quaternion);
+   }
+
+   public DoubleYoVariable getYoQx()
+   {
+      return qx;
+   }
+
+   public DoubleYoVariable getYoQy()
+   {
+      return qy;
+   }
+
+   public DoubleYoVariable getYoQz()
+   {
+      return qz;
+   }
+
+   public DoubleYoVariable getYoQs()
+   {
+      return qs;
    }
 
    public void interpolate(YoFrameQuaternion yoFrameQuaternion1, YoFrameQuaternion yoFrameQuaternion2, double alpha)
@@ -236,4 +271,13 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
       return "(" + qx.getDoubleValue() + ", " + qy.getDoubleValue() + ", " + qz.getDoubleValue() + ", " + qs.getDoubleValue() + ")-" + getReferenceFrame();
    }
 
+   public String getNamePrefix()
+   {
+      return namePrefix;
+   }
+
+   public String getNameSuffix()
+   {
+      return nameSuffix;
+   }
 }
