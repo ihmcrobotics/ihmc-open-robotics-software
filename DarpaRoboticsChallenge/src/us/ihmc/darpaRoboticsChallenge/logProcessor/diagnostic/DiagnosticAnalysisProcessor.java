@@ -19,9 +19,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.diagnostic.DelayEstimatorBetweenTwoSignals;
+import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.Online1DSignalFrequencyAnalysis;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity3DConsistencyChecker;
+import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
@@ -39,7 +41,7 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
    public DiagnosticAnalysisProcessor(LogDataProcessorHelper logDataProcessorHelper, DRCRobotModel drcRobotModel)
    {
       this.logDataProcessorHelper = logDataProcessorHelper;
-      DiagnosticParameters diagnosticParameters = new DiagnosticParameters();
+      DiagnosticParameters diagnosticParameters = new DiagnosticParameters(DiagnosticEnvironment.OFFLINE_LOG);
       FullHumanoidRobotModel fullRobotModel = logDataProcessorHelper.getFullRobotModel();
       double dt = drcRobotModel.getEstimatorDT();
       YoVariableHolder logYoVariableHolder = logDataProcessorHelper.getLogYoVariableHolder();
@@ -68,6 +70,7 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
             DoubleYoVariable q = (DoubleYoVariable) logYoVariableHolder.getVariable("raw_q_" + jointName);
             DoubleYoVariable qd = (DoubleYoVariable) logYoVariableHolder.getVariable("qd_" + jointName);
             PositionVelocity1DConsistencyChecker consistencyChecker = new PositionVelocity1DConsistencyChecker(jointName + "Check", q, qd, dt, registry);
+            consistencyChecker.enable();
 
             consistencyChecker.setDelayEstimationParameters(delayEstimatorMaxAbsoluteLead, delayEstimatorMaxAbsoluteLag, delayEstimatorObservationWindow);
             consistencyChecker.setInputSignalsSMAWindow(delayEstimatorIntputSignalsSMAWindow);
@@ -78,6 +81,7 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
             DoubleYoVariable tauDesired = (DoubleYoVariable) logYoVariableHolder.getVariable("ll_out_" + jointName + "_f_d");
             DoubleYoVariable tau = (DoubleYoVariable) logYoVariableHolder.getVariable("ll_in_" + jointName + "_f");
             DelayEstimatorBetweenTwoSignals forceTrackingDelay = new DelayEstimatorBetweenTwoSignals(jointName + "ForceTrackingDelay", tauDesired, tau, dt, registry);
+            forceTrackingDelay.enable();
             forceTrackingDelay.setAlphaFilterBreakFrequency(delayEstimatorFilterBreakFrequency);
             forceTrackingDelay.setEstimationParameters(delayEstimatorMaxAbsoluteLead, delayEstimatorMaxAbsoluteLag, delayEstimatorObservationWindow);
             
@@ -88,6 +92,7 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
       YoFramePoint com = logDataProcessorHelper.findYoFramePoint("estimatedCenterOfMassPosition", ReferenceFrame.getWorldFrame());
       YoFrameVector comVelocity = logDataProcessorHelper.findYoFrameVector("estimatedCenterOfMassVelocity", ReferenceFrame.getWorldFrame());
       centerOfMassCheck = new PositionVelocity3DConsistencyChecker("centerOfMass", com, comVelocity, dt, registry);
+      centerOfMassCheck.enable();
    }
 
    @Override

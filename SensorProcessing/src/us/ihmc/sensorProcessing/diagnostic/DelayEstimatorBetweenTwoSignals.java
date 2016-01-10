@@ -4,6 +4,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -25,6 +26,8 @@ public class DelayEstimatorBetweenTwoSignals
    private final DoubleYoVariable referenceSignal;
    private final DoubleYoVariable delayedSignal;
    private final DoubleYoVariable estimatedDelay;
+
+   private final BooleanYoVariable enabled;
 
    private final DenseMatrix64F referenceSignalBuffer;
    private final DenseMatrix64F delayedSignalBuffer;
@@ -65,6 +68,7 @@ public class DelayEstimatorBetweenTwoSignals
       estimatedDelay = new DoubleYoVariable(namePrefix + "_estimatedDelay", registry);
       correlationForDelay = new DoubleYoVariable(namePrefix + "_correlationForDelay", registry);
       maxCorrelation = new DoubleYoVariable(namePrefix + "_maxCorrelation", registry);
+      enabled = new BooleanYoVariable(namePrefix + "_enabled", registry);
 
       maxLeadInTicks = new IntegerYoVariable(namePrefix + "_maxPhaseLeadInTicks", registry);
       maxLeadInTicks.set(DEFAULT_MAX_ABS_LEAD);
@@ -81,6 +85,17 @@ public class DelayEstimatorBetweenTwoSignals
       correlationAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.16, dt));
       correlationBuffer = new DenseMatrix64F(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
       filteredCorrelationBuffer = new DenseMatrix64F(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
+   }
+
+   public void enable()
+   {
+      enabled.set(true);
+   }
+
+   public void disable()
+   {
+      enabled.set(false);
+      reset();
    }
 
    public void setAlphaFilterBreakFrequency(double breakFrequency)
@@ -120,6 +135,7 @@ public class DelayEstimatorBetweenTwoSignals
    {
       bufferPosition = 0;
       hasBufferBeenFilled = false;
+      firstEstimationTick = true;
    }
 
    public void update()
@@ -127,8 +143,15 @@ public class DelayEstimatorBetweenTwoSignals
       update(referenceSignal.getDoubleValue(), delayedSignal.getDoubleValue());
    }
 
+
    public void update(double referenceSignalCurrentPosition, double delayedSignalCurrentPosition)
    {
+      if (!enabled.getBooleanValue())
+      {
+         reset();
+         return;
+      }
+
       referenceSignalBuffer.set(bufferPosition, 0, referenceSignalCurrentPosition);
       delayedSignalBuffer.set(bufferPosition, 0, delayedSignalCurrentPosition);
 
@@ -151,6 +174,8 @@ public class DelayEstimatorBetweenTwoSignals
       estimatedDelay.set(nTicksOfDelay.getIntegerValue() * dt);
    }
 
+   private boolean firstEstimationTick = true;
+
    private void updateCorrelationBuffer()
    {
       double maxCorr = Double.NEGATIVE_INFINITY;
@@ -172,15 +197,24 @@ public class DelayEstimatorBetweenTwoSignals
 
          double currentCorrelation = correlationCalculator.getR();
          correlationBuffer.set(index, 0, currentCorrelation);
-         double previousFilteredCorrelation = filteredCorrelationBuffer.get(index, 0);
          if (Double.isNaN(currentCorrelation))
             currentCorrelation = 0.0;
-         double currentFilteredCorrelation = correlationAlpha.getDoubleValue() * previousFilteredCorrelation + (1.0 - correlationAlpha.getDoubleValue()) * currentCorrelation;
+         double currentFilteredCorrelation;
+         if (firstEstimationTick)
+         {
+            currentFilteredCorrelation = currentCorrelation;
+         }
+         else
+         {
+            double previousFilteredCorrelation = filteredCorrelationBuffer.get(index, 0);
+            currentFilteredCorrelation = correlationAlpha.getDoubleValue() * previousFilteredCorrelation + (1.0 - correlationAlpha.getDoubleValue()) * currentCorrelation;
+         }
          filteredCorrelationBuffer.set(index, 0, currentFilteredCorrelation);
 
          maxCorr = Math.max(maxCorr, currentFilteredCorrelation);
       }
 
+      firstEstimationTick = false;
       maxCorrelation.set(maxCorr);
    }
 

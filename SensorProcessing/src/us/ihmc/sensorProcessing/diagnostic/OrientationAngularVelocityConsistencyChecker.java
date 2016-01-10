@@ -11,7 +11,7 @@ import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 
-public class OrientationAngularVelocityConsistencyChecker
+public class OrientationAngularVelocityConsistencyChecker implements DiagnosticUpdatable
 {
    private final YoVariableRegistry registry;
 
@@ -45,6 +45,19 @@ public class OrientationAngularVelocityConsistencyChecker
       parentRegistry.addChild(registry);
    }
 
+   public void enable()
+   {
+      for (Axis axis : Axis.values)
+         delayEstimators.get(axis).enable();
+   }
+
+   public void disable()
+   {
+      for (Axis axis : Axis.values)
+         delayEstimators.get(axis).disable();
+   }
+
+   @Override
    public void update()
    {
       localVelocityFromFD.update();
