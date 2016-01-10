@@ -14,27 +14,27 @@ public class FormattingTools
    {
       return decimal3DPrintFormatter.format(value);
    }
-   
+
    public static String getFormattedDecimal2D(double value)
    {
       return decimal2DPrintFormatter.format(value);
    }
-   
+
    public static String getFormattedDecimal1D(double value)
    {
       return decimal1DPrintFormatter.format(value);
    }
-   
+
    public static String getFormattedToSignificantFigures(double number, int significantFigures)
    {
       double roundToSignificantFigures = roundToSignificantFigures(number, significantFigures);
-      
+
       if (roundToSignificantFigures >= 10)
          return String.valueOf((int) roundToSignificantFigures);
       else
          return String.valueOf(roundToSignificantFigures);
    }
-   
+
    public static double roundToSignificantFigures(double number, int significantFigures)
    {
       if (number == 0)
@@ -81,23 +81,23 @@ public class FormattingTools
    public static String toHumanReadable(double bits)
    {
       String siPrefix = "";
-      
-      if(bits > 1024*1024*1024)
+
+      if (bits > 1024 * 1024 * 1024)
       {
          siPrefix = "G";
-         bits /= 1024*1024*1024;
+         bits /= 1024 * 1024 * 1024;
       }
-      else if(bits > 1024*1024)
+      else if (bits > 1024 * 1024)
       {
          siPrefix = "M";
-         bits /= 1024*1024;
+         bits /= 1024 * 1024;
       }
-      else if(bits > 1024)
+      else if (bits > 1024)
       {
          siPrefix = "k";
          bits /= 1024;
       }
-      
+
       return String.format("%.2f", bits) + siPrefix;
    }
 
@@ -114,5 +114,18 @@ public class FormattingTools
          return namePrefix + originalName;
       else
          return namePrefix + StringUtils.capitalize(originalName);
+   }
+
+   public static String getCommonSuffix(String... strs)
+   {
+      if (strs == null || strs.length == 0)
+      {
+         return "";
+      }
+
+      String[] reversedStrs = new String[strs.length];
+      for (int i = 0; i < strs.length; i++)
+         reversedStrs[i] = StringUtils.reverse(strs[i]);
+      return StringUtils.getCommonPrefix(reversedStrs);
    }
 }
