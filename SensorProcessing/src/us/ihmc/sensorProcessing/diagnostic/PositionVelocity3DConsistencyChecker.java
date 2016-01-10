@@ -50,6 +50,18 @@ public class PositionVelocity3DConsistencyChecker
       parentRegistry.addChild(registry);
    }
 
+   public void enable()
+   {
+      for (Axis axis : Axis.values)
+         delayEstimators.get(axis).enable();
+   }
+
+   public void disable()
+   {
+      for (Axis axis : Axis.values)
+         delayEstimators.get(axis).disable();
+   }
+
    public void update()
    {
       localVelocityFromFD.update();

@@ -36,6 +36,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       DelayedDoubleYoVariable delayedSignal = new DelayedDoubleYoVariable("delayedSignal", "", referenceSignal, expectedDelayInTicks, registry);
 
       DelayEstimatorBetweenTwoSignals delayEstimatorBetweenTwoSignals = new DelayEstimatorBetweenTwoSignals("delayedSignal", referenceSignal, delayedSignal, dt, registry);
+      delayEstimatorBetweenTwoSignals.enable();
 
       for (int i = 0; i < numberOfTicks; i++)
       {
@@ -76,6 +77,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       DoubleYoVariable shiftedDelayedSignal = new DoubleYoVariable("shiftedDelayedSignal", registry);
 
       DelayEstimatorBetweenTwoSignals delayEstimatorBetweenTwoSignals = new DelayEstimatorBetweenTwoSignals("delayedSignal", referenceSignal, shiftedDelayedSignal, dt, registry);
+      delayEstimatorBetweenTwoSignals.enable();
 
       for (int i = 0; i < numberOfTicks; i++)
       {
@@ -111,6 +113,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       DoubleYoVariable noisyDelayedSignal = new DoubleYoVariable("noisyDelayedSignal", registry);
 
       DelayEstimatorBetweenTwoSignals delayEstimatorBetweenTwoSignals = new DelayEstimatorBetweenTwoSignals("delayedSignal", referenceSignal, noisyDelayedSignal, dt, registry);
+      delayEstimatorBetweenTwoSignals.enable();
 
       for (int i = 0; i < numberOfTicks; i++)
       {

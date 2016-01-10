@@ -5,7 +5,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 
-public class PositionVelocity1DConsistencyChecker
+public class PositionVelocity1DConsistencyChecker implements DiagnosticUpdatable
 {
    private final YoVariableRegistry registry;
 
@@ -29,9 +29,19 @@ public class PositionVelocity1DConsistencyChecker
       localVelocityFiltered = new SimpleMovingAverageFilteredYoVariable(namePrefix + "_referenceFiltered", windowSize, localVelocityFromFD, registry);
       filteredVelocityToCheck = new SimpleMovingAverageFilteredYoVariable(namePrefix + "_filtered", windowSize, velocityToCheck, registry);
 
-      delayEstimator = new DelayEstimatorBetweenTwoSignals(namePrefix, localVelocityFiltered, filteredVelocityToCheck, dt, registry);
+      delayEstimator = new DelayEstimatorBetweenTwoSignals(namePrefix + "PositionVelocity", localVelocityFiltered, filteredVelocityToCheck, dt, registry);
 
       parentRegistry.addChild(registry);
+   }
+
+   public void enable()
+   {
+      delayEstimator.enable();
+   }
+
+   public void disable()
+   {
+      delayEstimator.disable();
    }
 
    public void setInputSignalsSMAWindow(double window)
@@ -50,6 +60,7 @@ public class PositionVelocity1DConsistencyChecker
       delayEstimator.setEstimationParameters(maxAbsoluteLead, maxAbsoluteLag, observationWindow);
    }
 
+   @Override
    public void update()
    {
       localVelocityFromFD.update();
@@ -61,5 +72,20 @@ public class PositionVelocity1DConsistencyChecker
          return;
 
       delayEstimator.update();
+   }
+
+   public boolean isEstimatingDelay()
+   {
+      return delayEstimator.isEstimatingDelay();
+   }
+
+   public double getEstimatedDelay()
+   {
+      return delayEstimator.getEstimatedDelay();
+   }
+
+   public double getConsistencyQuality()
+   {
+      return delayEstimator.getCorrelationCoefficient();
    }
 }
