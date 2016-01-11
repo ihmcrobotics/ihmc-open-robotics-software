@@ -96,7 +96,7 @@ public class DiagnosticParameters
 
    public double getJointCheckUpDuration()
    {
-      return 5.0;
+      return 2.0;
    }
 
    public double getBadCorrelation()
