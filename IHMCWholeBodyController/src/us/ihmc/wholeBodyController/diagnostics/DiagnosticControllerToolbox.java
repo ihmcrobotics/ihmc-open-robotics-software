@@ -13,7 +13,9 @@ import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointForceTrackingDelayEstimator;
+import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
+import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.WrenchSensorValidityChecker;
 
@@ -27,8 +29,12 @@ public class DiagnosticControllerToolbox
    private final Map<OneDoFJoint, OneDoFJointSensorValidityChecker> jointSensorValidityCheckers;
    private final Map<IMUDefinition, IMUSensorValidityChecker> imuSensorValidityCheckers;
    private final Map<ForceSensorDefinition, WrenchSensorValidityChecker> wrenchSensorValidityCheckers;
+
    private final Map<OneDoFJoint, PositionVelocity1DConsistencyChecker> jointPositionVelocityConsistencyCheckers;
+   private final Map<IMUDefinition, OrientationAngularVelocityConsistencyChecker> orientationAngularVelocityConsistencyCheckers;
+
    private final Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> jointForceTrackingDelayEstimators;
+   private final Map<OneDoFJoint, OneDoFJointFourierAnalysis> jointFourierAnalysisMap;
 
    private final double dt;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -47,8 +53,12 @@ public class DiagnosticControllerToolbox
       jointSensorValidityCheckers = diagnosticSensorProcessingConfiguration.getJointSensorValidityCheckers();
       imuSensorValidityCheckers = diagnosticSensorProcessingConfiguration.getIMUSensorValidityCheckers();
       wrenchSensorValidityCheckers = diagnosticSensorProcessingConfiguration.getWrenchSensorValidityCheckers();
+
       jointPositionVelocityConsistencyCheckers = diagnosticSensorProcessingConfiguration.getJointPositionVelocityConsistencyCheckers();
+      orientationAngularVelocityConsistencyCheckers = diagnosticSensorProcessingConfiguration.getIMUOrientationAngularVelocityConsistencyCheckers();
+
       jointForceTrackingDelayEstimators = diagnosticSensorProcessingConfiguration.getJointForceTrackingDelayEstimators();
+      jointFourierAnalysisMap = diagnosticSensorProcessingConfiguration.getJointFourierAnalysisMap();
 
       parentRegistry.addChild(registry);
    }
@@ -98,8 +108,18 @@ public class DiagnosticControllerToolbox
       return jointPositionVelocityConsistencyCheckers.get(joint);
    }
 
+   public OrientationAngularVelocityConsistencyChecker getIMUOrientationAngularVelocityConsistencyChecker(IMUDefinition imuDefinition)
+   {
+      return orientationAngularVelocityConsistencyCheckers.get(imuDefinition);
+   }
+
    public OneDoFJointForceTrackingDelayEstimator getJointForceTrackingDelayEstimator(OneDoFJoint joint)
    {
       return jointForceTrackingDelayEstimators.get(joint);
+   }
+
+   public OneDoFJointFourierAnalysis getJointFourierAnalysis(OneDoFJoint joint)
+   {
+      return jointFourierAnalysisMap.get(joint);
    }
 }
