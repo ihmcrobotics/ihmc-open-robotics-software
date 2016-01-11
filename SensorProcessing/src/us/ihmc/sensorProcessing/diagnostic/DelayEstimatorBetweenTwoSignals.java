@@ -147,10 +147,7 @@ public class DelayEstimatorBetweenTwoSignals
    public void update(double referenceSignalCurrentPosition, double delayedSignalCurrentPosition)
    {
       if (!enabled.getBooleanValue())
-      {
-         reset();
          return;
-      }
 
       referenceSignalBuffer.set(bufferPosition, 0, referenceSignalCurrentPosition);
       delayedSignalBuffer.set(bufferPosition, 0, delayedSignalCurrentPosition);
