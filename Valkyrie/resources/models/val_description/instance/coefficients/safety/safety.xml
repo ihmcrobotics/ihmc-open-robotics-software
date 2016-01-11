@@ -1,0 +1,18 @@
+<CoeffData>
+  <Properties>
+    <CalibrationDate/>
+    <FileGenDate date="2014-11-26" time="13:45:07.321642"/>
+  </Properties>
+  <Coeffs>
+    <Coeff id="APS1DriftSafeLimit" value="9999.0"/>
+    <Coeff id="CommTimeoutMs" value="80.0"/>
+    <Coeff id="DeltaAPSSafeLimit" value="9999.0"/>
+    <Coeff id="EncDriftSafeLimit" value="9999.0"/>
+    <Coeff id="JerkSafeLimit" value="9999.0"/>
+    <Coeff id="TemperatureSensor_MaxTemp1" value="125.0"/>
+    <Coeff id="TemperatureSensor_MaxTemp2" value="110.0"/>
+    <Coeff id="TemperatureSensor_SensorLoc1" value="1.0"/>
+    <Coeff id="TemperatureSensor_SensorLoc2" value="2.0"/>
+    <Coeff id="VelocitySafeLimit" value="9999.0"/>
+  </Coeffs>
+</CoeffData>
