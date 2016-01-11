@@ -14,6 +14,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointForceTrackingDelayEstimator;
+import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
@@ -35,6 +36,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
    private final OneDoFJointSensorValidityChecker validityChecker;
    private final PositionVelocity1DConsistencyChecker positionVelocityConsistency;
    private final OneDoFJointForceTrackingDelayEstimator forceTrackingDelay;
+   private final OneDoFJointFourierAnalysis fourierAnalysis;
 
    private final YoFunctionGenerator functionGenerator;
    private final DoubleYoVariable checkUpDuration;
@@ -86,6 +88,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
       validityChecker = toolbox.getJointSensorValidityChecker(joint);
       positionVelocityConsistency = toolbox.getJointPositionVelocityConsistencyChecker(joint);
       forceTrackingDelay = toolbox.getJointForceTrackingDelayEstimator(joint);
+      fourierAnalysis = toolbox.getJointFourierAnalysis(joint);
 
       velocityQualityMean = new DoubleYoVariable(jointName + nameSuffix + "VelocityQualityMean", registry);
       velocityQualityStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "VelocityQualityStandardDeviation", registry);
@@ -131,16 +134,17 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
    {
       if (getTimeInCurrentTask() < rampDuration.getDoubleValue())
          ramp.set(getTimeInCurrentTask() / rampDuration.getDoubleValue());
-      else if (getTimeInCurrentTask() > checkUpDuration.getDoubleValue() - rampDuration.getDoubleValue())
+      else if (getTimeInCurrentTask() > checkUpDuration.getDoubleValue() + rampDuration.getDoubleValue())
       {
          if (disableEstimators)
          {
             reportCheckUpResults();
             positionVelocityConsistency.disable();
             forceTrackingDelay.disable();
+            fourierAnalysis.disable();
             disableEstimators = false;
          }
-         ramp.set(- (getTimeInCurrentTask() - checkUpDuration.getDoubleValue()) / rampDuration.getDoubleValue());
+         ramp.set(- (getTimeInCurrentTask() - checkUpDuration.getDoubleValue() - rampDuration.getDoubleValue()) / rampDuration.getDoubleValue());
       }
       else
       {
@@ -148,6 +152,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
          {
             positionVelocityConsistency.enable();
             forceTrackingDelay.enable();
+            fourierAnalysis.enable();
             enableEstimators = false;
          }
          ramp.set(1.0);
@@ -236,7 +241,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
 
       String forceTrackingQualityMeanFormatted = doubleFormat.format(forceTrackingQualityMean.getDoubleValue());
       String forceTrackingQualityStandardDeviationFormatted = doubleFormat.format(forceTrackingQualityStandardDeviation.getDoubleValue());
-      logger.log(logLevel, "Force tracking quality for the joint: " + joint.getName() + " equals " + forceTrackingQualityMeanFormatted + "(+/-" + forceTrackingQualityStandardDeviationFormatted + "). Note: 0 means force control is probably not doing anything, and 1 force control tends to achieve to desired input.");
+      logger.log(logLevel, "Force tracking quality for the joint: " + joint.getName() + " equals " + forceTrackingQualityMeanFormatted + "(+/-" + forceTrackingQualityStandardDeviationFormatted + "). Note: 0 means force control is probably not doing anything, and 1 force control tends to achieve the desired input.");
 
       if (forceTrackingDelayMean.getDoubleValue() > diagnosticParameters.getBadDelay())
          logLevel = Level.SEVERE;
@@ -260,7 +265,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
          return true;
       }
 
-      return getTimeInCurrentTask() >= checkUpDuration.getDoubleValue();
+      return getTimeInCurrentTask() >= checkUpDuration.getDoubleValue() + 2.0 * rampDuration.getDoubleValue();
    }
 
    @Override
