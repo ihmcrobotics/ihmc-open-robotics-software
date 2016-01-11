@@ -110,9 +110,9 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters, stateEstimatorParameters);
 
-      createStateEstimator(fullRobotModel, stateEstimatorParameters, sensorProcessingConfiguration);
+      SensorOutputMapReadOnly sensorOutputMap = createStateEstimator(fullRobotModel, stateEstimatorParameters, sensorProcessingConfiguration);
 
-      DiagnosticControllerToolbox diagnosticControllerToolbox = new DiagnosticControllerToolbox(fullRobotModel, diagnosticParameters, walkingControllerParameters, yoTime, dt,
+      DiagnosticControllerToolbox diagnosticControllerToolbox = new DiagnosticControllerToolbox(fullRobotModel, sensorOutputMap, diagnosticParameters, walkingControllerParameters, yoTime, dt,
             sensorProcessingConfiguration, simulationRegistry);
       automatedDiagnosticAnalysisController = new AutomatedDiagnosticAnalysisController(diagnosticControllerToolbox, gainStream, setpointStream,
             simulationRegistry);
@@ -121,15 +121,13 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       outputWriter = new DRCSimulationOutputWriter(simulatedRobot);
       outputWriter.setFullRobotModel(fullRobotModel, null);
 
-      
-      
       int simulationTicksPerControlTick = (int) (robotModel.getEstimatorDT() / robotModel.getSimulateDT());
       simulatedRobot.setController(this, simulationTicksPerControlTick);
 
       return automatedDiagnosticConfiguration;
    }
 
-   private void createStateEstimator(SDFFullHumanoidRobotModel fullRobotModel, StateEstimatorParameters stateEstimatorParameters,
+   private SensorOutputMapReadOnly createStateEstimator(SDFFullHumanoidRobotModel fullRobotModel, StateEstimatorParameters stateEstimatorParameters,
          DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration)
    {
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
@@ -178,6 +176,8 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
             forceSensorDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitches, null, new RobotMotionStatusHolder(),
             bipedFeet, null);
       simulationRegistry.addChild(stateEstimator.getYoVariableRegistry());
+
+      return sensorReader.getSensorOutputMapReadOnly();
    }
 
    public void setDiagnosticParameters(DiagnosticParameters diagnosticParameters)
