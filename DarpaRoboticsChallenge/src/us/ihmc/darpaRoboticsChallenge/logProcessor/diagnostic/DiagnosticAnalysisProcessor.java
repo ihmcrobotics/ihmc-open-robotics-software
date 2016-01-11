@@ -20,7 +20,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.diagnostic.DelayEstimatorBetweenTwoSignals;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
-import us.ihmc.sensorProcessing.diagnostic.Online1DSignalFrequencyAnalysis;
+import us.ihmc.sensorProcessing.diagnostic.Online1DSignalFourierAnalysis;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity3DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
@@ -32,7 +32,7 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
 
    private final LogDataProcessorHelper logDataProcessorHelper;
    private final ArrayList<OneDoFJoint> analyzedJoints = new ArrayList<>();
-   private final LinkedHashMap<OneDoFJoint, Online1DSignalFrequencyAnalysis> jointVelocityFFTs = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, Online1DSignalFourierAnalysis> jointVelocityFFTs = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, PositionVelocity1DConsistencyChecker> jointVelocityCheck = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, DelayEstimatorBetweenTwoSignals> jointForceControlDelay = new LinkedHashMap<>();
 
@@ -61,7 +61,7 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
 
             analyzedJoints.add(joint);
             double fftObservationWindow = diagnosticParameters.getFFTObservationWindow();
-            Online1DSignalFrequencyAnalysis online1dSignalFrequencyAnalysis = new Online1DSignalFrequencyAnalysis(jointName, fftObservationWindow, dt, registry);
+            Online1DSignalFourierAnalysis online1dSignalFrequencyAnalysis = new Online1DSignalFourierAnalysis(jointName, fftObservationWindow, dt, registry);
             online1dSignalFrequencyAnalysis.setMagnitudeFilterBreakFrequency(diagnosticParameters.getFFTMagnitudeFilterBreakFrequency());
             online1dSignalFrequencyAnalysis.setFrequencyGlitchFilterWindow(diagnosticParameters.getFFTFrequencyGlitchFilterWindow());
             online1dSignalFrequencyAnalysis.setMinimumMagnitude(diagnosticParameters.getFFTMinimumMagnitude());
