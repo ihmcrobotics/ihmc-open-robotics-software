@@ -12,9 +12,9 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Flaky)
 @SuiteClasses
 ({
+   us.ihmc.utilities.ros.AddTwoIntsServiceTest.class,
    us.ihmc.utilities.ros.RosPointCloudPublisherSubscriberTest.class,
-   us.ihmc.utilities.ros.RosTopicPublisherSubscriberTest.class,
-   us.ihmc.utilities.ros.AddTwoIntsServiceTest.class
+   us.ihmc.utilities.ros.RosTopicPublisherSubscriberTest.class
 })
 
 public class IHMCROSToolsAFlakyTestSuite

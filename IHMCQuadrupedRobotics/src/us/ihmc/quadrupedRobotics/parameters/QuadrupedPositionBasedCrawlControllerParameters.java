@@ -12,6 +12,8 @@ public interface QuadrupedPositionBasedCrawlControllerParameters extends SwingTa
 
    public abstract double getDefaultSubCircleRadius();
 
+   public abstract double getMaxYawRate();
+
    public abstract double getDefaultCoMCloseToFinalDesiredTransitionRadius();
    
    public abstract Vector2d getDefaultDesiredCoMOffset();

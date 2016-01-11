@@ -116,9 +116,11 @@ public class QuadrupedSupportPolygon implements Serializable
       return edgeNormals;
    }
 
+   /**
+    * Return the reference frame of the first non-null footstep.
+    */
    public ReferenceFrame getReferenceFrame()
    {
-      // Return the reference frame of the first non-null footstep.
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          FramePoint footstep = footsteps.get(robotQuadrant);
@@ -128,7 +130,7 @@ public class QuadrupedSupportPolygon implements Serializable
          }
       }
 
-      throw new RuntimeException("SupportPolygon.getReferenceFrame(): should not get here. There must be at least one non null footstep");
+      throw new RuntimeException(getClass().getSimpleName() + ".getReferenceFrame(): should not get here. There must be at least one non null footstep");
    }
 
    /**
@@ -309,7 +311,7 @@ public class QuadrupedSupportPolygon implements Serializable
       }
       return null;
    }
-   
+    
    public void set(QuadrupedSupportPolygon polygon)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -411,15 +413,14 @@ public class QuadrupedSupportPolygon implements Serializable
       return ret;
    }
 
-
    /**
     * getCentroid
     *
-    * @param centroid FramePoint
+    * @param centroidToPack FramePoint
     */
-   public void getCentroid(FramePoint centroid)
+   public void getCentroid(FramePoint centroidToPack)
    {
-      centroid.set(0.0, 0.0, 0.0);
+      centroidToPack.set(0.0, 0.0, 0.0);
 
       int numberOfFootsteps = 0;
       for (RobotQuadrant quadrant: RobotQuadrant.values)
@@ -427,12 +428,12 @@ public class QuadrupedSupportPolygon implements Serializable
          FramePoint footstep = footsteps.get(quadrant);
          if (useThisLeg(footstep))
          {
-            centroid.add(footstep);
+            centroidToPack.add(footstep);
             numberOfFootsteps++;
          }
       }
 
-      centroid.scale(1.0 / ((double) numberOfFootsteps));
+      centroidToPack.scale(1.0 / ((double) numberOfFootsteps));
    }
 
    /**
@@ -1049,6 +1050,7 @@ public class QuadrupedSupportPolygon implements Serializable
     *
     * @param removeSwingLeg boolean
     * @return FramePoint
+    * @deprecated Creates garbage. Use getCentroid().
     */
    public FramePoint getCentroidFramePoint()
    {
@@ -1388,7 +1390,8 @@ public class QuadrupedSupportPolygon implements Serializable
          FramePoint footstep = footsteps.get(quadrant);
          if (useThisLeg(footstep))
          {
-            FramePoint rotatedPoint = footstep.yawAboutPoint(centroid, yaw);
+            FramePoint rotatedPoint = new FramePoint();
+            footstep.yawAboutPoint(centroid, rotatedPoint, yaw);
             footstep.set(rotatedPoint);
          }
       }
@@ -1809,6 +1812,18 @@ public class QuadrupedSupportPolygon implements Serializable
       QuadrupedSupportPolygon newPolygon = new QuadrupedSupportPolygon(this);
       newPolygon.deleteLeg(legName);
       return newPolygon;
+   }
+   
+   public void packPolygonWithoutLeg(RobotQuadrant legToDelete, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
+   {
+      quadrupedSupportPolygonToPack.clear();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (robotQuadrant != legToDelete)
+         {
+            quadrupedSupportPolygonToPack.setFootstep(robotQuadrant, getFootstep(robotQuadrant));
+         }
+      }
    }
 
    public void deleteLeg(RobotQuadrant legName)
@@ -2531,8 +2546,6 @@ public class QuadrupedSupportPolygon implements Serializable
       }
       
       return false;
-      
-      
    }
 
    public RobotQuadrant getClosestFootStep(FramePoint midPoint)
@@ -2599,6 +2612,11 @@ public class QuadrupedSupportPolygon implements Serializable
    {
       computeFramePolygonConvex2d();
       polygon.setAndUpdate(frameConvexPolygon2d);
+   }
+
+   public void clear()
+   {
+      footsteps.clear();
    }
 
 }

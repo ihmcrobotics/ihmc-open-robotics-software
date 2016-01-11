@@ -102,7 +102,7 @@ KVelActuatorValve
 <Title>
 Stiffness
 </Title>
-<Entry Boxes>l_leg_hpystiffness,r_leg_hpystiffness,l_leg_knystiffness,r_leg_knystiffness,l_leg_hpxstiffness,r_leg_hpxstiffness,chestCoMOffsetX,chestCoMOffsetZ,back_bkystiffness,l_leg_hpzstiffness,r_leg_hpzstiffness</Entry Boxes>
+<Entry Boxes>l_leg_hpystiffness,r_leg_hpystiffness,l_leg_knystiffness,r_leg_knystiffness,l_leg_hpxstiffness,r_leg_hpxstiffness,back_bkystiffness,l_leg_hpzstiffness,r_leg_hpzstiffness</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>

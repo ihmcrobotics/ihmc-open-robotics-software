@@ -11,36 +11,42 @@ import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
 
 public class DesiredVelocityProvider implements VectorProvider, PacketConsumer<DesiredVelocityPacket>
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("desiredVelocityProvider");
-   private final YoFrameVector desiredBodyVelocity = new YoFrameVector("desiredBodyVelocity", null, registry);
+   private final YoVariableRegistry registry;
+   private final YoFrameVector desiredVelocity;
    private final Vector3d yoVelocityTemporary = new Vector3d();
    private final Vector3d velocity = new Vector3d();
    private final AtomicReference<Vector3d> lastUpdatedVelocity = new AtomicReference<Vector3d>(yoVelocityTemporary);
    
-   public DesiredVelocityProvider(GlobalDataProducer dataProducer, YoVariableRegistry parentRegistry)
+   public DesiredVelocityProvider(GlobalDataProducer dataProducer, String prefix, YoVariableRegistry parentRegistry)
    {
       dataProducer.attachListener(DesiredVelocityPacket.class, this);
-      parentRegistry.addChild(registry);
-      desiredBodyVelocity.attachVariableChangedListener(new VariableChangedListener()
+      
+      String name = YoFrameVariableNameTools.createName(prefix, "desiredVelocity", "");
+      registry = new YoVariableRegistry(name + "Provider");
+      desiredVelocity = new YoFrameVector(name, null, registry);
+      desiredVelocity.attachVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            desiredBodyVelocity.get(yoVelocityTemporary);
+            desiredVelocity.get(yoVelocityTemporary);
             lastUpdatedVelocity.set(yoVelocityTemporary);
          }
       });
+      parentRegistry.addChild(registry);
    }
    
    public DesiredVelocityProvider(GlobalDataProducer dataProducer)
    {
       dataProducer.attachListener(DesiredVelocityPacket.class, this);
+      registry = null;
+      desiredVelocity = null;
    }
 
    @Override 

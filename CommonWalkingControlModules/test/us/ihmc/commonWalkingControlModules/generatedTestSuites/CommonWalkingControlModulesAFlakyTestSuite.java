@@ -12,6 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Flaky)
 @SuiteClasses
 ({
+   us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepTest.class,
    us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.CutForceControlHelperTest.class
 })
 

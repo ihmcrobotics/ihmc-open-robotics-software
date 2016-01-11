@@ -461,13 +461,14 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       FramePoint2d pointToYawAbout = new FramePoint2d(theFrame);
       double yaw = Math.PI;
 
-      FramePoint2d result = original.yawAboutPoint(pointToYawAbout, yaw);
+      FramePoint2d result = new FramePoint2d(theFrame); 
+      original.yawAboutPoint(pointToYawAbout, result, yaw);
       assertEquals("Should be equal", result.getX(), -original.getX(), epsilon);
       assertEquals("Should be equal", result.getY(), -original.getY(), epsilon);
       try
       {
          FramePoint2d pointToYawAbout2 = new FramePoint2d(aFrame);
-         original.yawAboutPoint(pointToYawAbout2, yaw);
+         original.yawAboutPoint(pointToYawAbout2, result, yaw);
          fail("Should have thrown ReferenceFrameMismatchException");
       }
       catch (ReferenceFrameMismatchException rfme)

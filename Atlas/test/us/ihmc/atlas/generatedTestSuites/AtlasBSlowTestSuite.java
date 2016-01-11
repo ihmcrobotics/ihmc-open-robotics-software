@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Slow)
 @SuiteClasses
 ({
-   us.ihmc.atlas.AtlasPushRecoveryWalkingTest.class
+   us.ihmc.atlas.AtlasPushRecoveryTest.class
 })
 
 public class AtlasBSlowTestSuite
