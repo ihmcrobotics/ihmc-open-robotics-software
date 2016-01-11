@@ -152,23 +152,7 @@ task deployLocal(dependsOn: jar) {
 	}
 }
 
-task mipsservercmake(type:Exec) {
-	def projectDir = project.buildscript.sourceFile.parent
-	
-	mkdir new File(projectDir, "cbuild")
-		
-	workingDir "${projectDir}/cbuild"
-	commandLine 'cmake', '..'
-
-}
-
-task mipsservermake(type:Exec, dependsOn: 'mipsservercmake') {
-	def projectDir = project.buildscript.sourceFile.parent
-	workingDir "${projectDir}/cbuild"
-	commandLine 'make'
-}
-
-task deploy(dependsOn: ['jar', 'mipsservermake']) {
+task deploy(dependsOn: ['jar']) {
 	
 	def projectDir = project.buildscript.sourceFile.parent 
 	def directory = 'valkyrie'
@@ -200,15 +184,6 @@ task deploy(dependsOn: ['jar', 'mipsservermake']) {
 				def scriptDir = new File(projectDir, "launchScripts/")
 				def scriptDirCollection = files { scriptDir.listFiles() }
 				put scriptDirCollection, directory
-				
-				def microstrainCalibrator = new File(projectDir, "cbuild/csrc/MicrostrainCalibrator/MicrostrainCalibrator")
-				def microstrainServer = new File(projectDir, "cbuild/csrc/MicrostrainMIPServer/MicrostrainMipServer")
-				
-				put microstrainCalibrator, directory
-				put microstrainServer, directory
-				
-				execute 'chmod 777 ' + directory + '/MicrostrainCalibrator'
-				execute 'chmod 777 ' + directory + '/MicrostrainMipServer'
 				
 				scriptDirCollection.each
 				{
