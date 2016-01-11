@@ -6,6 +6,7 @@ import java.util.EnumMap;
 
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -22,13 +23,15 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
 
    private final EnumMap<Axis, DelayEstimatorBetweenTwoSignals> delayEstimators = new EnumMap<>(Axis.class);
 
+   private final FrameVector tempAngularVelocity = new FrameVector();
+
    public OrientationAngularVelocityConsistencyChecker(String namePrefix, YoFrameQuaternion orientation, YoFrameVector angularVelocityToCheck, double updateDT,
          YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + "OrientationVelocityCheck");
       localVelocityFromFD = new FiniteDifferenceAngularVelocityYoFrameVector(namePrefix + "referenceFD", orientation, updateDT, registry);
       int windowSize = 10;
-      localVelocityFiltered = createSimpleMovingAverageFilteredYoFrameVector(namePrefix, "_referenceFiltered", windowSize, localVelocityFromFD, registry);
+      localVelocityFiltered = SimpleMovingAverageFilteredYoFrameVector.createSimpleMovingAverageFilteredYoFrameVector(namePrefix, "_referenceFiltered", windowSize, angularVelocityToCheck.getReferenceFrame(), registry);
       filteredVelocityToCheck = createSimpleMovingAverageFilteredYoFrameVector(namePrefix, "_filtered", windowSize, angularVelocityToCheck, registry);
 
       DelayEstimatorBetweenTwoSignals xVelocityDelayEstimator = new DelayEstimatorBetweenTwoSignals(namePrefix + "WX", localVelocityFiltered.getYoX(), filteredVelocityToCheck.getYoX(), updateDT, registry);
@@ -42,13 +45,13 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
       parentRegistry.addChild(registry);
    }
 
-   public void enable()
+   public void enableAll()
    {
       for (Axis axis : Axis.values)
          delayEstimators.get(axis).enable();
    }
 
-   public void disable()
+   public void disableAll()
    {
       for (Axis axis : Axis.values)
          delayEstimators.get(axis).disable();
@@ -58,7 +61,9 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
    public void update()
    {
       localVelocityFromFD.update();
-      localVelocityFiltered.update();
+      localVelocityFromFD.getFrameTupleIncludingFrame(tempAngularVelocity);
+      tempAngularVelocity.changeFrame(localVelocityFiltered.getReferenceFrame());
+      localVelocityFiltered.update(tempAngularVelocity);
       filteredVelocityToCheck.update();
 
       if (!localVelocityFiltered.getHasBufferWindowFilled())
@@ -66,5 +71,30 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
 
       for (Axis axis : Axis.values)
          delayEstimators.get(axis).update();
+   }
+
+   public boolean isEstimatingDelayAll()
+   {
+      for (Axis axis : Axis.values)
+      {
+         if (!delayEstimators.get(axis).isEstimatingDelay())
+            return false;
+      }
+      return true;
+   }
+
+   public boolean isEstimatingDelay(Axis axis)
+   {
+      return delayEstimators.get(axis).isEstimatingDelay();
+   }
+
+   public double getCorrelation(Axis axis)
+   {
+      return delayEstimators.get(axis).getCorrelationCoefficient();
+   }
+
+   public double getEstimatedDelay(Axis axis)
+   {
+      return delayEstimators.get(axis).getEstimatedDelay();
    }
 }
