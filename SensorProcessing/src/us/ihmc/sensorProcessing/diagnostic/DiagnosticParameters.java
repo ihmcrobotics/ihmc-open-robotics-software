@@ -73,7 +73,15 @@ public class DiagnosticParameters
 
    public double getFFTObservationWindow()
    {
-      return 1.0;
+      switch (diagnosticEnvironment)
+      {
+      case RUNTIME_CONTROLLER:
+         return 1.0;
+      case OFFLINE_LOG:
+      case RUNTIME_EXTERNAL_MODULE:
+      default:
+         return 1.0;
+      }
    }
 
    public double getCheckUpOscillationPositionAmplitude()
@@ -88,7 +96,7 @@ public class DiagnosticParameters
 
    public double getJointCheckUpDuration()
    {
-      return 3.0;
+      return 5.0;
    }
 
    public double getBadCorrelation()
@@ -109,5 +117,10 @@ public class DiagnosticParameters
    public double getGoodDelay()
    {
       return 0.01;
+   }
+
+   public String getPelvisIMUName()
+   {
+      return null;
    }
 }

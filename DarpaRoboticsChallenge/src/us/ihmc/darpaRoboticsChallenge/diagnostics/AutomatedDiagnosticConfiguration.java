@@ -11,9 +11,11 @@ import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.OneDoFJointCheckUpDiagnosticTask;
+import us.ihmc.wholeBodyController.diagnostics.PelvisIMUCheckUpDiagnosticTask;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticParallelTask;
 import us.ihmc.wholeBodyController.diagnostics.utils.WaitDiagnosticTask;
 
@@ -87,5 +89,20 @@ public class AutomatedDiagnosticConfiguration
             diagnosticController.submitDiagnostic(checkUp);
          }
       }
+   }
+
+   public void addPelvisIMUCheckUpDiagnostic()
+   {
+      DiagnosticParameters diagnosticParameters = toolbox.getDiagnosticParameters();
+      String pelvisIMUName = diagnosticParameters.getPelvisIMUName();
+      if (pelvisIMUName == null || pelvisIMUName.isEmpty())
+      {
+         System.err.println(getClass().getSimpleName() + ": Cannot create the pelvis IMU check up diagnostic without a pelvisIMUName to look for.");
+         return;
+      }
+
+      PelvisIMUCheckUpDiagnosticTask checkUp = new PelvisIMUCheckUpDiagnosticTask(pelvisIMUName, toolbox, controllerRegistry);
+      checkUp.setupForLogging();
+      diagnosticController.submitDiagnostic(checkUp);
    }
 }

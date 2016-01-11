@@ -80,7 +80,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
    public void startSimulation()
    {
-      DiagnosticLoggerConfiguration.setupLogging(simulatedRobot.getYoTime(), getClass());
+      DiagnosticLoggerConfiguration.setupLogging(simulatedRobot.getYoTime(), getClass(), robotModel.getSimpleRobotName());
 
       SimulationConstructionSetParameters simulationParameters = new SimulationConstructionSetParameters(true, 16000);
       SimulationConstructionSet scs = new SimulationConstructionSet(simulatedRobot, simulationParameters);
@@ -90,7 +90,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       scs.startOnAThread();
    }
 
-   public void createDiagnosticController()
+   public AutomatedDiagnosticConfiguration createDiagnosticController()
    {
       simulatedRobot = robotModel.createSdfRobot(false);
 
@@ -125,6 +125,8 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       
       int simulationTicksPerControlTick = (int) (robotModel.getEstimatorDT() / robotModel.getSimulateDT());
       simulatedRobot.setController(this, simulationTicksPerControlTick);
+
+      return automatedDiagnosticConfiguration;
    }
 
    private void createStateEstimator(SDFFullHumanoidRobotModel fullRobotModel, StateEstimatorParameters stateEstimatorParameters,
@@ -223,11 +225,6 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    public void setSCSCameraFix(double fixX, double fixY, double fixZ)
    {
       scsCameraFix.set(fixX, fixY, fixZ);
-   }
-
-   public AutomatedDiagnosticConfiguration getAutomatedDiagnosticConfiguration()
-   {
-      return automatedDiagnosticConfiguration;
    }
 
    @Override
