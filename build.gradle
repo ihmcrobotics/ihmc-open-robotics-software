@@ -75,7 +75,7 @@ remotes
 {
 	valkyrieRealtimeComputer
 	{
-		host = '10.185.0.30'
+		host = project.hasProperty('valkyrie_link_ip')?"${valkyrie_realtime_ip}":"invalid"
 		
 		// Set the username and password in ~/.gradle/gradle.properties.
         user = project.hasProperty('valkyrie_realtime_username')?"${valkyrie_realtime_username}":"invalid"
@@ -86,7 +86,7 @@ remotes
 	
 	valkyrieNonRealtimeComputer
 	{
-		host = '10.185.0.31'
+		host = project.hasProperty('valkyrie_zelda_ip')?"${valkyrie_realtime_ip}":"invalid"
 		
 		// Set the username and password in ~/.gradle/gradle.properties.
         user = project.hasProperty('valkyrie_realtime_username')?"${valkyrie_realtime_username}":"invalid"
@@ -178,6 +178,11 @@ task deploy(dependsOn: ['jar', 'mipsservermake']) {
     	{
     		throw new GradleException("Please set valkyrie_realtime_username and valkyrie_realtime_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
     	}
+
+		if(!project.hasProperty('valkyrie_link_ip') || !project.hasProperty('valkyrie_zelda_ip'))
+		{
+			throw new GradleException("Please set valkyrie_link_ip and valkyrie_zelda_ip in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+		}
 	
 		sshexec {
 			session(remotes.valkyrieRealtimeComputer)
