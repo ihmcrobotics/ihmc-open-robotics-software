@@ -1,0 +1,11 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="waist">
+
+    <xacro:include filename="xacro/mechanisms/mechanisms.xacro"/>
+
+    <xacro:macro name="waist" params="j1_serial_number waist_left_actuator_serial waist_right_actuator_serial" >
+    	<xacro:simple_mechanism name="torso_yaw" serial_number="${j1_serial_number}" node="${TrunkYawNode}"/>
+
+    	<xacro:two_active_joint_mechanism mechanism_name="waist" actuator0_name="waistLeftActuator" actuator1_name="waistRightActuator" joint0_name="pitch" joint1_name="roll" actuator0_serial="${waist_left_actuator_serial}" actuator1_serial="${waist_right_actuator_serial}" actuator0_node="${WaistLeftActuatorNode}" actuator1_node="${WaistRightActuatorNode}" />
+    </xacro:macro>
+
+</robot>

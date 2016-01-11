@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/head/joint_limits">
+  
+  <xacro:property name="LowerNeckPitchTorqueLimit" value="26" />
+  <xacro:property name="NeckYawTorqueLimit" value="26" />
+  <xacro:property name="UpperNeckPitchTorqueLimit" value="26" />
+
+  <xacro:property name="LowerNeckPitchPositionLimit_Lower" value="0" />
+  <xacro:property name="NeckYawPositionLimit_Lower" value="-1.04719755" />
+  <xacro:property name="UpperNeckPitchPositionLimit_Lower" value="-0.872" />
+
+  <xacro:property name="LowerNeckPitchPositionLimit_Upper" value="1.162" />
+  <xacro:property name="NeckYawPositionLimit_Upper" value="1.04719755" />
+  <xacro:property name="UpperNeckPitchPositionLimit_Upper" value="0.0" />
+
+  <xacro:property name="LowerNeckPitchVelocityLimit" value="5" />
+  <xacro:property name="NeckYawVelocityLimit" value="5" />
+  <xacro:property name="UpperNeckPitchVelocityLimit" value="5" />
+</robot>

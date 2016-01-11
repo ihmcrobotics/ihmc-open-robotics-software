@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/leg/dh_parameters">
+
+  <xacro:property name="HipYawFrameOrigin_X" value="0.0"/>
+  <xacro:property name="HipYawFrameOrigin_Y" value="${reflect * 0.1016}"/>
+  <xacro:property name="HipYawFrameOrigin_Z" value="-0.1853"/>
+
+  <xacro:property name="HipYawFrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="HipYawFrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="HipYawFrameOrientation_Yaw" value="0.0"/>
+
+  <xacro:property name="HipRollFrameOrigin_X" value="0.0"/>
+  <xacro:property name="HipRollFrameOrigin_Y" value="0.0"/>
+  <xacro:property name="HipRollFrameOrigin_Z" value="0.0"/>
+
+  <xacro:property name="HipRollFrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="HipRollFrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="HipRollFrameOrientation_Yaw" value="0.0"/>
+
+  <xacro:property name="HipPitchFrameOrigin_X" value="0.0"/>
+  <xacro:property name="HipPitchFrameOrigin_Y" value="0.0"/>
+  <xacro:property name="HipPitchFrameOrigin_Z" value="-0.0609"/>
+
+  <xacro:property name="HipPitchFrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="HipPitchFrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="HipPitchFrameOrientation_Yaw" value="0.0"/>
+
+  <xacro:property name="KneePitchFrameOrigin_X" value="0.000112225"/>
+  <xacro:property name="KneePitchFrameOrigin_Y" value="${reflect * 0.0361046}"/>
+  <xacro:property name="KneePitchFrameOrigin_Z" value="-0.430959"/>
+
+  <xacro:property name="KneePitchFrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="KneePitchFrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="KneePitchFrameOrientation_Yaw" value="0.0"/>
+
+  <xacro:property name="AnklePitchFrameOrigin_X" value="-0.0102381"/>
+  <xacro:property name="AnklePitchFrameOrigin_Y" value="0.0"/>
+  <xacro:property name="AnklePitchFrameOrigin_Z" value="-0.40627"/>
+
+  <xacro:property name="AnklePitchFrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="AnklePitchFrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="AnklePitchFrameOrientation_Yaw" value="0.0"/>
+
+  <xacro:property name="AnkleRollFrameOrigin_X" value="0.0"/>
+  <xacro:property name="AnkleRollFrameOrigin_Y" value="0.0"/>
+  <xacro:property name="AnkleRollFrameOrigin_Z" value="0.0"/>
+
+  <xacro:property name="AnkleRollFrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="AnkleRollFrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="AnkleRollFrameOrientation_Yaw" value="0.0"/>
+
+</robot>

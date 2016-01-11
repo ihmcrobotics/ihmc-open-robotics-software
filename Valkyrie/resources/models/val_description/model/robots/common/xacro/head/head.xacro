@@ -1,0 +1,99 @@
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="head">
+
+  <xacro:include filename="$(find val_description)/common/xacro/joint_names/valkyrie_joint_names.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/actuator_names/valkyrie_actuator_names.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/nodes/valkyrie_nodes.xacro"/>
+  <xacro:include filename="$(find val_description)/common/xacro/api/valkyrie_api.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/joint_axes.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/link_names.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/joint_limits.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/frame_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/mass_parameters.xacro"/>
+  
+  <xacro:property name="NJ3_Link_Radius" value="0.139"/>
+
+  <xacro:macro name="include_head" params="lower_neck_pitch_root_link">
+  </xacro:macro>
+
+  <xacro:macro name="make_head" params="head_root_link">
+
+    <xacro:standard_link name="${LowerNeckPitchLinkName}"
+                        mass="${LowerNeckPitchLinkMass}"
+                        origin_xyz="${LowerNeckPitchLinkComPosition}"
+                        origin_rpy="0 0 0"
+                        ixx="${LowerNeckPitchLinkInertia_IXX}" ixy="${LowerNeckPitchLinkInertia_IXY}" ixz="${LowerNeckPitchLinkInertia_IXZ}"
+                        iyy="${LowerNeckPitchLinkInertia_IYY}" iyz="${LowerNeckPitchLinkInertia_IYZ}" izz="${LowerNeckPitchLinkInertia_IZZ}"
+                        visual_mesh="${mesh_root}/head/neckj1.dae"
+                        collision_mesh="${mesh_root}/head/neckj1.dae"/>
+
+    <xacro:standard_link name="${NeckYawLinkName}"
+                        mass="${NeckYawLinkMass}"
+                        origin_xyz="${NeckYawLinkComPosition}"
+                        origin_rpy="0 0 0"
+                        ixx="${NeckYawLinkInertia_IXX}" ixy="${NeckYawLinkInertia_IXY}" ixz="${NeckYawLinkInertia_IXZ}"
+                        iyy="${NeckYawLinkInertia_IYY}" iyz="${NeckYawLinkInertia_IYZ}" izz="${NeckYawLinkInertia_IZZ}"
+                        visual_mesh="${mesh_root}/head/neckj2.dae"
+                        collision_mesh="${mesh_root}/head/neckj2.dae" />
+
+    <xacro:standard_link name="${UpperNeckPitchLinkName}"
+                       mass="${UpperNeckPitchLinkMass}"
+                       origin_xyz="${UpperNeckPitchLinkComPosition}"
+                       ixx="${UpperNeckPitchLinkInertia_IXX}" ixy="${UpperNeckPitchLinkInertia_IXY}" ixz="${UpperNeckPitchLinkInertia_IXZ}"
+                       iyy="${UpperNeckPitchLinkInertia_IYY}" iyz="${UpperNeckPitchLinkInertia_IYZ}" izz="${UpperNeckPitchLinkInertia_IZZ}"
+                       origin_rpy="0 0 0"
+                       visual_mesh="${mesh_root}/head/head_multisense_no_visor.dae"
+                       collision_mesh="${mesh_root}/head/head_multisense_no_visor.dae"/>
+
+    <xacro:revolute_joint_ex jointName="${LowerNeckPitchJointName}"
+                          parent="${LowerNeckPitchParentLinkName}" child="${LowerNeckPitchLinkName}"
+                          origin_xyz="${LowerNeckPitchFrameOrigin_X} ${LowerNeckPitchFrameOrigin_Y} ${LowerNeckPitchFrameOrigin_Z}"
+                          origin_rpy="${LowerNeckPitchFrameOrientation_Roll} ${LowerNeckPitchFrameOrientation_Roll} ${LowerNeckPitchFrameOrientation_Yaw}" 
+                          axis="${LowerNeckPitchRotationAxis}"
+                          damping="0.1" friction="0.0">
+      <limit effort="${LowerNeckPitchTorqueLimit}" lower="${LowerNeckPitchPositionLimit_Lower}" upper="${LowerNeckPitchPositionLimit_Upper}" velocity="${LowerNeckPitchVelocityLimit}"/>
+      <controller_gains Kp="20000" Kd="0"/>
+    </xacro:revolute_joint_ex>
+
+    <xacro:revolute_joint_ex jointName="${NeckYawJointName}"
+                          parent="${LowerNeckPitchLinkName}" child="${NeckYawLinkName}"
+                          origin_xyz="${NeckYawFrameOrigin_X} ${NeckYawFrameOrigin_Y} ${NeckYawFrameOrigin_Z}"
+                          origin_rpy="${NeckYawFrameOrientation_Roll} ${NeckYawFrameOrientation_Pitch} ${NeckYawFrameOrientation_Yaw}" 
+                          axis="${NeckYawRotationAxis}"
+                          damping="0.1" friction="0.0">
+      <limit effort="${NeckYawTorqueLimit}" lower="${NeckYawPositionLimit_Lower}" upper="${NeckYawPositionLimit_Upper}" velocity="${NeckYawVelocityLimit}"/>
+      <controller_gains Kp="20000" Kd="0"/>
+    </xacro:revolute_joint_ex>
+
+    <xacro:revolute_joint_ex jointName="${UpperNeckPitchJointName}"
+                          parent="${NeckYawLinkName}" child="${UpperNeckPitchLinkName}"
+                          origin_xyz="${UpperNeckPitchFrameOrigin_X} ${UpperNeckPitchFrameOrigin_Y} ${UpperNeckPitchFrameOrigin_Z}"
+                          origin_rpy="${UpperNeckPitchFrameOrientation_Roll} ${UpperNeckPitchFrameOrientation_Pitch} ${UpperNeckPitchFrameOrientation_Yaw}" 
+                          axis="${UpperNeckPitchRotationAxis}"
+                          damping="0.1" friction="0.0">
+      <limit effort="${UpperNeckPitchTorqueLimit}" lower="${UpperNeckPitchPositionLimit_Lower}" upper="${UpperNeckPitchPositionLimit_Upper}" velocity="${UpperNeckPitchVelocityLimit}"/>
+      <controller_gains Kp="20000" Kd="0"/>
+    </xacro:revolute_joint_ex>
+  </xacro:macro>
+
+
+    <xacro:macro name="include_multisense_sim">
+      <xacro:fixed_joint jointName="multisense_head_root_joint" parent="${UpperNeckPitchLinkName}" child="head" origin_xyz="0.183585961 0.0 0.075353826" origin_rpy="-3.14159 0.130899694 0.0" />
+    </xacro:macro>
+
+    <xacro:macro name="include_multisense_hw">
+      <xacro:massless_virtual_link name="multisense_root_link" origin_xyz="0 0 0" origin_rpy="0 0 0"/>
+      <xacro:fixed_joint jointName="multisense_head_root_joint" parent="${UpperNeckPitchLinkName}" child="multisense_root_link" origin_xyz="0.183585961 0.0 0.075353826" origin_rpy="-3.14159 0.130899694 0.0" />
+    </xacro:macro>
+
+    <xacro:macro name="neck_transmissions_hw">
+      <xacro:simple_transmission jointName="${LowerNeckPitchJointName}" actuatorName="${LowerNeckPitchActuatorName}" nodeName="${LowerNeckPitchNode}" actuatorApi="${LowerNeckPitchApi}"/>
+      <xacro:simple_transmission jointName="${NeckYawJointName}" actuatorName="${NeckYawActuatorName}" nodeName="${NeckYawNode}" actuatorApi="${NeckYawApi}"/>
+      <xacro:simple_transmission jointName="${UpperNeckPitchJointName}" actuatorName="${UpperNeckPitchActuatorName}" nodeName="${UpperNeckPitchNode}" actuatorApi="${UpperNeckPitchApi}"/>
+    </xacro:macro>
+
+    <xacro:macro name="neck_transmissions_sim">
+      <xacro:simple_transmission jointName="${LowerNeckPitchJointName}" actuatorName="${LowerNeckPitchActuatorName}" nodeName="${LowerNeckPitchNode}" actuatorApi="${SimApi}"/>
+      <xacro:simple_transmission jointName="${NeckYawJointName}" actuatorName="${NeckYawActuatorName}" nodeName="${NeckYawNode}" actuatorApi="${SimApi}"/>
+      <xacro:simple_transmission jointName="${UpperNeckPitchJointName}" actuatorName="${UpperNeckPitchActuatorName}" nodeName="${UpperNeckPitchNode}" actuatorApi="${SimApi}"/>
+    </xacro:macro>
+</robot>
