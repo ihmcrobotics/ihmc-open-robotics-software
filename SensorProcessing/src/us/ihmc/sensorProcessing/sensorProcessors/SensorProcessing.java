@@ -282,6 +282,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
          String imuName = imuDefinition.getName();
          allIMUSensorNames.add(imuName);
+         ReferenceFrame sensorFrame = imuDefinition.getIMUFrame();
 
          prefix = IMU_ORIENTATION.getProcessorNamePrefix(RAW);
          suffix = IMU_ORIENTATION.getProcessorNameSuffix(imuName, -1);
@@ -292,14 +293,14 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
          prefix = IMU_ANGULAR_VELOCITY.getProcessorNamePrefix(RAW);
          suffix = IMU_ANGULAR_VELOCITY.getProcessorNameSuffix(imuName, -1);
-         YoFrameVector rawAngularVelocity = new YoFrameVector(prefix, suffix, worldFrame, registry);
+         YoFrameVector rawAngularVelocity = new YoFrameVector(prefix, suffix, sensorFrame, registry);
          inputAngularVelocities.put(imuDefinition, rawAngularVelocity);
          intermediateAngularVelocities.put(imuDefinition, rawAngularVelocity);
          processedAngularVelocities.put(imuDefinition, new ArrayList<ProcessingYoVariable>());
 
          prefix = IMU_LINEAR_ACCELERATION.getProcessorNamePrefix(RAW);
          suffix = IMU_LINEAR_ACCELERATION.getProcessorNameSuffix(imuName, -1);
-         YoFrameVector rawLinearAcceleration = new YoFrameVector(prefix, suffix, worldFrame, registry);
+         YoFrameVector rawLinearAcceleration = new YoFrameVector(prefix, suffix, sensorFrame, registry);
          inputLinearAccelerations.put(imuDefinition, rawLinearAcceleration);
          intermediateLinearAccelerations.put(imuDefinition, rawLinearAcceleration);
          processedLinearAccelerations.put(imuDefinition, new ArrayList<ProcessingYoVariable>());
