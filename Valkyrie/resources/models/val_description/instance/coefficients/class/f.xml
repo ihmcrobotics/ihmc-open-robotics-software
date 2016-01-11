@@ -1,0 +1,25 @@
+<CoeffData>
+  <Properties>
+    <CalibrationDate/>
+    <FileGenDate date="2013-10-25" time="21:34:25.451782"/>
+  </Properties>
+  <Type id="turbodriver" />
+  <Processor id="linear/turbo_bootloader.bin" />
+  <ScheduleFile id="turbo.yaml" />
+  <Coeffs>
+    <Coeff id="CurrentSafeLimit" value="8.5"/>
+    <Coeff id="EncoderCPR" value="543.0"/>
+    <Coeff id="FluxLinkage" value="0.01578"/>
+    <Coeff id="Inductance_DAxis" value="0.00089"/>
+    <Coeff id="Inductance_QAxis" value="0.00141"/>
+    <Coeff id="JointGearRatio" value="160.0"/>
+    <Coeff id="MotorWindingType" value="0.0"/>
+    <Coeff id="NumberOfPoles" value="6.0"/>
+    <Coeff id="JointOutputAPS_CountsToRad" value="0.00076699038"/>
+    <Coeff id="Renishaw_CountsToRad" value="5.8516723e-09"/>
+    <Coeff id="SpringStiffness" value="1180.0"/>
+    <Coeff id="WindingResistance" value="2.112"/>
+    <Coeff id="PositionControl_enableInLPF" value="1"/>
+    <Coeff id="PositionControl_Input_fc_Hz" value="30"/>
+  </Coeffs>
+</CoeffData>

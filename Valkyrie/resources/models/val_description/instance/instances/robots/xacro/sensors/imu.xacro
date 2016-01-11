@@ -1,0 +1,9 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="imu">
+
+	<xacro:macro name="microstrain_imu" params="name serial_number node">
+		<Device id="${name}" type="imu">
+			<SerialNumber id="${serial_number}" />
+			<Node id="${node}" />
+		</Device>
+	</xacro:macro>
+</robot>
