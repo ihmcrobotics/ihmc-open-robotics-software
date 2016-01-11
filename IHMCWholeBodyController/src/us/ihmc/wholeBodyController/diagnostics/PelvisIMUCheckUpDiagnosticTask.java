@@ -81,8 +81,8 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       rampDuration.set(0.2 * checkUpDuration.getDoubleValue());
       ramp = new DoubleYoVariable(imuName + nameSuffix + "SignalRamp", registry);
 
-      validityChecker = toolbox.getIMUSensorValidityChecker(imuToCheck);
-      orientationVelocityConsistencyChecker = toolbox.getIMUOrientationAngularVelocityConsistencyChecker(imuToCheck);
+      validityChecker = toolbox.getIMUSensorValidityChecker(imuName);
+      orientationVelocityConsistencyChecker = toolbox.getIMUOrientationAngularVelocityConsistencyChecker(imuName);
 
       DoubleYoVariable yoTime = toolbox.getYoTime();
       functionGenerator = new YoFunctionGenerator(imuName + nameSuffix, yoTime, registry);

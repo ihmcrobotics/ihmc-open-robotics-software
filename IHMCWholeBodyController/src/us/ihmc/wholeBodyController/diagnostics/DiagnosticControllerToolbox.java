@@ -27,11 +27,11 @@ public class DiagnosticControllerToolbox
    private final DiagnosticParameters diagnosticParameters;
 
    private final Map<OneDoFJoint, OneDoFJointSensorValidityChecker> jointSensorValidityCheckers;
-   private final Map<IMUDefinition, IMUSensorValidityChecker> imuSensorValidityCheckers;
+   private final Map<String, IMUSensorValidityChecker> imuSensorValidityCheckers;
    private final Map<ForceSensorDefinition, WrenchSensorValidityChecker> wrenchSensorValidityCheckers;
 
    private final Map<OneDoFJoint, PositionVelocity1DConsistencyChecker> jointPositionVelocityConsistencyCheckers;
-   private final Map<IMUDefinition, OrientationAngularVelocityConsistencyChecker> orientationAngularVelocityConsistencyCheckers;
+   private final Map<String, OrientationAngularVelocityConsistencyChecker> orientationAngularVelocityConsistencyCheckers;
 
    private final Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> jointForceTrackingDelayEstimators;
    private final Map<OneDoFJoint, OneDoFJointFourierAnalysis> jointFourierAnalysisMap;
@@ -93,9 +93,9 @@ public class DiagnosticControllerToolbox
       return jointSensorValidityCheckers.get(joint);
    }
 
-   public IMUSensorValidityChecker getIMUSensorValidityChecker(IMUDefinition imuDefinition)
+   public IMUSensorValidityChecker getIMUSensorValidityChecker(String imuName)
    {
-      return imuSensorValidityCheckers.get(imuDefinition);
+      return imuSensorValidityCheckers.get(imuName);
    }
 
    public WrenchSensorValidityChecker getWrenchSensorValidityChecker(ForceSensorDefinition wrenchSensorDefinition)
@@ -108,9 +108,9 @@ public class DiagnosticControllerToolbox
       return jointPositionVelocityConsistencyCheckers.get(joint);
    }
 
-   public OrientationAngularVelocityConsistencyChecker getIMUOrientationAngularVelocityConsistencyChecker(IMUDefinition imuDefinition)
+   public OrientationAngularVelocityConsistencyChecker getIMUOrientationAngularVelocityConsistencyChecker(String imuName)
    {
-      return orientationAngularVelocityConsistencyCheckers.get(imuDefinition);
+      return orientationAngularVelocityConsistencyCheckers.get(imuName);
    }
 
    public OneDoFJointForceTrackingDelayEstimator getJointForceTrackingDelayEstimator(OneDoFJoint joint)

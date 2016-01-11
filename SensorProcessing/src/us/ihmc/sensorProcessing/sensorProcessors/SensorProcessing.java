@@ -857,9 +857,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return validityCheckerMap;
    }
 
-   public Map<IMUDefinition, IMUSensorValidityChecker> addIMUSensorValidityCheckers(boolean enableLogging)
+   public Map<String, IMUSensorValidityChecker> addIMUSensorValidityCheckers(boolean enableLogging)
    {
-      LinkedHashMap<IMUDefinition, IMUSensorValidityChecker> validityCheckerMap = new LinkedHashMap<>();
+      LinkedHashMap<String, IMUSensorValidityChecker> validityCheckerMap = new LinkedHashMap<>();
 
       for (int i = 0; i < imuSensorDefinitions.size(); i++)
       {
@@ -870,7 +870,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          IMUSensorValidityChecker validityChecker = new IMUSensorValidityChecker(imuToCheck, orientation, angularVelocity, linearAcceleration, registry);
          if (enableLogging)
             validityChecker.setupForLogging();
-         validityCheckerMap.put(imuToCheck, validityChecker);
+         validityCheckerMap.put(imuToCheck.getName(), validityChecker);
          diagnosticModules.add(validityChecker);
       }
 
@@ -917,9 +917,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return consistencyCheckerMap;
    }
 
-   public Map<IMUDefinition, OrientationAngularVelocityConsistencyChecker> addIMUOrientationAngularVelocityConsistencyCheckers()
+   public Map<String, OrientationAngularVelocityConsistencyChecker> addIMUOrientationAngularVelocityConsistencyCheckers()
    {
-      LinkedHashMap<IMUDefinition, OrientationAngularVelocityConsistencyChecker> consistencyCheckerMap = new LinkedHashMap<>();
+      LinkedHashMap<String, OrientationAngularVelocityConsistencyChecker> consistencyCheckerMap = new LinkedHashMap<>();
 
       for (int i = 0; i < imuSensorDefinitions.size(); i++)
       {
@@ -928,7 +928,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          YoFrameQuaternion orientation = intermediateOrientations.get(imuToCheck);
          YoFrameVector angularVelocity = intermediateAngularVelocities.get(imuToCheck);
          OrientationAngularVelocityConsistencyChecker consistencyChecker = new OrientationAngularVelocityConsistencyChecker(imuToCheck.getName(), orientation, angularVelocity, updateDT, registry);
-         consistencyCheckerMap.put(imuToCheck, consistencyChecker);
+         consistencyCheckerMap.put(imuToCheck.getName(), consistencyChecker);
          diagnosticModules.add(consistencyChecker);
       }
 
