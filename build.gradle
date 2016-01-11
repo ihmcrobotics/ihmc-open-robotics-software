@@ -75,7 +75,7 @@ remotes
 {
 	valkyrieRealtimeComputer
 	{
-		host = project.hasProperty('valkyrie_link_ip')?"${valkyrie_realtime_ip}":"invalid"
+		host = project.hasProperty('valkyrie_link_ip')?"${valkyrie_link_ip}":"invalid"
 		
 		// Set the username and password in ~/.gradle/gradle.properties.
         user = project.hasProperty('valkyrie_realtime_username')?"${valkyrie_realtime_username}":"invalid"
@@ -86,7 +86,7 @@ remotes
 	
 	valkyrieNonRealtimeComputer
 	{
-		host = project.hasProperty('valkyrie_zelda_ip')?"${valkyrie_realtime_ip}":"invalid"
+		host = project.hasProperty('valkyrie_zelda_ip')?"${valkyrie_zelda_ip}":"invalid"
 		
 		// Set the username and password in ~/.gradle/gradle.properties.
         user = project.hasProperty('valkyrie_realtime_username')?"${valkyrie_realtime_username}":"invalid"
