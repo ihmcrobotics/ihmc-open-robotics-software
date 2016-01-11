@@ -12,9 +12,9 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.UI)
 @SuiteClasses
 ({
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisualizerTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensationTest.class,
-   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothICPComputerTest.class,
-   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisualizerTest.class
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothICPComputerTest.class
 })
 
 public class CommonWalkingControlModulesAUITestSuite

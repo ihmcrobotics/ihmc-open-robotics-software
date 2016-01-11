@@ -1,0 +1,236 @@
+leftHipYaw:
+    kp: 100.0
+    kd: 6.2
+    ki: 0.0
+leftHipRoll:
+    kp: 500.0
+    kd: 25.0
+    ki: 0.0    
+leftHipPitch:
+    kp: 550.0
+    kd: 21.0
+    ki: 0.0    
+leftKneePitch:
+    kp: 259.0
+    kd: 9.4
+    ki: 0.0    
+leftAnklePitch:
+    kp: 68.0
+    kd: 6.29
+    ki: 0.0    
+leftAnkleRoll:
+    kp: 56.0
+    kd: 3.14
+    ki: 0.0    
+rightHipYaw:
+    kp: 100.0
+    kd: 6.2
+    ki: 0.0
+rightHipRoll:
+    kp: 500.0
+    kd: 25.0
+    ki: 0.0   
+rightHipPitch:
+    kp: 550.0
+    kd: 21.0
+    ki: 0.0   
+rightKneePitch:
+    kp: 259.0
+    kd: 9.4
+    ki: 0.0        
+rightAnklePitch:
+    kp: 68.0
+    kd: 6.29
+    ki: 0.0  
+rightAnkleRoll:
+    kp: 56.0
+    kd: 3.14
+    ki: 0.0       
+torsoYaw:
+    kp: 100.0
+    kd: 6.2
+    ki: 0.0
+torsoPitch:
+    kp: 600.0
+    kd: 40.0
+    ki: 0.0    
+torsoRoll:
+    kp: 600.0
+    kd: 40.0
+    ki: 0.0  
+leftShoulderPitch: 
+    kp: 50.0
+    kd: 5.0
+    ki: 0.0    
+leftShoulderRoll:
+    kp: 50.0
+    kd: 5.0
+    ki: 0.0    
+leftShoulderYaw:
+    kp: 40.0
+    kd: 4.0
+    ki: 0.0    
+leftElbowPitch:
+    kp: 40.0
+    kd: 10.0
+    ki: 0.0    
+leftForearmYaw:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0    
+leftWristRoll:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0    
+leftWristPitch:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0       
+lowerNeckPitch:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0    
+neckYaw:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0    
+upperNeckPitch:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0    
+rightShoulderPitch:
+    kp: 50.0
+    kd: 5.0
+    ki: 0.0    
+rightShoulderRoll:
+    kp: 50.0
+    kd: 5.0
+    ki: 0.0    
+rightShoulderYaw:
+    kp: 40.0
+    kd: 4.0
+    ki: 0.0   
+rightElbowPitch:
+    kp: 40.0
+    kd: 4.0
+    ki: 0.0      
+rightForearmYaw:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0    
+rightWristRoll:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0    
+rightWristPitch:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+leftIndexFingerPitch1:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0         
+leftIndexFingerPitch2:         
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+leftIndexFingerPitch3:         
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+leftMiddleFingerPitch1:        
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+leftMiddleFingerPitch2:        
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+leftMiddleFingerPitch3:        
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+leftPinkyPitch1:          
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+leftPinkyPitch2:          
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+leftPinkyPitch3:          
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+leftThumbRoll:         
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+leftThumbPitch1:          
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+leftThumbPitch2:          
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+leftThumbPitch3:                   
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+rightIndexFingerPitch1:        
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+rightIndexFingerPitch2:        
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+rightIndexFingerPitch3:        
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+rightMiddleFingerPitch1:      
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+rightMiddleFingerPitch2:      
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+rightMiddleFingerPitch3:      
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+rightPinkyPitch1:        
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+rightPinkyPitch2:               
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+rightPinkyPitch3:               
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+rightThumbRoll:               
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+rightThumbPitch1:               
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+rightThumbPitch2:               
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+rightThumbPitch3:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+hokuyo_joint:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0

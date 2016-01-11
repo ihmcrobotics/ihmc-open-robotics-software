@@ -1,0 +1,52 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="right_knee">
+
+	<xacro:property name="prefix" value="right"/>
+	<xacro:property name="reflect" value="-1"/>
+
+    <xacro:property name="mesh_root" value="package://val_description/model/meshes"/>
+    <xacro:include filename="$(find val_description)/model/robots/common/xacro/generic_models.xacro" />
+    <xacro:include filename="$(find val_description)/model/robots/common/xacro/common_bodies.xacro" />
+    <xacro:include filename="$(find val_description)/common/xacro/serial_numbers/valkyrie_B_serials.xacro"/>
+
+    <xacro:include filename="$(find val_description)/common/xacro/joint_names/valkyrie_joint_names.xacro"/>
+  	<xacro:include filename="$(find val_description)/common/xacro/actuator_names/valkyrie_actuator_names.xacro"/>
+  	<xacro:include filename="$(find val_description)/common/xacro/nodes/valkyrie_nodes.xacro"/>
+  	<xacro:include filename="$(find val_description)/common/xacro/api/valkyrie_api.xacro"/>
+  	<xacro:include filename="$(find val_description)/model/robots/common/xacro/leg/joint_axes.xacro"/>
+  	<xacro:include filename="$(find val_description)/model/robots/common/xacro/leg/link_names.xacro"/>
+  	<xacro:include filename="$(find val_description)/model/robots/common/xacro/leg/joint_limits.xacro"/>
+  	<xacro:include filename="$(find val_description)/model/robots/common/xacro/leg/frame_parameters.xacro"/>
+  	<xacro:include filename="$(find val_description)/model/robots/common/xacro/leg/mass_parameters.xacro"/>
+
+  	<link name="rightHipPitchLink">
+      <inertial>
+        <mass value="1.0" />
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <inertia ixx="0.0001"  ixy="0.0" ixz="0.0"
+                 iyy="0.0001" iyz="0.0"
+                 izz="0.0001" />
+      </inertial>
+    </link>
+
+        <xacro:standard_link name="${KneePitchLinkName}"
+                    mass="${KneePitchLinkMass}"
+                    origin_xyz="${KneePitchLinkComPosition}"
+                    ixx="${KneePitchLinkInertia_IXX}" ixy="${KneePitchLinkInertia_IXY}" ixz="${KneePitchLinkInertia_IXZ}"
+                    iyy="${KneePitchLinkInertia_IYY}" iyz="${KneePitchLinkInertia_IYZ}" izz="${KneePitchLinkInertia_IZZ}"
+                    origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/legs/lj4_right.dae"
+                    collision_mesh="${mesh_root}/legs/lj4_right.dae"/>
+
+        <xacro:revolute_joint_ex jointName="${KneePitchJointName}"
+                          parent="${HipPitchLinkName}" child="${KneePitchLinkName}"
+                          origin_xyz="${KneePitchFrameOrigin_X} ${KneePitchFrameOrigin_Y} ${KneePitchFrameOrigin_Z}"
+                          origin_rpy="${KneePitchFrameOrientation_Roll} ${KneePitchFrameOrientation_Pitch} ${KneePitchFrameOrientation_Yaw}" 
+                          axis="${KneePitchRotationAxis}"
+                          damping="0.1" friction="0.0">
+        <limit effort="${KneePitchTorqueLimit}" lower="${KneePitchPositionLimit_Lower}" upper="${KneePitchPositionLimit_Upper}" velocity="${KneePitchVelocityLimit}"/>
+        <controller_gains Kp="15000" Kd="500"/>
+    </xacro:revolute_joint_ex>
+
+    <xacro:simple_transmission jointName="${KneePitchJointName}" actuatorName="${KneePitchActuatorName}" nodeName="${KneePitchNode}" actuatorApi="${KneePitchApi}"/>
+    
+</robot>

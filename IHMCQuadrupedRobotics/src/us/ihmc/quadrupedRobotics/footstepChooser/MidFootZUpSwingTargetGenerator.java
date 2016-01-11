@@ -7,7 +7,6 @@ import us.ihmc.quadrupedRobotics.parameters.SwingTargetGeneratorParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.util.QuadrupedLinkLengths;
-import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -285,14 +284,14 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       }
 
       //compensate the angular diplacement if the footsepts of the side used as reference is not aligned with the body
-      desiredSwingFootPositionFromHalfStride.set(desiredSwingFootPositionFromHalfStride.yawAboutPoint(footPositionOppositeSideSameEnd, - orientationDeltaWithBody));
+      desiredSwingFootPositionFromHalfStride.yawAboutPoint(footPositionOppositeSideSameEnd, desiredSwingFootPositionFromHalfStride, -orientationDeltaWithBody);
       
       desiredSwingFootPositionFromHalfStride.changeFrame(ReferenceFrame.getWorldFrame());
 
       //rotate the foot about the centroid of the predicted foot polygon
       supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromHalfStride);
       supportPolygon.getCentroid(centroid);
-      desiredSwingFootPositionFromHalfStride.set(desiredSwingFootPositionFromHalfStride.yawAboutPoint(centroid, deltaYaw));
+      desiredSwingFootPositionFromHalfStride.yawAboutPoint(centroid, desiredSwingFootPositionFromHalfStride, deltaYaw);
    }
 
    private void determineFootPositionFromOppositeSideFoot(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
@@ -332,14 +331,14 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       desiredSwingFootPositionFromOppositeSideFoot.setX(newX);
       
       //compensate the angular diplacement if the footsepts of the side used as reference is not aligned with the body
-      desiredSwingFootPositionFromOppositeSideFoot.set(desiredSwingFootPositionFromOppositeSideFoot.yawAboutPoint(footPositionOppositeSideSameEnd, - orientationDeltaWithBody));
+      desiredSwingFootPositionFromOppositeSideFoot.yawAboutPoint(footPositionOppositeSideSameEnd, desiredSwingFootPositionFromOppositeSideFoot, -orientationDeltaWithBody);
       
       desiredSwingFootPositionFromOppositeSideFoot.changeFrame(ReferenceFrame.getWorldFrame());
       
       //rotate the foot about the centroid of the predicted foot polygon
       supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromOppositeSideFoot);
       supportPolygon.getCentroid(centroid);
-      desiredSwingFootPositionFromOppositeSideFoot.set(desiredSwingFootPositionFromOppositeSideFoot.yawAboutPoint(centroid, deltaYaw));
+      desiredSwingFootPositionFromOppositeSideFoot.yawAboutPoint(centroid, desiredSwingFootPositionFromOppositeSideFoot, deltaYaw);
    }
 
    private double calculateOppositeSideOrientationWithRespectToBody(ReferenceFrame oppositeSideZUpFrame)

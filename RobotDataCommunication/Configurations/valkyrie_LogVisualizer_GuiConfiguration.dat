@@ -57,11 +57,11 @@
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>4</Graph Array Window Size>
+<Graph Array Window Size>5</Graph Array Window Size>
 <Graph Array Window1>
-<ScreenID>0</ScreenID>
-<WindowLocation>0.0, 27.0</WindowLocation>
-<WindowSize>1920.0, 1173.0</WindowSize>
+<ScreenID>3</ScreenID>
+<WindowLocation>0.0, 76.0</WindowLocation>
+<WindowSize>1920.0, 1200.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
@@ -247,7 +247,7 @@
 </GraphGroup>
 </Graph Array Window1><Graph Array Window2>
 <ScreenID>1</ScreenID>
-<WindowLocation>6720.0, 0.0</WindowLocation>
+<WindowLocation>6720.0, 76.0</WindowLocation>
 <WindowSize>960.0, 1080.0</WindowSize>
 <GraphGroup>
 	<Cols>4</Cols>
@@ -542,8 +542,8 @@
 </GraphGroup>
 </Graph Array Window2><Graph Array Window3>
 <ScreenID>0</ScreenID>
-<WindowLocation>-1.0, 27.0</WindowLocation>
-<WindowSize>1922.0, 1174.0</WindowSize>
+<WindowLocation>1920.0, 103.0</WindowLocation>
+<WindowSize>1920.0, 1173.0</WindowSize>
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
@@ -692,9 +692,9 @@
 	</Graph>
 </GraphGroup>
 </Graph Array Window3><Graph Array Window4>
-<ScreenID>3</ScreenID>
-<WindowLocation>3839.0, 0.0</WindowLocation>
-<WindowSize>1922.0, 1201.0</WindowSize>
+<ScreenID>2</ScreenID>
+<WindowLocation>3840.0, 0.0</WindowLocation>
+<WindowSize>1920.0, 1200.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
@@ -878,11 +878,54 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-</Graph Array Window4>
+</Graph Array Window4><Graph Array Window5>
+<ScreenID>1</ScreenID>
+<WindowLocation>5760.0, 76.0</WindowLocation>
+<WindowSize>960.0, 1080.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearAccelerationInWorldX,root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearAccelerationZ</Variables>
+		<GraphConfiguration>
+			<Name>config71</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearAccelerationY,root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearAccelerationInWorldY</Variables>
+		<GraphConfiguration>
+			<Name>config72</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearAccelerationX,root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearVelocityInWorldZ</Variables>
+		<GraphConfiguration>
+			<Name>config73</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window5>
 
 <Extra Panels>
 <Main Viewport>
-Plotter,
+
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
