@@ -116,9 +116,11 @@ public class QuadrupedSupportPolygon implements Serializable
       return edgeNormals;
    }
 
+   /**
+    * Return the reference frame of the first non-null footstep.
+    */
    public ReferenceFrame getReferenceFrame()
    {
-      // Return the reference frame of the first non-null footstep.
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          FramePoint footstep = footsteps.get(robotQuadrant);
@@ -128,7 +130,7 @@ public class QuadrupedSupportPolygon implements Serializable
          }
       }
 
-      throw new RuntimeException("SupportPolygon.getReferenceFrame(): should not get here. There must be at least one non null footstep");
+      throw new RuntimeException(getClass().getSimpleName() + ".getReferenceFrame(): should not get here. There must be at least one non null footstep");
    }
 
    /**
