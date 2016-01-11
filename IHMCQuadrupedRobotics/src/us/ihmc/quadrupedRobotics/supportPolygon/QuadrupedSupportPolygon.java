@@ -1814,6 +1814,7 @@ public class QuadrupedSupportPolygon implements Serializable
    
    public void packPolygonWithoutLeg(RobotQuadrant legToDelete, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
    {
+      quadrupedSupportPolygonToPack.clear();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          if (robotQuadrant != legToDelete)
