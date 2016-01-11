@@ -51,6 +51,11 @@ public class IMUSensorValidityChecker implements DiagnosticUpdatable
       return orientationChecker.isInputAlive() && angularVelocityChecker.isInputAlive() && linearAccelerationChecker.isInputAlive();
    }
 
+   public boolean sensorsCannotBeTrusted()
+   {
+      return orientationChecker.variableCannotBeTrusted() || angularVelocityChecker.variableCannotBeTrusted() || linearAccelerationChecker.variableCannotBeTrusted();
+   }
+
    public void verifyYovariableNames(String imuName, YoFrameQuaternion orientation, YoFrameVector angularVelocity, YoFrameVector linearAcceleration)
    {
       if (!orientation.getYoQx().getName().contains(imuName))

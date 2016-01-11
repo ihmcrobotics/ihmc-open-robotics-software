@@ -88,4 +88,14 @@ public class YoFrameQuaternionValidityChecker implements DiagnosticUpdatable
       }
       return true;
    }
+
+   public boolean variableCannotBeTrusted()
+   {
+      for (DoubleYoVariableValidityChecker validityChecker : validityCheckers)
+      {
+         if (validityChecker.variableCannotBeTrusted())
+            return true;
+      }
+      return false;
+   }
 }
