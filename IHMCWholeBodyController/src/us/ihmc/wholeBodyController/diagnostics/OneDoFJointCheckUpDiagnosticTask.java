@@ -144,7 +144,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
             fourierAnalysis.disable();
             disableEstimators = false;
          }
-         ramp.set(- (getTimeInCurrentTask() - checkUpDuration.getDoubleValue() - rampDuration.getDoubleValue()) / rampDuration.getDoubleValue());
+         ramp.set(1.0 - (getTimeInCurrentTask() - checkUpDuration.getDoubleValue() - rampDuration.getDoubleValue()) / rampDuration.getDoubleValue());
       }
       else
       {
