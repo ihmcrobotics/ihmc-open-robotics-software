@@ -22,14 +22,14 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class DiagnosticLoggerConfiguration
 {
-   public static void setupLogging(DoubleYoVariable yoTime, Class<?> clazz)
+   public static void setupLogging(DoubleYoVariable yoTime, Class<?> clazz, String robotName)
    {
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       Calendar calendar = Calendar.getInstance();
       String timestamp = dateFormat.format(calendar.getTime());
 
       Path diagnosticOutputDirectory = Paths.get(System.getProperty("user.home"), ".ihmc", "Diagnostic",
-            timestamp + "_" + clazz.getSimpleName() + "_Outputs");
+            timestamp + "_" + robotName + "_" + clazz.getSimpleName() + "_Outputs");
       try
       {
          Files.createDirectories(diagnosticOutputDirectory);
