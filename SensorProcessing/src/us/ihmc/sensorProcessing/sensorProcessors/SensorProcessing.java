@@ -47,7 +47,9 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobot
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticUpdatable;
 import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointForceTrackingDelayEstimator;
+import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
+import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.WrenchSensorValidityChecker;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
@@ -874,7 +876,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return validityCheckerMap;
    }
 
-   public Map<ForceSensorDefinition, WrenchSensorValidityChecker> addWrenchSensorValidityCheckers()
+   public Map<ForceSensorDefinition, WrenchSensorValidityChecker> addWrenchSensorValidityCheckers(boolean enableLogging)
    {
       LinkedHashMap<ForceSensorDefinition, WrenchSensorValidityChecker> validityCheckerMap = new LinkedHashMap<>();
 
@@ -884,6 +886,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          YoFrameVector forceMeasurement = intermediateForces.get(wrenchSensorToCheck);
          YoFrameVector torqueMeasurement = intermediateTorques.get(wrenchSensorToCheck);
          WrenchSensorValidityChecker validityChecker = new WrenchSensorValidityChecker(wrenchSensorToCheck, forceMeasurement, torqueMeasurement, registry);
+         if (enableLogging)
+            validityChecker.setupForLogging();
          validityCheckerMap.put(wrenchSensorToCheck, validityChecker);
          diagnosticModules.add(validityChecker);
       }
@@ -912,6 +916,24 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return consistencyCheckerMap;
    }
 
+   public Map<IMUDefinition, OrientationAngularVelocityConsistencyChecker> addIMUOrientationAngularVelocityConsistencyCheckers()
+   {
+      LinkedHashMap<IMUDefinition, OrientationAngularVelocityConsistencyChecker> consistencyCheckerMap = new LinkedHashMap<>();
+
+      for (int i = 0; i < imuSensorDefinitions.size(); i++)
+      {
+         IMUDefinition imuToCheck = imuSensorDefinitions.get(i);
+
+         YoFrameQuaternion orientation = intermediateOrientations.get(imuToCheck);
+         YoFrameVector angularVelocity = intermediateAngularVelocities.get(imuToCheck);
+         OrientationAngularVelocityConsistencyChecker consistencyChecker = new OrientationAngularVelocityConsistencyChecker(imuToCheck.getName(), orientation, angularVelocity, updateDT, registry);
+         consistencyCheckerMap.put(imuToCheck, consistencyChecker);
+         diagnosticModules.add(consistencyChecker);
+      }
+
+      return consistencyCheckerMap;
+   }
+
    public Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> addJointForceTrackingDelayEstimators(List<String> jointsToIgnore)
    {
       LinkedHashMap<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> delayEstimatorMap = new LinkedHashMap<>();
@@ -929,6 +951,25 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       }
 
       return delayEstimatorMap;
+   }
+
+   public Map<OneDoFJoint, OneDoFJointFourierAnalysis> addJointFourierAnalysis(double estimationWindow, List<String> jointsToIgnore)
+   {
+      LinkedHashMap<OneDoFJoint, OneDoFJointFourierAnalysis> jointFourierAnalysisMap = new LinkedHashMap<>();
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJoint jointToCheck = jointSensorDefinitions.get(i);
+
+         if (jointsToIgnore.contains(jointToCheck.getName()))
+            continue;
+
+         OneDoFJointFourierAnalysis jointFourierAnalysis = new OneDoFJointFourierAnalysis(jointToCheck, estimationWindow, updateDT, registry);
+         jointFourierAnalysisMap.put(jointToCheck, jointFourierAnalysis);
+         diagnosticModules.add(jointFourierAnalysis);
+      }
+
+      return jointFourierAnalysisMap;
    }
 
    /**
