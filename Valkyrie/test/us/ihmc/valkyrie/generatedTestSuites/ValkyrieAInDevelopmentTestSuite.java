@@ -9,13 +9,17 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Slow)
+@TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.ValkyrieObstacleCourseFlatTest.class
+   us.ihmc.valkyrie.kinematics.transmissions.ComparePushRodTransmissionsTest.class,
+   us.ihmc.valkyrie.kinematics.util.ClosedFormJacobianTest.class,
+   us.ihmc.valkyrie.simulation.ValkyriePosePlaybackDemoTest.class,
+   us.ihmc.valkyrie.ValkyrieObstacleCourseFlatTest.class,
+   us.ihmc.valkyrie.ValkyrieObstacleCourseTrialsTerrainTest.class
 })
 
-public class ValkyrieHardwareDriversASlowTestSuite
+public class ValkyrieAInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {

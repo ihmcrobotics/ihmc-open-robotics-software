@@ -9,13 +9,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.InDevelopment)
+@TestSuiteTarget(TestPlanTarget.VideoB)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.ValkyriePushRecoveryTest.class
+   us.ihmc.valkyrie.ValkyrieObstacleCourseFlatTest.class
 })
 
-public class ValkyrieHardwareDriversBInDevelopmentTestSuite
+public class ValkyrieCVideoBTestSuite
 {
    public static void main(String[] args)
    {

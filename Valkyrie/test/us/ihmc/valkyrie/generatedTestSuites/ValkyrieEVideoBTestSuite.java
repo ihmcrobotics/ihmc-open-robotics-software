@@ -12,10 +12,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.VideoB)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.simulation.ValkyrieObstacleCourseRampFootstepSnapperTest.class
+   us.ihmc.valkyrie.ValkyrieObstacleCourseTrialsTerrainTest.class
 })
 
-public class ValkyrieHardwareDriversAVideoBTestSuite
+public class ValkyrieEVideoBTestSuite
 {
    public static void main(String[] args)
    {
