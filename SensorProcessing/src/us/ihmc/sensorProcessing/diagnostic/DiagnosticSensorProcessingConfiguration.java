@@ -5,7 +5,6 @@ import java.util.Map;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
@@ -15,11 +14,11 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
    private final SensorProcessingConfiguration sensorProcessingConfiguration;
 
    private Map<OneDoFJoint, OneDoFJointSensorValidityChecker> jointSensorValidityCheckers;
-   private Map<IMUDefinition, IMUSensorValidityChecker> imuSensorValidityCheckers;
+   private Map<String, IMUSensorValidityChecker> imuSensorValidityCheckers;
    private Map<ForceSensorDefinition, WrenchSensorValidityChecker> wrenchSensorValidityCheckers;
 
    private Map<OneDoFJoint, PositionVelocity1DConsistencyChecker> jointPositionVelocityConsistencyCheckers;
-   private Map<IMUDefinition, OrientationAngularVelocityConsistencyChecker> imuOrientationAngularVelocityConsistencyCheckers;
+   private Map<String, OrientationAngularVelocityConsistencyChecker> imuOrientationAngularVelocityConsistencyCheckers;
 
    private Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> jointForceTrackingDelayEstimators;
    private Map<OneDoFJoint, OneDoFJointFourierAnalysis> jointFourierAnalysisMap;
@@ -88,7 +87,7 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
       return jointSensorValidityCheckers;
    }
 
-   public Map<IMUDefinition, IMUSensorValidityChecker> getIMUSensorValidityCheckers()
+   public Map<String, IMUSensorValidityChecker> getIMUSensorValidityCheckers()
    {
       return imuSensorValidityCheckers;
    }
@@ -103,7 +102,7 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
       return jointPositionVelocityConsistencyCheckers;
    }
 
-   public Map<IMUDefinition, OrientationAngularVelocityConsistencyChecker> getIMUOrientationAngularVelocityConsistencyCheckers()
+   public Map<String, OrientationAngularVelocityConsistencyChecker> getIMUOrientationAngularVelocityConsistencyCheckers()
    {
       return imuOrientationAngularVelocityConsistencyCheckers;
    }
