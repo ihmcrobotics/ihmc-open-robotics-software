@@ -17,8 +17,12 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
    private Map<OneDoFJoint, OneDoFJointSensorValidityChecker> jointSensorValidityCheckers;
    private Map<IMUDefinition, IMUSensorValidityChecker> imuSensorValidityCheckers;
    private Map<ForceSensorDefinition, WrenchSensorValidityChecker> wrenchSensorValidityCheckers;
+
    private Map<OneDoFJoint, PositionVelocity1DConsistencyChecker> jointPositionVelocityConsistencyCheckers;
+   private Map<IMUDefinition, OrientationAngularVelocityConsistencyChecker> imuOrientationAngularVelocityConsistencyCheckers;
+
    private Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> jointForceTrackingDelayEstimators;
+   private Map<OneDoFJoint, OneDoFJointFourierAnalysis> jointFourierAnalysisMap;
 
    private final double dt;
    private final DiagnosticParameters diagnosticParameters;
@@ -47,12 +51,17 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
          sensorProcessingConfiguration.configureSensorProcessing(sensorProcessing);
 
       List<String> jointsToIgnore = diagnosticParameters.getJointsToIgnoreDuringDiagnostic();
+      double fftObservationWindow = diagnosticParameters.getFFTObservationWindow();
 
       jointSensorValidityCheckers = sensorProcessing.addJointSensorValidityCheckers(true, jointsToIgnore);
       imuSensorValidityCheckers = sensorProcessing.addIMUSensorValidityCheckers(true);
-      wrenchSensorValidityCheckers = sensorProcessing.addWrenchSensorValidityCheckers();
+      wrenchSensorValidityCheckers = sensorProcessing.addWrenchSensorValidityCheckers(true);
+
       jointPositionVelocityConsistencyCheckers = sensorProcessing.addJointPositionVelocityConsistencyCheckers(jointsToIgnore);
+      imuOrientationAngularVelocityConsistencyCheckers = sensorProcessing.addIMUOrientationAngularVelocityConsistencyCheckers();
+
       jointForceTrackingDelayEstimators = sensorProcessing.addJointForceTrackingDelayEstimators(jointsToIgnore);
+      jointFourierAnalysisMap = sensorProcessing.addJointFourierAnalysis(fftObservationWindow, jointsToIgnore);
 
       double delayEstimatorFilterBreakFrequency = diagnosticParameters.getDelayEstimatorFilterBreakFrequency();
       double delayEstimatorIntputSignalsSMAWindow = diagnosticParameters.getDelayEstimatorIntputSignalsSMAWindow();
@@ -94,9 +103,19 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
       return jointPositionVelocityConsistencyCheckers;
    }
 
+   public Map<IMUDefinition, OrientationAngularVelocityConsistencyChecker> getIMUOrientationAngularVelocityConsistencyCheckers()
+   {
+      return imuOrientationAngularVelocityConsistencyCheckers;
+   }
+
    public Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> getJointForceTrackingDelayEstimators()
    {
       return jointForceTrackingDelayEstimators;
+   }
+
+   public Map<OneDoFJoint, OneDoFJointFourierAnalysis> getJointFourierAnalysisMap()
+   {
+      return jointFourierAnalysisMap;
    }
 
    @Override
