@@ -88,4 +88,14 @@ public class YoFrameTupleValidityChecker implements DiagnosticUpdatable
       }
       return true;
    }
+
+   public boolean variableCannotBeTrusted()
+   {
+      for (Axis axis : Axis.values)
+      {
+         if (validityCheckers.get(axis).variableCannotBeTrusted())
+            return true;
+      }
+      return false;
+   }
 }
