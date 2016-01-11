@@ -2,12 +2,13 @@ package us.ihmc.sensorProcessing.diagnostic;
 
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredIntegerYoVariable;
 
-public class Online1DSignalFrequencyAnalysis
+public class Online1DSignalFourierAnalysis
 {
    private final YoVariableRegistry registry;
 
@@ -22,6 +23,8 @@ public class Online1DSignalFrequencyAnalysis
 
    private final IntegerYoVariable minFrequencyIndex;
    private final DoubleYoVariable minimumMagnitude;
+
+   private final BooleanYoVariable enabled;
 
    private final DoubleFFT_1D fft;
    private final double[] signalBuffer;
@@ -40,12 +43,14 @@ public class Online1DSignalFrequencyAnalysis
 
    private final double dt;
 
-   public Online1DSignalFrequencyAnalysis(String namePrefix, double estimationWindow, double dt, YoVariableRegistry parentRegistry)
+   public Online1DSignalFourierAnalysis(String namePrefix, double estimationWindow, double dt, YoVariableRegistry parentRegistry)
    {
       this.dt = dt;
 
       registry = new YoVariableRegistry(namePrefix + "FrequencyAnalysis");
       parentRegistry.addChild(registry);
+
+      enabled = new BooleanYoVariable(registry.getName() + "_enabled", registry);
 
       int windowSize = 10;
       principalOscillationIndex = new GlitchFilteredIntegerYoVariable(namePrefix + "PrincipalOscillationIndex", windowSize, registry);
@@ -77,6 +82,17 @@ public class Online1DSignalFrequencyAnalysis
          frequencies[i] = i / observationDuration;
    }
 
+   public void enable()
+   {
+      enabled.set(true);
+   }
+
+   public void disable()
+   {
+      enabled.set(false);
+      reset();
+   }
+
    public void setMagnitudeFilterBreakFrequency(double breakFrequency)
    {
       magnitudeAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency, dt));
@@ -93,8 +109,13 @@ public class Online1DSignalFrequencyAnalysis
       this.minimumMagnitude.set(minimumMagnitude);
    }
 
+   private boolean firstEstimationTick = true;
+
    public void update(double currentSignalValue)
    {
+      if (!enabled.getBooleanValue())
+         return;
+
       signalBuffer[bufferPosition] = currentSignalValue;
       bufferPosition++;
 
@@ -107,17 +128,19 @@ public class Online1DSignalFrequencyAnalysis
       if (!hasBufferBeenFilled)
          return;
 
+      computeFFT();
+
+      findPrincipalOscillations();
+   }
+
+   private void computeFFT()
+   {
       for (int i = 0; i < numberOfObservations; i++)
       {
          fftOuput[i] = signalBuffer[(bufferPosition + i + 1) % numberOfObservations];
       }
 
       fft.realForward(fftOuput);
-
-      double principalMagnitude = Double.NEGATIVE_INFINITY;
-      int principalIndex = -1;
-      double secondaryMagnitude = Double.NEGATIVE_INFINITY;
-      int secondaryIndex = -1;
 
       for (int k = 1; k < numberOfObservations / 2; k++)
       {
@@ -136,27 +159,106 @@ public class Online1DSignalFrequencyAnalysis
          }
 
          magnitudes[k] = magnitude;
-         double previousFilteredMagnitude = filteredMagnitudes[k];
-         double currentFilteredMagnitude = magnitudeAlpha.getDoubleValue() * previousFilteredMagnitude + (1.0 - magnitudeAlpha.getDoubleValue()) * magnitude;
+         double currentFilteredMagnitude;
+         if (firstEstimationTick)
+         {
+            currentFilteredMagnitude = magnitude;
+         }
+         else
+         {
+            double previousFilteredMagnitude = filteredMagnitudes[k];
+            currentFilteredMagnitude = magnitudeAlpha.getDoubleValue() * previousFilteredMagnitude + (1.0 - magnitudeAlpha.getDoubleValue()) * magnitude;
+         }
          filteredMagnitudes[k] = currentFilteredMagnitude;
       }
 
+      firstEstimationTick = false;
+   }
+
+   private void findPrincipalOscillations()
+   {
+      double principalMagnitude = Double.NEGATIVE_INFINITY;
+      int principalIndex = -1;
       for (int k = 1; k < numberOfObservations / 2; k++)
       {
          double magnitude = filteredMagnitudes[k];
 
          if (magnitude > principalMagnitude)
          {
-            secondaryMagnitude = principalMagnitude;
-            secondaryIndex = principalIndex;
-
             principalMagnitude = magnitude;
             if (magnitude <= minimumMagnitude.getDoubleValue())
                principalIndex = -1;
             else
                principalIndex = k;
          }
-         else if (magnitude > secondaryMagnitude)
+      }
+
+      principalOscillationIndex.update(principalIndex);
+
+      if (principalOscillationIndex.getIntegerValue() == -1)
+      {
+         this.principalFrequency.set(0.0);
+         this.principalMagnitude.set(0.0);
+
+         this.secondaryOscillationIndex.set(-1);
+         this.secondaryFrequency.set(0.0);
+         this.secondaryMagnitude.set(0.0);
+         return;
+      }
+      else
+      {
+         this.principalFrequency.set(frequencies[principalOscillationIndex.getIntegerValue()]);
+         this.principalMagnitude.set(filteredMagnitudes[principalOscillationIndex.getIntegerValue()]);
+      }
+
+      int ignoreBandFirstIndex = principalOscillationIndex.getIntegerValue() - 1;
+      int ignoreBandLastIndex = principalOscillationIndex.getIntegerValue() + 1;
+      int counter = 0;
+
+      for (int k = principalOscillationIndex.getIntegerValue() - 1; k >= 0; k--)
+      {
+         if (magnitudes[k] <= magnitudes[k + 1])
+         {
+            counter = 0;
+            ignoreBandFirstIndex = k;
+         }
+         else
+         {
+            counter++;
+         }
+
+         if (counter >= 2)
+            break;
+      }
+
+      counter = 0;
+
+      for (int k = principalOscillationIndex.getIntegerValue() + 1; k < numberOfObservations / 2; k++)
+      {
+         if (magnitudes[k] <= magnitudes[k - 1])
+         {
+            counter = 0;
+            ignoreBandLastIndex = k;
+         }
+         else
+         {
+            counter++;
+         }
+
+         if (counter >= 2)
+            break;
+      }
+
+      double secondaryMagnitude = Double.NEGATIVE_INFINITY;
+      int secondaryIndex = -1;
+      for (int k = 1; k < numberOfObservations / 2; k++)
+      {
+         if (k > ignoreBandFirstIndex && k < ignoreBandLastIndex)
+            continue;
+
+         double magnitude = filteredMagnitudes[k];
+
+         if (magnitude > secondaryMagnitude)
          {
             secondaryMagnitude = magnitude;
             if (magnitude <= minimumMagnitude.getDoubleValue())
@@ -166,19 +268,7 @@ public class Online1DSignalFrequencyAnalysis
          }
       }
 
-      this.principalOscillationIndex.update(principalIndex);
-      this.secondaryOscillationIndex.update(secondaryIndex);
-
-      if (principalOscillationIndex.getIntegerValue() == -1)
-      {
-         this.principalFrequency.set(0.0);
-         this.principalMagnitude.set(0.0);
-      }
-      else
-      {
-         this.principalFrequency.set(frequencies[principalOscillationIndex.getIntegerValue()]);
-         this.principalMagnitude.set(filteredMagnitudes[principalOscillationIndex.getIntegerValue()]);
-      }
+      secondaryOscillationIndex.update(secondaryIndex);
 
       if (secondaryOscillationIndex.getIntegerValue() == -1)
       {
@@ -190,6 +280,13 @@ public class Online1DSignalFrequencyAnalysis
          this.secondaryFrequency.set(frequencies[secondaryOscillationIndex.getIntegerValue()]);
          this.secondaryMagnitude.set(filteredMagnitudes[secondaryOscillationIndex.getIntegerValue()]);
       }
+   }
+
+   public void reset()
+   {
+      bufferPosition = 0;
+      hasBufferBeenFilled = false;
+      firstEstimationTick = true;
    }
 
    public boolean hasAnalysisStarted()
