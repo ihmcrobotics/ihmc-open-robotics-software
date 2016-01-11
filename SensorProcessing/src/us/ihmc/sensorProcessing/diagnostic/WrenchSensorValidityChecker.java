@@ -23,6 +23,13 @@ public class WrenchSensorValidityChecker implements DiagnosticUpdatable
       torqueChecker = new YoFrameTupleValidityChecker(torqueMeasurement, registry);
    }
 
+   public void setupForLogging()
+   {
+      String loggerName = registry.getName();
+      forceChecker.setupForLogging(loggerName);
+      torqueChecker.setupForLogging(loggerName);
+   }
+
    @Override
    public void update()
    {
