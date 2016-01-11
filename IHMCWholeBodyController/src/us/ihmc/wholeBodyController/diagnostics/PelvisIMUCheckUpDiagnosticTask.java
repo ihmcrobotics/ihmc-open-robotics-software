@@ -145,7 +145,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
          if (disableEstimators)
          {
             reportCheckUpResults();
-            orientationVelocityConsistencyChecker.disable();
+            orientationVelocityConsistencyChecker.disableAll();
             disableEstimators = false;
          }
          ramp.set(- (getTimeInCurrentTask() - checkUpDuration.getDoubleValue() - rampDuration.getDoubleValue()) / rampDuration.getDoubleValue());
@@ -154,7 +154,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       {
          if (enableEstimators)
          {
-            orientationVelocityConsistencyChecker.enable();
+            orientationVelocityConsistencyChecker.enableAll();
             enableEstimators = false;
          }
          ramp.set(1.0);
