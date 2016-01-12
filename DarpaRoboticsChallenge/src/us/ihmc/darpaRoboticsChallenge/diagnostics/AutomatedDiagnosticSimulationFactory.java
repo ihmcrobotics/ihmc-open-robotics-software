@@ -59,7 +59,8 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private InputStream gainStream;
    private InputStream setpointStream;
    private final YoVariableRegistry simulationRegistry = new YoVariableRegistry("AutomatedDiagnosticSimulation");
-   private final AlphaFilteredYoVariable averageControllerTime = new AlphaFilteredYoVariable("averageControllerTime", simulationRegistry, 0.99);
+   private final DoubleYoVariable controllerTime = new DoubleYoVariable("controllerTime", simulationRegistry);
+   private final AlphaFilteredYoVariable averageControllerTime = new AlphaFilteredYoVariable("averageControllerTime", simulationRegistry, 0.99, controllerTime);
    private SensorReader sensorReader;
    private DiagnosticParameters diagnosticParameters;
    private AutomatedDiagnosticAnalysisController automatedDiagnosticAnalysisController;
@@ -80,8 +81,6 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
    public void startSimulation()
    {
-      DiagnosticLoggerConfiguration.setupLogging(simulatedRobot.getYoTime(), getClass(), robotModel.getSimpleRobotName());
-
       SimulationConstructionSetParameters simulationParameters = new SimulationConstructionSetParameters(true, 16000);
       SimulationConstructionSet scs = new SimulationConstructionSet(simulatedRobot, simulationParameters);
       scs.setDT(robotModel.getSimulateDT(), 10);
@@ -93,6 +92,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    public AutomatedDiagnosticConfiguration createDiagnosticController()
    {
       simulatedRobot = robotModel.createSdfRobot(false);
+      DiagnosticLoggerConfiguration.setupLogging(simulatedRobot.getYoTime(), getClass(), robotModel.getSimpleRobotName());
 
       if (robotInitialSetup == null)
          robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
@@ -255,7 +255,8 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       outputWriter.writeAfterController(0);
       long endTime = System.nanoTime();
-      averageControllerTime.update(TimeTools.nanoSecondstoSeconds(endTime - startTime));
+      controllerTime.set(TimeTools.nanoSecondstoSeconds(endTime - startTime));
+      averageControllerTime.update();
    }
 
    @Override
