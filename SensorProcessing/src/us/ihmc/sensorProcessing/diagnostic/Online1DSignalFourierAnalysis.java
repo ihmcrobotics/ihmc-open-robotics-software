@@ -1,5 +1,7 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
+import org.ejml.data.DenseMatrix64F;
+
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -292,5 +294,46 @@ public class Online1DSignalFourierAnalysis
    public boolean hasAnalysisStarted()
    {
       return hasBufferBeenFilled;
+   }
+
+   public int getOutputSize()
+   {
+      return frequencies.length;
+   }
+
+   public double getFrequency(int index)
+   {
+      return frequencies[index];
+   }
+
+   public double getMagnitude(int index)
+   {
+      return magnitudes[index];
+   }
+
+   /**
+    * Pack in the given matrix the result of the current Fourier analysis.
+    * The first column contains all the frequencies.
+    * The second column contains the corresponding magnitudes.
+    * @param outputToPack matrix in which the result is packed.
+    */
+   public void getOutput(DenseMatrix64F outputToPack)
+   {
+      outputToPack.reshape(frequencies.length, 2);
+      for (int i = 0; i < frequencies.length; i++)
+      {
+         outputToPack.set(i, 0, frequencies[i]);
+         outputToPack.set(i, 1, magnitudes[i]);
+      }
+   }
+
+   public void getFrequencies(double[] frequenciesToPack)
+   {
+      System.arraycopy(frequencies, 0, frequenciesToPack, 0, frequencies.length);
+   }
+
+   public void getMagnitudes(double[] magnitudesToPack)
+   {
+      System.arraycopy(magnitudes, 0, magnitudesToPack, 0, magnitudes.length);
    }
 }
