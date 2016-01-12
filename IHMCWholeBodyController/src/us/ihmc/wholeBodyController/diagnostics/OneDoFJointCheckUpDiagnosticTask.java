@@ -1,8 +1,6 @@
 package us.ihmc.wholeBodyController.diagnostics;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.logging.Level;
+import java.util.ArrayDeque;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
@@ -24,7 +22,6 @@ import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTask;
 public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
 {
    private Logger logger;
-   private final NumberFormat doubleFormat = new DecimalFormat("0.000;-0.000");
 
    private final YoVariableRegistry registry;
 
@@ -65,6 +62,8 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
    private final DoubleYoVariable forceTrackingDelayMean;
    private final StandardDeviation forceTrackingDelayStandardDeviationCalculator = new StandardDeviation();
    private final DoubleYoVariable forceTrackingDelayStandardDeviation;
+
+   private OneDoFJointCheckUpDiagnosticDataReporter dataReporter;
 
    public OneDoFJointCheckUpDiagnosticTask(OneDoFJoint jointToCheck, DiagnosticControllerToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -124,6 +123,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
       ramp.set(0.0);
       velocityQualityMean.set(Double.NaN);
       velocityQualityStandardDeviation.set(Double.NaN);
+      sendDataReporter = false;
    }
 
    private boolean enableEstimators = true;
@@ -201,58 +201,21 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
          logger.info("Done with check up for the joint: " + joint.getName());
 
       ramp.set(0.0);
+      sendDataReporter = false;
    }
+
+   private boolean sendDataReporter = false;
 
    private void reportCheckUpResults()
    {
       if (logger == null)
          return;
 
-      Level logLevel;
-
-      if (velocityQualityMean.getDoubleValue() < diagnosticParameters.getBadCorrelation())
-         logLevel = Level.SEVERE;
-      else if (velocityQualityMean.getDoubleValue() < diagnosticParameters.getGoodCorrelation())
-         logLevel = Level.WARNING;
-      else
-         logLevel = Level.INFO;
-
-      String velocityQualityMeanFormatted = doubleFormat.format(velocityQualityMean.getDoubleValue());
-      String velocityQualityStandardDeviationFormatted = doubleFormat.format(velocityQualityStandardDeviation.getDoubleValue());
-      logger.log(logLevel, "Velocity signal quality for the joint: " + joint.getName() + " equals " + velocityQualityMeanFormatted + "(+/-" + velocityQualityStandardDeviationFormatted + "). Note: 0 means position and velocity are completely inconsistent, and 1 they're perfectly matching.");
-
-      if (velocityDelayMean.getDoubleValue() > diagnosticParameters.getBadDelay())
-         logLevel = Level.SEVERE;
-      else if (velocityDelayMean.getDoubleValue() > diagnosticParameters.getGoodDelay())
-         logLevel = Level.WARNING;
-      else
-         logLevel = Level.INFO;
-
-      String velocityDelayMeanFormatted = doubleFormat.format(velocityDelayMean.getDoubleValue());
-      String velocityDelayStandardDeviationFormatted = doubleFormat.format(velocityDelayStandardDeviation.getDoubleValue());
-      logger.log(logLevel, "Estimated velocity delay for the joint: " + joint.getName() + " equals " + velocityDelayMeanFormatted + "(+/-" + velocityDelayStandardDeviationFormatted + ").");
-
-      if (forceTrackingQualityMean.getDoubleValue() < diagnosticParameters.getBadCorrelation())
-         logLevel = Level.SEVERE;
-      else if (forceTrackingQualityMean.getDoubleValue() < diagnosticParameters.getGoodCorrelation())
-         logLevel = Level.WARNING;
-      else
-         logLevel = Level.INFO;
-
-      String forceTrackingQualityMeanFormatted = doubleFormat.format(forceTrackingQualityMean.getDoubleValue());
-      String forceTrackingQualityStandardDeviationFormatted = doubleFormat.format(forceTrackingQualityStandardDeviation.getDoubleValue());
-      logger.log(logLevel, "Force tracking quality for the joint: " + joint.getName() + " equals " + forceTrackingQualityMeanFormatted + "(+/-" + forceTrackingQualityStandardDeviationFormatted + "). Note: 0 means force control is probably not doing anything, and 1 force control tends to achieve the desired input.");
-
-      if (forceTrackingDelayMean.getDoubleValue() > diagnosticParameters.getBadDelay())
-         logLevel = Level.SEVERE;
-      else if (forceTrackingDelayMean.getDoubleValue() > diagnosticParameters.getGoodDelay())
-         logLevel = Level.WARNING;
-      else
-         logLevel = Level.INFO;
-
-      String forceTrackingDelayMeanFormatted = doubleFormat.format(forceTrackingDelayMean.getDoubleValue());
-      String forceTrackingDelayStandardDeviationFormatted = doubleFormat.format(forceTrackingDelayStandardDeviation.getDoubleValue());
-      logger.log(logLevel, "Estimated force tracking delay for the joint: " + joint.getName() + " equals " + forceTrackingDelayMeanFormatted + "(+/-" + forceTrackingDelayStandardDeviationFormatted + ").");
+      String loggerName = logger.getName() + "DataReporter";
+      dataReporter = new OneDoFJointCheckUpDiagnosticDataReporter(loggerName, joint, diagnosticParameters, velocityQualityMean, velocityQualityStandardDeviation,
+            velocityDelayMean, velocityDelayStandardDeviation, forceTrackingQualityMean, forceTrackingQualityStandardDeviation, forceTrackingDelayMean,
+            forceTrackingDelayStandardDeviation, fourierAnalysis, functionGenerator);
+      sendDataReporter = true;
    }
 
    @Override
@@ -264,6 +227,9 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
             logger.severe(joint.getName() + " Joint sensors can't be trusted, skipping to the next diagnostic task.");
          return true;
       }
+
+      if (dataReporter != null && !dataReporter.isDoneExportingData())
+         return false;
 
       return getTimeInCurrentTask() >= checkUpDuration.getDoubleValue() + 2.0 * rampDuration.getDoubleValue();
    }
@@ -299,6 +265,15 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
          return desiredJointTauOffset.getDoubleValue();
       else
          return 0.0;
+   }
+
+   @Override
+   public void getDataReporterToRun(ArrayDeque<DiagnosticDataReporter> dataReportersToPack)
+   {
+      if (!sendDataReporter)
+         return;
+      dataReportersToPack.add(dataReporter);
+      sendDataReporter = false;
    }
 
    @Override
