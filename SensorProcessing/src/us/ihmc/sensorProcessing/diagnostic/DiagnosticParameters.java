@@ -13,6 +13,11 @@ public class DiagnosticParameters
       this.diagnosticEnvironment = diagnosticEnvironment;
    }
 
+   public boolean enableLogging()
+   {
+      return true;
+   }
+
    /**
     * Override this method to limit the scope of the automated diagnostic.
     * If not overridden, the diagnostic will be attempted on all the joints.
@@ -91,7 +96,7 @@ public class DiagnosticParameters
 
    public double getCheckUpOscillationPositionFrequency()
    {
-      return 5.0;
+      return 5.0; // 10.0Hz seems to give better delay estimation
    }
 
    public double getJointCheckUpDuration()
