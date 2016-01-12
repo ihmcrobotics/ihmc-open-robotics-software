@@ -25,6 +25,7 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
 
    private final double dt;
    private final DiagnosticParameters diagnosticParameters;
+   private final boolean enableLogging;
 
    public DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, double dt)
    {
@@ -41,6 +42,7 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
       this.sensorProcessingConfiguration = sensorProcessingConfiguration;
       this.dt = dt;
       this.diagnosticParameters = diagnosticParameters;
+      enableLogging = diagnosticParameters.enableLogging();
    }
 
    @Override
@@ -52,9 +54,9 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
       List<String> jointsToIgnore = diagnosticParameters.getJointsToIgnoreDuringDiagnostic();
       double fftObservationWindow = diagnosticParameters.getFFTObservationWindow();
 
-      jointSensorValidityCheckers = sensorProcessing.addJointSensorValidityCheckers(true, jointsToIgnore);
-      imuSensorValidityCheckers = sensorProcessing.addIMUSensorValidityCheckers(true);
-      wrenchSensorValidityCheckers = sensorProcessing.addWrenchSensorValidityCheckers(true);
+      jointSensorValidityCheckers = sensorProcessing.addJointSensorValidityCheckers(enableLogging, jointsToIgnore);
+      imuSensorValidityCheckers = sensorProcessing.addIMUSensorValidityCheckers(enableLogging);
+      wrenchSensorValidityCheckers = sensorProcessing.addWrenchSensorValidityCheckers(enableLogging);
 
       jointPositionVelocityConsistencyCheckers = sensorProcessing.addJointPositionVelocityConsistencyCheckers(jointsToIgnore);
       imuOrientationAngularVelocityConsistencyCheckers = sensorProcessing.addIMUOrientationAngularVelocityConsistencyCheckers();
