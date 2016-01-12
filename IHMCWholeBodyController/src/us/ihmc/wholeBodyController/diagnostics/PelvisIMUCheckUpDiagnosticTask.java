@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
@@ -71,22 +72,22 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
    private final Mean velocityToOrientationQualityMeanCalculator = new Mean();
    private final DoubleYoVariable velocityToOrientationQualityMean;
-   private final Mean velocityToOrientationQualityStandardDeviationCalculator = new Mean();
+   private final StandardDeviation velocityToOrientationQualityStandardDeviationCalculator = new StandardDeviation();
    private final DoubleYoVariable velocityToOrientationQualityStandardDeviation;
 
    private final Mean velocityToOrientationDelayMeanCalculator = new Mean();
    private final DoubleYoVariable velocityToOrientationDelayMean;
-   private final Mean velocityToOrientationDelayStandardDeviationCalculator = new Mean();
+   private final StandardDeviation velocityToOrientationDelayStandardDeviationCalculator = new StandardDeviation();
    private final DoubleYoVariable velocityToOrientationDelayStandardDeviation;
 
    private final Mean velocityIMUVsJointQualityMeanCalculator = new Mean();
    private final DoubleYoVariable velocityIMUVsJointQualityMean;
-   private final Mean velocityIMUVsJointQualityStandardDeviationCalculator = new Mean();
+   private final StandardDeviation velocityIMUVsJointQualityStandardDeviationCalculator = new StandardDeviation();
    private final DoubleYoVariable velocityIMUVsJointQualityStandardDeviation;
 
    private final Mean velocityIMUVsJointDelayMeanCalculator = new Mean();
    private final DoubleYoVariable velocityIMUVsJointDelayMean;
-   private final Mean velocityIMUVsJointDelayStandardDeviationCalculator = new Mean();
+   private final StandardDeviation velocityIMUVsJointDelayStandardDeviationCalculator = new StandardDeviation();
    private final DoubleYoVariable velocityIMUVsJointDelayStandardDeviation;
 
    public PelvisIMUCheckUpDiagnosticTask(String imuToCheck, DiagnosticControllerToolbox toolbox, YoVariableRegistry parentRegistry)
@@ -303,6 +304,12 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
                velocityToOrientationQualityStandardDeviationCalculator.clear();
                velocityToOrientationDelayMeanCalculator.clear();
                velocityToOrientationDelayStandardDeviationCalculator.clear();
+
+               velocityIMUVsJointQualityMeanCalculator.clear();
+               velocityIMUVsJointQualityStandardDeviationCalculator.clear();
+               velocityIMUVsJointDelayMeanCalculator.clear();
+               velocityIMUVsJointDelayStandardDeviationCalculator.clear();
+
                disableEstimators = false;
                enableEstimators = true;
             }
