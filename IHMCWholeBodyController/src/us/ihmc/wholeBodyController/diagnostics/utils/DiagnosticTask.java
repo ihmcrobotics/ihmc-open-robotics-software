@@ -1,7 +1,10 @@
 package us.ihmc.wholeBodyController.diagnostics.utils;
 
+import java.util.ArrayDeque;
+
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticDataReporter;
 
 public abstract class DiagnosticTask
 {
@@ -38,5 +41,13 @@ public abstract class DiagnosticTask
    public double getDesiredJointTauOffset(OneDoFJoint joint)
    {
       return 0.0;
+   }
+
+   /**
+    *  Use this method to require the high level controller to run a dataReporter.
+    *  Make sure that only one thread is running at a time.
+    */
+   public void getDataReporterToRun(ArrayDeque<DiagnosticDataReporter> dataReportersToPack)
+   {
    }
 }

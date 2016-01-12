@@ -1,9 +1,11 @@
 package us.ihmc.wholeBodyController.diagnostics.utils;
 
+import java.util.ArrayDeque;
 import java.util.List;
 
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticDataReporter;
 
 public class DiagnosticParallelTask extends DiagnosticTask
 {
@@ -99,6 +101,13 @@ public class DiagnosticParallelTask extends DiagnosticTask
          desiredJointTauOffset += diagnosticTasks[i].getDesiredJointTauOffset(joint);
 
       return desiredJointTauOffset;
+   }
+
+   @Override
+   public void getDataReporterToRun(ArrayDeque<DiagnosticDataReporter> dataReportersToPack)
+   {
+      for (int i = 0; i < diagnosticTasks.length; i++)
+         diagnosticTasks[i].getDataReporterToRun(dataReportersToPack);
    }
 
    @Override
