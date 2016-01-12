@@ -277,6 +277,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
             {
                reportCheckUpResults(axis);
                orientationVelocityConsistency.disableAll();
+               delayEstimator.disable();
                velocityToOrientationQualityMeanCalculator.clear();
                velocityToOrientationQualityStandardDeviationCalculator.clear();
                velocityToOrientationDelayMeanCalculator.clear();
@@ -295,6 +296,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
             if (enableEstimators)
             {
                orientationVelocityConsistency.enableAll();
+               delayEstimator.enable();
                enableEstimators = false;
                disableEstimators = true;
             }
@@ -310,6 +312,8 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
       // Really hackish, but it should work.
       // The idea is to compare the joint velocities against the IMU velocity to look for delay.
+      // By taking the negative average the velocity should be pretty close to the provided by the IMU.
+      // If close enough the delay estimator should work, allowing us to compare IMU and joint sensors.
       for (Axis axis : Axis.values)
       {
          meanOfJointVelocities.get(axis).set(0.0);
