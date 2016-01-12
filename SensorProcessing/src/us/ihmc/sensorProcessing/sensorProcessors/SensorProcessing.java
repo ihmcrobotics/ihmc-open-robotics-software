@@ -435,7 +435,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     */
    public void addSensorAlphaFilterOnlyForSpecifiedSensors(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType, String... sensorsToBeProcessed)
    {
-      addSensorAlphaFilterOnlyForSpecifiedSensors(alphaFilter, forVizOnly, sensorType, invertSensorSelection(sensorType, sensorsToBeProcessed));
+      addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, sensorType, invertSensorSelection(sensorType, sensorsToBeProcessed));
    }
 
    /**
