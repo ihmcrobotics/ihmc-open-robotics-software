@@ -1,6 +1,7 @@
 package us.ihmc.wholeBodyController.diagnostics.utils;
 
 import java.util.ArrayDeque;
+import java.util.logging.Logger;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -9,6 +10,8 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 
 public class DiagnosticTaskExecutor
 {
+   private Logger logger;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final IntegerYoVariable currentTaskIndex;
    private final IntegerYoVariable numberOfTasksRemaining;
@@ -36,6 +39,11 @@ public class DiagnosticTaskExecutor
       clear();
    }
 
+   public void setupForLogging()
+   {
+      logger = Logger.getLogger(registry.getName());
+   }
+
    public void submit(DiagnosticTask task)
    {
       task.setYoTimeInCurrentTask(timeInCurrentTask);
@@ -61,7 +69,7 @@ public class DiagnosticTaskExecutor
       }
    }
 
-   public void handleTransitions()
+   private void handleTransitions()
    {
       if (currentTask != null)
       {
@@ -69,6 +77,11 @@ public class DiagnosticTaskExecutor
             return;
 
          currentTask.doTransitionOutOfAction();
+
+         if (logger != null)
+         {
+            logger.info("Diagnostic task completed.\n");
+         }
       }
 
       if (!taskQueue.isEmpty())
