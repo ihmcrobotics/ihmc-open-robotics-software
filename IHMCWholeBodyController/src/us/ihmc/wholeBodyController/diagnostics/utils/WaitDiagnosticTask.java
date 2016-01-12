@@ -35,4 +35,10 @@ public class WaitDiagnosticTask extends DiagnosticTask
    {
       return false;
    }
+
+   @Override
+   public String getName()
+   {
+      return "WaitTask";
+   }
 }

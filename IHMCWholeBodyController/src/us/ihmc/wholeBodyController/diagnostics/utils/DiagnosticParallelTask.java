@@ -100,4 +100,14 @@ public class DiagnosticParallelTask extends DiagnosticTask
 
       return desiredJointTauOffset;
    }
+
+   @Override
+   public String getName()
+   {
+      String ret = "{ ";
+      for (int i = 0; i < diagnosticTasks.length - 1; i++)
+         ret += diagnosticTasks[i].getName() + ", ";
+      ret += diagnosticTasks[diagnosticTasks.length - 1].getName() + " }";
+      return ret;
+   }
 }

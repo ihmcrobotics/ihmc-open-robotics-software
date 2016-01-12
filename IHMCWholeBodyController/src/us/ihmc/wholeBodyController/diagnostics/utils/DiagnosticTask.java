@@ -13,6 +13,7 @@ public abstract class DiagnosticTask
 
    public abstract boolean isDone();
    public abstract boolean abortRequested();
+   public abstract String getName();
 
    void setYoTimeInCurrentTask(DoubleYoVariable timeInCurrentTask)
    {
