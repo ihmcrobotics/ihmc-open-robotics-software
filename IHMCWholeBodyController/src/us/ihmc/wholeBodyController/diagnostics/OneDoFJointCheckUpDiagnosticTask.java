@@ -300,4 +300,10 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
       else
          return 0.0;
    }
+
+   @Override
+   public String getName()
+   {
+      return registry.getName();
+   }
 }

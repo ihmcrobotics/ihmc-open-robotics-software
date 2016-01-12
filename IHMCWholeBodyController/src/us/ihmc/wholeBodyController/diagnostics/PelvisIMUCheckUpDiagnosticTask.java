@@ -439,5 +439,12 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
          if (jointsToWiggle.get(direction).contains(joint))
             return desiredJointVelocityOffsets.get(direction).getDoubleValue();
       }
-      return 0.0;}
+      return 0.0;
+   }
+
+   @Override
+   public String getName()
+   {
+      return registry.getName();
+   }
 }
