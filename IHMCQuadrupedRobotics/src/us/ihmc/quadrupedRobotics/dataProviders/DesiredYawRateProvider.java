@@ -21,6 +21,11 @@ public class DesiredYawRateProvider implements DoubleProvider, PacketConsumer<De
 
    public DesiredYawRateProvider(GlobalDataProducer dataProducer, String prefix, YoVariableRegistry parentRegistry)
    {
+      if(dataProducer != null)
+      {
+         dataProducer.attachListener(DesiredYawRatePacket.class, this);
+      }
+      
       String name = YoFrameVariableNameTools.createName(prefix, "desiredYawRate", "");
       registry = new YoVariableRegistry(name + "Provider");
       desiredYawRate = new DoubleYoVariable(name, registry);
@@ -34,7 +39,6 @@ public class DesiredYawRateProvider implements DoubleProvider, PacketConsumer<De
             lastReceivedYawRate.set(desiredYawRate.getDoubleValue());
          }
       });
-      dataProducer.attachListener(DesiredYawRatePacket.class, this);
    }
    
    public DesiredYawRateProvider(GlobalDataProducer dataProducer)
