@@ -2,6 +2,7 @@ package us.ihmc.wholeBodyController.diagnostics;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -33,6 +34,9 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    private final Map<OneDoFJoint, PDController> jointPDControllerMap = new LinkedHashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> jointDesiredPositionMap = new LinkedHashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> jointDesiredTauMap = new LinkedHashMap<>();
+
+   private final ArrayDeque<DiagnosticDataReporter> dataReportersToExecute = new ArrayDeque<>();
+   private DiagnosticDataReporter diagnosticDataReporterRunning = null;
 
    private final BooleanYoVariable isDiagnosticComplete = new BooleanYoVariable("isDiagnosticComplete", registry);
 
@@ -197,6 +201,11 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          jointDesiredTauMap.get(joint).set(tauDesired);
       }
 
+      if (currentTask != null)
+         currentTask.getDataReporterToRun(dataReportersToExecute);
+
+      handleDataReporters();
+
       boolean isDone = diagnosticTaskExecutor.isDone();
       if (isDone && !isDiagnosticComplete.getBooleanValue())
       {
@@ -208,6 +217,25 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          }
       }
       isDiagnosticComplete.set(isDone);
+   }
+
+   private void handleDataReporters()
+   {
+      if (dataReportersToExecute.isEmpty() && diagnosticDataReporterRunning == null)
+         return;
+
+      if (diagnosticDataReporterRunning == null || diagnosticDataReporterRunning.isDoneExportingData())
+      {
+         diagnosticDataReporterRunning = null;
+
+         if (dataReportersToExecute.isEmpty())
+            return;
+
+         diagnosticDataReporterRunning = dataReportersToExecute.poll();
+         Thread thread = new Thread(diagnosticDataReporterRunning);
+         thread.setPriority(Thread.MIN_PRIORITY);
+         thread.start();
+      }
    }
 
    @Override
