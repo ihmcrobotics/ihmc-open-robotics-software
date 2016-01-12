@@ -4,8 +4,8 @@ import java.util.EnumMap;
 
 import javax.vecmath.Tuple3d;
 
-import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.math.frames.YoFrameTuple;
 
 public class YoFrameTupleValidityChecker implements DiagnosticUpdatable
@@ -13,7 +13,7 @@ public class YoFrameTupleValidityChecker implements DiagnosticUpdatable
    private final YoVariableRegistry registry;
    private final YoFrameTuple<?> input;
 
-   private final EnumMap<Axis, DoubleYoVariableValidityChecker> validityCheckers = new EnumMap<>(Axis.class);
+   private final EnumMap<Direction, DoubleYoVariableValidityChecker> validityCheckers = new EnumMap<>(Direction.class);
 
    public YoFrameTupleValidityChecker(String inputName, YoVariableRegistry parentRegistry)
    {
@@ -33,15 +33,15 @@ public class YoFrameTupleValidityChecker implements DiagnosticUpdatable
 
       if (input != null)
       {
-         validityCheckers.put(Axis.X, new DoubleYoVariableValidityChecker(input.getYoX(), registry));
-         validityCheckers.put(Axis.Y, new DoubleYoVariableValidityChecker(input.getYoY(), registry));
-         validityCheckers.put(Axis.Z, new DoubleYoVariableValidityChecker(input.getYoZ(), registry));
+         validityCheckers.put(Direction.X, new DoubleYoVariableValidityChecker(input.getYoX(), registry));
+         validityCheckers.put(Direction.Y, new DoubleYoVariableValidityChecker(input.getYoY(), registry));
+         validityCheckers.put(Direction.Z, new DoubleYoVariableValidityChecker(input.getYoZ(), registry));
       }
       else
       {
-         validityCheckers.put(Axis.X, new DoubleYoVariableValidityChecker(inputName + "X", registry));
-         validityCheckers.put(Axis.Y, new DoubleYoVariableValidityChecker(inputName + "Y", registry));
-         validityCheckers.put(Axis.Z, new DoubleYoVariableValidityChecker(inputName + "Z", registry));
+         validityCheckers.put(Direction.X, new DoubleYoVariableValidityChecker(inputName + "X", registry));
+         validityCheckers.put(Direction.Y, new DoubleYoVariableValidityChecker(inputName + "Y", registry));
+         validityCheckers.put(Direction.Z, new DoubleYoVariableValidityChecker(inputName + "Z", registry));
       }
    }
 
@@ -52,28 +52,28 @@ public class YoFrameTupleValidityChecker implements DiagnosticUpdatable
          throw new NullPointerException(getClass().getSimpleName() + " must be constructed with a non null "
                + "input variable to call update(), otherwise use update(Vector3d)");
 
-      for (Axis axis : Axis.values)
-         validityCheckers.get(axis).update();
+      for (Direction direction : Direction.values)
+         validityCheckers.get(direction).update();
    }
 
    public void update(Tuple3d newInputValue)
    {
-      validityCheckers.get(Axis.X).update(newInputValue.getX());
-      validityCheckers.get(Axis.Y).update(newInputValue.getY());
-      validityCheckers.get(Axis.Z).update(newInputValue.getZ());
+      validityCheckers.get(Direction.X).update(newInputValue.getX());
+      validityCheckers.get(Direction.Y).update(newInputValue.getY());
+      validityCheckers.get(Direction.Z).update(newInputValue.getZ());
    }
 
    public void setupForLogging(String loggerName)
    {
-      for (Axis axis : Axis.values)
-         validityCheckers.get(axis).setupForLogging(loggerName);
+      for (Direction direction : Direction.values)
+         validityCheckers.get(direction).setupForLogging(loggerName);
    }
 
    public boolean isInputSane()
    {
-      for (Axis axis : Axis.values)
+      for (Direction direction : Direction.values)
       {
-         if (!validityCheckers.get(axis).isInputSane())
+         if (!validityCheckers.get(direction).isInputSane())
             return false;
       }
       return true;
@@ -81,9 +81,9 @@ public class YoFrameTupleValidityChecker implements DiagnosticUpdatable
 
    public boolean isInputAlive()
    {
-      for (Axis axis : Axis.values)
+      for (Direction direction : Direction.values)
       {
-         if (!validityCheckers.get(axis).isInputAlive())
+         if (!validityCheckers.get(direction).isInputAlive())
             return false;
       }
       return true;
@@ -91,9 +91,9 @@ public class YoFrameTupleValidityChecker implements DiagnosticUpdatable
 
    public boolean variableCannotBeTrusted()
    {
-      for (Axis axis : Axis.values)
+      for (Direction direction : Direction.values)
       {
-         if (validityCheckers.get(axis).variableCannotBeTrusted())
+         if (validityCheckers.get(direction).variableCannotBeTrusted())
             return true;
       }
       return false;

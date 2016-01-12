@@ -4,9 +4,9 @@ import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVe
 
 import java.util.EnumMap;
 
-import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -21,7 +21,7 @@ public class PositionVelocity3DConsistencyChecker
    private final SimpleMovingAverageFilteredYoFrameVector localVelocityFiltered;
    private final SimpleMovingAverageFilteredYoFrameVector filteredVelocityToCheck;
 
-   private final EnumMap<Axis, DelayEstimatorBetweenTwoSignals> delayEstimators = new EnumMap<>(Axis.class);
+   private final EnumMap<Direction, DelayEstimatorBetweenTwoSignals> delayEstimators = new EnumMap<>(Direction.class);
 
    private final DoubleYoVariable dummyAlpha;
 
@@ -43,23 +43,23 @@ public class PositionVelocity3DConsistencyChecker
       DelayEstimatorBetweenTwoSignals zVelocityDelayEstimator = new DelayEstimatorBetweenTwoSignals(namePrefix + "Z", localVelocityFiltered.getYoZ(),
             filteredVelocityToCheck.getYoZ(), updateDT, registry);
 
-      delayEstimators.put(Axis.X, xVelocityDelayEstimator);
-      delayEstimators.put(Axis.Y, yVelocityDelayEstimator);
-      delayEstimators.put(Axis.Z, zVelocityDelayEstimator);
+      delayEstimators.put(Direction.X, xVelocityDelayEstimator);
+      delayEstimators.put(Direction.Y, yVelocityDelayEstimator);
+      delayEstimators.put(Direction.Z, zVelocityDelayEstimator);
 
       parentRegistry.addChild(registry);
    }
 
    public void enable()
    {
-      for (Axis axis : Axis.values)
-         delayEstimators.get(axis).enable();
+      for (Direction direction : Direction.values)
+         delayEstimators.get(direction).enable();
    }
 
    public void disable()
    {
-      for (Axis axis : Axis.values)
-         delayEstimators.get(axis).disable();
+      for (Direction direction : Direction.values)
+         delayEstimators.get(direction).disable();
    }
 
    public void update()
@@ -71,7 +71,7 @@ public class PositionVelocity3DConsistencyChecker
       if (!localVelocityFiltered.getHasBufferWindowFilled())
          return;
 
-      for (Axis axis : Axis.values)
-         delayEstimators.get(axis).update();
+      for (Direction direction : Direction.values)
+         delayEstimators.get(direction).update();
    }
 }
