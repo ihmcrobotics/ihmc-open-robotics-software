@@ -58,7 +58,7 @@ public class DiagnosticParameters
 
    public double getDelayEstimatorObservationWindow()
    {
-      return 0.10;
+      return 0.16;
    }
 
    public double getFFTMagnitudeFilterBreakFrequency()
