@@ -24,12 +24,14 @@ public class AutomatedDiagnosticConfiguration
    private final DiagnosticControllerToolbox toolbox;
    private final AutomatedDiagnosticAnalysisController diagnosticController;
    private final YoVariableRegistry controllerRegistry;
+   private final boolean enableLogging;
 
    public AutomatedDiagnosticConfiguration(DiagnosticControllerToolbox toolbox, AutomatedDiagnosticAnalysisController diagnosticController)
    {
       this.toolbox = toolbox;
       this.diagnosticController = diagnosticController;
       controllerRegistry = diagnosticController.getYoVariableRegistry();
+      enableLogging = toolbox.getDiagnosticParameters().enableLogging();
    }
 
    public void addWait(double timeToWait)
@@ -53,12 +55,19 @@ public class AutomatedDiagnosticConfiguration
             if (!jointsToIgnore.contains(legJoint.getName()))
             {
                OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(legJoint, toolbox, controllerRegistry);
-               checkUp.setupForLogging();
+               if (enableLogging)
+                  checkUp.setupForLogging();
                checkUps.add(checkUp);
             }
          }
 
-         diagnosticController.submitDiagnostic(new DiagnosticParallelTask(checkUps));
+         if (!checkUps.isEmpty())
+         {
+            if (checkUps.size() > 1)
+               diagnosticController.submitDiagnostic(new DiagnosticParallelTask(checkUps));
+            else
+               diagnosticController.submitDiagnostic(checkUps.get(0));
+         }
       }
 
       for (ArmJointName armJointName : robotSpecificJointNames.getArmJointNames())
@@ -71,12 +80,19 @@ public class AutomatedDiagnosticConfiguration
             if (!jointsToIgnore.contains(armJoint.getName()))
             {
                OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(armJoint, toolbox, controllerRegistry);
-               checkUp.setupForLogging();
+               if (enableLogging)
+                  checkUp.setupForLogging();
                checkUps.add(checkUp);
             }
          }
 
-         diagnosticController.submitDiagnostic(new DiagnosticParallelTask(checkUps));
+         if (!checkUps.isEmpty())
+         {
+            if (checkUps.size() > 1)
+               diagnosticController.submitDiagnostic(new DiagnosticParallelTask(checkUps));
+            else
+               diagnosticController.submitDiagnostic(checkUps.get(0));
+         }
       }
 
       for (SpineJointName spineJointName : robotSpecificJointNames.getSpineJointNames())
@@ -85,7 +101,8 @@ public class AutomatedDiagnosticConfiguration
          if (!jointsToIgnore.contains(spineJoint.getName()))
          {
             OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(spineJoint, toolbox, controllerRegistry);
-            checkUp.setupForLogging();
+            if (enableLogging)
+               checkUp.setupForLogging();
             diagnosticController.submitDiagnostic(checkUp);
          }
       }
@@ -102,7 +119,8 @@ public class AutomatedDiagnosticConfiguration
       }
 
       PelvisIMUCheckUpDiagnosticTask checkUp = new PelvisIMUCheckUpDiagnosticTask(pelvisIMUName, toolbox, controllerRegistry);
-      checkUp.setupForLogging();
+      if (enableLogging)
+         checkUp.setupForLogging();
       diagnosticController.submitDiagnostic(checkUp);
    }
 }
