@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -20,6 +21,8 @@ import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTaskExecutor;
 
 public class AutomatedDiagnosticAnalysisController implements RobotController
 {
+   private Logger logger;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getName());
 
    private final DoubleYoVariable yoTime;
@@ -53,6 +56,12 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
       }
 
       setupJointControllers(gainStream, setpointStream);
+
+      if (toolbox.getDiagnosticParameters().enableLogging())
+      {
+         diagnosticTaskExecutor.setupForLogging();
+         setupForLogging();
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -138,8 +147,15 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
       }
    }
 
+   public void setupForLogging()
+   {
+      logger = Logger.getLogger(getName());
+   }
+
    public void submitDiagnostic(DiagnosticTask diagnosticTask)
    {
+      if (logger != null)
+         logger.info("Diagnostic task: " + diagnosticTask.getName() + " has been submitted to the controller.");
       diagnosticTaskExecutor.submit(diagnosticTask);
    }
 
@@ -181,7 +197,17 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          jointDesiredTauMap.get(joint).set(tauDesired);
       }
 
-      isDiagnosticComplete.set(diagnosticTaskExecutor.isDone());
+      boolean isDone = diagnosticTaskExecutor.isDone();
+      if (isDone && !isDiagnosticComplete.getBooleanValue())
+      {
+         if (logger != null)
+         {
+            logger.info("---------------------------------------------------");
+            logger.info("               Diagnostic complete.                ");
+            logger.info("---------------------------------------------------");
+         }
+      }
+      isDiagnosticComplete.set(isDone);
    }
 
    @Override
