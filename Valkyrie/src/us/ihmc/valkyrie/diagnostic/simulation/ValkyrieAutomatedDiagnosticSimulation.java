@@ -34,8 +34,7 @@ public class ValkyrieAutomatedDiagnosticSimulation
       simulationFactory.setRobotInitialSetup(0.5, 0.0);
       simulationFactory.setDiagnosticParameters(diagnosticParameters);
       
-      AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = simulationFactory.createDiagnosticController();
-      automatedDiagnosticConfiguration.addWait(1.0);
+      AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = simulationFactory.createDiagnosticController(true);
       automatedDiagnosticConfiguration.addJointCheckUpDiagnostic();
       automatedDiagnosticConfiguration.addPelvisIMUCheckUpDiagnostic();
 
