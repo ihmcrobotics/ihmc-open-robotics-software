@@ -46,6 +46,7 @@ public class DiagnosticTaskExecutor
 
    public void submit(DiagnosticTask task)
    {
+      task.attachParentYoVariableRegistry(registry);
       task.setYoTimeInCurrentTask(timeInCurrentTask);
       taskQueue.add(task);
    }

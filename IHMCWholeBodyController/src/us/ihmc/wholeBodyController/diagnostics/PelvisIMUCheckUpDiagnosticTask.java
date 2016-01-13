@@ -90,12 +90,12 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    private final StandardDeviation velocityIMUVsJointDelayStandardDeviationCalculator = new StandardDeviation();
    private final DoubleYoVariable velocityIMUVsJointDelayStandardDeviation;
 
-   public PelvisIMUCheckUpDiagnosticTask(String imuToCheck, DiagnosticControllerToolbox toolbox, YoVariableRegistry parentRegistry)
+   public PelvisIMUCheckUpDiagnosticTask(String imuToCheck, DiagnosticControllerToolbox toolbox)
    {
-      this(findIMUDefinition(imuToCheck, toolbox), toolbox, parentRegistry);
+      this(findIMUDefinition(imuToCheck, toolbox), toolbox);
    }
 
-   public PelvisIMUCheckUpDiagnosticTask(IMUDefinition imuToCheck, DiagnosticControllerToolbox toolbox, YoVariableRegistry parentRegistry)
+   public PelvisIMUCheckUpDiagnosticTask(IMUDefinition imuToCheck, DiagnosticControllerToolbox toolbox)
    {
       FullHumanoidRobotModel fullRobotModel = toolbox.getFullRobotModel();
       RigidBody pelvis = fullRobotModel.getPelvis();
@@ -109,7 +109,6 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       imuSensor = toolbox.getIMUSensorReadOnly(imuName);
 
       registry = new YoVariableRegistry(imuName + nameSuffix);
-      parentRegistry.addChild(registry);
       diagnosticParameters = toolbox.getDiagnosticParameters();
 
       for (Direction direction : Direction.values)
@@ -519,6 +518,12 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
             return desiredJointVelocityOffsets.get(direction).getDoubleValue();
       }
       return 0.0;
+   }
+
+   @Override
+   public void attachParentYoVariableRegistry(YoVariableRegistry parentRegistry)
+   {
+      parentRegistry.addChild(registry);
    }
 
    @Override

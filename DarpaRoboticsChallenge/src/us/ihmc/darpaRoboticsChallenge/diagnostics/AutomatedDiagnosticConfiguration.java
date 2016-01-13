@@ -8,7 +8,6 @@ import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
@@ -23,14 +22,12 @@ public class AutomatedDiagnosticConfiguration
 {
    private final DiagnosticControllerToolbox toolbox;
    private final AutomatedDiagnosticAnalysisController diagnosticController;
-   private final YoVariableRegistry controllerRegistry;
    private final boolean enableLogging;
 
    public AutomatedDiagnosticConfiguration(DiagnosticControllerToolbox toolbox, AutomatedDiagnosticAnalysisController diagnosticController)
    {
       this.toolbox = toolbox;
       this.diagnosticController = diagnosticController;
-      controllerRegistry = diagnosticController.getYoVariableRegistry();
       enableLogging = toolbox.getDiagnosticParameters().enableLogging();
    }
 
@@ -54,7 +51,7 @@ public class AutomatedDiagnosticConfiguration
             OneDoFJoint legJoint = fullRobotModel.getLegJoint(robotSide, legJointName);
             if (!jointsToIgnore.contains(legJoint.getName()))
             {
-               OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(legJoint, toolbox, controllerRegistry);
+               OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(legJoint, toolbox);
                if (enableLogging)
                   checkUp.setupForLogging();
                checkUps.add(checkUp);
@@ -79,7 +76,7 @@ public class AutomatedDiagnosticConfiguration
             OneDoFJoint armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
             if (!jointsToIgnore.contains(armJoint.getName()))
             {
-               OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(armJoint, toolbox, controllerRegistry);
+               OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(armJoint, toolbox);
                if (enableLogging)
                   checkUp.setupForLogging();
                checkUps.add(checkUp);
@@ -100,7 +97,7 @@ public class AutomatedDiagnosticConfiguration
          OneDoFJoint spineJoint = fullRobotModel.getSpineJoint(spineJointName);
          if (!jointsToIgnore.contains(spineJoint.getName()))
          {
-            OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(spineJoint, toolbox, controllerRegistry);
+            OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(spineJoint, toolbox);
             if (enableLogging)
                checkUp.setupForLogging();
             diagnosticController.submitDiagnostic(checkUp);
@@ -118,7 +115,7 @@ public class AutomatedDiagnosticConfiguration
          return;
       }
 
-      PelvisIMUCheckUpDiagnosticTask checkUp = new PelvisIMUCheckUpDiagnosticTask(pelvisIMUName, toolbox, controllerRegistry);
+      PelvisIMUCheckUpDiagnosticTask checkUp = new PelvisIMUCheckUpDiagnosticTask(pelvisIMUName, toolbox);
       if (enableLogging)
          checkUp.setupForLogging();
       diagnosticController.submitDiagnostic(checkUp);

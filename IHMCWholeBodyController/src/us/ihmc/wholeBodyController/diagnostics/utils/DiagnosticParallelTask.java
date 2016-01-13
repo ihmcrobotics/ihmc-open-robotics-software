@@ -3,6 +3,7 @@ package us.ihmc.wholeBodyController.diagnostics.utils;
 import java.util.ArrayDeque;
 import java.util.List;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticDataReporter;
@@ -108,6 +109,13 @@ public class DiagnosticParallelTask extends DiagnosticTask
    {
       for (int i = 0; i < diagnosticTasks.length; i++)
          diagnosticTasks[i].getDataReporterToRun(dataReportersToPack);
+   }
+
+   @Override
+   public void attachParentYoVariableRegistry(YoVariableRegistry parentRegistry)
+   {
+      for (int i = 0; i < diagnosticTasks.length; i++)
+         diagnosticTasks[i].attachParentYoVariableRegistry(parentRegistry);
    }
 
    @Override
