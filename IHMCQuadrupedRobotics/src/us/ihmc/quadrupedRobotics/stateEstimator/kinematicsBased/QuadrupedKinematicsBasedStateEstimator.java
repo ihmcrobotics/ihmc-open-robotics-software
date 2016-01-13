@@ -29,7 +29,7 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
 
    private final JointStateUpdater jointStateUpdater;
    private final FootSwitchUpdater footSwitchUpdater;
-   private final CenterOfMassLinearStateUpdater comLinearStateUpdater;
+   private final CenterOfMassLinearAndRotationalStateUpdater comLinearAndRotationalStateUpdater;
 
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
 
@@ -42,8 +42,10 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    
    private final BooleanYoVariable isEnabled = new BooleanYoVariable(name + "IsEnabled", registry);
    
+   private boolean hasBeenInitialized = false;
+   
    public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
-         FootSwitchUpdater footSwitchUpdater, JointStateUpdater jointStateUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater,
+         FootSwitchUpdater footSwitchUpdater, JointStateUpdater jointStateUpdater, CenterOfMassLinearAndRotationalStateUpdater comLinearStateUpdater,
          SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
@@ -53,14 +55,14 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       this.footSwitchUpdater = footSwitchUpdater;
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
 
-      this.comLinearStateUpdater = comLinearStateUpdater;
+      this.comLinearAndRotationalStateUpdater = comLinearStateUpdater;
 
       this.sdfFullRobotModelForViz = sdfFullRobotModelForViz;
 
       if (this.sdfFullRobotModelForViz != null)
          initializeVisualization();
 
-      isEnabled.set(true); //TODO initialize to false
+      isEnabled.set(false); //TODO initialize to false
       
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
@@ -96,7 +98,8 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       updateFeetContactStatus();
 
       jointStateUpdater.initialize();
-      comLinearStateUpdater.initialize();
+      sdfFullRobotModelForViz.updateFrames();
+      comLinearAndRotationalStateUpdater.initialize();
    }
 
    @Override
@@ -104,10 +107,16 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    {
       if(isEnabled.getBooleanValue())
       {
+         if(!hasBeenInitialized)
+         {
+            initialize();
+            hasBeenInitialized = true;
+         }
+         
          updateFeetContactStatus();
          
          jointStateUpdater.updateJointState();
-         comLinearStateUpdater.updateCenterOfMassLinearState(feetInContact, feetNotInContact);
+         comLinearAndRotationalStateUpdater.updateCenterOfMassLinearAndRotationalState(feetInContact, feetNotInContact);
          
          sdfFullRobotModelForViz.updateFrames();
          updateViz();
