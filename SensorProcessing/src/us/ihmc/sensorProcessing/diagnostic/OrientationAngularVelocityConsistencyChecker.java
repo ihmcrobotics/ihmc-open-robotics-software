@@ -11,28 +11,41 @@ import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVecto
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class OrientationAngularVelocityConsistencyChecker implements DiagnosticUpdatable
 {
    private final YoVariableRegistry registry;
 
    private final FiniteDifferenceAngularVelocityYoFrameVector localVelocityFromFD;
+   private final YoFrameVector angularVelocityToCheck;
 
    private final SimpleMovingAverageFilteredYoFrameVector localVelocityFiltered;
    private final SimpleMovingAverageFilteredYoFrameVector filteredVelocityToCheck;
 
    private final EnumMap<Direction, DelayEstimatorBetweenTwoSignals> delayEstimators = new EnumMap<>(Direction.class);
 
+   private final ReferenceFrame referenceFrameUsedForComparison;
    private final FrameVector tempAngularVelocity = new FrameVector();
 
    public OrientationAngularVelocityConsistencyChecker(String namePrefix, YoFrameQuaternion orientation, YoFrameVector angularVelocityToCheck, double updateDT,
          YoVariableRegistry parentRegistry)
    {
+      this(namePrefix, orientation, angularVelocityToCheck, angularVelocityToCheck.getReferenceFrame(), updateDT, parentRegistry);
+   }
+
+   public OrientationAngularVelocityConsistencyChecker(String namePrefix, YoFrameQuaternion orientation, YoFrameVector angularVelocityToCheck,
+         ReferenceFrame referenceFrameUsedForComparison, double updateDT, YoVariableRegistry parentRegistry)
+   {
       registry = new YoVariableRegistry(namePrefix + "OrientationVelocityCheck");
+      this.referenceFrameUsedForComparison = referenceFrameUsedForComparison;
+
       localVelocityFromFD = new FiniteDifferenceAngularVelocityYoFrameVector(namePrefix + "referenceFD", orientation, updateDT, registry);
+      this.angularVelocityToCheck = angularVelocityToCheck;
+
       int windowSize = 10;
-      localVelocityFiltered = SimpleMovingAverageFilteredYoFrameVector.createSimpleMovingAverageFilteredYoFrameVector(namePrefix, "_referenceFiltered", windowSize, angularVelocityToCheck.getReferenceFrame(), registry);
-      filteredVelocityToCheck = createSimpleMovingAverageFilteredYoFrameVector(namePrefix, "_filtered", windowSize, angularVelocityToCheck, registry);
+      localVelocityFiltered = createSimpleMovingAverageFilteredYoFrameVector(namePrefix, "_referenceFiltered", windowSize, referenceFrameUsedForComparison, registry);
+      filteredVelocityToCheck = createSimpleMovingAverageFilteredYoFrameVector(namePrefix, "_filtered", windowSize, referenceFrameUsedForComparison, registry);
 
       DelayEstimatorBetweenTwoSignals xVelocityDelayEstimator = new DelayEstimatorBetweenTwoSignals(namePrefix + "WX", localVelocityFiltered.getYoX(), filteredVelocityToCheck.getYoX(), updateDT, registry);
       DelayEstimatorBetweenTwoSignals yVelocityDelayEstimator = new DelayEstimatorBetweenTwoSignals(namePrefix + "WY", localVelocityFiltered.getYoY(), filteredVelocityToCheck.getYoY(), updateDT, registry);
@@ -62,9 +75,12 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
    {
       localVelocityFromFD.update();
       localVelocityFromFD.getFrameTupleIncludingFrame(tempAngularVelocity);
-      tempAngularVelocity.changeFrame(localVelocityFiltered.getReferenceFrame());
+      tempAngularVelocity.changeFrame(referenceFrameUsedForComparison);
       localVelocityFiltered.update(tempAngularVelocity);
-      filteredVelocityToCheck.update();
+
+      angularVelocityToCheck.getFrameTupleIncludingFrame(tempAngularVelocity);
+      tempAngularVelocity.changeFrame(referenceFrameUsedForComparison);
+      filteredVelocityToCheck.update(tempAngularVelocity);
 
       if (!localVelocityFiltered.getHasBufferWindowFilled())
          return;
