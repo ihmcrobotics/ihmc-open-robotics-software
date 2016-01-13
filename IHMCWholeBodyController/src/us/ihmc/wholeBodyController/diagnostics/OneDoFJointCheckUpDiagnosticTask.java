@@ -65,13 +65,12 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
 
    private OneDoFJointCheckUpDiagnosticDataReporter dataReporter;
 
-   public OneDoFJointCheckUpDiagnosticTask(OneDoFJoint jointToCheck, DiagnosticControllerToolbox toolbox, YoVariableRegistry parentRegistry)
+   public OneDoFJointCheckUpDiagnosticTask(OneDoFJoint jointToCheck, DiagnosticControllerToolbox toolbox)
    {
       this.joint = jointToCheck;
       String jointName = joint.getName();
       String nameSuffix = "CheckUp";
       registry = new YoVariableRegistry(jointName + nameSuffix);
-      parentRegistry.addChild(registry);
       diagnosticParameters = toolbox.getDiagnosticParameters();
 
       desiredJointPositionOffset = new DoubleYoVariable("q_off_d_" + jointName + nameSuffix, registry);
@@ -274,6 +273,12 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
          return;
       dataReportersToPack.add(dataReporter);
       sendDataReporter = false;
+   }
+
+   @Override
+   public void attachParentYoVariableRegistry(YoVariableRegistry parentRegistry)
+   {
+      parentRegistry.addChild(registry);
    }
 
    @Override

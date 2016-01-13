@@ -1,5 +1,7 @@
 package us.ihmc.wholeBodyController.diagnostics.utils;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+
 public class WaitDiagnosticTask extends DiagnosticTask
 {
    private final double timeToWait;
@@ -34,6 +36,12 @@ public class WaitDiagnosticTask extends DiagnosticTask
    public boolean abortRequested()
    {
       return false;
+   }
+
+   @Override
+   public void attachParentYoVariableRegistry(YoVariableRegistry parentRegistry)
+   {
+      // No registry, do nothing.
    }
 
    @Override
