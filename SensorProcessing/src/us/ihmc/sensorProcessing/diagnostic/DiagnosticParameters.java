@@ -7,10 +7,12 @@ public class DiagnosticParameters
 {
    public enum DiagnosticEnvironment {RUNTIME_CONTROLLER, RUNTIME_EXTERNAL_MODULE, OFFLINE_LOG};
    protected final DiagnosticEnvironment diagnosticEnvironment;
+   private final boolean runningOnRealRobot;
 
-   public DiagnosticParameters(DiagnosticEnvironment diagnosticEnvironment)
+   public DiagnosticParameters(DiagnosticEnvironment diagnosticEnvironment, boolean runningOnRealRobot)
    {
       this.diagnosticEnvironment = diagnosticEnvironment;
+      this.runningOnRealRobot = runningOnRealRobot;
    }
 
    public boolean enableLogging()
@@ -20,7 +22,7 @@ public class DiagnosticParameters
 
    public double getInitialJointSplineDuration()
    {
-      return 2.0;
+      return runningOnRealRobot ? 10.0 : 1.0;
    }
 
    /**

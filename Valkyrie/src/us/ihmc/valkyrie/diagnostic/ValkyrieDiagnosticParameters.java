@@ -24,9 +24,9 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
    private final boolean ignoreAllLegJoints = false;
    private final boolean ignoreAllSpineJoints = true;
 
-   public ValkyrieDiagnosticParameters(DiagnosticEnvironment diagnosticEnvironment, ValkyrieRobotModel robotModel)
+   public ValkyrieDiagnosticParameters(DiagnosticEnvironment diagnosticEnvironment, ValkyrieRobotModel robotModel, boolean runningOnRealRobot)
    {
-      super(diagnosticEnvironment);
+      super(diagnosticEnvironment, runningOnRealRobot);
       this.jointMap = robotModel.getJointMap();
       this.sensorInformation = robotModel.getSensorInformation();
    }

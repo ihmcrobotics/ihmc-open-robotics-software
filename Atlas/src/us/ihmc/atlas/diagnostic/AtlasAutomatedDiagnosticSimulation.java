@@ -21,7 +21,7 @@ public class AtlasAutomatedDiagnosticSimulation
    public AtlasAutomatedDiagnosticSimulation()
    {
       AtlasRobotModelWithHoist robotModel = new AtlasRobotModelWithHoist(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-      AtlasDiagnosticParameters diagnosticParameters = new AtlasDiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, robotModel);
+      AtlasDiagnosticParameters diagnosticParameters = new AtlasDiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, robotModel, false);
 
       AutomatedDiagnosticSimulationFactory simulationFactory = new AutomatedDiagnosticSimulationFactory(robotModel);
 

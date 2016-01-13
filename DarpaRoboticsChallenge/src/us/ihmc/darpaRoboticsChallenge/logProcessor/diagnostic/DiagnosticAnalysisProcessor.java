@@ -41,7 +41,7 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
    public DiagnosticAnalysisProcessor(LogDataProcessorHelper logDataProcessorHelper, DRCRobotModel drcRobotModel)
    {
       this.logDataProcessorHelper = logDataProcessorHelper;
-      DiagnosticParameters diagnosticParameters = new DiagnosticParameters(DiagnosticEnvironment.OFFLINE_LOG);
+      DiagnosticParameters diagnosticParameters = new DiagnosticParameters(DiagnosticEnvironment.OFFLINE_LOG, false);
       FullHumanoidRobotModel fullRobotModel = logDataProcessorHelper.getFullRobotModel();
       double dt = drcRobotModel.getEstimatorDT();
       YoVariableHolder logYoVariableHolder = logDataProcessorHelper.getLogYoVariableHolder();
