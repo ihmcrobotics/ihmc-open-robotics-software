@@ -925,9 +925,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       {
          IMUDefinition imuToCheck = imuSensorDefinitions.get(i);
 
+         ReferenceFrame referenceFrame = imuToCheck.getRigidBody().getBodyFixedFrame();
          YoFrameQuaternion orientation = intermediateOrientations.get(imuToCheck);
          YoFrameVector angularVelocity = intermediateAngularVelocities.get(imuToCheck);
-         OrientationAngularVelocityConsistencyChecker consistencyChecker = new OrientationAngularVelocityConsistencyChecker(imuToCheck.getName(), orientation, angularVelocity, updateDT, registry);
+         OrientationAngularVelocityConsistencyChecker consistencyChecker = new OrientationAngularVelocityConsistencyChecker(imuToCheck.getName(), orientation, angularVelocity, referenceFrame, updateDT, registry);
          consistencyCheckerMap.put(imuToCheck.getName(), consistencyChecker);
          diagnosticModules.add(consistencyChecker);
       }
