@@ -58,7 +58,6 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
    private final DoubleYoVariable rampDuration;
    private final EnumMap<Direction, DoubleYoVariable> ramps = new EnumMap<>(Direction.class);
-   private final EnumMap<Direction, Direction> pelvisToIMUAxes = new EnumMap<>(Direction.class);
 
    private final DiagnosticParameters diagnosticParameters;
 
@@ -199,45 +198,6 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       jointsToWiggleLists.put(Direction.X, new ArrayList<>(rollJointsAttachedToPelvis));
       jointsToWiggleLists.put(Direction.Y, new ArrayList<>(pitchJointsAttachedToPelvis));
       jointsToWiggleLists.put(Direction.Z, new ArrayList<>(yawJointsAttachedToPelvis));
-
-      buildPelvisToIMUAxesMap(pelvis);
-   }
-
-   /**
-    * Pretty hackish and ugly but that'll do for now.
-    * @param pelvis
-    */
-   private void buildPelvisToIMUAxesMap(RigidBody pelvis)
-   {
-      FrameVector xVector = new FrameVector(pelvis.getBodyFixedFrame(), 1.0, 0.0, 0.0);
-      xVector.changeFrame(imuDefinition.getIMUFrame());
-      xVector.absolute();
-      if (xVector.getX() >= xVector.getY() && xVector.getX() >= xVector.getZ())
-         pelvisToIMUAxes.put(Direction.X, Direction.X);
-      else if (xVector.getY() >= xVector.getX() && xVector.getY() >= xVector.getZ())
-         pelvisToIMUAxes.put(Direction.X, Direction.Y);
-      else
-         pelvisToIMUAxes.put(Direction.X, Direction.Z);
-
-      FrameVector yVector = new FrameVector(pelvis.getBodyFixedFrame(), 0.0, 1.0, 0.0);
-      yVector.changeFrame(imuDefinition.getIMUFrame());
-      yVector.absolute();
-      if (yVector.getX() >= yVector.getY() && yVector.getX() >= yVector.getZ())
-         pelvisToIMUAxes.put(Direction.Y, Direction.X);
-      else if (yVector.getY() >= yVector.getX() && yVector.getY() >= yVector.getZ())
-         pelvisToIMUAxes.put(Direction.Y, Direction.Y);
-      else
-         pelvisToIMUAxes.put(Direction.Y, Direction.Z);
-
-      FrameVector zVector = new FrameVector(pelvis.getBodyFixedFrame(), 0.0, 0.0, 1.0);
-      zVector.changeFrame(imuDefinition.getIMUFrame());
-      zVector.absolute();
-      if (zVector.getX() >= zVector.getY() && zVector.getX() >= zVector.getZ())
-         pelvisToIMUAxes.put(Direction.Z, Direction.X);
-      else if (zVector.getY() >= zVector.getX() && zVector.getY() >= zVector.getZ())
-         pelvisToIMUAxes.put(Direction.Z, Direction.Y);
-      else
-         pelvisToIMUAxes.put(Direction.Z, Direction.Z);
    }
 
    private static IMUDefinition findIMUDefinition(String imuName, DiagnosticControllerToolbox toolbox)
@@ -354,18 +314,16 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       if (currentDirection == null)
          return;
 
-      Direction imuAxis = pelvisToIMUAxes.get(currentDirection);
-
-      if (orientationVelocityConsistency.isEstimatingDelay(imuAxis))
+      if (orientationVelocityConsistency.isEstimatingDelay(currentDirection))
       {
-         velocityToOrientationQualityMeanCalculator.increment(orientationVelocityConsistency.getCorrelation(imuAxis));
+         velocityToOrientationQualityMeanCalculator.increment(orientationVelocityConsistency.getCorrelation(currentDirection));
          velocityToOrientationQualityMean.set(velocityToOrientationQualityMeanCalculator.getResult());
-         velocityToOrientationQualityStandardDeviationCalculator.increment(orientationVelocityConsistency.getCorrelation(imuAxis));
+         velocityToOrientationQualityStandardDeviationCalculator.increment(orientationVelocityConsistency.getCorrelation(currentDirection));
          velocityToOrientationQualityStandardDeviation.set(velocityToOrientationQualityStandardDeviationCalculator.getResult());
          
-         velocityToOrientationDelayMeanCalculator.increment(orientationVelocityConsistency.getEstimatedDelay(imuAxis));
+         velocityToOrientationDelayMeanCalculator.increment(orientationVelocityConsistency.getEstimatedDelay(currentDirection));
          velocityToOrientationDelayMean.set(velocityToOrientationDelayMeanCalculator.getResult());
-         velocityToOrientationDelayStandardDeviationCalculator.increment(orientationVelocityConsistency.getEstimatedDelay(imuAxis));
+         velocityToOrientationDelayStandardDeviationCalculator.increment(orientationVelocityConsistency.getEstimatedDelay(currentDirection));
          velocityToOrientationDelayStandardDeviation.set(velocityToOrientationDelayStandardDeviationCalculator.getResult());
       }
 
@@ -414,8 +372,6 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       if (logger == null)
          return;
 
-      Direction imuAxis = pelvisToIMUAxes.get(direction);
-
       Level logLevel;
 
       //////////////////////////////////////////////////////////////////////////////////////////
@@ -432,7 +388,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       String velocityToOrientationQualityMeanFormatted = doubleFormat.format(velocityToOrientationQualityMean.getDoubleValue());
       String velocityToOrientationQualityStandardDeviationFormatted = doubleFormat.format(velocityToOrientationQualityStandardDeviation.getDoubleValue());
       logger.log(logLevel,
-            "Velocity (qd_w" + imuAxis + ") signal quality against orientation for the IMU: " + imuDefinition.getName() + " equals "
+            "Velocity (qd_w" + direction + ") signal quality against orientation for the IMU: " + imuDefinition.getName() + " equals "
                   + velocityToOrientationQualityMeanFormatted + "(+/-" + velocityToOrientationQualityStandardDeviationFormatted
                   + "). Note: 0 means orientation and velocity are completely inconsistent, and 1 they're perfectly matching.");
 
@@ -445,7 +401,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
       String velocityToOrientationDelayMeanFormatted = doubleFormat.format(velocityToOrientationDelayMean.getDoubleValue());
       String velocityToOrientationDelayStandardDeviationFormatted = doubleFormat.format(velocityToOrientationDelayStandardDeviation.getDoubleValue());
-      logger.log(logLevel, "Estimated velocity (qd_w" + imuAxis + ") delay w.r.t. orientation for the IMU: " + imuDefinition.getName() + " equals "
+      logger.log(logLevel, "Estimated velocity (qd_w" + direction + ") delay w.r.t. orientation for the IMU: " + imuDefinition.getName() + " equals "
             + velocityToOrientationDelayMeanFormatted + "(+/-" + velocityToOrientationDelayStandardDeviationFormatted + ").");
 
       ///////////////////////////////////////////////////////////////////////
@@ -462,7 +418,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       String velocityIMUVsJointQualityMeanFormatted = doubleFormat.format(velocityIMUVsJointQualityMean.getDoubleValue());
       String velocityIMUVsJointQualityStandardDeviationFormatted = doubleFormat.format(velocityIMUVsJointQualityStandardDeviation.getDoubleValue());
       logger.log(logLevel,
-            "IMU Velocity (qd_w" + imuAxis + ") signal quality against joint velocity: " + imuDefinition.getName() + " equals "
+            "IMU Velocity (qd_w" + direction + ") signal quality against joint velocity: " + imuDefinition.getName() + " equals "
                   + velocityIMUVsJointQualityMeanFormatted + "(+/-" + velocityIMUVsJointQualityStandardDeviationFormatted
                   + "). Note: 0 means orientation and velocity are completely inconsistent, and 1 they're perfectly matching.");
 
@@ -475,7 +431,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
       String velocityIMUVsJointDelayMeanFormatted = doubleFormat.format(velocityIMUVsJointDelayMean.getDoubleValue());
       String velocityIMUVsJointDelayStandardDeviationFormatted = doubleFormat.format(velocityIMUVsJointDelayStandardDeviation.getDoubleValue());
-      logger.log(logLevel, "Estimated IMU velocity (qd_w" + imuAxis + ") delay w.r.t. joint velocity: " + imuDefinition.getName() + " equals "
+      logger.log(logLevel, "Estimated IMU velocity (qd_w" + direction + ") delay w.r.t. joint velocity: " + imuDefinition.getName() + " equals "
             + velocityIMUVsJointDelayMeanFormatted + "(+/-" + velocityIMUVsJointDelayStandardDeviationFormatted + ").");
    }
 
