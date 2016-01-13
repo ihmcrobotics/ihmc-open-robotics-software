@@ -7,9 +7,9 @@ public class AtlasDiagnosticParameters extends DiagnosticParameters
 {
    private final DRCRobotModel robotModel;
 
-   public AtlasDiagnosticParameters(DiagnosticEnvironment diagnosticEnvironment, DRCRobotModel robotModel)
+   public AtlasDiagnosticParameters(DiagnosticEnvironment diagnosticEnvironment, DRCRobotModel robotModel, boolean runningOnRealRobot)
    {
-      super(diagnosticEnvironment);
+      super(diagnosticEnvironment, runningOnRealRobot);
 
       this.robotModel = robotModel;
    }

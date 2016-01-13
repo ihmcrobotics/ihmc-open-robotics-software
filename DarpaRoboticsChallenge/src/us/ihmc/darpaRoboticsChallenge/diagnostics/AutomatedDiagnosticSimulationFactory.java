@@ -106,7 +106,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
       
       if (diagnosticParameters == null)
-         diagnosticParameters = new DiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER);
+         diagnosticParameters = new DiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, false);
 
       DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters, stateEstimatorParameters);
 
