@@ -376,10 +376,8 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
    }
 
    private void setupScs()
-   {
-      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-      
-      scs = new SimulationConstructionSet(robot, parameters);
+   {      
+      scs = new SimulationConstructionSet(robot, simulationTestingParameters);
       scs.setDT(simulateDT, recordFrequency);
 
       scs.startOnAThread();
