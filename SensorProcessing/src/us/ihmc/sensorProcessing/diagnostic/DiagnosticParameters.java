@@ -18,6 +18,11 @@ public class DiagnosticParameters
       return true;
    }
 
+   public double getInitialJointSplineDuration()
+   {
+      return 2.0;
+   }
+
    /**
     * Override this method to limit the scope of the automated diagnostic.
     * If not overridden, the diagnostic will be attempted on all the joints.

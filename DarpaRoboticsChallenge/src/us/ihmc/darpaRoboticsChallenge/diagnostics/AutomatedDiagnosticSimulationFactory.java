@@ -89,7 +89,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       scs.startOnAThread();
    }
 
-   public AutomatedDiagnosticConfiguration createDiagnosticController()
+   public AutomatedDiagnosticConfiguration createDiagnosticController(boolean startWithRobotAlive)
    {
       simulatedRobot = robotModel.createSdfRobot(false);
       DiagnosticLoggerConfiguration.setupLogging(simulatedRobot.getYoTime(), getClass(), robotModel.getSimpleRobotName());
@@ -116,6 +116,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
             sensorProcessingConfiguration, simulationRegistry);
       automatedDiagnosticAnalysisController = new AutomatedDiagnosticAnalysisController(diagnosticControllerToolbox, gainStream, setpointStream,
             simulationRegistry);
+      automatedDiagnosticAnalysisController.setRobotIsAlive(startWithRobotAlive);
       automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(diagnosticControllerToolbox, automatedDiagnosticAnalysisController);
 
       outputWriter = new DRCSimulationOutputWriter(simulatedRobot);

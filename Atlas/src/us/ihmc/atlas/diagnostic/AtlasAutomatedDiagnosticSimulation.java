@@ -33,8 +33,7 @@ public class AtlasAutomatedDiagnosticSimulation
       simulationFactory.setRobotInitialSetup(0.2, 0.0);
       simulationFactory.setDiagnosticParameters(diagnosticParameters);
       
-      AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = simulationFactory.createDiagnosticController();
-      automatedDiagnosticConfiguration.addWait(1.0);
+      AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = simulationFactory.createDiagnosticController(true);
       automatedDiagnosticConfiguration.addJointCheckUpDiagnostic();
       automatedDiagnosticConfiguration.addPelvisIMUCheckUpDiagnostic();
 
