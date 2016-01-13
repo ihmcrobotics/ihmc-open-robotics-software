@@ -288,6 +288,11 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
       }
    }
 
+   public boolean isDiagnosticDone()
+   {
+      return isDiagnosticComplete.getBooleanValue();
+   }
+
    @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
