@@ -24,7 +24,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public class CenterOfMassLinearStateUpdater
+public class CenterOfMassLinearAndRotationalStateUpdater
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -35,15 +35,21 @@ public class CenterOfMassLinearStateUpdater
    private Twist rootJointTwist = new Twist();
    private final TwistCalculator twistCalculator;
 
-   private final QuadrantDependentList<YoFramePoint> estimatedFeetPositions = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoFramePoint> estimatedYoFeetPositions = new QuadrantDependentList<>();
 
-   private final CenterOfMassKinematicBasedLinearStateCalculator comAndFeetCalculator;
+   private final CenterOfMassKinematicBasedLinearStateCalculator comLinearStateCalculator;
+   private final CenterOfMassKinematicBasedRotationalStateCalculator comRotationalStateCalculator;
+   private final FeetPositionCalculator feetPositionCalculator;
 
    private final YoFramePoint yoRootJointPosition = new YoFramePoint("estimatedRootJointPosition", worldFrame, registry);
+
    private final YoFrameVector yoRootJointVelocity = new YoFrameVector("estimatedRootJointVelocity", worldFrame, registry);
+
    private final YoFrameQuaternion yoRootJointOrientation = new YoFrameQuaternion("estimatedRootJointOrientation", worldFrame, registry);
-   
+
    private double initialHeight = 0.0;
+
+   private final ArrayList<RobotQuadrant> allQuadrants = new ArrayList<>();
 
    // Temporary variables
    private final FramePoint rootJointPosition = new FramePoint(worldFrame);
@@ -53,7 +59,7 @@ public class CenterOfMassLinearStateUpdater
    private final Quat4d tempRootJointOrientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
    private final FrameVector tempVelocity = new FrameVector();
 
-   public CenterOfMassLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, QuadrantDependentList<RigidBody> shinRigidBodies,
+   public CenterOfMassLinearAndRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, QuadrantDependentList<RigidBody> shinRigidBodies,
          QuadrantDependentList<ReferenceFrame> footFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
@@ -63,16 +69,23 @@ public class CenterOfMassLinearStateUpdater
 
       for (RobotQuadrant quadrant : RobotQuadrant.values())
       {
-         YoFramePoint footPosition = new YoFramePoint(quadrant.getCamelCaseNameForStartOfExpression() + "EstimatedFootPositionInWorld", worldFrame, registry);
-         estimatedFeetPositions.set(quadrant, footPosition);
+         YoFramePoint yoFootPosition = new YoFramePoint(quadrant.getCamelCaseNameForStartOfExpression() + "EstimatedFootPositionInWorld", worldFrame, registry);
+         estimatedYoFeetPositions.set(quadrant, yoFootPosition);
 
-         YoGraphicPosition footPositionViz = new YoGraphicPosition(quadrant.getCamelCaseNameForStartOfExpression() + "EstimatedPosition", footPosition, 0.02,
+         YoGraphicPosition footPositionViz = new YoGraphicPosition(quadrant.getCamelCaseNameForStartOfExpression() + "EstimatedPosition", yoFootPosition, 0.02,
                YoAppearance.Yellow());
          graphicsListRegistry.registerYoGraphic("KinematicsBasedStateEstimatorEstimated", footPositionViz);
       }
 
-      comAndFeetCalculator = new CenterOfMassKinematicBasedLinearStateCalculator(inverseDynamicsStructure, shinRigidBodies, footFrames, estimatedFeetPositions, registry,
-            graphicsListRegistry);
+      comLinearStateCalculator = new CenterOfMassKinematicBasedLinearStateCalculator(inverseDynamicsStructure, shinRigidBodies, footFrames, registry);
+
+      comRotationalStateCalculator = new CenterOfMassKinematicBasedRotationalStateCalculator(inverseDynamicsStructure, shinRigidBodies, footFrames,
+            estimatedYoFeetPositions, registry, graphicsListRegistry);
+
+      feetPositionCalculator = new FeetPositionCalculator(rootJointFrame, footFrames, registry);
+
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+         allQuadrants.add(quadrant);
 
       parentRegistry.addChild(registry);
    }
@@ -81,24 +94,33 @@ public class CenterOfMassLinearStateUpdater
    {
       //initialize the CoM to be at 0.0 0.0 0.0 in worldFrame
       //XXX: will need to do initialize that more smartly
-      comAndFeetCalculator.initialize(new FramePoint(worldFrame, 0.0, 0.0, initialHeight), new FrameOrientation(worldFrame, 0.0, 0.0, 0.0));//, estimatedFeetPositions);
+      comLinearStateCalculator.initialize(new FramePoint(worldFrame, 0.0, 0.0, initialHeight));
+      comRotationalStateCalculator.initialize(new FrameOrientation(worldFrame, 0.0, 0.0, 0.0));
       updateRootJoint();
+      feetPositionCalculator.initialize();
+      feetPositionCalculator.estimateFeetPosition(yoRootJointPosition, yoRootJointOrientation, allQuadrants, estimatedYoFeetPositions);
    }
 
-   public void updateCenterOfMassLinearState(ArrayList<RobotQuadrant> feetInContact, ArrayList<RobotQuadrant> feetNotInContact)
+   public void updateCenterOfMassLinearAndRotationalState(ArrayList<RobotQuadrant> feetInContact, ArrayList<RobotQuadrant> feetNotInContact)
    {
-      comAndFeetCalculator.estimateFeetAndComPositionAndOrientation(feetInContact, feetNotInContact);//, estimatedFeetPositions, comPosition);
+      comRotationalStateCalculator.estimateCoMOrientation(feetInContact, feetNotInContact, estimatedYoFeetPositions, yoRootJointPosition);
+
+      comLinearStateCalculator.estimateComPositionAndVelocity(feetInContact, feetNotInContact, estimatedYoFeetPositions);
+
       updateRootJoint();
+
+      feetPositionCalculator.updateFootToRootJointPositions();
+      feetPositionCalculator.estimateFeetPosition(yoRootJointPosition, yoRootJointOrientation, feetNotInContact, estimatedYoFeetPositions);
    }
 
    private void updateRootJoint()
    {
-      comAndFeetCalculator.getRootJointPositionAndVelocity(rootJointPosition, rootJointVelocity);
+      comLinearStateCalculator.getRootJointPositionAndVelocity(rootJointPosition, rootJointVelocity);
       yoRootJointPosition.set(rootJointPosition);
       rootJointPosition.get(tempRootJointTranslation);
       rootJoint.setPosition(tempRootJointTranslation);
 
-      comAndFeetCalculator.getCoMOrientation(rootJointOrientation);
+      comRotationalStateCalculator.getCoMOrientation(rootJointOrientation);
       yoRootJointOrientation.set(rootJointOrientation);
       rootJointOrientation.getQuaternion(tempRootJointOrientation);
       rootJoint.setRotation(tempRootJointOrientation);
@@ -112,7 +134,6 @@ public class CenterOfMassLinearStateUpdater
 
       rootJointFrame.update();
       twistCalculator.compute();
-
    }
 
    public void setInitialHeight(double initialHeight)
