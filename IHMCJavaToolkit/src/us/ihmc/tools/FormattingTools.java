@@ -126,6 +126,6 @@ public class FormattingTools
       String[] reversedStrs = new String[strs.length];
       for (int i = 0; i < strs.length; i++)
          reversedStrs[i] = StringUtils.reverse(strs[i]);
-      return StringUtils.getCommonPrefix(reversedStrs);
+      return StringUtils.reverse(StringUtils.getCommonPrefix(reversedStrs));
    }
 }
