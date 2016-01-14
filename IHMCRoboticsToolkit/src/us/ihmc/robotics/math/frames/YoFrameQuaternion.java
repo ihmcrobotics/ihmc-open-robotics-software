@@ -1,5 +1,10 @@
 package us.ihmc.robotics.math.frames;
 
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQsName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQxName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQyName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQzName;
+
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Matrix3f;
@@ -37,10 +42,10 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
 
-      this.qx = new DoubleYoVariable(namePrefix + "Qx" + nameSuffix, registry);
-      this.qy = new DoubleYoVariable(namePrefix + "Qy" + nameSuffix, registry);
-      this.qz = new DoubleYoVariable(namePrefix + "Qz" + nameSuffix, registry);
-      this.qs = new DoubleYoVariable(namePrefix + "Qs" + nameSuffix, registry);
+      this.qx = new DoubleYoVariable(createQxName(namePrefix, nameSuffix), registry);
+      this.qy = new DoubleYoVariable(createQyName(namePrefix, nameSuffix), registry);
+      this.qz = new DoubleYoVariable(createQzName(namePrefix, nameSuffix), registry);
+      this.qs = new DoubleYoVariable(createQsName(namePrefix, nameSuffix), registry);
       this.referenceFrame = referenceFrame;
 
       qs.set(1.0);
@@ -108,11 +113,11 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
       quat.set(quaternion);
    }
 
-//   public void get(Quat4f quat)
-//   {
-//      putYoValuesIntoQuat4d();
-//      quat.set(quaternion);
-//   }
+   //   public void get(Quat4f quat)
+   //   {
+   //      putYoValuesIntoQuat4d();
+   //      quat.set(quaternion);
+   //   }
 
    public void get(Matrix3d matrix)
    {
@@ -173,18 +178,17 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
       yoFrameQuaternion1.putYoValuesIntoQuat4d();
       yoFrameQuaternion2.putYoValuesIntoQuat4d();
 
-      quaternion.interpolate(yoFrameQuaternion1.quaternion, yoFrameQuaternion2.quaternion, alpha); 
+      quaternion.interpolate(yoFrameQuaternion1.quaternion, yoFrameQuaternion2.quaternion, alpha);
       checkQuaternionIsUnitMagnitude(quaternion);
       getYoValuesFromQuat4d();
    }
-
 
    public void checkQuaternionIsUnitMagnitude()
    {
       putYoValuesIntoQuat4d();
       checkQuaternionIsUnitMagnitude(this.quaternion);
    }
-   
+
    private static void checkQuaternionIsUnitMagnitude(Quat4d quaternion)
    {
       double normSquared = (quaternion.x * quaternion.x + quaternion.y * quaternion.y + quaternion.z * quaternion.z + quaternion.w * quaternion.w);
@@ -195,7 +199,7 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
          throw new RuntimeException("Quaternion " + quaternion + " is not unit magnitude! normSquared = " + normSquared);
       }
    }
-   
+
    /**
     * Method used to concatenate the orientation represented by this YoFrameQuaternion and the orientation represented by the FrameOrientation.
     * @param quat4d
