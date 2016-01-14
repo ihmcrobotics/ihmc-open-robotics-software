@@ -446,7 +446,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       String velocityToOrientationQualityStandardDeviationFormatted = doubleFormat.format(velocityToOrientationQualityStandardDeviation.getDoubleValue());
       logger.log(logLevel,
             "Velocity (qd_w" + direction + ") signal quality against orientation for the IMU: " + imuDefinition.getName() + " equals "
-                  + velocityToOrientationQualityMeanFormatted + "(+/-" + velocityToOrientationQualityStandardDeviationFormatted
+                  + velocityToOrientationQualityMeanFormatted + " second (+/-" + velocityToOrientationQualityStandardDeviationFormatted
                   + "). Note: 0 means orientation and velocity are completely inconsistent, and 1 they're perfectly matching.");
 
       if (velocityToOrientationDelayMean.getDoubleValue() > diagnosticParameters.getBadDelay())
@@ -459,7 +459,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       String velocityToOrientationDelayMeanFormatted = doubleFormat.format(velocityToOrientationDelayMean.getDoubleValue());
       String velocityToOrientationDelayStandardDeviationFormatted = doubleFormat.format(velocityToOrientationDelayStandardDeviation.getDoubleValue());
       logger.log(logLevel, "Estimated velocity (qd_w" + direction + ") delay w.r.t. orientation for the IMU: " + imuDefinition.getName() + " equals "
-            + velocityToOrientationDelayMeanFormatted + "(+/-" + velocityToOrientationDelayStandardDeviationFormatted + ").");
+            + velocityToOrientationDelayMeanFormatted + " second (+/-" + velocityToOrientationDelayStandardDeviationFormatted + ").");
 
       ///////////////////////////////////////////////////////////////////////
       //// Report results of comparing the IMU against the joint sensors ////
@@ -476,7 +476,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       String velocityIMUVsJointQualityStandardDeviationFormatted = doubleFormat.format(velocityIMUVsJointQualityStandardDeviation.getDoubleValue());
       logger.log(logLevel,
             "IMU Velocity (qd_w" + direction + ") signal quality against joint velocity: " + imuDefinition.getName() + " equals "
-                  + velocityIMUVsJointQualityMeanFormatted + "(+/-" + velocityIMUVsJointQualityStandardDeviationFormatted
+                  + velocityIMUVsJointQualityMeanFormatted + " second (+/-" + velocityIMUVsJointQualityStandardDeviationFormatted
                   + "). Note: 0 means orientation and velocity are completely inconsistent, and 1 they're perfectly matching.");
 
       if (velocityIMUVsJointDelayMean.getDoubleValue() > diagnosticParameters.getBadDelay())
@@ -489,7 +489,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       String velocityIMUVsJointDelayMeanFormatted = doubleFormat.format(velocityIMUVsJointDelayMean.getDoubleValue());
       String velocityIMUVsJointDelayStandardDeviationFormatted = doubleFormat.format(velocityIMUVsJointDelayStandardDeviation.getDoubleValue());
       logger.log(logLevel, "Estimated IMU velocity (qd_w" + direction + ") delay w.r.t. joint velocity: " + imuDefinition.getName() + " equals "
-            + velocityIMUVsJointDelayMeanFormatted + "(+/-" + velocityIMUVsJointDelayStandardDeviationFormatted + ").");
+            + velocityIMUVsJointDelayMeanFormatted + " second (+/-" + velocityIMUVsJointDelayStandardDeviationFormatted + ").");
    }
 
    @Override

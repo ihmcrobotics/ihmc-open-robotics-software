@@ -112,7 +112,7 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
       String velocityQualityMeanFormatted = doubleFormat.format(velocityQualityMean);
       String velocityQualityStandardDeviationFormatted = doubleFormat.format(velocityQualityStandardDeviation);
       logger.log(logLevel,
-            "Velocity signal quality for the joint: " + jointName + " equals " + velocityQualityMeanFormatted + "(+/-"
+            "Velocity signal quality for the joint: " + jointName + " equals " + velocityQualityMeanFormatted + " second (+/-"
                   + velocityQualityStandardDeviationFormatted
                   + "). Note: 0 means position and velocity are completely inconsistent, and 1 they're perfectly matching.");
 
@@ -125,7 +125,7 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
 
       String velocityDelayMeanFormatted = doubleFormat.format(velocityDelayMean);
       String velocityDelayStandardDeviationFormatted = doubleFormat.format(velocityDelayStandardDeviation);
-      logger.log(logLevel, "Estimated velocity delay for the joint: " + jointName + " equals " + velocityDelayMeanFormatted + "(+/-"
+      logger.log(logLevel, "Estimated velocity delay for the joint: " + jointName + " equals " + velocityDelayMeanFormatted + " second (+/-"
             + velocityDelayStandardDeviationFormatted + ").");
 
       if (forceTrackingQualityMean < badCorrelation)
@@ -138,7 +138,7 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
       String forceTrackingQualityMeanFormatted = doubleFormat.format(forceTrackingQualityMean);
       String forceTrackingQualityStandardDeviationFormatted = doubleFormat.format(forceTrackingQualityStandardDeviation);
       logger.log(logLevel,
-            "Force tracking quality for the joint: " + jointName + " equals " + forceTrackingQualityMeanFormatted + "(+/-"
+            "Force tracking quality for the joint: " + jointName + " equals " + forceTrackingQualityMeanFormatted + " second (+/-"
                   + forceTrackingQualityStandardDeviationFormatted
                   + "). Note: 0 means force control is probably not doing anything, and 1 force control tends to achieve the desired input.");
 
@@ -151,7 +151,7 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
 
       String forceTrackingDelayMeanFormatted = doubleFormat.format(forceTrackingDelayMean);
       String forceTrackingDelayStandardDeviationFormatted = doubleFormat.format(forceTrackingDelayStandardDeviation);
-      logger.log(logLevel, "Estimated force tracking delay for the joint: " + jointName + " equals " + forceTrackingDelayMeanFormatted + "(+/-"
+      logger.log(logLevel, "Estimated force tracking delay for the joint: " + jointName + " equals " + forceTrackingDelayMeanFormatted + " second (+/-"
             + forceTrackingDelayStandardDeviationFormatted + ").");
 
       logLevel = Level.INFO;
@@ -171,10 +171,10 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
 
       logger.log(logLevel, "Fourier analysis results. The desired joint position is a " + functionGeneratorMode + " with frequency of "
             + doubleFormat.format(functionGeneratorFrequency) + " Hz and amplitude of " + doubleFormat.format(functionGeneratorAmplitude) + " rad.");
-      logger.log(logLevel, "Frequency spectrum     (Hz): " + frequencies);
-      logger.log(logLevel, "Velocity magnitudes (rad/s): " + velMags);
-      logger.log(logLevel, "Tau magnitudes        (N.m): " + tauMags);
-      logger.log(logLevel, "Tau desired spectrum  (N.m): " + tauDMags);
+      logger.log(logLevel, "Frequency spectrum      (Hz): " + frequencies);
+      logger.log(logLevel, "Velocity magnitudes  (rad/s): " + velMags);
+      logger.log(logLevel, "Tau magnitudes         (N.m): " + tauMags);
+      logger.log(logLevel, "Tau desired magnitudes (N.m): " + tauDMags);
    }
 
    public boolean isDoneExportingData()
