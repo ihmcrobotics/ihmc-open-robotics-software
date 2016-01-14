@@ -12,7 +12,7 @@ import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 
-public class PositionVelocity3DConsistencyChecker
+public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
 {
    private final YoVariableRegistry registry;
 
@@ -50,18 +50,21 @@ public class PositionVelocity3DConsistencyChecker
       parentRegistry.addChild(registry);
    }
 
+   @Override
    public void enable()
    {
       for (Direction direction : Direction.values)
          delayEstimators.get(direction).enable();
    }
 
+   @Override
    public void disable()
    {
       for (Direction direction : Direction.values)
          delayEstimators.get(direction).disable();
    }
 
+   @Override
    public void update()
    {
       localVelocityFromFD.update();
