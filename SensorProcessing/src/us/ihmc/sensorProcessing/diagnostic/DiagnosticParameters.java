@@ -60,7 +60,7 @@ public class DiagnosticParameters
 
    public double getDelayEstimatorMaximumLead()
    {
-      return 0.00;
+      return 0.025;
    }
 
    public double getDelayEstimatorObservationWindow()
@@ -98,7 +98,7 @@ public class DiagnosticParameters
 
    public double getCheckUpOscillationPositionAmplitude()
    {
-      return 0.10;
+      return 0.05;
    }
 
    public double getCheckUpOscillationPositionFrequency()
