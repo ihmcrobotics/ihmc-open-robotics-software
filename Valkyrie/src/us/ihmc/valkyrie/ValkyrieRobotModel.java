@@ -107,7 +107,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
             };
    }
 
-   public final JaxbSDFLoader loader;
+   private final JaxbSDFLoader loader;
 
    private boolean enableJointDamping = true;
    
