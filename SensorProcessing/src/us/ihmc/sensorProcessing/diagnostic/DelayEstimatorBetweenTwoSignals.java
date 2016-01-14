@@ -17,7 +17,7 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
  * @author Sylvain
  *
  */
-public class DelayEstimatorBetweenTwoSignals
+public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
 {
    private static final int DEFAULT_MAX_ABS_LEAD = 0;
    private static final int DEFAULT_MAX_ABS_LAG = 25;
@@ -87,11 +87,13 @@ public class DelayEstimatorBetweenTwoSignals
       filteredCorrelationBuffer = new DenseMatrix64F(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
    }
 
+   @Override
    public void enable()
    {
       enabled.set(true);
    }
 
+   @Override
    public void disable()
    {
       enabled.set(false);
@@ -138,6 +140,7 @@ public class DelayEstimatorBetweenTwoSignals
       firstEstimationTick = true;
    }
 
+   @Override
    public void update()
    {
       update(referenceSignal.getDoubleValue(), delayedSignal.getDoubleValue());
