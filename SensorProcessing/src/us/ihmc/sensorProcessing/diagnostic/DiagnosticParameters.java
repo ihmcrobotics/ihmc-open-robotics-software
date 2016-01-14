@@ -135,4 +135,24 @@ public class DiagnosticParameters
    {
       return null;
    }
+
+   public boolean doIdleControlUntilRobotIsAlive()
+   {
+      return false;
+   }
+
+   public double getIdleQdMax()
+   {
+      return 0.3;
+   }
+
+   public double getIdleQddMax()
+   {
+      return 3.0;
+   }
+
+   public double getIdleTauMax()
+   {
+      return 10.0;
+   }
 }

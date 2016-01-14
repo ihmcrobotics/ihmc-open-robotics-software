@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -40,24 +41,38 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    private final Map<OneDoFJoint, DoubleYoVariable> jointDesiredPositionMap = new LinkedHashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> jointDesiredTauMap = new LinkedHashMap<>();
 
+   private final DoubleProvider trajectoryTimeProvider;
    private final Map<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> jointTrajectories = new LinkedHashMap<>();
 
    private final ArrayDeque<DiagnosticDataReporter> dataReportersToExecute = new ArrayDeque<>();
    private DiagnosticDataReporter diagnosticDataReporterRunning = null;
 
+   private final BooleanYoVariable doIdleControl = new BooleanYoVariable("doIdleControl", registry);
+   private final DoubleYoVariable qdMaxIdle = new DoubleYoVariable("qdMaxIdle", registry);
+   private final DoubleYoVariable qddMaxIdle = new DoubleYoVariable("qddMaxIdle", registry);
+   private final DoubleYoVariable tauMaxIdle = new DoubleYoVariable("tauMaxIdle", registry);
+
    private final BooleanYoVariable isDiagnosticComplete = new BooleanYoVariable("isDiagnosticComplete", registry);
    private final BooleanYoVariable robotIsAlive = new BooleanYoVariable("robotIsAlive", registry);
    private final DoubleYoVariable startTime = new DoubleYoVariable("diagnosticControllerStartTime", registry);
+
+   private final double controlDT;
 
    public AutomatedDiagnosticAnalysisController(DiagnosticControllerToolbox toolbox, InputStream gainStream, InputStream setpointStream,
          YoVariableRegistry parentRegistry)
    {
       this.yoTime = toolbox.getYoTime();
+      this.controlDT = toolbox.getDT();
 
       diagnosticTaskExecutor = new DiagnosticTaskExecutor("highLevelTaskExecutor", yoTime, registry);
 
       FullHumanoidRobotModel fullRobotModel = toolbox.getFullRobotModel();
       DiagnosticParameters diagnosticParameters = toolbox.getDiagnosticParameters();
+
+      doIdleControl.set(diagnosticParameters.doIdleControlUntilRobotIsAlive());
+      qdMaxIdle.set(diagnosticParameters.getIdleQdMax());
+      qddMaxIdle.set(diagnosticParameters.getIdleQddMax());
+      tauMaxIdle.set(diagnosticParameters.getIdleTauMax());
 
       fullRobotModel.getOneDoFJoints(controlledJoints);
 
@@ -70,7 +85,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          }
       }
 
-      DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(diagnosticParameters.getInitialJointSplineDuration());
+      trajectoryTimeProvider = new ConstantDoubleProvider(diagnosticParameters.getInitialJointSplineDuration());
       submitDiagnostic(new WaitDiagnosticTask(trajectoryTimeProvider.getValue()));
 
       for (int i = 0; i < controlledJoints.size(); i++)
@@ -209,9 +224,17 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    @Override
    public void doControl()
    {
-      if (!robotIsAlive.getBooleanValue() || !hasBeenInitialized)
+      if (!hasBeenInitialized)
       {
          initialize();
+         return;
+      }
+
+      if (!robotIsAlive.getBooleanValue())
+      {
+         initialize();
+         if (doIdleControl.getBooleanValue())
+            doIdleControl();
          return;
       }
 
@@ -267,6 +290,38 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          }
       }
       isDiagnosticComplete.set(isDone);
+   }
+
+   private void doIdleControl()
+   {
+      for (int i = 0; i < controlledJoints.size(); i++)
+      {
+         OneDoFJoint joint = controlledJoints.get(i);
+         PDController jointPDController = jointPDControllerMap.get(joint);
+
+         OneDoFJointQuinticTrajectoryGenerator jointTrajectory = jointTrajectories.get(joint);
+         DoubleYoVariable jointDesiredPosition = jointDesiredPositionMap.get(joint);
+         jointTrajectory.compute(trajectoryTimeProvider.getValue());
+         jointDesiredPosition.set(jointTrajectory.getValue());
+
+         double q = joint.getQ();
+         double qDesired = jointDesiredPosition.getDoubleValue();
+         double qd = joint.getQd();
+         double qdDesired = jointTrajectory.getVelocity();
+         double tauDesired = jointPDController.compute(q, qDesired, qd, qdDesired);
+
+         double qdMax = qdMaxIdle.getDoubleValue();
+         double qddMax = qddMaxIdle.getDoubleValue();
+         double tauMax = tauMaxIdle.getDoubleValue();
+
+         qDesired = q + MathTools.clipToMinMax(qDesired - q, qdMax * controlDT);
+         qdDesired = qd + MathTools.clipToMinMax(qdDesired - qd, qddMax * controlDT);
+         joint.setTau(MathTools.clipToMinMax(tauDesired, tauMax));
+         joint.setqDesired(qDesired);
+         joint.setQdDesired(qdDesired);
+
+         jointDesiredTauMap.get(joint).set(tauDesired);
+      }
    }
 
    private void handleDataReporters()
