@@ -138,9 +138,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
          if (disableEstimators)
          {
             reportCheckUpResults();
-            positionVelocityConsistency.disable();
-            forceTrackingDelay.disable();
-            fourierAnalysis.disable();
+            disableEstimators();
             disableEstimators = false;
          }
          ramp.set(1.0 - (getTimeInCurrentTask() - checkUpDuration.getDoubleValue() - rampDuration.getDoubleValue()) / rampDuration.getDoubleValue());
@@ -149,9 +147,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
       {
          if (enableEstimators)
          {
-            positionVelocityConsistency.enable();
-            forceTrackingDelay.enable();
-            fourierAnalysis.enable();
+            enableEstimators();
             enableEstimators = false;
          }
          ramp.set(1.0);
@@ -193,6 +189,22 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
       }
    }
 
+   private void enableEstimators()
+   {
+      validityChecker.enable();
+      positionVelocityConsistency.enable();
+      forceTrackingDelay.enable();
+      fourierAnalysis.enable();
+   }
+
+   private void disableEstimators()
+   {
+      validityChecker.disable();
+      positionVelocityConsistency.disable();
+      forceTrackingDelay.disable();
+      fourierAnalysis.disable();
+   }
+
    @Override
    public void doTransitionOutOfAction()
    {
@@ -222,6 +234,8 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
    {
       if (validityChecker.sensorsCannotBeTrusted())
       {
+         disableEstimators();
+
          if (logger != null)
             logger.severe(joint.getName() + " Joint sensors can't be trusted, skipping to the next diagnostic task.");
          return true;

@@ -30,6 +30,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.diagnostic.DelayEstimatorBetweenTwoSignals;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
+import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
@@ -46,6 +47,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    private final IMUDefinition imuDefinition;
    private final IMUSensorReadOnly imuSensor;
 
+   private final EnumMap<Direction, List<OneDoFJointSensorValidityChecker>> jointValidityCheckers = new EnumMap<>(Direction.class);
    private final IMUSensorValidityChecker validityChecker;
    private final OrientationAngularVelocityConsistencyChecker orientationVelocityConsistency;
    private final DelayEstimatorBetweenTwoSignals delayEstimator;
@@ -198,6 +200,16 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       jointsToWiggleLists.put(Direction.X, new ArrayList<>(rollJointsAttachedToPelvis));
       jointsToWiggleLists.put(Direction.Y, new ArrayList<>(pitchJointsAttachedToPelvis));
       jointsToWiggleLists.put(Direction.Z, new ArrayList<>(yawJointsAttachedToPelvis));
+
+      for (Direction direction : Direction.values)
+      {
+         List<OneDoFJointSensorValidityChecker> jointValidityCheckerList = new ArrayList<>();
+         for (OneDoFJoint joint : jointsToWiggle.get(direction))
+         {
+            jointValidityCheckerList.add(toolbox.getJointSensorValidityChecker(joint));
+         }
+         jointValidityCheckers.put(direction, jointValidityCheckerList);
+      }
    }
 
    private static IMUDefinition findIMUDefinition(String imuName, DiagnosticControllerToolbox toolbox)
@@ -235,11 +247,12 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
    private boolean enableEstimators = true;
    private boolean disableEstimators = true;
+   private Direction currentDirection = null;
 
    @Override
    public void doAction()
    {
-      Direction currentDirection = null;
+      currentDirection = null;
 
       for (Direction direction : Direction.values)
       {
@@ -257,17 +270,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
             if (disableEstimators)
             {
                reportCheckUpResults(direction);
-               orientationVelocityConsistency.disableAll();
-               delayEstimator.disable();
-               velocityToOrientationQualityMeanCalculator.clear();
-               velocityToOrientationQualityStandardDeviationCalculator.clear();
-               velocityToOrientationDelayMeanCalculator.clear();
-               velocityToOrientationDelayStandardDeviationCalculator.clear();
-
-               velocityIMUVsJointQualityMeanCalculator.clear();
-               velocityIMUVsJointQualityStandardDeviationCalculator.clear();
-               velocityIMUVsJointDelayMeanCalculator.clear();
-               velocityIMUVsJointDelayStandardDeviationCalculator.clear();
+               disableEstimators(direction);
 
                disableEstimators = false;
                enableEstimators = true;
@@ -282,8 +285,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
             currentDirection = direction;
             if (enableEstimators)
             {
-               orientationVelocityConsistency.enableAll();
-               delayEstimator.enable();
+               enableEstimators(direction);
                enableEstimators = false;
                disableEstimators = true;
             }
@@ -343,6 +345,61 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
          velocityIMUVsJointDelayStandardDeviationCalculator.increment(delayEstimator.getEstimatedDelay());
          velocityIMUVsJointDelayStandardDeviation.set(velocityIMUVsJointDelayStandardDeviationCalculator.getResult());
       }
+   }
+
+   private void enableEstimators(Direction currentDirection)
+   {
+      if (currentDirection != null)
+      {
+         List<OneDoFJointSensorValidityChecker> jointValidityCheckerList = jointValidityCheckers.get(currentDirection);
+         for (int i = 0; i < jointValidityCheckerList.size(); i++)
+            jointValidityCheckerList.get(i).enable();
+      }
+      else
+      {
+         for (Direction direction : Direction.values)
+         {
+            List<OneDoFJointSensorValidityChecker> jointValidityCheckerList = jointValidityCheckers.get(direction);
+            for (int i = 0; i < jointValidityCheckerList.size(); i++)
+               jointValidityCheckerList.get(i).enable();
+         }
+      }
+
+      validityChecker.enable();
+      orientationVelocityConsistency.enableAll();
+      delayEstimator.enable();
+   }
+
+   private void disableEstimators(Direction currentDirection)
+   {
+      if (currentDirection != null)
+      {
+         List<OneDoFJointSensorValidityChecker> jointValidityCheckerList = jointValidityCheckers.get(currentDirection);
+         for (int i = 0; i < jointValidityCheckerList.size(); i++)
+            jointValidityCheckerList.get(i).disable();
+      }
+      else
+      {
+         for (Direction direction : Direction.values)
+         {
+            List<OneDoFJointSensorValidityChecker> jointValidityCheckerList = jointValidityCheckers.get(direction);
+            for (int i = 0; i < jointValidityCheckerList.size(); i++)
+               jointValidityCheckerList.get(i).disable();
+         }
+      }
+
+      validityChecker.disable();
+      orientationVelocityConsistency.disableAll();
+      delayEstimator.disable();
+      velocityToOrientationQualityMeanCalculator.clear();
+      velocityToOrientationQualityStandardDeviationCalculator.clear();
+      velocityToOrientationDelayMeanCalculator.clear();
+      velocityToOrientationDelayStandardDeviationCalculator.clear();
+
+      velocityIMUVsJointQualityMeanCalculator.clear();
+      velocityIMUVsJointQualityStandardDeviationCalculator.clear();
+      velocityIMUVsJointDelayMeanCalculator.clear();
+      velocityIMUVsJointDelayStandardDeviationCalculator.clear();
    }
 
    private void updateDesiredJointOffsets()
@@ -440,9 +497,25 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    {
       if (validityChecker.sensorsCannotBeTrusted())
       {
+         disableEstimators(null);
          if (logger != null)
             logger.severe(imuDefinition.getName() + " IMU sensor can't be trusted, skipping to the next diagnostic task.");
          return true;
+      }
+
+      if (currentDirection != null)
+      {
+         List<OneDoFJointSensorValidityChecker> jointValidityCheckerList = jointValidityCheckers.get(currentDirection);
+         for (int i = 0; i < jointValidityCheckerList.size(); i++)
+         {
+            if (jointValidityCheckerList.get(i).sensorsCannotBeTrusted())
+            {
+               disableEstimators(null);
+               if (logger != null)
+                  logger.severe(imuDefinition.getName() + " IMU sensor can't be trusted, skipping to the next diagnostic task.");
+               return true;
+            }
+         }
       }
 
       return getTimeInCurrentTask() >= axisEvaluationEndTime.get(Direction.Z).getDoubleValue();
