@@ -78,7 +78,7 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
       fourierAnalysisTauMagnitude = new double[fourierAnalysisOutputSize];
       fourierAnalysisTauDesiredMagnitude = new double[fourierAnalysisOutputSize];
       fourierAnalysis.getFrequencies(fourierAnalysisFrequency);
-      fourierAnalysis.getVelocityMagnitudes(fourierAnalysisTauDesiredMagnitude);
+      fourierAnalysis.getVelocityMagnitudes(fourierAnalysisVelocityMagnitude);
       fourierAnalysis.getTauMagnitudes(fourierAnalysisTauMagnitude);
       fourierAnalysis.getTauDesiredMagnitudes(fourierAnalysisTauDesiredMagnitude);
 
