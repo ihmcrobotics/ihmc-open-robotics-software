@@ -1,5 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge.logProcessor;
 
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQsName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQxName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQyName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQzName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createXName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createYName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createZName;
+
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -18,6 +26,7 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -235,19 +244,43 @@ public class LogDataProcessorHelper
       return scs;
    }
 
-   public YoFramePoint findYoFramePoint(String pointName, ReferenceFrame pointFrame)
+   public YoFramePoint findYoFramePoint(String pointPrefix, ReferenceFrame pointFrame)
    {
-      DoubleYoVariable x = (DoubleYoVariable) scs.getVariable(pointName + "X");
-      DoubleYoVariable y = (DoubleYoVariable) scs.getVariable(pointName + "Y");
-      DoubleYoVariable z = (DoubleYoVariable) scs.getVariable(pointName + "Z");
+      return findYoFramePoint(pointPrefix, "", pointFrame);
+   }
+
+   public YoFramePoint findYoFramePoint(String pointPrefix, String pointSuffix, ReferenceFrame pointFrame)
+   {
+      DoubleYoVariable x = (DoubleYoVariable) scs.getVariable(createXName(pointPrefix, pointSuffix));
+      DoubleYoVariable y = (DoubleYoVariable) scs.getVariable(createYName(pointPrefix, pointSuffix));
+      DoubleYoVariable z = (DoubleYoVariable) scs.getVariable(createZName(pointPrefix, pointSuffix));
       return new YoFramePoint(x, y, z, pointFrame);
    }
 
-   public YoFrameVector findYoFrameVector(String vectorName, ReferenceFrame vectorFrame)
+   public YoFrameVector findYoFrameVector(String vectorPrefix, ReferenceFrame vectorFrame)
    {
-      DoubleYoVariable x = (DoubleYoVariable) scs.getVariable(vectorName + "X");
-      DoubleYoVariable y = (DoubleYoVariable) scs.getVariable(vectorName + "Y");
-      DoubleYoVariable z = (DoubleYoVariable) scs.getVariable(vectorName + "Z");
+      return findYoFrameVector(vectorPrefix, "", vectorFrame);
+   }
+   
+   public YoFrameVector findYoFrameVector(String vectorPrefix, String vectorSuffix, ReferenceFrame vectorFrame)
+   {
+      DoubleYoVariable x = (DoubleYoVariable) scs.getVariable(createXName(vectorPrefix, vectorSuffix));
+      DoubleYoVariable y = (DoubleYoVariable) scs.getVariable(createYName(vectorPrefix, vectorSuffix));
+      DoubleYoVariable z = (DoubleYoVariable) scs.getVariable(createZName(vectorPrefix, vectorSuffix));
       return new YoFrameVector(x, y, z, vectorFrame);
+   }
+
+   public YoFrameQuaternion findYoFrameQuaternion(String quaternionPrefix, ReferenceFrame quaternionFrame)
+   {
+      return findYoFrameQuaternion(quaternionPrefix, "", quaternionFrame);
+   }
+   
+   public YoFrameQuaternion findYoFrameQuaternion(String quaternionPrefix, String quaternionSuffix, ReferenceFrame quaternionFrame)
+   {
+      DoubleYoVariable qx = (DoubleYoVariable) scs.getVariable(createQxName(quaternionPrefix, quaternionSuffix));
+      DoubleYoVariable qy = (DoubleYoVariable) scs.getVariable(createQyName(quaternionPrefix, quaternionSuffix));
+      DoubleYoVariable qz = (DoubleYoVariable) scs.getVariable(createQzName(quaternionPrefix, quaternionSuffix));
+      DoubleYoVariable qs = (DoubleYoVariable) scs.getVariable(createQsName(quaternionPrefix, quaternionSuffix));
+      return new YoFrameQuaternion(qx, qy, qz, qs, quaternionFrame);
    }
 }
