@@ -29,7 +29,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.valkyrie.imu.MicroStrainData;
@@ -68,12 +68,12 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    private final Matrix3d orientationMatrix = new Matrix3d();
 
    @SuppressWarnings("unchecked")
-   public ValkyrieRosControlSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, StateEstimatorParameters stateEstimatorParameters,
+   public ValkyrieRosControlSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessingConfiguration sensorProcessingConfiguration,
          TimestampProvider timestampProvider, List<YoJointHandleHolder> yoJointHandleHolders, List<YoIMUHandleHolder> yoIMUHandleHolders,
          List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles, YoVariableRegistry registry)
    {
 
-      this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, stateEstimatorParameters, registry);
+      this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
       this.timestampProvider = timestampProvider;
       this.yoJointHandleHolders = yoJointHandleHolders;
       this.yoIMUHandleHolders = yoIMUHandleHolders;
@@ -131,7 +131,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
             standPrepAngle = setPointMap.get(jointName);
          }
          ValkyrieRosControlJointControlCommandCalculator controlCommandCalculator = new ValkyrieRosControlJointControlCommandCalculator(jointHandleHolder,
-               standPrepGains, torqueOffset, standPrepAngle, stateEstimatorParameters.getEstimatorDT(), registry);
+               standPrepGains, torqueOffset, standPrepAngle, sensorProcessingConfiguration.getEstimatorDT(), registry);
          controlCommandCalculators.add(controlCommandCalculator);
 
          jointToControlCommandCalculatorMap.put(jointName, controlCommandCalculator);
