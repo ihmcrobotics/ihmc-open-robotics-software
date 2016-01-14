@@ -58,13 +58,15 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
       parentRegistry.addChild(registry);
    }
 
-   public void enableAll()
+   @Override
+   public void enable()
    {
       for (Direction direction : Direction.values)
          delayEstimators.get(direction).enable();
    }
 
-   public void disableAll()
+   @Override
+   public void disable()
    {
       for (Direction direction : Direction.values)
          delayEstimators.get(direction).disable();

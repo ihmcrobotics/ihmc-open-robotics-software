@@ -34,11 +34,13 @@ public class PositionVelocity1DConsistencyChecker implements DiagnosticUpdatable
       parentRegistry.addChild(registry);
    }
 
+   @Override
    public void enable()
    {
       delayEstimator.enable();
    }
 
+   @Override
    public void disable()
    {
       delayEstimator.disable();

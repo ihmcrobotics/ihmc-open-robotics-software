@@ -366,7 +366,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       }
 
       validityChecker.enable();
-      orientationVelocityConsistency.enableAll();
+      orientationVelocityConsistency.enable();
       delayEstimator.enable();
    }
 
@@ -389,7 +389,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       }
 
       validityChecker.disable();
-      orientationVelocityConsistency.disableAll();
+      orientationVelocityConsistency.disable();
       delayEstimator.disable();
       velocityToOrientationQualityMeanCalculator.clear();
       velocityToOrientationQualityStandardDeviationCalculator.clear();
