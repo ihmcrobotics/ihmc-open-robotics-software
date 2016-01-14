@@ -65,7 +65,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 
-public class ValkyrieRosControlDiagnostic extends IHMCValkyrieControlJavaBridge
+public class ValkyrieAutomatedDiagnosticController extends IHMCValkyrieControlJavaBridge
 {
    private static final String[] controlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
          "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
@@ -91,7 +91,7 @@ public class ValkyrieRosControlDiagnostic extends IHMCValkyrieControlJavaBridge
    private DRCKinematicsBasedStateEstimator stateEstimator;
    private AutomatedDiagnosticAnalysisController diagnosticController;
 
-   public ValkyrieRosControlDiagnostic()
+   public ValkyrieAutomatedDiagnosticController()
    {
       DiagnosticLoggerConfiguration.setupLogging(diagnosticControllerTime, getClass(), robotModel.getSimpleRobotName(), true);
    }
