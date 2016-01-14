@@ -26,8 +26,8 @@ public class ValkyrieAutomatedDiagnosticSimulation
 
       AutomatedDiagnosticSimulationFactory simulationFactory = new AutomatedDiagnosticSimulationFactory(robotModel);
 
-      InputStream gainStream = getClass().getClassLoader().getResourceAsStream("standPrep/simulationGains.yaml");
-      InputStream setpointStream = getClass().getClassLoader().getResourceAsStream("standPrep/setpoints.yaml");
+      InputStream gainStream = getClass().getClassLoader().getResourceAsStream("diagnostic/simulationPDGains.yaml");
+      InputStream setpointStream = getClass().getClassLoader().getResourceAsStream("diagnostic/diagnosticSetPoints.yaml");
 
       simulationFactory.setGainStream(gainStream);
       simulationFactory.setSetpointStream(setpointStream);

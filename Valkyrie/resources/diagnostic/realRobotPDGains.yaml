@@ -1,0 +1,99 @@
+leftHipYaw:
+    kp: 100.0
+    kd: 10.0
+leftHipRoll:
+    kp: 200.0
+    kd: 20.0
+leftHipPitch:
+    kp: 200.0
+    kd: 20.0
+leftKneePitch:
+    kp: 200.0
+    kd: 20.0
+leftAnklePitch:
+    kp: 200.0
+    kd: 20.0
+leftAnkleRoll:
+    kp: 200.0
+    kd: 20.0
+rightHipYaw:
+    kp: 100.0
+    kd: 10.0
+rightHipRoll:
+    kp: 200.0
+    kd: 20.0
+rightHipPitch:
+    kp: 200.0
+    kd: 20.0
+rightKneePitch:
+    kp: 200.0
+    kd: 20.0
+rightAnklePitch:
+    kp: 200.0
+    kd: 20.0
+rightAnkleRoll:
+    kp: 200.0
+    kd: 20.0
+torsoYaw:
+    kp: 300.0
+    kd: 30.0
+torsoPitch:
+    kp: 400.0
+    kd: 40.0
+torsoRoll:
+    kp: 400.0
+    kd: 40.0
+leftShoulderPitch: 
+    kp: 200.0
+    kd: 20.0
+leftShoulderRoll:
+    kp: 200.0
+    kd: 20.0
+leftShoulderYaw:
+    kp: 100.0
+    kd: 10.0
+leftElbowPitch:
+    kp: 100.0
+    kd: 10.0
+leftForearmYaw:
+    kp: 100.0
+    kd: 10.0
+leftWristRoll:
+    kp: 50.0
+    kd: 5.0
+leftWristPitch:
+    kp: 50.0
+    kd: 5.0
+lowerNeckPitch:
+    kp: 100.0
+    kd: 10.0
+neckYaw:
+    kp: 100.0
+    kd: 10.0
+upperNeckPitch:
+    kp: 100.0
+    kd: 10.0
+rightShoulderPitch:
+    kp: 200.0
+    kd: 20.0
+rightShoulderRoll:
+    kp: 200.0
+    kd: 20.0
+rightShoulderYaw:
+    kp: 100.0
+    kd: 10.0
+rightElbowPitch:
+    kp: 100.0
+    kd: 10.0
+rightForearmYaw:
+    kp: 100.0
+    kd: 10.0
+rightWristRoll:
+    kp: 50.0
+    kd: 5.0
+rightWristPitch:
+    kp: 50.0
+    kd: 5.0
+hokuyo_joint:
+    kp: 5.0
+    kd: 0.5
