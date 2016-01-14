@@ -81,11 +81,13 @@ public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
          logger = Logger.getLogger(getClass().getName());
    }
 
+   @Override
    public void enable()
    {
       enabled.set(true);
    }
 
+   @Override
    public void disable()
    {
       reset();

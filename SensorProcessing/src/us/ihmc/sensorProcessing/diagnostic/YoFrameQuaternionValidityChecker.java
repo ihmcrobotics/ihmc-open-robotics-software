@@ -69,12 +69,14 @@ public class YoFrameQuaternionValidityChecker implements DiagnosticUpdatable
          validityChecker.setupForLogging(loggerName);
    }
    
+   @Override
    public void enable()
    {
       for (DoubleYoVariableValidityChecker validityChecker : validityCheckers)
          validityChecker.enable();
    }
    
+   @Override
    public void disable()
    {
       for (DoubleYoVariableValidityChecker validityChecker : validityCheckers)

@@ -41,6 +41,7 @@ public class IMUSensorValidityChecker implements DiagnosticUpdatable
       linearAccelerationChecker.setupForLogging(loggerName);
    }
 
+   @Override
    public void enable()
    {
       orientationChecker.enable();
@@ -48,6 +49,7 @@ public class IMUSensorValidityChecker implements DiagnosticUpdatable
       linearAccelerationChecker.enable();
    }
 
+   @Override
    public void disable()
    {
       orientationChecker.disable();

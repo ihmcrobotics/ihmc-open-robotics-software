@@ -37,6 +37,20 @@ public class WrenchSensorValidityChecker implements DiagnosticUpdatable
       torqueChecker.update();
    }
 
+   @Override
+   public void enable()
+   {
+      forceChecker.enable();
+      torqueChecker.enable();
+   }
+
+   @Override
+   public void disable()
+   {
+      forceChecker.disable();
+      torqueChecker.disable();
+   }
+
    public boolean areSensorValuesSane()
    {
       return forceChecker.isInputSane() && torqueChecker.isInputSane();

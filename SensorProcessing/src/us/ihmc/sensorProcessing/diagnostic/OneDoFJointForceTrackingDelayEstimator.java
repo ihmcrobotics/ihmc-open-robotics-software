@@ -17,11 +17,13 @@ public class OneDoFJointForceTrackingDelayEstimator implements DiagnosticUpdatab
       delayEstimator = new DelayEstimatorBetweenTwoSignals(jointName + "ForceTracking", dt, registry);
    }
 
+   @Override
    public void enable()
    {
       delayEstimator.enable();
    }
 
+   @Override
    public void disable()
    {
       delayEstimator.disable();

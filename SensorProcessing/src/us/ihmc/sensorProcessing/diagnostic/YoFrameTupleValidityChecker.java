@@ -69,12 +69,14 @@ public class YoFrameTupleValidityChecker implements DiagnosticUpdatable
          validityCheckers.get(direction).setupForLogging(loggerName);
    }
 
+   @Override
    public void enable()
    {
       for (Direction direction : Direction.values)
          validityCheckers.get(direction).enable();
    }
 
+   @Override
    public void disable()
    {
       for (Direction direction : Direction.values)

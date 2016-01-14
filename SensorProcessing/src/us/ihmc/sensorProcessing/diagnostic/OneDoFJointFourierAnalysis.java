@@ -28,6 +28,7 @@ public class OneDoFJointFourierAnalysis implements DiagnosticUpdatable
       tauDesiredFourierAnalysis = new Online1DSignalFourierAnalysis(jointName + "TauDesired", estimationWindow, dt, registry);
    }
 
+   @Override
    public void enable()
    {
       velocityFourierAnalysis.enable();
@@ -35,6 +36,7 @@ public class OneDoFJointFourierAnalysis implements DiagnosticUpdatable
       tauDesiredFourierAnalysis.enable();
    }
 
+   @Override
    public void disable()
    {
       velocityFourierAnalysis.disable();
