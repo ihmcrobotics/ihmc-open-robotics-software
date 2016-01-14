@@ -31,6 +31,8 @@ public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
    private final BooleanYoVariable isVariableInfinite;
    private final IntegerYoVariable hasBeenInfiniteForNTicks;
 
+   private final BooleanYoVariable enabled;
+
    private final BooleanYoVariable cannotBeTrusted;
 
    public DoubleYoVariableValidityChecker(String inputName, YoVariableRegistry parentRegistry)
@@ -66,6 +68,8 @@ public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
       isVariableInfinite.set(false);
       hasBeenInfiniteForNTicks = new IntegerYoVariable(inputName + "HasBeenInfiniteForNTicks", registry);
 
+      enabled = new BooleanYoVariable(registry.getName() + "Enabled", registry);
+
       cannotBeTrusted = new BooleanYoVariable(inputName + "CannotBeTrusted", registry);
    }
 
@@ -75,6 +79,17 @@ public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
          logger = Logger.getLogger(loggerName);
       else
          logger = Logger.getLogger(getClass().getName());
+   }
+
+   public void enable()
+   {
+      enabled.set(true);
+   }
+
+   public void disable()
+   {
+      reset();
+      enabled.set(false);
    }
 
    @Override
@@ -88,6 +103,9 @@ public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
 
    public void update(double newInputValue)
    {
+      if (!enabled.getBooleanValue())
+         return;
+
       checkIfVariableIsDead(newInputValue);
       checkIfVariableIsNaN(newInputValue);
       checkIfVariableIsInfinite(newInputValue);
@@ -182,6 +200,19 @@ public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
       }
 
       isVariableNaN.set(isInfinite);
+   }
+
+   public void reset()
+   {
+      isVariableDead.set(false);
+      isVariableInfinite.set(false);
+      isVariableNaN.set(false);
+
+      hasBeenDeadForNTicks.set(0);
+      hasBeenInfiniteForNTicks.set(0);
+      hasBeenNaNForNTicks.set(0);
+
+      cannotBeTrusted.set(false);
    }
 
    public boolean isInputSane()

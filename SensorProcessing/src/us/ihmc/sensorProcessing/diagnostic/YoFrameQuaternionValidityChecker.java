@@ -68,6 +68,18 @@ public class YoFrameQuaternionValidityChecker implements DiagnosticUpdatable
       for (DoubleYoVariableValidityChecker validityChecker : validityCheckers)
          validityChecker.setupForLogging(loggerName);
    }
+   
+   public void enable()
+   {
+      for (DoubleYoVariableValidityChecker validityChecker : validityCheckers)
+         validityChecker.enable();
+   }
+   
+   public void disable()
+   {
+      for (DoubleYoVariableValidityChecker validityChecker : validityCheckers)
+         validityChecker.disable();
+   }
 
    public boolean isInputSane()
    {

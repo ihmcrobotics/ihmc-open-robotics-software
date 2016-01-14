@@ -41,6 +41,20 @@ public class IMUSensorValidityChecker implements DiagnosticUpdatable
       linearAccelerationChecker.setupForLogging(loggerName);
    }
 
+   public void enable()
+   {
+      orientationChecker.enable();
+      angularVelocityChecker.enable();
+      linearAccelerationChecker.enable();
+   }
+
+   public void disable()
+   {
+      orientationChecker.disable();
+      angularVelocityChecker.disable();
+      linearAccelerationChecker.disable();
+   }
+
    public boolean areSensorValuesSane()
    {
       return orientationChecker.isInputSane() && angularVelocityChecker.isInputSane() && linearAccelerationChecker.isInputSane();

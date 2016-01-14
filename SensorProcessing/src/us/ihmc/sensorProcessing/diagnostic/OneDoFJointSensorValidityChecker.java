@@ -45,6 +45,20 @@ public class OneDoFJointSensorValidityChecker implements DiagnosticUpdatable
       tauChecker = new DoubleYoVariableValidityChecker(jointName + "Tau", registry);
    }
 
+   public void enable()
+   {
+      positionChecker.enable();
+      velocityChecker.enable();
+      tauChecker.enable();
+   }
+
+   public void disable()
+   {
+      positionChecker.disable();
+      velocityChecker.disable();
+      tauChecker.disable();
+   }
+
    @Override
    public void update()
    {
