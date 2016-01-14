@@ -105,6 +105,12 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
    }
 
    @Override
+   public boolean doIdleControlUntilRobotIsAlive()
+   {
+      return true;
+   }
+
+   @Override
    public String getPelvisIMUName()
    {
       return sensorInformation.getPrimaryBodyImu();
