@@ -26,7 +26,7 @@ public class AtlasAutomatedDiagnosticSimulation
       AutomatedDiagnosticSimulationFactory simulationFactory = new AutomatedDiagnosticSimulationFactory(robotModel);
 
       InputStream gainStream = getClass().getClassLoader().getResourceAsStream("diagnostic/simulationPDGains.yaml");
-      InputStream setpointStream = getClass().getClassLoader().getResourceAsStream("diagnostic/diagnosticSetpoints.yaml");
+      InputStream setpointStream = getClass().getClassLoader().getResourceAsStream("diagnostic/diagnosticSetPoints.yaml");
 
       simulationFactory.setGainStream(gainStream);
       simulationFactory.setSetpointStream(setpointStream);
