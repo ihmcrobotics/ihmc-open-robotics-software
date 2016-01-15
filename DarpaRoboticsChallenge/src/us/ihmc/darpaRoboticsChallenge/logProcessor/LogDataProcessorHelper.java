@@ -254,7 +254,10 @@ public class LogDataProcessorHelper
       DoubleYoVariable x = (DoubleYoVariable) scs.getVariable(createXName(pointPrefix, pointSuffix));
       DoubleYoVariable y = (DoubleYoVariable) scs.getVariable(createYName(pointPrefix, pointSuffix));
       DoubleYoVariable z = (DoubleYoVariable) scs.getVariable(createZName(pointPrefix, pointSuffix));
-      return new YoFramePoint(x, y, z, pointFrame);
+      if (x == null || y == null || z == null)
+         return null;
+      else
+         return new YoFramePoint(x, y, z, pointFrame);
    }
 
    public YoFrameVector findYoFrameVector(String vectorPrefix, ReferenceFrame vectorFrame)
@@ -267,7 +270,10 @@ public class LogDataProcessorHelper
       DoubleYoVariable x = (DoubleYoVariable) scs.getVariable(createXName(vectorPrefix, vectorSuffix));
       DoubleYoVariable y = (DoubleYoVariable) scs.getVariable(createYName(vectorPrefix, vectorSuffix));
       DoubleYoVariable z = (DoubleYoVariable) scs.getVariable(createZName(vectorPrefix, vectorSuffix));
-      return new YoFrameVector(x, y, z, vectorFrame);
+      if (x == null || y == null || z == null)
+         return null;
+      else
+         return new YoFrameVector(x, y, z, vectorFrame);
    }
 
    public YoFrameQuaternion findYoFrameQuaternion(String quaternionPrefix, ReferenceFrame quaternionFrame)
@@ -281,6 +287,10 @@ public class LogDataProcessorHelper
       DoubleYoVariable qy = (DoubleYoVariable) scs.getVariable(createQyName(quaternionPrefix, quaternionSuffix));
       DoubleYoVariable qz = (DoubleYoVariable) scs.getVariable(createQzName(quaternionPrefix, quaternionSuffix));
       DoubleYoVariable qs = (DoubleYoVariable) scs.getVariable(createQsName(quaternionPrefix, quaternionSuffix));
-      return new YoFrameQuaternion(qx, qy, qz, qs, quaternionFrame);
+
+      if (qx == null || qy == null || qz == null || qs == null)
+         return null;
+      else
+         return new YoFrameQuaternion(qx, qy, qz, qs, quaternionFrame);
    }
 }
