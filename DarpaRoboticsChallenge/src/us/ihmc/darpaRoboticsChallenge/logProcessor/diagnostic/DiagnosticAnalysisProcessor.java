@@ -1,29 +1,29 @@
 package us.ihmc.darpaRoboticsChallenge.logProcessor.diagnostic;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.List;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorFunction;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorHelper;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.diagnostic.DelayEstimatorBetweenTwoSignals;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
-import us.ihmc.sensorProcessing.diagnostic.Online1DSignalFourierAnalysis;
+import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
+import us.ihmc.sensorProcessing.diagnostic.DiagnosticUpdatable;
+import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
+import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity3DConsistencyChecker;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
@@ -31,68 +31,159 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final LogDataProcessorHelper logDataProcessorHelper;
-   private final ArrayList<OneDoFJoint> analyzedJoints = new ArrayList<>();
-   private final LinkedHashMap<OneDoFJoint, Online1DSignalFourierAnalysis> jointVelocityFFTs = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDoFJoint, PositionVelocity1DConsistencyChecker> jointVelocityCheck = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDoFJoint, DelayEstimatorBetweenTwoSignals> jointForceControlDelay = new LinkedHashMap<>();
+   private final List<DiagnosticUpdatable> diagnosticUpdatables = new ArrayList<>();
 
-   private final PositionVelocity3DConsistencyChecker centerOfMassCheck;
+   private final FullHumanoidRobotModel fullRobotModel;
+   private final YoVariableHolder logYoVariableHolder;
+   private final double dt;
+
+   private DiagnosticParameters diagnosticParameters;
 
    public DiagnosticAnalysisProcessor(LogDataProcessorHelper logDataProcessorHelper, DRCRobotModel drcRobotModel)
    {
       this.logDataProcessorHelper = logDataProcessorHelper;
-      DiagnosticParameters diagnosticParameters = new DiagnosticParameters(DiagnosticEnvironment.OFFLINE_LOG, false);
-      FullHumanoidRobotModel fullRobotModel = logDataProcessorHelper.getFullRobotModel();
-      double dt = drcRobotModel.getEstimatorDT();
-      YoVariableHolder logYoVariableHolder = logDataProcessorHelper.getLogYoVariableHolder();
+      diagnosticParameters = new DiagnosticParameters(DiagnosticEnvironment.OFFLINE_LOG, false);
+      fullRobotModel = logDataProcessorHelper.getFullRobotModel();
+      dt = drcRobotModel.getEstimatorDT();
+      logYoVariableHolder = logDataProcessorHelper.getLogYoVariableHolder();
+   }
 
-      double delayEstimatorMaxAbsoluteLead = diagnosticParameters.getDelayEstimatorMaximumLead();
-      double delayEstimatorMaxAbsoluteLag = diagnosticParameters.getDelayEstimatorMaximumLag();
-      double delayEstimatorObservationWindow = diagnosticParameters.getDelayEstimatorObservationWindow();
-      double delayEstimatorIntputSignalsSMAWindow = diagnosticParameters.getDelayEstimatorIntputSignalsSMAWindow();
-      double delayEstimatorFilterBreakFrequency = diagnosticParameters.getDelayEstimatorFilterBreakFrequency();
+   public void addJointFourierAnalyses(String qd_prefix, String qd_suffix, String tau_prefix, String tau_suffix, String tau_d_prefix, String tau_d_suffix)
+   {
+      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+      double fftObservationWindow = diagnosticParameters.getFFTObservationWindow();
 
-      for (RobotSide robotSide : RobotSide.values)
+      for (OneDoFJoint joint : oneDoFJoints)
       {
-         for (LegJointName legJointName : fullRobotModel.getRobotSpecificJointNames().getLegJointNames())
+         String jointName = joint.getName();
+         DoubleYoVariable qd = (DoubleYoVariable) logYoVariableHolder.getVariable(qd_prefix + jointName + qd_suffix);
+         DoubleYoVariable tau = (DoubleYoVariable) logYoVariableHolder.getVariable(tau_prefix + jointName + tau_suffix);
+         DoubleYoVariable tau_d = (DoubleYoVariable) logYoVariableHolder.getVariable(tau_d_prefix + jointName + tau_d_suffix);
+
+         if (qd == null)
          {
-            OneDoFJoint joint = fullRobotModel.getLegJoint(robotSide, legJointName);
-            String jointName = joint.getName();
-
-            analyzedJoints.add(joint);
-            double fftObservationWindow = diagnosticParameters.getFFTObservationWindow();
-            Online1DSignalFourierAnalysis online1dSignalFrequencyAnalysis = new Online1DSignalFourierAnalysis(jointName, fftObservationWindow, dt, registry);
-            online1dSignalFrequencyAnalysis.setMagnitudeFilterBreakFrequency(diagnosticParameters.getFFTMagnitudeFilterBreakFrequency());
-            online1dSignalFrequencyAnalysis.setFrequencyGlitchFilterWindow(diagnosticParameters.getFFTFrequencyGlitchFilterWindow());
-            online1dSignalFrequencyAnalysis.setMinimumMagnitude(diagnosticParameters.getFFTMinimumMagnitude());
-            
-            jointVelocityFFTs.put(joint, online1dSignalFrequencyAnalysis);
-            DoubleYoVariable q = (DoubleYoVariable) logYoVariableHolder.getVariable("raw_q_" + jointName);
-            DoubleYoVariable qd = (DoubleYoVariable) logYoVariableHolder.getVariable("qd_" + jointName);
-            PositionVelocity1DConsistencyChecker consistencyChecker = new PositionVelocity1DConsistencyChecker(jointName + "Check", q, qd, dt, registry);
-            consistencyChecker.enable();
-
-            consistencyChecker.setDelayEstimationParameters(delayEstimatorMaxAbsoluteLead, delayEstimatorMaxAbsoluteLag, delayEstimatorObservationWindow);
-            consistencyChecker.setInputSignalsSMAWindow(delayEstimatorIntputSignalsSMAWindow);
-            consistencyChecker.setDelayEstimatorAlphaFilterBreakFrequency(delayEstimatorFilterBreakFrequency);
-            
-            jointVelocityCheck.put(joint, consistencyChecker);
-
-            DoubleYoVariable tauDesired = (DoubleYoVariable) logYoVariableHolder.getVariable("ll_out_" + jointName + "_f_d");
-            DoubleYoVariable tau = (DoubleYoVariable) logYoVariableHolder.getVariable("ll_in_" + jointName + "_f");
-            DelayEstimatorBetweenTwoSignals forceTrackingDelay = new DelayEstimatorBetweenTwoSignals(jointName + "ForceTrackingDelay", tauDesired, tau, dt, registry);
-            forceTrackingDelay.enable();
-            forceTrackingDelay.setAlphaFilterBreakFrequency(delayEstimatorFilterBreakFrequency);
-            forceTrackingDelay.setEstimationParameters(delayEstimatorMaxAbsoluteLead, delayEstimatorMaxAbsoluteLag, delayEstimatorObservationWindow);
-            
-            jointForceControlDelay.put(joint, forceTrackingDelay);
+            System.err.println("Could not find the find the velocity variable for the joint: " + jointName);
+            continue;
          }
-      }
 
+         if (tau == null)
+         {
+            System.err.println("Could not find the find the tau variable for the joint: " + jointName);
+            continue;
+         }
+
+         if (tau_d == null)
+         {
+            System.err.println("Could not find the find the tau desired variable for the joint: " + jointName);
+            continue;
+         }
+
+         OneDoFJointFourierAnalysis online1dSignalFrequencyAnalysis = new OneDoFJointFourierAnalysis(joint, fftObservationWindow, dt, qd, tau, tau_d, registry);
+         diagnosticUpdatables.add(online1dSignalFrequencyAnalysis);
+      }
+   }
+
+   public void addJointConsistencyCheckers(String q_prefix, String q_suffix, String qd_prefix, String qd_suffix)
+   {
+      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+
+      for (OneDoFJoint joint : oneDoFJoints)
+      {
+         String jointName = joint.getName();
+         DoubleYoVariable q = (DoubleYoVariable) logYoVariableHolder.getVariable(q_prefix + jointName + q_suffix);
+         DoubleYoVariable qd = (DoubleYoVariable) logYoVariableHolder.getVariable(qd_prefix + jointName + qd_suffix);
+
+         if (q == null)
+         {
+            System.err.println("Could not find the find the position variable for the joint: " + jointName);
+            continue;
+         }
+
+         if (qd == null)
+         {
+            System.err.println("Could not find the find the velocity variable for the joint: " + jointName);
+            continue;
+         }
+
+         diagnosticUpdatables.add(new PositionVelocity1DConsistencyChecker(jointName, q, qd, dt, registry));
+      }
+   }
+
+   public void addIMUConsistencyCheckers(String q_prefix, String q_suffix, String qd_prefix, String qd_suffix, boolean performAnalysisInBodyFrame)
+   {
+      IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
+
+      for (IMUDefinition imuDefinition : imuDefinitions)
+      {
+         String imuName = imuDefinition.getName();
+         ReferenceFrame bodyFrame = imuDefinition.getRigidBody().getBodyFixedFrame();
+         ReferenceFrame imuFrame = imuDefinition.getIMUFrame();
+
+         YoFrameQuaternion q = logDataProcessorHelper.findYoFrameQuaternion(q_prefix, imuName + q_suffix, ReferenceFrame.getWorldFrame());
+         YoFrameVector qd = logDataProcessorHelper.findYoFrameVector(qd_prefix, imuName + qd_suffix, imuFrame);
+
+         if (q == null)
+         {
+            System.err.println("Could not find the find the position variable for the IMU: " + imuName);
+            continue;
+         }
+
+         if (qd == null)
+         {
+            System.err.println("Could not find the find the velocity variable for the IMU: " + imuName);
+            continue;
+         }
+
+         ReferenceFrame referenceFrameUsedForComparison = performAnalysisInBodyFrame ? bodyFrame : imuFrame;
+         diagnosticUpdatables.add(new OrientationAngularVelocityConsistencyChecker(imuName, q, qd, referenceFrameUsedForComparison, dt, registry));
+      }
+   }
+
+   public void addForceTrackingDelayEstimators(String tau_prefix, String tau_suffix, String tau_d_prefix, String tau_d_suffix)
+   {
+      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+
+      for (OneDoFJoint joint : oneDoFJoints)
+      {
+         String jointName = joint.getName();
+
+         DoubleYoVariable tau = (DoubleYoVariable) logYoVariableHolder.getVariable(tau_prefix + jointName + tau_suffix);
+         DoubleYoVariable tau_d = (DoubleYoVariable) logYoVariableHolder.getVariable(tau_d_prefix + jointName + tau_d_suffix);
+
+         if (tau == null)
+         {
+            System.err.println("Could not find the find the tau variable for the joint: " + jointName);
+            continue;
+         }
+
+         if (tau_d == null)
+         {
+            System.err.println("Could not find the find the tau desired variable for the joint: " + jointName);
+            continue;
+         }
+
+         diagnosticUpdatables.add(new DelayEstimatorBetweenTwoSignals(jointName + "ForceTracking", tau_d, tau, dt, registry));
+      }
+   }
+
+   public void addCenterOfMassConsistencyChecker()
+   {
       YoFramePoint com = logDataProcessorHelper.findYoFramePoint("estimatedCenterOfMassPosition", ReferenceFrame.getWorldFrame());
       YoFrameVector comVelocity = logDataProcessorHelper.findYoFrameVector("estimatedCenterOfMassVelocity", ReferenceFrame.getWorldFrame());
-      centerOfMassCheck = new PositionVelocity3DConsistencyChecker("centerOfMass", com, comVelocity, dt, registry);
-      centerOfMassCheck.enable();
+
+      if (com == null)
+      {
+         System.err.println("Could not find the YoFramePoint for the center of mass position");
+         return;
+      }
+
+      if (comVelocity == null)
+      {
+         System.err.println("Could not find the YoFrameVector for the center of mass velocity");
+         return;
+      }
+
+      diagnosticUpdatables.add(new PositionVelocity3DConsistencyChecker("centerOfMass", com, comVelocity, dt, registry));
    }
 
    @Override
@@ -100,22 +191,21 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
    {
    }
 
-   private final AlphaFilteredYoVariable averageDiagnosticDT = new AlphaFilteredYoVariable("averageDiagnosticDT", registry, 0.995);
+   private boolean firstTick = true;
 
    @Override
    public void processDataAtStateEstimatorRate()
    {
-      logDataProcessorHelper.update();
-      long startTime = System.nanoTime();
-      for (int i = 0; i < analyzedJoints.size(); i++)
+      if (firstTick)
       {
-         jointVelocityFFTs.get(analyzedJoints.get(i)).update(analyzedJoints.get(i).getQd());
-         jointVelocityCheck.get(analyzedJoints.get(i)).update();
-         jointForceControlDelay.get(analyzedJoints.get(i)).update();
+         for (DiagnosticUpdatable diagnosticUpdatable : diagnosticUpdatables)
+            diagnosticUpdatable.enable();
+         firstTick = false;
       }
-      centerOfMassCheck.update();
-      long endTime = System.nanoTime();
-      averageDiagnosticDT.update(TimeTools.nanoSecondstoSeconds(endTime - startTime));
+
+      logDataProcessorHelper.update();
+      for (DiagnosticUpdatable diagnosticUpdatable : diagnosticUpdatables)
+         diagnosticUpdatable.update();
    }
 
    @Override
