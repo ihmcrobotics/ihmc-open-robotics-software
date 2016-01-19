@@ -16,11 +16,14 @@ import us.ihmc.tools.testing.TestPlanTarget;
 public class PassiveRevoluteJointTest
 {
    // Variables
-   DenseMatrix64F matrix = new DenseMatrix64F();
-   ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-   FrameVector frameVec = new FrameVector();
-   RigidBody rigidBody = new RigidBody("rigidBody", referenceFrame);
-   PassiveRevoluteJoint joint = new PassiveRevoluteJoint("testJoint",rigidBody, referenceFrame, frameVec);
+   private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
+   private FrameVector frameVec = new FrameVector();
+   private RigidBody rigidBody = new RigidBody("rigidBody", referenceFrame);
+   private PassiveRevoluteJoint joint = new PassiveRevoluteJoint("testJoint",rigidBody, referenceFrame, frameVec);
+   private DenseMatrix64F matrix = new DenseMatrix64F();
+   private int rowStart = 1;
+   private Wrench jointWrench = new Wrench();
+   private double q, qd, qdd, qddDesired, tau;
    
    @Before
    public void setUp() throws Exception
@@ -42,10 +45,69 @@ public class PassiveRevoluteJointTest
       }
       catch(RuntimeException e)
       {
-         return;
+         return; // it caught an exception (which is what we wanted) so it returns (passes)
+      }     
+      Assert.fail(); // if it doesn't catch anything it will reach this line, which will make the test fail
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testPackVelocityMatrix()
+   {
+      try
+      {
+         joint.packVelocityMatrix(matrix, rowStart);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
+      }     
+      Assert.fail();
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testPackDesiredAccelerationMatrix()
+   {
+      try
+      {
+         joint.packDesiredAccelerationMatrix(matrix, rowStart);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
       }     
       Assert.fail();
    }
    
-
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetTorqueFromWrench()
+   {
+      try
+      {
+         joint.setTorqueFromWrench(jointWrench);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
+      }     
+      Assert.fail();
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetDesiredAcceleration()
+   {
+      try
+      {
+         joint.setDesiredAcceleration(matrix, rowStart);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
+      }     
+      Assert.fail();
+   }
+   
 }
