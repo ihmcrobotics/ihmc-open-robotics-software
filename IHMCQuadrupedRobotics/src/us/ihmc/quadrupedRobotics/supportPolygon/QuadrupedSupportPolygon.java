@@ -1814,6 +1814,12 @@ public class QuadrupedSupportPolygon implements Serializable
       return newPolygon;
    }
    
+   public void deleteLegCopy(RobotQuadrant legName, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
+   {
+      quadrupedSupportPolygonToPack.set(this);
+      quadrupedSupportPolygonToPack.deleteLeg(legName);
+   }
+   
    public void packPolygonWithoutLeg(RobotQuadrant legToDelete, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
    {
       quadrupedSupportPolygonToPack.clear();
@@ -2303,6 +2309,19 @@ public class QuadrupedSupportPolygon implements Serializable
       QuadrupedSupportPolygon newPolygon = new QuadrupedSupportPolygon(this);
       newPolygon.setFootstep(quadrant, footstep);
       return newPolygon;
+   }
+   
+   /**
+    * replaceFootstepCopy: this replaces the stored footsep with the passed in one.
+    * If the stored footstep is null, it will throw an exception.
+    *
+    * @param footstep Footstep
+    * @return Polygon
+    */
+   public void replaceFootstepCopy(RobotQuadrant quadrant, FramePoint footstep, QuadrupedSupportPolygon supportPolygonToPack)
+   {
+      supportPolygonToPack.set(this);
+      supportPolygonToPack.setFootstep(quadrant, footstep);
    }
 
    /**
