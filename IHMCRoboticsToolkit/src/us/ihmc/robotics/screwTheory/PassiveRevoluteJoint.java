@@ -27,126 +27,102 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    @Override
    public void packTauMatrix(DenseMatrix64F matrix)
    {
-      throw new RuntimeException("Cannot set Tau on passive joint");  
+      throw new RuntimeException("Cannot set torque of a passive joint");  
    }
 
    @Override
    public void packVelocityMatrix(DenseMatrix64F matrix, int rowStart)
    {
-
+      throw new RuntimeException("Cannot set velocity of a passive joint");
    }
 
    @Override
    public void packDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
    {
-
+      throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
 
    @Override
    public void setDesiredAccelerationToZero()
    {
-
+      throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
 
    @Override
    public void setTorqueFromWrench(Wrench jointWrench)
    {
-
+      throw new RuntimeException("Cannot set torque of a passive joint");
    }
 
    @Override
    public void setDesiredAcceleration(DenseMatrix64F matrix, int rowStart)
    {
-
+      throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
 
    @Override
    public void setQ(double q)
    {
-
+      throw new RuntimeException("Cannot set position of a passive joint");
    }
 
    @Override
    public void setQd(double qd)
    {
-
+      throw new RuntimeException("Cannot set velocity of a passive joint");
    }
 
    @Override
    public void setQdd(double qdd)
    {
-
+      throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
 
    @Override
    public void setQddDesired(double qddDesired)
    {
-
+      throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
 
    @Override
    public void setTau(double tau)
    {
-
+      throw new RuntimeException("Cannot set torque of a passive joint");  
    }
 
    @Override
    public void packConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
-
+      throw new RuntimeException("Cannot set position of a passive joint");
    }
 
    @Override
    public void setConfiguration(DenseMatrix64F matrix, int rowStart)
    {
-
+      throw new RuntimeException("Cannot set position of a passive joint");
    }
 
    @Override
    public void setVelocity(DenseMatrix64F matrix, int rowStart)
    {
-
+      throw new RuntimeException("Cannot set velocity of a passive joint");
    }
 
    @Override
    public void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint)
    {
-
+      throw new RuntimeException("Cannot set position, velocity, or acceleration of a passive joint");
    }
 
    @Override
    public void setQddDesired(InverseDynamicsJoint originalJoint)
    {
-
+      throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
-
-   @Override
-   public void setJointLimitLower(double jointLimitLower)
-   {
-
-   }
-
-   @Override
-   public void setJointLimitUpper(double jointLimitUpper)
-   {
-
-   }
-
-   @Override
-   public void setEffortLimit(double effortLimit)
-   {
-
-   }
-
-   @Override
-   //   public double getEffortLimit()  //TODO does this make sense?
-   //   {
-   //     
-   //   }
 
    public void setIntegrateDesiredAccelerations(boolean integrateDesiredAccelerations)
    {
-
+      throw new RuntimeException("Cannot modify the acceleration of a passive joint");
    }
 
 }
