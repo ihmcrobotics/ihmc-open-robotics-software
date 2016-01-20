@@ -5,7 +5,11 @@ import java.net.URI;
 
 import org.ros.internal.message.Message;
 
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JointPositionControllerFactory;
 import us.ihmc.communication.PacketRouter;
@@ -26,8 +30,9 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPac
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
+import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
 
-public class ValkyrieIPABSimulator
+public class OpenHumanoidsSimulator
 {
    private static final String ROBOT_NAME = "valkyrie";
    private static final String DEFAULT_PREFIX = "/ihmc_ros";
@@ -55,10 +60,22 @@ public class ValkyrieIPABSimulator
    }
    
    
-   public ValkyrieIPABSimulator(DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
-         boolean runAutomaticDiagnosticRoutine, boolean disableViz) throws IOException
+   public OpenHumanoidsSimulator(String model, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
+         boolean runAutomaticDiagnosticRoutine, boolean disableViz, boolean extra_sim_points) throws IOException
    {
-	      DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+	      DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false, model);
+	      if(load_sdf_contacts)
+	      {
+	    	  ValkyrieContactPointParameters contactPointParameters = (ValkyrieContactPointParameters) robotModel.getContactPointParameters();
+		      contactPointParameters.setupContactPointsFromRobotModel(robotModel, replace_contacts);
+	      }
+	      if(extra_sim_points)
+	      {
+	        ValkyrieContactPointParameters contactPointParameters = (ValkyrieContactPointParameters) robotModel.getContactPointParameters();
+	        contactPointParameters.addMoreFootContactPointsSimOnly();
+	        System.out.println("Added extra foot contact points.");
+	      }
+	      
 	      environment = new SDFEnvironment();
 	      
 	   	  DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
@@ -95,6 +112,8 @@ public class ValkyrieIPABSimulator
 		  simulationStarter.setStartingLocation(startingLocation);
 		  simulationStarter.setInitializeEstimatorToActual(true);
 		  simulationStarter.startSimulation(networkProcessorParameters, false);
+		  simulationStarter.getDRCSimulationFactory().getSimulationConstructionSet().hideAllDynamicGraphicObjects();
+		  
 		
 		  if (REDIRECT_UI_PACKETS_TO_ROS)
 		  {
@@ -156,11 +175,44 @@ public class ValkyrieIPABSimulator
 	   drcSimulationFactory.updateEnvironment(environment);
    }
    
+   public static boolean extra_sim_points = false;
+   public static String robotModel = "DEFAULT";
+   public static boolean load_sdf_contacts = false;
+   public static boolean replace_contacts = false;
    
+   public static void parseArguments(String[] args) throws JSAPException
+   {
+	   JSAP jsap = new JSAP();
+	   
+	   Switch extra_sim = new Switch("extra-foot-contact-points").setShortFlag('f').setLongFlag("extra-foot-contact-points");
+	   extra_sim.setHelp("Adds additional contact points to the simulator (not the conroller)");
+	   
+	   FlaggedOption model = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(false).setStringParser(JSAP.STRING_PARSER);
+	   model.setHelp("Set robot SDF/URDF");
+       model.setDefault("DEFAULT");
+       
+       Switch sdf_contacts_keep = new Switch("sdf-contact-points").setShortFlag('s').setLongFlag("sdf-contact-points");
+       sdf_contacts_keep.setHelp("Creates additional contact points from the SDF file.");
+       Switch sdf_contacts_replace = new Switch("sdf-contact-points-replace").setShortFlag('S').setLongFlag("sdf-contact-points-replace");
+       sdf_contacts_replace.setHelp("Replaces existing contact points with ones specified in the SDF file.");
+	   
+	   jsap.registerParameter(extra_sim);
+	   jsap.registerParameter(model);
+	   jsap.registerParameter(sdf_contacts_keep);
+	   jsap.registerParameter(sdf_contacts_replace);
+       JSAPResult config = jsap.parse(args);
+       
+       robotModel = config.getString(model.getID());
+       extra_sim_points = config.getBoolean(extra_sim.getID());
+       replace_contacts = config.getBoolean(sdf_contacts_replace.getID());
+       load_sdf_contacts = config.getBoolean(sdf_contacts_keep.getID()) || config.getBoolean(sdf_contacts_replace.getID());
+   }
    
    public static void main(String[] args) throws JSAPException, IOException
    {         
-	  ValkyrieIPABSimulator sim = new ValkyrieIPABSimulator(DRCObstacleCourseStartingLocation.DEFAULT, DEFAULT_PREFIX + "/" + ROBOT_NAME, DEFAULT_TF_PREFIX, false, false);
+	   parseArguments(args);
+
+	   OpenHumanoidsSimulator sim = new OpenHumanoidsSimulator(robotModel, DRCObstacleCourseStartingLocation.DEFAULT, DEFAULT_PREFIX + "/" + ROBOT_NAME, DEFAULT_TF_PREFIX, false, false, extra_sim_points);
    }
 }
 
