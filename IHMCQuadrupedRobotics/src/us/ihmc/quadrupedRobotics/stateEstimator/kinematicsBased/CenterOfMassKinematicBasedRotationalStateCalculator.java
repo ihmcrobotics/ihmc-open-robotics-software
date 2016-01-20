@@ -28,7 +28,7 @@ public class CenterOfMassKinematicBasedRotationalStateCalculator
    private final FrameOrientation rootJointOrientation = new FrameOrientation(worldFrame);
 
    private final YoFrameQuaternion previousYoRootJointOrientation = new YoFrameQuaternion("previousEstimatedRootJointOrientation", worldFrame, registry);
-   
+
    private final RootJointOrientationCorrectorHelper rootJointOrientationCorrectorHelper = new RootJointOrientationCorrectorHelper("stateEstimator", registry);
 
    private final ArrayList<RobotQuadrant> allQuadrants = new ArrayList<>();
@@ -56,7 +56,7 @@ public class CenterOfMassKinematicBasedRotationalStateCalculator
       for (RobotQuadrant quadrant : RobotQuadrant.values)
          allQuadrants.add(quadrant);
 
-      errorCalculator = new QuadrupedErrorCalculatorBasedOnThreePointsAverageReference(registry, graphicsListRegistry);
+      errorCalculator = new QuadrupedErrorCalculatorBasedOnThreePointsAverageReference("comLinearAndRotationalCalculator", registry, graphicsListRegistry);
 
       feetPositionCalculator = new FeetPositionCalculator(rootJointFrame, footFrames, registry);
 
@@ -72,7 +72,7 @@ public class CenterOfMassKinematicBasedRotationalStateCalculator
          FramePoint calculatedFootPosition = new FramePoint(worldFrame);
          calculatedFeetPositions.set(quadrant, calculatedFootPosition);
       }
-      
+
       parentRegistry.addChild(registry);
    }
 
@@ -81,7 +81,8 @@ public class CenterOfMassKinematicBasedRotationalStateCalculator
       rootJointOrientationCorrectorHelper.setCorrectionAlpha(0.1);
 
       rootJointYoOrientation.set(comInitialOrientation);
-
+      previousYoRootJointOrientation.set(comInitialOrientation);
+      
       feetPositionCalculator.initialize();
 
       yoUsedQuadrant.set(usedQuadrant);
@@ -97,9 +98,9 @@ public class CenterOfMassKinematicBasedRotationalStateCalculator
       {
          //estimate feet position with the previous estimate and the current joint angles, and store them in an array of calculated feet position
          feetPositionCalculator.estimateFeetPosition(previousRootJointPosition, previousYoRootJointOrientation, feetInContact, calculatedYoFeetPositions);
-         
+
          copyYoFeetPositionsInFeetPositions(estimatedYoFeetPositions);
-         
+
          errorCalculator.updateReferenceFrames(estimatedFeetPositions, calculatedFeetPositions);
          errorCalculator.getOrientationError(usedQuadrant, orientationError);
          compensateOrientationError(previousYoRootJointOrientation);
@@ -124,7 +125,7 @@ public class CenterOfMassKinematicBasedRotationalStateCalculator
 
    private void copyYoFeetPositionsInFeetPositions(QuadrantDependentList<YoFramePoint> estimatedYoFeetPositions)
    {
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          estimatedYoFeetPositions.get(quadrant).getFrameTuple(estimatedFeetPositions.get(quadrant));
          calculatedYoFeetPositions.get(quadrant).getFrameTuple(calculatedFeetPositions.get(quadrant));
