@@ -13,6 +13,10 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
+/*
+ * This class does not work
+ */
+
 public class QuadrupedErrorCalculatorBasedOnThreePointsAverageReference
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -29,7 +33,7 @@ public class QuadrupedErrorCalculatorBasedOnThreePointsAverageReference
   private final ArrayList<YoGraphicReferenceFrame> referenceFeetAverageReferenceFrameVizs = new ArrayList<>();
   private final ArrayList<YoGraphicReferenceFrame> comparedFeetAverageReferenceFrameVizs = new ArrayList<>();
    
-   public QuadrupedErrorCalculatorBasedOnThreePointsAverageReference(YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public QuadrupedErrorCalculatorBasedOnThreePointsAverageReference(String name, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
@@ -41,19 +45,19 @@ public class QuadrupedErrorCalculatorBasedOnThreePointsAverageReference
       }
       
       //this one needs to be in a difference for loop because all the feetPosition FramePoints have to be previously created
-      constructAverageFrame(RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT, graphicsListRegistry);
-      constructAverageFrame(RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT, graphicsListRegistry);
-      constructAverageFrame(RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT, graphicsListRegistry);
-      constructAverageFrame(RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT, graphicsListRegistry);
+      constructAverageFrame(RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT, name, graphicsListRegistry);
+      constructAverageFrame(RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT, name, graphicsListRegistry);
+      constructAverageFrame(RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT, name, graphicsListRegistry);
+      constructAverageFrame(RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT, name, graphicsListRegistry);
    
       parentRegistry.addChild(registry);
    }
 
    //The quadrantNotUsed is the key of the quadrantDependentLists containing the ThreePointsAverageReferenceFrame
    private void constructAverageFrame(RobotQuadrant quadrant1, RobotQuadrant quadrant2, RobotQuadrant quadrant3, RobotQuadrant quadrantNotUsed,
-         YoGraphicsListRegistry graphicsListRegistry)
+         String name, YoGraphicsListRegistry graphicsListRegistry)
    {
-      String prefix = quadrantNotUsed.getCamelCaseNameForStartOfExpression();
+      String prefix = name + quadrantNotUsed.getCamelCaseNameForMiddleOfExpression();
 
       //construction of the estimated related variables
       FramePoint referenceP1 = referenceFeetPositions.get(quadrant1);
