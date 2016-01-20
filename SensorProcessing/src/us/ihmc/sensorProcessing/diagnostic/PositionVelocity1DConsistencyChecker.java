@@ -9,27 +9,34 @@ public class PositionVelocity1DConsistencyChecker implements DiagnosticUpdatable
 {
    private final YoVariableRegistry registry;
 
-   private final FilteredVelocityYoVariable localVelocityFromFD;
+   private final FilteredVelocityYoVariable referenceVelocity;
 
-   private final SimpleMovingAverageFilteredYoVariable filteredVelocityToCheck;
-   private final SimpleMovingAverageFilteredYoVariable localVelocityFiltered;
+   private final SimpleMovingAverageFilteredYoVariable filteredRawVelocityToCheck;
+   private final SimpleMovingAverageFilteredYoVariable filteredProcessedVelocityToCheck;
+   private final SimpleMovingAverageFilteredYoVariable referenceVelocityFiltered;
 
-   private final DelayEstimatorBetweenTwoSignals delayEstimator;
+   private final DelayEstimatorBetweenTwoSignals delayEstimatorProcessedPosition;
+   private final DelayEstimatorBetweenTwoSignals delayEstimatorRawVelocity;
+   private final DelayEstimatorBetweenTwoSignals delayEstimatorProcessedVelocity;
 
    private final double dt;
 
-   public PositionVelocity1DConsistencyChecker(String namePrefix, DoubleYoVariable position, DoubleYoVariable velocityToCheck, double dt,
+   public PositionVelocity1DConsistencyChecker(String namePrefix, DoubleYoVariable rawPosition, DoubleYoVariable rawVelocityToCheck, DoubleYoVariable processedPositionToCheck, DoubleYoVariable processedVelocityToCheck, double dt,
          YoVariableRegistry parentRegistry)
    {
       this.dt = dt;
       registry = new YoVariableRegistry(namePrefix + "PositionVelocity1DCheck");
 
-      localVelocityFromFD = new FilteredVelocityYoVariable(namePrefix + "_referenceFD", "", 0.0, position, dt, registry);
+      referenceVelocity = new FilteredVelocityYoVariable(namePrefix + "_referenceVelocity", "", 0.0, rawPosition, dt, registry);
       int windowSize = 10;
-      localVelocityFiltered = new SimpleMovingAverageFilteredYoVariable(namePrefix + "_referenceFiltered", windowSize, localVelocityFromFD, registry);
-      filteredVelocityToCheck = new SimpleMovingAverageFilteredYoVariable(namePrefix + "_filtered", windowSize, velocityToCheck, registry);
+      referenceVelocityFiltered = new SimpleMovingAverageFilteredYoVariable(namePrefix + "_referenceVelocityFiltered", windowSize, referenceVelocity, registry);
 
-      delayEstimator = new DelayEstimatorBetweenTwoSignals(namePrefix + "PositionVelocity", localVelocityFiltered, filteredVelocityToCheck, dt, registry);
+      filteredRawVelocityToCheck = new SimpleMovingAverageFilteredYoVariable(namePrefix + "_filteredRawVelocity", windowSize, rawVelocityToCheck, registry);
+      filteredProcessedVelocityToCheck = new SimpleMovingAverageFilteredYoVariable(namePrefix + "_filteredProcessedVelocity", windowSize, processedVelocityToCheck, registry);
+
+      delayEstimatorProcessedPosition = new DelayEstimatorBetweenTwoSignals(namePrefix + "ProcessedPosition", rawPosition, processedPositionToCheck, dt, registry);
+      delayEstimatorRawVelocity = new DelayEstimatorBetweenTwoSignals(namePrefix + "RawVelocity", referenceVelocityFiltered, filteredRawVelocityToCheck, dt, registry);
+      delayEstimatorProcessedVelocity = new DelayEstimatorBetweenTwoSignals(namePrefix + "ProcessedVelocity", referenceVelocityFiltered, filteredProcessedVelocityToCheck, dt, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -37,57 +44,90 @@ public class PositionVelocity1DConsistencyChecker implements DiagnosticUpdatable
    @Override
    public void enable()
    {
-      delayEstimator.enable();
+      delayEstimatorProcessedPosition.enable();
+      delayEstimatorRawVelocity.enable();
+      delayEstimatorProcessedVelocity.enable();
    }
 
    @Override
    public void disable()
    {
-      delayEstimator.disable();
+      delayEstimatorProcessedPosition.disable();
+      delayEstimatorRawVelocity.disable();
+      delayEstimatorProcessedVelocity.disable();
    }
 
    public void setInputSignalsSMAWindow(double window)
    {
-      localVelocityFiltered.setWindowSize((int) (window / dt));
-      filteredVelocityToCheck.setWindowSize((int) (window / dt));
+      int windowSize = (int) (window / dt);
+      referenceVelocityFiltered.setWindowSize(windowSize);
+      filteredRawVelocityToCheck.setWindowSize(windowSize);
+      filteredProcessedVelocityToCheck.setWindowSize(windowSize);
    }
 
    public void setDelayEstimatorAlphaFilterBreakFrequency(double breakFrequency)
    {
-      delayEstimator.setAlphaFilterBreakFrequency(breakFrequency);
+      delayEstimatorProcessedPosition.setAlphaFilterBreakFrequency(breakFrequency);
+      delayEstimatorRawVelocity.setAlphaFilterBreakFrequency(breakFrequency);
+      delayEstimatorProcessedVelocity.setAlphaFilterBreakFrequency(breakFrequency);
    }
 
    public void setDelayEstimationParameters(double maxAbsoluteLead, double maxAbsoluteLag, double observationWindow)
    {
-      delayEstimator.setEstimationParameters(maxAbsoluteLead, maxAbsoluteLag, observationWindow);
+      delayEstimatorProcessedPosition.setEstimationParameters(maxAbsoluteLead, maxAbsoluteLag, observationWindow);
+      delayEstimatorRawVelocity.setEstimationParameters(maxAbsoluteLead, maxAbsoluteLag, observationWindow);
+      delayEstimatorProcessedVelocity.setEstimationParameters(maxAbsoluteLead, maxAbsoluteLag, observationWindow);
    }
 
    @Override
    public void update()
    {
-      localVelocityFromFD.update();
-      localVelocityFiltered.update();
+      referenceVelocity.update();
+      referenceVelocityFiltered.update();
 
-      filteredVelocityToCheck.update();
+      filteredRawVelocityToCheck.update();
+      filteredProcessedVelocityToCheck.update();
 
-      if (!localVelocityFiltered.getHasBufferWindowFilled())
+      if (!referenceVelocityFiltered.getHasBufferWindowFilled())
          return;
 
-      delayEstimator.update();
+      delayEstimatorProcessedPosition.update();
+      delayEstimatorRawVelocity.update();
+      delayEstimatorProcessedVelocity.update();
    }
 
    public boolean isEstimatingDelay()
    {
-      return delayEstimator.isEstimatingDelay();
+      return delayEstimatorProcessedPosition.isEstimatingDelay() && delayEstimatorRawVelocity.isEstimatingDelay() && delayEstimatorProcessedVelocity.isEstimatingDelay();
    }
 
-   public double getEstimatedDelay()
+   public double getEstimatedDelayForProcessedPosition()
    {
-      return delayEstimator.getEstimatedDelay();
+      return delayEstimatorProcessedPosition.getEstimatedDelay();
    }
 
-   public double getConsistencyQuality()
+   public double getConsistencyQualityForProcessedPosition()
    {
-      return delayEstimator.getCorrelationCoefficient();
+      return delayEstimatorProcessedPosition.getCorrelationCoefficient();
+   }
+
+   public double getEstimatedDelayForRawVelocity()
+   {
+      return delayEstimatorRawVelocity.getEstimatedDelay();
+   }
+
+   public double getConsistencyQualityForRawVelocity()
+   {
+      return delayEstimatorRawVelocity.getCorrelationCoefficient();
+   }
+
+   public double getEstimatedDelayForProcessedVelocity()
+   {
+      return delayEstimatorProcessedVelocity.getEstimatedDelay();
+   }
+
+   public double getConsistencyQualityForProcessedVelocity()
+   {
+      return delayEstimatorProcessedVelocity.getCorrelationCoefficient();
    }
 }

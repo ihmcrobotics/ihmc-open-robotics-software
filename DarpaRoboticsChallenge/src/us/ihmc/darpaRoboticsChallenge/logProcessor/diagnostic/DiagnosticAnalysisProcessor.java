@@ -83,29 +83,43 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
       }
    }
 
-   public void addJointConsistencyCheckers(String q_prefix, String q_suffix, String qd_prefix, String qd_suffix)
+   public void addJointConsistencyCheckers()
    {
       OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
       for (OneDoFJoint joint : oneDoFJoints)
       {
          String jointName = joint.getName();
-         DoubleYoVariable q = (DoubleYoVariable) logYoVariableHolder.getVariable(q_prefix + jointName + q_suffix);
-         DoubleYoVariable qd = (DoubleYoVariable) logYoVariableHolder.getVariable(qd_prefix + jointName + qd_suffix);
+         DoubleYoVariable rawJointPosition = (DoubleYoVariable) logYoVariableHolder.getVariable("raw_q_" + jointName);
+         DoubleYoVariable rawJointVelocity = (DoubleYoVariable) logYoVariableHolder.getVariable("raw_qd_" + jointName);
+         DoubleYoVariable processedJointPosition = (DoubleYoVariable) logYoVariableHolder.getVariable("q_" + jointName);
+         DoubleYoVariable processedJointVelocity = (DoubleYoVariable) logYoVariableHolder.getVariable("qd_" + jointName);
 
-         if (q == null)
+         if (rawJointPosition == null)
          {
-            System.err.println("Could not find the find the position variable for the joint: " + jointName);
+            System.err.println("Could not find the find the raw position variable for the joint: " + jointName);
             continue;
          }
 
-         if (qd == null)
+         if (rawJointVelocity == null)
          {
-            System.err.println("Could not find the find the velocity variable for the joint: " + jointName);
+            System.err.println("Could not find the find the raw velocity variable for the joint: " + jointName);
             continue;
          }
 
-         diagnosticUpdatables.add(new PositionVelocity1DConsistencyChecker(jointName, q, qd, dt, registry));
+         if (processedJointPosition == null)
+         {
+            System.err.println("Could not find the find the processed position variable for the joint: " + jointName);
+            continue;
+         }
+
+         if (processedJointVelocity == null)
+         {
+            System.err.println("Could not find the find the processed velocity variable for the joint: " + jointName);
+            continue;
+         }
+
+         diagnosticUpdatables.add(new PositionVelocity1DConsistencyChecker(jointName, rawJointPosition, rawJointVelocity, processedJointPosition, processedJointVelocity, dt, registry));
       }
    }
 

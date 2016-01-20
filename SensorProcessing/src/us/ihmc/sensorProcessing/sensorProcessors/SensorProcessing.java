@@ -948,9 +948,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointsToIgnore.contains(jointToCheck.getName()))
             continue;
 
-         DoubleYoVariable position = outputJointPositions.get(jointToCheck);
-         DoubleYoVariable velocity = outputJointVelocities.get(jointToCheck);
-         PositionVelocity1DConsistencyChecker consistencyChecker = new PositionVelocity1DConsistencyChecker(jointToCheck.getName(), position, velocity, updateDT, registry);
+         DoubleYoVariable rawPosition = inputJointPositions.get(jointToCheck);
+         DoubleYoVariable rawVelocity = inputJointVelocities.get(jointToCheck);
+         DoubleYoVariable processedPosition = outputJointPositions.get(jointToCheck);
+         DoubleYoVariable processedVelocity = outputJointVelocities.get(jointToCheck);
+         PositionVelocity1DConsistencyChecker consistencyChecker = new PositionVelocity1DConsistencyChecker(jointToCheck.getName(), rawPosition, rawVelocity, processedPosition, processedVelocity, updateDT, registry);
          consistencyCheckerMap.put(jointToCheck, consistencyChecker);
          diagnosticModules.add(consistencyChecker);
       }

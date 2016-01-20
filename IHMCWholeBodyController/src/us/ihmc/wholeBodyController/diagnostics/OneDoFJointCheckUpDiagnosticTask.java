@@ -43,15 +43,35 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
 
    private final DiagnosticParameters diagnosticParameters;
 
-   private final Mean velocityQualityMeanCalculator = new Mean();
-   private final DoubleYoVariable velocityQualityMean;
-   private final StandardDeviation velocityQualityStandardDeviationCalculator = new StandardDeviation();
-   private final DoubleYoVariable velocityQualityStandardDeviation;
+   private final Mean processedPositionQualityMeanCalculator = new Mean();
+   private final DoubleYoVariable processedPositionQualityMean;
+   private final StandardDeviation processedPositionQualityStandardDeviationCalculator = new StandardDeviation();
+   private final DoubleYoVariable processedPositionQualityStandardDeviation;
 
-   private final Mean velocityDelayMeanCalculator = new Mean();
-   private final DoubleYoVariable velocityDelayMean;
-   private final StandardDeviation velocityDelayStandardDeviationCalculator = new StandardDeviation();
-   private final DoubleYoVariable velocityDelayStandardDeviation;
+   private final Mean processedPositionDelayMeanCalculator = new Mean();
+   private final DoubleYoVariable processedPositionDelayMean;
+   private final StandardDeviation processedPositionDelayStandardDeviationCalculator = new StandardDeviation();
+   private final DoubleYoVariable processedPositionDelayStandardDeviation;
+
+   private final Mean rawVelocityQualityMeanCalculator = new Mean();
+   private final DoubleYoVariable rawVelocityQualityMean;
+   private final StandardDeviation rawVelocityQualityStandardDeviationCalculator = new StandardDeviation();
+   private final DoubleYoVariable rawVelocityQualityStandardDeviation;
+
+   private final Mean rawVelocityDelayMeanCalculator = new Mean();
+   private final DoubleYoVariable rawVelocityDelayMean;
+   private final StandardDeviation rawVelocityDelayStandardDeviationCalculator = new StandardDeviation();
+   private final DoubleYoVariable rawVelocityDelayStandardDeviation;
+
+   private final Mean processedVelocityQualityMeanCalculator = new Mean();
+   private final DoubleYoVariable processedVelocityQualityMean;
+   private final StandardDeviation processedVelocityQualityStandardDeviationCalculator = new StandardDeviation();
+   private final DoubleYoVariable processedVelocityQualityStandardDeviation;
+
+   private final Mean processedVelocityDelayMeanCalculator = new Mean();
+   private final DoubleYoVariable processedVelocityDelayMean;
+   private final StandardDeviation processedVelocityDelayStandardDeviationCalculator = new StandardDeviation();
+   private final DoubleYoVariable processedVelocityDelayStandardDeviation;
 
    private final Mean forceTrackingQualityMeanCalculator = new Mean();
    private final DoubleYoVariable forceTrackingQualityMean;
@@ -88,11 +108,23 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
       forceTrackingDelay = toolbox.getJointForceTrackingDelayEstimator(joint);
       fourierAnalysis = toolbox.getJointFourierAnalysis(joint);
 
-      velocityQualityMean = new DoubleYoVariable(jointName + nameSuffix + "VelocityQualityMean", registry);
-      velocityQualityStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "VelocityQualityStandardDeviation", registry);
+      processedPositionQualityMean = new DoubleYoVariable(jointName + nameSuffix + "ProcessedPositionQualityMean", registry);
+      processedPositionQualityStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "ProcessedPositionQualityStandardDeviation", registry);
 
-      velocityDelayMean = new DoubleYoVariable(jointName + nameSuffix + "VelocityDelayMean", registry);
-      velocityDelayStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "VelocityDelayStandardDeviation", registry);
+      processedPositionDelayMean = new DoubleYoVariable(jointName + nameSuffix + "ProcessedPositionDelayMean", registry);
+      processedPositionDelayStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "ProcessedPositionDelayStandardDeviation", registry);
+
+      rawVelocityQualityMean = new DoubleYoVariable(jointName + nameSuffix + "RawVelocityQualityMean", registry);
+      rawVelocityQualityStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "RawVelocityQualityStandardDeviation", registry);
+
+      rawVelocityDelayMean = new DoubleYoVariable(jointName + nameSuffix + "RawVelocityDelayMean", registry);
+      rawVelocityDelayStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "RawVelocityDelayStandardDeviation", registry);
+
+      processedVelocityQualityMean = new DoubleYoVariable(jointName + nameSuffix + "ProcessedVelocityQualityMean", registry);
+      processedVelocityQualityStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "ProcessedVelocityQualityStandardDeviation", registry);
+
+      processedVelocityDelayMean = new DoubleYoVariable(jointName + nameSuffix + "ProcessedVelocityDelayMean", registry);
+      processedVelocityDelayStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "ProcessedVelocityDelayStandardDeviation", registry);
 
       forceTrackingQualityMean = new DoubleYoVariable(jointName + nameSuffix + "ForceTrackingQualityMean", registry);
       forceTrackingQualityStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "ForceTrackingQualityStandardDeviation", registry);
@@ -120,8 +152,12 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
          logger.info("Starting check up for the joint: " + joint.getName());
 
       ramp.set(0.0);
-      velocityQualityMean.set(Double.NaN);
-      velocityQualityStandardDeviation.set(Double.NaN);
+      processedPositionQualityMean.set(Double.NaN);
+      processedPositionQualityStandardDeviation.set(Double.NaN);
+      rawVelocityQualityMean.set(Double.NaN);
+      rawVelocityQualityStandardDeviation.set(Double.NaN);
+      processedVelocityQualityMean.set(Double.NaN);
+      processedVelocityQualityStandardDeviation.set(Double.NaN);
       sendDataReporter = false;
    }
 
@@ -164,15 +200,35 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
 
       if (positionVelocityConsistency.isEstimatingDelay())
       {
-         velocityQualityMeanCalculator.increment(positionVelocityConsistency.getConsistencyQuality());
-         velocityQualityMean.set(velocityQualityMeanCalculator.getResult());
-         velocityQualityStandardDeviationCalculator.increment(positionVelocityConsistency.getConsistencyQuality());
-         velocityQualityStandardDeviation.set(velocityQualityStandardDeviationCalculator.getResult());
+         processedPositionQualityMeanCalculator.increment(positionVelocityConsistency.getConsistencyQualityForProcessedPosition());
+         processedPositionQualityMean.set(processedPositionQualityMeanCalculator.getResult());
+         processedPositionQualityStandardDeviationCalculator.increment(positionVelocityConsistency.getConsistencyQualityForProcessedPosition());
+         processedPositionQualityStandardDeviation.set(processedPositionQualityStandardDeviationCalculator.getResult());
 
-         velocityDelayMeanCalculator.increment(positionVelocityConsistency.getEstimatedDelay());
-         velocityDelayMean.set(velocityDelayMeanCalculator.getResult());
-         velocityDelayStandardDeviationCalculator.increment(positionVelocityConsistency.getEstimatedDelay());
-         velocityDelayStandardDeviation.set(velocityDelayStandardDeviationCalculator.getResult());
+         processedPositionDelayMeanCalculator.increment(positionVelocityConsistency.getEstimatedDelayForProcessedPosition());
+         processedPositionDelayMean.set(processedPositionDelayMeanCalculator.getResult());
+         processedPositionDelayStandardDeviationCalculator.increment(positionVelocityConsistency.getEstimatedDelayForProcessedPosition());
+         processedPositionDelayStandardDeviation.set(processedPositionDelayStandardDeviationCalculator.getResult());
+
+         rawVelocityQualityMeanCalculator.increment(positionVelocityConsistency.getConsistencyQualityForRawVelocity());
+         rawVelocityQualityMean.set(rawVelocityQualityMeanCalculator.getResult());
+         rawVelocityQualityStandardDeviationCalculator.increment(positionVelocityConsistency.getConsistencyQualityForRawVelocity());
+         rawVelocityQualityStandardDeviation.set(rawVelocityQualityStandardDeviationCalculator.getResult());
+
+         rawVelocityDelayMeanCalculator.increment(positionVelocityConsistency.getEstimatedDelayForRawVelocity());
+         rawVelocityDelayMean.set(rawVelocityDelayMeanCalculator.getResult());
+         rawVelocityDelayStandardDeviationCalculator.increment(positionVelocityConsistency.getEstimatedDelayForRawVelocity());
+         rawVelocityDelayStandardDeviation.set(rawVelocityDelayStandardDeviationCalculator.getResult());
+
+         processedVelocityQualityMeanCalculator.increment(positionVelocityConsistency.getConsistencyQualityForProcessedVelocity());
+         processedVelocityQualityMean.set(processedVelocityQualityMeanCalculator.getResult());
+         processedVelocityQualityStandardDeviationCalculator.increment(positionVelocityConsistency.getConsistencyQualityForProcessedVelocity());
+         processedVelocityQualityStandardDeviation.set(processedVelocityQualityStandardDeviationCalculator.getResult());
+
+         processedVelocityDelayMeanCalculator.increment(positionVelocityConsistency.getEstimatedDelayForProcessedVelocity());
+         processedVelocityDelayMean.set(processedVelocityDelayMeanCalculator.getResult());
+         processedVelocityDelayStandardDeviationCalculator.increment(positionVelocityConsistency.getEstimatedDelayForProcessedVelocity());
+         processedVelocityDelayStandardDeviation.set(processedVelocityDelayStandardDeviationCalculator.getResult());
       }
       
       if (forceTrackingDelay.isEstimatingDelay())
@@ -223,8 +279,11 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
          return;
 
       String loggerName = logger.getName() + "DataReporter";
-      dataReporter = new OneDoFJointCheckUpDiagnosticDataReporter(loggerName, joint, diagnosticParameters, velocityQualityMean, velocityQualityStandardDeviation,
-            velocityDelayMean, velocityDelayStandardDeviation, forceTrackingQualityMean, forceTrackingQualityStandardDeviation, forceTrackingDelayMean,
+      dataReporter = new OneDoFJointCheckUpDiagnosticDataReporter(loggerName, joint, diagnosticParameters,
+            processedPositionQualityMean, processedPositionQualityStandardDeviation, processedPositionDelayMean, processedPositionDelayStandardDeviation,
+            rawVelocityQualityMean, rawVelocityQualityStandardDeviation, rawVelocityDelayMean, rawVelocityDelayStandardDeviation,
+            processedVelocityQualityMean, processedVelocityQualityStandardDeviation, processedVelocityDelayMean, processedVelocityDelayStandardDeviation,
+            forceTrackingQualityMean, forceTrackingQualityStandardDeviation, forceTrackingDelayMean,
             forceTrackingDelayStandardDeviation, fourierAnalysis, functionGenerator);
       sendDataReporter = true;
    }
