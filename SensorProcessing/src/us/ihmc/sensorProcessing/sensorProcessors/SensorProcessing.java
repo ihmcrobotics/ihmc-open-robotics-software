@@ -583,6 +583,47 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
+    * Apply an elasticity compensator to correct the joint positions according their torque and a given stiffness.
+    * Useful when the robot has a non negligible elasticity in the links or joints.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param stiffnesses estimated stiffness for each joint.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToIgnore list of the names of the joints to ignore.
+    */
+   public void addJointVelocityElasticyCompensator(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, DoubleYoVariable maximumDeflection, DoubleYoVariable alphaFilter, boolean forVizOnly)
+   {
+      addJointVelocityElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, alphaFilter, forVizOnly);
+   }
+
+   public void addJointVelocityElasticyCompensatorWithJointsToIgnore(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, DoubleYoVariable maximumDeflection, DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToIgnore)
+   {
+      List<String> jointToIgnoreList = new ArrayList<>();
+      if (jointsToIgnore != null && jointsToIgnore.length > 0)
+         jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
+         String jointName = oneDoFJoint.getName();
+
+         if (jointToIgnoreList.contains(jointName))
+            continue;
+
+         DoubleYoVariable stiffness = stiffnesses.get(oneDoFJoint);
+         DoubleYoVariable intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
+         DoubleYoVariable intermediateJointTau = outputJointTaus.get(oneDoFJoint);
+         List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
+         String prefix = JOINT_VELOCITY.getProcessorNamePrefix(ELASTICITY_COMPENSATOR);
+         String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
+         VelocityElasticityCompensatorYoVariable filteredJointVelocity = new VelocityElasticityCompensatorYoVariable(prefix + suffix, stiffness, maximumDeflection, intermediateJointVelocity, intermediateJointTau, alphaFilter, updateDT, registry);
+         processors.add(filteredJointVelocity);
+         
+         if (!forVizOnly)
+            outputJointVelocities.put(oneDoFJoint, filteredJointVelocity);
+      }
+   }
+
+   /**
     * Compute the joint velocities by calculating finite-difference on joint positions using {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered.
     * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
     * @param alphaFilter low-pass filter parameter.

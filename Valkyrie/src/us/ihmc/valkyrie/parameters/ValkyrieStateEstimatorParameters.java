@@ -45,6 +45,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    private SensorNoiseParameters sensorNoiseParameters = null;
 
    private final boolean doElasticityCompensation;
+   private final double jointElasticityFilterFrequencyHz;
    private final double maximumDeflection;
    private final double defaultJointStiffness;
    private final HashMap<String, Double> jointSpecificStiffness = new HashMap<String, Double>();
@@ -72,6 +73,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       jointVelocitySlopTimeForBacklashCompensation = 0.03;
 
       doElasticityCompensation = runningOnRealRobot;
+      jointElasticityFilterFrequencyHz = 10.0;
       maximumDeflection = 0.2;
       defaultJointStiffness = 10000;
       for (RobotSide robotSide : RobotSide.values)
@@ -88,6 +90,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
+      DoubleYoVariable elasticityAlphaFilter = sensorProcessing.createAlphaFilter("jointDeflectionDotAlphaFilter", jointElasticityFilterFrequencyHz);
       DoubleYoVariable maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", maximumDeflection);
       Map<OneDoFJoint, DoubleYoVariable> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
 
@@ -108,6 +111,9 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       jointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
       sensorProcessing.addSensorAlphaFilter(jointVelocityAlphaFilter, false, JOINT_VELOCITY);
       sensorProcessing.addJointVelocityBacklashFilter(jointVelocitySlopTime, false);
+
+      if (doElasticityCompensation)
+         sensorProcessing.addJointVelocityElasticyCompensator(jointPositionStiffness, maxDeflection, elasticityAlphaFilter, false);
       
       //imu
       sensorProcessing.addSensorAlphaFilter(orientationAlphaFilter, false, IMU_ORIENTATION);
