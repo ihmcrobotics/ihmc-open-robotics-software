@@ -3,6 +3,7 @@ package us.ihmc.valkyrieRosControl;
 import java.io.IOException;
 import java.util.HashMap;
 
+import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.affinity.Affinity;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -233,12 +234,13 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
       {
          double controllerDT = robotModel.getControllerDT();
          LegJointName[] legJointNames = new LegJointName[]{LegJointName.HIP_YAW, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL};
+         ArmJointName[] armJointNames = new ArmJointName[]{ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH};
          DRCOutputWriterWithAccelerationIntegration valkyrieOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(
-               drcOutputWriter, legJointNames, null, null, controllerDT, true, true);
+               drcOutputWriter, legJointNames, armJointNames, null, controllerDT, true, true);
 
-         valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.9, 0.0);
+         valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.9, 0.9);
          valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
-         valkyrieOutputWriterWithAccelerationIntegration.setVelocityGains(4.75, 0.0);
+         valkyrieOutputWriterWithAccelerationIntegration.setVelocityGains(4.75, 6.0);
          valkyrieOutputWriterWithAccelerationIntegration.setPositionGains(0.0, 0.0);
 
          drcOutputWriter = valkyrieOutputWriterWithAccelerationIntegration;
