@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.diagnostics.logging;
+package us.ihmc.wholeBodyController.diagnostics.logging;
 
 import java.util.logging.Filter;
 import java.util.logging.Formatter;
