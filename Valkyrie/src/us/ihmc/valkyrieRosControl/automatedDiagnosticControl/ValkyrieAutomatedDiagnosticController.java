@@ -87,6 +87,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCValkyrieControlJa
    private final String diagnosticGainsFilePath = "diagnostic/realRobotPDGains.yaml";
    private final String diagnosticSetPointsFilePath = "diagnostic/diagnosticSetPoints.yaml";
 
+   private DesiredJointDataHolder estimatorDesiredJointDataHolder;
    private ValkyrieRosControlSensorReader sensorReader;
    private DRCKinematicsBasedStateEstimator stateEstimator;
    private AutomatedDiagnosticAnalysisController diagnosticController;
@@ -158,10 +159,11 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCValkyrieControlJa
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       ContactSensorHolder contactSensorHolder = new ContactSensorHolder(Arrays.asList(fullRobotModel.getContactSensorDefinitions()));
       RawJointSensorDataHolderMap rawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(fullRobotModel);
-      DesiredJointDataHolder estimatorDesiredJointDataHolder = new DesiredJointDataHolder(fullRobotModel.getOneDoFJoints());
+      estimatorDesiredJointDataHolder = new DesiredJointDataHolder(fullRobotModel.getOneDoFJoints());
       sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, contactSensorHolder, rawJointSensorDataHolderMap,
             estimatorDesiredJointDataHolder, registry);
       sensorReader = sensorReaderFactory.getSensorReader();
+      sensorReader.setDoIHMCControlRatio(1.0);
       SensorOutputMapReadOnly sensorOutputMap = sensorReader.getSensorOutputMapReadOnly();
 
       /*
@@ -177,8 +179,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCValkyrieControlJa
       DiagnosticControllerToolbox toolbox = new DiagnosticControllerToolbox(fullRobotModel, sensorOutputMap, diagnosticParameters, walkingControllerParameters,
             diagnosticControllerTime, diagnosticControllerDT, diagnosticSensorProcessingConfiguration, registry);
 
-      InputStream gainStream = getClass().getResourceAsStream(diagnosticGainsFilePath);
-      InputStream setpointStream = getClass().getResourceAsStream(diagnosticSetPointsFilePath);
+      InputStream gainStream = getClass().getClassLoader().getResourceAsStream(diagnosticGainsFilePath);
+      InputStream setpointStream = getClass().getClassLoader().getResourceAsStream(diagnosticSetPointsFilePath);
       diagnosticController = new AutomatedDiagnosticAnalysisController(toolbox, gainStream, setpointStream, registry);
       AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(toolbox, diagnosticController);
       automatedDiagnosticConfiguration.addWait(1.0);
@@ -197,10 +199,11 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCValkyrieControlJa
    {
       diagnosticControllerTimer.startMeasurement();
       timestampProvider.setTimestamp(time);
-      sensorReader.read();
+      sensorReader.readSensors();
 
       if (firstEstimatorTick)
       {
+         startTime.set(time);
          stateEstimator.initialize();
          firstEstimatorTick = false;
       }
@@ -209,22 +212,20 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCValkyrieControlJa
 
       if (!startController.getBooleanValue())
       {
-         diagnosticControllerTime.set(0.0);
          firstDiagnosticControlTick = true;
-         diagnosticControllerTimer.stopMeasurement();
-         return;
+         diagnosticController.setRobotIsAlive(false);
       }
-
-      if (firstDiagnosticControlTick)
+      else if (firstDiagnosticControlTick)
       {
-         startTime.set(time);
          diagnosticController.setRobotIsAlive(true);
          diagnosticController.initialize();
          firstDiagnosticControlTick = false;
       }
 
       diagnosticController.doControl();
-
+      estimatorDesiredJointDataHolder.updateFromModel();
+      sensorReader.writeCommandsToRobot();
+      
       diagnosticControllerTime.set(TimeTools.nanoSecondstoSeconds(time - startTime.getLongValue()));
 
       yoVariableServer.update(time);

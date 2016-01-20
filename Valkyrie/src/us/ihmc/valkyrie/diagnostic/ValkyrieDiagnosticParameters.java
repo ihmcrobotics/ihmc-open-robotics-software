@@ -22,7 +22,7 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
    private final boolean ignoreAllNeckJoints = true;
    private final boolean ignoreAllArmJoints = false;
    private final boolean ignoreAllLegJoints = false;
-   private final boolean ignoreAllSpineJoints = true;
+   private final boolean ignoreAllSpineJoints = false;
 
    public ValkyrieDiagnosticParameters(DiagnosticEnvironment diagnosticEnvironment, ValkyrieRobotModel robotModel, boolean runningOnRealRobot)
    {

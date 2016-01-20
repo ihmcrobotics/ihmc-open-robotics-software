@@ -17,6 +17,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.yaml.snakeyaml.Yaml;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -138,8 +139,19 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       }
    }
 
+   public void setDoIHMCControlRatio(double controlRatio)
+   {
+      doIHMCControlRatio.set(MathTools.clipToMinMax(controlRatio, 0.0, 1.0));
+   }
+
    @Override
    public void read()
+   {
+      readSensors();
+      writeCommandsToRobot();
+   }
+
+   public void readSensors()
    {
       for (int i = 0; i < yoJointHandleHolders.size(); i++)
       {
@@ -180,12 +192,12 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
 
       long timestamp = timestampProvider.getTimestamp();
       sensorProcessing.startComputation(timestamp, timestamp, -1);
-
-      write(timestamp);
    }
 
-   private void write(long timestamp)
+   public void writeCommandsToRobot()
    {
+      long timestamp = timestampProvider.getTimestamp();
+
       if (standPrepStartTime > 0)
       {
          timeInStandprep.set(TimeTools.nanoSecondstoSeconds(timestamp - standPrepStartTime));
