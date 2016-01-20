@@ -20,17 +20,21 @@ import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.valkyrieRosControl.dataHolders.*;
+import us.ihmc.valkyrieRosControl.dataHolders.YoForceTorqueSensorHandle;
+import us.ihmc.valkyrieRosControl.dataHolders.YoIMUHandleHolder;
+import us.ihmc.valkyrieRosControl.dataHolders.YoJointHandleHolder;
+import us.ihmc.valkyrieRosControl.dataHolders.YoMicroStrainIMUHandleHolder;
+import us.ihmc.valkyrieRosControl.dataHolders.YoSwitchableFilterModeIMUHandleHolder;
 
 public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactory
 {
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private ValkyrieRosControlSensorReader sensorReader;
 
-   private final StateEstimatorParameters stateEstimatorParameters;
+   private final SensorProcessingConfiguration sensorProcessingConfiguration;
 
    private final HashMap<String, JointHandle> jointHandles;
    private final HashMap<String, IMUHandle> imuHandles;
@@ -39,12 +43,12 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
    private final TimestampProvider timestampProvider;
    private final ValkyrieSensorInformation sensorInformation;
 
-   public ValkyrieRosControlSensorReaderFactory(TimestampProvider timestampProvider, StateEstimatorParameters stateEstimatorParameters,
+   public ValkyrieRosControlSensorReaderFactory(TimestampProvider timestampProvider, SensorProcessingConfiguration sensorProcessingConfiguration,
          HashMap<String, JointHandle> jointHandles, HashMap<String, IMUHandle> imuHandles, HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles,
          ValkyrieSensorInformation sensorInformation)
    {
       this.timestampProvider = timestampProvider;
-      this.stateEstimatorParameters = stateEstimatorParameters;
+      this.sensorProcessingConfiguration = sensorProcessingConfiguration;
 
       this.jointHandles = jointHandles;
       this.imuHandles = imuHandles;
@@ -144,7 +148,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
          }
       }
 
-      sensorReader = new ValkyrieRosControlSensorReader(stateEstimatorSensorDefinitions, stateEstimatorParameters, timestampProvider, yoJointHandleHolders,
+      sensorReader = new ValkyrieRosControlSensorReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, timestampProvider, yoJointHandleHolders,
             yoIMUHandleHolders, yoForceTorqueSensorHandles, sensorReaderRegistry);
 
       parentRegistry.addChild(sensorReaderRegistry);
