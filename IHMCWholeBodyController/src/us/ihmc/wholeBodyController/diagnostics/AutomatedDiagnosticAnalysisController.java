@@ -39,6 +39,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    private final ArrayList<OneDoFJoint> controlledJoints = new ArrayList<>();
    private final Map<OneDoFJoint, PDController> jointPDControllerMap = new LinkedHashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> jointDesiredPositionMap = new LinkedHashMap<>();
+   private final Map<OneDoFJoint, DoubleYoVariable> jointDesiredVelocityMap = new LinkedHashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> jointDesiredTauMap = new LinkedHashMap<>();
 
    private final DoubleProvider trajectoryTimeProvider;
@@ -154,6 +155,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          
          PDController jointPDController = new PDController(jointName, registry);
          DoubleYoVariable jointDesiredPosition = new DoubleYoVariable("q_d_" + jointName, registry);
+         DoubleYoVariable jointDesiredVelocity = new DoubleYoVariable("qd_d_" + jointName, registry);
          DoubleYoVariable jointDesiredTau = new DoubleYoVariable("tau_d_" + jointName, registry);
          
          if (gainMap != null)
@@ -189,6 +191,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
          jointPDControllerMap.put(joint, jointPDController);
          jointDesiredPositionMap.put(joint, jointDesiredPosition);
+         jointDesiredVelocityMap.put(joint, jointDesiredVelocity);
          jointDesiredTauMap.put(joint, jointDesiredTau);
       }
    }
@@ -258,14 +261,18 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          }
 
          OneDoFJointQuinticTrajectoryGenerator jointTrajectory = jointTrajectories.get(joint);
-         DoubleYoVariable jointDesiredPosition = jointDesiredPositionMap.get(joint);
          jointTrajectory.compute(yoTime.getDoubleValue() - startTime.getDoubleValue());
-         jointDesiredPosition.set(jointTrajectory.getValue());
+
+         DoubleYoVariable jointDesiredPosition = jointDesiredPositionMap.get(joint);
+         DoubleYoVariable jointDesiredVelocity = jointDesiredVelocityMap.get(joint);
+
+         jointDesiredPosition.set(jointTrajectory.getValue() + desiredJointPositionOffset);
+         jointDesiredVelocity.set(jointTrajectory.getVelocity() + desiredJointVelocityOffset);
 
          double q = joint.getQ();
-         double qDesired = jointDesiredPosition.getDoubleValue() + desiredJointPositionOffset;
+         double qDesired = jointDesiredPosition.getDoubleValue();
          double qd = joint.getQd();
-         double qdDesired = jointTrajectory.getVelocity() + desiredJointVelocityOffset;
+         double qdDesired = jointDesiredVelocity.getDoubleValue();
          double tauDesired = jointPDController.compute(q, qDesired, qd, qdDesired) + desiredJointTauOffset;
          joint.setTau(tauDesired);
          joint.setqDesired(qDesired);
@@ -300,14 +307,17 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          PDController jointPDController = jointPDControllerMap.get(joint);
 
          OneDoFJointQuinticTrajectoryGenerator jointTrajectory = jointTrajectories.get(joint);
-         DoubleYoVariable jointDesiredPosition = jointDesiredPositionMap.get(joint);
          jointTrajectory.compute(trajectoryTimeProvider.getValue());
+
+         DoubleYoVariable jointDesiredPosition = jointDesiredPositionMap.get(joint);
+         DoubleYoVariable jointDesiredVelocity = jointDesiredVelocityMap.get(joint);
          jointDesiredPosition.set(jointTrajectory.getValue());
+         jointDesiredVelocity.set(0.0);
 
          double q = joint.getQ();
          double qDesired = jointDesiredPosition.getDoubleValue();
          double qd = joint.getQd();
-         double qdDesired = jointTrajectory.getVelocity();
+         double qdDesired = jointDesiredVelocity.getDoubleValue();
          double tauDesired = jointPDController.compute(q, qDesired, qd, qdDesired);
 
          double qdMax = qdMaxIdle.getDoubleValue();
