@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.diagnostics.logging;
+package us.ihmc.wholeBodyController.diagnostics.logging;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;

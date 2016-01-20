@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.diagnostics.logging;
+package us.ihmc.wholeBodyController.diagnostics.logging;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.FileHandler;
 import java.util.logging.Filter;
+import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -99,7 +100,6 @@ public class DiagnosticLoggerConfiguration
          e.printStackTrace();
          return null;
       }
-
    }
 
    private static void setupLogFiles(Path diagnosticOutputDirectory, DiagnosticLoggerFormatter formatter)
@@ -115,67 +115,85 @@ public class DiagnosticLoggerConfiguration
       rootLogger.addHandler(new DiagnosticLoggerSystemOutHandler(formatter, Level.INFO));
       rootLogger.addHandler(new DiagnosticLoggerSystemErrHandler(formatter, Level.INFO));
       
-      try
+      Filter severeFilter = new Filter()
       {
-         String severeFileName = Paths.get(diagnosticOutputDirectory.toString(), "severe.log").toString();
-         Handler severeFileHandler = new FileHandler(severeFileName);
-         severeFileHandler.setFormatter(formatter);
-         Filter severeFilter = new Filter()
+         @Override
+         public boolean isLoggable(LogRecord record)
          {
-            @Override
-            public boolean isLoggable(LogRecord record)
-            {
-               return record.getLevel() == Level.SEVERE;
-            }
-         };
-         severeFileHandler.setFilter(severeFilter);
-         rootLogger.addHandler(severeFileHandler);
-      }
-      catch (SecurityException | IOException e)
-      {
-         e.printStackTrace();
-      }
+            return record.getLevel() == Level.SEVERE;
+         }
+      };
+      addFileHandler("severe", severeFilter, formatter, diagnosticOutputDirectory, rootLogger);
 
-      try
+      Filter warningFilter = new Filter()
       {
-         String warningFileName = Paths.get(diagnosticOutputDirectory.toString(), "warning.log").toString();
-         Handler warningFileHandler = new FileHandler(warningFileName);
-         warningFileHandler.setFormatter(formatter);
-         Filter warningFilter = new Filter()
+         @Override
+         public boolean isLoggable(LogRecord record)
          {
-            @Override
-            public boolean isLoggable(LogRecord record)
-            {
-               return record.getLevel() == Level.WARNING;
-            }
-         };
-         warningFileHandler.setFilter(warningFilter);
-         rootLogger.addHandler(warningFileHandler);
-      }
-      catch (SecurityException | IOException e)
-      {
-         e.printStackTrace();
-      }
+            return record.getLevel() == Level.WARNING;
+         }
+      };
+      addFileHandler("warning", warningFilter, formatter, diagnosticOutputDirectory, rootLogger);
 
+      Filter noFilter = new Filter()
+      {
+         @Override
+         public boolean isLoggable(LogRecord record)
+         {
+            return true;
+         }
+      };
+      addFileHandler("all", noFilter, formatter, diagnosticOutputDirectory, rootLogger);
+
+      Filter processedJointPositionDelayFiter = new Filter()
+      {
+         
+         @Override
+         public boolean isLoggable(LogRecord record)
+         {
+            return record instanceof ProcessedJointPositionDelayLogRecord;
+         }
+      };
+      addFileHandler("processedJointPositionDelay", processedJointPositionDelayFiter, formatter, diagnosticOutputDirectory, rootLogger);
+
+      Filter processedJointVelocityDelayFiter = new Filter()
+      {
+         
+         @Override
+         public boolean isLoggable(LogRecord record)
+         {
+            return record instanceof ProcessedJointVelocityDelayLogRecord;
+         }
+      };
+      addFileHandler("processedJointVelocityDelay", processedJointVelocityDelayFiter, formatter, diagnosticOutputDirectory, rootLogger);
+
+      Filter jointForceTrackingDelayFiter = new Filter()
+      {
+         
+         @Override
+         public boolean isLoggable(LogRecord record)
+         {
+            return record instanceof JointForceTrackingDelayLogRecord;
+         }
+      };
+      addFileHandler("jointForceTrackingDelay", jointForceTrackingDelayFiter, formatter, diagnosticOutputDirectory, rootLogger);
+   }
+
+   private static void addFileHandler(String fileName, Filter filter, Formatter formatter, Path diagnosticOutputDirectory, Logger rootLogger)
+   {
       try
       {
-         String allFileName = Paths.get(diagnosticOutputDirectory.toString(), "all.log").toString();
-         Handler allFileHandler = new FileHandler(allFileName);
-         allFileHandler.setFormatter(formatter);
-         allFileHandler.setFilter(new Filter()
-         {
-            @Override
-            public boolean isLoggable(LogRecord record)
-            {
-               return true;
-            }
-         });
-         rootLogger.addHandler(allFileHandler);
+         String fullFileName = Paths.get(diagnosticOutputDirectory.toString(), fileName + ".log").toString();
+         Handler fileHandler = new FileHandler(fullFileName);
+         fileHandler.setFormatter(formatter);
+         fileHandler.setFilter(filter);
+         rootLogger.addHandler(fileHandler);
       }
       catch (SecurityException | IOException e)
       {
          e.printStackTrace();
       }
+      
    }
 
    private static void setupSystemOut(Path diagnosticOutputDirectory)

@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +15,9 @@ import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+import us.ihmc.wholeBodyController.diagnostics.logging.JointForceTrackingDelayLogRecord;
+import us.ihmc.wholeBodyController.diagnostics.logging.ProcessedJointPositionDelayLogRecord;
+import us.ihmc.wholeBodyController.diagnostics.logging.ProcessedJointVelocityDelayLogRecord;
 
 public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataReporter
 {
@@ -119,6 +123,41 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
       isDoneExportingData.set(true);
    }
 
+   private enum DelaySignalType
+   {
+      PROCESSED_POSITION, RAW_VELOCITY, PROCESSED_VELOCITY;
+
+      public LogRecord createLogRecord(Level level, String msg)
+      {
+         switch (this)
+         {
+         case PROCESSED_POSITION:
+            return new ProcessedJointPositionDelayLogRecord(level, msg);
+         case PROCESSED_VELOCITY:
+            return new ProcessedJointVelocityDelayLogRecord(level, msg);
+         case RAW_VELOCITY:
+            return new LogRecord(level, msg);
+         default:
+            throw new RuntimeException("Should not get there.");
+         }
+      }
+
+      public String getSignalName()
+      {
+         switch (this)
+         {
+         case PROCESSED_POSITION:
+            return "processed position";
+         case RAW_VELOCITY:
+            return "raw velocity";
+         case PROCESSED_VELOCITY:
+            return "processed velocity";
+         default:
+            throw new RuntimeException("Should not get there.");
+         }
+      }
+   }
+
    private void reportCheckUpResults()
    {
       if (logger == null)
@@ -126,9 +165,9 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
 
       Level logLevel;
 
-      reportDelay("processed position", processedPositionQualityMean, processedPositionQualityStandardDeviation, processedPositionDelayMean, processedPositionDelayStandardDeviation);
-      reportDelay("raw velocity", rawVelocityQualityMean, rawVelocityQualityStandardDeviation, rawVelocityDelayMean, rawVelocityDelayStandardDeviation);
-      reportDelay("processed velocity", processedVelocityQualityMean, processedVelocityQualityStandardDeviation, processedVelocityDelayMean, processedVelocityDelayStandardDeviation);
+      reportDelay(DelaySignalType.PROCESSED_POSITION, processedPositionQualityMean, processedPositionQualityStandardDeviation, processedPositionDelayMean, processedPositionDelayStandardDeviation);
+      reportDelay(DelaySignalType.RAW_VELOCITY, rawVelocityQualityMean, rawVelocityQualityStandardDeviation, rawVelocityDelayMean, rawVelocityDelayStandardDeviation);
+      reportDelay(DelaySignalType.PROCESSED_VELOCITY, processedVelocityQualityMean, processedVelocityQualityStandardDeviation, processedVelocityDelayMean, processedVelocityDelayStandardDeviation);
 
       if (forceTrackingQualityMean < badCorrelation)
          logLevel = Level.SEVERE;
@@ -153,8 +192,9 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
 
       String forceTrackingDelayMeanFormatted = doubleFormat.format(forceTrackingDelayMean);
       String forceTrackingDelayStandardDeviationFormatted = doubleFormat.format(forceTrackingDelayStandardDeviation);
-      logger.log(logLevel, "Estimated force tracking delay for the joint: " + jointName + " equals " + forceTrackingDelayMeanFormatted + " second (+/-"
-            + forceTrackingDelayStandardDeviationFormatted + ").");
+      JointForceTrackingDelayLogRecord logRecord = new JointForceTrackingDelayLogRecord(logLevel, "Estimated force tracking delay for the joint: " + jointName
+            + " equals " + forceTrackingDelayMeanFormatted + " second (+/-" + forceTrackingDelayStandardDeviationFormatted + ").");
+      logger.log(logRecord);
 
       logLevel = Level.INFO;
 
@@ -179,7 +219,7 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
       logger.log(logLevel, "Tau desired magnitudes (N.m): " + tauDMags);
    }
 
-   private void reportDelay(String signalName, double qualityMean, double qualityStandardDeviation, double delayMean, double delayStandardDeviation)
+   private void reportDelay(DelaySignalType signalType, double qualityMean, double qualityStandardDeviation, double delayMean, double delayStandardDeviation)
    {
       Level logLevel;
       if (qualityMean < badCorrelation)
@@ -191,6 +231,7 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
 
       String velocityQualityMeanFormatted = doubleFormat.format(qualityMean);
       String velocityQualityStandardDeviationFormatted = doubleFormat.format(qualityStandardDeviation);
+      String signalName = signalType.getSignalName();
       logger.log(logLevel,
             StringUtils.capitalize(signalName) + " signal quality for the joint: " + jointName + " equals " + velocityQualityMeanFormatted + " second (+/-"
                   + velocityQualityStandardDeviationFormatted
@@ -205,8 +246,8 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
 
       String velocityDelayMeanFormatted = doubleFormat.format(delayMean);
       String velocityDelayStandardDeviationFormatted = doubleFormat.format(delayStandardDeviation);
-      logger.log(logLevel, StringUtils.capitalize(signalName) + " estimated delay for the joint: " + jointName + " equals " + velocityDelayMeanFormatted + " second (+/-"
-            + velocityDelayStandardDeviationFormatted + ").");
+      logger.log(signalType.createLogRecord(logLevel, StringUtils.capitalize(signalName) + " estimated delay for the joint: " + jointName + " equals " + velocityDelayMeanFormatted + " second (+/-"
+            + velocityDelayStandardDeviationFormatted + ")."));
    }
 
    public boolean isDoneExportingData()
