@@ -19,6 +19,26 @@ public class YoFrameVariableNameTools
       return createName(namePrefix, "z", nameSuffix);
    }
 
+   public static String createQxName(String namePrefix, String nameSuffix)
+   {
+      return createName(namePrefix, "qx", nameSuffix);
+   }
+   
+   public static String createQyName(String namePrefix, String nameSuffix)
+   {
+      return createName(namePrefix, "qy", nameSuffix);
+   }
+
+   public static String createQzName(String namePrefix, String nameSuffix)
+   {
+      return createName(namePrefix, "qz", nameSuffix);
+   }
+
+   public static String createQsName(String namePrefix, String nameSuffix)
+   {
+      return createName(namePrefix, "qs", nameSuffix);
+   }
+
    public static String createName(String namePrefix, String between, String nameSuffix)
    {
       if ((namePrefix == null) || (namePrefix.equals("") || namePrefix.endsWith("_")))

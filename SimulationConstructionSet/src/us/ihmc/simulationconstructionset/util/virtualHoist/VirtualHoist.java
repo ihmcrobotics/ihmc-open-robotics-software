@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.util.virtualHoist;
 
-
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -26,6 +26,11 @@ public class VirtualHoist implements RobotController
    private final BooleanYoVariable hoistUp = new BooleanYoVariable("hoistUp", registry);
    private final BooleanYoVariable hoistDown = new BooleanYoVariable("hoistDown", registry);
 
+   private final List<DoubleYoVariable> cableLengths = new ArrayList<>();
+   private final DoubleYoVariable physicalCableLength = new DoubleYoVariable("hoistPhysicalCableLength", registry);
+
+   private final List<DoubleYoVariable> cableForceMagnitudes = new ArrayList<>();
+
    private final DoubleYoVariable hoistUpDownSpeed = new DoubleYoVariable("hoistUpDownSpeed", registry);
 
    private final DoubleYoVariable hoistStiffness = new DoubleYoVariable("hoistStiffness", registry);
@@ -35,22 +40,24 @@ public class VirtualHoist implements RobotController
 
    private final DoubleYoVariable q_x, q_y, q_z;
 
-   private static final double CABLE_LENGTH = 0.5;
    private final double updateDT;
 
    public VirtualHoist(Joint jointToAttachHoist, Robot robot, ArrayList<Vector3d> hoistPointPositions, double updateDT)
    {
       this.updateDT = updateDT;
 
-      int index = 0;
-      for (Vector3d hoistPointPosition : hoistPointPositions)
+      for (int i = 0; i < hoistPointPositions.size(); i++)
       {
-         ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_hoist" + index, hoistPointPosition, robot.getRobotsYoVariableRegistry());
+         Vector3d hoistPointPosition = hoistPointPositions.get(i);
+         ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_hoist" + i, hoistPointPosition, robot.getRobotsYoVariableRegistry());
          externalForcePoints.add(externalForcePoint);
          jointToAttachHoist.addExternalForcePoint(externalForcePoint);
 
-         index++;
+         cableLengths.add(new DoubleYoVariable("hoistCableLength" + i, registry));
+         cableForceMagnitudes.add(new DoubleYoVariable("hoistCableForceMagnitude" + i, registry));
       }
+
+      physicalCableLength.set(0.5);
 
       // Initial gains and teepee location:
       hoistStiffness.set(5000.0);
@@ -78,12 +85,12 @@ public class VirtualHoist implements RobotController
    {
       hoistOn.set(false);
    }
-   
+
    public void setHoistStiffness(double hoistStiffness)
    {
       this.hoistStiffness.set(hoistStiffness);
    }
-   
+
    public void setHoistDamping(double hoistDamping)
    {
       this.hoistDamping.set(hoistDamping);
@@ -104,7 +111,6 @@ public class VirtualHoist implements RobotController
       hoistUp.set(true);
       hoistDown.set(false);
    }
-
 
    public void moveHoistDown()
    {
@@ -159,13 +165,15 @@ public class VirtualHoist implements RobotController
       Vector3d forceVector = new Vector3d();
       Vector3d velocityVector = new Vector3d();
 
-      for (ExternalForcePoint externalForcePoint : externalForcePoints)
+      for (int i = 0; i < externalForcePoints.size(); i++)
       {
+         ExternalForcePoint externalForcePoint = externalForcePoints.get(i);
          pointPosition.set(externalForcePoint.getX(), externalForcePoint.getY(), externalForcePoint.getZ());
 
-         double distance = teepeePosition.distance(pointPosition);
+         double cableLength = teepeePosition.distance(pointPosition);
+         cableLengths.get(i).set(cableLength);
 
-         if (distance < CABLE_LENGTH)
+         if (cableLength < physicalCableLength.getDoubleValue())
          {
             externalForcePoint.setForce(0.0, 0.0, 0.0);
          }
@@ -173,7 +181,7 @@ public class VirtualHoist implements RobotController
          else
          {
             forceVector.sub(teepeePosition, pointPosition);
-            double delta = forceVector.length() - CABLE_LENGTH;
+            double delta = forceVector.length() - physicalCableLength.getDoubleValue();
             double springForce = hoistStiffness.getDoubleValue() * delta;
 
             velocityVector.set(externalForcePoint.getXVelocity(), externalForcePoint.getYVelocity(), externalForcePoint.getZVelocity());
@@ -184,6 +192,9 @@ public class VirtualHoist implements RobotController
 
             if (totalForce < 0.0)
                totalForce = 0.0;
+
+            cableForceMagnitudes.get(i).set(totalForce);
+
             forceVector.scale(totalForce);
 
             externalForcePoint.setForce(forceVector);
