@@ -6,6 +6,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
@@ -26,10 +28,20 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
    private final double badDelay;
    private final double goodDelay;
 
-   private final double velocityQualityMean;
-   private final double velocityQualityStandardDeviation;
-   private final double velocityDelayMean;
-   private final double velocityDelayStandardDeviation;
+   private final double processedPositionQualityMean;
+   private final double processedPositionQualityStandardDeviation;
+   private final double processedPositionDelayMean;
+   private final double processedPositionDelayStandardDeviation;
+
+   private final double rawVelocityQualityMean;
+   private final double rawVelocityQualityStandardDeviation;
+   private final double rawVelocityDelayMean;
+   private final double rawVelocityDelayStandardDeviation;
+
+   private final double processedVelocityQualityMean;
+   private final double processedVelocityQualityStandardDeviation;
+   private final double processedVelocityDelayMean;
+   private final double processedVelocityDelayStandardDeviation;
 
    private final double forceTrackingQualityMean;
    private final double forceTrackingQualityStandardDeviation;
@@ -49,7 +61,9 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
    private final AtomicBoolean isDoneExportingData = new AtomicBoolean(false);
 
    public OneDoFJointCheckUpDiagnosticDataReporter(String loggerName, OneDoFJoint joint, DiagnosticParameters diagnosticParameters,
-         DoubleYoVariable velocityQualityMean, DoubleYoVariable velocityQualityStandardDeviation, DoubleYoVariable velocityDelayMean, DoubleYoVariable velocityDelayStandardDeviation,
+         DoubleYoVariable processedPositionQualityMean, DoubleYoVariable processedPositionQualityStandardDeviation, DoubleYoVariable processedPositionDelayMean, DoubleYoVariable processedPositionDelayStandardDeviation,
+         DoubleYoVariable rawVelocityQualityMean, DoubleYoVariable rawVelocityQualityStandardDeviation, DoubleYoVariable rawVelocityDelayMean, DoubleYoVariable rawVelocityDelayStandardDeviation,
+         DoubleYoVariable processedVelocityQualityMean, DoubleYoVariable processedVelocityQualityStandardDeviation, DoubleYoVariable processedVelocityDelayMean, DoubleYoVariable processedVelocityDelayStandardDeviation,
          DoubleYoVariable forceTrackingQualityMean, DoubleYoVariable forceTrackingQualityStandardDeviation, DoubleYoVariable forceTrackingDelayMean, DoubleYoVariable forceTrackingDelayStandardDeviation,
          OneDoFJointFourierAnalysis fourierAnalysis, YoFunctionGenerator functionGenerator)
    {
@@ -62,10 +76,20 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
       badDelay = diagnosticParameters.getBadDelay();
       goodDelay = diagnosticParameters.getGoodDelay();
 
-      this.velocityQualityMean = velocityQualityMean.getDoubleValue();
-      this.velocityQualityStandardDeviation = velocityQualityStandardDeviation.getDoubleValue();
-      this.velocityDelayMean = velocityDelayMean.getDoubleValue();
-      this.velocityDelayStandardDeviation = velocityDelayStandardDeviation.getDoubleValue();
+      this.processedPositionQualityMean = processedPositionQualityMean.getDoubleValue();
+      this.processedPositionQualityStandardDeviation = processedPositionQualityStandardDeviation.getDoubleValue();
+      this.processedPositionDelayMean = processedPositionDelayMean.getDoubleValue();
+      this.processedPositionDelayStandardDeviation = processedPositionDelayStandardDeviation.getDoubleValue();
+
+      this.rawVelocityQualityMean = rawVelocityQualityMean.getDoubleValue();
+      this.rawVelocityQualityStandardDeviation = rawVelocityQualityStandardDeviation.getDoubleValue();
+      this.rawVelocityDelayMean = rawVelocityDelayMean.getDoubleValue();
+      this.rawVelocityDelayStandardDeviation = rawVelocityDelayStandardDeviation.getDoubleValue();
+
+      this.processedVelocityQualityMean = processedVelocityQualityMean.getDoubleValue();
+      this.processedVelocityQualityStandardDeviation = processedVelocityQualityStandardDeviation.getDoubleValue();
+      this.processedVelocityDelayMean = processedVelocityDelayMean.getDoubleValue();
+      this.processedVelocityDelayStandardDeviation = processedVelocityDelayStandardDeviation.getDoubleValue();
 
       this.forceTrackingQualityMean = forceTrackingQualityMean.getDoubleValue();
       this.forceTrackingQualityStandardDeviation = forceTrackingQualityStandardDeviation.getDoubleValue();
@@ -102,31 +126,9 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
 
       Level logLevel;
 
-      if (velocityQualityMean < badCorrelation)
-         logLevel = Level.SEVERE;
-      else if (velocityQualityMean < goodCorrelation)
-         logLevel = Level.WARNING;
-      else
-         logLevel = Level.INFO;
-
-      String velocityQualityMeanFormatted = doubleFormat.format(velocityQualityMean);
-      String velocityQualityStandardDeviationFormatted = doubleFormat.format(velocityQualityStandardDeviation);
-      logger.log(logLevel,
-            "Velocity signal quality for the joint: " + jointName + " equals " + velocityQualityMeanFormatted + " second (+/-"
-                  + velocityQualityStandardDeviationFormatted
-                  + "). Note: 0 means position and velocity are completely inconsistent, and 1 they're perfectly matching.");
-
-      if (velocityDelayMean > badDelay)
-         logLevel = Level.SEVERE;
-      else if (velocityDelayMean > goodDelay)
-         logLevel = Level.WARNING;
-      else
-         logLevel = Level.INFO;
-
-      String velocityDelayMeanFormatted = doubleFormat.format(velocityDelayMean);
-      String velocityDelayStandardDeviationFormatted = doubleFormat.format(velocityDelayStandardDeviation);
-      logger.log(logLevel, "Estimated velocity delay for the joint: " + jointName + " equals " + velocityDelayMeanFormatted + " second (+/-"
-            + velocityDelayStandardDeviationFormatted + ").");
+      reportDelay("processed position", processedPositionQualityMean, processedPositionQualityStandardDeviation, processedPositionDelayMean, processedPositionDelayStandardDeviation);
+      reportDelay("raw velocity", rawVelocityQualityMean, rawVelocityQualityStandardDeviation, rawVelocityDelayMean, rawVelocityDelayStandardDeviation);
+      reportDelay("processed velocity", processedVelocityQualityMean, processedVelocityQualityStandardDeviation, processedVelocityDelayMean, processedVelocityDelayStandardDeviation);
 
       if (forceTrackingQualityMean < badCorrelation)
          logLevel = Level.SEVERE;
@@ -175,6 +177,36 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
       logger.log(logLevel, "Velocity magnitudes  (rad/s): " + velMags);
       logger.log(logLevel, "Tau magnitudes         (N.m): " + tauMags);
       logger.log(logLevel, "Tau desired magnitudes (N.m): " + tauDMags);
+   }
+
+   private void reportDelay(String signalName, double qualityMean, double qualityStandardDeviation, double delayMean, double delayStandardDeviation)
+   {
+      Level logLevel;
+      if (qualityMean < badCorrelation)
+         logLevel = Level.SEVERE;
+      else if (qualityMean < goodCorrelation)
+         logLevel = Level.WARNING;
+      else
+         logLevel = Level.INFO;
+
+      String velocityQualityMeanFormatted = doubleFormat.format(qualityMean);
+      String velocityQualityStandardDeviationFormatted = doubleFormat.format(qualityStandardDeviation);
+      logger.log(logLevel,
+            StringUtils.capitalize(signalName) + " signal quality for the joint: " + jointName + " equals " + velocityQualityMeanFormatted + " second (+/-"
+                  + velocityQualityStandardDeviationFormatted
+                  + "). Note: 0 means raw position and " + signalName + " are completely inconsistent, and 1 they're perfectly matching.");
+
+      if (delayMean > badDelay)
+         logLevel = Level.SEVERE;
+      else if (delayMean > goodDelay)
+         logLevel = Level.WARNING;
+      else
+         logLevel = Level.INFO;
+
+      String velocityDelayMeanFormatted = doubleFormat.format(delayMean);
+      String velocityDelayStandardDeviationFormatted = doubleFormat.format(delayStandardDeviation);
+      logger.log(logLevel, StringUtils.capitalize(signalName) + " estimated delay for the joint: " + jointName + " equals " + velocityDelayMeanFormatted + " second (+/-"
+            + velocityDelayStandardDeviationFormatted + ").");
    }
 
    public boolean isDoneExportingData()

@@ -20,7 +20,7 @@ public class ValkyrieLogDiagnostic extends DRCLogProcessor
       DiagnosticAnalysisProcessor diagnostic = new DiagnosticAnalysisProcessor(logDataProcessorHelper, drcRobotModel);
       diagnostic.addJointFourierAnalyses("raw_qd_", "", "raw_tau_", "", "", "TauDesired");
       diagnostic.addForceTrackingDelayEstimators("raw_tau_", "", "", "TauDesired");
-      diagnostic.addJointConsistencyCheckers("q_", "", "qd_", "");
+      diagnostic.addJointConsistencyCheckers();
       diagnostic.addIMUConsistencyCheckers("raw_q_", "", "filt_qd_w", "_sp0", true);
       diagnostic.addCenterOfMassConsistencyChecker();
       setLogDataProcessor(diagnostic);
