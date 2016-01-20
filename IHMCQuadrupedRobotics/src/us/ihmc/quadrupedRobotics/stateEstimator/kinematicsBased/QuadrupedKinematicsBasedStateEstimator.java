@@ -21,6 +21,8 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStat
 
 public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEstimator
 {
+   private static final boolean USE_OTHER_COM_UPDATER = true;
+
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -30,6 +32,7 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    private final JointStateUpdater jointStateUpdater;
    private final FootSwitchUpdater footSwitchUpdater;
    private final CenterOfMassLinearAndRotationalStateUpdater comLinearAndRotationalStateUpdater;
+   private final AnotherCenterOfMassLinearAndRotationalStateUpdater anotherComLinearAndRotationalStateUpdater;
 
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
 
@@ -39,14 +42,15 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    private final ArrayList<RobotQuadrant> feetNotInContact = new ArrayList<>();
 
    private final QuadrantDependentList<BooleanYoVariable> footContactBooleans = new QuadrantDependentList<>();
-   
+
    private final BooleanYoVariable isEnabled = new BooleanYoVariable(name + "IsEnabled", registry);
-   
+
    private boolean hasBeenInitialized = false;
-   
+
    public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
          FootSwitchUpdater footSwitchUpdater, JointStateUpdater jointStateUpdater, CenterOfMassLinearAndRotationalStateUpdater comLinearStateUpdater,
-         SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         AnotherCenterOfMassLinearAndRotationalStateUpdater anotherComLinearAndRotationalStateUpdater, SDFFullRobotModel sdfFullRobotModelForViz,
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
@@ -57,20 +61,22 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
 
       this.comLinearAndRotationalStateUpdater = comLinearStateUpdater;
 
+      this.anotherComLinearAndRotationalStateUpdater = anotherComLinearAndRotationalStateUpdater;
+
       this.sdfFullRobotModelForViz = sdfFullRobotModelForViz;
 
       if (this.sdfFullRobotModelForViz != null)
          initializeVisualization();
 
       isEnabled.set(false); //TODO initialize to false
-      
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          String name = quadrant.getCamelCaseNameForStartOfExpression() + "FootInContact";
          BooleanYoVariable footContactBoolean = new BooleanYoVariable(name, registry);
          footContactBooleans.put(quadrant, footContactBoolean);
       }
-      
+
       parentRegistry.addChild(registry);
    }
 
@@ -99,25 +105,32 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
 
       jointStateUpdater.initialize();
       sdfFullRobotModelForViz.updateFrames();
-      comLinearAndRotationalStateUpdater.initialize();
+      if (USE_OTHER_COM_UPDATER)
+         anotherComLinearAndRotationalStateUpdater.initialize();
+      else
+         comLinearAndRotationalStateUpdater.initialize();
    }
 
    @Override
    public void doControl()
    {
-      if(isEnabled.getBooleanValue())
+      if (isEnabled.getBooleanValue())
       {
-         if(!hasBeenInitialized)
+         if (!hasBeenInitialized)
          {
             initialize();
             hasBeenInitialized = true;
          }
-         
+
          updateFeetContactStatus();
-         
+
          jointStateUpdater.updateJointState();
-         comLinearAndRotationalStateUpdater.updateCenterOfMassLinearAndRotationalState(feetInContact, feetNotInContact);
-         
+
+         if (USE_OTHER_COM_UPDATER)
+            anotherComLinearAndRotationalStateUpdater.updateCenterOfMassLinearAndRotationalState(feetInContact, feetNotInContact);
+         else
+            comLinearAndRotationalStateUpdater.updateCenterOfMassLinearAndRotationalState(feetInContact, feetNotInContact);
+
          sdfFullRobotModelForViz.updateFrames();
          updateViz();
       }
