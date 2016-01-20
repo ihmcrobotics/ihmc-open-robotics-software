@@ -11,11 +11,11 @@ leftKneePitch:
     kp: 100.0
     kd: 10.0
 leftAnklePitch:
-    kp: 50.0
-    kd: 5.0
+    kp: 30.0
+    kd: 3.0
 leftAnkleRoll:
-    kp: 50.0
-    kd: 5.0
+    kp: 30.0
+    kd: 3.0
 rightHipYaw:
     kp: 50.0
     kd: 5.0
@@ -29,11 +29,11 @@ rightKneePitch:
     kp: 100.0
     kd: 10.0
 rightAnklePitch:
-    kp: 50.0
-    kd: 5.0
+    kp: 30.0
+    kd: 3.0
 rightAnkleRoll:
-    kp: 50.0
-    kd: 5.0
+    kp: 30.0
+    kd: 3.0
 torsoYaw:
     kp: 100.0
     kd: 10.0
@@ -50,8 +50,8 @@ leftShoulderRoll:
     kp: 50.0
     kd: 5.0
 leftShoulderYaw:
-    kp: 50.0
-    kd: 5.0
+    kp: 30.0
+    kd: 3.0
 leftElbowPitch:
     kp: 50.0
     kd: 5.0
@@ -71,8 +71,8 @@ rightShoulderRoll:
     kp: 50.0
     kd: 5.0
 rightShoulderYaw:
-    kp: 50.0
-    kd: 5.0
+    kp: 30.0
+    kd: 3.0
 rightElbowPitch:
     kp: 50.0
     kd: 5.0
