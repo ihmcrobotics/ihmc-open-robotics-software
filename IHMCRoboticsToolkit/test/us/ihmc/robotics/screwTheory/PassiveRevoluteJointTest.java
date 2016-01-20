@@ -24,6 +24,7 @@ public class PassiveRevoluteJointTest
    private int rowStart = 1;
    private Wrench jointWrench = new Wrench();
    private double q, qd, qdd, qddDesired, tau;
+   private boolean integrateQddDes;
    
    @Before
    public void setUp() throws Exception
@@ -110,4 +111,168 @@ public class PassiveRevoluteJointTest
       Assert.fail();
    }
    
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetQ()
+   {
+      try
+      {
+         joint.setQ(q);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
+      }     
+      Assert.fail();
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetQd()
+   {
+      try
+      {
+         joint.setQd(qd);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
+      }     
+      Assert.fail();
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetQdd()
+   {
+      try
+      {
+         joint.setQdd(qdd);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
+      }     
+      Assert.fail();
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetQddDesired()
+   {
+      try
+      {
+         joint.setQddDesired(qddDesired);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
+      }     
+      Assert.fail();
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetTau()
+   {
+      try
+      {
+         joint.setTau(tau);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
+      }     
+      Assert.fail();
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testPackConfigurationMatrix()
+   {
+      try
+      {
+         joint.packConfigurationMatrix(matrix, rowStart);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
+      }     
+      Assert.fail();
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetConfiguration()
+   {
+      try
+      {
+         joint.setConfiguration(matrix, rowStart);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
+      }     
+      Assert.fail();
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetVelocity()
+   {
+      try
+      {
+         joint.setVelocity(matrix, rowStart);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
+      }     
+      Assert.fail();
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetJointPositionVelocityAndAcceleration()
+   {
+      try
+      {
+         joint.setJointPositionVelocityAndAcceleration(joint);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
+      }     
+      Assert.fail();
+   }
+    
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetQddDesiredFromJoint()
+   {
+      try
+      {
+         joint.setQddDesired(joint);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
+      }     
+      Assert.fail();
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetIntegrateDesiredAccelerations()
+   {
+      try
+      {
+         joint.setIntegrateDesiredAccelerations(integrateQddDes);
+      }
+      catch(RuntimeException e)
+      {
+         return; 
+      }     
+      Assert.fail();
+   }  
 }
