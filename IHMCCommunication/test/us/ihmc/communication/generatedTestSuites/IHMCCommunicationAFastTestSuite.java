@@ -16,9 +16,9 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.communication.net.KryoStreamSerializerTest.class,
    us.ihmc.communication.net.local.InterprocessObjectCommunicatorTest.class,
    us.ihmc.communication.remote.DataObjectTransponderTest.class,
-   us.ihmc.communication.streamingData.StreamingDataProducerConsumerTest.class,
+   us.ihmc.communication.streamingData.PersistentTCPClientTest.class,
    us.ihmc.communication.streamingData.PersistentTCPServerTest.class,
-   us.ihmc.communication.streamingData.PersistentTCPClientTest.class
+   us.ihmc.communication.streamingData.StreamingDataProducerConsumerTest.class
 })
 
 public class IHMCCommunicationAFastTestSuite

@@ -100,7 +100,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    public void testForVideo() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
-      setupTest(getRobotModel());
+      DRCRobotModel robotModel = getRobotModel();
+      setupTest(robotModel);
 
       // setup all parameters
       Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
@@ -111,6 +112,10 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
+      if (simulationTestingParameters.getCreateSCSVideos())
+      {
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(robotModel.getSimpleRobotName(), drcFlatGroundWalkingTrack.getSimulationConstructionSet(), 1);
+      }
       BambooTools.reportTestFinishedMessage();
    }
 

@@ -1,0 +1,93 @@
+l_leg_hpz:
+    kp: 200.0
+    kd: 20.0
+l_leg_hpx:
+    kp: 200.0
+    kd: 20.0
+l_leg_hpy:
+    kp: 200.0
+    kd: 20.0
+l_leg_kny:
+    kp: 200.0
+    kd: 20.0
+l_leg_aky:
+    kp: 200.0
+    kd: 20.0
+l_leg_akx:
+    kp: 200.0
+    kd: 20.0
+r_leg_hpz:
+    kp: 200.0
+    kd: 20.0
+r_leg_hpx:
+    kp: 200.0
+    kd: 20.0
+r_leg_hpy:
+    kp: 200.0
+    kd: 20.0
+r_leg_kny:
+    kp: 200.0
+    kd: 20.0
+r_leg_aky:
+    kp: 200.0
+    kd: 20.0
+r_leg_akx:
+    kp: 200.0
+    kd: 20.0
+back_bkz:
+    kp: 400.0
+    kd: 40.0
+back_bky:
+    kp: 400.0
+    kd: 40.0
+back_bkx:
+    kp: 400.0
+    kd: 40.0
+l_arm_shz:
+    kp: 200.0
+    kd: 20.0
+l_arm_shx:
+    kp: 200.0
+    kd: 20.0
+l_arm_ely:
+    kp: 200.0
+    kd: 20.0
+l_arm_elx:
+    kp: 200.0
+    kd: 20.0
+l_arm_wry:
+    kp: 50.0
+    kd: 5.0
+l_arm_wrx:
+    kp: 10.0
+    kd: 1.0
+l_arm_wry2:
+    kp: 0.5
+    kd: 0.05
+r_arm_shz:
+    kp: 200.0
+    kd: 20.0
+r_arm_shx:
+    kp: 200.0
+    kd: 20.0
+r_arm_ely:
+    kp: 200.0
+    kd: 20.0
+r_arm_elx:
+    kp: 200.0
+    kd: 20.0
+r_arm_wry:
+    kp: 50.0
+    kd: 5.0
+r_arm_wrx:
+    kp: 10.0
+    kd: 1.0
+r_arm_wry2:
+    kp: 0.5
+    kd: 0.05
+neck_ry:
+    kp: 5.0
+    kd: 0.5
+hokuyo_joint:
+    kp: 5.0
+    kd: 0.5

@@ -116,9 +116,11 @@ public class QuadrupedSupportPolygon implements Serializable
       return edgeNormals;
    }
 
+   /**
+    * Return the reference frame of the first non-null footstep.
+    */
    public ReferenceFrame getReferenceFrame()
    {
-      // Return the reference frame of the first non-null footstep.
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          FramePoint footstep = footsteps.get(robotQuadrant);
@@ -128,7 +130,7 @@ public class QuadrupedSupportPolygon implements Serializable
          }
       }
 
-      throw new RuntimeException("SupportPolygon.getReferenceFrame(): should not get here. There must be at least one non null footstep");
+      throw new RuntimeException(getClass().getSimpleName() + ".getReferenceFrame(): should not get here. There must be at least one non null footstep");
    }
 
    /**
@@ -309,7 +311,7 @@ public class QuadrupedSupportPolygon implements Serializable
       }
       return null;
    }
-   
+    
    public void set(QuadrupedSupportPolygon polygon)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -1811,6 +1813,24 @@ public class QuadrupedSupportPolygon implements Serializable
       newPolygon.deleteLeg(legName);
       return newPolygon;
    }
+   
+   public void deleteLegCopy(RobotQuadrant legName, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
+   {
+      quadrupedSupportPolygonToPack.set(this);
+      quadrupedSupportPolygonToPack.deleteLeg(legName);
+   }
+   
+   public void packPolygonWithoutLeg(RobotQuadrant legToDelete, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
+   {
+      quadrupedSupportPolygonToPack.clear();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (robotQuadrant != legToDelete)
+         {
+            quadrupedSupportPolygonToPack.setFootstep(robotQuadrant, getFootstep(robotQuadrant));
+         }
+      }
+   }
 
    public void deleteLeg(RobotQuadrant legName)
    {
@@ -2290,6 +2310,19 @@ public class QuadrupedSupportPolygon implements Serializable
       newPolygon.setFootstep(quadrant, footstep);
       return newPolygon;
    }
+   
+   /**
+    * replaceFootstepCopy: this replaces the stored footsep with the passed in one.
+    * If the stored footstep is null, it will throw an exception.
+    *
+    * @param footstep Footstep
+    * @return Polygon
+    */
+   public void replaceFootstepCopy(RobotQuadrant quadrant, FramePoint footstep, QuadrupedSupportPolygon supportPolygonToPack)
+   {
+      supportPolygonToPack.set(this);
+      supportPolygonToPack.setFootstep(quadrant, footstep);
+   }
 
    /**
     *  getDiagonalIntersection returns a point that has a value of the intersection
@@ -2532,8 +2565,6 @@ public class QuadrupedSupportPolygon implements Serializable
       }
       
       return false;
-      
-      
    }
 
    public RobotQuadrant getClosestFootStep(FramePoint midPoint)

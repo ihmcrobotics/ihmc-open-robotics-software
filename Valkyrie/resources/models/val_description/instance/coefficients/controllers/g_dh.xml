@@ -1,0 +1,21 @@
+<CoeffData>
+  <Properties>
+    <CalibrationDate/>
+    <FileGenDate date="2013-11-14" time="16:10:35.857047"/>
+  </Properties>
+  <Coeffs>
+    <Coeff id="JointVelFilter_fc_Hz" value="25.0"/>
+    <Coeff id="MotorAccFilter_fc_Hz" value="50.0"/>
+    <Coeff id="MotorVelFilter_fc_Hz" value="800.0"/>
+    <Coeff id="PositionControl_Kd" value="0.1"/>
+    <Coeff id="PositionControl_Kd_fc_Hz" value="0.0"/>
+    <Coeff id="PositionControl_Ki" value="0.0"/>
+    <Coeff id="PositionControl_Kp" value="100.0"/>
+    <Coeff id="PositionControl_SensorFeedback" value="4.0"/>
+    <Coeff id="TorqueControl_Current2MotorTorque" value="0.025"/>
+    <Coeff id="TorqueControl_FFd_fc_Hz" value="20.0"/>
+    <Coeff id="TorqueControl_ParallelDamping" value="0.0"/>
+    <Coeff id="TorqueControl_enableDynFF" value="0.0"/>
+    <Coeff id="TorqueControl_enableFF" value="1.0"/>
+  </Coeffs>
+</CoeffData>

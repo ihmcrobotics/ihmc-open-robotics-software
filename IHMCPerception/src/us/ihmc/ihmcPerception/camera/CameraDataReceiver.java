@@ -52,18 +52,6 @@ public abstract class CameraDataReceiver extends Thread
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
       this.cameraFrame = fullRobotModel.getCameraFrame(sensorNameInSdf);
       
-      if (cameraFrame == null)
-      {
-         new Exception().printStackTrace();
-         PrintTools.error("Camera frame in SDF does not exist: " + sensorNameInSdf);
-      }
-      else
-      {
-         Vector3d point = new Vector3d();
-         cameraFrame.getTransformToWorldFrame().getTranslation(point);
-         PrintTools.info("Using camera frame: " + cameraFrame.getName() + " at " + point);
-      }
-
       compressedVideoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(compressedVideoHandler);
    }
 

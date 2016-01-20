@@ -12,8 +12,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasHeadOrientationBehaviorTest.class,
-   us.ihmc.atlas.hikSim.AtlasWholeBodyTrajectoryTest.class
+   us.ihmc.atlas.commonWalkingControlModules.sensors.AtlasProvidedMassMatrixToolRigidBodyTest.class,
+   us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
+   us.ihmc.atlas.controllers.responses.AtlasHandPoseStatusTest.class,
+   us.ihmc.atlas.drcRobot.AtlasSDFVerificationTest.class
 })
 
 public class AtlasEFastTestSuite
