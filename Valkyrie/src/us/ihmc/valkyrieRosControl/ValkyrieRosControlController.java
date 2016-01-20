@@ -55,14 +55,14 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
 //         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch", "lowerNeckPitch",
 //         "neckYaw", "upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll",
 //         "rightWristPitch" };
-	private static final String[] controlledJoints = { "leftHipYaw",
-			"leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch",
-			"leftAnkleRoll", "rightHipYaw", "rightHipRoll", "rightHipPitch",
-			"rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw",
-			"torsoPitch", "torsoRoll", "leftShoulderPitch", "leftShoulderRoll",
-			"leftShoulderYaw", "leftElbowPitch", "lowerNeckPitch", "neckYaw",
-			"upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll",
-			"rightShoulderYaw", "rightElbowPitch" };
+	private static final String[] controlledJoints = {
+	      "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
+	      "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll",
+	      "torsoYaw", "torsoPitch", "torsoRoll",
+	      "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch",
+//	      "lowerNeckPitch", "neckYaw", "upperNeckPitch",
+	      "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"
+	      };
    
 	public static final boolean USE_USB_MICROSTRAIN_IMUS = false;
 	public static final boolean USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS = false;
