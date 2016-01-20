@@ -316,7 +316,8 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
          qDesired = q + MathTools.clipToMinMax(qDesired - q, qdMax * controlDT);
          qdDesired = qd + MathTools.clipToMinMax(qdDesired - qd, qddMax * controlDT);
-         joint.setTau(MathTools.clipToMinMax(tauDesired, tauMax));
+         tauDesired = MathTools.clipToMinMax(tauDesired, tauMax);
+         joint.setTau(tauDesired);
          joint.setqDesired(qDesired);
          joint.setQdDesired(qdDesired);
 
