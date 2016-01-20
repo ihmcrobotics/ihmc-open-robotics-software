@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasRemoveSingleDebrisBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasRotateHandAboutAxisBehaviorTest.class
 })
 
 public class AtlasFInDevelopmentTestSuite

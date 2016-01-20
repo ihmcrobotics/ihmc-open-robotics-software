@@ -18,13 +18,15 @@ public class QuadrupedSimulationController implements RobotController
    private QuadrupedStateEstimator stateEstimator; //not implemented yet
    private final DRCPoseCommunicator poseCommunicator;
    
-   public QuadrupedSimulationController(RawSensorReader sensorReader, OutputWriter outputWriter, QuadrupedControllerManager gaitControlManager, QuadrupedStateEstimator stateEstimator, DRCPoseCommunicator poseCommunicator)
+   public QuadrupedSimulationController(RawSensorReader sensorReader, OutputWriter outputWriter, QuadrupedControllerManager gaitControlManager, QuadrupedStateEstimator stateEstimator,
+         DRCPoseCommunicator poseCommunicator, RobotController headController)
    {
       this.poseCommunicator = poseCommunicator;
       this.sensorReader = sensorReader;
       this.outputWriter = outputWriter;
       this.gaitControlManager = gaitControlManager;
       this.stateEstimator = stateEstimator;
+      this.headController = headController;
       registry.addChild(gaitControlManager.getYoVariableRegistry());
    }
 
@@ -62,6 +64,10 @@ public class QuadrupedSimulationController implements RobotController
       {
          poseCommunicator.write();
       }
+
+      if(headController != null)
+         headController.doControl();
+
       outputWriter.write();
    }
 }

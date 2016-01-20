@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Flaky)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasScriptBehaviorTest.class
+   us.ihmc.atlas.AtlasFlatGroundRewindabilityTest.class
 })
 
 public class AtlasAFlakyTestSuite

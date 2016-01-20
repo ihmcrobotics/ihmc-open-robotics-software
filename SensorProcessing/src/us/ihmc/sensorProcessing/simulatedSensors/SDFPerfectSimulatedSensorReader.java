@@ -184,6 +184,8 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
          OneDoFJoint revoluteJoint = jointPair.getRight();
 
+         if (pinJoint == null) continue;
+
          revoluteJoint.setQ(pinJoint.getQ().getDoubleValue());
          revoluteJoint.setQd(pinJoint.getQD().getDoubleValue());
          revoluteJoint.setQdd(pinJoint.getQDD().getDoubleValue());

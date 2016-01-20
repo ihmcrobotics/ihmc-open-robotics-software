@@ -18,5 +18,7 @@ dependencies {
 	compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.23'
    compile group: 'us.ihmc', name: 'IHMCHierachicalKinematics', version: '1.0'
 
+	compile project(':IHMCJavaToolkit')
+
    testCompile project(':IHMCUnitTesting')
 }

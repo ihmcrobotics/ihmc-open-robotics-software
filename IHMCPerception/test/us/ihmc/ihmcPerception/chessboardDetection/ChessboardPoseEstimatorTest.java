@@ -1,12 +1,10 @@
 package us.ihmc.ihmcPerception.chessboardDetection;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
@@ -14,8 +12,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.Assert.*;
+import javax.imageio.ImageIO;
 
+import org.junit.Ignore;
+import org.junit.Test;
+
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
+
+@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
 public class ChessboardPoseEstimatorTest
 {
    static final boolean DEBUG = false;

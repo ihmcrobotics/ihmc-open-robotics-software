@@ -25,7 +25,10 @@ public class DesiredVelocityProvider implements VectorProvider, PacketConsumer<D
    
    public DesiredVelocityProvider(GlobalDataProducer dataProducer, String prefix, YoVariableRegistry parentRegistry)
    {
-      dataProducer.attachListener(DesiredVelocityPacket.class, this);
+      if(dataProducer != null)
+      {
+         dataProducer.attachListener(DesiredVelocityPacket.class, this);
+      }
       
       String name = YoFrameVariableNameTools.createName(prefix, "desiredVelocity", "");
       registry = new YoVariableRegistry(name + "Provider");

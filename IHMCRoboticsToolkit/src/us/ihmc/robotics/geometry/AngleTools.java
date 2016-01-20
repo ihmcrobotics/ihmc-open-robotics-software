@@ -58,6 +58,28 @@ public class AngleTools
    }
 
    /**
+    * Formula found on <a href="https://en.wikipedia.org/wiki/Mean_of_circular_quantities"> Wikipedia</a>.
+    */
+   public static double computeAngleAverage(double[] angles)
+   {
+      double average = 0.0;
+
+      double averageOfSin = 0.0;
+      double averageOfCos = 0.0;
+      double weight = 1.0 / angles.length;
+
+      for (int i = 0; i < angles.length; i++)
+      {
+         averageOfSin += weight * Math.sin(angles[i]);
+         averageOfCos += weight * Math.cos(angles[i]);
+      }
+
+      average = Math.atan2(averageOfSin, averageOfCos);
+
+      return average;
+   }
+
+   /**
     * Finds the closest 90 degree yaw and returns number of 90 degrees (0 = 0; 1 = 90; 2 = 180; 3 = 270).
     *
     * @param yawInRadians double

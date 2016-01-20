@@ -1,0 +1,20 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="arm">
+
+    <xacro:include filename="$(find val_description)/instance/instances/robots/xacro/mechanisms/mechanisms.xacro"/>
+    <xacro:include filename="$(find val_description)/common/xacro/joint_names/valkyrie_joint_names.xacro"/>
+
+    <xacro:macro name="arm" params="prefix j1_serial_number j2_serial_number j3_serial_number j4_serial_number j5_serial_number wrist_actuator0_serial wrist_actuator1_serial" >
+    	<xacro:simple_mechanism name="${ShoulderPitchJointName}" serial_number="${j1_serial_number}" node="${ShoulderPitchNode}"/>
+
+    	<xacro:simple_mechanism name="${ShoulderRollJointName}" serial_number="${j2_serial_number}" node="${ShoulderRollNode}"/>
+
+    	<xacro:simple_mechanism name="${ShoulderYawJointName}" serial_number="${j3_serial_number}" node="${ShoulderYawNode}"/>
+
+    	<xacro:simple_mechanism name="${ElbowPitchJointName}" serial_number="${j4_serial_number}" node="${ElbowPitchNode}"/>
+
+    	<xacro:simple_mechanism name="${ForearmYawJointName}" serial_number="${j5_serial_number}" node="${ForearmYawNode}"/>
+
+    	<xacro:two_active_joint_mechanism mechanism_name="${prefix}Wrist" actuator0_name="${prefix}WristTopActuator" actuator1_name="${prefix}WristBottomActuator" joint0_name="${WristPitchJointName}" joint1_name="${WristRollJointName}" actuator0_serial="${wrist_actuator0_serial}" actuator1_serial="${wrist_actuator1_serial}" actuator0_node="${WristTopActuatorNode}" actuator1_node="${WristBottomActuatorNode}" />
+    </xacro:macro>
+
+</robot>

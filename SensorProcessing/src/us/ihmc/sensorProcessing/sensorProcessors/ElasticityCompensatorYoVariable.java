@@ -11,48 +11,43 @@ public class ElasticityCompensatorYoVariable extends DoubleYoVariable implements
    private final DoubleYoVariable stiffness;
    private final DoubleYoVariable rawJointPosition;
    private final DoubleYoVariable jointTau;
-   private final DoubleYoVariable maximuDeflection;
+   private final DoubleYoVariable maximumDeflection;
 
    public ElasticityCompensatorYoVariable(String name, YoVariableRegistry registry)
    {
-      super(name, registry);
-      
-      maximuDeflection = new DoubleYoVariable(name + "MaxDeflection", registry);
-      maximuDeflection.set(0.1);
-      stiffness = new DoubleYoVariable(name + "Stiffness", registry);
-      rawJointPosition = null;
-      jointTau = null;
+      this(name, null, null, null, null, registry);
    }
 
    public ElasticityCompensatorYoVariable(String name, DoubleYoVariable stiffness, YoVariableRegistry registry)
    {
-      super(name, registry);
-
-      maximuDeflection = new DoubleYoVariable(name + "MaxDeflection", registry);
-      maximuDeflection.set(0.1);
-      this.stiffness = stiffness;
-      rawJointPosition = null;
-      jointTau = null;
+      this(name, stiffness, null, null, null, registry);
    }
 
    public ElasticityCompensatorYoVariable(String name, DoubleYoVariable rawJointPosition, DoubleYoVariable jointTau, YoVariableRegistry registry)
    {
-      super(name, registry);
-
-      maximuDeflection = new DoubleYoVariable(name + "MaxDeflection", registry);
-      maximuDeflection.set(0.1);
-      this.stiffness = new DoubleYoVariable(name + "Stiffness", registry);
-      this.rawJointPosition = rawJointPosition;
-      this.jointTau = jointTau;
+      this(name, null, null, rawJointPosition, jointTau, registry);
    }
 
    public ElasticityCompensatorYoVariable(String name, DoubleYoVariable stiffness, DoubleYoVariable rawJointPosition, DoubleYoVariable jointTau, YoVariableRegistry registry)
    {
+      this(name, stiffness, null, rawJointPosition, jointTau, registry);
+   }
+
+   public ElasticityCompensatorYoVariable(String name, DoubleYoVariable stiffness, DoubleYoVariable maximumDeflection, DoubleYoVariable rawJointPosition, DoubleYoVariable jointTau, YoVariableRegistry registry)
+   {
       super(name, registry);
 
-      maximuDeflection = new DoubleYoVariable(name + "MaxDeflection", registry);
-      maximuDeflection.set(0.1);
+      if (maximumDeflection == null)
+      {
+         maximumDeflection = new DoubleYoVariable(name + "MaxDeflection", registry);
+         maximumDeflection.set(0.1);
+      }
+      this.maximumDeflection = maximumDeflection;
+      
+      if (stiffness == null)
+         stiffness = new DoubleYoVariable(name + "Stiffness", registry);
       this.stiffness = stiffness;
+
       this.rawJointPosition = rawJointPosition;
       this.jointTau = jointTau;
    }
@@ -64,7 +59,7 @@ public class ElasticityCompensatorYoVariable extends DoubleYoVariable implements
 
    public void setMaximuDeflection(double newMaxDeflection)
    {
-      maximuDeflection.set(newMaxDeflection);
+      maximumDeflection.set(newMaxDeflection);
    }
 
    public void update()
@@ -84,7 +79,7 @@ public class ElasticityCompensatorYoVariable extends DoubleYoVariable implements
       if (stiffness.getDoubleValue() > 1e-10)
       {
          jointDeflection = jointTau / stiffness.getDoubleValue();
-         jointDeflection = MathTools.clipToMinMax(jointDeflection, maximuDeflection.getDoubleValue());
+         jointDeflection = MathTools.clipToMinMax(jointDeflection, maximumDeflection.getDoubleValue());
          this.set(rawJointPosition - jointDeflection);
       }
       else

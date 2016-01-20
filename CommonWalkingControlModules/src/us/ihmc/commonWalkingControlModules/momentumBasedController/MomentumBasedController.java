@@ -1471,7 +1471,12 @@ public class MomentumBasedController
 
    public ForceSensorDataReadOnly getWristForceSensor(RobotSide robotSide)
    {
-      return wristForceSensors.get(robotSide);
+      if(wristForceSensors != null)
+      {
+         return wristForceSensors.get(robotSide);
+      }
+
+      return null;
    }
 
    public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()

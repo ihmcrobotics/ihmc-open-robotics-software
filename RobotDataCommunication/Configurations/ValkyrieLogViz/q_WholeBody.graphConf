@@ -2,9 +2,9 @@
 <GraphGroup>
 	<Cols>4</Cols>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftShoulderPitch</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftShoulderPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_leftShoulderPitch_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config1</Name>
+			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -14,9 +14,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftHipYaw</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftHipYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_leftHipYaw_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config2</Name>
+			<Name>config26</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -26,9 +26,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightHipYaw</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightHipYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_rightHipYaw_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config3</Name>
+			<Name>config27</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -38,9 +38,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightShoulderPitch</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightShoulderPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_rightShoulderPitch_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config4</Name>
+			<Name>config28</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -50,9 +50,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftShoulderRoll</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftShoulderRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_leftShoulderRoll_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config5</Name>
+			<Name>config29</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -62,9 +62,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftHipRoll</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftHipRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_leftHipRoll_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config6</Name>
+			<Name>config30</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -74,9 +74,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightHipRoll</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightHipRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_rightHipRoll_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config7</Name>
+			<Name>config31</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -86,9 +86,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightShoulderRoll</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightShoulderRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_rightShoulderRoll_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config8</Name>
+			<Name>config32</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -98,9 +98,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftShoulderYaw</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftShoulderYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_leftShoulderYaw_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config9</Name>
+			<Name>config33</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -110,9 +110,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftHipPitch</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftHipPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_leftHipPitch_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config10</Name>
+			<Name>config34</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -122,9 +122,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightHipPitch</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightHipPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_rightHipPitch_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config11</Name>
+			<Name>config35</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -134,9 +134,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightShoulderYaw</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightShoulderYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_rightShoulderYaw_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config12</Name>
+			<Name>config36</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -146,9 +146,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftElbowPitch</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftElbowPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_leftElbowPitch_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config13</Name>
+			<Name>config37</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -158,9 +158,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftKneePitch</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftKneePitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_leftKneePitch_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config14</Name>
+			<Name>config38</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -170,9 +170,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightKneePitch</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightKneePitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_rightKneePitch_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config15</Name>
+			<Name>config39</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -182,9 +182,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightElbowPitch</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightElbowPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_rightElbowPitch_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config16</Name>
+			<Name>config40</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -194,9 +194,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_torsoYaw</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_torsoYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_torsoYaw_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config17</Name>
+			<Name>config41</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -206,9 +206,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftAnklePitch</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftAnklePitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_leftAnklePitch_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config18</Name>
+			<Name>config42</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -218,9 +218,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightAnklePitch</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightAnklePitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_rightAnklePitch_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config19</Name>
+			<Name>config43</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -230,9 +230,45 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_torsoPitch</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_torsoRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_torsoRoll_sp0</Variables>
 		<GraphConfiguration>
-			<Name>config20</Name>
+			<Name>config44</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_torsoPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_torsoPitch_sp0</Variables>
+		<GraphConfiguration>
+			<Name>config45</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftAnkleRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_leftAnkleRoll_sp0</Variables>
+		<GraphConfiguration>
+			<Name>config46</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightAnkleRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.stiff_q_rightAnkleRoll_sp0</Variables>
+		<GraphConfiguration>
+			<Name>config47</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -244,43 +280,7 @@
 	<Graph>
 		<Variables></Variables>
 		<GraphConfiguration>
-			<Name>config21</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_leftAnkleRoll</Variables>
-		<GraphConfiguration>
-			<Name>config22</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_rightAnkleRoll</Variables>
-		<GraphConfiguration>
-			<Name>config23</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_q_torsoRoll</Variables>
-		<GraphConfiguration>
-			<Name>config24</Name>
+			<Name>config48</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>

@@ -1,0 +1,23 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="valkyrie">
+
+    <xacro:make_pelvis />
+    <xacro:make_waist waist_root_link="${Pelvis_Link_Name}" />
+    <xacro:make_head head_root_link="${TorsoRollLinkName}" />
+    <xacro:make_arm_no_hands prefix="right" reflect="-1" arm_root_link="${TorsoRollLinkName}" />
+    <xacro:make_arm_no_hands prefix="left" reflect="1" arm_root_link="${TorsoRollLinkName}" />
+    <xacro:make_leg prefix="right" reflect="-1" leg_root_link="${Pelvis_Link_Name}"/>
+    <xacro:make_leg prefix="left" reflect="1" leg_root_link="${Pelvis_Link_Name}"/>
+
+    <xacro:v1_trunk_sensors/>
+    <xacro:v1_leg_sensors prefix="left" reflect="1" ATI_serial_number="${left_foot_ATI_serial}" ATI_node="${left_foot_ATI_node}"/>
+    <xacro:v1_leg_sensors prefix="right" reflect="-1" ATI_serial_number="${right_foot_ATI_serial}" ATI_node="${right_foot_ATI_node}"/>
+    <xacro:include_multisense_hw />
+    <xacro:v1_pelvis_sensors/>
+
+    <xacro:waist_transmissions_hw />
+    <xacro:leg_transmissions_hw prefix="left"/>
+    <xacro:leg_transmissions_hw prefix="right"/>
+    <xacro:arm_transmissions_no_hands prefix="left"/>
+    <xacro:arm_transmissions_no_hands prefix="right"/>
+    <xacro:neck_transmissions_hw />
+</robot>
