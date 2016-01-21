@@ -63,20 +63,29 @@ public class LogDataRawSensorMap
          DoubleYoVariable qy = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, "raw_q_Qy" + imuName);
          DoubleYoVariable qz = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, "raw_q_Qz" + imuName);
          DoubleYoVariable qs = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, "raw_q_Qs" + imuName);
-         YoFrameQuaternion rawOrientation = new YoFrameQuaternion(qx, qy, qz, qs, null);
-         rawIMUOrientationMap.put(imuName, rawOrientation);
+         if (qx != null && qy != null && qz != null && qs != null)
+         {
+            YoFrameQuaternion rawOrientation = new YoFrameQuaternion(qx, qy, qz, qs, null);
+            rawIMUOrientationMap.put(imuName, rawOrientation);
+         }
          
          DoubleYoVariable qd_wx = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createXName("raw_qd_w", imuName));
          DoubleYoVariable qd_wy = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createYName("raw_qd_w", imuName));
          DoubleYoVariable qd_wz = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createZName("raw_qd_w", imuName));
-         YoFrameVector rawAngularVelocity = new YoFrameVector(qd_wx, qd_wy, qd_wz, null);
-         rawIMUAngularVelocityMap.put(imuName, rawAngularVelocity);
+         if (qd_wx != null && qd_wy != null && qd_wz != null)
+         {
+            YoFrameVector rawAngularVelocity = new YoFrameVector(qd_wx, qd_wy, qd_wz, null);
+            rawIMUAngularVelocityMap.put(imuName, rawAngularVelocity);
+         }
          
          DoubleYoVariable qdd_x = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createXName("raw_qdd_", imuName));
          DoubleYoVariable qdd_y = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createYName("raw_qdd_", imuName));
          DoubleYoVariable qdd_z = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createZName("raw_qdd_", imuName));
-         YoFrameVector rawLinearAcceleration = new YoFrameVector(qdd_x, qdd_y, qdd_z, null);
-         rawIMULinearAccelerationMap.put(imuName, rawLinearAcceleration);
+         if (qdd_x != null && qdd_y != null && qdd_z != null)
+         {
+            YoFrameVector rawLinearAcceleration = new YoFrameVector(qdd_x, qdd_y, qdd_z, null);
+            rawIMULinearAccelerationMap.put(imuName, rawLinearAcceleration);
+         }
       }
    }
 

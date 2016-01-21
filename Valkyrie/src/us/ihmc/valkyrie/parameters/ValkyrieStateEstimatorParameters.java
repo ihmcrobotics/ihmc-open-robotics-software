@@ -1,5 +1,10 @@
 package us.ihmc.valkyrie.parameters;
 
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ANGULAR_VELOCITY;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_LINEAR_ACCELERATION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ORIENTATION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_VELOCITY;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +45,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    private SensorNoiseParameters sensorNoiseParameters = null;
 
    private final boolean doElasticityCompensation;
+   private final double jointElasticityFilterFrequencyHz;
    private final double maximumDeflection;
    private final double defaultJointStiffness;
    private final HashMap<String, Double> jointSpecificStiffness = new HashMap<String, Double>();
@@ -67,6 +73,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       jointVelocitySlopTimeForBacklashCompensation = 0.03;
 
       doElasticityCompensation = runningOnRealRobot;
+      jointElasticityFilterFrequencyHz = 10.0;
       maximumDeflection = 0.2;
       defaultJointStiffness = 10000;
       for (RobotSide robotSide : RobotSide.values)
@@ -83,6 +90,8 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
+      DoubleYoVariable elasticityAlphaFilter = sensorProcessing.createAlphaFilter("jointDeflectionDotAlphaFilter", jointElasticityFilterFrequencyHz);
+      DoubleYoVariable maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", maximumDeflection);
       Map<OneDoFJoint, DoubleYoVariable> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
 
       DoubleYoVariable orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", orientationFilterFrequencyHz);
@@ -90,7 +99,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       DoubleYoVariable linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", linearAccelerationFilterFrequencyHz);
 
       if (doElasticityCompensation)
-         sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, maximumDeflection, false);
+         sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, maxDeflection, false);
 
       // For the joints using the output encoders: Compute velocity from the joint position using finite difference.
       DoubleYoVariable jointOutputEncoderVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointOutputEncoderVelocityAlphaFilter", jointVelocityFilterFrequencyHz);
@@ -100,13 +109,16 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", jointVelocityFilterFrequencyHz);
       DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointVelocityBacklashSlopTime", registry);
       jointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
-      sensorProcessing.addJointVelocityAlphaFilter(jointVelocityAlphaFilter, false);
+      sensorProcessing.addSensorAlphaFilter(jointVelocityAlphaFilter, false, JOINT_VELOCITY);
       sensorProcessing.addJointVelocityBacklashFilter(jointVelocitySlopTime, false);
+
+      if (doElasticityCompensation)
+         sensorProcessing.addJointVelocityElasticyCompensator(jointPositionStiffness, maxDeflection, elasticityAlphaFilter, false);
       
       //imu
-      sensorProcessing.addIMUOrientationAlphaFilter(orientationAlphaFilter, false);
-      sensorProcessing.addIMUAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
-      sensorProcessing.addIMULinearAccelerationAlphaFilter(linearAccelerationAlphaFilter, false);
+      sensorProcessing.addSensorAlphaFilter(orientationAlphaFilter, false, IMU_ORIENTATION);
+      sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, IMU_ANGULAR_VELOCITY);
+      sensorProcessing.addSensorAlphaFilter(linearAccelerationAlphaFilter, false, IMU_LINEAR_ACCELERATION);
 
       // Raw finite difference on all joint positions
       DoubleYoVariable dummyAlphaFilter = new DoubleYoVariable("dummyAlphaFilter", registry);
@@ -294,7 +306,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
    {
-      return new ImmutablePair<String, String>(sensorInformation.getRearPelvisIMUSensor(), sensorInformation.getLeftTrunkIMUSensor());
+      return new ImmutablePair<String, String>(sensorInformation.getMiddlePelvisIMUSensor(), sensorInformation.getLeftTrunkIMUSensor());
    }
    
    @Override
