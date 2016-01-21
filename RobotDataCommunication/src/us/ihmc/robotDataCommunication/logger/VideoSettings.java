@@ -24,8 +24,6 @@ public class VideoSettings
 
    private final String description;
    private final int device;
-   private final int mode;
-   private final boolean interlaced;
    private final VideoIn videoIn;
 
    public String getDescription()
@@ -38,22 +36,10 @@ public class VideoSettings
       return device;
    }
 
-   public int getMode()
-   {
-      return mode;
-   }
-
-   public boolean isInterlaced()
-   {
-      return interlaced;
-   }
-
-   private VideoSettings(String description, int device, int mode, boolean interlaced, VideoIn videoIn)
+   private VideoSettings(String description, int device, VideoIn videoIn)
    {
       this.description = description;
       this.device = device;
-      this.mode = mode;
-      this.interlaced = interlaced;
       this.videoIn = videoIn;
    }
 
@@ -77,11 +63,9 @@ public class VideoSettings
          {
             String description = (String) camera.get("description");
             int device = (Integer) camera.get("device");
-            int mode = (Integer) camera.get("mode");
-            boolean interlaced = (Boolean) camera.get("interlaced");
             VideoIn videoIn = VideoIn.valueOf((String) camera.get("videoIn"));
             
-            cameraList.add(new VideoSettings(description, device, mode, interlaced, videoIn));
+            cameraList.add(new VideoSettings(description, device, videoIn));
             
          }
       }
@@ -97,7 +81,7 @@ public class VideoSettings
    @Override
    public String toString()
    {
-      return "VideoSettings [description=" + description + ", device=" + device + ", mode=" + mode + ", interlaced=" + interlaced + ", videoIn=" + videoIn
+      return "VideoSettings [description=" + description + ", device=" + device + ", videoIn=" + videoIn
             + "]";
    }
    
