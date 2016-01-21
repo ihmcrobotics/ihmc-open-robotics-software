@@ -20,26 +20,27 @@ public class ThreePointsAverageReferenceFrame extends ReferenceFrame
    private final FramePoint framePoint2;
    private final FramePoint framePoint3;
 
-   private final FrameVector vectorOrigin;
+   private final FrameVector vectorOriginX;
+   private final FrameVector vectorOriginY;
    private final FrameVector vectorFromCenterToPoint1;
    private final FrameVector vectorFromCenterToPoint2;
    private final FrameVector vectorFromCenterToPoint3;
 
    private final FrameVector normalVector;
-   
+
    private final FramePoint averagePoint;
    private final FrameOrientation averageOrientation;
 
    private final FramePlane3d framePlane;
-   
+
    //temporary variable
    private final Quat4d temporaryQuaternion = new Quat4d(0.0, 0.0, 0.0, 1.0);
    private final Vector3d temporaryVector = new Vector3d();
-   
+
    public ThreePointsAverageReferenceFrame(String frameName, FramePoint p1, FramePoint p2, FramePoint p3, ReferenceFrame parentFrame)
    {
       super(frameName, parentFrame);
-      
+
       p1.checkReferenceFrameMatch(parentFrame);
       p2.checkReferenceFrameMatch(parentFrame);
       p3.checkReferenceFrameMatch(parentFrame);
@@ -50,14 +51,15 @@ public class ThreePointsAverageReferenceFrame extends ReferenceFrame
 
       averagePoint = new FramePoint(parentFrame);
       averageOrientation = new FrameOrientation(parentFrame);
-      
+
       framePlane = new FramePlane3d(parentFrame);
-      
-      vectorOrigin = new FrameVector(parentFrame, 1.0, 0.0, 0.0);
+
+      vectorOriginX = new FrameVector(parentFrame, 1.0, 0.0, 0.0);
+      vectorOriginY = new FrameVector(parentFrame, 0.0, 1.0, 0.0);
       vectorFromCenterToPoint1 = new FrameVector(parentFrame);
       vectorFromCenterToPoint2 = new FrameVector(parentFrame);
       vectorFromCenterToPoint3 = new FrameVector(parentFrame);
-      
+
       normalVector = new FrameVector(parentFrame);
    }
 
@@ -69,7 +71,7 @@ public class ThreePointsAverageReferenceFrame extends ReferenceFrame
 
       averagePoint.scale(1.0 / 3.0);
    }
-   
+
    private void updateAverageOrientation()
    {
       framePlane.setPoints(framePoint1, framePoint2, framePoint3);
@@ -79,28 +81,41 @@ public class ThreePointsAverageReferenceFrame extends ReferenceFrame
       double tempY = framePoint1.getY() - averagePoint.getY();
       double tempZ = framePoint1.getZ() - averagePoint.getZ();
       vectorFromCenterToPoint1.set(tempX, tempY, tempZ);
+      vectorFromCenterToPoint1.normalize();
       
       tempX = framePoint2.getX() - averagePoint.getX();
       tempY = framePoint2.getY() - averagePoint.getY();
       tempZ = framePoint2.getZ() - averagePoint.getZ();
       vectorFromCenterToPoint2.set(tempX, tempY, tempZ);
+      vectorFromCenterToPoint2.normalize();
       
       tempX = framePoint3.getX() - averagePoint.getX();
       tempY = framePoint3.getY() - averagePoint.getY();
       tempZ = framePoint3.getZ() - averagePoint.getZ();
       vectorFromCenterToPoint3.set(tempX, tempY, tempZ);
+      vectorFromCenterToPoint3.normalize();
       
+      //calculate the average angle
       
-      //calculate the average angle 
-      double angleFromOriginTo1 =  vectorOrigin.angle(vectorFromCenterToPoint1);
+      double angleToY = vectorOriginY.angle(vectorFromCenterToPoint1);
+      double angleToX = vectorOriginX.angle(vectorFromCenterToPoint1);
+
+      double angleFromOriginTo1 = 0.0;
+      
+      if(angleToY < Math.PI/2.0)
+         angleFromOriginTo1 = angleToX;
+      else
+         angleFromOriginTo1 = 2.0 * Math.PI - angleToX;
+      
       double angleFrom1To2 = vectorFromCenterToPoint1.angle(vectorFromCenterToPoint2);
-      double angleFrom1To3 = vectorFromCenterToPoint1.angle(vectorFromCenterToPoint3);
+      double angleFrom2To3 = vectorFromCenterToPoint2.angle(vectorFromCenterToPoint3);
+      double angleFrom1To3 = angleFrom1To2+angleFrom2To3;
       
       double averageAngle = AngleTools.computeAngleAverage(angleFrom1To2, angleFrom1To3);
       
       framePlane.getNormal(normalVector);
-      if(normalVector.getZ() < 0.0)
-         normalVector.negate();
+//      if(normalVector.getZ() < 0.0)
+//         normalVector.negate();
       
       normalVector.get(temporaryVector);
       
@@ -111,13 +126,13 @@ public class ThreePointsAverageReferenceFrame extends ReferenceFrame
 
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
-   {      
+   {
       updateAveragePoint();
       updateAverageOrientation();
-      
+
       averagePoint.get(temporaryVector);
       averageOrientation.getQuaternion(temporaryQuaternion);
-      
+
       transformToParent.set(temporaryQuaternion, temporaryVector);
    }
 }
