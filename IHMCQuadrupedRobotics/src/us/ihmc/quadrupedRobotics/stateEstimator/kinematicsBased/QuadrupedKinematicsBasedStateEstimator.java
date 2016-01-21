@@ -21,8 +21,6 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStat
 
 public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEstimator
 {
-   private static final boolean USE_OTHER_COM_UPDATER = true;
-
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -31,8 +29,8 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
 
    private final JointStateUpdater jointStateUpdater;
    private final FootSwitchUpdater footSwitchUpdater;
-   private final CenterOfMassLinearAndRotationalStateUpdater comLinearAndRotationalStateUpdater;
-   private final AnotherCenterOfMassLinearAndRotationalStateUpdater anotherComLinearAndRotationalStateUpdater;
+   private final CenterOfMassLinearStateUpdater comLinearStateUpdater;
+   private final CenterOfMassImuBasedRotationalStateUpdater comRotationalStateUpdater;
 
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
 
@@ -48,9 +46,9 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    private boolean hasBeenInitialized = false;
 
    public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
-         FootSwitchUpdater footSwitchUpdater, JointStateUpdater jointStateUpdater, CenterOfMassLinearAndRotationalStateUpdater comLinearStateUpdater,
-         AnotherCenterOfMassLinearAndRotationalStateUpdater anotherComLinearAndRotationalStateUpdater, SDFFullRobotModel sdfFullRobotModelForViz,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         FootSwitchUpdater footSwitchUpdater, JointStateUpdater jointStateUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater,
+         CenterOfMassImuBasedRotationalStateUpdater comRotationalStateUpdater, SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
@@ -59,10 +57,9 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       this.footSwitchUpdater = footSwitchUpdater;
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
 
-      this.comLinearAndRotationalStateUpdater = comLinearStateUpdater;
-
-      this.anotherComLinearAndRotationalStateUpdater = anotherComLinearAndRotationalStateUpdater;
-
+      this.comLinearStateUpdater = comLinearStateUpdater;
+      this.comRotationalStateUpdater = comRotationalStateUpdater;
+      
       this.sdfFullRobotModelForViz = sdfFullRobotModelForViz;
 
       if (this.sdfFullRobotModelForViz != null)
@@ -105,10 +102,8 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
 
       jointStateUpdater.initialize();
       sdfFullRobotModelForViz.updateFrames();
-      if (USE_OTHER_COM_UPDATER)
-         anotherComLinearAndRotationalStateUpdater.initialize();
-      else
-         comLinearAndRotationalStateUpdater.initialize();
+      comRotationalStateUpdater.initialize();
+      comLinearStateUpdater.initialize();
    }
 
    @Override
@@ -125,11 +120,10 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
          updateFeetContactStatus();
 
          jointStateUpdater.updateJointState();
-
-         if (USE_OTHER_COM_UPDATER)
-            anotherComLinearAndRotationalStateUpdater.updateCenterOfMassLinearAndRotationalState(feetInContact, feetNotInContact);
-         else
-            comLinearAndRotationalStateUpdater.updateCenterOfMassLinearAndRotationalState(feetInContact, feetNotInContact);
+         
+         comRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
+         
+         comLinearStateUpdater.updateRootJointPositionAndLinearVelocity(feetInContact, feetNotInContact);
 
          sdfFullRobotModelForViz.updateFrames();
          updateViz();
