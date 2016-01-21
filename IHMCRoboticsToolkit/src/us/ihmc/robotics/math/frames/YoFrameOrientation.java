@@ -72,7 +72,7 @@ public class YoFrameOrientation extends ReferenceFrameHolder
 
    public void set(Matrix3d rotation)
    {
-      tempFrameOrientation.set(rotation);
+      tempFrameOrientation.setIncludingFrame(getReferenceFrame(), rotation);
       set(tempFrameOrientation);
    }
 
@@ -125,6 +125,36 @@ public class YoFrameOrientation extends ReferenceFrameHolder
    public void setAndMatchFrame(FrameOrientation orientation, boolean notifyListeners)
    {
       tempFrameOrientation.setIncludingFrame(orientation);
+      tempFrameOrientation.changeFrame(getReferenceFrame());
+      tempFrameOrientation.getYawPitchRoll(tempYawPitchRoll);
+      yaw.set(tempYawPitchRoll[0], notifyListeners);
+      pitch.set(tempYawPitchRoll[1], notifyListeners);
+      roll.set(tempYawPitchRoll[2], notifyListeners);
+   }
+
+   public void setAndMatchFrame(YoFrameQuaternion yoFrameQuaternion)
+   {
+      setAndMatchFrame(yoFrameQuaternion, true);
+   }
+
+   public void setAndMatchFrame(YoFrameQuaternion yoFrameQuaternion, boolean notifyListeners)
+   {
+      yoFrameQuaternion.getFrameOrientationIncludingFrame(tempFrameOrientation);
+      tempFrameOrientation.changeFrame(getReferenceFrame());
+      tempFrameOrientation.getYawPitchRoll(tempYawPitchRoll);
+      yaw.set(tempYawPitchRoll[0], notifyListeners);
+      pitch.set(tempYawPitchRoll[1], notifyListeners);
+      roll.set(tempYawPitchRoll[2], notifyListeners);
+   }
+
+   public void setAndMatchFrame(YoFrameOrientation yoFrameOrientation)
+   {
+      setAndMatchFrame(yoFrameOrientation, true);
+   }
+
+   public void setAndMatchFrame(YoFrameOrientation yoFrameOrientation, boolean notifyListeners)
+   {
+      yoFrameOrientation.getFrameOrientationIncludingFrame(tempFrameOrientation);
       tempFrameOrientation.changeFrame(getReferenceFrame());
       tempFrameOrientation.getYawPitchRoll(tempYawPitchRoll);
       yaw.set(tempYawPitchRoll[0], notifyListeners);
