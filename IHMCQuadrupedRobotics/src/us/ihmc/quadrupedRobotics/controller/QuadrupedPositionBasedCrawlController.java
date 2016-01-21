@@ -1657,6 +1657,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       {
          oneDofJoint.setUnderPositionControl(true);
       }
+
+//      stateEstimator.initialize();
+//      stateEstimator.enable();
       
       fullRobotModel.updateFrames();
       referenceFrames.updateFrames();
