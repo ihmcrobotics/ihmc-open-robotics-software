@@ -528,6 +528,13 @@ public class QuadrupedSupportPolygon implements Serializable
 
       return lowest;
    }
+   
+   public double getLowestFootStepZHeight()
+   {
+      RobotQuadrant lowestFootstepQuadrant = getLowestFootstep();
+      FramePoint lowestFootstep = getFootstep(lowestFootstepQuadrant);
+      return lowestFootstep.getZ();
+   }
 
    /**
     * getHighestFootstep
