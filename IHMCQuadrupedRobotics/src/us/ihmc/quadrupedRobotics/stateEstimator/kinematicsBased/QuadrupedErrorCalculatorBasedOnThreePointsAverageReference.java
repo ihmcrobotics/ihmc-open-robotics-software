@@ -14,7 +14,8 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReference
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /*
- * This class does not work
+ * This class does not work, there is a problem in the way the position error is calculated.
+ * To fix it, the error should be calculated between the reference and compared referenceFrame and expressed in a third reference frame.
  */
 
 public class QuadrupedErrorCalculatorBasedOnThreePointsAverageReference
