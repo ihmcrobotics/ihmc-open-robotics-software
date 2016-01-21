@@ -96,6 +96,16 @@ public class TwistCalculator
       return rootBody;
    }
 
+   public void changeTwistBaseFrameNoRelativeTwist(RigidBody body, ReferenceFrame baseFrame)
+   {
+      twists.get(body).changeBaseFrameNoRelativeTwist(baseFrame);
+   }
+   
+   public void changeTwistchangeBodyFrameNoRelativeTwist(RigidBody body, ReferenceFrame bodyFrame)
+   {
+      twists.get(body).changeBodyFrameNoRelativeTwist(bodyFrame);
+   }
+   
    private void populateMapsAndLists(ReferenceFrame inertialFrame)
    {
       addTwist(inertialFrame, rootBody);
