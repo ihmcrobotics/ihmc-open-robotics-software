@@ -4,6 +4,19 @@ import org.apache.commons.lang3.StringUtils;
 
 public class YoFrameVariableNameTools
 {
+   public static String getCommonSuffix(String... strs)
+   {
+      if (strs == null || strs.length == 0)
+      {
+         return "";
+      }
+
+      String[] reversedStrs = new String[strs.length];
+      for (int i = 0; i < strs.length; i++)
+         reversedStrs[i] = StringUtils.reverse(strs[i]);
+      return StringUtils.reverse(StringUtils.getCommonPrefix(reversedStrs));
+   }
+   
    public static String createXName(String namePrefix, String nameSuffix)
    {
       return createName(namePrefix, "x", nameSuffix);
