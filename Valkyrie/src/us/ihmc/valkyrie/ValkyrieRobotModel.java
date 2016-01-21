@@ -1,5 +1,7 @@
 package us.ihmc.valkyrie;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -108,21 +110,50 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final JaxbSDFLoader loader;
 
    private boolean enableJointDamping = true;
+   
+   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless) 
+   {
+	   this(target,headless, "DEFAULT");
+   }
 
-   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless)
+   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model)
    {
       this.target = target;
       jointMap = new ValkyrieJointMap();
       physicalProperties = new ValkyriePhysicalProperties();
       sensorInformation = new ValkyrieSensorInformation(target);
-
-      if (headless)
+      InputStream sdf = null;
+      
+      if(model.equalsIgnoreCase("DEFAULT"))
       {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[] {}, getSdfFileAsStream(), true, this);
+    	  System.out.println("Loading robot model from: '"+getSdfFile()+"'");
+    	  sdf=getSdfFileAsStream();    	  
       }
       else
       {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false, this);
+    	  System.out.println("Loading robot model from: '"+model+"'");
+    	  sdf=getClass().getClassLoader().getResourceAsStream(model);
+    	  if(sdf==null)
+    	  {
+    		  try
+    		  {
+    			  sdf=new FileInputStream(model);
+    		  } 
+    		  catch (FileNotFoundException e) 
+    		  {
+    			  System.err.println("failed to load sdf file - file not found");
+    		  }
+    	  }
+    	  
+      }
+
+      if (headless)
+      {
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[] {}, sdf, true, this);
+      }
+      else
+      {
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), sdf, false, this);
       }
 
       for (String forceSensorNames : ValkyrieSensorInformation.forceSensorNames)

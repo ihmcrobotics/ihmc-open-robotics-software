@@ -31,6 +31,8 @@ public abstract class QuadrupedRobotParameters
 
    public abstract QuadrupedPositionBasedCrawlControllerParameters getQuadrupedPositionBasedCrawlControllerParameters();
    
+   public abstract QuadrupedSensorInformation getQuadrupedSensorInformation();
+
    public QuadrupedJointLimits getQuadrupedJointLimits()
    {
       return jointLimits;

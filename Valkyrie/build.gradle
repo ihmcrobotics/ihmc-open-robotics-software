@@ -217,28 +217,35 @@ task deploy(dependsOn: ['jar']) {
 	}
 }
 
+def getCheckedOutGitCommitHash() {
+    def gitFolder = "$projectDir/../.git/"
+    def takeFromHash = 12
+    /*
+     * '.git/HEAD' contains either
+     *      in case of detached head: the currently checked out commit hash
+     *      otherwise: a reference to a file containing the current commit hash
+     */
+    def head = new File(gitFolder + "HEAD").text.split(":") // .git/HEAD
+    def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
+    // def isRef = head.length > 1     // ref: refs/heads/master
 
-/*
-task svnversion {
-  description 'Get SVN revision number.'
-  new ByteArrayOutputStream().withStream { os ->
-    def result = exec {
-      executable = 'svnversion'
-      standardOutput = os
-    }
-    def tmp=os.toString()
-    ext.revid = tmp.substring(0,tmp.lastIndexOf("M"))
-  }
+    if(isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
+
+    def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
+    refHead.text.trim().take takeFromHash
 }
 
+
 task createRosJar(type: Jar) {
-	manifest {
+    version = getCheckedOutGitCommitHash()
+    manifest 
+    {
         attributes 'Implementation-Title': 'ROSAPI',  
-        	'Implementation-Version': svnversion.revid,
-        	'Main-Class': 'us.ihmc.valkyrie.ValkyrieIPABSimulator'
+        'Implementation-Version': version,
+        'Main-Class': 'us.ihmc.valkyrie.OpenHumanoidsSimulator'
     }
-    version = svnversion.revid
-    baseName = 'ValkyrieIPABSimulator'
+    
+    baseName = 'OpenHumanoidsSimulator'
     from ( { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } } ) {
       exclude "META-INF/*.SF"
       exclude "META-INF/*.DSA"
@@ -247,7 +254,7 @@ task createRosJar(type: Jar) {
     }
 }
 
-task rosJar(type: Copy) {
+task OH(type: Copy, dependsOn: [createRosJar]) {
     from createRosJar
     into "lib/"
-}*/
+}

@@ -1,5 +1,9 @@
 package us.ihmc.steppr.logProcessor;
 
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ANGULAR_VELOCITY;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_LINEAR_ACCELERATION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_VELOCITY;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -45,6 +49,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -102,6 +107,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
          @Override
          public void configureSensorProcessing(SensorProcessing sensorProcessing)
          {
+            DoubleYoVariable maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", 0.1);
             double defaultJointStiffness = Double.POSITIVE_INFINITY;
             Map<String, Double> jointSpecificStiffness = new HashMap<>();
 
@@ -123,14 +129,14 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
             DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("log_angularVelocityAlphaFilter", 16.0);
             DoubleYoVariable linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("log_linearAccelerationAlphaFilter", 67.0);
 
-            sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, false);
+            sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, maxDeflection, false);
 
             sensorProcessing.computeJointVelocityFromFiniteDifference(jointVelocityAlphaFilter, true); //vizonly
-            sensorProcessing.addJointVelocityAlphaFilter(jointVelocityAlphaFilter, false);
+            sensorProcessing.addSensorAlphaFilter(jointVelocityAlphaFilter, false, JOINT_VELOCITY);
             sensorProcessing.computeJointAccelerationFromFiniteDifference(jointVelocityAlphaFilter, false);
 
-            sensorProcessing.addIMUAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
-            sensorProcessing.addIMULinearAccelerationAlphaFilter(linearAccelerationAlphaFilter, false);
+            sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, IMU_ANGULAR_VELOCITY);
+            sensorProcessing.addSensorAlphaFilter(linearAccelerationAlphaFilter, false, IMU_LINEAR_ACCELERATION);
          }
       };
 

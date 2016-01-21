@@ -2,21 +2,30 @@ package us.ihmc.robotics.math.frames;
 
 import javax.vecmath.*;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.FormattingTools;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
 public abstract class YoFrameTuple<T extends FrameTuple<?>> extends ReferenceFrameHolder
 {
+   private final String namePrefix;
+   private final String nameSuffix;
+
    private final DoubleYoVariable x, y, z; // This is where the data is stored. All operations must act on these numbers.
    private final T frameTuple; // This is only for assistance. The data is stored in the YoVariables, not in here!
    private final ReferenceFrame referenceFrame; // Redundant but allows to make sure the frame isn't changed
 
    public YoFrameTuple(DoubleYoVariable xVariable, DoubleYoVariable yVariable, DoubleYoVariable zVariable, ReferenceFrame referenceFrame)
    {
+      this.namePrefix = StringUtils.getCommonPrefix(xVariable.getName(), yVariable.getName(), zVariable.getName());
+      this.nameSuffix = FormattingTools.getCommonSuffix(xVariable.getName(), yVariable.getName(), zVariable.getName());
+
       this.x = xVariable;
       this.y = yVariable;
       this.z = zVariable;
@@ -26,6 +35,9 @@ public abstract class YoFrameTuple<T extends FrameTuple<?>> extends ReferenceFra
 
    public YoFrameTuple(String namePrefix, String nameSuffix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
+      this.namePrefix = namePrefix;
+      this.nameSuffix = nameSuffix;
+
       x = new DoubleYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry);
       y = new DoubleYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry);
       z = new DoubleYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry);
@@ -557,5 +569,15 @@ public abstract class YoFrameTuple<T extends FrameTuple<?>> extends ReferenceFra
    {
       putYoValuesIntoFrameTuple();
       return frameTuple.toString();
+   }
+
+   public String getNamePrefix()
+   {
+      return namePrefix;
+   }
+
+   public String getNameSuffix()
+   {
+      return nameSuffix;
    }
 }

@@ -33,6 +33,7 @@ import org.jmonkeyengine.scene.plugins.ogre.MaterialLoader;
 import com.google.common.collect.HashBiMap;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.jme3.asset.AssetConfig;
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioContext;
 import com.jme3.input.InputManager;
@@ -42,17 +43,22 @@ import com.jme3.material.TechniqueDef;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.profile.AppStep;
+import com.jme3.renderer.opengl.GLRenderer;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
+import com.jme3.system.JmeSystem;
 import com.jme3.system.NativeLibraryLoader;
 import com.jme3.system.awt.AwtPanelsContext;
+import com.jme3.system.lwjgl.LwjglContext;
 import com.jme3.texture.plugins.AWTLoader;
 import com.jme3.util.SkyFactory;
 
 import jme3dae.ColladaLoader;
+import jme3dae.collada14.ColladaDocumentV14;
+import jme3dae.materials.FXBumpMaterialGenerator;
 import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
@@ -89,6 +95,20 @@ import us.ihmc.tools.time.Timer;
 
 public class JMERenderer extends SimpleApplication implements Graphics3DAdapter, PBOAwtPanelListener
 {
+   /**
+    * Some bullshit because JME is flooding the JAVA logger and has no option to deactivate it rather than changing the logger level.
+    * It is not desirable to change the level the root logger though, it'll prevent other loggers to display useful information.
+    * The annoyance here is to find all JME loggers to keep a reference to each of them so any changes will remain permanent.
+    */
+   private final Logger[] jmeLoggers = new Logger[]{
+         Logger.getLogger(FXBumpMaterialGenerator.class.getName()),
+         Logger.getLogger(ColladaDocumentV14.class.getName()),
+         Logger.getLogger(GLRenderer.class.getName()),
+         Logger.getLogger(AssetConfig.class.getName()),
+         Logger.getLogger(JmeSystem.class.getName()),
+         Logger.getLogger(LwjglContext.class.getName())
+   };
+
    public enum RenderType {CANVAS, AWTPANELS}
 
    public final static boolean USE_PBO = true;
@@ -144,7 +164,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       super();
       this.renderType = renderType;
-      Logger.getLogger("").setLevel(Level.SEVERE);
+
+      changeJMELoggerLevelToSevere();
 
       if (renderType == RenderType.AWTPANELS)
       {
@@ -168,7 +189,13 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       }
       
    }
-   
+
+   private void changeJMELoggerLevelToSevere()
+   {
+      for (Logger jmeLogger : jmeLoggers)
+         jmeLogger.setLevel(Level.SEVERE);
+   }
+
    private void notifyRepaint(int rendersToPerform) {
       synchronized (repaintNotifier) {
          // Multiply by 2 because of double buffering - we want to repaint both buffers
