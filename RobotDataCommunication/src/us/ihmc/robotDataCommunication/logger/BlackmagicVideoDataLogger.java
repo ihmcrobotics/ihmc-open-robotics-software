@@ -28,7 +28,7 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
 
    public BlackmagicVideoDataLogger(File logPath, LogProperties logProperties, VideoSettings settings, YoVariableLoggerOptions options) throws IOException
    {
-      super(logPath, logProperties, settings.getDescription(), settings.isInterlaced());
+      super(logPath, logProperties, settings.getDescription());
       decklink = settings.getDevice();
       quality = 0.75;
 
@@ -84,7 +84,10 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
       if(capture != null)
       {
          long hardwareTimestamp = capture.getHardwareTime();
-         circularLongMap.insert(hardwareTimestamp, newTimestamp);
+         if(hardwareTimestamp != -1)
+         {
+            circularLongMap.insert(hardwareTimestamp, newTimestamp);
+         }
       }
    }
 
@@ -115,18 +118,20 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
    @Override
    public void receivedFrameAtTime(long hardwareTime, long pts)
    {
-      if(frame % 60 == 0)
-      {
-         System.out.println("[Decklink " + decklink + "] Received frame " + frame + " at time " + hardwareTime + "ns, delay: " + TimeTools.nanoSecondstoSeconds(circularLongMap.getLatestValue() - hardwareTime) + "s. pts: " + pts);
-      }
       
       if(circularLongMap.size() > 0)
-      {  
+      {
+         if(frame % 60 == 0)
+         {
+            System.out.println("[Decklink " + decklink + "] Received frame " + frame + " at time " + hardwareTime + "ns, delay: " + TimeTools.nanoSecondstoSeconds(circularLongMap.getLatestKey() - hardwareTime) + "s. pts: " + pts);
+         }
+
+         
          long robotTimestamp = circularLongMap.getValue(true, hardwareTime);
          
          try
          {
-            timestampWriter.write(robotTimestamp + " " + pts);
+            timestampWriter.write(robotTimestamp + " " + pts + "\n");
          }
          catch (IOException e)
          {
