@@ -10,15 +10,15 @@ dependencies {
 	compile group: 'org.georegression' , name: 'georegression', version: '0.8'
 	compile group: 'org.ddogleg' , name: 'ddogleg', version: '0.7'
 	compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
-   compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
-   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-   compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
-   compile group: 'jgraph', name: 'jgraph', version: '5.13.0.0'
+    compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
+    compile group: 'jgraph', name: 'jgraph', version: '5.13.0.0'
 
 	compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.23'
-   compile group: 'us.ihmc', name: 'IHMCHierachicalKinematics', version: '1.0'
+    compile group: 'us.ihmc', name: 'IHMCHierachicalKinematics', version: '1.0'
 
-	compile project(':IHMCJavaToolkit')
+	// NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 
-   testCompile project(':IHMCUnitTesting')
+    testCompile project(':IHMCUnitTesting')
 }

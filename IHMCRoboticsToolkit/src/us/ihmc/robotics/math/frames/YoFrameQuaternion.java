@@ -20,7 +20,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.FormattingTools;
 
 public class YoFrameQuaternion extends ReferenceFrameHolder
 {
@@ -54,7 +53,7 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
    public YoFrameQuaternion(DoubleYoVariable qx, DoubleYoVariable qy, DoubleYoVariable qz, DoubleYoVariable qs, ReferenceFrame referenceFrame)
    {
       this.namePrefix = StringUtils.getCommonPrefix(qx.getName(), qy.getName(), qz.getName(), qs.getName());
-      this.nameSuffix = FormattingTools.getCommonSuffix(qx.getName(), qy.getName(), qz.getName(), qs.getName());
+      this.nameSuffix = YoFrameVariableNameTools.getCommonSuffix(qx.getName(), qy.getName(), qz.getName(), qs.getName());
 
       this.qx = qx;
       this.qy = qy;
@@ -173,16 +172,21 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
    {
       checkReferenceFrameMatch(yoFrameQuaternion1);
       checkReferenceFrameMatch(yoFrameQuaternion2);
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
 
       yoFrameQuaternion1.putYoValuesIntoQuat4d();
       yoFrameQuaternion2.putYoValuesIntoQuat4d();
 
-      quaternion.interpolate(yoFrameQuaternion1.quaternion, yoFrameQuaternion2.quaternion, alpha);
+      interpolate(yoFrameQuaternion1.quaternion, yoFrameQuaternion2.quaternion, alpha);
+   }
+
+   public void interpolate(Quat4d quaternion1, Quat4d quaternion2, double alpha)
+   {
+      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+
+      quaternion.interpolate(quaternion1, quaternion2, alpha); 
       checkQuaternionIsUnitMagnitude(quaternion);
       getYoValuesFromQuat4d();
    }
-
    public void checkQuaternionIsUnitMagnitude()
    {
       putYoValuesIntoQuat4d();

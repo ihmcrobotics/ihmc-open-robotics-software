@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class CircularLongmapTest
+public class CircularLongMapTest
 {
    @Test
    public void testFillingMap()
@@ -14,6 +14,7 @@ public class CircularLongmapTest
       for (int i = 0; i < 100; i++)
       {
          map.insert(i, i * 10);
+         assertEquals(i * 10, map.getLatestValue());
       }
 
 
@@ -21,11 +22,13 @@ public class CircularLongmapTest
       {
          long value = map.getValue(false, i);
          assertEquals(i * 10, value);
+
       }
 
       for (int i = 100; i < 150; i++)
       {
          map.insert(i, i * 10);
+         assertEquals(i * 10, map.getLatestValue());
       }
       for (int i = 50; i < 150; i++)
       {
@@ -43,7 +46,7 @@ public class CircularLongmapTest
       {
          map.insert(i * 10, i * 50);
       }
-      map.print();
+
       for (int i = 0; i < 100; i++)
       {
          long value = map.getValue(true, i * 10 + 6);
@@ -54,7 +57,7 @@ public class CircularLongmapTest
       {
          map.insert(i * 10, i * 50);
       }
-      map.print();
+
       for (int i = 50; i < 150; i++)
       {
          long value = map.getValue(true, i * 10 + 2);
