@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -42,7 +43,10 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
 
    private final Point3d comPoint = new Point3d();
    private final YoFramePoint actualCenterOfMassPosition = new YoFramePoint("actualCenterOfMass", ReferenceFrame.getWorldFrame(), registry);
-   private final YoGraphicPosition actualCenterOfMassViz;
+   private final YoGraphicPosition actualCenterOfMassViz = new YoGraphicPosition("actualCenterOfMass", actualCenterOfMassPosition, 0.04, YoAppearance.DeepPink(), GraphicType.BALL_WITH_CROSS);
+   
+   private final YoFramePoint cop = new YoFramePoint("cop", ReferenceFrame.getWorldFrame(), registry);
+   private final YoGraphicPosition copViz = new YoGraphicPosition("copViz", cop, 0.01, YoAppearance.Red());
    
    public SimulatedOutputWriterWithControlModeSelection(SDFFullRobotModel sdfFullRobotModel, SDFRobot robot, QuadrupedRobotParameters robotParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -55,8 +59,9 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
       
       createPDControllers(sdfFullRobotModel, robotParameters, oneDegreeOfFreedomJoints);
       
-      actualCenterOfMassViz = new YoGraphicPosition("actualCenterOfMass", actualCenterOfMassPosition, 0.04, YoAppearance.DeepPink(), GraphicType.BALL_WITH_CROSS);
       yoGraphicsListRegistry.registerYoGraphic("actualCenterOfMassViz", actualCenterOfMassViz);
+      yoGraphicsListRegistry.registerArtifact("centerOfPressure", copViz.createArtifact());
+      
       actualCenterOfMassViz.hideGraphicObject();
       parentRegistry.addChild(registry);
    }
@@ -77,6 +82,10 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
       outputWriter.setFullRobotModel(sdfFullRobotModel);
    }
    
+   private final Point3d copPoint = new Point3d();
+   private final Vector3d copForce = new Vector3d();
+   private final Vector3d copMoment = new Vector3d();
+   
    @Override
    public void write()
    {
@@ -91,6 +100,8 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
       outputWriter.write();
       
       sdfRobot.computeCenterOfMass(comPoint);
+      sdfRobot.computeCenterOfPressure(copPoint, copForce, copMoment);
+      cop.set(copPoint);
       actualCenterOfMassPosition.set(comPoint);
       actualCenterOfMassViz.update();
    }
