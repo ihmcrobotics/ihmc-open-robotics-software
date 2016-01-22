@@ -116,7 +116,7 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
    }
 
    @Override
-   public void receivedFrameAtTime(long hardwareTime, long pts)
+   public void receivedFrameAtTime(long hardwareTime, long pts, long timeScaleNumerator, long timeScaleDenumerator)
    {
       
       if(circularLongMap.size() > 0)
@@ -131,15 +131,20 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
          
          try
          {
+            if(frame == 0)
+            {
+               timestampWriter.write(timeScaleNumerator + "\n");
+               timestampWriter.write(timeScaleDenumerator + "\n");
+            }
             timestampWriter.write(robotTimestamp + " " + pts + "\n");
          }
          catch (IOException e)
          {
             e.printStackTrace();
          }
+         ++frame;
       }
       
-      ++frame;
    }
 
 
