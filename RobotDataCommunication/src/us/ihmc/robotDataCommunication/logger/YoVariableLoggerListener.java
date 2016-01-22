@@ -55,7 +55,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private final LogPropertiesWriter logProperties;
    private ArrayList<VideoDataLoggerInterface> videoDataLoggers = new ArrayList<>();
 
-   private final ArrayList<VideoSettings> cameras = new ArrayList<>();
+   private final ArrayList<Integer> cameras = new ArrayList<>();
    private final InetSocketAddress videoStreamAddress;
 
    private boolean clearingLog = false;
@@ -86,12 +86,11 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          try
          {
             FileInputStream configuration = new FileInputStream(configurationFile);
-            List<VideoSettings> cameraSettings = VideoSettings.loadCameraSettings(configuration);
             
             System.out.println("Cameras: " + Arrays.toString(request.getCameras()));
             for (int camera : request.getCameras())
             {
-               cameras.add(cameraSettings.get(camera));
+               cameras.add(camera);
             }
             
             if (request.hasVideoStream())
@@ -372,7 +371,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
       if (!options.getDisableVideo())
       {
-         for (VideoSettings camera : cameras)
+         for (int camera : cameras)
          {
             try
             {

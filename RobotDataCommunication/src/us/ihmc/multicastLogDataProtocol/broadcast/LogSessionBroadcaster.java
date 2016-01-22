@@ -19,6 +19,9 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 
+import gnu.trove.list.array.TByteArrayList;
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.tools.io.files.FileTools;
@@ -52,6 +55,8 @@ public class LogSessionBroadcaster extends Thread
    private MembershipKey receiveKey;
    private final Selector selector;
    private SelectionKey key;
+   
+   private final byte[] cameras;
 
    public LogSessionBroadcaster(InetSocketAddress controlAddress, InetAddress dataAddress, Class<?> clazz, LogSettings logSettings)
    {
@@ -78,6 +83,31 @@ public class LogSessionBroadcaster extends Thread
          this.announceGroup = InetAddress.getByAddress(announceGroupAddress);
          this.sendAddress = new InetSocketAddress(announceGroup, LogDataProtocolSettings.LOG_DATA_ANNOUNCE_PORT);
          this.selector = Selector.open();
+         
+         String cameraString = NetworkParameters.getHost(NetworkParameterKeys.loggedCameras);
+         
+         
+         String[] split = cameraString.split(",");
+         cameras = new byte[split.length];
+         for(int i = 0; i < split.length; i++)
+         {
+            try
+            {
+               byte camera = Byte.parseByte(split[i].trim());
+               if(camera >= 0 && camera <= 127)
+               {
+                  cameras[i] = camera;
+               }
+               else
+               {
+                  throw new NumberFormatException();
+               }
+            }
+            catch(NumberFormatException e)
+            {
+               throw new RuntimeException("Invalid camera id: " + split[i] +". Valid camera ids are 0-127");
+            }
+         }
       }
       catch (IOException e)
       {
@@ -103,7 +133,7 @@ public class LogSessionBroadcaster extends Thread
          canIHazRequest.setVideoStream(logSettings.getVideoStream().getAddress());
          canIHazRequest.setVideoPort(LogDataProtocolSettings.UI_DATA_PORT);
       }
-      canIHazRequest.setCameras(logSettings.getCameras());
+      canIHazRequest.setCameras(cameras);
       canIHazRequest.setLog(logSettings.isLog());
       canIHazRequest.setName(className);
 
@@ -177,7 +207,7 @@ public class LogSessionBroadcaster extends Thread
          announcement.setVideoStream(logSettings.getVideoStream().getAddress());
          announcement.setVideoPort(LogDataProtocolSettings.UI_ANNOUNCE_PORT);
       }
-      announcement.setCameras(logSettings.getCameras());
+      announcement.setCameras(cameras);
       announcement.setLog(logSettings.isLog());
       announcement.setName(className);
       announcement.createRequest(sendBuffer);
