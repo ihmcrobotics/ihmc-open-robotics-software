@@ -120,9 +120,15 @@ public class PassiveRevoluteJoint extends RevoluteJoint
       throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
 
+   @Override
    public void setIntegrateDesiredAccelerations(boolean integrateDesiredAccelerations)
    {
       throw new RuntimeException("Cannot modify the acceleration of a passive joint");
    }
 
+   @Override
+   public boolean isPassiveJoint()
+   {
+      return true;
+   }
 }

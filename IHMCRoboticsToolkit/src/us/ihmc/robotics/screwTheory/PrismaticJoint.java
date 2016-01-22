@@ -47,5 +47,11 @@ public class PrismaticJoint extends OneDoFJoint
 
       setMotionSubspace(unitSuccessorTwist);
    }
+   
+   @Override
+   public boolean isPassiveJoint()
+   {
+      return false;
+   }
 
 }
