@@ -16,6 +16,9 @@ apply from: 'gradleScripts/util.gradle'
 
 sourceCompatibility = 1.7
 version = "${rootProject.version}"
+project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
+project.ext.licenseName = "GPLv3"
+project.ext.bintrayLicenseName = "GPL-3.0"
 
 setupDefaultDirectoryStructure()
 
@@ -30,18 +33,18 @@ mainClassName = "us.ihmc.atlas.AtlasROSAPINetworkProcessor"
 applicationDefaultJvmArgs = ["-Xmx4g"]
 
 jar {
-   manifest {
-      attributes(
-      "Created-By": "IHMC Gradle Build Script",
-      "Implementation-Title": project.name,
-      "Implementation-Version": project.version,
-      "Implementation-Vendor": "IHMC",
-      
-      "Bundle-Name": project.name,
-      "Bundle-Version": project.version,
-      "Bundle-License": "http://gnu.org/licenses/gpl-3.0.txt",
-      "Bundle-Vendor": "IHMC")
-   }
+    manifest {
+        attributes(
+                "Created-By": "IHMC Gradle Build Script",
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "IHMC",
+
+                "Bundle-Name": project.name,
+                "Bundle-Version": project.version,
+                "Bundle-License": "${project.ext.licenseURL}",
+                "Bundle-Vendor": "IHMC")
+    }
 }
 
 startScripts {
@@ -54,8 +57,8 @@ startScripts {
 
         def simWindowsScriptDemo01 = file(outputDir.canonicalPath + "/${applicationName}SimulatorDemo01.bat")
         simWindowsScriptDemo01.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasDemo01ROSAPISimulator")
-    	
-    	def simUnixScriptFinals = file(outputDir.canonicalPath + "/${applicationName}SimulatorFinals")
+
+        def simUnixScriptFinals = file(outputDir.canonicalPath + "/${applicationName}SimulatorFinals")
         simUnixScriptFinals.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasFinalsROSAPISimulator")
         simUnixScriptFinals.setExecutable(true)
 
@@ -79,7 +82,7 @@ startScripts {
         def simUnixScriptGazebo = file(outputDir.canonicalPath + "/IHMCAtlasGazeboController")
         simUnixScriptGazebo.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasGazeboController").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.atlas.gazebo.AtlasGazeboControllerFactory")
         simUnixScriptGazebo.setExecutable(true)
-    	
+
     }
 }
 
@@ -94,12 +97,11 @@ task awsDeploySim(type: S3Sync, dependsOn: distTar) {
 
     from "${buildDir}/distributions"
     into "ihmc/api_releases"
-    
+
     keepFiles true
 
-    doFirst{
-        if(!project.hasProperty("awsAccessKey") || !project.hasProperty("awsSecretKey"))
-        {
+    doFirst {
+        if (!project.hasProperty("awsAccessKey") || !project.hasProperty("awsSecretKey")) {
             throw new TaskExecutionException(tasks.tasks.awsDeploySim, new StopActionException("AWS credentials not set, you should store them safely and locally in your user's gradle.properties (defaults to \$HOME/.gradle/gradle.properties)"));
         }
 
@@ -112,14 +114,12 @@ task awsDeploySim(type: S3Sync, dependsOn: distTar) {
     }
 }
 
-task gfeDevCompile(dependsOn:distTar) << {
-    if(!project.hasProperty("ihmcRosPackageLocation"))
-    {
+task gfeDevCompile(dependsOn: distTar) << {
+    if (!project.hasProperty("ihmcRosPackageLocation")) {
         throw new TaskExecutionException(tasks.gfeDevCompile, new StopActionException("gfeDevCompile requires the project property ihmcRosPackageLocation to be set. Check your gradle.properties or set \"-PihmcRosPackageLocation=<absolute path>\" from the command line."))
     }
 
-    if(ihmcRosPackageLocation.startsWith("~"))
-    {
+    if (ihmcRosPackageLocation.startsWith("~")) {
         ihmcRosPackageLocation = ihmcRosPackageLocation.replace("~", System.getProperty("user.home"))
     }
 
@@ -130,8 +130,7 @@ task gfeDevCompile(dependsOn:distTar) << {
     java.nio.file.Path ihmcSimLocation = ihmcRosPackageLocationPath.resolve("ihmc_atlas")
     java.nio.file.Path archiveLocation = Paths.get(project.buildDir.absolutePath, "distributions", buildName + ".tar")
 
-    if(!Files.exists(ihmcMsgsLocation))
-    {
+    if (!Files.exists(ihmcMsgsLocation)) {
         throw new TaskExecutionException(tasks.gfeDevCompile, new StopActionException("ihmc_msgs not in ihmc_ros directory. Check out ihmc_ros from BitBucket."))
     }
 
