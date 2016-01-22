@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Properties;
 
+import javax.sql.rowset.spi.SyncResolver;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -27,14 +28,18 @@ import javax.swing.border.EtchedBorder;
 public class NetworkParametersCreator
 {
    private final JFrame frame = new JFrame();
+   
+   private boolean waiting = true;
+   private final Object lock = new Object();
 
    private final EnumMap<NetworkParameterKeys, JTextField> entryBoxes = new EnumMap<>(NetworkParameterKeys.class);
 
-   private final JTextField exportName;
-   private final JComboBox<NetworkParameterKeys> destination;
+//   private final JTextField exportName;
+//   private final JComboBox<NetworkParameterKeys> destination;
 
    public NetworkParametersCreator()
    {
+      File defaultFile = new File(NetworkParameters.defaultParameterFile);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.setTitle(getClass().getSimpleName());
       Container content = frame.getContentPane();
@@ -47,6 +52,7 @@ public class NetworkParametersCreator
          panel.setBorder(BorderFactory.createTitledBorder(key.toString() + (key.isRequired() ? "*" : "")));
          JLabel description = new JLabel(key.getDescription());
          JTextField host = new JTextField(64);
+         host.setText(key.getDefaultValue());
          panel.add(description);
          panel.add(host);
 
@@ -64,34 +70,78 @@ public class NetworkParametersCreator
       savePanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 
       JButton save = new JButton("Save");
-      save.addActionListener(new SaveActionListener());
+      save.addActionListener(new SaveActionListener(defaultFile, true));
+      save.setToolTipText("Save parameters to default location (" + defaultFile.getAbsolutePath() + ")");
       savePanel.add(save);
 
-      JButton load = new JButton("Load");
+      JButton load = new JButton("Import...");
       load.addActionListener(new LoadActionListener());
+      load.setToolTipText("Import parameters from file");
       savePanel.add(load);
 
+      JButton export = new JButton("Export...");
+      export.addActionListener(new SaveActionListener(null, false));
+      export.setToolTipText("Export parameters to file");
+      savePanel.add(export);
+
+      JButton quit = new JButton("Quit without saving");
+      quit.addActionListener(new ActionListener()
+      {
+         
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            synchronized(lock)
+            {
+               waiting = false;
+               lock.notifyAll();
+            }
+         }
+      });
+      savePanel.add(quit);
+      
       content.add(savePanel);
 
-      JPanel exportPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-      exportPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-
-      JButton export = new JButton("Export to: ");
-      export.addActionListener(new ExportActionListener());
-      destination = new JComboBox<>(NetworkParameterKeys.values());
-      JLabel nameLabel = new JLabel(" Path:");
-      exportName = new JTextField(NetworkParameters.defaultParameterFile, 32);
-
-      exportPanel.add(export);
-      exportPanel.add(destination);
-      exportPanel.add(nameLabel);
-      exportPanel.add(exportName);
-
-      content.add(exportPanel);
-
+//      JPanel exportPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+//      exportPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+//
+//      JButton export = new JButton("Export to: ");
+//      export.addActionListener(new ExportActionListener());
+//      destination = new JComboBox<>(NetworkParameterKeys.values());
+//      JLabel nameLabel = new JLabel(" Path:");
+//      exportName = new JTextField(NetworkParameters.defaultParameterFile, 32);
+//
+//      exportPanel.add(export);
+//      exportPanel.add(destination);
+//      exportPanel.add(nameLabel);
+//      exportPanel.add(exportName);
+//
+//      content.add(exportPanel);
+      
+      if(defaultFile.exists())
+      {
+         load(defaultFile);
+      }
       frame.pack();
       frame.setLocationByPlatform(true);
       frame.setVisible(true);
+      System.out.println("WAITING");
+      synchronized (lock)
+      {
+         while (waiting)
+         {
+            try
+            {
+               lock.wait();
+            }
+            catch (InterruptedException e)
+            {
+            }
+         }
+      }
+      
+      frame.setVisible(false);
+      frame.dispose();
    }
 
    private boolean isValid()
@@ -135,7 +185,7 @@ public class NetworkParametersCreator
       }
    }
 
-   private void save(File file)
+   private void save(File file, boolean exit)
    {
       try
       {
@@ -150,6 +200,14 @@ public class NetworkParametersCreator
          }
          properties.store(out, "Generated by " + getClass().getCanonicalName());
          out.close();
+         if(exit)
+         {
+            synchronized(lock)
+            {
+               waiting = false;
+               lock.notifyAll();
+            }
+         }
       }
       catch (IOException e)
       {
@@ -157,39 +215,39 @@ public class NetworkParametersCreator
       }
    }
 
-   private void export(String host, String path)
-   {
-      JOptionPane.showMessageDialog(frame, "TODO: Implement exporting to " + host + ":" + path, "Implement me", JOptionPane.ERROR_MESSAGE);
-
-   }
-
-   private class ExportActionListener implements ActionListener
-   {
-
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-         if (isValid())
-         {
-            NetworkParameterKeys key = (NetworkParameterKeys) destination.getSelectedItem();
-            if (entryBoxes.get(key).getText().length() == 0)
-            {
-               JOptionPane.showMessageDialog(frame, key + " is not set.", "Invalid host", JOptionPane.ERROR_MESSAGE);
-               return;
-            }
-
-            if (exportName.getText().length() == 0)
-            {
-               JOptionPane.showMessageDialog(frame, "No path given", "Invalid entry", JOptionPane.ERROR_MESSAGE);
-               return;
-            }
-
-            export(entryBoxes.get(key).getText(), exportName.getText());
-         }
-
-      }
-
-   }
+//   private void export(String host, String path)
+//   {
+//      JOptionPane.showMessageDialog(frame, "TODO: Implement exporting to " + host + ":" + path, "Implement me", JOptionPane.ERROR_MESSAGE);
+//
+//   }
+//
+//   private class ExportActionListener implements ActionListener
+//   {
+//
+//      @Override
+//      public void actionPerformed(ActionEvent e)
+//      {
+//         if (isValid())
+//         {
+//            NetworkParameterKeys key = (NetworkParameterKeys) destination.getSelectedItem();
+//            if (entryBoxes.get(key).getText().length() == 0)
+//            {
+//               JOptionPane.showMessageDialog(frame, key + " is not set.", "Invalid host", JOptionPane.ERROR_MESSAGE);
+//               return;
+//            }
+//
+//            if (exportName.getText().length() == 0)
+//            {
+//               JOptionPane.showMessageDialog(frame, "No path given", "Invalid entry", JOptionPane.ERROR_MESSAGE);
+//               return;
+//            }
+//
+//            export(entryBoxes.get(key).getText(), exportName.getText());
+//         }
+//
+//      }
+//
+//   }
 
    private class LoadActionListener implements ActionListener
    {
@@ -215,25 +273,40 @@ public class NetworkParametersCreator
 
    private class SaveActionListener implements ActionListener
    {
+      
+      private final File target;
+      private final boolean exit;
+      public SaveActionListener(File target, boolean exit)
+      {
+         this.target = target;      
+         this.exit = exit;
+      }
 
       @Override
       public void actionPerformed(ActionEvent e)
       {
          if (isValid())
          {
-            FileDialog dialog = new FileDialog(frame, "Choose file", FileDialog.SAVE);
-            dialog.setFilenameFilter(new INIFileFilter());
-            dialog.setFile(NetworkParameters.defaultParameterFile);
-            dialog.setVisible(true);
-
-            String filename = dialog.getFile();
-            if (filename == null)
+            if(target != null)
             {
-               return;
+               save(target, exit);
             }
             else
             {
-               save(new File(dialog.getDirectory(), dialog.getFile()));
+               FileDialog dialog = new FileDialog(frame, "Choose file", FileDialog.SAVE);
+               dialog.setFilenameFilter(new INIFileFilter());
+               dialog.setFile(NetworkParameters.defaultParameterFile);
+               dialog.setVisible(true);
+               
+               String filename = dialog.getFile();
+               if (filename == null)
+               {
+                  return;
+               }
+               else
+               {
+                  save(new File(dialog.getDirectory(), dialog.getFile()), exit);
+               }               
             }
          }
       }
