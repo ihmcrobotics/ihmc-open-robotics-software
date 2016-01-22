@@ -3,7 +3,7 @@ apply plugin: 'jacoco'
 apply from: 'gradleScripts/util.gradle'
 
 sourceCompatibility = 1.7
-version = '1.0'
+version = "${rootProject.version}"
 
 setupDefaultDirectoryStructure()
 

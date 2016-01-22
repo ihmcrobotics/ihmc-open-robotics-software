@@ -97,7 +97,7 @@ public class QuadrupedSupportPolygonTest
    @Test(timeout = 30000)
    public void testGetLegPairs()
    {
-      QuadrupedSupportPolygon quadrupedSupportPolygon = createSimplePolygon();
+      final QuadrupedSupportPolygon quadrupedSupportPolygon = createSimplePolygon();
       
       RobotQuadrant[][] legPairs = quadrupedSupportPolygon.getLegPairs();
       assertEquals("not 4", 4, legPairs.length);
