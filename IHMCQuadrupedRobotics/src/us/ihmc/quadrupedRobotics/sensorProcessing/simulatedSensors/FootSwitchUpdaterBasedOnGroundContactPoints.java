@@ -25,10 +25,10 @@ public class FootSwitchUpdaterBasedOnGroundContactPoints implements FootSwitchUp
       {
          String prefix = quadrant.getCamelCaseNameForStartOfExpression();
          GlitchFilteredBooleanYoVariable filteredBoolean = new GlitchFilteredBooleanYoVariable(prefix + "FilteredContact", parentRegistry, FILTER_WINDOW_SIZE);
-         glitchFilteredFootContacts.put(quadrant, filteredBoolean);
+         glitchFilteredFootContacts.set(quadrant, filteredBoolean);
          
          BooleanYoVariable rawBoolean = new BooleanYoVariable(prefix + "rawContact", parentRegistry);
-         rawFootContacts.put(quadrant, rawBoolean);
+         rawFootContacts.set(quadrant, rawBoolean);
          
       }
    }

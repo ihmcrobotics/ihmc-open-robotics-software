@@ -71,7 +71,7 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
       {
          String name = quadrant.getCamelCaseNameForStartOfExpression() + "FootInContact";
          BooleanYoVariable footContactBoolean = new BooleanYoVariable(name, registry);
-         footContactBooleans.put(quadrant, footContactBoolean);
+         footContactBooleans.set(quadrant, footContactBoolean);
       }
 
       parentRegistry.addChild(registry);

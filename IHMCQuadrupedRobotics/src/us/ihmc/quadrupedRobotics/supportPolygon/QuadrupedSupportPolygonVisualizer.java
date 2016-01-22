@@ -2,7 +2,6 @@ package us.ihmc.quadrupedRobotics.supportPolygon;
 
 import java.awt.Color;
 
-import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
@@ -12,6 +11,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -31,6 +31,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class QuadrupedSupportPolygonVisualizer implements RobotController
 {
+   private static final ReferenceFrame WORLD = ReferenceFrame.getWorldFrame();
    private static final double simulateDT = 0.01;
    private static final int recordFrequency = 1;
    
@@ -44,7 +45,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
 
    private final QuadrantDependentList<YoFramePoint> vertices = new QuadrantDependentList<YoFramePoint>();
    private QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon(); 
-   private final YoFrameConvexPolygon2d currentSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
+   private final YoFrameConvexPolygon2d currentSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoArtifactPolygon currentQuadSupportPolygonArtifact = new YoArtifactPolygon("supportPolygonArtifact", currentSupportPolygon, Color.blue, false);
 
    private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
@@ -72,18 +73,52 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       rootJoint = new FloatingJoint("floating", new Vector3d(), robot);
       
       FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), 0.5, 0.0, 0.0);
-      FramePoint origin = new FramePoint();
+      FramePoint origin = new FramePoint(ReferenceFrame.getWorldFrame(), 0.5, -1.0, 2.0);
       
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         if(!quadrant.equals(RobotQuadrant.HIND_RIGHT))
-         {
-            YoFramePoint vertex = new YoFramePoint(quadrant.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry);
-            vertex.set(point);
-            vertices.put(quadrant, vertex);
-            point.yawAboutPoint(origin, point, 2 * Math.PI / 3);
-         }
-      }
+      vertices.set(RobotQuadrant.FRONT_LEFT, new YoFramePoint(RobotQuadrant.FRONT_LEFT.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry));
+      vertices.set(RobotQuadrant.FRONT_RIGHT, new YoFramePoint(RobotQuadrant.FRONT_RIGHT.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry));
+      vertices.set(RobotQuadrant.HIND_RIGHT, new YoFramePoint(RobotQuadrant.HIND_RIGHT.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry));
+      vertices.set(RobotQuadrant.HIND_LEFT, new YoFramePoint(RobotQuadrant.HIND_LEFT.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry));
+      
+      vertices.get(RobotQuadrant.FRONT_LEFT).set(0.0, 1.0, 0.0);
+      vertices.get(RobotQuadrant.FRONT_RIGHT).set(1.0, 1.0, 0.0);
+      vertices.get(RobotQuadrant.HIND_RIGHT).set(1.0, 0.0, 0.0);
+      vertices.get(RobotQuadrant.HIND_LEFT).set(0.0, 0.0, 0.0);
+      
+      vertices.get(RobotQuadrant.FRONT_LEFT).add(origin);
+      vertices.get(RobotQuadrant.FRONT_RIGHT).add(origin);
+      vertices.get(RobotQuadrant.HIND_RIGHT).add(origin);
+      vertices.get(RobotQuadrant.HIND_LEFT).add(origin);
+      
+      QuadrupedSupportPolygon firstQuadrupedPolygon = new QuadrupedSupportPolygon();
+      firstQuadrupedPolygon.setFootstep(RobotQuadrant.FRONT_LEFT, new FramePoint(WORLD, 0.0, 2.0, 0.0));
+      firstQuadrupedPolygon.setFootstep(RobotQuadrant.FRONT_RIGHT, new FramePoint(WORLD, 1.0, 2.0, 0.0));
+      firstQuadrupedPolygon.setFootstep(RobotQuadrant.HIND_LEFT, new FramePoint(WORLD, 0.0, 0.0, 0.0));
+      
+      QuadrupedSupportPolygon secondQuadrupedPolygon = new QuadrupedSupportPolygon();
+      secondQuadrupedPolygon.setFootstep(RobotQuadrant.FRONT_LEFT, new FramePoint(WORLD, 0.0, 2.0, 0.0));
+      secondQuadrupedPolygon.setFootstep(RobotQuadrant.HIND_RIGHT, new FramePoint(WORLD, 1.0, 1.0, 0.0));
+      secondQuadrupedPolygon.setFootstep(RobotQuadrant.HIND_LEFT, new FramePoint(WORLD, 0.0, 0.0, 0.0));
+      
+      QuadrupedSupportPolygon commonPolygonToPack = new QuadrupedSupportPolygon();
+//      firstQuadrupedPolygon.getCommonSupportPolygon(secondQuadrupedPolygon, commonPolygonToPack , RobotQuadrant.FRONT_RIGHT);
+      firstQuadrupedPolygon.getShrunkenCommonSupportPolygon(secondQuadrupedPolygon, commonPolygonToPack , RobotQuadrant.FRONT_RIGHT, 0.1, 0.1, 0.1);
+      
+      vertices.get(RobotQuadrant.FRONT_LEFT).set(commonPolygonToPack.getFootstep(RobotQuadrant.FRONT_LEFT));
+      vertices.get(RobotQuadrant.FRONT_RIGHT).set(commonPolygonToPack.getFootstep(RobotQuadrant.FRONT_RIGHT));
+      vertices.remove(RobotQuadrant.HIND_RIGHT);
+      vertices.get(RobotQuadrant.HIND_LEFT).set(commonPolygonToPack.getFootstep(RobotQuadrant.HIND_LEFT));
+      
+//      for(RobotQuadrant quadrant : RobotQuadrant.values)
+//      {
+//         if(!quadrant.equals(RobotQuadrant.HIND_RIGHT))
+//         {
+//            YoFramePoint vertex = new YoFramePoint(quadrant.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry);
+//            vertex.set(point);
+//            vertices.put(quadrant, vertex);
+//            point.yawAboutPoint(origin, point, 2 * Math.PI / 3);
+//         }
+//      }
       
       robot.getRobotsYoVariableRegistry();
       robot.setController(this);
@@ -155,33 +190,33 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    @Override
    public void doControl()
    {
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      for (RobotQuadrant quadrant : vertices.quadrants())
       {
-         if(!quadrant.equals(RobotQuadrant.HIND_RIGHT))
-         {
-            YoFramePoint vertex = vertices.get(quadrant);
-            supportPolygon.setFootstep(quadrant, vertex.getFrameTuple());
-         }
+         YoFramePoint vertex = vertices.get(quadrant);
+         supportPolygon.setFootstep(quadrant, vertex.getFrameTuple());
       }
       drawSupportPolygon(supportPolygon, currentSupportPolygon);
       
-      supportPolygon.getCentroid(centroidFramePoint);
+      supportPolygon.getCentroid2d(centroidFramePoint);
       centroid.set(centroidFramePoint);
       
-      Point2d centerOfInscribedCircle = new Point2d();
-      double radius = supportPolygon.getInCircle(centerOfInscribedCircle);
+      FramePoint centerOfInscribedCircle = new FramePoint();
+      double radius = supportPolygon.getInCircle2d(centerOfInscribedCircle);
       circleCenter.setX(centerOfInscribedCircle.getX());
       circleCenter.setY(centerOfInscribedCircle.getY());
       inscribedCircleRadius.set(radius);
       
-      Point2d centerOfMiniCircle = new Point2d();
-      boolean successful = supportPolygon.getTangentTangentRadiusCircleCenter(RobotQuadrant.HIND_LEFT, miniCircleRadius.getDoubleValue(), centerOfMiniCircle);
-      
-      miniCircleRadiusSuccess.set(successful);
-      if(successful)
+      FramePoint2d centerOfMiniCircle = new FramePoint2d();
+      if (supportPolygon.getNumberOfSupportLegs() == 3)
       {
-         miniCircleCenter.setX(centerOfMiniCircle.getX());
-         miniCircleCenter.setY(centerOfMiniCircle.getY());
+         boolean successful = supportPolygon.getTangentTangentRadiusCircleCenter(RobotQuadrant.HIND_LEFT, miniCircleRadius.getDoubleValue(), centerOfMiniCircle);
+
+         miniCircleRadiusSuccess.set(successful);
+         if (successful)
+         {
+            miniCircleCenter.setX(centerOfMiniCircle.getX());
+            miniCircleCenter.setY(centerOfMiniCircle.getY());
+         }
       }
       ThreadTools.sleep(10);
    }
@@ -189,13 +224,10 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
    {
       ConvexPolygon2d polygon = new ConvexPolygon2d();
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      for(RobotQuadrant quadrant : supportPolygon.getSupportingQuadrantsInOrder())
       {
          FramePoint footstep = supportPolygon.getFootstep(quadrant);
-         if(footstep != null)
-         {
-            polygon.addVertex(footstep.getX(), footstep.getY());
-         }
+         polygon.addVertex(footstep.getX(), footstep.getY());
       }
       polygon.update();
       yoFramePolygon.setConvexPolygon2d(polygon);
