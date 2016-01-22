@@ -18,6 +18,7 @@ import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionG
 import us.ihmc.wholeBodyController.diagnostics.logging.JointForceTrackingDelayLogRecord;
 import us.ihmc.wholeBodyController.diagnostics.logging.ProcessedJointPositionDelayLogRecord;
 import us.ihmc.wholeBodyController.diagnostics.logging.ProcessedJointVelocityDelayLogRecord;
+import us.ihmc.wholeBodyController.diagnostics.logging.RawJointVelocityDelayLogRecord;
 
 public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataReporter
 {
@@ -136,7 +137,7 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
          case PROCESSED_VELOCITY:
             return new ProcessedJointVelocityDelayLogRecord(level, msg);
          case RAW_VELOCITY:
-            return new LogRecord(level, msg);
+            return new RawJointVelocityDelayLogRecord(level, msg);
          default:
             throw new RuntimeException("Should not get there.");
          }
