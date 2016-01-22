@@ -59,6 +59,18 @@ public class CircularLongMap
    {
       return size;
    }
+   
+   public long getLatestKey()
+   {
+      if (insertionIndex == 0 && size > 0)
+      {
+         return keys[size - 1];
+      }
+      else
+      {
+         return keys[insertionIndex - 1];
+      }
+   }
 
    public long getLatestValue()
    {

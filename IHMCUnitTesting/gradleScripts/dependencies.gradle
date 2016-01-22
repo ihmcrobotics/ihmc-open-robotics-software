@@ -5,4 +5,5 @@ dependencies {
 	compile group: 'org.ejml', name: 'all', version: '0.28'
 	compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
 	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
+	compile group: 'com.google.caliper', name: 'caliper', version: '1.0-beta-2'
 }

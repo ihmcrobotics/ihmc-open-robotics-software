@@ -3,6 +3,8 @@ package us.ihmc.robotics.geometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
+
 import java.util.Random;
 
 /**
@@ -21,6 +23,9 @@ public class FrameLineSegment2d extends FrameGeometry2d
 {
    protected ReferenceFrame referenceFrame;
    protected final LineSegment2d lineSegment;
+
+   private final Point2d tempPoint2d = new Point2d();
+   private final Vector2d tempVector2d = new Vector2d();
 
    public FrameLineSegment2d()
    {
@@ -441,8 +446,6 @@ public class FrameLineSegment2d extends FrameGeometry2d
 
       return this.lineSegment.distance(convexPolygon.convexPolygon);
    }
-
-   private final Point2d tempPoint2d = new Point2d();
    
    public boolean isPointOnLeftSideOfLineSegment(FramePoint2d point)
    {
@@ -481,12 +484,26 @@ public class FrameLineSegment2d extends FrameGeometry2d
 
    public FramePoint2d pointBetweenEndPointsGivenParameter(double parameter)
    {
-      return new FramePoint2d(this.referenceFrame, this.lineSegment.pointBetweenEndPointsGivenParameter(parameter));
+      return new FramePoint2d(referenceFrame, lineSegment.pointBetweenEndPointsGivenParameter(parameter));
    }
 
    public void pointBetweenEndPointsGivenParameter(FramePoint2d framePoint2dToPack, double parameter)
    {
-      framePoint2dToPack.setIncludingFrame(this.referenceFrame, this.lineSegment.pointBetweenEndPointsGivenParameter(parameter));
+      framePoint2dToPack.setIncludingFrame(referenceFrame, lineSegment.pointBetweenEndPointsGivenParameter(parameter));
+   }
+   
+   public void getClosestPointOnLineSegment(FramePoint2d framePoint2dToPack, FramePoint2d point)
+   {
+      checkReferenceFrameMatch(point);
+      
+      lineSegment.getClosestPointOnLineSegment(tempPoint2d, point.getPoint());
+      framePoint2dToPack.setIncludingFrame(referenceFrame, tempPoint2d);
+   }
+   
+   public void getPerpendicularBisector(FrameVector2d perpendicularBisectorToPack, double bisectorLengthDesired)
+   {
+      lineSegment.getPerpendicularBisector(tempVector2d, bisectorLengthDesired);
+      perpendicularBisectorToPack.setIncludingFrame(referenceFrame, tempVector2d);
    }
 
    public static FrameLineSegment2d generateRandomFrameLineSegment2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)

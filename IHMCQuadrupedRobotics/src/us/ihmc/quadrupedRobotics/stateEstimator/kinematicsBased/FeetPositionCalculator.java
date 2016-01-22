@@ -49,7 +49,7 @@ public class FeetPositionCalculator
          String quadrantPrefix = quadrant.getCamelCaseNameForStartOfExpression();
          AlphaFilteredYoFrameVector footToRootJointPosition = AlphaFilteredYoFrameVector
                .createAlphaFilteredYoFrameVector(quadrantPrefix + "FootToRootJointPosition", "", registry, alphaFootToRootJointPosition, worldFrame);
-         footToRootJointPositions.put(quadrant, footToRootJointPosition);
+         footToRootJointPositions.set(quadrant, footToRootJointPosition);
       }
    }
 
