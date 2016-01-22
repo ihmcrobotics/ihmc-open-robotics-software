@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply from: 'gradleScripts/util.gradle'
 
 sourceCompatibility = 1.7
-version = '1.0'
+version = "${rootProject.version}"
 
 setupDefaultDirectoryStructure()
 

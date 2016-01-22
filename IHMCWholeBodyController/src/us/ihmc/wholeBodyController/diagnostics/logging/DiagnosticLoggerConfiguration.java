@@ -177,6 +177,17 @@ public class DiagnosticLoggerConfiguration
          }
       };
       addFileHandler("jointForceTrackingDelay", jointForceTrackingDelayFiter, formatter, diagnosticOutputDirectory, rootLogger);
+
+      Filter rawJointVelocityDelayFilter = new Filter()
+      {
+         
+         @Override
+         public boolean isLoggable(LogRecord record)
+         {
+            return record instanceof RawJointVelocityDelayLogRecord;
+         }
+      };
+      addFileHandler("rawJointVelocityDelay", rawJointVelocityDelayFilter, formatter, diagnosticOutputDirectory, rootLogger);
    }
 
    private static void addFileHandler(String fileName, Filter filter, Formatter formatter, Path diagnosticOutputDirectory, Logger rootLogger)
