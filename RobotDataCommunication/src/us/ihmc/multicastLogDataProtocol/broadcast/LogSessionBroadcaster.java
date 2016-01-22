@@ -86,27 +86,33 @@ public class LogSessionBroadcaster extends Thread
          
          String cameraString = NetworkParameters.getHost(NetworkParameterKeys.loggedCameras);
          
-         
-         String[] split = cameraString.split(",");
-         cameras = new byte[split.length];
-         for(int i = 0; i < split.length; i++)
+         if(cameraString != null)
          {
-            try
+            String[] split = cameraString.split(",");
+            cameras = new byte[split.length];
+            for(int i = 0; i < split.length; i++)
             {
-               byte camera = Byte.parseByte(split[i].trim());
-               if(camera >= 0 && camera <= 127)
+               try
                {
-                  cameras[i] = camera;
+                  byte camera = Byte.parseByte(split[i].trim());
+                  if(camera >= 0 && camera <= 127)
+                  {
+                     cameras[i] = camera;
+                  }
+                  else
+                  {
+                     throw new NumberFormatException();
+                  }
                }
-               else
+               catch(NumberFormatException e)
                {
-                  throw new NumberFormatException();
+                  throw new RuntimeException("Invalid camera id: " + split[i] +". Valid camera ids are 0-127");
                }
             }
-            catch(NumberFormatException e)
-            {
-               throw new RuntimeException("Invalid camera id: " + split[i] +". Valid camera ids are 0-127");
-            }
+         }
+         else
+         {
+            cameras = new byte[0];
          }
       }
       catch (IOException e)
