@@ -179,8 +179,9 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    private void readAndUpdateOneDoFJointPositionsVelocitiesAndAccelerations()
    {
-      for (ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
+      for (int i = 0; i < revoluteJoints.size(); i++)
       {
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = revoluteJoints.get(i);
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
          OneDoFJoint revoluteJoint = jointPair.getRight();
 
