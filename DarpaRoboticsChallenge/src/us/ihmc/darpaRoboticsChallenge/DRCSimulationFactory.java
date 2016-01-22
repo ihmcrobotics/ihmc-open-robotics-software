@@ -223,7 +223,7 @@ public class DRCSimulationFactory
  
       if (DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET)
       {
-         DRCOutputWriterWithTorqueOffsets outputWriterWithTorqueOffsets = new DRCOutputWriterWithTorqueOffsets(drcOutputWriter, drcRobotModel.getControllerDT(), true);
+         DRCOutputWriterWithTorqueOffsets outputWriterWithTorqueOffsets = new DRCOutputWriterWithTorqueOffsets(drcOutputWriter, drcRobotModel.getControllerDT());
          drcOutputWriter = outputWriterWithTorqueOffsets;
       }
       
