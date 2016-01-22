@@ -75,7 +75,7 @@ public class CenterOfMassKinematicBasedLinearStateCalculator
 
          AlphaFilteredYoFrameVector footToRootJointPosition = AlphaFilteredYoFrameVector
                .createAlphaFilteredYoFrameVector(quadrantPrefix + "FootToRootJointPosition", "", registry, alphaFootToRootJointPosition, worldFrame);
-         footToRootJointPositions.put(quadrant, footToRootJointPosition);
+         footToRootJointPositions.set(quadrant, footToRootJointPosition);
       }
 
       parentRegistry.addChild(registry);

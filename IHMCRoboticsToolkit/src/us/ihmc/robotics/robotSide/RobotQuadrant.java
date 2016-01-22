@@ -154,6 +154,130 @@ public enum RobotQuadrant
          }
       }
    }
+   
+   public final RobotQuadrant getAcrossBodyFrontQuadrant()
+   {
+      switch (this)
+      {
+         case FRONT_LEFT:
+         {
+            return RobotQuadrant.FRONT_RIGHT;
+         }
+   
+         case FRONT_RIGHT:
+         {
+            return RobotQuadrant.FRONT_LEFT;
+         }
+   
+         case HIND_RIGHT:
+         {
+            return RobotQuadrant.FRONT_LEFT;
+         }
+   
+         case HIND_LEFT:
+         {
+            return RobotQuadrant.FRONT_RIGHT;
+         }
+   
+         default:
+         {
+            throw new RuntimeException();
+         }
+      }
+   }
+   
+   public final RobotQuadrant getAcrossBodyHindQuadrant()
+   {
+      switch (this)
+      {
+         case FRONT_LEFT:
+         {
+            return RobotQuadrant.HIND_RIGHT;
+         }
+   
+         case FRONT_RIGHT:
+         {
+            return RobotQuadrant.HIND_LEFT;
+         }
+   
+         case HIND_RIGHT:
+         {
+            return RobotQuadrant.HIND_LEFT;
+         }
+   
+         case HIND_LEFT:
+         {
+            return RobotQuadrant.HIND_RIGHT;
+         }
+   
+         default:
+         {
+            throw new RuntimeException();
+         }
+      }
+   }
+   
+   public final RobotQuadrant getNextClockwiseQuadrant()
+   {
+      switch (this)
+      {
+         case FRONT_LEFT:
+         {
+            return RobotQuadrant.FRONT_RIGHT;
+         }
+   
+         case FRONT_RIGHT:
+         {
+            return RobotQuadrant.HIND_RIGHT;
+         }
+   
+         case HIND_RIGHT:
+         {
+            return RobotQuadrant.HIND_LEFT;
+         }
+   
+         case HIND_LEFT:
+         {
+            return RobotQuadrant.FRONT_LEFT;
+         }
+   
+         default:
+         {
+            throw new RuntimeException();
+         }
+      }
+   }
+   
+   public final RobotQuadrant getNextCounterClockwiseQuadrant()
+   {
+      switch (this)
+      {
+         case FRONT_LEFT:
+         {
+            return RobotQuadrant.HIND_LEFT;
+         }
+   
+         case HIND_LEFT:
+         {
+            return RobotQuadrant.HIND_RIGHT;
+         }
+   
+         case HIND_RIGHT:
+         {
+            return RobotQuadrant.FRONT_RIGHT;
+         }
+   
+         case FRONT_RIGHT:
+         {
+            return RobotQuadrant.FRONT_LEFT;
+         }
+   
+         default:
+         {
+            throw new RuntimeException();
+         }
+      }
+   }
 
    public final String getShortName()
    {
@@ -364,16 +488,7 @@ public enum RobotQuadrant
 
    public static RobotQuadrant getQuadrantNameFromOrdinal(int quadrantIndex)
    {
-      if (quadrantIndex == RobotQuadrant.FRONT_LEFT.ordinal())
-         return RobotQuadrant.FRONT_LEFT;
-      if (quadrantIndex == RobotQuadrant.FRONT_RIGHT.ordinal())
-         return RobotQuadrant.FRONT_RIGHT;
-      if (quadrantIndex == RobotQuadrant.HIND_LEFT.ordinal())
-         return RobotQuadrant.HIND_LEFT;
-      if (quadrantIndex == RobotQuadrant.HIND_RIGHT.ordinal())
-         return RobotQuadrant.HIND_RIGHT;
-
-      throw new RuntimeException("Invalid quadrant index: " + quadrantIndex);
+      return values[quadrantIndex];
    }
 
    public static RobotQuadrant getQuadrantName(String quadrantName)

@@ -91,6 +91,28 @@ public class FrameVector2d extends FrameTuple2d<Vector2d>
    {
       return this.tuple;
    }
+   
+   @Override
+   public boolean equals(Object frameVector)
+   {
+      if (frameVector instanceof FrameVector2d)
+      {
+         boolean referenceFrameMatches = referenceFrame.equals(((FrameVector2d) frameVector).getReferenceFrame());
+         boolean pointEquals = tuple.equals(((FrameVector2d) frameVector).tuple);
+         return referenceFrameMatches && pointEquals;
+      }
+      else
+      {
+         return super.equals(frameVector);
+      }
+   }
+   
+   public boolean eplilonEquals(FrameVector2d frameVector, double epsilon)
+   {
+      boolean referenceFrameMatches = referenceFrame.equals(frameVector.getReferenceFrame());
+      boolean pointEquals = tuple.epsilonEquals(frameVector.tuple, epsilon);
+      return referenceFrameMatches && pointEquals;
+   }
 
    public void rotate90()
    {
@@ -156,6 +178,7 @@ public class FrameVector2d extends FrameTuple2d<Vector2d>
     *
     * @param desiredFrame ReferenceFrame to change the FrameVector2d into.
     */
+   @Override
    public void changeFrame(ReferenceFrame desiredFrame)
    {
       // this is in the correct frame already
@@ -167,6 +190,7 @@ public class FrameVector2d extends FrameTuple2d<Vector2d>
       referenceFrame = desiredFrame;
    }
 
+   @Override
    public void applyTransform(RigidBodyTransform transform)
    {
       temporaryTransformedVector.set(tuple.x, tuple.y, 0.0);
@@ -178,6 +202,7 @@ public class FrameVector2d extends FrameTuple2d<Vector2d>
       this.tuple.set(temporaryTransformedVector.x, temporaryTransformedVector.y);
    }
 
+   @Override
    public FrameVector2d applyTransformCopy(RigidBodyTransform transform3D)
    {
       FrameVector2d ret = new FrameVector2d(this);

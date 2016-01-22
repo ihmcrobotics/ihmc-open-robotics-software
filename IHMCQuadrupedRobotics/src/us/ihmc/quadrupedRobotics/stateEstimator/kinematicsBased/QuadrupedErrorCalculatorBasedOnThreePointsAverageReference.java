@@ -39,10 +39,10 @@ public class QuadrupedErrorCalculatorBasedOnThreePointsAverageReference
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          FramePoint referenceFootPosition = new FramePoint(worldFrame);
-         referenceFeetPositions.put(quadrant, referenceFootPosition);
+         referenceFeetPositions.set(quadrant, referenceFootPosition);
 
          FramePoint comparedFootPosition = new FramePoint(worldFrame);
-         comparedFeetPositions.put(quadrant, comparedFootPosition);
+         comparedFeetPositions.set(quadrant, comparedFootPosition);
       }
       
       //this one needs to be in a difference for loop because all the feetPosition FramePoints have to be previously created
@@ -67,7 +67,7 @@ public class QuadrupedErrorCalculatorBasedOnThreePointsAverageReference
 
       ThreePointsAverageReferenceFrame estimatedFootAverageReferenceFrame = new ThreePointsAverageReferenceFrame(prefix + "EstimatedFootAverageReferenceFrame",
             referenceP1, referenceP2, referenceP3, worldFrame);
-      referenceFeetAverageReferenceFrames.put(quadrantNotUsed, estimatedFootAverageReferenceFrame);
+      referenceFeetAverageReferenceFrames.set(quadrantNotUsed, estimatedFootAverageReferenceFrame);
 
       YoGraphicReferenceFrame estimatedFootAverageRefViz = new YoGraphicReferenceFrame(estimatedFootAverageReferenceFrame, registry, 0.15,
             YoAppearance.Yellow());
@@ -81,7 +81,7 @@ public class QuadrupedErrorCalculatorBasedOnThreePointsAverageReference
 
       ThreePointsAverageReferenceFrame calculatedFootAverageReferenceFrame = new ThreePointsAverageReferenceFrame(
             prefix + "CalculatedFootAverageReferenceFrame", comparedP1, comparedP2, comparedP3, worldFrame);
-      comparedFeetAverageReferenceFrames.put(quadrantNotUsed, calculatedFootAverageReferenceFrame);
+      comparedFeetAverageReferenceFrames.set(quadrantNotUsed, calculatedFootAverageReferenceFrame);
 
       YoGraphicReferenceFrame calculatedFootAverageRefViz = new YoGraphicReferenceFrame(calculatedFootAverageReferenceFrame, registry, 0.2,
             YoAppearance.Green());

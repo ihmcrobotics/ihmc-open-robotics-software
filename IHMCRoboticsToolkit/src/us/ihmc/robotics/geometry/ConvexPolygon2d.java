@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -13,6 +14,7 @@ import javax.vecmath.Vector2d;
 
 import us.ihmc.robotics.geometry.ConvexPolygonTools.EmptyPolygonException;
 import us.ihmc.robotics.geometry.ConvexPolygonTools.OutdatedPolygonException;
+import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -44,6 +46,8 @@ public class ConvexPolygon2d implements Geometry2d
    private int minX_index = 0, maxX_index = 0, minY_index = 0, maxY_index = 0;
    private int minXminY_index = 0, maxXminY_index = 0, maxXmaxY_index = 0;
    private final int minXmaxY_index = 0;
+
+   private final Point2d tempPoint2dForDistance = new Point2d();
 
    /**
     * Creates an empty convex polygon.
@@ -2344,48 +2348,40 @@ public class ConvexPolygon2d implements Geometry2d
       return true;
    }
 
-   public ArrayList<Vector2d> getOutSideFacingOrthoNormalVectorsCopy()
+   public List<Vector2d> getOutSideFacingOrthoNormalVectorsCopy()
    {
       checkIfUpToDate();
-      if (hasExactlyOneVertex())
-      {
-         return null;
-      }
+      Vector2d[] outsideFacingOrthogonalVectors = new Vector2d[numberOfVertices];
+      
+      getOutSideFacingOrthoNormalVectors(outsideFacingOrthogonalVectors);
 
-      ArrayList<Vector2d> outsideFacingOrthogonalVectors = getOutSideFacingOrthogonalVectorsCopy();
-
-      for (int i = 0; i < outsideFacingOrthogonalVectors.size(); i++)
-      {
-         outsideFacingOrthogonalVectors.get(i).normalize();
-      }
-
-      return outsideFacingOrthogonalVectors;
+      return Arrays.asList(outsideFacingOrthogonalVectors);
    }
 
-   private ArrayList<Vector2d> getOutSideFacingOrthogonalVectorsCopy()
+   public void getOutSideFacingOrthoNormalVectors(Vector2d[] orthoNormalVectorsToPack)
    {
       checkIfUpToDate();
-      if (hasExactlyOneVertex())
+      
+      if (orthoNormalVectorsToPack == null || orthoNormalVectorsToPack.length != numberOfVertices)
       {
-         return null;
+         throw new RuntimeException("orthogonalVectorsToPack is null or wrong length");
       }
-
-      ArrayList<Vector2d> outsideFacingOrthogonalVectors = new ArrayList<Vector2d>(numberOfVertices);
-
+      
+      if (numberOfVertices == 1)
+      {
+         throw new UndefinedOperationException("orthoNormal vectors undefined for a point");
+      }
+      
       for (int i = 0; i < numberOfVertices; i++)
-      {
-         Point2d startPoint = getVertex(i);
-         Point2d endPoint = getNextVertex(i);
-
-         double dx = endPoint.getX() - startPoint.getX();
-         double dy = endPoint.getY() - startPoint.getY();
-         outsideFacingOrthogonalVectors.add(new Vector2d(-dy, dx));
+      {         
+         orthoNormalVectorsToPack[i].set(getNextVertex(i));
+         orthoNormalVectorsToPack[i].sub(getVertex(i));
+         
+         GeometryTools.getPerpendicularVector(orthoNormalVectorsToPack[i], orthoNormalVectorsToPack[i]);
+         
+         orthoNormalVectorsToPack[i].normalize();
       }
-
-      return outsideFacingOrthogonalVectors;
    }
-
-   private final Point2d tempPoint2dForDistance = new Point2d();
    
    @Override
    public double distance(Point2d point)

@@ -106,10 +106,10 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
          soleFrame.updateTranslation(quadrupedPhysicalProperties.getOffsetFromKneeToFoot(robotQuadrant));
          soleFrame.update();
          
-         soleFrames.put(robotQuadrant, soleFrame);
+         soleFrames.set(robotQuadrant, soleFrame);
          
          FramePoint legAttachmentPoint = new FramePoint();
-         legAttachementPoints.put(robotQuadrant, legAttachmentPoint);
+         legAttachementPoints.set(robotQuadrant, legAttachmentPoint);
       }
       
       for (RobotSide robotSide : RobotSide.values)
@@ -147,7 +147,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
          xyOffsetFromRollToPitch.setZ(0.0);
          
          legAttachmentFrame.updateTranslation(xyOffsetFromRollToPitch);
-         legAttachementFrames.put(robotQuadrant, legAttachmentFrame);
+         legAttachementFrames.set(robotQuadrant, legAttachmentFrame);
       }
       
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, fullRobotModel.getElevator());
