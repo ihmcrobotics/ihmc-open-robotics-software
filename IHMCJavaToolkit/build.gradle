@@ -4,20 +4,23 @@ apply from: 'gradleScripts/util.gradle'
 
 sourceCompatibility = 1.7
 version = "${rootProject.version}"
+project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+project.ext.licenseName = "Apache License, Version 2.0"
+project.ext.bintrayLicenseName = "Apache-2.0"
 
 jar {
-   manifest {
-      attributes(
-      "Created-By": "IHMC Gradle Build Script",
-      "Implementation-Title": project.name,
-      "Implementation-Version": project.version,
-      "Implementation-Vendor": "IHMC",
-      
-      "Bundle-Name": project.name,
-      "Bundle-Version": project.version,
-      "Bundle-License": "http://www.apache.org/licenses/LICENSE-2.0.txt",
-      "Bundle-Vendor": "IHMC")
-   }
+    manifest {
+        attributes(
+                "Created-By": "IHMC Gradle Build Script",
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "IHMC",
+
+                "Bundle-Name": project.name,
+                "Bundle-Version": project.version,
+                "Bundle-License": "${project.ext.licenseURL}",
+                "Bundle-Vendor": "IHMC")
+    }
 }
 
 setupDefaultDirectoryStructure()
@@ -27,4 +30,3 @@ setupDefaultRepositories()
 setupProjectSpecificDependencies()
 
 test.finalizedBy jacocoTestReport
-
