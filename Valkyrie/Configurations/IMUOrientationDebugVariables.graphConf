@@ -1,0 +1,40 @@
+
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.q_yaw_torso_leftTorsoImuOfBodyFrame,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisRotationalStateUpdater.estimatedRootJointFrameYaw,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.q_yaw_pelvis_pelvisRearImuOfBodyFrame</Variables>
+		<GraphConfiguration>
+			<Name>config80</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.q_pitch_torso_leftTorsoImuOfBodyFrame,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisRotationalStateUpdater.estimatedRootJointFramePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.q_pitch_pelvis_pelvisRearImuOfBodyFrame</Variables>
+		<GraphConfiguration>
+			<Name>config81</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.q_roll_torso_leftTorsoImuOfBodyFrame,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisRotationalStateUpdater.estimatedRootJointFrameRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.q_roll_pelvis_pelvisRearImuOfBodyFrame</Variables>
+		<GraphConfiguration>
+			<Name>config82</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
