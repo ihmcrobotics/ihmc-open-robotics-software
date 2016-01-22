@@ -37,7 +37,7 @@ public class SimpleSimulationQuadrupedStateEstimator implements QuadrupedStateEs
          {
             if(groundContactPoint.getParentJoint() == jointBeforeFoot)
             {
-               footSwitches.put(quadrant, new SimulatedContactBasedFootSwitch(prefix + groundContactPoint.getName(), groundContactPoint, registry));
+               footSwitches.set(quadrant, new SimulatedContactBasedFootSwitch(prefix + groundContactPoint.getName(), groundContactPoint, registry));
             }
          }
       }

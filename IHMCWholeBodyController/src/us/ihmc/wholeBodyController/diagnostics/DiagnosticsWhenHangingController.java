@@ -55,6 +55,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> finalPositions = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
    private final LinkedHashMap<OneDoFJoint, YoMinimumJerkTrajectory> transitionSplines = new LinkedHashMap<OneDoFJoint, YoMinimumJerkTrajectory>();
 
+   private final BooleanYoVariable manualMode = new BooleanYoVariable("diagnosticsWhenHangingManualMode", registry);
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredPositions = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredVelocities = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
@@ -557,12 +558,18 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       double desiredPosition = transitionSpline.getPosition();
       double desiredVelocity = transitionSpline.getVelocity();
 
-      // Switch between these two if you want to enter via gui.
-      desiredPositions.get(oneDoFJoint).set(desiredPosition);
-//      desiredPosition = desiredPositions.get(oneDoFJoint).getDoubleValue();
-
-      desiredVelocities.get(oneDoFJoint).set(desiredVelocity);
+      // Setting the desired positions via SCS ui.
+      if (manualMode.getBooleanValue())
+      {
+         desiredPosition = desiredPositions.get(oneDoFJoint).getDoubleValue();
+         desiredVelocity = 0.0;
+      }
+      else
+      {
+         desiredPositions.get(oneDoFJoint).set(desiredPosition);
+      }
       
+      desiredVelocities.get(oneDoFJoint).set(desiredVelocity);
 
       double tau = pdController.compute(oneDoFJoint.getQ(), desiredPosition, oneDoFJoint.getQd(), desiredVelocity);
       tau = tau * diagnosticsPDMasterGain.getDoubleValue();
