@@ -8,50 +8,62 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.valkyrieRosControl.dataHolders.YoJointHandleHolder;
 
 public class ValkyrieTorqueHysteresisCompensator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("TorqueHysteresisCompensator");
 
    private final List<OneDoFJoint> processedJoints = new ArrayList<>();
+   private final List<YoJointHandleHolder> processedJointHandles = new ArrayList<>();
    private final List<TorqueHysteresisCompensatorYoVariable> hysteresisCompensators = new ArrayList<>();
 
    private final DoubleYoVariable torqueHysteresisAmplitude = new DoubleYoVariable("torqueHysteresisAmplitude", registry);
    private final DoubleYoVariable jointAccelerationMin = new DoubleYoVariable("hysteresisJointAccelerationMin", registry);
    private final DoubleYoVariable jointVelocityMax = new DoubleYoVariable("hysteresisJointVelocityMax", registry);
 
-   private final DoubleYoVariable rampTime = new DoubleYoVariable("rampTime", registry);
+   private final DoubleYoVariable rampUpTime = new DoubleYoVariable("torqueHysteresisRampUpTime", registry);
+   private final DoubleYoVariable rampDownTime = new DoubleYoVariable("torqueHysteresisRampDownTime", registry);
 
    /**
     * Need to be extracted to a config file
     */
    private final String[] jointShortNamesToProcess = new String[]{"Hip", "Torso"};
 
-   public ValkyrieTorqueHysteresisCompensator(RigidBody rootBody, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public ValkyrieTorqueHysteresisCompensator(List<YoJointHandleHolder> yoJointHandleHolders, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
-      OneDoFJoint[] allJoints = ScrewTools.filterJoints(ScrewTools.computeSubtreeJoints(rootBody), OneDoFJoint.class);
 
-      for (OneDoFJoint joint : allJoints)
+      torqueHysteresisAmplitude.set(7.0);
+      jointAccelerationMin.set(1.0);
+      jointVelocityMax.set(0.1);
+      rampUpTime.set(5.0);
+      rampDownTime.set(0.1);
+
+      for (YoJointHandleHolder jointHandle : yoJointHandleHolders)
       {
+         OneDoFJoint joint = jointHandle.getOneDoFJoint();
          String jointName = joint.getName();
          if (!shouldProcessJoint(jointName))
             continue;
 
          processedJoints.add(joint);
-         hysteresisCompensators.add(new TorqueHysteresisCompensatorYoVariable("tau_hyst_", joint, torqueHysteresisAmplitude, jointAccelerationMin, jointVelocityMax, rampTime, yoTime, registry));
+         processedJointHandles.add(jointHandle);
+         hysteresisCompensators.add(new TorqueHysteresisCompensatorYoVariable("tau_offHyst_", joint, torqueHysteresisAmplitude, jointAccelerationMin, jointVelocityMax, rampUpTime, rampDownTime, yoTime, registry));
       }
    }
 
    public void compute()
    {
-      for (int i = 0; i < processedJoints.size(); i++)
+      for (int i = 0; i < processedJointHandles.size(); i++)
       {
          TorqueHysteresisCompensatorYoVariable hysteresisCompensator = hysteresisCompensators.get(i);
+         YoJointHandleHolder jointHandle = processedJointHandles.get(i);
+         
+         jointHandle.getOneDoFJoint().setQddDesired(jointHandle.getControllerQddDesired());
          hysteresisCompensator.update();
-         processedJoints.get(i).setTau(hysteresisCompensator.getDoubleValue());
+         
+         jointHandle.addDesiredEffort(hysteresisCompensator.getDoubleValue());
       }
    }
 
