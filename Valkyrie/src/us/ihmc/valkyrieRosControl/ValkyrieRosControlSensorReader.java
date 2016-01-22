@@ -23,8 +23,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -91,8 +89,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       startStandPrep.set(true);
       masterGain.set(0.3);
 
-      RigidBody rootBody = ScrewTools.getRootBody(stateEstimatorSensorDefinitions.getJointSensorDefinitions().get(0).getSuccessor());
-      torqueHysteresisCompensator = new ValkyrieTorqueHysteresisCompensator(rootBody, timeInStandprep, registry);
+      torqueHysteresisCompensator = new ValkyrieTorqueHysteresisCompensator(yoJointHandleHolders, timeInStandprep, registry);
 
       Yaml yaml = new Yaml();
 
@@ -209,13 +206,13 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       {
          timeInStandprep.set(TimeTools.nanoSecondstoSeconds(timestamp - standPrepStartTime));
 
-         torqueHysteresisCompensator.compute();
-
          for (int i = 0; i < controlCommandCalculators.size(); i++)
          {
             ValkyrieRosControlJointControlCommandCalculator commandCalculator = controlCommandCalculators.get(i);
             commandCalculator.computeAndUpdateJointTorque(timeInStandprep.getDoubleValue(), doIHMCControlRatio.getDoubleValue(), masterGain.getDoubleValue());
          }
+
+         torqueHysteresisCompensator.compute();
 
       }
       else if (startStandPrep.getBooleanValue())

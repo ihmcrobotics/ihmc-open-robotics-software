@@ -1,5 +1,6 @@
 package us.ihmc.valkyrieRosControl;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -14,7 +15,6 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
    };
 
    private final OneDoFJoint joint;
-   private final DoubleYoVariable computedHysteresisTorqueOffset;
    private final DoubleYoVariable torqueHysteresisAmplitude;
    private final DoubleYoVariable jointAccelerationMin;
    private final DoubleYoVariable jointVelocityMax;
@@ -54,8 +54,6 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
       this.rampDownTime = rampDownTime;
       this.yoTime = yoTime;
 
-      computedHysteresisTorqueOffset = new DoubleYoVariable(getName() + "TorqueOffset", registry);
-
       ramp = new DoubleYoVariable(getName() + "Ramp", registry);
       rampStartTime = new DoubleYoVariable(getName() + "RampStartTime", registry);
       hysteresisState = new EnumYoVariable<>(getName() + "State", registry, HysteresisState.class, false);
@@ -85,6 +83,12 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
 
    public void update()
    {
+      if (!enabled.getBooleanValue())
+      {
+         set(0.0);
+         return;
+      }
+
       checkAcceleration();
       checkVelocity();
 
@@ -105,11 +109,6 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
       default:
          throw new RuntimeException("Should not get there.");
       }
-
-      if (enabled.getBooleanValue())
-         set(joint.getTau() + computedHysteresisTorqueOffset.getDoubleValue());
-      else
-         set(joint.getTau());
    }
 
    private void updateZeroState()
@@ -128,17 +127,21 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
          hysteresisState.set(HysteresisState.ZERO);
       }
 
-      computedHysteresisTorqueOffset.set(0.0);
+      set(0.0);
    }
 
    private void updateRampUpState()
    {
       double timeInRampUp = yoTime.getDoubleValue() - rampStartTime.getDoubleValue();
-      ramp.set(timeInRampUp / rampUpTime.getDoubleValue());
-      computedHysteresisTorqueOffset.set(ramp.getDoubleValue() * torqueHysteresisAmplitude.getDoubleValue());
-      computedHysteresisTorqueOffset.mul(hysteresisSign.getDoubleValue());
+      ramp.set(MathTools.clipToMinMax(timeInRampUp / rampUpTime.getDoubleValue(), 0.0, 1.0));
+      
+      double tau_off_hyst = ramp.getDoubleValue() * torqueHysteresisAmplitude.getDoubleValue();
+      tau_off_hyst *= hysteresisSign.getDoubleValue();
 
-      boolean startRampDown = !isVelocityLow.getBooleanValue() || !isAccelerationHigh.getBooleanValue();
+      set(tau_off_hyst);
+
+      boolean qddDesiredChangedSign = hysteresisSign.getDoubleValue() * joint.getQddDesired() < 0.0;
+      boolean startRampDown = !isVelocityLow.getBooleanValue() || !isAccelerationHigh.getBooleanValue() || qddDesiredChangedSign;
       if (startRampDown)
       {
          rampStartTime.set(yoTime.getDoubleValue() - rampDownTime.getDoubleValue() * (1.0 - ramp.getDoubleValue()));
@@ -157,10 +160,12 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
 
    private void updateMaxHysteresisState()
    {
-      computedHysteresisTorqueOffset.set(torqueHysteresisAmplitude.getDoubleValue());
-      computedHysteresisTorqueOffset.mul(hysteresisSign.getDoubleValue());
+      double tau_off_hyst = torqueHysteresisAmplitude.getDoubleValue();
+      tau_off_hyst *= hysteresisSign.getDoubleValue();
+      set(tau_off_hyst);
 
-      boolean startRampDown = !isVelocityLow.getBooleanValue() || !isAccelerationHigh.getBooleanValue();
+      boolean qddDesiredChangedSign = hysteresisSign.getDoubleValue() * joint.getQddDesired() < 0.0;
+      boolean startRampDown = !isVelocityLow.getBooleanValue() || !isAccelerationHigh.getBooleanValue() || qddDesiredChangedSign;
       if (startRampDown)
       {
          rampStartTime.set(yoTime.getDoubleValue());
@@ -175,9 +180,11 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
    private void updateRampDownState()
    {
       double timeInRampDown = yoTime.getDoubleValue() - rampStartTime.getDoubleValue();
-      ramp.set(1.0 - timeInRampDown / rampDownTime.getDoubleValue());
-      computedHysteresisTorqueOffset.set(ramp.getDoubleValue() * torqueHysteresisAmplitude.getDoubleValue());
-      computedHysteresisTorqueOffset.mul(hysteresisSign.getDoubleValue());
+      ramp.set(MathTools.clipToMinMax(1.0 - timeInRampDown / rampDownTime.getDoubleValue(), 0.0, 1.0));
+
+      double tau_off_hyst = ramp.getDoubleValue() * torqueHysteresisAmplitude.getDoubleValue();
+      tau_off_hyst *= hysteresisSign.getDoubleValue();
+      set(tau_off_hyst);
 
       boolean startRampUp = isVelocityLow.getBooleanValue() && isAccelerationHigh.getBooleanValue();
       if (startRampUp)
