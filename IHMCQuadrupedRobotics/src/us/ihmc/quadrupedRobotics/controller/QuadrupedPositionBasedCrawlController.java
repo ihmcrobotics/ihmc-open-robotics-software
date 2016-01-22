@@ -111,6 +111,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final QuadrupedReferenceFrames referenceFrames;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final CenterOfMassJacobian feedForwardCenterOfMassJacobian;
+   private final FramePoint feedForwardCoMPosition = new FramePoint();
+   private final FramePoint tempCoMPosition = new FramePoint();
    private final ReferenceFrame feedForwardBodyFrame;
    private final ReferenceFrame comFrame;
    private final PoseReferenceFrame desiredCoMPoseReferenceFrame = new PoseReferenceFrame("desiredCoMPoseReferenceFrame", ReferenceFrame.getWorldFrame());
@@ -705,9 +707,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
     */
    private void updateEstimates()
    {
-
       // compute center of mass position and velocity
-      FramePoint feedForwardCoMPosition = new FramePoint(feedForwardReferenceFrames.getCenterOfMassFrame());
+      feedForwardCoMPosition.setIncludingFrame(feedForwardReferenceFrames.getCenterOfMassFrame(), 0.0, 0.0, 0.0);
       feedForwardCoMPosition.changeFrame(ReferenceFrame.getWorldFrame());
       feedForwardCenterOfMassJacobian.compute();
       feedForwardCenterOfMassJacobian.packCenterOfMassVelocity(tempFrameVector);
@@ -723,8 +724,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       feedForwardICP.setZ(feedForwardZFoot);
 
       // compute center of mass position and velocity
-      FramePoint comPosition = new FramePoint(comFrame);
-      comPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      tempCoMPosition.setIncludingFrame(comFrame, 0.0, 0.0, 0.0);
+      tempCoMPosition.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassJacobian.compute();
       centerOfMassJacobian.packCenterOfMassVelocity(tempFrameVector);
       tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
@@ -732,10 +733,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 
       // compute instantaneous capture point
       double zFoot = actualFeetLocations.get(fourFootSupportPolygon.getLowestFootstep()).getZ();
-      double zDelta = comPosition.getZ() - zFoot;
+      double zDelta = tempCoMPosition.getZ() - zFoot;
       double omega = Math.sqrt(9.81 / zDelta);
-      currentICP.setX(comPosition.getX() + centerOfMassVelocity.getX() / omega);
-      currentICP.setY(comPosition.getY() + centerOfMassVelocity.getY() / omega);
+      currentICP.setX(tempCoMPosition.getX() + centerOfMassVelocity.getX() / omega);
+      currentICP.setY(tempCoMPosition.getY() + centerOfMassVelocity.getY() / omega);
       currentICP.setZ(zFoot);
 
       updateFeetLocations();
@@ -757,7 +758,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 
          // Use the desired foot locations instead of the actual locations
          YoFramePoint desiredFootLocation = desiredFeetLocations.get(robotQuadrant);
-         fourFootSupportPolygon.setFootstep(robotQuadrant, desiredFootLocation.getFramePointCopy());
+         fourFootSupportPolygon.setFootstep(robotQuadrant, desiredFootLocation.getFrameTuple());
       }
    }
 
@@ -1480,10 +1481,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       
       private void initializeCoMTrajectory(FramePoint2d target)
       {
-         FramePoint desiredBodyCurrent = desiredCoMPose.getPosition().getFramePointCopy();
+         FramePoint desiredBodyCurrent = desiredCoMPose.getPosition().getFrameTuple();
          initialCoMPosition.set(desiredBodyCurrent);
          
-         FrameVector desiredBodyVelocityCurrent = desiredCoMVelocity.getFrameVectorCopy();
+         FrameVector desiredBodyVelocityCurrent = desiredCoMVelocity.getFrameTuple();
          initialCoMVelocity.set(desiredBodyVelocityCurrent);
          
          desiredCoMTarget.setXY(target);
@@ -1609,7 +1610,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          currentSwingTarget.set(swingTarget);
          finalSwingTarget.set(swingTarget);
          
-         initializeSwingTrajectory(swingQuadrant, yoDesiredFootPosition.getFramePointCopy(), swingTarget, swingDuration.getDoubleValue());
+         initializeSwingTrajectory(swingQuadrant, yoDesiredFootPosition.getFrameTuple(), swingTarget, swingDuration.getDoubleValue());
       }
 
       @Override
