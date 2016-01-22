@@ -44,7 +44,7 @@ public class QuadrupedPathPreview
    private final FramePoint footLocation = new FramePoint(ReferenceFrame.getWorldFrame());
 
    private final FramePoint desiredPosition = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final QuadrupedSupportPolygon emptyPolygon = new QuadrupedSupportPolygon();
+//   private final QuadrupedSupportPolygon emptyPolygon = new QuadrupedSupportPolygon();
 
    public QuadrupedPathPreview(SwingTargetGenerator swingTargetGenerator, CommonQuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -104,7 +104,7 @@ public class QuadrupedPathPreview
          //get next step in future support
          RobotQuadrant nextRegularGaitSwingQuadrant = swingLeg.getNextRegularGaitSwingQuadrant();
          QuadrupedSupportPolygon nextSwingLegSupportPolygon = updatedSupportPolygon.replaceFootstepCopy(swingLeg, desiredPosition);
-         nextSwingLegSupportPolygon.deleteLeg(nextRegularGaitSwingQuadrant);
+         nextSwingLegSupportPolygon.removeFootstep(nextRegularGaitSwingQuadrant);
          drawSupportPolygon(nextSwingLegSupportPolygon, tripleSupportPolygons[i * 2 + 1]);
 
          //if there's a common draw it
