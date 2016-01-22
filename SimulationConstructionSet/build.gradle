@@ -3,7 +3,7 @@ apply plugin: 'java-library-distribution'
 apply from: 'gradleScripts/util.gradle'
 
 sourceCompatibility = 1.7
-version = '1.0'
+version = "${rootProject.version}"
 
 setupDefaultDirectoryStructure()
 
@@ -47,6 +47,8 @@ task fatJar(type: Jar) {
     }
 
     baseName = "${project.name}-fat"
+
+    subprojects.each {subProject -> subProject.name}
 
     def deps = project.configurations.runtime
     def depClasses = { deps.collect { it.isDirectory() ? it : project.zipTree(it) } }
