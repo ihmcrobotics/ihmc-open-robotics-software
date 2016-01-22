@@ -2351,7 +2351,15 @@ public class ConvexPolygon2d implements Geometry2d
    public List<Vector2d> getOutSideFacingOrthoNormalVectorsCopy()
    {
       checkIfUpToDate();
+      
+      if (numberOfVertices == 1)
+         return null;
+      
       Vector2d[] outsideFacingOrthogonalVectors = new Vector2d[numberOfVertices];
+      for (int i = 0; i < numberOfVertices; i++)
+      {
+         outsideFacingOrthogonalVectors[i] = new Vector2d();
+      }
       
       getOutSideFacingOrthoNormalVectors(outsideFacingOrthogonalVectors);
 
