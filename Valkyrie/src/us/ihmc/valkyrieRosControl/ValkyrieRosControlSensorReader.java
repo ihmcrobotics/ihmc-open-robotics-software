@@ -23,6 +23,8 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -68,6 +70,8 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    private final Matrix3d quaternionConversionMatrix = new Matrix3d();
    private final Matrix3d orientationMatrix = new Matrix3d();
 
+   private final ValkyrieTorqueHysteresisCompensator torqueHysteresisCompensator;
+
    @SuppressWarnings("unchecked")
    public ValkyrieRosControlSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessingConfiguration sensorProcessingConfiguration,
          TimestampProvider timestampProvider, List<YoJointHandleHolder> yoJointHandleHolders, List<YoIMUHandleHolder> yoIMUHandleHolders,
@@ -86,6 +90,9 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       startStandPrep = new BooleanYoVariable("startStandPrep", registry);
       startStandPrep.set(true);
       masterGain.set(0.3);
+
+      RigidBody rootBody = ScrewTools.getRootBody(stateEstimatorSensorDefinitions.getJointSensorDefinitions().get(0).getSuccessor());
+      torqueHysteresisCompensator = new ValkyrieTorqueHysteresisCompensator(rootBody, timeInStandprep, registry);
 
       Yaml yaml = new Yaml();
 
@@ -201,6 +208,8 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       if (standPrepStartTime > 0)
       {
          timeInStandprep.set(TimeTools.nanoSecondstoSeconds(timestamp - standPrepStartTime));
+
+         torqueHysteresisCompensator.compute();
 
          for (int i = 0; i < controlCommandCalculators.size(); i++)
          {
