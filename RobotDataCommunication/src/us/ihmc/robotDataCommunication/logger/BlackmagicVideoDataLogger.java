@@ -30,7 +30,7 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
    {
       super(logPath, logProperties, "Camera" + decklinkID);
       decklink = decklinkID;
-      quality = 0.75;
+      quality = options.getVideoQuality();
 
       createCaptureInterface();
    }
