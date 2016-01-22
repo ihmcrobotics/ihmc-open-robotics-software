@@ -1,4 +1,95 @@
 apply plugin: 'java'
 
 sourceCompatibility = 1.7
-version = '1.0'
+version = '0.7.0'
+
+if(buildType.equals("SNAPSHOT"))
+{
+  getGitHash()
+  getDate()
+  version += "-SNAPSHOT+date.${project.ext.date}.hash.${project.ext.revision}"
+}
+
+buildscript {
+  repositories {
+	  jcenter()
+	  mavenCentral()
+  }
+}
+
+repositories {
+  maven {
+    url "https://bengal.ihmc.us/nexus/content/repositories/releases/"
+  }
+
+  maven {
+      url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+  }
+
+  maven {
+      url "https://bengal.ihmc.us/nexus/content/repositories/central/"
+  }
+
+  jcenter()
+
+  mavenCentral()
+}
+
+dependencies {
+  subprojects.each { subProject ->
+    if(!subProject.name.toLowerCase().equals("acsell") && !subProject.name.toLowerCase().equals("atlas") && !subProject.name.toLowerCase().equals("valkyrie"))
+    {
+      runtime project(":${subProject.name}")
+      testRuntime project(":${subProject.name}")
+    }
+  }
+}
+
+task buildInfo {
+  doFirst {
+    getDate()
+    getGitHash()
+  }
+}
+
+task libJar(type: Jar, dependsOn: [assemble, buildInfo]) {
+    doFirst {
+      delete "${buildDir}/tmp"
+    }
+
+    manifest {
+        attributes(
+                "Created-By": "IHMC Gradle Build Script",
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "IHMC",
+
+                "Bundle-Name": project.name,
+                "Bundle-Version": project.version,
+                "Bundle-License": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+                "Bundle-Vendor": "IHMC")
+    }
+
+    from sourceSets.main.runtimeClasspath
+
+    baseName = "IHMCOpenRoboticsSoftware"
+
+    def deps = project.configurations.runtime
+    def depClasses = { deps.collect { it.isDirectory() ? it : project.zipTree(it) } }
+
+    from(depClasses) {
+        exclude 'META-INF/MANIFEST.MF', 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+    }
+}
+
+private void getGitHash() {
+  def cmd = "git rev-parse --short HEAD"
+  def proc = cmd.execute()
+  project.ext.revision = proc.text.trim()
+}
+
+private void getDate() {
+    def date = new Date()
+    def formattedDate = date.format('yyyy.MM.dd.HH.mm')
+    project.ext.date = formattedDate
+}
