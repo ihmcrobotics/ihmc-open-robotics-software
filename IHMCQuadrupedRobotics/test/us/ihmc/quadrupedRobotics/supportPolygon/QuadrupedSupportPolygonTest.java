@@ -79,7 +79,7 @@ public class QuadrupedSupportPolygonTest
    {
       QuadrupedSupportPolygon quadrupedSupportPolygon = createSimplePolygon();
       
-      FrameVector2d[] normalsToPack = new FrameVector2d[quadrupedSupportPolygon.getNumberOfSupportLegs()];
+      FrameVector2d[] normalsToPack = new FrameVector2d[quadrupedSupportPolygon.size()];
       for (int i = 0; i < normalsToPack.length; i++)
       {
          normalsToPack[i] = new FrameVector2d(quadrupedSupportPolygon.getReferenceFrame());
@@ -102,17 +102,17 @@ public class QuadrupedSupportPolygonTest
       RobotQuadrant[][] legPairs = quadrupedSupportPolygon.getLegPairs();
       assertEquals("not 4", 4, legPairs.length);
       
-      quadrupedSupportPolygon.deleteLeg(RobotQuadrant.FRONT_LEFT);
+      quadrupedSupportPolygon.removeFootstep(RobotQuadrant.FRONT_LEFT);
       
       legPairs = quadrupedSupportPolygon.getLegPairs();
       assertEquals("not 3", 3, legPairs.length);
       
-      quadrupedSupportPolygon.deleteLeg(RobotQuadrant.FRONT_RIGHT);
+      quadrupedSupportPolygon.removeFootstep(RobotQuadrant.FRONT_RIGHT);
       
       legPairs = quadrupedSupportPolygon.getLegPairs();
       assertEquals("not 1", 1, legPairs.length);
       
-      quadrupedSupportPolygon.deleteLeg(RobotQuadrant.HIND_LEFT);
+      quadrupedSupportPolygon.removeFootstep(RobotQuadrant.HIND_LEFT);
       
       JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
@@ -150,13 +150,13 @@ public class QuadrupedSupportPolygonTest
    public void testSizeMethods()
    {
       QuadrupedSupportPolygon variableSizedPolygon = create3LegPolygon();
-      assertEquals("not size 3", 3, variableSizedPolygon.getNumberOfSupportLegs());
-      variableSizedPolygon.deleteLeg(variableSizedPolygon.getFirstSupportingQuadrant());
-      assertEquals("not size 2", 2, variableSizedPolygon.getNumberOfSupportLegs());
-      variableSizedPolygon.deleteLeg(variableSizedPolygon.getFirstSupportingQuadrant());
-      assertEquals("not size 1", 1, variableSizedPolygon.getNumberOfSupportLegs());
-      variableSizedPolygon.deleteLeg(variableSizedPolygon.getFirstSupportingQuadrant());
-      assertEquals("not size 0", 0, variableSizedPolygon.getNumberOfSupportLegs());
+      assertEquals("not size 3", 3, variableSizedPolygon.size());
+      variableSizedPolygon.removeFootstep(variableSizedPolygon.getFirstSupportingQuadrant());
+      assertEquals("not size 2", 2, variableSizedPolygon.size());
+      variableSizedPolygon.removeFootstep(variableSizedPolygon.getFirstSupportingQuadrant());
+      assertEquals("not size 1", 1, variableSizedPolygon.size());
+      variableSizedPolygon.removeFootstep(variableSizedPolygon.getFirstSupportingQuadrant());
+      assertEquals("not size 0", 0, variableSizedPolygon.size());
    }
    
    @DeployableTestMethod(estimatedDuration = 0.1)
@@ -210,7 +210,7 @@ public class QuadrupedSupportPolygonTest
    {
       QuadrupedSupportPolygon createSimplePolygon = createSimplePolygon();
       
-      FrameVector2d[] normalsToPack = new FrameVector2d[createSimplePolygon.getNumberOfSupportLegs()];
+      FrameVector2d[] normalsToPack = new FrameVector2d[createSimplePolygon.size()];
       for (int j = 0; j < normalsToPack.length; j++)
       {
          normalsToPack[j] = new FrameVector2d();
