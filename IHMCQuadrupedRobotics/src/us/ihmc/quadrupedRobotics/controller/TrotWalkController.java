@@ -37,6 +37,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicLineSegment;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
@@ -76,6 +77,9 @@ public class TrotWalkController extends QuadrupedController
 
    private final DoubleYoVariable quadAlpha = new DoubleYoVariable("quadAlpha", registry);
 
+   private final FramePoint copFramePoint = new FramePoint();
+   private final YoFramePoint centerOfPressure = new YoFramePoint("centerOfPressure", ReferenceFrame.getWorldFrame(), registry);
+   private final YoGraphicPosition centerOfPressureViz = new YoGraphicPosition("centerOfPressureViz", centerOfPressure, 0.01, YoAppearance.Black());
    private final DoubleYoVariable centerOfPressureS1 = new DoubleYoVariable("centerOfPressureS1", registry);
    private final DoubleYoVariable centerOfPressureS2 = new DoubleYoVariable("centerOfPressureS2", registry);
 
@@ -214,7 +218,7 @@ public class TrotWalkController extends QuadrupedController
 
       yoGraphicsListRegistry.registerArtifact("icpViz", icpViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact("centerOfMassViz", centerOfMassViz.createArtifact());
-      
+      yoGraphicsListRegistry.registerArtifact("centerOfPressureViz", centerOfPressureViz.createArtifact());
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -318,13 +322,16 @@ public class TrotWalkController extends QuadrupedController
 
    private void updateEstimates()
    {
+      //update frames
       referenceFrames.updateFrames();
       bodyPose.setToZero(referenceFrames.getBodyFrame());
       bodyPose.changeFrame(worldFrame);
 
+      //update orientation qs
       q_roll.set(bodyPose.getRoll());
       q_pitch.set(bodyPose.getPitch());
 
+      //update feet locations
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotQuadrant);
@@ -334,8 +341,10 @@ public class TrotWalkController extends QuadrupedController
          feetLocations.get(robotQuadrant).set(footLocation);
       }
 
+      //update centroid
       fourFootSupportPolygon.getCentroid(centroid);
 
+      //update relative offset from center of feet to center of body
       double body_x = bodyPose.getX() - centroid.getX();
       double body_y = bodyPose.getY() - centroid.getY();
       double yaw = bodyPose.getYaw();
@@ -359,6 +368,35 @@ public class TrotWalkController extends QuadrupedController
       icp.setX(coMPosition.getX() + centerOfMassVelocity.getX() / omega);
       icp.setY(coMPosition.getY() + centerOfMassVelocity.getY() / omega);
       icp.setZ(lowestFootZ);
+      
+      //update CoP
+      double fzTotal = 0.0;
+      copFramePoint.setToZero(worldFrame);
+      
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         YoFramePoint foot = feetLocations.get(robotQuadrant);
+         YoFrameVector legForce = legForces.get(robotQuadrant);
+
+         double fz = legForce.getZ();
+         fzTotal += fz;
+
+         double x = foot.getX() * fz;
+         double y = foot.getY() * fz;
+         double z = foot.getZ() * fz;
+         
+         copFramePoint.add(x, y, z);
+      }
+
+      if (fzTotal < 1e-14)
+      {
+         copFramePoint.set(Double.NaN, Double.NaN, Double.NaN);
+      }
+      else
+      {
+         copFramePoint.scale(1.0 / fzTotal);
+      }
+      centerOfPressure.set(copFramePoint);
    }
 
    public void computeFeetContactState()
@@ -395,7 +433,18 @@ public class TrotWalkController extends QuadrupedController
          xAdjust = 0.3;
       if (xAdjust < -0.3)
          xAdjust = -0.3;
-
+      
+      
+      
+      double icpX = icp.getX();
+      double icpY = icp.getY();
+      
+      double copX = centerOfPressure.getX();
+      double copY = centerOfPressure.getY();
+      
+      
+      
+      
       centerOfPressureS1.set(0.5 - yAdjust + xAdjust);
       centerOfPressureS2.set(0.5 + yAdjust + xAdjust);
 
