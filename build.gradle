@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.7
 version = '0.7.0'
@@ -12,12 +13,15 @@ if(buildType.equals("SNAPSHOT"))
 
 buildscript {
   repositories {
+    mavenLocal()
 	  jcenter()
 	  mavenCentral()
   }
 }
 
 repositories {
+  mavenLocal()
+
   maven {
     url "https://bengal.ihmc.us/nexus/content/repositories/releases/"
   }
@@ -33,6 +37,40 @@ repositories {
   jcenter()
 
   mavenCentral()
+}
+
+subprojects {
+  apply plugin: 'java'
+  apply plugin: 'maven-publish'
+
+  buildscript {
+    repositories {
+      mavenLocal()
+  	  jcenter()
+  	  mavenCentral()
+    }
+  }
+
+  task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+  }
+
+  publishing {
+    publications {
+      mavenJava(MavenPublication) {
+
+        groupId 'us.ihmc'
+        artifactId "${project.name}"
+        version "${project.version}"
+
+        from components.java
+
+        artifact sourceJar {
+          classifier "sources"
+        }
+      }
+    }
+  }
 }
 
 dependencies {
@@ -52,7 +90,11 @@ task buildInfo {
   }
 }
 
-task libJar(type: Jar, dependsOn: [assemble, buildInfo]) {
+task fatSourceJar(type: Jar, dependsOn: [assemble, buildInfo]) {
+      from sourceSets.main.runtimeClasspath
+}
+
+task fatLibJar(type: Jar, dependsOn: [assemble, buildInfo]) {
     doFirst {
       delete "${buildDir}/tmp"
     }
@@ -70,9 +112,7 @@ task libJar(type: Jar, dependsOn: [assemble, buildInfo]) {
                 "Bundle-Vendor": "IHMC")
     }
 
-    from sourceSets.main.runtimeClasspath
-
-    baseName = "IHMCOpenRoboticsSoftware"
+    baseName = "${project.name}"
 
     def deps = project.configurations.runtime
     def depClasses = { deps.collect { it.isDirectory() ? it : project.zipTree(it) } }
@@ -80,6 +120,22 @@ task libJar(type: Jar, dependsOn: [assemble, buildInfo]) {
     from(depClasses) {
         exclude 'META-INF/MANIFEST.MF', 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
     }
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      groupId 'us.ihmc'
+      artifactId "${project.name}"
+      version "${project.version}"
+
+      artifact fatLibJar
+
+      artifact fatSourceJar {
+        classifier "sources"
+      }
+    }
+  }
 }
 
 private void getGitHash() {
