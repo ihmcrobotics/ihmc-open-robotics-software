@@ -29,3 +29,9 @@ jar {
       "Bundle-Vendor": "IHMC")
    }
 }
+
+distributions {
+   main {
+      version = ""
+   }
+}

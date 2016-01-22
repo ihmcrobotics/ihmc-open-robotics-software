@@ -34,11 +34,10 @@ public class QuadrantDependentList<V>
    {
       super();
       
-      elements[FRONT_LEFT_ORDINAL] = frontLeftObject;
-      elements[FRONT_RIGHT_ORDINAL] = frontRightObject;
-      elements[HIND_LEFT_ORDINAL] = hindLeftObject;
-      elements[HIND_RIGHT_ORDINAL] = hindRightObject;
-      size = 4;
+      set(RobotQuadrant.FRONT_LEFT, frontLeftObject);
+      set(RobotQuadrant.FRONT_RIGHT, frontRightObject);
+      set(RobotQuadrant.HIND_RIGHT, hindLeftObject);
+      set(RobotQuadrant.HIND_LEFT, hindRightObject);
    }
    
    public V get(RobotQuadrant key)
@@ -92,14 +91,14 @@ public class QuadrantDependentList<V>
       
       for (int i = 0, j = 0; i < RobotQuadrant.values.length; i++)
       {
-         if (containsKey(RobotQuadrant.values[i]))
+         if (containsQuadrant(RobotQuadrant.values[i]))
          {
             quadrantArrays[size][j++] = RobotQuadrant.values[i];
          }
       }
    }
    
-   public boolean containsKey(RobotQuadrant robotQuadrant)
+   public boolean containsQuadrant(RobotQuadrant robotQuadrant)
    {
       return elements[robotQuadrant.ordinal()] != null;
    }

@@ -9,7 +9,9 @@ public enum NetworkParameterKeys
    rosURI(false, "Fully qualified ROS master URI.", "http://127.0.0.1:11311"),
    head(false, "Hostname/IP of the head.", ""),
    leftHand(false, "Hostname/IP of the left hand.", ""),
-   rightHand(false, "Hostname/IP of the right hand.", "");
+   rightHand(false, "Hostname/IP of the right hand.", ""), 
+   
+   loggedCameras(false, "Cameras to be recorded by the logger. Should be a comma seperated list", "");
    
    
    private final boolean required;
