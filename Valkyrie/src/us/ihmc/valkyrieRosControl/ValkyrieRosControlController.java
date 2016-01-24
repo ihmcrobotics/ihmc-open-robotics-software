@@ -3,8 +3,6 @@ package us.ihmc.valkyrieRosControl;
 import java.io.IOException;
 import java.util.HashMap;
 
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.affinity.Affinity;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -42,7 +40,6 @@ import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
-import us.ihmc.wholeBodyController.DRCOutputWriterWithAccelerationIntegration;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
@@ -86,7 +83,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
    
    private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
 
-   private static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
+   public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
    private static final boolean DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET = true;
 
    private MultiThreadedRealTimeRobotController robotController;
@@ -128,6 +125,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
       humanoidJointPoseList.createPoseSetters();
       humanoidJointPoseList.createPoseSettersJustArms();
+      humanoidJointPoseList.createPoseSettersJustLegs();
       humanoidJointPoseList.createPoseSettersTuneWaist();
 
       ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
@@ -231,22 +229,6 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
        */
       ValkyrieRosControlOutputWriter valkyrieOutputWriter = new ValkyrieRosControlOutputWriter(robotModel);
       DRCOutputWriter drcOutputWriter = valkyrieOutputWriter;
-      
-      if (INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
-      {
-         double controllerDT = robotModel.getControllerDT();
-         LegJointName[] legJointNames = new LegJointName[]{LegJointName.HIP_YAW, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL};
-         ArmJointName[] armJointNames = new ArmJointName[]{ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH};
-         DRCOutputWriterWithAccelerationIntegration valkyrieOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(
-               drcOutputWriter, legJointNames, armJointNames, null, controllerDT, true, true);
-
-         valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.9, 0.9);
-         valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
-         valkyrieOutputWriterWithAccelerationIntegration.setVelocityGains(4.75, 6.0);
-         valkyrieOutputWriterWithAccelerationIntegration.setPositionGains(0.0, 0.0);
-
-         drcOutputWriter = valkyrieOutputWriterWithAccelerationIntegration;
-      }
 
       if (DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET)
       {
