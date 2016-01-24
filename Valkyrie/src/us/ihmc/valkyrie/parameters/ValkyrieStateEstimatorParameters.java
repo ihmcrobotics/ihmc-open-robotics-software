@@ -3,13 +3,17 @@ package us.ihmc.valkyrie.parameters;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ANGULAR_VELOCITY;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_LINEAR_ACCELERATION;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ORIENTATION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_TAU;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_VELOCITY;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -30,9 +34,10 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    private final double kinematicsPelvisLinearVelocityFilterFreqInHertz;
    private final double kinematicsPelvisPositionFilterFreqInHertz;
 
-   private final double jointVelocitySlopTimeForBacklashCompensation;
+   private final double lowerBodyJointVelocityBacklashSlopTime;
+   private final double armJointVelocityBacklashSlopTime;
 
-   private final double jointVelocityFilterFrequencyHz;
+   private final double lowerBodyJointVelocityFilterFrequencyHz;
    private final double orientationFilterFrequencyHz;
    private final double angularVelocityFilterFrequencyHz;
    private final double linearAccelerationFilterFrequencyHz;
@@ -40,8 +45,6 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    private final ValkyrieSensorInformation sensorInformation;
    private final ValkyrieJointMap jointMap;
 
-//   private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
-//   private SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
    private SensorNoiseParameters sensorNoiseParameters = null;
 
    private final boolean doElasticityCompensation;
@@ -64,20 +67,21 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       this.footForceSensorNames = sensorInformation.getFeetForceSensorNames();
       this.wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
-      jointVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
+      lowerBodyJointVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
 
       orientationFilterFrequencyHz        = 20.0; //50.0;
       angularVelocityFilterFrequencyHz    = 20.0; //50.0;
       linearAccelerationFilterFrequencyHz = 20.0; //runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
 
-      jointVelocitySlopTimeForBacklashCompensation = 0.03;
+      lowerBodyJointVelocityBacklashSlopTime = 0.03;
+      armJointVelocityBacklashSlopTime = 0.06;
 
       doElasticityCompensation = runningOnRealRobot;
-      jointElasticityFilterFrequencyHz = 10.0;
-      maximumDeflection = 0.2;
+      jointElasticityFilterFrequencyHz = 20.0;
+      maximumDeflection = 0.25;
       defaultJointStiffness = 10000;
       for (RobotSide robotSide : RobotSide.values)
-         jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 8000.0);
+         jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 6500.0);
 
       kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
       kinematicsPelvisLinearVelocityFilterFreqInHertz = 50.0;
@@ -87,42 +91,61 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    public void configureSensorProcessing(SensorProcessing sensorProcessing)
    {
       String[] namesOfJointsUsingOutputEncoder = jointMap.getNamesOfJointsUsingOutputEncoder();
+      String[] armJointNames = createArrayWithArmJointNames();
       
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
-      DoubleYoVariable elasticityAlphaFilter = sensorProcessing.createAlphaFilter("jointDeflectionDotAlphaFilter", jointElasticityFilterFrequencyHz);
-      DoubleYoVariable maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", maximumDeflection);
-      Map<OneDoFJoint, DoubleYoVariable> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
 
       DoubleYoVariable orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", orientationFilterFrequencyHz);
       DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", angularVelocityFilterFrequencyHz);
       DoubleYoVariable linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", linearAccelerationFilterFrequencyHz);
 
-      if (doElasticityCompensation)
-         sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, maxDeflection, false);
-
-      // For the joints using the output encoders: Compute velocity from the joint position using finite difference.
-      DoubleYoVariable jointOutputEncoderVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointOutputEncoderVelocityAlphaFilter", jointVelocityFilterFrequencyHz);
+      // Lower body: For the joints using the output encoders: Compute velocity from the joint position using finite difference.
+      DoubleYoVariable jointOutputEncoderVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointOutputEncoderVelocityAlphaFilter", lowerBodyJointVelocityFilterFrequencyHz);
       sensorProcessing.computeJointVelocityFromFiniteDifferenceOnlyForSpecifiedJoints(jointOutputEncoderVelocityAlphaFilter, false, namesOfJointsUsingOutputEncoder);
 
-      // Then apply for all: 1- alpha filter 2- backlash compensator.
-      DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", jointVelocityFilterFrequencyHz);
-      DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointVelocityBacklashSlopTime", registry);
-      jointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
-      sensorProcessing.addSensorAlphaFilter(jointVelocityAlphaFilter, false, JOINT_VELOCITY);
-      sensorProcessing.addJointVelocityBacklashFilter(jointVelocitySlopTime, false);
-
+      // Lower body: Then apply for all: 1- alpha filter 2- backlash compensator 3- elasticity compensation.
+      DoubleYoVariable lowerBodyJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointVelocityAlphaFilter", lowerBodyJointVelocityFilterFrequencyHz);
+      DoubleYoVariable lowerBodyJointVelocitySlopTime = new DoubleYoVariable("lowerBodyJointVelocityBacklashSlopTime", registry);
+      lowerBodyJointVelocitySlopTime.set(lowerBodyJointVelocityBacklashSlopTime);
+      sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(lowerBodyJointVelocityAlphaFilter, false, JOINT_VELOCITY, armJointNames);
+      sensorProcessing.addJointVelocityBacklashFilterWithJointsToIgnore(lowerBodyJointVelocitySlopTime, false, armJointNames);
+      
       if (doElasticityCompensation)
-         sensorProcessing.addJointVelocityElasticyCompensator(jointPositionStiffness, maxDeflection, elasticityAlphaFilter, false);
+      {
+         DoubleYoVariable elasticityAlphaFilter = sensorProcessing.createAlphaFilter("jointDeflectionDotAlphaFilter", jointElasticityFilterFrequencyHz);
+         DoubleYoVariable maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", maximumDeflection);
+         Map<OneDoFJoint, DoubleYoVariable> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
+
+         Map<String, Integer> filteredTauForElasticity = sensorProcessing.addSensorAlphaFilter(elasticityAlphaFilter, true, JOINT_TAU);
+         sensorProcessing.addJointPositionElasticyCompensatorWithJointsToIgnore(jointPositionStiffness, maxDeflection, filteredTauForElasticity, false, armJointNames);
+         sensorProcessing.addJointVelocityElasticyCompensatorWithJointsToIgnore(jointPositionStiffness, maxDeflection, filteredTauForElasticity, false, armJointNames);
+      }
+
+      // Arm joints: Apply for all: 1- backlash compensator.
+      DoubleYoVariable armJointVelocitySlopTime = new DoubleYoVariable("armJointVelocityBacklashSlopTime", registry);
+      armJointVelocitySlopTime.set(armJointVelocityBacklashSlopTime);
+      sensorProcessing.addJointVelocityBacklashFilterOnlyForSpecifiedJoints(armJointVelocitySlopTime, false, armJointNames);
       
       //imu
       sensorProcessing.addSensorAlphaFilter(orientationAlphaFilter, false, IMU_ORIENTATION);
       sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, IMU_ANGULAR_VELOCITY);
       sensorProcessing.addSensorAlphaFilter(linearAccelerationAlphaFilter, false, IMU_LINEAR_ACCELERATION);
+   }
 
-      // Raw finite difference on all joint positions
-      DoubleYoVariable dummyAlphaFilter = new DoubleYoVariable("dummyAlphaFilter", registry);
-      sensorProcessing.computeJointVelocityFromFiniteDifference(dummyAlphaFilter, true);
+   private String[] createArrayWithArmJointNames()
+   {
+      List<String> nameList = new ArrayList<>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (ArmJointName armJointName : jointMap.getArmJointNames())
+         {
+            nameList.add(jointMap.getArmJointName(robotSide, armJointName));
+         }
+      }
+
+      return nameList.toArray(new String[0]);
    }
 
    @Override
@@ -200,7 +223,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public double getPelvisVelocityBacklashSlopTime()
    {
-      return jointVelocitySlopTimeForBacklashCompensation;
+      return lowerBodyJointVelocityBacklashSlopTime;
    }
 
    @Override
