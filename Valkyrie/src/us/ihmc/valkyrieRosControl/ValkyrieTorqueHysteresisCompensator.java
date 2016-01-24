@@ -14,7 +14,6 @@ public class ValkyrieTorqueHysteresisCompensator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("TorqueHysteresisCompensator");
 
-   private final List<OneDoFJoint> processedJoints = new ArrayList<>();
    private final List<YoJointHandleHolder> processedJointHandles = new ArrayList<>();
    private final List<TorqueHysteresisCompensatorYoVariable> hysteresisCompensators = new ArrayList<>();
 
@@ -28,16 +27,16 @@ public class ValkyrieTorqueHysteresisCompensator
    /**
     * Need to be extracted to a config file
     */
-   private final String[] jointShortNamesToProcess = new String[]{"Hip", "Torso"};
+   private final String[] jointShortNamesToProcess = new String[]{"Hip", "Knee", "Torso", "Shoulder", "Elbow"};
 
    public ValkyrieTorqueHysteresisCompensator(List<YoJointHandleHolder> yoJointHandleHolders, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 
-      torqueHysteresisAmplitude.set(7.0);
+      torqueHysteresisAmplitude.set(1.5);
       jointAccelerationMin.set(1.0);
       jointVelocityMax.set(0.1);
-      rampUpTime.set(5.0);
+      rampUpTime.set(1.0);
       rampDownTime.set(0.1);
 
       for (YoJointHandleHolder jointHandle : yoJointHandleHolders)
@@ -47,9 +46,10 @@ public class ValkyrieTorqueHysteresisCompensator
          if (!shouldProcessJoint(jointName))
             continue;
 
-         processedJoints.add(joint);
          processedJointHandles.add(jointHandle);
-         hysteresisCompensators.add(new TorqueHysteresisCompensatorYoVariable("tau_offHyst_", joint, torqueHysteresisAmplitude, jointAccelerationMin, jointVelocityMax, rampUpTime, rampDownTime, yoTime, registry));
+         TorqueHysteresisCompensatorYoVariable hysteresisCompensator = new TorqueHysteresisCompensatorYoVariable("tau_offHyst_", joint, torqueHysteresisAmplitude, jointAccelerationMin, jointVelocityMax, rampUpTime, rampDownTime, yoTime, registry);
+         hysteresisCompensator.enable();
+         hysteresisCompensators.add(hysteresisCompensator);
       }
    }
 
@@ -63,7 +63,7 @@ public class ValkyrieTorqueHysteresisCompensator
          jointHandle.getOneDoFJoint().setQddDesired(jointHandle.getControllerQddDesired());
          hysteresisCompensator.update();
          
-         jointHandle.addDesiredEffort(hysteresisCompensator.getDoubleValue());
+         jointHandle.addOffetControllerTauDesired(hysteresisCompensator.getDoubleValue());
       }
    }
 

@@ -56,11 +56,6 @@ public class YoJointHandleHolder
       handle.setDesiredEffort(effort);
    }
 
-   public void addDesiredEffort(double effortOffset)
-   {
-      setDesiredEffort(tauDesired.getDoubleValue() + effortOffset);
-   }
-
    public OneDoFJoint getOneDoFJoint()
    {
       return joint;
@@ -84,6 +79,11 @@ public class YoJointHandleHolder
    public double getControllerTauDesired()
    {
       return controllerTauDesired.getDoubleValue();
+   }
+
+   public void addOffetControllerTauDesired(double effortOffset)
+   {
+      controllerTauDesired.add(effortOffset);
    }
 
    public double getControllerQddDesired()
