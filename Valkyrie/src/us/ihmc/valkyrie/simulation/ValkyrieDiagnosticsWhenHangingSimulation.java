@@ -38,9 +38,9 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw);
       
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
-      humanoidJointPoseList.createPoseSetters();
+//      humanoidJointPoseList.createPoseSetters();
       humanoidJointPoseList.createPoseSettersJustArms();
-      humanoidJointPoseList.createPoseSettersTuneWaist();
+//      humanoidJointPoseList.createPoseSettersTuneWaist();
       
       boolean robotIsHanging = true;
       HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation = new HumanoidDiagnosticsWhenHangingSimulation(humanoidJointPoseList, ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS, robotIsHanging, robotModel, robotInitialSetup, computeTorqueOffsetsBasedOnAverages);
@@ -50,18 +50,50 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       diagnosticsWhenHangingController = humanoidDiagnosticsWhenHangingSimulation.getDiagnosticsWhenHangingController();
       SimulationConstructionSet simulationConstructionSet = humanoidDiagnosticsWhenHangingSimulation.getSimulationConstructionSet();
       
-//      loadUpperBodyDataAndDoSomeOptimizationTests(humanoidDiagnosticsWhenHangingSimulation);
-      //loadArmDataAndDoSomeOptimizationTests(humanoidDiagnosticsWhenHangingSimulation);
-//      loadLegDataAndDoSomeOptimizationTests(humanoidDiagnosticsWhenHangingSimulation);
+//      loadDataAndDoSomeOptimizationTests(humanoidDiagnosticsWhenHangingSimulation);
+
+
+      String side = "right";
+//    String[] containsToOptimizeCoM = new String[]{side + "ShoulderPitchLinkCoM", side + "leftShoulderRollLinkCoM", side + "ShoulderYawLinkCoM", side + "ElbowPitchLinkCoM", side + "ForearmLinkCoM"};
+//    String[] containsToOptimizeTorqueScore = new String[]{"ShoulderPitch", "ShoulderRoll", "ShoulderYaw", "ElbowPitch"};
+
+      String[] containsToOptimizeCoM = new String[]{side + "ThighCoM", side + "ShinCoM", side + "FootCoM"};
+      String[] containsToOptimizeTorqueScore = new String[]{side + "HipYaw", side + "HipRoll", side + "HipPitch", side + "KneePitch", side + "AnklePitch", side + "AnkleRoll"};
+
+//      String[] containsToOptimizeCoM = new String[]{"pelvisCoM", "leftThighCoM", "leftShinCoM", "leftFootCoM", "rightThighCoM", "rightShinCoM", "rightFootCoM"};
+//      String[] containsToOptimizeTorqueScore = new String[]{"torsoYaw", "torsoPitch", "torsoRoll", "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll", "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll"};
+
+      humanoidDiagnosticsWhenHangingSimulation.setVariablesToOptimize(containsToOptimizeCoM, containsToOptimizeTorqueScore);
       
+//      humanoidDiagnosticsWhenHangingSimulation.updateDataAndComputeTorqueOffsetsBasedOnAverages(computeTorqueOffsetsBasedOnAverages);
       
-      humanoidDiagnosticsWhenHangingSimulation.updateDataAndComputeTorqueOffsetsBasedOnAverages(computeTorqueOffsetsBasedOnAverages);
+      simulationConstructionSet.addButton(new UpdateDataAndComputeTorqueOffsetsBasedOnAveragesButton(humanoidDiagnosticsWhenHangingSimulation));
+//      PrintTorqueOffsetsButton printTorqueOffsetsButton = new PrintTorqueOffsetsButton();
+//      simulationConstructionSet.addButton(printTorqueOffsetsButton);
+   }
+
+   private class UpdateDataAndComputeTorqueOffsetsBasedOnAveragesButton extends JButton implements ActionListener
+   {
+      private static final long serialVersionUID = 262981153765265286L;
+      private final HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation;
       
-      PrintTorqueOffsetsButton printTorqueOffsetsButton = new PrintTorqueOffsetsButton();
-      simulationConstructionSet.addButton(printTorqueOffsetsButton);
+      public UpdateDataAndComputeTorqueOffsetsBasedOnAveragesButton(HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation)
+      {
+         super("ComputeTorqueOffsets");
+         this.humanoidDiagnosticsWhenHangingSimulation = humanoidDiagnosticsWhenHangingSimulation;
+         
+         this.addActionListener(this);
+      }
+
+      @Override
+      public void actionPerformed(ActionEvent e)
+      {
+       humanoidDiagnosticsWhenHangingSimulation.updateDataAndComputeTorqueOffsetsBasedOnAverages(computeTorqueOffsetsBasedOnAverages);
+      }
+
    }
    
-   
+
    private class PrintTorqueOffsetsButton extends JButton implements ActionListener
    {
       private static final long serialVersionUID = 262981153765265286L;
@@ -109,70 +141,25 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
             System.out.println(oneDoFJoint.getName() + " torque offset = " + offsetString);
          }
       }
-
-      System.out.println();
-
-      double reflectTop = 1.0;
-      double reflectBottom = -1.0;
-      boolean topJointFirst = true;
-
-//      InefficientPushRodTransmission leftAnkleTransmission = new InefficientPushRodTransmission(PushRodTransmissionJoint.ANKLE, reflectTop, reflectBottom,
-//                                                                topJointFirst, null, null);
-//
-//      reflectBottom = 1.0;
-//      InefficientPushRodTransmission rightAnkleTransmission = new InefficientPushRodTransmission(PushRodTransmissionJoint.ANKLE, reflectTop, reflectBottom,
-//                                                                 topJointFirst, null, null);
-
-//      double[] leftAnkleForceOffsets = leftAnkleTransmission.jointToActuatorEffortAtZero(diagnosticsWhenHangingController.getAnkleTorqueOffsets(RobotSide.LEFT));
-//      double[] rightAnkleForceOffsets = rightAnkleTransmission.jointToActuatorEffortAtZero(diagnosticsWhenHangingController.getAnkleTorqueOffsets(RobotSide.RIGHT));
-
-//      System.out.println("\nLeft ankle J5 force offset = " + doubleFormat.format(-leftAnkleForceOffsets[0]));
-//      System.out.println("Left ankle J6 force offset = " + doubleFormat.format(-leftAnkleForceOffsets[1]));
-//
-//      System.out.println("\nRight ankle J5 force offset = " + doubleFormat.format(-rightAnkleForceOffsets[0]));
-//      System.out.println("Right ankle J6 force offset = " + doubleFormat.format(-rightAnkleForceOffsets[1]));
-
-      reflectTop = -1.0;
-      reflectBottom = 1.0;
-      topJointFirst = false;
-
-//      InefficientPushRodTransmission waistTransmission = new InefficientPushRodTransmission(PushRodTransmissionJoint.WAIST, reflectTop, reflectBottom,
-//                                                            topJointFirst, null, null);
-
-//      double[] waistForceOffsets = waistTransmission.jointToActuatorEffortAtZero(diagnosticsWhenHangingController.getWaistTorqueOffsets());
-
-      // TODO: Need to figure out why this is not seeming to work correctly...
-//      System.out.println("\nWaist J2 force offset = " + doubleFormat.format(waistForceOffsets[0]));
-//      System.out.println("Waist J3 force offset = " + doubleFormat.format(-waistForceOffsets[1]));
-
    }
-   
+
    private void loadDataAndDoSomeOptimizationTests(HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation)
    {
       SimulationConstructionSet simulationConstructionSet = humanoidDiagnosticsWhenHangingSimulation.getSimulationConstructionSet();
-      simulationConstructionSet.readData("D:/20141204_091350_Valkyrie_VerySlowArmMotionsWithMorePoses_Processed.data.gz");
+      simulationConstructionSet.readData("/home/val/Desktop/diagnosticsWhenHangingRenamed.data.gz.data");
 
       humanoidDiagnosticsWhenHangingSimulation.restoreCorruptorVariableValues();
-
-      //      setInitialCorruptorArmMassValues(simulationConstructionSet);
-      //      setInitialCorruptorArmCoMOffsetValues(simulationConstructionSet);
-      setInitialCorruptorArmTorqueOffsetValues(simulationConstructionSet);
-
-      //      humanoidDiagnosticsWhenHangingSimulation.setCorruptorVariableValuesToOptimizeToZero();
+//      setInitialCorruptorValues(simulationConstructionSet);
 
 
-      String side = "Right";
+      String side = "left";
 
-      // Forearm only:
-      String[] containsToOptimizeCoM = new String[]{side + "ForearmCoM"};
-      String[] containsToOptimizeTorqueScore = new String[]{""};
+      String[] containsToOptimizeCoM = new String[]{side + "ShoulderPitchLinkCoM", side + "leftShoulderRollLinkCoM", side + "ShoulderYawLinkCoM", side + "ElbowPitchLinkCoM", side + "ForearmLinkCoM"};
+      String[] containsToOptimizeTorqueScore = new String[]{"ShoulderPitch", "ShoulderRoll", "ShoulderYaw", "ElbowPitch"};
 
-      //    String[] containsToOptimizeCoM = new String[]{side + "ShoulderRotatorCoM", side + "ShoulderAdductorCoM", side + "ForearmCoM"};
-      //    String[] containsToOptimizeTorqueOffset = new String[]{side + "Shoulder", side + "Elbow"};
       humanoidDiagnosticsWhenHangingSimulation.setVariablesToOptimize(containsToOptimizeCoM, containsToOptimizeTorqueScore);
-
    }
-   
+  
    private void loadLegDataAndDoSomeOptimizationTests(HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation)
    {
       SimulationConstructionSet simulationConstructionSet = humanoidDiagnosticsWhenHangingSimulation.getSimulationConstructionSet();

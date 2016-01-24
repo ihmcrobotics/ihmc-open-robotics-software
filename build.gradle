@@ -3,6 +3,7 @@ apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.7
 version = '0.7.0'
+rootProject.ext.vcsUrl = "https://bitbucket.org/ihmcrobotics/ihmc-open-robotics-software.git"
 
 if(buildType.equals("SNAPSHOT"))
 {
@@ -61,24 +62,20 @@ subprojects {
 
         groupId 'us.ihmc'
         artifactId "${project.name}"
-        version "${project.version}"
+        version "${rootProject.version}"
 
         from components.java
 
         artifact sourceJar {
           classifier "sources"
         }
-      }
-    }
-  }
-}
 
-dependencies {
-  subprojects.each { subProject ->
-    if(!subProject.name.toLowerCase().equals("acsell") && !subProject.name.toLowerCase().equals("atlas") && !subProject.name.toLowerCase().equals("valkyrie"))
-    {
-      runtime project(":${subProject.name}")
-      testRuntime project(":${subProject.name}")
+        pom.withXml {
+          def licenseNode = asNode().appendNode('licenses').appendNode('license')
+          licenseNode.appendNode('name', project.ext.licenseName)
+          licenseNode.appendNode('url', project.ext.licenseURL)
+        }
+      }
     }
   }
 }
@@ -87,54 +84,6 @@ task buildInfo {
   doFirst {
     getDate()
     getGitHash()
-  }
-}
-
-task fatSourceJar(type: Jar, dependsOn: [assemble, buildInfo]) {
-      from sourceSets.main.runtimeClasspath
-}
-
-task fatLibJar(type: Jar, dependsOn: [assemble, buildInfo]) {
-    doFirst {
-      delete "${buildDir}/tmp"
-    }
-
-    manifest {
-        attributes(
-                "Created-By": "IHMC Gradle Build Script",
-                "Implementation-Title": project.name,
-                "Implementation-Version": project.version,
-                "Implementation-Vendor": "IHMC",
-
-                "Bundle-Name": project.name,
-                "Bundle-Version": project.version,
-                "Bundle-License": "http://www.apache.org/licenses/LICENSE-2.0.txt",
-                "Bundle-Vendor": "IHMC")
-    }
-
-    baseName = "${project.name}"
-
-    def deps = project.configurations.runtime
-    def depClasses = { deps.collect { it.isDirectory() ? it : project.zipTree(it) } }
-
-    from(depClasses) {
-        exclude 'META-INF/MANIFEST.MF', 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
-    }
-}
-
-publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      groupId 'us.ihmc'
-      artifactId "${project.name}"
-      version "${project.version}"
-
-      artifact fatLibJar
-
-      artifact fatSourceJar {
-        classifier "sources"
-      }
-    }
   }
 }
 
