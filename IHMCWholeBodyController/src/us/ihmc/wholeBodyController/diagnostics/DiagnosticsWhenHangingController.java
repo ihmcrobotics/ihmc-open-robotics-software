@@ -92,25 +92,25 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    private final DoubleYoVariable alphaFootForce = new DoubleYoVariable("alphaDiagFootForce", registry);
    private final SideDependentList<AlphaFilteredYoFrameVector> footForcesRawFiltered = new SideDependentList<AlphaFilteredYoFrameVector>();
    private final SideDependentList<AlphaFilteredYoFrameVector> footTorquesRawFiltered = new SideDependentList<AlphaFilteredYoFrameVector>();
-   
+
    private final TorqueOffsetPrinter torqueOffsetPrinter;
 
    private final HumanoidJointPoseList humanoidJointPoseList;
 
-   public DiagnosticsWhenHangingController(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, MomentumBasedController momentumBasedController, TorqueOffsetPrinter torqueOffsetPrinter)
+   public DiagnosticsWhenHangingController(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging,
+         MomentumBasedController momentumBasedController, TorqueOffsetPrinter torqueOffsetPrinter)
    {
       super(HighLevelState.DIAGNOSTICS);
 
       this.humanoidJointPoseList = humanoidJointPoseList;
       humanoidJointPoseList.setParentRegistry(registry);
-      
+
       splineDuration.set(3.0);
 
-//    desiredPoseSetterIndex.set(0);
       this.useArms = useArms;
 
       this.torqueOffsetPrinter = torqueOffsetPrinter;
-      
+
       ditherAmplitude.set(0.3);
       ditherFrequency.set(5.0);
 
@@ -136,7 +136,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          initialPositions.put(oneDoFJoint, initialPosition);
          finalPositions.put(oneDoFJoint, finalPosition);
 
-//       System.out.println("Setting initial and final positions for " + oneDoFJoint.getName() + " to " + oneDoFJoint.getQ());
+         //       System.out.println("Setting initial and final positions for " + oneDoFJoint.getName() + " to " + oneDoFJoint.getQ());
       }
 
       setDesiredPositionsFromPoseList(finalPositions);
@@ -149,19 +149,18 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          pdControllers.put(oneDoFJoints.get(i), controller);
       }
 
-      setPDControllerGains();
+      setDefaultPDControllerGains();
       createTransitionSplines();
 
       createHelpers(robotIsHanging);
       setTransitionSplines();
 
       stateMachine = new StateMachine<DiagnosticsWhenHangingState>("DiagnosticsState", "DiagnosticsSwitchTime", DiagnosticsWhenHangingState.class, yoTime,
-                                      registry);
+            registry);
 
       InitializeState initializeState = new InitializeState(DiagnosticsWhenHangingState.INITIALIZE);
       initializeState.setDefaultNextState(DiagnosticsWhenHangingState.SPLINE_BETWEEN_POSITIONS);
       stateMachine.addState(initializeState);
-
 
       SplineBetweenPositionsState splineBetweenPositionsState = new SplineBetweenPositionsState(DiagnosticsWhenHangingState.SPLINE_BETWEEN_POSITIONS);
       splineBetweenPositionsState.setDefaultNextState(DiagnosticsWhenHangingState.CHECK_DIAGNOSTICS);
@@ -179,8 +178,8 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          }
       };
 
-      StateTransition<DiagnosticsWhenHangingState> transitionToFinished =
-         new StateTransition<DiagnosticsWhenHangingState>(DiagnosticsWhenHangingState.FINISHED, finishedTransitionCondition);
+      StateTransition<DiagnosticsWhenHangingState> transitionToFinished = new StateTransition<DiagnosticsWhenHangingState>(DiagnosticsWhenHangingState.FINISHED,
+            finishedTransitionCondition);
       checkDiagnosticsState.addStateTransition(transitionToFinished);
 
       stateMachine.addState(checkDiagnosticsState);
@@ -206,11 +205,11 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          footTorquesRaw.put(robotSide, footTorqueRaw);
 
          AlphaFilteredYoFrameVector footForceRawFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(sidePrefix + "DiagFootForceRawFilt", "",
-                                                              registry, alphaFootForce, footForceRaw);
+               registry, alphaFootForce, footForceRaw);
          footForcesRawFiltered.put(robotSide, footForceRawFiltered);
 
          AlphaFilteredYoFrameVector footTorqueRawFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(sidePrefix + "DiagFootTorqueRawFilt",
-                                                               "", registry, alphaFootForce, footTorqueRaw);
+               "", registry, alphaFootForce, footTorqueRaw);
          footTorquesRawFiltered.put(robotSide, footTorqueRawFiltered);
       }
    }
@@ -219,7 +218,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    {
       return fullRobotModel;
    }
-   
+
    public ArrayList<OneDoFJoint> getOneDoFJoints()
    {
       return oneDoFJoints;
@@ -241,12 +240,12 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    {
       return registry.getName();
    }
-   
+
    public DiagnosticsWhenHangingHelper getDiagnosticsWhenHangingHelper(OneDoFJoint oneDoFJoint)
    {
-     return helpers.get(oneDoFJoint);
+      return helpers.get(oneDoFJoint);
    }
-   
+
    public double getTorqueOffsetSign(OneDoFJoint oneDoFJoint)
    {
       return torqueOffsetSigns.get(oneDoFJoint);
@@ -257,7 +256,6 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    {
       return "Controller for doing diagnostics when robot is hanging in the air. It will go to several known configurations and check that the joint torques are reasonable.";
    }
-
 
    @Override
    public void doControl()
@@ -277,12 +275,12 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          transferTorqueOffsetsToOutputWriter();
       }
 
-      if (printTorqueOffsets.getBooleanValue() && torqueOffsetPrinter!=null)
+      if (printTorqueOffsets.getBooleanValue() && torqueOffsetPrinter != null)
       {
          printTorqueOffsets.set(false);
-//         System.err.println("Need to reimplement this again!");
+         //         System.err.println("Need to reimplement this again!");
          torqueOffsetPrinter.printTorqueOffsets(this);
-//         printOffsetsForCoeffsForValkyrie();
+         //         printOffsetsForCoeffsForValkyrie();
       }
 
       if (printForceSensorsOffsets.getBooleanValue())
@@ -364,7 +362,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          updatePDController(oneDoFJoints.get(i), stateMachine.timeInCurrentState());
       }
    }
-   
+
    private void setDesiredPositionsFromPoseList(LinkedHashMap<OneDoFJoint, DoubleYoVariable> positionListToSet)
    {
       SideDependentList<ArrayList<OneDoFJoint>> armJointList = humanoidJointPoseList.getArmJoints(fullRobotModel);
@@ -387,7 +385,6 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
             positionListToSet.get(armJoint).set(armJointAngles[i]);
          }
 
-
          ArrayList<OneDoFJoint> legJoints = legJointList.get(robotSide);
          double[] legJointAngles = legJointAngleList.get(robotSide);
 
@@ -405,7 +402,6 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          positionListToSet.get(spineJoint).set(spineJointAngles[i]);
       }
    }
-
 
    private class InitializeState extends State<DiagnosticsWhenHangingState>
    {
@@ -436,10 +432,9 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       @Override
       public void doTransitionOutOfAction()
       {
-//       startDiagnostics.set(false);
+         //       startDiagnostics.set(false);
       }
    }
-
 
    private class SplineBetweenPositionsState extends State<DiagnosticsWhenHangingState>
    {
@@ -490,7 +485,6 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
    }
 
-
    private class CheckDiagnosticsState extends State<DiagnosticsWhenHangingState>
    {
       public CheckDiagnosticsState(DiagnosticsWhenHangingState stateEnum)
@@ -522,7 +516,6 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
    }
 
-
    private class FinishedState extends State<DiagnosticsWhenHangingState>
    {
       public FinishedState(DiagnosticsWhenHangingState stateEnum)
@@ -550,7 +543,6 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
    }
 
-
    private void updatePDController(OneDoFJoint oneDoFJoint, double timeInCurrentState)
    {
       PDController pdController = pdControllers.get(oneDoFJoint);
@@ -568,7 +560,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       {
          desiredPositions.get(oneDoFJoint).set(desiredPosition);
       }
-      
+
       desiredVelocities.get(oneDoFJoint).set(desiredVelocity);
 
       double tau = pdController.compute(oneDoFJoint.getQ(), desiredPosition, oneDoFJoint.getQd(), desiredVelocity);
@@ -598,7 +590,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          YoMinimumJerkTrajectory spline = new YoMinimumJerkTrajectory(oneDoFJoint.getName() + "TransitionSpline", registry);
          transitionSplines.put(oneDoFJoint, spline);
 
-//       spline.setParams(initialPositions.get(oneDoFJoint), 0.0, 0.0, finalPositions.get(oneDoFJoint), 0.0, 0.0, 0.0, 3.0);
+         //       spline.setParams(initialPositions.get(oneDoFJoint), 0.0, 0.0, finalPositions.get(oneDoFJoint), 0.0, 0.0, 0.0, 3.0);
 
          DoubleYoVariable desiredPosition = new DoubleYoVariable("q_d_" + oneDoFJoint.getName(), registry);
          DoubleYoVariable desiredVelocity = new DoubleYoVariable("qd_d_" + oneDoFJoint.getName(), registry);
@@ -651,7 +643,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          makeArmJointHelper(RobotSide.LEFT, 1.0, false, ArmJointName.SHOULDER_YAW);
          makeArmJointHelper(RobotSide.RIGHT, -1.0, false, ArmJointName.SHOULDER_YAW);
 
-         makeArmJointHelper(RobotSide.LEFT, -1.0, true, ArmJointName.ELBOW_PITCH);    // TODO: Should this be false here?
+         makeArmJointHelper(RobotSide.LEFT, -1.0, true, ArmJointName.ELBOW_PITCH); // TODO: Should this be false here?
          makeArmJointHelper(RobotSide.RIGHT, -1.0, true, ArmJointName.ELBOW_PITCH);
       }
 
@@ -660,7 +652,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       {
          topLegJoints.set(robotSide, fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW));
       }
-      
+
       OneDoFJoint spineJoint = fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW);
       helpers.put(spineJoint, new DiagnosticsWhenHangingHelper(spineJoint, false, robotIsHanging, topLegJoints, registry));
       torqueOffsetSigns.put(spineJoint, 1.0);
@@ -673,14 +665,11 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       helpers.put(spineJoint, new DiagnosticsWhenHangingHelper(spineJoint, false, robotIsHanging, topLegJoints, registry));
       torqueOffsetSigns.put(spineJoint, 1.0);
 
-
-
       makeLegJointHelper(RobotSide.LEFT, 1.0, false, LegJointName.HIP_YAW);
       makeLegJointHelper(RobotSide.RIGHT, -1.0, false, LegJointName.HIP_YAW);
 
       makeLegJointHelper(RobotSide.LEFT, 1.0, true, LegJointName.HIP_PITCH);
       makeLegJointHelper(RobotSide.RIGHT, -1.0, true, LegJointName.HIP_PITCH);
-
 
       makeLegJointHelper(RobotSide.LEFT, 1.0, false, LegJointName.HIP_ROLL);
       makeLegJointHelper(RobotSide.RIGHT, -1.0, false, LegJointName.HIP_ROLL);
@@ -702,7 +691,6 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       torqueOffsetSigns.put(armJoint, torqueOffsetSign);
    }
 
-
    private void makeLegJointHelper(RobotSide robotSide, double torqueOffsetSign, boolean preserveY, LegJointName legJointName)
    {
       OneDoFJoint legJoint = fullRobotModel.getLegJoint(robotSide, legJointName);
@@ -721,7 +709,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       double ankleRollTorqueOffset = helpers.get(ankleRoll).getTorqueOffset();
       double ankleRollTorqueOffsetSign = torqueOffsetSigns.get(ankleRoll);
 
-      return new double[] {anklePitchTorqueOffset * anklePitchTorqueOffsetSign, ankleRollTorqueOffset * ankleRollTorqueOffsetSign};
+      return new double[] { anklePitchTorqueOffset * anklePitchTorqueOffsetSign, ankleRollTorqueOffset * ankleRollTorqueOffsetSign };
    }
 
    public double[] getWaistTorqueOffsets()
@@ -735,9 +723,8 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       double waistRollTorqueOffset = helpers.get(waistRoll).getTorqueOffset();
       double waistRollTorqueOffsetSign = torqueOffsetSigns.get(waistRoll);
 
-      return new double[] {waistPitchTorqueOffset * waistPitchTorqueOffsetSign, waistRollTorqueOffset * waistRollTorqueOffsetSign};
+      return new double[] { waistPitchTorqueOffset * waistPitchTorqueOffsetSign, waistRollTorqueOffset * waistRollTorqueOffsetSign };
    }
-
 
    public ArrayList<DoubleYoVariable> getTorqueOffsetVariables()
    {
@@ -767,20 +754,20 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       return null;
    }
 
-   private void setPDControllerGains()
+   private void setDefaultPDControllerGains()
    {
       if (useArms)
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW)).setProportionalGain(20.0);
-            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW)).setDerivativeGain(4.0);
+            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW)).setProportionalGain(30.0);
+            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW)).setDerivativeGain(3.0);
 
-            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH)).setProportionalGain(60.0);
-            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH)).setDerivativeGain(8.0);
+            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH)).setProportionalGain(50.0);
+            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH)).setDerivativeGain(5.0);
 
-            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL)).setProportionalGain(60.0);
-            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL)).setDerivativeGain(8.0);
+            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL)).setProportionalGain(50.0);
+            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL)).setDerivativeGain(5.0);
 
             pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH)).setProportionalGain(40.0);
             pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH)).setDerivativeGain(4.0);
@@ -819,7 +806,10 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       }
    }
 
-   public enum DiagnosticsWhenHangingState {INITIALIZE, SPLINE_BETWEEN_POSITIONS, CHECK_DIAGNOSTICS, FINISHED}
+   public enum DiagnosticsWhenHangingState
+   {
+      INITIALIZE, SPLINE_BETWEEN_POSITIONS, CHECK_DIAGNOSTICS, FINISHED
+   }
 
    public void addUpdatable(Updatable updatable)
    {
@@ -919,7 +909,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       }
 
       offsetString += "\n      footForceSensorTareOffsets = new SideDependentList<SpatialForceVector>(leftFootForceSensorTareOffset_" + timestamp
-                      + ", rightFootForceSensorTareOffset_" + timestamp + ");";
+            + ", rightFootForceSensorTareOffset_" + timestamp + ");";
 
       System.out.println(offsetString);
    }
@@ -934,20 +924,19 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       }
    }
 
-
-// private void tareFootSensors()
-// {
-//    for (RobotSide robotSide : RobotSide.values)
-//    {
-//       FootSwitchInterface footSwitch = footSwitches.get(robotSide);
-//       tempWrench.setToZero(footSwitch.getMeasurementFrame(), footSwitch.getMeasurementFrame());
-//
-//       footForcesRawFiltered.get(robotSide).getFrameTupleIncludingFrame(tempFrameVector);
-//       tempWrench.setLinearPart(tempFrameVector);
-//       footTorquesRawFiltered.get(robotSide).getFrameTupleIncludingFrame(tempFrameVector);
-//       tempWrench.setAngularPart(tempFrameVector);
-//
-//       footSwitch.setSensorWrenchOffset(tempWrench);
-//    }
-// }
+   // private void tareFootSensors()
+   // {
+   //    for (RobotSide robotSide : RobotSide.values)
+   //    {
+   //       FootSwitchInterface footSwitch = footSwitches.get(robotSide);
+   //       tempWrench.setToZero(footSwitch.getMeasurementFrame(), footSwitch.getMeasurementFrame());
+   //
+   //       footForcesRawFiltered.get(robotSide).getFrameTupleIncludingFrame(tempFrameVector);
+   //       tempWrench.setLinearPart(tempFrameVector);
+   //       footTorquesRawFiltered.get(robotSide).getFrameTupleIncludingFrame(tempFrameVector);
+   //       tempWrench.setAngularPart(tempFrameVector);
+   //
+   //       footSwitch.setSensorWrenchOffset(tempWrench);
+   //    }
+   // }
 }
