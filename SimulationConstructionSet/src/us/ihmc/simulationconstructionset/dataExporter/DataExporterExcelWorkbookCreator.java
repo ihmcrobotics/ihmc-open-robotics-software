@@ -37,6 +37,8 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 
 public class DataExporterExcelWorkbookCreator
 {
+   private static boolean DEBUG = false;
+
    private final Robot robot;
    private final List<PinJoint> pinJoints = new ArrayList<PinJoint>();
    private final List<Joint> allJoints = new ArrayList<Joint>();
@@ -473,7 +475,7 @@ public class DataExporterExcelWorkbookCreator
    {
       if (joint instanceof PinJoint)
          pinJoints.add((PinJoint) joint);
-      else if (!(joint instanceof FloatingJoint))
+      else if (DEBUG && !(joint instanceof FloatingJoint))
          PrintTools.error("Joint " + joint.getName() + " not currently handled by " + DataExporterExcelWorkbookCreator.class.getSimpleName());
 
       for (Joint child : joint.getChildrenJoints())
