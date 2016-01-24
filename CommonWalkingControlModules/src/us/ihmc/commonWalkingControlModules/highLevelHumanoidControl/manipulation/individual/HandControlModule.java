@@ -12,7 +12,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
@@ -39,6 +38,12 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.geometry.FrameMatrix3D;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.ConstantPoseTrajectoryGenerator;
@@ -46,22 +51,13 @@ import us.ihmc.robotics.math.trajectories.MultipleWaypointsOneDoFJointTrajectory
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.OneDoFJointTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.OneDoFJointWayPointTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.geometry.FrameMatrix3D;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.trajectories.providers.CurrentPositionProvider;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -74,6 +70,10 @@ import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionAction;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.trajectories.providers.CurrentPositionProvider;
+import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class HandControlModule
 {
@@ -83,8 +83,6 @@ public class HandControlModule
    // It was sending 14,000 variables. This and others reduces it a bit when set to false.
    private static final boolean REGISTER_YOVARIABLES = true;
 
-   private static final boolean DEBUG = false;
-   
    private static final boolean USE_VELOCITYCONSTRAINED_INSTEADOF_STRAIGHTLINE = false;
 
    private final YoVariableRegistry registry;
@@ -115,7 +113,8 @@ public class HandControlModule
    private final MultipleWaypointsOrientationTrajectoryGenerator waypointOrientationTrajectoryGenerator;
    private final WrapperForPositionAndOrientationTrajectoryGenerators wayPointPositionAndOrientationTrajectoryGenerator;
 
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> qDesireds = new LinkedHashMap<>();
+   private final Map<OneDoFJoint, DoubleYoVariable> qDesireds = new LinkedHashMap<>();
+   private final Map<OneDoFJoint, DoubleYoVariable> qdDesireds = new LinkedHashMap<>();
 
    private final BooleanYoVariable isExecutingHandStep;
 
@@ -212,10 +211,10 @@ public class HandControlModule
 
       oneDoFJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, hand), OneDoFJoint.class);
 
-      if (DEBUG)
+      for (OneDoFJoint joint : oneDoFJoints)
       {
-         for (OneDoFJoint joint : oneDoFJoints)
-            qDesireds.put(joint, new DoubleYoVariable("qDesired_" + joint.getName(), registry));
+         qDesireds.put(joint, new DoubleYoVariable("q_d_" + joint.getName() + "HandControlModule", registry));
+         qdDesireds.put(joint, new DoubleYoVariable("qd_d_" + joint.getName() + "HandControlModule", registry));
       }
 
       requestedState = new EnumYoVariable<HandControlState>(name + "RequestedState", "", registry, HandControlState.class, true);
@@ -405,6 +404,16 @@ public class HandControlModule
       fromState.addStateTransition(swingToSupportTransition);
    }
 
+   public void initialize()
+   {
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         OneDoFJoint joint = oneDoFJoints[i];
+         qDesireds.get(joint).set(joint.getQ());
+         qdDesireds.get(joint).set(joint.getQd());
+      }
+   }
+
    public void doControl()
    {
       boolean isAtLeastOneJointDisabled = checkIfAtLeastOneJointIsDisabled();
@@ -428,10 +437,10 @@ public class HandControlModule
 
       checkAndSendHandPoseStatusIsCompleted();
 
-      if (DEBUG)
+      for (OneDoFJoint joint : oneDoFJoints)
       {
-         for (OneDoFJoint joint : oneDoFJoints)
-            qDesireds.get(joint).set(joint.getqDesired());
+         qDesireds.get(joint).set(joint.getqDesired());
+         qdDesireds.get(joint).set(joint.getQdDesired());
       }
    }
 
@@ -840,22 +849,12 @@ public class HandControlModule
 
    public void moveUsingQuinticSplines(Map<OneDoFJoint, Double> desiredJointPositions, double time)
    {
-      moveUsingQuinticSplines(desiredJointPositions, time, true);
-   }
-
-   private void moveUsingQuinticSplines(Map<OneDoFJoint, Double> desiredJointPositions, double time, boolean checkTrajectoryTime)
-   {
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          if (!desiredJointPositions.containsKey(oneDoFJoints[i]))
             throw new RuntimeException("not all joint positions specified");
       }
 
-      // Limit arm joint motor speed based on Boston Dynamics Limit
-      // of 700 rad/s input to the transmission.
-      // For now, just set move time to at least 2 seconds
-      if (checkTrajectoryTime)
-         time = Math.max(2.0, time);
       trajectoryTimeProvider.set(time);
 
       for (OneDoFJoint oneDoFJoint : desiredJointPositions.keySet())
@@ -864,16 +863,10 @@ public class HandControlModule
 
          // make sure that we do not set the desired position outside the joint limit
          desiredPositions = MathTools.clipToMinMax(desiredPositions, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
-
          quinticPolynomialTrajectoryGenerators.get(oneDoFJoint).setFinalPosition(desiredPositions);
       }
 
-      jointSpaceHandControlState.setTrajectories(quinticPolynomialTrajectoryGenerators);
-      requestedState.set(jointSpaceHandControlState.getStateEnum());
-      stateMachine.checkTransitionConditions();
-
-      if (handPoseStatusProducer != null)
-         handPoseStatusProducer.sendStartedStatus(robotSide);
+      executeJointspaceTrajectory(quinticPolynomialTrajectoryGenerators);
    }
    
    public void initializeDesiredToCurrent()
@@ -889,15 +882,9 @@ public class HandControlModule
          jointCurrentPositionMap.put( oneDoFJoint, oneDoFJoint.getQ() );
 
          quinticPolynomialTrajectoryGenerators.get(oneDoFJoint).setFinalPosition(desiredPosition);
-         quinticPolynomialTrajectoryGenerators.get(oneDoFJoint).initialize();
       }
 
-      jointSpaceHandControlState.setTrajectories(quinticPolynomialTrajectoryGenerators);
-      requestedState.set(jointSpaceHandControlState.getStateEnum());
-      stateMachine.checkTransitionConditions();
-
-      if (handPoseStatusProducer != null)
-         handPoseStatusProducer.sendStartedStatus(robotSide);
+      executeJointspaceTrajectory(quinticPolynomialTrajectoryGenerators, true);
    }
 
    public void moveUsingCubicTrajectory(ArmJointTrajectoryPacket trajectoryPacket)
@@ -910,7 +897,6 @@ public class HandControlModule
          return;
       }
 
-      boolean success = true;
       int waypoints = trajectoryPacket.trajectoryPoints.length;
       for (int jointIdx = 0; jointIdx < oneDoFJoints.length; jointIdx++)
       {
@@ -923,87 +909,20 @@ public class HandControlModule
             double velocity = trajectoryPacket.trajectoryPoints[i].velocities[jointIdx];
             double time = trajectoryPacket.trajectoryPoints[i].time;
 
-            // Safety for the new arms Boston Dynamic limit
-            // ----------------------------------------------------
-            // 1. limit the positions to be within joint limits
-            position = MathTools.clipToMinMax(position, oneDoFJoints[jointIdx].getJointLimitLower(), oneDoFJoints[jointIdx].getJointLimitUpper());
-
-            if (position != trajectoryPacket.trajectoryPoints[i].positions[jointIdx])
+            if (!MathTools.isInsideBoundsInclusive(position, oneDoFJoints[jointIdx].getJointLimitLower(), oneDoFJoints[jointIdx].getJointLimitUpper()))
             {
-               System.out.println(this.getClass().getSimpleName() + " limited the angle because of new arms safety");
+               PrintTools.warn(this, "Waypoint " + i + " is out of the joint position limits, cancelling action.");
+               trajectoryGenerator.clear();
+               return;
             }
 
-            // 2. limit the velocities at the waypoints to a maximum of 7rad/s
-            velocity = MathTools.clipToMinMax(velocity, -7.0, 7.0);
-
-            if (velocity != trajectoryPacket.trajectoryPoints[i].velocities[jointIdx])
-            {
-               System.out.println(this.getClass().getSimpleName() + " limited the joint velocity because of new arms safety");
-            }
-
-            // 3. make sure there are at least two seconds in between all waypoints
-            double MAX_JOINT_VEL = 1.0;
-            double maxDisplacement = 0.0;
-            for (int j = 0; j < oneDoFJoints.length; j++)
-            {
-               double displacement;
-               if (i == 0)
-               {
-                  ArmJointName jointName = fullRobotModel.getRobotSpecificJointNames().getArmJointNames()[j];
-                  double current = fullRobotModel.getArmJoint(robotSide, jointName).getQ();
-                  displacement = current - trajectoryPacket.trajectoryPoints[i].positions[j];
-               }
-               else
-               {
-                  displacement = trajectoryPacket.trajectoryPoints[i].positions[j] - trajectoryPacket.trajectoryPoints[i - 1].positions[j];
-               }
-
-               maxDisplacement = Math.max(maxDisplacement, Math.abs(displacement));
-            }
-
-            double minDeltaTime = maxDisplacement / MAX_JOINT_VEL;
-
-            if (i == 0)
-            {
-               double deltaTime = trajectoryPacket.trajectoryPoints[i].time;
-               if (deltaTime < minDeltaTime)
-               {
-                  time = minDeltaTime;
-
-                  if (jointIdx == 0)
-                  {
-                     System.out.println(this.getClass().getSimpleName() + " set time in between waypoints to " + minDeltaTime + " seconds "
-                                        + "for safety (this only affects the arms)");
-                  }
-               }
-            }
-            else
-            {
-               double deltaTime = trajectoryPacket.trajectoryPoints[i].time - trajectoryPacket.trajectoryPoints[i - 1].time;
-               if (deltaTime < minDeltaTime)
-               {
-                  time = trajectoryPacket.trajectoryPoints[i - 1].time + minDeltaTime;
-
-                  if (jointIdx == 0)
-                  {
-                     System.out.println(this.getClass().getSimpleName() + " set time in between waypoints to " + minDeltaTime + " seconds"
-                                        + "for new arm safety (this only affects the arms)");
-                  }
-               }
-            }
-
-            // ----------------------------------------------------
-
-            success &= trajectoryGenerator.appendWaypoint(time, position, velocity);
+            boolean success = trajectoryGenerator.appendWaypoint(time, position, velocity);
+            if (!success)
+               return;
          }
       }
 
-      if (success)
-      {
-         jointSpaceHandControlState.setTrajectories(wholeBodyWaypointsPolynomialTrajectoryGenerators);
-         requestedState.set(jointSpaceHandControlState.getStateEnum());
-         stateMachine.checkTransitionConditions();
-      }
+      executeJointspaceTrajectory(wholeBodyWaypointsPolynomialTrajectoryGenerators);
    }
 
    @Deprecated
@@ -1015,12 +934,6 @@ public class HandControlModule
             throw new RuntimeException("not all joint positions specified");
       }
 
-      // Limit arm joint motor speed based on Boston Dynamics Limit
-      // of 700 rad/s input to the transmission.
-      // For now, just set move time to at least 2 seconds
-      // Note that for way points, this will be really really slow because
-      // it will be TWO seconds between each way point
-      time = Math.max(2.0, time);
       trajectoryTimeProvider.set(time);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
@@ -1037,12 +950,41 @@ public class HandControlModule
          waypointsPolynomialTrajectoryGenerators.get(oneDoFJoint).setDesiredPositions(desiredPositions);
       }
 
-      jointSpaceHandControlState.setTrajectories(waypointsPolynomialTrajectoryGenerators);
+      executeJointspaceTrajectory(waypointsPolynomialTrajectoryGenerators);
+   }
+
+   private void executeJointspaceTrajectory(Map<OneDoFJoint, ? extends OneDoFJointTrajectoryGenerator> trajectoryGenrators)
+   {
+      executeJointspaceTrajectory(trajectoryGenrators, false);
+   }
+
+   private void executeJointspaceTrajectory(Map<OneDoFJoint, ? extends OneDoFJointTrajectoryGenerator> trajectoryGenrators, boolean initializeToCurrent)
+   {
+      if (!initializeToCurrent && stateMachine.getCurrentState() == jointSpaceHandControlState)
+      {
+         for (int i = 0; i < oneDoFJoints.length; i++)
+         {
+            OneDoFJoint joint = oneDoFJoints[i];
+            double initialPosition = qDesireds.get(joint).getDoubleValue();
+            double initialVelocity = qdDesireds.get(joint).getDoubleValue();
+            trajectoryGenrators.get(joint).initialize(initialPosition, initialVelocity);
+         }
+      }
+      else
+      {
+         for (int i = 0; i < oneDoFJoints.length; i++)
+         {
+            OneDoFJoint joint = oneDoFJoints[i];
+            trajectoryGenrators.get(joint).initialize();
+         }
+      }
+
+      jointSpaceHandControlState.setTrajectories(trajectoryGenrators);
       requestedState.set(jointSpaceHandControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
 
-//    if (handPoseStatusProducer != null)
-//       handPoseStatusProducer.sendStartedStatus(robotSide);
+      if (handPoseStatusProducer != null)
+         handPoseStatusProducer.sendStartedStatus(robotSide);
    }
 
    public boolean isLoadBearing()
@@ -1069,7 +1011,7 @@ public class HandControlModule
          jointCurrentPositionMap.put(oneDoFJoint, oneDoFJoint.getQ());
       }
 
-      moveUsingQuinticSplines(jointCurrentPositionMap, 0.0, false);
+      moveUsingQuinticSplines(jointCurrentPositionMap, 0.0);
    }
 
    public void resetJointIntegrators()
