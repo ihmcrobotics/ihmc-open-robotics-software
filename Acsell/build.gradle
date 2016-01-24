@@ -1,5 +1,5 @@
 plugins {
-  id 'org.hidetake.ssh' version '1.1.3'
+	id 'org.hidetake.ssh' version '1.1.3'
 }
 
 apply plugin: 'java'
@@ -7,6 +7,9 @@ apply from: 'gradleScripts/util.gradle'
 
 sourceCompatibility = 1.7
 version = "${rootProject.version}"
+project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
+project.ext.licenseName = "GPLv3"
+project.ext.bintrayLicenseName = "GPL-3.0"
 
 setupDefaultDirectoryStructure()
 
@@ -18,43 +21,43 @@ setupProjectSpecificDependencies()
 
 remotes {
 	stepprController
-   	{
-    	host = '10.66.171.20' //CPU1   	
-		// Set the username and password in ~/.gradle/gradle.properties.
-        user = project.hasProperty('steppr_username')?"${steppr_username}":"invalid"
-        password = project.hasProperty('steppr_password')?"${steppr_password}":"invalid"
-        knownHosts = allowAnyHosts
-	}
+			{
+				host = '10.66.171.20' //CPU1
+				// Set the username and password in ~/.gradle/gradle.properties.
+				user = project.hasProperty('steppr_username') ? "${steppr_username}" : "invalid"
+				password = project.hasProperty('steppr_password') ? "${steppr_password}" : "invalid"
+				knownHosts = allowAnyHosts
+			}
 	wandererController
-    {
-		host = '10.66.171.21'
-		// Set the username and password in ~/.gradle/gradle.properties.
-        user = project.hasProperty('wanderer_username')?"${wanderer_username}":"invalid"
-        password = project.hasProperty('wanderer_password')?"${wanderer_password}":"invalid"
-		knownHosts = allowAnyHosts
-    }
+			{
+				host = '10.66.171.21'
+				// Set the username and password in ~/.gradle/gradle.properties.
+				user = project.hasProperty('wanderer_username') ? "${wanderer_username}" : "invalid"
+				password = project.hasProperty('wanderer_password') ? "${wanderer_password}" : "invalid"
+				knownHosts = allowAnyHosts
+			}
 }
 
 jar {
 	List depend = []
 	configurations.runtime.each {
-		if(!it.name.contains("IHMCHumanoidOperatorInterface")){
+		if (!it.name.contains("IHMCHumanoidOperatorInterface")) {
 			depend.add('lib/' + it.name)
 		}
 	}
-   manifest {
-      attributes(
-            'Created-By': 'IHMC Gradle Build Script',
-            'Class-Path': depend.join(' '),
-            "Implementation-Title": project.name,
-            "Implementation-Version": project.version,
-            "Implementation-Vendor": "IHMC",
+	manifest {
+		attributes(
+				'Created-By': 'IHMC Gradle Build Script',
+				'Class-Path': depend.join(' '),
+				"Implementation-Title": project.name,
+				"Implementation-Version": project.version,
+				"Implementation-Vendor": "IHMC",
 
-            "Bundle-Name": project.name,
-            "Bundle-Version": project.version,
-            "Bundle-License": "http://gnu.org/licenses/gpl-3.0.txt",
-            "Bundle-Vendor": "IHMC")
-   }
+				"Bundle-Name": project.name,
+				"Bundle-Version": project.version,
+				"Bundle-License": "${project.ext.licenseURL}",
+				"Bundle-Vendor": "IHMC")
+	}
 }
 
 task deploy(dependsOn: assemble) << {
@@ -62,53 +65,48 @@ task deploy(dependsOn: assemble) << {
 	def rep;
 	def scriptDir;
 	def directory;
-	
-	
-	
-	if(!project.hasProperty("robot")) {
+
+
+
+	if (!project.hasProperty("robot")) {
 		throw new GradleException("No robot passed in. Pass in -Probot=[robot].");
-	}
-	else if("$robot" == "steppr") {
-	    	
-    	if(!project.hasProperty('steppr_username') || !project.hasProperty('steppr_password'))
-    	{
-    		throw new GradleException("Please set stepper_username and steppr_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
-    	}
-    	
+	} else if ("$robot" == "steppr") {
+
+		if (!project.hasProperty('steppr_username') || !project.hasProperty('steppr_password')) {
+			throw new GradleException("Please set stepper_username and steppr_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+		}
+
 		rep = remotes.stepprController
 		scriptDir = new File("scripts/steppr");
 		directory = "steppr"
-	}
-	else if("$robot" == "wanderer") {
-	
-		    	
-    	if(!project.hasProperty('wanderer_username') || !project.hasProperty('wanderer_password'))
-    	{
-    		throw new GradleException("Please set wanderer_username and wanderer_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
-    	}
-	
+	} else if ("$robot" == "wanderer") {
+
+
+		if (!project.hasProperty('wanderer_username') || !project.hasProperty('wanderer_password')) {
+			throw new GradleException("Please set wanderer_username and wanderer_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+		}
+
 		rep = remotes.wandererController
 		scriptDir = new File("scripts/wanderer");
 		directory = "wanderer"
-	}
-	else {
+	} else {
 		throw new GradleException("Invalid robot \"$robot\" passed in. Valid options are \"steppr\" and \"wanderer\"");
 	}
-	
+
 	println "Trying ssh"
 	ssh.run {
 		session(rep) {
 			execute("mkdir -p " + directory + "/lib")
 			println "Adding Jars"
 			configurations.runtime.each
-            {
-            	put it, directory + '/lib'
-        	}
+					{
+						put it, directory + '/lib'
+					}
 
             put jar.archivePath, directory + '/AcsellController.jar'
 
             def scriptDirCollection = files { scriptDir.listFiles() }
-	        put scriptDirCollection, directory
+			put scriptDirCollection, directory
 
             scriptDirCollection.each {
                 execute 'chmod 777 ' + directory + '/' + it.name

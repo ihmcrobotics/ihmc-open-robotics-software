@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 public enum HumanoidSpinePose
 {
-   STAND_PREP, TURN_LEFT, TURN_RIGHT, LEAN_FORWARD_A_LOT, LEAN_BACKWARD_A_LOT, LEAN_LEFT, LEAN_RIGHT,
+   STAND_PREP, ZERO, TURN_LEFT, TURN_RIGHT, LEAN_FORWARD_A_LOT, LEAN_BACKWARD_A_LOT, LEAN_LEFT, LEAN_RIGHT,
    LEAN_FORWARD, LEAN_BACKWARD;
  
    /**
@@ -20,6 +20,8 @@ public enum HumanoidSpinePose
       {
          case STAND_PREP:
             return new double[]{0.0, -0.06, 0.0};
+         case ZERO:
+            return new double[]{0.0, 0.0, 0.0};
          case TURN_LEFT:
             return new double[]{0.1, -0.06, 0.0};
          case TURN_RIGHT:
