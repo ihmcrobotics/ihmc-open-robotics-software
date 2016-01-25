@@ -10,7 +10,7 @@ dependencies
 	compile group: 'com.github.vincentfk', name:'joptimizer', version:'3.3.0'
 	
 	
-	compile project(':IHMCRoboticsToolkit')
-    testCompile project(':IHMCUnitTesting')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
+    testCompile project(':IHMCOpenRoboticsSoftware:IHMCUnitTesting')
 	
 }

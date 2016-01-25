@@ -8,11 +8,11 @@ dependencies {
     compile group: 'org.ejml', name: 'all', version: '0.28'
     compile group: 'gov.nist.math', name: 'jama', version: '1.0.3' 
       
-    compile project(':Graphics3DAdapter')
-    compile project(':SimulationConstructionSet')
+    compile project(':IHMCOpenRoboticsSoftware:Graphics3DAdapter')
+    compile project(':IHMCOpenRoboticsSoftware:SimulationConstructionSet')
     
-    compile project(':IHMCRoboticsToolkit')
-    testCompile project(':IHMCUnitTesting')
+    compile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
+    testCompile project(':IHMCOpenRoboticsSoftware:IHMCUnitTesting')
   
     
 }

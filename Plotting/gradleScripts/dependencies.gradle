@@ -2,7 +2,7 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 	
-	compile project(':IHMCUnitTesting')
-	compile project(':Graphics3DAdapter')
-	compile project(':IHMCRoboticsToolkit')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCUnitTesting')
+	compile project(':IHMCOpenRoboticsSoftware:Graphics3DAdapter')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
 }
