@@ -238,7 +238,9 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       else if (target == DRCRobotModel.RobotTarget.REAL_ROBOT)
       {
          // On the real robot, return all 3 so it knows to use them all. The real robot will use position control.
-         return new String[] {jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
+//         return new String[] {jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
+         // For now the neck is not controllable
+         return new String[] {};
       }
       
       // For sims using the QP and whole body controller, only allow one neck joint for now since the QP and inverse dynamics
