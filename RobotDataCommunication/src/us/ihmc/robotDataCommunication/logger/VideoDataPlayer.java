@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
@@ -220,6 +219,7 @@ public class VideoDataPlayer
       long startVideoTimestamp = getVideoTimestamp(startTimestamp);
       long endVideoTimestamp = getVideoTimestamp(endTimestamp);
       
+      
       try
       {
          VideoConverter.convert(videoFile, selectedFile, startVideoTimestamp, endVideoTimestamp, 8000, monitor);
@@ -239,12 +239,12 @@ public class VideoDataPlayer
       long startVideoTimestamp = getVideoTimestamp(startTimestamp);
       long endVideoTimestamp = getVideoTimestamp(endTimestamp);
       
-      int frameRate = VideoConverter.crop(videoFile, outputFile, startVideoTimestamp, endVideoTimestamp, monitor);
+      int framerate = VideoConverter.crop(videoFile, outputFile, startVideoTimestamp, endVideoTimestamp, monitor);
 
       
       PrintWriter timestampWriter = new PrintWriter(timestampFile);
       timestampWriter.println(1);
-      timestampWriter.println(frameRate);
+      timestampWriter.println(framerate);
 
       long pts = 0;
       /*

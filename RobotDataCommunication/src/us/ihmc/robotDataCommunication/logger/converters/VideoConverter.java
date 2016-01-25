@@ -31,12 +31,13 @@ public class VideoConverter
       MP4MJPEGMovieBuilder builder = null;
       MP4VideoDemuxer demuxer = new MP4VideoDemuxer(source);
       
-      int frameRate = getFrameRate(demuxer);
       
       
       long endFrame = getFrame(endPTS, demuxer);
       long startFrame = getFrame(startPTS, demuxer);
       long numberOfFrames = endFrame - startFrame;
+      
+      int frameRate = getFrameRate(demuxer);
       
       MP4Packet frame;
       while((frame = demuxer.getNextPacket()) != null && demuxer.getCurrentFrame() <= endFrame)
@@ -59,7 +60,7 @@ public class VideoConverter
       demuxer.delete();
       
       return frameRate;
-      
+            
    }
    /**
     * 
@@ -73,18 +74,18 @@ public class VideoConverter
     * 
     * @throws IOException
     */
-   public static int convert(File source, File target, long startPTS, long endPTS, int bitrate, CustomProgressMonitor monitor) throws IOException
+   public static void convert(File source, File target, long startPTS, long endPTS, int bitrate, CustomProgressMonitor monitor) throws IOException
    {
       MP4H264MovieBuilder builder = null;
       MP4VideoDemuxer demuxer = new MP4VideoDemuxer(source);
       
-      int frameRate = getFrameRate(demuxer);
       
       
       long endFrame = getFrame(endPTS, demuxer);
       long startFrame = getFrame(startPTS, demuxer);
       long numberOfFrames = endFrame - startFrame;
       
+      int frameRate = getFrameRate(demuxer);
       YUVPicture frame;
       while((frame = demuxer.getNextFrame()) != null && demuxer.getCurrentFrame() <= endFrame)
       {
@@ -105,9 +106,22 @@ public class VideoConverter
       
       builder.close();
       demuxer.delete();
+            
+   }
+   
+   private static int getFrameRate(MP4VideoDemuxer demuxer) throws IOException
+   {
+      demuxer.seekToFrame(0);
+      long startPts = demuxer.getCurrentPTS();
+      demuxer.seekToFrame(1);
+      long endPts = demuxer.getCurrentPTS();      
       
-      return frameRate;
+      double step = endPts - startPts;
+      int rate = (int)Math.round((double)demuxer.getTimescale() / step);
       
+      System.out.println("Framerate is " + rate);
+      return rate;
+     
    }
 
    private static long getFrame(long endPTS, MP4VideoDemuxer demuxer) throws IOException
@@ -115,17 +129,5 @@ public class VideoConverter
       demuxer.seekToPTS(endPTS);
       long endFrame = demuxer.getCurrentFrame();
       return endFrame;
-   }
-
-   private static int getFrameRate(MP4VideoDemuxer demuxer) throws IOException
-   {
-      demuxer.seek(0.0);
-      long start = demuxer.getCurrentFrame();
-      demuxer.seek(1.0);
-      long end = demuxer.getCurrentFrame();
-      
-      int frameRate = (int) (end - start);
-      System.out.println("Video framerate is " + frameRate);
-      return frameRate;
    }
 }
