@@ -1,4 +1,4 @@
-evaluationDependsOn(':IHMCQuadrupedRobotics')
+evaluationDependsOn(':IHMCOpenRoboticsSoftware:IHMCQuadrupedRobotics')
 
 dependencies 
 {
@@ -6,14 +6,14 @@ dependencies
   compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
   compile group: 'us.ihmc', name: 'IHMCJavaDynamixelLibrary', version: '0.1.1'
 
-  compile project(':RobotDataCommunication') 
-  compile project(':SensorProcessing')
-  compile project(':IHMCJavaToolkit')
-  testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
-  testCompile project(':IHMCQuadrupedRobotics').sourceSets.test.output
-  compile project(':IHMCQuadrupedRobotics')
-  compile project(':SerialPortCommunication')
-  testCompile project(':IHMCUnitTesting')
+  compile project(':IHMCOpenRoboticsSoftware:RobotDataCommunication')
+  compile project(':IHMCOpenRoboticsSoftware:SensorProcessing')
+  compile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit')
+  testCompile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit').sourceSets.test.output
+  testCompile project(':IHMCOpenRoboticsSoftware:IHMCQuadrupedRobotics').sourceSets.test.output
+  compile project(':IHMCOpenRoboticsSoftware:IHMCQuadrupedRobotics')
+  compile project(':IHMCInternalSoftware:SerialPortCommunication')
+  testCompile project(':IHMCOpenRoboticsSoftware:IHMCUnitTesting')
   compile project(':EtherlabWrapper')
-  compile project(':AwareNetworking')
+  compile project(':AwareRobotics:AwareNetworking')
 }
