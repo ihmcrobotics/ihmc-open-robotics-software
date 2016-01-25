@@ -9,7 +9,7 @@ dependencies
 	compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
 	compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
 	compile group: 'net.sourceforge.jexcelapi', name: 'jxl', version: '2.6.12'
-	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.10'
+	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
     compile group: 'org.boofcv', name: 'all', version: '0.19'
 
 	

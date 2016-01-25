@@ -2,7 +2,6 @@ package us.ihmc.robotDataCommunication.logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -116,16 +115,14 @@ public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
       if (activePlayer != null)
       {
          CustomProgressMonitor monitor = new CustomProgressMonitor("Exporting " + activePlayer.getName(), selectedFile.getAbsolutePath(), 0, 100);
-         PrintStream output = new PrintStream(monitor.getOutputStream(), true);
          monitor.setProgress(10);
-         activePlayer.exportVideo(selectedFile, startTimestamp, endTimestamp, output);
+         activePlayer.exportVideo(selectedFile, startTimestamp, endTimestamp, monitor);
          monitor.close();
       }
    }
 
    public void crop(File selectedDirectory, long startTimestamp, long endTimestamp, CustomProgressMonitor monitor) throws IOException
    {
-      PrintStream output = new PrintStream(monitor.getOutputStream(), true);
 
       for (int i = 0; i < videos.size(); i++)
       {
@@ -138,7 +135,7 @@ public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
 
          File timestampFile = new File(selectedDirectory, logProperties.getTimestampFile(video));
          File videoFile = new File(selectedDirectory, logProperties.getVideoFile(video));
-         players.get(video).cropVideo(videoFile, timestampFile, startTimestamp, endTimestamp, output);
+         players.get(video).cropVideo(videoFile, timestampFile, startTimestamp, endTimestamp, monitor);
       }
    }
 
