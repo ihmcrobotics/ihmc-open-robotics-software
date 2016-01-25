@@ -3,13 +3,28 @@ apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.7
 version = '0.7.0'
+
 rootProject.ext.vcsUrl = "https://bitbucket.org/ihmcrobotics/ihmc-open-robotics-software.git"
+rootProject.ext.snapshotCounter = 1
+rootProject.ext.releaseCandidateCounter = 1
+
+getGitHash()
+
+getDate()
+
+if(buildType.equals("NIGHTLY"))
+{
+  version += "-NIGHTLY+date.${project.ext.date}.rev.${project.ext.revision}"
+}
 
 if(buildType.equals("SNAPSHOT"))
 {
-  getGitHash()
-  getDate()
-  version += "-SNAPSHOT+date.${project.ext.date}.hash.${project.ext.revision}"
+  version += "-SNAPSHOT${project.ext.snapshotCounter}.rev.${project.ext.revision}"
+}
+
+if(buildType.equals("RC"))
+{
+  version += "-RC${project.ext.releaseCandidateCounter}.rev.${project.ext.revision}"
 }
 
 buildscript {
@@ -52,6 +67,12 @@ subprojects {
     }
   }
 
+  jar {
+    from (project.projectDir) {
+      include 'LICENSE*txt'
+    }
+  }
+
   task sourceJar(type: Jar) {
     from sourceSets.main.allJava
   }
@@ -87,14 +108,14 @@ task buildInfo {
   }
 }
 
-private void getGitHash() {
+def getGitHash() {
   def cmd = "git rev-parse --short HEAD"
   def proc = cmd.execute()
   project.ext.revision = proc.text.trim()
 }
 
-private void getDate() {
+def getDate() {
     def date = new Date()
-    def formattedDate = date.format('yyyy.MM.dd.HH.mm')
+    def formattedDate = date.format('yyyy.MM.dd')
     project.ext.date = formattedDate
 }
