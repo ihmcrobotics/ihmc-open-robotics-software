@@ -1,5 +1,5 @@
-evaluationDependsOn(':IHMCRoboticsToolkit')
-evaluationDependsOn(':IHMCJavaToolkit')
+evaluationDependsOn(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
+evaluationDependsOn(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit')
 
 dependencies {
     compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.23'
@@ -18,19 +18,19 @@ dependencies {
     compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
     
     
-    compile project(':Plotting')
-    compile project(':KalmanProject')
-    compile project(':SensorProcessing')
-    compile project(':Graphics3DAdapter')
-    compile project(':SimulationConstructionSet')
-    compile project(':IHMCCommunication')
-    compile project(':ConvexOptimizationAdapter')
-    compile project(':IHMCRoboticsToolkit')
-    compile project(':IHMCJavaToolkit')
-    compile project(':IHMCHumanoidRobotics')
-    compile project(':IHMCJavaToolkit')
+    compile project(':IHMCOpenRoboticsSoftware:Plotting')
+    compile project(':IHMCOpenRoboticsSoftware:KalmanProject')
+    compile project(':IHMCOpenRoboticsSoftware:SensorProcessing')
+    compile project(':IHMCOpenRoboticsSoftware:Graphics3DAdapter')
+    compile project(':IHMCOpenRoboticsSoftware:SimulationConstructionSet')
+    compile project(':IHMCOpenRoboticsSoftware:IHMCCommunication')
+    compile project(':IHMCOpenRoboticsSoftware:ConvexOptimizationAdapter')
+    compile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
+    compile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit')
+    compile project(':IHMCOpenRoboticsSoftware:IHMCHumanoidRobotics')
+    compile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit')
 
-    testCompile project(':IHMCUnitTesting')
-    testCompile project(':IHMCJavaToolkit').sourceSets.test.output
-    testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
+    testCompile project(':IHMCOpenRoboticsSoftware:IHMCUnitTesting')
+    testCompile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit').sourceSets.test.output
+    testCompile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit').sourceSets.test.output
 }

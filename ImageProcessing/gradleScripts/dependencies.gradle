@@ -13,8 +13,8 @@ dependencies
     compile group: 'org.boofcv', name: 'all', version: '0.19'
 
 	
-	compile project(':Plotting')
-	compile project(':IHMCCommunication')
-	compile project(':IHMCRoboticsToolkit')
-	testCompile project(':IHMCUnitTesting')
+	compile project(':IHMCOpenRoboticsSoftware:Plotting')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCCommunication')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
+	testCompile project(':IHMCOpenRoboticsSoftware:IHMCUnitTesting')
 }

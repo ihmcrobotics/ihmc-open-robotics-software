@@ -7,14 +7,14 @@ dependencies {
 	compile group: 'org.yaml', name: 'snakeyaml', version: '1.13' //1.11
 	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
 	
-	compile project(':CommonWalkingControlModules')
-	compile project(':IHMCCommunication')
-	compile project(':IHMCHumanoidRobotics')
+	compile project(':IHMCOpenRoboticsSoftware:CommonWalkingControlModules')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCCommunication')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCHumanoidRobotics')
 	
-	compile project(':SDFLoader')
-	compile project(':SensorProcessing')
-	compile project(':SimulationConstructionSet')
-	compile project(':IHMCJavaToolkit')
-	compile project(':IHMCRoboticsToolkit')
-	testCompile project(':IHMCUnitTesting')
+	compile project(':IHMCOpenRoboticsSoftware:SDFLoader')
+	compile project(':IHMCOpenRoboticsSoftware:SensorProcessing')
+	compile project(':IHMCOpenRoboticsSoftware:SimulationConstructionSet')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
+	testCompile project(':IHMCOpenRoboticsSoftware:IHMCUnitTesting')
 }
