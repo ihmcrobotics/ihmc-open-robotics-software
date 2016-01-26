@@ -1,8 +1,10 @@
 apply plugin: 'java'
 apply from: 'gradleScripts/util.gradle'
+evaluationDependsOn(':IHMCOpenRoboticsSoftware')
 
 sourceCompatibility = 1.7
-version = "${rootProject.version}"
+version = "${project(':IHMCOpenRoboticsSoftware').version}"
+project.ext.fullVersion = "${project(':IHMCOpenRoboticsSoftware').ext.fullVersion}"
 project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"

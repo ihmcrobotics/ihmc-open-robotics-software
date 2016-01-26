@@ -3,13 +3,37 @@ apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.7
 version = '0.7.0'
-rootProject.ext.vcsUrl = "https://bitbucket.org/ihmcrobotics/ihmc-open-robotics-software.git"
+
+project.ext.fullVersion = version
+project.ext.vcsUrl = "https://bitbucket.org/ihmcrobotics/ihmc-open-robotics-software.git"
+project.ext.snapshotCounter = 1
+project.ext.releaseCandidateCounter = 1
+
+getGitInfo()
+
+getDate()
+
+if(buildType.equals("NIGHTLY"))
+{
+  project.ext.fullVersion = version += "-NIGHTLY+date.${project.ext.date}.rev.${project.ext.revision}"
+}
 
 if(buildType.equals("SNAPSHOT"))
 {
-  getGitHash()
-  getDate()
-  version += "-SNAPSHOT+date.${project.ext.date}.hash.${project.ext.revision}"
+  project.ext.fullVersion = version += "-SNAPSHOT${project.ext.snapshotCounter}.rev.${project.ext.revision}"
+}
+
+if(buildType.equals("RC"))
+{
+  project.ext.fullVersion = version += "-RC${project.ext.releaseCandidateCounter}.rev.${project.ext.revision}"
+}
+
+if(buildType.equals("RELEASE"))
+{
+  if(!project.ext.branch.equals("master"))
+  {
+      throw new GradleException("Cannot make RELEASE build from branch \"${project.ext.branch}\", it is not the branch used for stable releases!")
+  }
 }
 
 buildscript {
@@ -52,6 +76,12 @@ subprojects {
     }
   }
 
+  jar {
+    from (project.projectDir) {
+      include 'LICENSE*txt'
+    }
+  }
+
   task sourceJar(type: Jar) {
     from sourceSets.main.allJava
   }
@@ -62,7 +92,7 @@ subprojects {
 
         groupId 'us.ihmc'
         artifactId "${project.name}"
-        version "${rootProject.version}"
+        version "${project.ext.fullVersion}"
 
         from components.java
 
@@ -80,21 +110,25 @@ subprojects {
   }
 }
 
-task buildInfo {
-  doFirst {
-    getDate()
-    getGitHash()
-  }
+def getGitInfo() {
+  getGitHash()
+  getGitBranch()
 }
 
-private void getGitHash() {
+def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('yyyy.MM.dd')
+    project.ext.date = formattedDate
+}
+
+def getGitHash() {
   def cmd = "git rev-parse --short HEAD"
   def proc = cmd.execute()
   project.ext.revision = proc.text.trim()
 }
 
-private void getDate() {
-    def date = new Date()
-    def formattedDate = date.format('yyyy.MM.dd.HH.mm')
-    project.ext.date = formattedDate
+def getGitBranch() {
+  def cmd = "git rev-parse --abbrev-ref HEAD"
+  def proc = cmd.execute()
+  project.ext.branch = proc.text.trim()
 }

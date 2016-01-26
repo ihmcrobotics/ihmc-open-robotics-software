@@ -1,5 +1,5 @@
-evaluationDependsOn(':IHMCJavaToolkit')
-evaluationDependsOn(':IHMCRoboticsToolkit')
+evaluationDependsOn(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit')
+evaluationDependsOn(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
@@ -12,7 +12,7 @@ dependencies {
 	compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
 	compile group: 'org.georegression' , name: 'georegression', version: '0.8'
    	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: 'internal-151123'
-	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.10'
+	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
 	compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
 	compile group: 'org.apache.xmlgraphics', name: 'batik-svggen', version: '1.7'
 	compile group: 'org.apache.xmlgraphics', name: 'batik-dom', version: '1.7'
@@ -33,13 +33,13 @@ dependencies {
 		exclude group: 'org.easytesting', module: 'fest'
 	}
 	
-	testCompile project(':IHMCJavaToolkit').sourceSets.test.output
-	testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
-    compile project(':Plotting')
-	compile project(':Graphics3DAdapter')
-	compile project(':ParameterOptimization')
-	compile project(':IHMCCommunication')
-	compile project(':IHMCJavaToolkit')
-	compile project(':IHMCRoboticsToolkit')
-	testCompile project(':IHMCUnitTesting')
+	testCompile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit').sourceSets.test.output
+	testCompile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit').sourceSets.test.output
+    compile project(':IHMCOpenRoboticsSoftware:Plotting')
+	compile project(':IHMCOpenRoboticsSoftware:Graphics3DAdapter')
+	compile project(':IHMCOpenRoboticsSoftware:ParameterOptimization')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCCommunication')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
+	testCompile project(':IHMCOpenRoboticsSoftware:IHMCUnitTesting')
 }

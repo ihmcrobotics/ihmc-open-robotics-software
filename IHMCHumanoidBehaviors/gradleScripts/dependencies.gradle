@@ -8,16 +8,16 @@ dependencies {
 	compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
 	
 	
-	compile project(':Graphics3DAdapter')
-	compile project(':IHMCCommunication')
-	compile project(':IHMCHumanoidRobotics')
-	compile project(':CommonWalkingControlModules')
-	compile project(':SimulationConstructionSet')
-	compile project(':RobotDataCommunication')
-	compile project(':SensorProcessing')
-	compile project(':IHMCWholeBodyController')
-	compile project(':IHMCPerception')
-	compile project(':IHMCJavaToolkit')
-	compile project(':IHMCRoboticsToolkit')
-    testCompile project(':IHMCUnitTesting')
+	compile project(':IHMCOpenRoboticsSoftware:Graphics3DAdapter')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCCommunication')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCHumanoidRobotics')
+	compile project(':IHMCOpenRoboticsSoftware:CommonWalkingControlModules')
+	compile project(':IHMCOpenRoboticsSoftware:SimulationConstructionSet')
+	compile project(':IHMCOpenRoboticsSoftware:RobotDataCommunication')
+	compile project(':IHMCOpenRoboticsSoftware:SensorProcessing')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCWholeBodyController')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCPerception')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
+    testCompile project(':IHMCOpenRoboticsSoftware:IHMCUnitTesting')
 }

@@ -1,6 +1,6 @@
-evaluationDependsOn(':IHMCJavaToolkit')
-evaluationDependsOn(':IHMCRoboticsToolkit')
-evaluationDependsOn(':DarpaRoboticsChallenge')
+evaluationDependsOn(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit')
+evaluationDependsOn(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
+evaluationDependsOn(':IHMCOpenRoboticsSoftware:DarpaRoboticsChallenge')
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -21,25 +21,25 @@ dependencies {
 	
 	compile group: 'us.ihmc', name: 'IHMCRosControl', version: '0.2.1'
 	
-	compile project(':CommonWalkingControlModules')
-	compile project(':DarpaRoboticsChallenge')
-	compile project(':Graphics3DAdapter')
+	compile project(':IHMCOpenRoboticsSoftware:CommonWalkingControlModules')
+	compile project(':IHMCOpenRoboticsSoftware:DarpaRoboticsChallenge')
+	compile project(':IHMCOpenRoboticsSoftware:Graphics3DAdapter')
 	
-	compile project(':IHMCROSTools')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCROSTools')
 	
-	compile project(':RobotDataCommunication')
-	compile project(':ROSJavaMessages')
-	compile project(':SDFLoader')
-	compile project(':SensorProcessing')
-	compile project(':SimulationConstructionSet')
-    compile project(':IHMCPerception')
-    compile project(':IHMCWholeBodyController')
-	compile project(':IHMCJavaToolkit')
-	compile project(':IHMCRoboticsToolkit')
+	compile project(':IHMCOpenRoboticsSoftware:RobotDataCommunication')
+	compile project(':IHMCOpenRoboticsSoftware:ROSJavaMessages')
+	compile project(':IHMCOpenRoboticsSoftware:SDFLoader')
+	compile project(':IHMCOpenRoboticsSoftware:SensorProcessing')
+	compile project(':IHMCOpenRoboticsSoftware:SimulationConstructionSet')
+    compile project(':IHMCOpenRoboticsSoftware:IHMCPerception')
+    compile project(':IHMCOpenRoboticsSoftware:IHMCWholeBodyController')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit')
+	compile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
 	
-	testCompile project(':IHMCUnitTesting')
+	testCompile project(':IHMCOpenRoboticsSoftware:IHMCUnitTesting')
 	
-	testCompile project(':IHMCJavaToolkit').sourceSets.test.output
-	testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
-	testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
+	testCompile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit').sourceSets.test.output
+	testCompile project(':IHMCOpenRoboticsSoftware:DarpaRoboticsChallenge').sourceSets.test.output
+	testCompile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit').sourceSets.test.output
 }
