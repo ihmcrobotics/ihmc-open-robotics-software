@@ -3,10 +3,9 @@ package us.ihmc.aware.state;
 /**
  * Defines a state machine edge, specifying a source state and event, along with the destination state.
  *
- * @param <S> the state type.
  * @param <E> the event enum type.
  */
-public class StateMachineTransition<S, E extends Enum<E>>
+public class StateMachineTransition<S extends StateMachineState, E extends Enum<E>>
 {
    /**
     * The event on which to transition.
