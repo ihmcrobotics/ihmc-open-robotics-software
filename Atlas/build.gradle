@@ -1,16 +1,3 @@
-import java.nio.file.Files
-import java.nio.file.Paths
-import com.monochromeroad.gradle.plugin.aws.s3.S3Sync
-
-buildscript {
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath "com.monochromeroad.gradle-plugins:gradle-aws-s3-sync:0.5"
-    }
-}
 apply plugin: 'java'
 apply from: 'gradleScripts/util.gradle'
 if(!rootProject.name.equals(getParent().name)) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
@@ -90,62 +77,4 @@ startScripts {
 
 applicationDistribution.from(startScripts.outputDir) {
     into "bin"
-}
-
-
-task awsDeploySim(type: S3Sync, dependsOn: distTar) {
-    description = "Push current API release to AWS S3"
-    configFile "aws.properties"
-
-    from "${buildDir}/distributions"
-    into "ihmc/api_releases"
-
-    keepFiles true
-
-    doFirst {
-        if (!project.hasProperty("awsAccessKey") || !project.hasProperty("awsSecretKey")) {
-            throw new TaskExecutionException(tasks.tasks.awsDeploySim, new StopActionException("AWS credentials not set, you should store them safely and locally in your user's gradle.properties (defaults to \$HOME/.gradle/gradle.properties)"));
-        }
-
-        accessKey awsAccessKey
-        secretKey awsSecretKey
-
-        def verManifestFile = new File("${buildDir}/distributions/atlas-version")
-
-        verManifestFile.text = version
-    }
-}
-
-task gfeDevCompile(dependsOn: distTar) << {
-    if (!project.hasProperty("ihmcRosPackageLocation")) {
-        throw new TaskExecutionException(tasks.gfeDevCompile, new StopActionException("gfeDevCompile requires the project property ihmcRosPackageLocation to be set. Check your gradle.properties or set \"-PihmcRosPackageLocation=<absolute path>\" from the command line."))
-    }
-
-    if (ihmcRosPackageLocation.startsWith("~")) {
-        ihmcRosPackageLocation = ihmcRosPackageLocation.replace("~", System.getProperty("user.home"))
-    }
-
-    String buildName = applicationName.toString() + "-" + version;
-    java.nio.file.Path messagesLocation = Paths.get(project(':ROSJavaBootstrap').projectDir.absolutePath, "ROSMessagesAndServices", "ihmc_msgs", "msg")
-    java.nio.file.Path ihmcRosPackageLocationPath = Paths.get("$ihmcRosPackageLocation")
-    java.nio.file.Path ihmcMsgsLocation = ihmcRosPackageLocationPath.resolve("ihmc_msgs")
-    java.nio.file.Path ihmcSimLocation = ihmcRosPackageLocationPath.resolve("ihmc_atlas")
-    java.nio.file.Path archiveLocation = Paths.get(project.buildDir.absolutePath, "distributions", buildName + ".tar")
-
-    if (!Files.exists(ihmcMsgsLocation)) {
-        throw new TaskExecutionException(tasks.gfeDevCompile, new StopActionException("ihmc_msgs not in ihmc_ros directory. Check out ihmc_ros from BitBucket."))
-    }
-
-    copy {
-        println "Copying ROS messages from ROSJavaBootstrop in to ihmc_ros"
-        from messagesLocation.toAbsolutePath().toString()
-        into ihmcMsgsLocation.resolve("msg").toAbsolutePath().toString()
-        exclude { details -> !details.file.name.endsWith(".msg") }
-    }
-
-    copy {
-        println "Expanding the distribution archive in to ihmc_sim/scripts"
-        from tarTree(archiveLocation.toAbsolutePath().toString())
-        into ihmcSimLocation.toAbsolutePath().toString()
-    }
 }
