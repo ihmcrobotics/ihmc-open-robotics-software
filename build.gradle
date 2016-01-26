@@ -36,14 +36,6 @@ if(buildType.equals("RELEASE"))
   }
 }
 
-buildscript {
-  repositories {
-    mavenLocal()
-	  jcenter()
-	  mavenCentral()
-  }
-}
-
 repositories {
   mavenLocal()
 
@@ -99,14 +91,6 @@ subprojects { subproject ->
       {
         return ":IHMCOpenRoboticsSoftware"
       }
-    }
-  }
-
-  buildscript {
-    repositories {
-      mavenLocal()
-  	  jcenter()
-  	  mavenCentral()
     }
   }
 

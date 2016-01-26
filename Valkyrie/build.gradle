@@ -1,3 +1,7 @@
+plugins {
+	id 'org.hidetake.ssh' version '0.3.12'
+}
+
 apply plugin: 'java'
 apply from: 'gradleScripts/util.gradle'
 if(!rootProject.name.equals(getParent().name)) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
@@ -14,20 +18,6 @@ setupDefaultDirectoryStructure()
 setupDefaultRepositories()
 
 setupProjectSpecificDependencies()
-
-buildscript {
-	repositories {
-		jcenter()
-
-		maven {
-			url "https://bengal.ihmc.us/nexus/content/repositories/central/"
-		}
-	}
-	dependencies {
-		classpath "com.monochromeroad.gradle-plugins:gradle-aws-s3-sync:0.5"
-		classpath 'org.hidetake:gradle-ssh-plugin:0.3.12'
-	}
-}
 
 apply plugin: 'application'
 applicationName = "IHMCValkyrieAPI"
@@ -47,33 +37,6 @@ startScripts {
 applicationDistribution.from(startScripts.outputDir) {
 	into "bin"
 }
-
-import com.monochromeroad.gradle.plugin.aws.s3.S3Sync
-
-task awsDeploySim(type: S3Sync, dependsOn: distTar) {
-	description = "Push current API release to AWS S3"
-	configFile "aws.properties"
-
-	from "${buildDir}/distributions"
-	into "ihmc/api_releases"
-
-	keepFiles true
-
-	doFirst {
-		if (!project.hasProperty("awsAccessKey") || !project.hasProperty("awsSecretKey")) {
-			throw new TaskExecutionException(tasks.tasks.awsDeploySim, new StopActionException("AWS credentials not set, you should store them safely and locally in your user's gradle.properties (defaults to \$HOME/.gradle/gradle.properties)"));
-		}
-
-		accessKey awsAccessKey
-		secretKey awsSecretKey
-
-		def verManifestFile = new File("${buildDir}/distributions/val-version")
-
-		verManifestFile.text = version
-	}
-}
-
-apply plugin: 'org.hidetake.ssh'
 
 remotes
 		{
