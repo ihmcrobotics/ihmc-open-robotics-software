@@ -1,4 +1,6 @@
-package us.ihmc.quadrupedRobotics.parameters;
+package us.ihmc.aware.parameters;
+
+import us.ihmc.aware.parameters.QuadrupedStandPrepParameters;
 
 public class DefaultQuadrupedStandPrepParameters implements QuadrupedStandPrepParameters
 {
