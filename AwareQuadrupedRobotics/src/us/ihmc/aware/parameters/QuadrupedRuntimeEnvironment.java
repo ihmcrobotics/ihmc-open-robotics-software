@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.parameters;
+package us.ihmc.aware.parameters;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;

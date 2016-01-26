@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.parameters;
+package us.ihmc.aware.parameters;
 
 public class DefaultQuadrupedVirtualModelBasedStepParameters implements QuadrupedVirtualModelBasedStepParameters
 {

@@ -1,10 +1,11 @@
 package us.ihmc.aware.controller;
 
+import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 
@@ -14,6 +15,8 @@ public class QuadrupedControllerManager implements RobotController
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
 
    private final StateMachine<QuadrupedController, QuadrupedControllerEvent> stateMachine;
+
+   private final EnumYoVariable<QuadrupedControllerEvent> userEvent = new EnumYoVariable<>("userEvent", registry, QuadrupedControllerEvent.class, true);
 
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters parameters)
    {
@@ -36,6 +39,12 @@ public class QuadrupedControllerManager implements RobotController
    @Override
    public void doControl()
    {
+      if (userEvent.getEnumValue() != null)
+      {
+         stateMachine.trigger(userEvent.getEnumValue());
+         userEvent.set(null);
+      }
+
       stateMachine.process();
    }
 

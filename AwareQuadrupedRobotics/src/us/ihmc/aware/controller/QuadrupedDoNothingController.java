@@ -2,7 +2,7 @@ package us.ihmc.aware.controller;
 
 import com.google.common.primitives.Booleans;
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
