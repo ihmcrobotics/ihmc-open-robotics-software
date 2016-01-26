@@ -2,7 +2,7 @@ package us.ihmc.aware.state;
 
 import java.util.List;
 
-public class StateMachine<S, E extends Enum<E>>
+public class StateMachine<S extends StateMachineState<E>, E extends Enum<E>>
 {
    /**
     * The list of possible transitions. This is equivalent to a state-transition function in FSM literature.
@@ -41,8 +41,23 @@ public class StateMachine<S, E extends Enum<E>>
          if (transition.getFrom().equals(state) && event.equals(transition.getEvent()))
          {
             // It does, so transition to the next state.
+            state.onExit();
             state = transition.getTo();
+            state.onEntry();
          }
+      }
+   }
+
+   /**
+    * Run the current state's {@link StateMachineState#process()} method and transition on any generated events.
+    */
+   public void process()
+   {
+      // Run the current state and see if it generates an event.
+      E event = state.process();
+      if (event != null)
+      {
+         trigger(event);
       }
    }
 
