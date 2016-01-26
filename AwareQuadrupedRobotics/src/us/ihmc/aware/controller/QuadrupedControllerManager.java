@@ -1,10 +1,7 @@
 package us.ihmc.aware.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.aware.state.StateMachine;
-import us.ihmc.aware.state.StateMachineTransition;
+import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -24,11 +21,10 @@ public class QuadrupedControllerManager implements RobotController
       QuadrupedStandPrepController standPrepController = new QuadrupedStandPrepController(runtimeEnvironment, parameters);
 
       // TODO: Define more state transitions.
-      List<StateMachineTransition<QuadrupedController, QuadrupedControllerEvent>> transitions = new ArrayList<>();
-      transitions.add(new StateMachineTransition<>(QuadrupedControllerEvent.JOINTS_INITIALIZED, doNothingController,
-            standPrepController));
+      StateMachineBuilder<QuadrupedController, QuadrupedControllerEvent> builder = new StateMachineBuilder<>();
+      builder.addTransition(QuadrupedControllerEvent.JOINTS_INITIALIZED, doNothingController, standPrepController);
 
-      stateMachine = new StateMachine<>(transitions, doNothingController);
+      stateMachine = builder.build(doNothingController);
    }
 
    @Override
