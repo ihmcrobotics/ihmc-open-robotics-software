@@ -1,7 +1,5 @@
-apply plugin: 'java'
 apply plugin: 'maven-publish'
 
-sourceCompatibility = 1.7
 version = '0.7.0'
 
 project.ext.fullVersion = version
