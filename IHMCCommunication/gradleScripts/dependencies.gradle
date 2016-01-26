@@ -9,8 +9,8 @@ dependencies {
 
 	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
 	
-	testCompile project(':IHMCOpenRoboticsSoftware:IHMCUnitTesting')
+	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
 	
-	compile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit')
-	compile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
 }

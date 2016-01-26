@@ -64,9 +64,33 @@ repositories {
   mavenCentral()
 }
 
-subprojects {
+subprojects { subproject ->
   apply plugin: 'java'
   apply plugin: 'maven-publish'
+
+  subproject.ext {
+    getOpenRoboticsSoftwareProject = {
+      if(subproject.getParent().name.equals(rootProject.name))
+      {
+        return rootProject
+      }
+      else
+      {
+        return project(':IHMCOpenRoboticsSoftware')
+      }
+    }
+
+    getOpenRoboticsSoftwareGradlePath = {
+      if(subproject.getParent().name.equals(rootProject.name))
+      {
+        return ""
+      }
+      else
+      {
+        return ":IHMCOpenRoboticsSoftware"
+      }
+    }
+  }
 
   buildscript {
     repositories {

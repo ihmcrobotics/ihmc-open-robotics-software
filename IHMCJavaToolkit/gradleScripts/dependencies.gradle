@@ -20,5 +20,5 @@ dependencies {
    
    compile group: 'us.ihmc.thirdparty.com.centralnexus', name: 'joystick', version: '0.7'
    
-   testCompile project(':IHMCOpenRoboticsSoftware:IHMCUnitTesting')
+   testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
 }

@@ -1,5 +1,5 @@
-evaluationDependsOn(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
-evaluationDependsOn(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit')
+evaluationDependsOn("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
+evaluationDependsOn("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit")
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -28,9 +28,9 @@ dependencies {
     compile group: 'commons-codec', name: 'commons-codec', version: '1.9'
 	
 	
-	compile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit')
-	compile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit')
-	testCompile project(':IHMCOpenRoboticsSoftware:IHMCUnitTesting')
-	testCompile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit').sourceSets.test.output
-	testCompile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit').sourceSets.test.output
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
+	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
+	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit").sourceSets.test.output
+	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit").sourceSets.test.output
 }

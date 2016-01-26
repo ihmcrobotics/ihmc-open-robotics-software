@@ -1,11 +1,11 @@
 apply plugin: 'java'
 apply plugin: 'jacoco'
 apply from: 'gradleScripts/util.gradle'
-evaluationDependsOn(':IHMCOpenRoboticsSoftware')
+if(!rootProject.name.equals(getParent().name)) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
-version = "${project(':IHMCOpenRoboticsSoftware').version}"
-project.ext.fullVersion = "${project(':IHMCOpenRoboticsSoftware').ext.fullVersion}"
+version = "${getOpenRoboticsSoftwareProject().version}"
+project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
 project.ext.licenseName = "Apache License, Version 2.0"
 project.ext.bintrayLicenseName = "Apache-2.0"
