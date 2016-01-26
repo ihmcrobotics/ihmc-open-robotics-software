@@ -64,6 +64,16 @@ repositories {
   mavenCentral()
 }
 
+task publishAllToMavenLocal(type: GradleBuild) {
+  buildFile "build.gradle"
+  def allTasks = [":clean"]
+  subprojects.each {subproject ->
+    allTasks.add(":" + subproject.name + ":publishToMavenLocal")
+  }
+
+  tasks = allTasks
+}
+
 subprojects { subproject ->
   apply plugin: 'java'
   apply plugin: 'maven-publish'
@@ -147,12 +157,12 @@ def getDate() {
 
 def getGitHash() {
   def cmd = "git rev-parse --short HEAD"
-  def proc = cmd.execute()
+  def proc = cmd.execute(null, projectDir)
   project.ext.revision = proc.text.trim()
 }
 
 def getGitBranch() {
   def cmd = "git rev-parse --abbrev-ref HEAD"
-  def proc = cmd.execute()
+  def proc = cmd.execute(null, projectDir)
   project.ext.branch = proc.text.trim()
 }
