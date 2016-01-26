@@ -86,10 +86,6 @@ jar {
 	}
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.6'
-}
-
 task deployLocal(dependsOn: jar) {
 	def directory = 'valkyrie'
 	doLast {
