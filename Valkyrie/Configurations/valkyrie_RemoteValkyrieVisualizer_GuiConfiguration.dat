@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.alphaAccelerationBiasEstimation,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.highLevelState,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.DiagnosticsState,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.OptimizationMomentumControlModule.currentQPSolver</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.alphaAccelerationBiasEstimation,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.highLevelState,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.DiagnosticsState</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -102,13 +102,13 @@
 <Title>
 Startup
 </Title>
-<Entry Boxes>requestedHighLevelState,calibrateFootForceSensors,sliderBoardMode,alphaTorqueOffset,requestedQPSolver</Entry Boxes>
+<Entry Boxes>requestedHighLevelState,calibrateFootForceSensors,sliderBoardMode,alphaTorqueOffset,lambda,alphaFilterLinearAcceleration</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
 Diagnostics
 </Title>
-<Entry Boxes>adaptTorqueOffset,printTorqueOffsets,transferTorqueOffsets,diagnosticsWhenHangingManualMode,q_d_leftShoulderRoll,q_d_rightShoulderRoll,uniqueDither,useUniqueDitherAmplitude,startDiagnostics,splineDuration</Entry Boxes>
+<Entry Boxes>adaptTorqueOffset,printTorqueOffsets,transferTorqueOffsets,diagnosticsWhenHangingManualMode,q_d_leftShoulderRoll,q_d_rightShoulderRoll,startDiagnostics,splineDuration,ditherAmplitude</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -150,7 +150,7 @@ ManualICP
 <Title>
 SwingGains
 </Title>
-<Entry Boxes>kpXYLinearSwingFoot,kpZLinearSwingFoot,kpXYAngularSwingFoot,kpZAngularSwingFoot</Entry Boxes>
+<Entry Boxes>kpXYLinearSwingFoot,kpZLinearSwingFoot,kpXYAngularSwingFoot,kpZAngularSwingFoot,zetaLinearSwingFoot,zetaXYAngularSwingFoot,zetaZAngularSwingFoot</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -162,13 +162,13 @@ JointElasticity
 <Title>
 Filter
 </Title>
-<Entry Boxes>linearAccelerationAlphaFilter,angularVelocityAlphaFilter,orientationAlphaFilter,armJointVelocityBacklashSlopTime,imuBasedJointVelocityEstimatorAlphaFuse,lowerBodyJointVelocityAlphaFilter,lowerBodyJointVelocityBacklashSlopTime</Entry Boxes>
+<Entry Boxes>linearAccelerationAlphaFilter,angularVelocityAlphaFilter,orientationAlphaFilter,armJointVelocityBacklashSlopTime,imuBasedJointVelocityEstimatorAlphaFuse,lowerBodyJointVelocityAlphaFilter,lowerBodyJointVelocityBacklashSlopTime,jointOutputEncoderVelocityAlphaFilter,jointFiniteDifferenceUseTimer,armJointPositionAlphaFilter,lowerBodyJointPositionAlphaFilter</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
 AccelIntegr
 </Title>
-<Entry Boxes>alphaAccelerationIntegration</Entry Boxes>
+<Entry Boxes>alphaAccelerationIntegration,kVelocity_leftHipPitch,kVelocity_rightHipPitch</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -189,11 +189,11 @@ Corruptor
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>6</Graph Array Window Size>
+<Graph Array Window Size>7</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
-<WindowLocation>5759.0, 0.0</WindowLocation>
-<WindowSize>1922.0, 1081.0</WindowSize>
+<WindowLocation>5760.0, 0.0</WindowLocation>
+<WindowSize>960.0, 1080.0</WindowSize>
 <GraphGroup>
 	<Cols>4</Cols>
 	<Graph>
@@ -353,7 +353,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightKneePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightKneePitch.rightKneePitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftKneePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftKneePitch.leftKneePitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -365,7 +365,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftKneePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftKneePitch.leftKneePitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightKneePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightKneePitch.rightKneePitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -486,9 +486,9 @@ Corruptor
 	</Graph>
 </GraphGroup>
 </Graph Array Window1><Graph Array Window2>
-<ScreenID>1</ScreenID>
-<WindowLocation>5760.0, 0.0</WindowLocation>
-<WindowSize>960.0, 1080.0</WindowSize>
+<ScreenID>3</ScreenID>
+<WindowLocation>4800.0, 0.0</WindowLocation>
+<WindowSize>960.0, 1200.0</WindowSize>
 <GraphGroup>
 	<Cols>4</Cols>
 	<Graph>
@@ -847,7 +847,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.AccelerationIntegration.tau_vel_leftHipRoll</Variables>
 		<GraphConfiguration>
 			<Name>config62</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -859,7 +859,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.AccelerationIntegration.tau_vel_rightHipRoll</Variables>
 		<GraphConfiguration>
 			<Name>config63</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -895,7 +895,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.AccelerationIntegration.tau_vel_leftHipPitch</Variables>
 		<GraphConfiguration>
 			<Name>config66</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -907,7 +907,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.AccelerationIntegration.tau_vel_rightHipPitch</Variables>
 		<GraphConfiguration>
 			<Name>config67</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -943,7 +943,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.AccelerationIntegration.tau_vel_leftKneePitch</Variables>
 		<GraphConfiguration>
 			<Name>config70</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -955,7 +955,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.AccelerationIntegration.tau_vel_rightKneePitch</Variables>
 		<GraphConfiguration>
 			<Name>config71</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1371,13 +1371,13 @@ Corruptor
 	</Graph>
 </GraphGroup>
 </Graph Array Window4><Graph Array Window5>
-<ScreenID>1</ScreenID>
-<WindowLocation>5760.0, 0.0</WindowLocation>
-<WindowSize>960.0, 1080.0</WindowSize>
+<ScreenID>0</ScreenID>
+<WindowLocation>960.0, 27.0</WindowLocation>
+<WindowSize>960.0, 1173.0</WindowSize>
 <GraphGroup>
-	<Cols>3</Cols>
+	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationManager.controlledChestAngularAccelerationX</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityX</Variables>
 		<GraphConfiguration>
 			<Name>config105</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1389,7 +1389,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationManager.controlledChestAngularAccelerationY</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityY</Variables>
 		<GraphConfiguration>
 			<Name>config106</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1401,7 +1401,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationManager.controlledChestAngularAccelerationZ</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistX</Variables>
 		<GraphConfiguration>
 			<Name>config107</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1413,7 +1413,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationX</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistY</Variables>
 		<GraphConfiguration>
 			<Name>config108</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1425,7 +1425,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationY</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedCenterOfMassVelocityX</Variables>
 		<GraphConfiguration>
 			<Name>config109</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1437,7 +1437,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationZ</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedCenterOfMassVelocityY</Variables>
 		<GraphConfiguration>
 			<Name>config110</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1449,7 +1449,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCoMAccelerationX,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.qpOutputCoMAccelerationX</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistX</Variables>
 		<GraphConfiguration>
 			<Name>config111</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1461,7 +1461,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCoMAccelerationY,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.qpOutputCoMAccelerationY</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistY</Variables>
 		<GraphConfiguration>
 			<Name>config112</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1473,7 +1473,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCoMAccelerationZ,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.qpOutputCoMAccelerationZ</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config113</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1485,7 +1485,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.leftFootFootControlModule.leftFootRigidBodySpatialAccelerationControlModule.leftFootLinearAccelVizX</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config114</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1497,7 +1497,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.leftFootFootControlModule.leftFootRigidBodySpatialAccelerationControlModule.leftFootLinearAccelVizY</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisRotationalStateUpdater.estimatedRootJointFrameYaw</Variables>
 		<GraphConfiguration>
 			<Name>config115</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1509,7 +1509,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.leftFootFootControlModule.leftFootRigidBodySpatialAccelerationControlModule.leftFootLinearAccelVizZ</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisRotationalStateUpdater.estimatedRootJointFramePitch</Variables>
 		<GraphConfiguration>
 			<Name>config116</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1521,7 +1521,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.leftFootFootControlModule.leftFootRigidBodySpatialAccelerationControlModule.leftFootAngularAccelVizX</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisRotationalStateUpdater.estimatedRootJointFrameRoll</Variables>
 		<GraphConfiguration>
 			<Name>config117</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1533,93 +1533,9 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.leftFootFootControlModule.leftFootRigidBodySpatialAccelerationControlModule.leftFootAngularAccelVizY</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config118</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.leftFootFootControlModule.leftFootRigidBodySpatialAccelerationControlModule.leftFootAngularAccelVizZ</Variables>
-		<GraphConfiguration>
-			<Name>config119</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.rightFootFootControlModule.rightFootRigidBodySpatialAccelerationControlModule.rightFootLinearAccelVizX</Variables>
-		<GraphConfiguration>
-			<Name>config120</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.rightFootFootControlModule.rightFootRigidBodySpatialAccelerationControlModule.rightFootLinearAccelVizY</Variables>
-		<GraphConfiguration>
-			<Name>config121</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.rightFootFootControlModule.rightFootRigidBodySpatialAccelerationControlModule.rightFootLinearAccelVizZ</Variables>
-		<GraphConfiguration>
-			<Name>config122</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.rightFootFootControlModule.rightFootRigidBodySpatialAccelerationControlModule.rightFootAngularAccelVizX</Variables>
-		<GraphConfiguration>
-			<Name>config123</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.rightFootFootControlModule.rightFootRigidBodySpatialAccelerationControlModule.rightFootAngularAccelVizY</Variables>
-		<GraphConfiguration>
-			<Name>config124</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.rightFootFootControlModule.rightFootRigidBodySpatialAccelerationControlModule.rightFootAngularAccelVizZ</Variables>
-		<GraphConfiguration>
-			<Name>config125</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1636,7 +1552,98 @@ Corruptor
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationControlModule.chestElevatorAxisAngleOrientationController.chestElevatorAxisAngleErrorInBodyX</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUOrientationBiasEstimator.pelvis_pelvisMiddleImuLinearAccelerationFilteredX</Variables>
+		<GraphConfiguration>
+			<Name>config119</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUOrientationBiasEstimator.pelvis_pelvisMiddleImuLinearAccelerationFilteredY</Variables>
+		<GraphConfiguration>
+			<Name>config120</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUOrientationBiasEstimator.pelvis_pelvisMiddleImuLinearAccelerationFilteredZ</Variables>
+		<GraphConfiguration>
+			<Name>config121</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUOrientationBiasEstimator.pelvis_pelvisMiddleImuEstimatedBiasRoll</Variables>
+		<GraphConfiguration>
+			<Name>config122</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUOrientationBiasEstimator.pelvis_pelvisMiddleImuEstimatedBiasPitch</Variables>
+		<GraphConfiguration>
+			<Name>config123</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUOrientationBiasEstimator.pelvis_pelvisMiddleImuEstimatedBiasYaw</Variables>
+		<GraphConfiguration>
+			<Name>config124</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window6><Graph Array Window7>
+<ScreenID>3</ScreenID>
+<WindowLocation>3840.0, 0.0</WindowLocation>
+<WindowSize>960.0, 1200.0</WindowSize>
+<GraphGroup>
+	<Cols>3</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationManager.controlledChestAngularAccelerationX</Variables>
+		<GraphConfiguration>
+			<Name>config125</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationManager.controlledChestAngularAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config126</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1648,7 +1655,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationControlModule.chestElevatorAxisAngleOrientationController.chestElevatorAxisAngleErrorInBodyY</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationManager.controlledChestAngularAccelerationZ</Variables>
 		<GraphConfiguration>
 			<Name>config127</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1660,7 +1667,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationControlModule.chestElevatorAxisAngleOrientationController.chestElevatorAxisAngleErrorInBodyZ</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config128</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1672,7 +1679,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController.pelvisAxisAngleErrorInBodyX</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config129</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1684,7 +1691,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController.pelvisAxisAngleErrorInBodyY</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationZ</Variables>
 		<GraphConfiguration>
 			<Name>config130</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1696,7 +1703,7 @@ Corruptor
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController.pelvisAxisAngleErrorInBodyZ</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCoMAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config131</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1707,8 +1714,68 @@ Corruptor
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCoMAccelerationY</Variables>
+		<GraphConfiguration>
+			<Name>config132</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCoMAccelerationZ</Variables>
+		<GraphConfiguration>
+			<Name>config133</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationManager.controlledChestAngularAccelerationX,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationX</Variables>
+		<GraphConfiguration>
+			<Name>config134</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationManager.controlledChestAngularAccelerationY,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCoMAccelerationY</Variables>
+		<GraphConfiguration>
+			<Name>config135</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationManager.controlledChestAngularAccelerationZ,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationZ</Variables>
+		<GraphConfiguration>
+			<Name>config136</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
-</Graph Array Window6>
+</Graph Array Window7>
 
 <Extra Panels>
 <Main Viewport>
