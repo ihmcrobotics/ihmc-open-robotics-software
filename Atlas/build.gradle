@@ -13,11 +13,11 @@ buildscript {
 }
 apply plugin: 'java'
 apply from: 'gradleScripts/util.gradle'
-evaluationDependsOn(':IHMCOpenRoboticsSoftware')
+if(!rootProject.name.equals(getParent().name)) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
-version = "${project(':IHMCOpenRoboticsSoftware').version}"
-project.ext.fullVersion = "${project(':IHMCOpenRoboticsSoftware').ext.fullVersion}"
+version = "${getOpenRoboticsSoftwareProject().version}"
+project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"
