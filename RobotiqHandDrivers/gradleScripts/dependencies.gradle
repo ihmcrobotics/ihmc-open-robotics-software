@@ -3,13 +3,13 @@ dependencies {
 	compile group: 'net.wimpi', name: 'jamod', version: '1.2'
 	
 	
-	compile project(':DarpaRoboticsChallenge')
-	compile project(':CommonWalkingControlModules')
-	compile project(':IHMCCommunication')
-	compile project(':SDFLoader')
-	compile project(':SimulationConstructionSet')
-	compile project(':IHMCWholeBodyController')
-	compile project(':IHMCJavaToolkit')
-	compile project(':IHMCRoboticsToolkit')
-	testCompile project(':IHMCUnitTesting')
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:DarpaRoboticsChallenge")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:CommonWalkingControlModules")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCCommunication")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:SDFLoader")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:SimulationConstructionSet")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCWholeBodyController")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
+	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
 }

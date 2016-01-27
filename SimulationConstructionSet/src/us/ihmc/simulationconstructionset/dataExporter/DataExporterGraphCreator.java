@@ -16,6 +16,8 @@ import us.ihmc.tools.io.printing.PrintTools;
 //TODO: currently only does PinJoints
 public class DataExporterGraphCreator
 {
+   private static boolean DEBUG = false;
+
    private final List<PinJoint> pinJoints = new ArrayList<PinJoint>();
    private final DataBuffer dataBuffer;
    private final DataBufferEntry timeEntry;
@@ -83,7 +85,7 @@ public class DataExporterGraphCreator
    {
       if (joint instanceof PinJoint)
          pinJoints.add((PinJoint) joint);
-      else if (!(joint instanceof FloatingJoint))
+      else if (DEBUG && !(joint instanceof FloatingJoint))
          PrintTools.error("Joint " + joint.getName() + " not currently handled by " + getClass().getSimpleName());
 
       for (Joint child : joint.getChildrenJoints())

@@ -5,13 +5,13 @@ dependencies {
     compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
     compile group: 'us.ihmc.thirdparty', name: 'opencv', version: '3.1.0-internal2'
     
-	compile project(':IHMCCommunication')
-    compile project(':IHMCROSTools')
-	compile project(':IHMCWholeBodyController')
-    compile project(':ROSJavaMessages')
-    compile project(':SensorProcessing')
-    compile project(':SDFLoader')
-    compile project(':IHMCJavaToolkit')
-    compile project(':IHMCRoboticsToolkit')
-    testCompile project(':IHMCUnitTesting')
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCCommunication")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCROSTools")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCWholeBodyController")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:ROSJavaMessages")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:SensorProcessing")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:SDFLoader")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
+    testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
 }

@@ -19,8 +19,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.thread.RunnableThatThrows;
 
 /**
  * <p>Title: </p>
@@ -462,9 +465,16 @@ public class GeometryToolsTest
    @Test(timeout = 30000)
    public void testGetLineSegmentPercentagesIfIntersecting()
    {
-      double[] percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 1.0),
-                                new Point2d(1.0, 1.0));
-      assertNull(percentages);
+      double[] percentages;
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            double[] percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 1.0),
+                  new Point2d(1.0, 1.0));
+         }
+      });
 
       percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(0.0, 1.0),
               new Point2d(0.0, -1.0));
@@ -477,9 +487,14 @@ public class GeometryToolsTest
       assertEquals(0.5, percentages[0], 1e-7);
       assertEquals(0.5, percentages[1], 1e-7);
 
-      percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 0.0),
-              new Point2d(1.0, 0.0));
-      assertNull(percentages);
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            double[] percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0));
+         }
+      });
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)

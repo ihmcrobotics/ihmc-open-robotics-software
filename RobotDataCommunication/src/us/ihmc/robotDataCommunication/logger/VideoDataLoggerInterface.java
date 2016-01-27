@@ -13,7 +13,7 @@ public abstract class VideoDataLoggerInterface implements TimestampListener
    protected final String videoFile;
    protected final String timestampData;
    
-   public VideoDataLoggerInterface(File logPath, LogProperties logProperties, String description, boolean isInterlaced)
+   public VideoDataLoggerInterface(File logPath, LogProperties logProperties, String description)
    {
       logProperties.addVideoFile(description);
       logProperties.setInterlaced(description, false);

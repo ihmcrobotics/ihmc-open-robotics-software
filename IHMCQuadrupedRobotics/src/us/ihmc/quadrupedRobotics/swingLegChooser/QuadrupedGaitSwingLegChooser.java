@@ -64,12 +64,12 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
       {
          FramePoint foot = new FramePoint(ReferenceFrame.getWorldFrame());
          foot.setIncludingFrame(supportPolygon.getFootstep(quadrant));
-         feet.put(quadrant,  foot);
+         feet.set(quadrant,  foot);
          
          String prefix = quadrant.getCamelCaseNameForStartOfExpression();
          TranslationReferenceFrame footFrame = new TranslationReferenceFrame(prefix + "FootFrame", ReferenceFrame.getWorldFrame());
          footFrame.updateTranslation(foot);
-         feetFrames.put(quadrant, footFrame);
+         feetFrames.set(quadrant, footFrame);
       }
       
       double yaw = supportPolygon.getNominalYaw();
@@ -80,7 +80,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
       yaw -= desiredYawRate;
       feetCentroidPose.setOrientation(yaw, 0.0, 0.0);
       
-      supportPolygon.getCentroid(feetCentroid);
+      supportPolygon.getCentroid2d(feetCentroid);
       feetCentroidPose.setPosition(feetCentroid);
       centroidFrame.setPoseAndUpdate(feetCentroidPose);
       centroidFrameViz.update();

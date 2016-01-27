@@ -1,5 +1,5 @@
-evaluationDependsOn(':IHMCRoboticsToolkit')
-evaluationDependsOn(':IHMCJavaToolkit')
+evaluationDependsOn("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
+evaluationDependsOn("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit")
 
 dependencies {
     compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.23'
@@ -18,19 +18,19 @@ dependencies {
     compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
     
     
-    compile project(':Plotting')
-    compile project(':KalmanProject')
-    compile project(':SensorProcessing')
-    compile project(':Graphics3DAdapter')
-    compile project(':SimulationConstructionSet')
-    compile project(':IHMCCommunication')
-    compile project(':ConvexOptimizationAdapter')
-    compile project(':IHMCRoboticsToolkit')
-    compile project(':IHMCJavaToolkit')
-    compile project(':IHMCHumanoidRobotics')
-    compile project(':IHMCJavaToolkit')
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:Plotting")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:KalmanProject")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:SensorProcessing")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:Graphics3DAdapter")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:SimulationConstructionSet")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCCommunication")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:ConvexOptimizationAdapter")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCHumanoidRobotics")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit")
 
-    testCompile project(':IHMCUnitTesting')
-    testCompile project(':IHMCJavaToolkit').sourceSets.test.output
-    testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
+    testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
+    testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit").sourceSets.test.output
+    testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit").sourceSets.test.output
 }

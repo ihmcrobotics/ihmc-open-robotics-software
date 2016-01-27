@@ -1660,7 +1660,7 @@ public class ConvexPolygon2dTest
    {
       ConvexPolygon2d polygon = createSomeValidPolygon();
 
-      ArrayList<Vector2d> normalVectors = polygon.getOutSideFacingOrthoNormalVectorsCopy();
+      List<Vector2d> normalVectors = polygon.getOutSideFacingOrthoNormalVectorsCopy();
 
       for (Vector2d normalVector : normalVectors)
       {

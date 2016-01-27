@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
@@ -16,14 +15,12 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
-import org.apache.commons.lang3.SystemUtils;
-
 import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
-import us.ihmc.robotDataCommunication.logger.util.FFMpeg;
-import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
+import us.ihmc.robotDataCommunication.logger.converters.VideoConverter;
+import us.ihmc.robotDataCommunication.logger.util.CustomProgressMonitor;
 
 public class VideoDataPlayer
 {
@@ -216,64 +213,54 @@ public class VideoDataPlayer
       }
    }
 
-   public void exportVideo(File selectedFile, long startTimestamp, long endTimestamp, PrintStream output)
+   public void exportVideo(File selectedFile, long startTimestamp, long endTimestamp, CustomProgressMonitor monitor)
    {
 
       long startVideoTimestamp = getVideoTimestamp(startTimestamp);
       long endVideoTimestamp = getVideoTimestamp(endTimestamp);
-
-      double timebase = 1.0 / ((double) demuxer.getTimescale());
-
-      double startTime = startVideoTimestamp * timebase;
-      double endTime = endVideoTimestamp * timebase;
-
-      FFMpeg ffMpeg = new FFMpeg();
-
-      ffMpeg.setStarttime(startTime);
-      ffMpeg.setEndtime(endTime);
-      ffMpeg.setInputFile("\"" + videoFile.getAbsolutePath() + "\"");
-      ffMpeg.setVideoCodec("h264");
-      ffMpeg.setAudioCodec("aac");
-      ffMpeg.enableExperimentalCodecs(true);
-      ffMpeg.setOutputFile("\"" + selectedFile.getAbsolutePath() + "\"");
-
-      PipedCommandExecutor executor = new PipedCommandExecutor(ffMpeg);
+      
+      
       try
       {
-         executor.execute(output, output);
-         executor.waitFor();
+         VideoConverter.convert(videoFile, selectedFile, startVideoTimestamp, endVideoTimestamp, 8000, monitor);
       }
       catch (IOException e)
       {
          e.printStackTrace();
       }
-
+      
    }
 
-   public void cropVideo(File outputFile, File timestampFile, long startTimestamp, long endTimestamp, PrintStream output) throws IOException
+   public void cropVideo(File outputFile, File timestampFile, long startTimestamp, long endTimestamp, CustomProgressMonitor monitor) throws IOException
    {
 
+
+
+      long startVideoTimestamp = getVideoTimestamp(startTimestamp);
+      long endVideoTimestamp = getVideoTimestamp(endTimestamp);
+      
+      int framerate = VideoConverter.crop(videoFile, outputFile, startVideoTimestamp, endVideoTimestamp, monitor);
+
+      
       PrintWriter timestampWriter = new PrintWriter(timestampFile);
-      timestampWriter.println(bmdTimeBaseNum);
-      timestampWriter.println(bmdTimeBaseDen);
+      timestampWriter.println(1);
+      timestampWriter.println(framerate);
 
-      long videoOffset = Long.MIN_VALUE;
-
+      long pts = 0;
+      /*
+       * PTS gets reorderd to be monotonically increaseing starting from 0
+       */
       for (int i = 0; i < robotTimestamps.length; i++)
       {
          long robotTimestamp = robotTimestamps[i];
-         long videoTimestamp = videoTimestamps[i];
 
          if (robotTimestamp >= startTimestamp && robotTimestamp <= endTimestamp)
          {
-            if (videoOffset == Long.MIN_VALUE)
-            {
-               videoOffset = videoTimestamp;
-            }
 
             timestampWriter.print(robotTimestamp);
             timestampWriter.print(" ");
-            timestampWriter.println(videoTimestamp - videoOffset);
+            timestampWriter.println(pts);
+            pts++;
          }
          else if (robotTimestamp > endTimestamp)
          {
@@ -282,46 +269,6 @@ public class VideoDataPlayer
       }
 
       timestampWriter.close();
-
-      long startVideoTimestamp = getVideoTimestamp(startTimestamp);
-      long endVideoTimestamp = getVideoTimestamp(endTimestamp);
-      double timebase = 1.0 / ((double) demuxer.getTimescale());
-
-      double startTime = startVideoTimestamp * timebase;
-      double endTime = endVideoTimestamp * timebase;
-
-      FFMpeg ffMpeg = new FFMpeg();
-
-      ffMpeg.setStarttime(startTime);
-      ffMpeg.setEndtime(endTime);
-
-      String filePathEncloser;
-
-      if (SystemUtils.IS_OS_WINDOWS)
-      {
-         filePathEncloser = "\"";
-      }
-      else
-      {
-         filePathEncloser = "'";
-      }
-
-      ffMpeg.setInputFile(filePathEncloser + videoFile.getAbsolutePath() + filePathEncloser);
-      ffMpeg.setVideoCodec("copy");
-      ffMpeg.setAudioCodec("copy");
-      ffMpeg.enableExperimentalCodecs(true);
-      ffMpeg.setOutputFile(filePathEncloser + outputFile.getAbsolutePath() + filePathEncloser);
-
-      PipedCommandExecutor executor = new PipedCommandExecutor(ffMpeg);
-      try
-      {
-         executor.execute(output, output);
-         executor.waitFor();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
    }
 
    private class HideableMediaFrame extends JFrame

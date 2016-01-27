@@ -1,18 +1,20 @@
 package us.ihmc.robotics.geometry;
 
-import Jama.Matrix;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
+import Jama.Matrix;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class GeometryTools
 {
@@ -55,6 +57,20 @@ public class GeometryTools
          return crossProduct.length() / startToEnd.length();
       }
    }
+   
+   /**
+    * 2d point to line distance.
+    * 
+    * @param point FramePoint
+    * @param lineStart FramePoint
+    * @param lineEnd FramePoint
+    * @return double
+    */
+   public static double distanceFromPointToLine2d(FramePoint point, FramePoint lineStart, FramePoint lineEnd)
+   {
+
+      return distanceFromPointToLine(point.getX(), point.getY(), lineStart.getX(), lineStart.getY(), lineEnd.getX(), lineEnd.getY());
+   }
 
    /**
     * Returns the minimum distance between a 2D point and an infinitely long 2D
@@ -69,16 +85,32 @@ public class GeometryTools
     */
    public static double distanceFromPointToLine(Point2d point, Point2d lineStart, Point2d lineEnd)
    {
-      if (lineStart.x - lineEnd.x == 0 & lineStart.y - lineEnd.y == 0)
+      return distanceFromPointToLine(point.x, point.y, lineStart.x, lineStart.y, lineEnd.x, lineEnd.y);
+   }
+   
+   /**
+    * Returns the minimum distance between a 2D point and an infinitely long 2D
+    * line defined by a given line segment.
+    * If line is defined by the same point, returns distance between that point
+    * and the given 2D point
+    *
+    * @param point Point2d
+    * @param lineStart Point2d
+    * @param lineEnd Point2d
+    * @return double
+    */
+   public static double distanceFromPointToLine(double pointX, double pointY, double lineStartX, double lineStartY, double lineEndX, double lineEndY)
+   {
+      if (lineStartX - lineEndX == 0 & lineStartY - lineEndY == 0)
       {
-         double distance = Math.sqrt(((lineStart.x - point.x) * (lineStart.x - point.x)) + ((lineStart.y - point.y) * (lineStart.y - point.y)));
+         double distance = Math.sqrt(((lineStartX - pointX) * (lineStartX - pointX)) + ((lineStartY - pointY) * (lineStartY - pointY)));
 
          return distance;
       }
       else
       {
-         double numerator = Math.abs(((lineEnd.x - lineStart.x) * (lineStart.y - point.y)) - ((lineStart.x - point.x) * (lineEnd.y - lineStart.y)));
-         double denominator = Math.sqrt(((lineEnd.x - lineStart.x) * (lineEnd.x - lineStart.x)) + ((lineEnd.y - lineStart.y) * (lineEnd.y - lineStart.y)));
+         double numerator = Math.abs(((lineEndX - lineStartX) * (lineStartY - pointY)) - ((lineStartX - pointX) * (lineEndY - lineStartY)));
+         double denominator = Math.sqrt(((lineEndX - lineStartX) * (lineEndX - lineStartX)) + ((lineEndY - lineStartY) * (lineEndY - lineStartY)));
 
          return numerator / denominator;
       }
@@ -420,24 +452,58 @@ public class GeometryTools
 
       return false;
    }
-
+   
+   /**
+    * @deprecated Creates garbage. Use {@link GeometryTools.intersection}.
+    * @param lineStart1
+    * @param lineEnd1
+    * @param lineStart2
+    * @param lineEnd2
+    * @return
+    */
    public static Point2d getIntersectionBetweenTwoLines(Point2d lineStart1, Point2d lineEnd1, Point2d lineStart2, Point2d lineEnd2)
    {
       Line2d line1 = new Line2d(lineStart1, lineEnd1);
       Line2d line2 = new Line2d(lineStart2, lineEnd2);
 
-//
-//    return Geometry2dCalculator.intersection(line1, line2);
-
       return line1.intersectionWith(line2);
    }
-
-   // TODO move to Line2d replacing with intersection from geometry2dcalc
-// public static Point2d intersection(Line2d firstLine, Line2d secondLine)
-// {
-//    return getIntersectionBetweenTwoLines(firstLine.getPointCopy(), firstLine.getNormalizedVectorCopy(), secondLine.getPointCopy(),
-//            secondLine.getNormalizedVectorCopy());
-// }
+   
+   private static final ThreadLocal<double[]> tempAlphaBeta = new ThreadLocal<double[]>()
+   {
+      @Override
+      public double[] initialValue()
+      {
+         return new double[2];
+      }
+   };
+   
+   private static final ThreadLocal<FrameVector[]> tempDirectionsForIntersection = new ThreadLocal<FrameVector[]>()
+   {
+      @Override
+      public FrameVector[] initialValue()
+      {
+         return new FrameVector[] {new FrameVector(), new FrameVector()};
+      }
+   };
+   
+   public static void getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint lineStart1, FramePoint lineEnd1, FramePoint lineStart2, FramePoint lineEnd2)
+   {
+      tempDirectionsForIntersection.get()[0].sub(lineEnd1, lineStart1);
+      tempDirectionsForIntersection.get()[1].sub(lineEnd2, lineStart2);
+      
+      GeometryTools.getIntersectionBetweenTwoLines2d(intersectionToPack, lineStart1, tempDirectionsForIntersection.get()[0], lineStart2, tempDirectionsForIntersection.get()[1]);
+   }
+   
+   public static void getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint point1, FrameVector direction1, FramePoint point2, FrameVector direction2)
+   {
+      GeometryTools.intersection(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(), direction2.getY(), tempAlphaBeta.get());
+      
+      if (Double.isNaN(tempAlphaBeta.get()[0]) || Double.isNaN(tempAlphaBeta.get()[1]))
+         throw new UndefinedOperationException("Lines are parallel.");
+      
+      intersectionToPack.set(point1.getX() + direction1.getX() * tempAlphaBeta.get()[0], point1.getY() + direction1.getY() * tempAlphaBeta.get()[0], intersectionToPack.getZ());
+   }
 
    /**
     * Finds the intersection between two 2D lines.
@@ -450,9 +516,9 @@ public class GeometryTools
     * @param point2 Start Point of second line.
     * @param vector2 Direction Vector of second line.
     * @return Point of Intersection.
+    * @deprecated Creates garbage. Use {@link GeometryTools.intersection}.
+    * TODO ensure consistant with line2D
     */
-
-   // TODO ensure consistant with line2D
    public static Point2d getIntersectionBetweenTwoLines(Point2d point1, Vector2d vector1, Point2d point2, Vector2d vector2)
    {
       Line2d line1 = new Line2d(point1, vector1);
@@ -462,41 +528,130 @@ public class GeometryTools
    }
 
    /**
+       *       Finds the intersection parameters between two lines. First line starts at (firstPointX, firstPointY) and has direction vector (firstVectorX, firstVectorY).
+       *       The second line starts at (secondPointX, secondPointY) and has direction vector (secondVectorX, secondVectorY). Returns null if the lines are parallel.
+       *       Returns {alpha, beta} such that the intersection between the lines occurs at P1 + alpha * V1 = P2 + beta * V2;
+       *
+       *       @param x0 double First line starting x.
+       *       @param y0 double First line starting y.
+       *       @param vx0 double First line direction x.
+       *       @param vy0 double First line direction y.
+       *       @param x1 double Second line starting x.
+       *       @param y1 double Second line starting y.
+       *       @param vx1 double Second line direction x.
+       *       @param vy1 double Second line direction y.
+       *
+       *       @return double[] {alpha, beta} such that the intersection between the lines occurs at P1 + alpha * V1 = P2 + beta * V2;
+       */
+   
+      // TODO only used by the intersection methods in this class
+      public static void intersection(double x0, double y0, double vx0, double vy0, double x1, double y1, double vx1, double vy1, double[] alphaBetaToPack)
+      {
+   //      We solve for x the problem of the form: A * x = b
+   //            A      *     x     =      b
+   //      / vx0 -vx1 \   / alpha \   / x1 - x0 \
+   //      |          | * |       | = |         |
+   //      \ vy0 -vy1 /   \ beta  /   \ y1 - y0 /
+   //      
+   //      
+   //      double[][] A = new double[2][2];
+   //      A[0][0] = vx0;
+   //      A[0][1] = -vx1;
+   //      A[1][0] = vy0;
+   //      A[1][1] = -vy1;
+   //
+   //      double[] b = new double[2];
+   //      b[0] = x1 - x0;
+   //      b[1] = y1 - y0;
+   
+         double determinant = -vx0 * vy1 + vy0 * vx1; //(A[0][0] * A[1][1]) - (A[1][0] * A[0][1]);
+   
+         double epsilon = 1.0E-12;
+         if (Math.abs(determinant) < epsilon)
+         {
+            alphaBetaToPack[0] = Double.NaN;
+            alphaBetaToPack[1] = Double.NaN;
+         }
+         else
+         {
+            double oneOverDeterminant = 1.0 / determinant;
+            double AInverse00 = oneOverDeterminant * -vy1; // A[1][1];
+            double AInverse01 = oneOverDeterminant *  vx1; //-A[0][1];
+            double AInverse10 = oneOverDeterminant * -vy0; //-A[1][0];
+            double AInverse11 = oneOverDeterminant *  vx0; // A[0][0];
+   
+            double dx = x1 - x0;
+            double dy = y1 - y0;
+            double alpha = AInverse00 * dx + AInverse01 * dy;// AInverse00 * b[0] + AInverse01 * b[1];
+            double beta  = AInverse10 * dx + AInverse11 * dy;// AInverse10 * b[0] + AInverse11 * b[1];
+   
+            alphaBetaToPack[0] = alpha;
+            alphaBetaToPack[1] = beta;
+         }
+      }
+
+   /**
     * Returns the line segment percentages of the intersection point between two lines if the lines are intersecting and not colinear.
     * If colinear, or parallel, then returns null.
     * This is epsilon conservative in determining parallelness or colinearity. If just slightly not parallel, will still return null.
+    * 
+    * TODO ensure consistant with lineSegment2D
     *
     * @param lineStart1 Point2d
     * @param lineEnd1 Point2d
     * @param lineStart2 Point2d
     * @param lineEnd2 Point2d
     *
+    * @deprecated Creates garbage
     * @return Intersecting percentages of the two line segments if intersecting and not colinear. Null if not intersecting, or colinear.
     */
-
-   // TODO ensure consistant with lineSegment2D
    public static double[] getLineSegmentPercentagesIfIntersecting(Point2d lineStart1, Point2d lineEnd1, Point2d lineStart2, Point2d lineEnd2)
    {
-      double r1numerator = (lineEnd2.x - lineStart2.x) * (lineStart1.y - lineStart2.y) - (lineEnd2.y - lineStart2.y) * (lineStart1.x - lineStart2.x);
+      double[] garbage = new double[2];
+      getLineSegmentPercentagesIfIntersecting(lineStart1.x, lineStart1.y, lineEnd1.x, lineEnd1.y, lineStart2.x, lineStart2.y, lineEnd2.x, lineEnd2.y, garbage);
+      return garbage;
+   }
+   
+   /**
+    * Returns the line segment percentages of the intersection point between two lines if the lines are intersecting and not colinear.
+    * If colinear, or parallel, then returns null.
+    * This is epsilon conservative in determining parallelness or colinearity. If just slightly not parallel, will still return null.
+    * 
+    * TODO ensure consistant with lineSegment2D
+    *
+    * @param lineStart1 Point2d
+    * @param lineEnd1 Point2d
+    * @param lineStart2 Point2d
+    * @param lineEnd2 Point2d
+    * @param Intersecting percentages of the two line segments if intersecting and not colinear. Null if not intersecting, or colinear.
+    */
+   public static void getLineSegmentPercentagesIfIntersecting(FramePoint lineStart1, FramePoint lineEnd1, FramePoint lineStart2, FramePoint lineEnd2, double[] percentages)
+   {
+      getLineSegmentPercentagesIfIntersecting(lineStart1.getX(), lineStart1.getY(), lineEnd1.getX(), lineEnd1.getY(), lineStart2.getX(), lineStart2.getY(), lineEnd2.getX(), lineEnd2.getY(), percentages);
+   }
 
-      double r1denominator = (lineEnd2.y - lineStart2.y) * (lineEnd1.x - lineStart1.x) - (lineEnd2.x - lineStart2.x) * (lineEnd1.y - lineStart1.y);
+   private static void getLineSegmentPercentagesIfIntersecting(double l1ax, double l1ay, double l1bx, double l1by, double l2ax, double l2ay, double l2bx, double l2by, double[] percentages)
+   {
+      double r1numerator = (l2bx - l2ax) * (l1ay - l2ay) - (l2by - l2ay) * (l1ax - l2ax);
 
-      double r2numerator = (lineEnd1.x - lineStart1.x) * (lineStart1.y - lineStart2.y) - (lineEnd1.y - lineStart1.y) * (lineStart1.x - lineStart2.x);
+      double r1denominator = (l2by - l2ay) * (l1bx - l1ax) - (l2bx - l2ax) * (l1by - l1ay);
+
+      double r2numerator = (l1bx - l1ax) * (l1ay - l2ay) - (l1by - l1ay) * (l1ax - l2ax);
 
       double r2denominator = r1denominator;
 
-      // If the denominator is zero, the lines are either colinear or parallel. In either case, we'll return null
+      // If the denominator is zero, the lines are either colinear or parallel.
       if (Math.abs(r1denominator) < EPSILON)
       {
-         return null;
+         throw new UndefinedOperationException("Lines are colinear or parallel.");
       }
 
       double r1 = r1numerator / r1denominator;
       double r2 = r2numerator / r2denominator;
 
-      return new double[] {r1, r2};
+      percentages[0] = r1;
+      percentages[1] = r2;
    }
-
 
    /**
     * Returns the Normal of a plane that is defined by three points
@@ -563,13 +718,27 @@ public class GeometryTools
       return lineToReturn;
    }
 
+   /**
+    * Not garbage free.
+    * 
+    * @deprecated Use {@link #getPerpendicularVector(Vector2d, Vector2d)}
+    */
    public static Vector2d getPerpendicularVector(Vector2d vector)
    {
       Vector2d perpendicularVector = new Vector2d();
-      perpendicularVector.x = -vector.y;
-      perpendicularVector.y = vector.x;
+      getPerpendicularVector(perpendicularVector, vector);
 
       return perpendicularVector;
+   }
+   
+   public static void getPerpendicularVector(Vector2d perpendicularVectorToPack, Vector2d vector)
+   {
+      perpendicularVectorToPack.set(-vector.y, vector.x);
+   }
+   
+   public static void getPerpendicularVector2d(FrameVector perpendicularVectorToPack, FrameVector vector)
+   {
+      perpendicularVectorToPack.set(-vector.getY(), vector.getX(), perpendicularVectorToPack.getZ());
    }
 
    /**
@@ -600,7 +769,6 @@ public class GeometryTools
          return null;
 
       return normal.getVectorCopy();
-
    }
    
    /**
@@ -702,6 +870,7 @@ public class GeometryTools
 
    private static final ThreadLocal<Vector3d> tempCrossProduct = new ThreadLocal<Vector3d>()
    {
+      @Override
       public Vector3d initialValue()
       {
          return new Vector3d();
@@ -710,6 +879,7 @@ public class GeometryTools
 
    private static final ThreadLocal<Vector3d> tempWorldNormal = new ThreadLocal<Vector3d>()
    {
+      @Override
       public Vector3d initialValue()
       {
          return new Vector3d();
@@ -1507,69 +1677,6 @@ public class GeometryTools
       Matrix Proj = P.plus(Perp);
 
       return new Vector3d(Proj.get(0, 0), Proj.get(1, 0), Proj.get(2, 0));
-   }
-
-   /**
-    *       Finds the intersection parameters between two lines. First line starts at (firstPointX, firstPointY) and has direction vector (firstVectorX, firstVectorY).
-    *       The second line starts at (secondPointX, secondPointY) and has direction vector (secondVectorX, secondVectorY). Returns null if the lines are parallel.
-    *       Returns {alpha, beta} such that the intersection between the lines occurs at P1 + alpha * V1 = P2 + beta * V2;
-    *
-    *       @param x0 double First line starting x.
-    *       @param y0 double First line starting y.
-    *       @param vx0 double First line direction x.
-    *       @param vy0 double First line direction y.
-    *       @param x1 double Second line starting x.
-    *       @param y1 double Second line starting y.
-    *       @param vx1 double Second line direction x.
-    *       @param vy1 double Second line direction y.
-    *
-    *       @return double[] {alpha, beta} such that the intersection between the lines occurs at P1 + alpha * V1 = P2 + beta * V2;
-    */
-
-   // TODO only used by the intersection methods in this class
-   public static void intersection(double x0, double y0, double vx0, double vy0, double x1, double y1, double vx1, double vy1, double[] alphaBetaToPack)
-   {
-//      We solve for x the problem of the form: A * x = b
-//            A      *     x     =      b
-//      / vx0 -vx1 \   / alpha \   / x1 - x0 \
-//      |          | * |       | = |         |
-//      \ vy0 -vy1 /   \ beta  /   \ y1 - y0 /
-//      
-//      
-//      double[][] A = new double[2][2];
-//      A[0][0] = vx0;
-//      A[0][1] = -vx1;
-//      A[1][0] = vy0;
-//      A[1][1] = -vy1;
-//
-//      double[] b = new double[2];
-//      b[0] = x1 - x0;
-//      b[1] = y1 - y0;
-
-      double determinant = -vx0 * vy1 + vy0 * vx1; //(A[0][0] * A[1][1]) - (A[1][0] * A[0][1]);
-
-      double epsilon = 1.0E-12;
-      if (Math.abs(determinant) < epsilon)
-      {
-         alphaBetaToPack[0] = Double.NaN;
-         alphaBetaToPack[1] = Double.NaN;
-      }
-      else
-      {
-         double oneOverDeterminant = 1.0 / determinant;
-         double AInverse00 = oneOverDeterminant * -vy1; // A[1][1];
-         double AInverse01 = oneOverDeterminant *  vx1; //-A[0][1];
-         double AInverse10 = oneOverDeterminant * -vy0; //-A[1][0];
-         double AInverse11 = oneOverDeterminant *  vx0; // A[0][0];
-
-         double dx = x1 - x0;
-         double dy = y1 - y0;
-         double alpha = AInverse00 * dx + AInverse01 * dy;// AInverse00 * b[0] + AInverse01 * b[1];
-         double beta  = AInverse10 * dx + AInverse11 * dy;// AInverse10 * b[0] + AInverse11 * b[1];
-
-         alphaBetaToPack[0] = alpha;
-         alphaBetaToPack[1] = beta;
-      }
    }
 
    public static double minimumDistance(FramePoint testPoint, List<FramePoint> points)

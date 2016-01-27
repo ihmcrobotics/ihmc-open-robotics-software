@@ -8,16 +8,16 @@ dependencies {
 	compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
 	
 	
-	compile project(':Graphics3DAdapter')
-	compile project(':IHMCCommunication')
-	compile project(':IHMCHumanoidRobotics')
-	compile project(':CommonWalkingControlModules')
-	compile project(':SimulationConstructionSet')
-	compile project(':RobotDataCommunication')
-	compile project(':SensorProcessing')
-	compile project(':IHMCWholeBodyController')
-	compile project(':IHMCPerception')
-	compile project(':IHMCJavaToolkit')
-	compile project(':IHMCRoboticsToolkit')
-    testCompile project(':IHMCUnitTesting')
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:Graphics3DAdapter")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCCommunication")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCHumanoidRobotics")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:CommonWalkingControlModules")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:SimulationConstructionSet")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:RobotDataCommunication")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:SensorProcessing")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCWholeBodyController")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCPerception")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
+    testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
 }

@@ -11,6 +11,8 @@ public class OneDoFJointQuinticTrajectoryGenerator implements OneDoFJointTraject
    private final YoVariableRegistry registry;
    private final DoubleYoVariable finalPosition;
    private final DoubleYoVariable currentPosition;
+   private final DoubleYoVariable currentVelocity;
+   private final DoubleYoVariable currentAcceleration;
    private final YoPolynomial polynomial;
    private final DoubleYoVariable trajectoryTime;
    private final DoubleProvider trajectoryTimeProvider;
@@ -25,6 +27,8 @@ public class OneDoFJointQuinticTrajectoryGenerator implements OneDoFJointTraject
       this.trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
       this.currentTime = new DoubleYoVariable(namePrefix + "CurrentTime", registry);
       this.currentPosition = new DoubleYoVariable(namePrefix + "CurrentPosition", registry);
+      this.currentVelocity = new DoubleYoVariable(namePrefix + "CurrentVelocity", registry);
+      this.currentAcceleration = new DoubleYoVariable(namePrefix + "CurrentAcceleration", registry);
       this.finalPosition = new DoubleYoVariable(namePrefix + "FinalPosition", registry);
       this.trajectoryTimeProvider = trajectoryTimeProvider;
       parentRegistry.addChild(registry);
@@ -42,6 +46,8 @@ public class OneDoFJointQuinticTrajectoryGenerator implements OneDoFJointTraject
       this.trajectoryTime.set(trajectoryTimeProvider.getValue());
       this.polynomial.setQuintic(0.0, trajectoryTime.getDoubleValue(), initialPosition, initialVelocity, 0.0, finalPosition.getDoubleValue(), 0.0, 0.0);
       currentPosition.set(initialPosition);
+      currentVelocity.set(initialVelocity);
+      currentAcceleration.set(0.0);
    }
 
    @Override
@@ -56,10 +62,18 @@ public class OneDoFJointQuinticTrajectoryGenerator implements OneDoFJointTraject
       this.currentTime.set(time);
       time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
       polynomial.compute(time);
-      if (isDone())
+      if (isDone() || trajectoryTime.getDoubleValue() <= 0.0)
+      {
          currentPosition.set(finalPosition.getDoubleValue());
+         currentVelocity.set(0.0);
+         currentAcceleration.set(0.0);
+      }
       else
+      {
          currentPosition.set(polynomial.getPosition());
+         currentVelocity.set(polynomial.getVelocity());
+         currentAcceleration.set(polynomial.getAcceleration());
+      }
    }
 
    @Override
@@ -77,19 +91,13 @@ public class OneDoFJointQuinticTrajectoryGenerator implements OneDoFJointTraject
    @Override
    public double getVelocity()
    {
-      if (isDone())
-         return 0.0;
-      else
-         return polynomial.getVelocity();
+      return currentVelocity.getDoubleValue();
    }
 
    @Override
    public double getAcceleration()
    {
-      if (isDone())
-         return 0.0;
-      else
-         return polynomial.getAcceleration();
+         return currentAcceleration.getDoubleValue();
    }
 
    public void setFinalPosition(double finalPosition)

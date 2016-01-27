@@ -1,6 +1,6 @@
-evaluationDependsOn(':IHMCJavaToolkit')
-evaluationDependsOn(':IHMCRoboticsToolkit')
-evaluationDependsOn(':DarpaRoboticsChallenge')
+evaluationDependsOn("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit")
+evaluationDependsOn("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
+evaluationDependsOn("${getOpenRoboticsSoftwareGradlePath()}:DarpaRoboticsChallenge")
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -21,25 +21,25 @@ dependencies {
 	
 	compile group: 'us.ihmc', name: 'IHMCRosControl', version: '0.2.1'
 	
-	compile project(':CommonWalkingControlModules')
-	compile project(':DarpaRoboticsChallenge')
-	compile project(':Graphics3DAdapter')
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:CommonWalkingControlModules")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:DarpaRoboticsChallenge")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:Graphics3DAdapter")
 	
-	compile project(':IHMCROSTools')
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCROSTools")
 	
-	compile project(':RobotDataCommunication')
-	compile project(':ROSJavaMessages')
-	compile project(':SDFLoader')
-	compile project(':SensorProcessing')
-	compile project(':SimulationConstructionSet')
-    compile project(':IHMCPerception')
-    compile project(':IHMCWholeBodyController')
-	compile project(':IHMCJavaToolkit')
-	compile project(':IHMCRoboticsToolkit')
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:RobotDataCommunication")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:ROSJavaMessages")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:SDFLoader")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:SensorProcessing")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:SimulationConstructionSet")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCPerception")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCWholeBodyController")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
 	
-	testCompile project(':IHMCUnitTesting')
+	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
 	
-	testCompile project(':IHMCJavaToolkit').sourceSets.test.output
-	testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
-	testCompile project(':IHMCRoboticsToolkit').sourceSets.test.output
+	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit").sourceSets.test.output
+	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:DarpaRoboticsChallenge").sourceSets.test.output
+	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit").sourceSets.test.output
 }

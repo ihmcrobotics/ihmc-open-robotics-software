@@ -1,15 +1,27 @@
 package us.ihmc.robotics.math.frames;
 
-import javax.vecmath.*;
+import javax.vecmath.Point3d;
+import javax.vecmath.Tuple2d;
+import javax.vecmath.Tuple3d;
+import javax.vecmath.Tuple3f;
+import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameTuple2d;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.FormattingTools;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
 public abstract class YoFrameTuple<T extends FrameTuple<?>> extends ReferenceFrameHolder
@@ -24,7 +36,7 @@ public abstract class YoFrameTuple<T extends FrameTuple<?>> extends ReferenceFra
    public YoFrameTuple(DoubleYoVariable xVariable, DoubleYoVariable yVariable, DoubleYoVariable zVariable, ReferenceFrame referenceFrame)
    {
       this.namePrefix = StringUtils.getCommonPrefix(xVariable.getName(), yVariable.getName(), zVariable.getName());
-      this.nameSuffix = FormattingTools.getCommonSuffix(xVariable.getName(), yVariable.getName(), zVariable.getName());
+      this.nameSuffix = YoFrameVariableNameTools.getCommonSuffix(xVariable.getName(), yVariable.getName(), zVariable.getName());
 
       this.x = xVariable;
       this.y = yVariable;

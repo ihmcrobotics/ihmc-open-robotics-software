@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.supportPolygon;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
@@ -9,38 +8,35 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
-@SuppressWarnings("all")
-/**
- *
- * <p>Title: Polygon </p>
- *
- * <p>Description:
- *
- * This class holds anywhere between 0 and 4
- * Footsteps that form a polygon.
- * Methods cycle over all feet.
- *
- * </p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
+
 public class QuadrupedSupportPolygon implements Serializable
 {
-   protected final QuadrantDependentList<FramePoint> footsteps = new QuadrantDependentList<FramePoint>();
+   private static final long serialVersionUID = 4247638266737494462L;
+   
+   private final QuadrantDependentFootstepList footsteps = new QuadrantDependentFootstepList();
+   
    private final FrameConvexPolygon2d frameConvexPolygon2d = new FrameConvexPolygon2d();
+   
+   private final FramePoint temporaryFramePoint = new FramePoint();
+   private final FramePoint temporaryFramePoint2 = new FramePoint();
+   private final FrameVector tempPlaneNormalInWorld = new FrameVector();
+   
+   private final FrameVector[] tempVectorsForInCirclePoint = new FrameVector[] {new FrameVector(), new FrameVector(), new FrameVector(), new FrameVector()};
+   private final FramePoint[] tempPointListForInCirclePoint = new FramePoint[4];
+   private final FramePoint tempInCircleCenter = new FramePoint();
+   
+   private final FrameVector[] tempVectorsForCommonSupportPolygon = new FrameVector[] {new FrameVector(), new FrameVector()};
 
    public QuadrupedSupportPolygon()
    {
@@ -49,40 +45,498 @@ public class QuadrupedSupportPolygon implements Serializable
    
    public QuadrupedSupportPolygon(QuadrantDependentList<FramePoint> footsteps)
    {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      for (RobotQuadrant robotQuadrant : footsteps.quadrants())
       {
-         FramePoint footStep = footsteps.get(robotQuadrant);
-         if(footStep != null)
-         {
-            this.footsteps.put(robotQuadrant, new FramePoint(footStep));
-         }
+         setFootstep(robotQuadrant, footsteps.get(robotQuadrant));
       }
    }
 
-   public QuadrupedSupportPolygon(QuadrupedSupportPolygon polygon)
+   /**
+    * Copies the support polygon with copies of all of the FramePoints.
+    * 
+    * @param polygon to copy
+    */
+   public QuadrupedSupportPolygon(QuadrupedSupportPolygon polygon) 
    {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      for (RobotQuadrant robotQuadrant : polygon.getSupportingQuadrantsInOrder())
       {
-         FramePoint footStep = polygon.getFootstep(robotQuadrant);
-         if(footStep != null)
+         footsteps.set(robotQuadrant, polygon.getFootstep(robotQuadrant));
+      }
+   }
+   
+   private class QuadrantDependentFootstepList extends QuadrantDependentList<FramePoint>
+   {
+      private final FramePoint[] framePointsForStorageWhenNull = new FramePoint[4];
+      {
+         framePointsForStorageWhenNull[0] = new FramePoint();
+         framePointsForStorageWhenNull[1] = new FramePoint();
+         framePointsForStorageWhenNull[2] = new FramePoint();
+         framePointsForStorageWhenNull[3] = new FramePoint();
+      }
+      
+      public QuadrantDependentFootstepList()
+      {
+         super();
+      }
+      
+      @Override
+      public void set(RobotQuadrant robotQuadrant, FramePoint element)
+      {
+         // do nothing
+         if (element == get(robotQuadrant))
          {
-            this.footsteps.put(robotQuadrant, new FramePoint(footStep));
+            return;
          }
+         // remove
+         if (element == null && containsQuadrant(robotQuadrant))
+         {
+            framePointsForStorageWhenNull[robotQuadrant.ordinal()] = get(robotQuadrant);
+            super.set(robotQuadrant, element);
+            return;
+         }
+         // add
+         else if (element != null && !containsQuadrant(robotQuadrant))
+         {
+            framePointsForStorageWhenNull[robotQuadrant.ordinal()].setIncludingFrame(element);
+            super.set(robotQuadrant, element);
+            return;
+         }
+         // replace
+         else if (element != get(robotQuadrant))
+         {
+            get(robotQuadrant).setIncludingFrame(element);
+         }
+      }
+      
+      @Override
+      public FramePoint remove(RobotQuadrant robotQuadrant)
+      {
+         // remove
+         if (containsQuadrant(robotQuadrant))
+         {
+            framePointsForStorageWhenNull[robotQuadrant.ordinal()] = get(robotQuadrant);
+            return super.remove(robotQuadrant);
+         }
+         // do nothing
+         else
+         {
+            return get(robotQuadrant);
+         }
+      }
+      
+      @Override
+      public void clear()
+      {
+         for (RobotQuadrant robotQuadrant : quadrants())
+         {
+            framePointsForStorageWhenNull[robotQuadrant.ordinal()] = get(robotQuadrant);
+         }
+         
+         super.clear();
       }
    }
    
    public void printOutPolygon(String string)
    {
-      System.out.print(string + " ");
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      System.out.print(getClass().getSimpleName() + ": " + string);
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
-         System.out.print(robotQuadrant + ": " + footsteps.get(robotQuadrant) + "  , ");
+         System.out.print("\n" + robotQuadrant + " " + getFootstep(robotQuadrant));
       }
+      System.out.println();
+   }
 
-      System.out.println("\n");
+   @Override
+   public String toString()
+   {
+      String string = getClass().getSimpleName();
+      for(RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         string += "\n" + robotQuadrant + " " + getFootstep(robotQuadrant);
+      }
+      return string;
+   }
+
+   /**
+    * @return the reference frame of the first non-null footstep.
+    */
+   public ReferenceFrame getReferenceFrame()
+   {
+      return getFootstep(getFirstSupportingQuadrant()).getReferenceFrame();
+   }
+
+   public void changeFrame(ReferenceFrame referenceFrame)
+   {
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         getFootstep(robotQuadrant).changeFrame(referenceFrame);
+      }
+   }
+
+   /**
+    * This method cycles over the cases 0 - 4 for the number
+    * of Footsteps in the polygon. The ordering of the pairs
+    * starts with the FL and goes clockwise. E.g., if the swing leg is the FR,
+    * the pairs will be: FL-HR, HR-HL, HL-FL
+    *
+    * @return LegName[][]
+    */
+   public RobotQuadrant[][] getLegPairs()
+   {
+      int numberOfLegs = size();
+      switch (numberOfLegs)
+      {
+      case 0:
+      case 1:
+         throw new UndefinedOperationException("No leg pairs exist");
+      case 2:
+         RobotQuadrant firstLeg = getFirstSupportingQuadrant();
+         RobotQuadrant lastLeg = getLastSupportingQuadrant();
+         return new RobotQuadrant[][] {{firstLeg, lastLeg}};
+      case 3:
+         switch (getFirstNonSupportingQuadrant())
+         {
+         case FRONT_LEFT:
+            return new RobotQuadrant[][]
+            {
+               {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT},
+               {RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT},
+               {RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_RIGHT}
+            };
+         case FRONT_RIGHT:
+            return new RobotQuadrant[][]
+            {
+               {RobotQuadrant.FRONT_LEFT, RobotQuadrant.HIND_RIGHT},
+               {RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT},
+               {RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT}
+            };
+         case HIND_RIGHT:
+            return new RobotQuadrant[][]
+            {
+               {RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT},
+               {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_LEFT},
+               {RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT}
+            };
+         case HIND_LEFT:
+            return new RobotQuadrant[][]
+            {
+               {RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT},
+               {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT},
+               {RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_LEFT}
+            };
+         }
+      case 4:
+         return new RobotQuadrant[][]
+         {
+            {RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT},
+            {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT},
+            {RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT},
+            {RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT}
+         };
+      default:
+         throw new UndefinedOperationException("Size unknown");
+      }
    }
    
+   public int size()
+   {
+      return footsteps.size();
+   }
+   
+   public RobotQuadrant[] getSupportingQuadrantsInOrder()
+   {
+      return footsteps.quadrants();
+   }
+
+   public RobotQuadrant getFirstSupportingQuadrant()
+   {
+      if (containsFootstep(RobotQuadrant.FRONT_LEFT)) // begin punching nanos
+         return RobotQuadrant.FRONT_LEFT;
+      else if (containsFootstep(RobotQuadrant.FRONT_RIGHT))
+         return RobotQuadrant.FRONT_RIGHT;
+      else if (containsFootstep(RobotQuadrant.HIND_RIGHT))
+         return RobotQuadrant.HIND_RIGHT;
+      else if (containsFootstep(RobotQuadrant.HIND_LEFT))
+         return RobotQuadrant.HIND_LEFT;
+      else
+         throw new EmptySupportPolygonException();
+   }
+   
+   public RobotQuadrant getFirstNonSupportingQuadrant()
+   {
+      if (!containsFootstep(RobotQuadrant.FRONT_LEFT))
+         return RobotQuadrant.FRONT_LEFT;
+      else if (!containsFootstep(RobotQuadrant.FRONT_RIGHT))
+         return RobotQuadrant.FRONT_RIGHT;
+      else if (!containsFootstep(RobotQuadrant.HIND_RIGHT))
+         return RobotQuadrant.HIND_RIGHT;
+      else if (!containsFootstep(RobotQuadrant.HIND_LEFT))
+         return RobotQuadrant.HIND_LEFT;
+      else
+         throw new EmptySupportPolygonException();
+   }
+   
+   public RobotQuadrant getLastSupportingQuadrant()
+   {
+      if (containsFootstep(RobotQuadrant.HIND_LEFT))
+         return RobotQuadrant.HIND_LEFT;
+      else if (containsFootstep(RobotQuadrant.HIND_RIGHT))
+         return RobotQuadrant.HIND_RIGHT;
+      else if (containsFootstep(RobotQuadrant.FRONT_RIGHT))
+         return RobotQuadrant.FRONT_RIGHT;
+      else if (containsFootstep(RobotQuadrant.FRONT_LEFT))
+         return RobotQuadrant.FRONT_LEFT;
+      else
+         throw new EmptySupportPolygonException();
+   }
+
+   public RobotQuadrant getLastNonSupportingQuadrant()
+   {
+      if (!containsFootstep(RobotQuadrant.HIND_LEFT))
+         return RobotQuadrant.HIND_LEFT;
+      else if (!containsFootstep(RobotQuadrant.HIND_RIGHT))
+         return RobotQuadrant.HIND_RIGHT;
+      else if (!containsFootstep(RobotQuadrant.FRONT_RIGHT))
+         return RobotQuadrant.FRONT_RIGHT;
+      else if (!containsFootstep(RobotQuadrant.FRONT_LEFT))
+         return RobotQuadrant.FRONT_LEFT;
+      else
+         throw new EmptySupportPolygonException();
+   }
+   
+   public RobotQuadrant getNextClockwiseSupportingQuadrant(RobotQuadrant robotQuadrant)
+   {
+      RobotQuadrant prospectiveQuadrant = robotQuadrant;
+      for (int i = 0; i < 4; i++)
+      {
+         prospectiveQuadrant = prospectiveQuadrant.getNextClockwiseQuadrant();
+         if (containsFootstep(prospectiveQuadrant))
+            return prospectiveQuadrant;
+      }
+      
+      throw new EmptySupportPolygonException("Legs: " + size());
+   }
+   
+   public RobotQuadrant getNextCounterClockwiseSupportingQuadrant(RobotQuadrant robotQuadrant)
+   {
+      RobotQuadrant prospectiveQuadrant = robotQuadrant;
+      for (int i = 0; i < 4; i++)
+      {
+         prospectiveQuadrant = prospectiveQuadrant.getNextCounterClockwiseQuadrant();
+         if (containsFootstep(prospectiveQuadrant))
+            return prospectiveQuadrant;
+      }
+      
+      throw new EmptySupportPolygonException();
+   }
+    
+   public FramePoint getFootstep(RobotQuadrant robotQuadrant)
+   {
+      return footsteps.get(robotQuadrant);
+   }
+   
+   public FramePoint getFootstepOrCreateIfNonSupporting(RobotQuadrant robotQuadrant)
+   {
+      if  (!containsFootstep(robotQuadrant))
+         setFootstep(robotQuadrant, new FramePoint());
+      
+      return getFootstep(robotQuadrant);
+   }
+   
+   public void set(QuadrupedSupportPolygon polygon)
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
+      {
+         setFootstep(robotQuadrant, polygon.getFootstep(robotQuadrant));
+      }
+   }
+
+   public void setFootstep(RobotQuadrant robotQuadrant, FramePoint footstep)
+   {
+      footsteps.set(robotQuadrant, footstep);
+   }
+
+   /**
+    * replaceFootstepCopy: this replaces the stored footsep with the passed in one.
+    * If the stored footstep is null, it will throw an exception.
+    *
+    * @param footstep Footstep
+    * @return Polygon
+    */
+   public QuadrupedSupportPolygon replaceFootstepCopy(RobotQuadrant quadrant, FramePoint footstep)
+   {
+      QuadrupedSupportPolygon newPolygon = new QuadrupedSupportPolygon(this);
+      newPolygon.setFootstep(quadrant, footstep);
+      return newPolygon;
+   }
+
+   public void packPolygonWithoutLeg(RobotQuadrant legToDelete, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
+   {
+      quadrupedSupportPolygonToPack.clear();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (robotQuadrant != legToDelete)
+         {
+            quadrupedSupportPolygonToPack.setFootstep(robotQuadrant, getFootstep(robotQuadrant));
+         }
+      }
+   }
+
+   public QuadrupedSupportPolygon swapSameSideFeetCopy(RobotQuadrant quadrant)
+   {
+      QuadrupedSupportPolygon newQuadrupedSupportPolygon = new QuadrupedSupportPolygon(this);
+      newQuadrupedSupportPolygon.setFootstep(quadrant, getFootstep(quadrant.getSameSideQuadrant()));
+      newQuadrupedSupportPolygon.setFootstep(quadrant.getSameSideQuadrant(), getFootstep(quadrant));
+      return newQuadrupedSupportPolygon;
+   }
+
+   public QuadrupedSupportPolygon deleteLegCopy(RobotQuadrant legName)
+   {
+      QuadrupedSupportPolygon newPolygon = new QuadrupedSupportPolygon(this);
+      newPolygon.removeFootstep(legName);
+      return newPolygon;
+   }
+
+   public void removeFootstep(RobotQuadrant robotQuadrant)
+   {
+      footsteps.remove(robotQuadrant);
+   }
+
+   /**
+    * Translates this polygon in X and Y.
+    */
+   public void translate(Vector3d translateBy)
+   {
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         getFootstep(robotQuadrant).add(translateBy);
+      }
+   }
+
+   /**
+    * Rotates the feet about the Centroid, keeping the z heights.
+    *
+    * @return SupportPolygon
+    */
+   public void yawAboutCentroid(double yaw)
+   {
+      getCentroid2d(temporaryFramePoint);
+   
+      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         FramePoint footstep = getFootstep(quadrant);
+         if (containsFootstep(footstep))
+         {
+            FramePoint rotatedPoint = new FramePoint();
+            footstep.yawAboutPoint(temporaryFramePoint, rotatedPoint, yaw);
+            footstep.set(rotatedPoint);
+         }
+      }
+   }
+
+   private boolean containsFootstep(FramePoint footstep)
+   {
+      if (footstep == null)
+         return false;
+      else
+         return true;
+   }
+
+   public boolean containsFootstep(RobotQuadrant robotQuadrant)
+   {
+      return footsteps.containsQuadrant(robotQuadrant);
+   }
+
+   public void clear()
+   {
+      footsteps.clear();
+   }
+   
+   private void computeFramePolygonConvex2d()
+   {
+      frameConvexPolygon2d.clear();
+      frameConvexPolygon2d.changeFrame(getReferenceFrame());
+      for (RobotQuadrant supportingQuadrant : getSupportingQuadrantsInOrder())
+      {
+         frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
+      }
+      frameConvexPolygon2d.update();
+   }
+
+   public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2d yoFrameConvexPolygon2d)
+   {
+      FrameConvexPolygon2d frameConvexPolygon2d = yoFrameConvexPolygon2d.getFrameConvexPolygon2d();
+      
+      frameConvexPolygon2d.clear();
+      frameConvexPolygon2d.changeFrame(getReferenceFrame());
+      for (RobotQuadrant supportingQuadrant : getSupportingQuadrantsInOrder())
+      {
+         frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
+      }
+      frameConvexPolygon2d.update();
+      
+      yoFrameConvexPolygon2d.setFrameConvexPolygon2d(frameConvexPolygon2d);
+   }
+
+   /**
+    * Get footstep with least Z height.
+    *
+    * @return lowest footstep
+    */
+   public RobotQuadrant getLowestFootstep()
+   {
+      double minZ = Double.POSITIVE_INFINITY;
+      RobotQuadrant lowest = null;
+   
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         double footZ = getFootstep(robotQuadrant).getZ();
+         if (footZ < minZ)
+         {
+            minZ = footZ;
+            lowest = robotQuadrant;
+         }
+      }
+   
+      return lowest;
+   }
+
+   /**
+    * Get footstep with most Z height.
+    *
+    * @return highest footstep
+    */
+   public RobotQuadrant getHighestFootstep()
+   {
+      double maxZ = Double.NEGATIVE_INFINITY;
+      RobotQuadrant highest = null;
+   
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         double footZ = getFootstep(robotQuadrant).getZ();
+         if (footZ > maxZ)
+         {
+            maxZ = footZ;
+            highest = robotQuadrant;
+         }
+      }
+   
+      return highest;
+   }
+
+   public RobotQuadrant getClosestFootstep(FramePoint midPoint)
+   {
+      double minDistance = Double.MAX_VALUE;
+      RobotQuadrant closestQuadrant = null;
+      for(RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         if(getFootstep(robotQuadrant).distance(midPoint) < minDistance)
+         {
+            closestQuadrant = robotQuadrant;
+         }
+      }
+      return closestQuadrant;
+   }
 
    /**
     * This will return the vector normal for each edge. The normal of an
@@ -92,348 +546,35 @@ public class QuadrupedSupportPolygon implements Serializable
     *
     * @return Vector2d[]
     */
-   public Vector2d[] getEdgeNormals()
+   public void getEdgeNormals2d(FrameVector2d[] normalsToPack)
    {
-      // make sure in world frame
-      if (!this.getReferenceFrame().isWorldFrame())
-         throw new RuntimeException("polygon must be in world frame");
+      computeFramePolygonConvex2d();
+      
+      frameConvexPolygon2d.getOutwardEdgeNormals(normalsToPack);
+   }
 
-      RobotQuadrant[][] legPairs = getLegPairs();
-
-      Vector2d[] edgeNormals = new Vector2d[legPairs.length];
-
-      for (int i = 0; i < legPairs.length; i++)
+   public void getCentroid2d(FramePoint centroidToPack)
+   {
+      centroidToPack.setToZero();
+      
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
-         FramePoint point1 = this.getFootstep(legPairs[i][0]);
-         FramePoint point2 = this.getFootstep(legPairs[i][1]);
-
-         Vector2d edgeVector = new Vector2d(point2.getX(), point2.getY());
-         edgeVector.sub(new Point2d(point1.getX(), point1.getY()));
-
-         edgeNormals[i] = GeometryTools.getPerpendicularVector(edgeVector);
-      }
-
-      return edgeNormals;
-   }
-
-   /**
-    * Return the reference frame of the first non-null footstep.
-    */
-   public ReferenceFrame getReferenceFrame()
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         FramePoint footstep = footsteps.get(robotQuadrant);
-         if (footstep != null)
-         {
-            return footstep.getReferenceFrame();
-         }
-      }
-
-      throw new RuntimeException(getClass().getSimpleName() + ".getReferenceFrame(): should not get here. There must be at least one non null footstep");
-   }
-
-   /**
-    * Creates and returns a new copy of a Polygon whose footsteps have been redefined
-    * according to the referenceFrame parameter.
-    *
-    * @param referenceFrame Frame
-    *
-    * @return SupportPolygon
-    */
-   public QuadrupedSupportPolygon changeFrameCopy(ReferenceFrame referenceFrame)
-   {
-      QuadrupedSupportPolygon newPolygon = new QuadrupedSupportPolygon(this);
-      newPolygon.changeFrame(referenceFrame);
-      return newPolygon;
-   }
-
-   public void changeFrame(ReferenceFrame referenceFrame)
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         footsteps.get(robotQuadrant).changeFrame(referenceFrame);
-      }
-   }
-
-   /**
-    * This method cycles over the cases 0 - 4 for the number
-    * of Footsteps in the polygon.
-    *
-    * @return LegName[][]
-    */
-   public RobotQuadrant[][] getLegPairs()
-   {
-      RobotQuadrant[][] legPairs;
-
-      int numberOfLegs = this.getNumberOfLegs();
-
-      switch (numberOfLegs)
-      {
-         case 0 :
-         case 1 :
-            legPairs = null;    // BVB : Or should this read:  LegPairs = new LegName[][] { {} };
-
-            break;
-
-         case 2 :
-            RobotQuadrant firstLeg = getFirstNonNullQuadrant();
-            RobotQuadrant lastLeg = getLastNonNullQuadrant();
-            legPairs = new RobotQuadrant[][]
-            {
-               {firstLeg, lastLeg}
-            };
-
-            break;
-
-         case 3 :
-
-            RobotQuadrant swingLeg = null;
-            for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-            {
-               if (footsteps.get(robotQuadrant) == null)
-               {
-                  swingLeg = robotQuadrant;
-               }
-            }
-
-            switch (swingLeg)
-            {
-               case FRONT_LEFT :
-               {
-                  legPairs = new RobotQuadrant[][]
-                  {
-                     {RobotQuadrant.HIND_LEFT, RobotQuadrant.HIND_RIGHT}, {RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_RIGHT}, {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_LEFT}
-                  };
-
-                  break;
-               }
-
-               case FRONT_RIGHT :
-               {
-                  legPairs = new RobotQuadrant[][]
-                  {
-                     {RobotQuadrant.FRONT_LEFT, RobotQuadrant.HIND_LEFT}, {RobotQuadrant.HIND_LEFT, RobotQuadrant.HIND_RIGHT}, {RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_LEFT}
-                  };
-
-                  break;
-               }
-
-               case HIND_RIGHT :
-               {
-                  legPairs = new RobotQuadrant[][]
-                  {
-                     {RobotQuadrant.FRONT_LEFT, RobotQuadrant.HIND_LEFT}, {RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_RIGHT}, {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.FRONT_LEFT},
-                  };
-
-                  break;
-               }
-
-               case HIND_LEFT :
-               {
-                  legPairs = new RobotQuadrant[][]
-                  {
-                     {RobotQuadrant.FRONT_LEFT, RobotQuadrant.HIND_RIGHT}, {RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_RIGHT}, {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.FRONT_LEFT},
-                  };
-
-                  break;
-               }
-
-               default :
-               {
-                  throw new RuntimeException("unknown leg name");
-               }
-            }
-
-         case 4 :
-            legPairs = new RobotQuadrant[][]
-            {
-               {RobotQuadrant.FRONT_LEFT, RobotQuadrant.HIND_LEFT}, {RobotQuadrant.HIND_LEFT, RobotQuadrant.HIND_RIGHT}, {RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_RIGHT},
-               {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.FRONT_LEFT},
-            };
-
-            break;
-
-         default :
-         {
-            throw new RuntimeException("unknown number of legs " + numberOfLegs);
-         }
-
-      }
-
-      return legPairs;
-   }
-
-   private RobotQuadrant getLastNonNullQuadrant()
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.reversedValues)
-      {
-         if(useThisLeg(robotQuadrant))
-         {
-            return robotQuadrant;
-         }
-      }
-      return null;
-   }
-
-   private RobotQuadrant getFirstNonNullQuadrant()
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if(useThisLeg(robotQuadrant))
-         {
-            return robotQuadrant;
-         }
-      }
-      return null;
-   }
-   
-   private RobotQuadrant getFirstNullQuadrant()
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if(!useThisLeg(robotQuadrant))
-         {
-            return robotQuadrant;
-         }
-      }
-      return null;
-   }
-   
-   private RobotQuadrant getLastNullQuadrant()
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.reversedValues)
-      {
-         if(!useThisLeg(robotQuadrant))
-         {
-            return robotQuadrant;
-         }
-      }
-      return null;
-   }
-    
-   public void set(QuadrupedSupportPolygon polygon)
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         FramePoint footStep = polygon.getFootstep(robotQuadrant);
-         if(footStep != null)
-         {
-            this.footsteps.put(robotQuadrant, new FramePoint(footStep));
-         }
-         else
-         {
-            this.footsteps.remove(robotQuadrant);
-         }
-      }
-   }
-
-   public FramePoint getFootstep(RobotQuadrant robotQuadrant)
-   {
-      return footsteps.get(robotQuadrant);
-   }
-   
-   public void setFootstep(RobotQuadrant quadrant, FramePoint newFootstep)
-   {
-      if(newFootstep == null)
-      {
-         footsteps.put(quadrant, null);
-         return;
+         centroidToPack.add(getFootstep(robotQuadrant));
       }
       
-      FramePoint polygonFootstep = footsteps.get(quadrant);
-      if(polygonFootstep != null)
-      {
-         polygonFootstep.set(newFootstep);
-      }
-      else
-      {
-         footsteps.put(quadrant, new FramePoint(newFootstep));
-      }
+      centroidToPack.scale(1.0 / size());
    }
 
-   /**
-    * Returns the number of feet (vertices) in the polygon.
-    *
-    * @return int
-    */
-   public int getNumberOfLegs()
+   public void getCentroid2d(FramePoint2d centroidToPack2d)
    {
-      // check the number of null legs
-      int numberOfLegs = 0;
+      centroidToPack2d.setToZero();
       
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
-         FramePoint footStep = footsteps.get(robotQuadrant);
-         if (useThisLeg(footStep))
-         {
-            numberOfLegs++;
-         }
+         centroidToPack2d.add(getFootstep(robotQuadrant).getX(), getFootstep(robotQuadrant).getY());
       }
-
-      return numberOfLegs;
-   }
-
-   /**
-    *  This method compares this to another support polygon and returns the number of matching footsetps
-    *
-    * @return int the number of footsteps that epsilon match
-    */
-   public int getNumberOfMatchinfFootsteps(QuadrupedSupportPolygon polygon)
-   {
-      // check the number of null legs
-      int numberOfMatching = 0;
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         FramePoint thisFootStep = this.getFootstep(robotQuadrant);
-         FramePoint otherFootStep = polygon.getFootstep(robotQuadrant);
-         
-         if (thisFootStep != null && thisFootStep.epsilonEquals(otherFootStep, 0.0005))
-         {
-            numberOfMatching++;
-         }
-      }
-
-      return numberOfMatching;
-   }
-
-
-   public ArrayList<RobotQuadrant> getLegs()
-   {
-      ArrayList<RobotQuadrant> ret = new ArrayList<RobotQuadrant>();
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if (useThisLeg(robotQuadrant))
-         {
-            ret.add(robotQuadrant);
-         }
-      }
-
-      return ret;
-   }
-
-   /**
-    * getCentroid
-    *
-    * @param centroidToPack FramePoint
-    */
-   public void getCentroid(FramePoint centroidToPack)
-   {
-      centroidToPack.set(0.0, 0.0, 0.0);
-
-      int numberOfFootsteps = 0;
-      for (RobotQuadrant quadrant: RobotQuadrant.values)
-      {
-         FramePoint footstep = footsteps.get(quadrant);
-         if (useThisLeg(footstep))
-         {
-            centroidToPack.add(footstep);
-            numberOfFootsteps++;
-         }
-      }
-
-      centroidToPack.scale(1.0 / ((double) numberOfFootsteps));
+      
+      centroidToPack2d.scale(1.0 / size());
    }
 
    /**
@@ -450,83 +591,55 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param shrinkDistance double
     * @return Polygon
     */
-   public QuadrupedSupportPolygon getShrunkenPolygon(double shrinkDistance)
+   public QuadrupedSupportPolygon getShrunkenPolygon2d(double shrinkDistance)
    {
-      if (getNumberOfLegs() != 3)
+      if (size() != 3)
       {
          throw new RuntimeException("This method works only for triangle polygons.");
       }
 
       // Cap the shrink amount by half the radius of the largest inscribed circle.
-      shrinkDistance = Math.min(shrinkDistance, 0.5 * this.getInCircleRadius3Legs());
+      shrinkDistance = Math.min(shrinkDistance, 0.5 * getInCircleRadius2d());
 
       QuadrantDependentList<FramePoint> newFeet = new QuadrantDependentList<FramePoint>();
 
       // Foot 0
-      FramePoint footPoint = footsteps.get(RobotQuadrant.FRONT_LEFT);
-      FramePoint point1 = footsteps.get(RobotQuadrant.FRONT_RIGHT);
-      FramePoint point2 = footsteps.get(RobotQuadrant.HIND_RIGHT);
+      FramePoint footPoint = getFootstep(RobotQuadrant.FRONT_LEFT);
+      FramePoint point1 = getFootstep(RobotQuadrant.FRONT_RIGHT);
+      FramePoint point2 = getFootstep(RobotQuadrant.HIND_RIGHT);
       Vector2d edgeVector = new Vector2d(point2.getX(), point2.getY());
       edgeVector.sub(new Point2d(point1.getX(), point1.getY()));
       Vector3d edgeNormal = new Vector3d(-edgeVector.y, edgeVector.x, 0.0);
       edgeNormal.normalize();
       edgeNormal.scale(shrinkDistance);
       footPoint.add(new FrameVector(footPoint.getReferenceFrame(), edgeNormal));
-      newFeet.put(RobotQuadrant.FRONT_LEFT, footPoint);
+      newFeet.set(RobotQuadrant.FRONT_LEFT, footPoint);
 
       // Foot 1
-      footPoint = footsteps.get(RobotQuadrant.FRONT_RIGHT);
-      point1 = footsteps.get(RobotQuadrant.HIND_RIGHT);
-      point2 = footsteps.get(RobotQuadrant.FRONT_LEFT);
+      footPoint = getFootstep(RobotQuadrant.FRONT_RIGHT);
+      point1 = getFootstep(RobotQuadrant.HIND_RIGHT);
+      point2 = getFootstep(RobotQuadrant.FRONT_LEFT);
       edgeVector = new Vector2d(point2.getX(), point2.getY());
       edgeVector.sub(new Point2d(point1.getX(), point1.getY()));
       edgeNormal = new Vector3d(-edgeVector.y, edgeVector.x, 0.0);
       edgeNormal.normalize();
       edgeNormal.scale(shrinkDistance);
       footPoint.add(new FrameVector(footPoint.getReferenceFrame(), edgeNormal));
-      newFeet.put(RobotQuadrant.FRONT_RIGHT, footPoint);
+      newFeet.set(RobotQuadrant.FRONT_RIGHT, footPoint);
 
       // Foot 2
-      footPoint = footsteps.get(RobotQuadrant.HIND_RIGHT);
-      point1 = footsteps.get(RobotQuadrant.FRONT_LEFT);
-      point2 = point1 = footsteps.get(RobotQuadrant.FRONT_RIGHT);
+      footPoint = getFootstep(RobotQuadrant.HIND_RIGHT);
+      point1 = getFootstep(RobotQuadrant.FRONT_LEFT);
+      point2 = point1 = getFootstep(RobotQuadrant.FRONT_RIGHT);
       edgeVector = new Vector2d(point2.getX(), point2.getY());
       edgeVector.sub(new Point2d(point1.getX(), point1.getY()));
       edgeNormal = new Vector3d(-edgeVector.y, edgeVector.x, 0.0);
       edgeNormal.normalize();
       edgeNormal.scale(shrinkDistance);
       footPoint.add(new FrameVector(footPoint.getReferenceFrame(), edgeNormal));
-      newFeet.put(RobotQuadrant.HIND_RIGHT, footPoint);
+      newFeet.set(RobotQuadrant.HIND_RIGHT, footPoint);
 
       return new QuadrupedSupportPolygon(newFeet);
-   }
-
-   /**
-    * getLowestFootstep
-    *
-    * @param removeSwingLeg boolean
-    * @return Footstep
-    */
-   public RobotQuadrant getLowestFootstep()
-   {
-      double minZ = Double.POSITIVE_INFINITY;
-      RobotQuadrant lowest = null;
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         FramePoint footstep = footsteps.get(robotQuadrant);
-         if (useThisLeg(footstep))
-         {
-            double footZ = footstep.getZ();
-            if (footZ < minZ)
-            {
-               minZ = footZ;
-               lowest = robotQuadrant;
-            }
-         }
-      }
-
-      return lowest;
    }
    
    public double getLowestFootStepZHeight()
@@ -534,34 +647,6 @@ public class QuadrupedSupportPolygon implements Serializable
       RobotQuadrant lowestFootstepQuadrant = getLowestFootstep();
       FramePoint lowestFootstep = getFootstep(lowestFootstepQuadrant);
       return lowestFootstep.getZ();
-   }
-
-   /**
-    * getHighestFootstep
-    *
-    * @param removeSwingLeg boolean
-    * @return Footstep
-    */
-   public RobotQuadrant getHighestFootstep()
-   {
-      double maxZ = Double.NEGATIVE_INFINITY;
-      RobotQuadrant highest = null;
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         FramePoint footstep = footsteps.get(robotQuadrant);
-         if (useThisLeg(footstep))
-         {
-            double footZ = footstep.getZ();
-            if (footZ > maxZ)
-            {
-               maxZ = footZ;
-               highest = robotQuadrant;
-            }
-         }
-      }
-
-      return highest;
    }
 
    /**
@@ -578,8 +663,8 @@ public class QuadrupedSupportPolygon implements Serializable
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         FramePoint footstep = footsteps.get(robotQuadrant);
-         if (useThisLeg(footstep))
+         FramePoint footstep = getFootstep(robotQuadrant);
+         if (containsFootstep(footstep))
          {
             if (footstep.getX() < min.x)
             {
@@ -612,28 +697,33 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param point Point2d
     * @return boolean
     */
-   public boolean isInside(Point2d point)
+   public boolean isInside(FramePoint point)
    {
-      if (distanceInside(point) > 0.0)
+      if (distanceInside2d(point) > 0.0)
       {
          return true;
       }
 
       return false;
    }
-
+   
    /**
-    * Projects a 3D point onto the plane defined by z=0.  Returns the 2D
-    * projected point.
+    * Returns true if the given (x,y) value is inside the polygon. This test
+    * ignores Z values for the polygon. The test works by computing the minimum
+    * distance from each polygon line segment to the point.
     *
-    * @param point Point3d
-    * @return Point2d
+    * @param point Point2d
+    * @return boolean
     */
-   public static Point2d projectXY(FramePoint point)
+   public boolean isInside(FramePoint2d point)
    {
-      Point2d point2d = new Point2d(point.getX(), point.getY());
+      temporaryFramePoint.setXY(point);
+      if (distanceInside2d(temporaryFramePoint) > 0.0)
+      {
+         return true;
+      }
 
-      return point2d;
+      return false;
    }
 
    /**
@@ -646,298 +736,98 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param point Point2d
     * @return boolean
     */
-   public double distanceInside(Point2d point)
+   public double distanceInside2d(FramePoint point)
    {
-      boolean inside = true;
-
-      RobotQuadrant indexStart = getLastNonNullQuadrant();
-      RobotQuadrant indexEnd = getFirstNonNullQuadrant();
-
-      // indexStart must be greater than indexEnd
-      if (indexStart.ordinal() < indexEnd.ordinal())
-      {
-         throw new RuntimeException("SupportPolygon.distanceInside(): indexStart must be > indexEnd");
-      }
-      FramePoint pointStart = this.footsteps.get(indexStart);
-      FramePoint pointEnd = this.footsteps.get(indexEnd);
-
-//    FramePoint pointStart = footsteps.get(footsteps.size() - 1).getPositionFramePoint();
-//    FramePoint pointEnd = footsteps.get(0).getPositionFramePoint();
-
-      if ((!pointStart.getReferenceFrame().isWorldFrame()) || (!pointEnd.getReferenceFrame().isWorldFrame()))
-      {
-         throw new RuntimeException("SupportPolygon.distanceInside() should only be called from a Polygon in a World Frame!!");
-      }
-
-      Point2d lineStart = projectXY(pointStart);
-      Point2d lineEnd = projectXY(pointEnd);
-      boolean onLeftSide = GeometryTools.isPointOnLeftSideOfLine(point, lineStart, lineEnd);
-      double distance = GeometryTools.distanceFromPointToLine(point, lineStart, lineEnd);
+//      computeFramePolygonConvex2d();
+//      
+//      temporaryFramePoint2d.set(point.getX(), point.getY());
+//      return frameConvexPolygon2d.getDistanceInside(temporaryFramePoint2d);
       
-      
-      for (int i = indexEnd.ordinal() + 1; i <= indexStart.ordinal(); i++)
+      if (size() == 1)
       {
-         lineStart = lineEnd;
-         FramePoint footstep = this.footsteps.get(RobotQuadrant.getQuadrantNameFromOrdinal(i));
-         if (useThisLeg(footstep))
-         {
-            lineEnd = projectXY(footstep);
-
-            if (onLeftSide != GeometryTools.isPointOnLeftSideOfLine(point, lineStart, lineEnd))
-            {
-               inside = false;
-            }
-
-            distance = Math.min(distance, GeometryTools.distanceFromPointToLine(point, lineStart, lineEnd));
-         }
+         return -point.distance(getFootstep(getFirstSupportingQuadrant()));
       }
-
-      if (inside)
+      else if (size() == 2)
       {
-         return distance;
+         FramePoint pointOne = getFootstep(getFirstSupportingQuadrant());
+         FramePoint pointTwo = getFootstep(getLastSupportingQuadrant());
+         return -Math.abs(GeometryTools.distanceFromPointToLine2d(point, pointOne, pointTwo));
       }
       else
       {
-         return -distance;
-      }
-   }
-
-   /**
-    * getInCircleAllLegs
-    *
-    * This method packs the best (largest radius) incircle point and radius of the polygon excluding circles that are not inscribed
-    * 2 or more feet cannot be in the same place, and legs cannot be crossed. All four legs have to be defined.
-    *
-    * @deprecated
-    * @param bestInCirclePoint Point2d  to be overwritten by best incircle point of polygon
-    * @param bestInCircleRadius double to be overwritten by best incircle radius of polygon
-    */
-   public double getInCircle(Point2d bestInCirclePoint)
-   {
-      double bestInCircleRadius = -1.0;
-      Point2d intersection = null;
-
-      int numberOfLegs = getNumberOfLegs();
-      int overlappingFootSteps = getNumberOfFootstepsOnTopOfEachOther();
-
-      if (numberOfLegs == 3)
-      {
-         if(overlappingFootSteps > 0)
+         double closestDistance = Double.POSITIVE_INFINITY;
+         
+         for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
          {
-            return Double.NaN;
-         }
-         bestInCircleRadius = this.getInCircleRadius3Legs();
-         intersection = this.getInCirclePoint3Legs();
-         bestInCirclePoint.set(intersection);
-      }
-
-      else if (numberOfLegs == 4)
-      {
-         if(overlappingFootSteps > 1)
-         {
-            return Double.NaN;
+            FramePoint pointOne = getFootstep(robotQuadrant);
+            FramePoint pointTwo = getFootstep(getNextClockwiseSupportingQuadrant(robotQuadrant));
+            
+            double distance = computeDistanceToSideOfSegment(point, pointOne, pointTwo);
+            if (distance < closestDistance)
+            {
+               closestDistance = distance;
+            }
          }
          
-         FramePoint a = getFootstep(RobotQuadrant.FRONT_LEFT);
-         FramePoint b = getFootstep(RobotQuadrant.FRONT_RIGHT);
-         FramePoint c = getFootstep(RobotQuadrant.HIND_RIGHT);
-         FramePoint d = getFootstep(RobotQuadrant.HIND_LEFT);
-
-         Point2d p1 = new Point2d(a.getX(), a.getY());
-         Point2d p2 = new Point2d(b.getX(), b.getY());
-         Point2d p3 = new Point2d(c.getX(), c.getY());
-         Point2d p4 = new Point2d(d.getX(), d.getY());
-
-         double radius, farSideDistance;
-
-         intersection = getInCirclePoint(p1, p2, p3, p4);
-
-         if (intersection != null)
-         {
-            radius = GeometryTools.distanceFromPointToLine(intersection, p2, p3);
-            farSideDistance = GeometryTools.distanceFromPointToLine(intersection, p1, p4);
-
-            if (farSideDistance >= radius)
-            {
-               if (radius > bestInCircleRadius)
-               {
-                  bestInCircleRadius = radius;
-                  bestInCirclePoint.set(intersection);
-               }
-            }
-         }
-
-         intersection = getInCirclePoint(p2, p3, p4, p1);
-
-         if (intersection != null)
-         {
-            radius = GeometryTools.distanceFromPointToLine(intersection, p3, p4);
-            farSideDistance = GeometryTools.distanceFromPointToLine(intersection, p2, p1);
-
-            if (farSideDistance >= radius)
-            {
-               if (radius > bestInCircleRadius)
-               {
-                  bestInCircleRadius = radius;
-                  bestInCirclePoint.set(intersection);
-               }
-            }
-         }
-
-         intersection = getInCirclePoint(p3, p4, p1, p2);
-
-         if (intersection != null)
-         {
-            radius = GeometryTools.distanceFromPointToLine(intersection, p4, p1);
-            farSideDistance = GeometryTools.distanceFromPointToLine(intersection, p3, p2);
-
-            if (farSideDistance >= radius)
-            {
-               if (radius > bestInCircleRadius)
-               {
-                  bestInCircleRadius = radius;
-                  bestInCirclePoint.set(intersection);
-               }
-            }
-         }
-
-         intersection = getInCirclePoint(p4, p1, p2, p3);
-
-         if (intersection != null)
-         {
-            radius = GeometryTools.distanceFromPointToLine(intersection, p1, p2);
-            farSideDistance = GeometryTools.distanceFromPointToLine(intersection, p4, p3);
-
-            if (farSideDistance >= radius)
-            {
-               if (radius > bestInCircleRadius)
-               {
-                  bestInCircleRadius = radius;
-                  bestInCirclePoint.set(intersection);
-               }
-            }
-         }
-
-         if ((Double.isNaN(bestInCirclePoint.x)) || (Double.isNaN(bestInCirclePoint.y)))
-         {
-            throw new RuntimeException("NaN in InCircle Point for SupportPolygon: " + this);
-         }
+         return closestDistance;
       }
-
-      return bestInCircleRadius;
    }
-
-   private int getNumberOfFootstepsOnTopOfEachOther()
+   
+   private double computeDistanceToSideOfSegment(FramePoint point, FramePoint pointOne, FramePoint pointTwo)
    {
-      int total = 0;
-      RobotQuadrant[] quadrants = RobotQuadrant.values;
-      for (int i = 0; i < quadrants.length; i++)
-      {
-         FramePoint footStep = footsteps.get(quadrants[i]);
-         if(footStep != null)
-         {
-            for (int j = i + 1; j < quadrants.length; j++)
-            {
-               FramePoint otherFootStep = footsteps.get(quadrants[j]);
-               if(footStep != null && footStep.epsilonEquals(otherFootStep, 0.001))
-               {
-                  total++;
-               }
-            }
-         }
-      }
-      return total;
+      double x0 = point.getX();
+      double y0 = point.getY();
+      
+      double x1 = pointOne.getX();
+      double y1 = pointOne.getY();
+      
+      double x2 = pointTwo.getX();
+      double y2 = pointTwo.getY();
+      
+      double numerator = (y2 - y1) * x0 - (x2 - x1) * y0 + x2*y1 - y2*x1;
+      double denominator = Math.sqrt((y2-y1) * (y2-y1) + (x2-x1) * (x2-x1));
+      
+      return numerator/denominator;
    }
 
    /**
-    * getInCircleRadiusIgnoreSwingLeg
+    * Get the radius of the largest circle that can be
+    * drawn in the polygon.
     *
-    * This method returns the best (largest radius) incircle radius of the polygon excluding circles that are not inscribed.
-    * If the swing leg is null it includes all legs
-    * If the swing leg is not null, there must be three specified non-null legs
-    * 2 or more feet cannot be in the same place, and legs cannot be crossed.
-    *
-    * @deprecated
-    * @return double best incircle radius of polygon
+    * @return radius of the in circle
     */
-   public double getInCircleRadius3Legs()
+   public double getInCircleRadius2d()
    {
-      if (!this.getReferenceFrame().isWorldFrame())
-         throw new RuntimeException("SupportPolygon:getInCircleAllLegs() requires the SupportPolygon to be in a world frame!");
-
-      Point2d intersection = getInCirclePoint3Legs();
-
-      ArrayList<RobotQuadrant> nonSwingLegs = new ArrayList<RobotQuadrant>();
-      for (RobotQuadrant robotQuadrant: RobotQuadrant.values)
-      {
-         FramePoint footstep = footsteps.get(robotQuadrant);
-         if (useThisLeg(footstep))
-            nonSwingLegs.add(robotQuadrant);
-      }
-
-      if (nonSwingLegs.size() != 3)
-         throw new RuntimeException("Stance: getInCircleRadiusIgnoreSwingLeg cannot be applied to stance with < 3 nonSwingLegs\n" + this);
-
-      FramePoint b = getFootstep(nonSwingLegs.get(1));
-      FramePoint c = getFootstep(nonSwingLegs.get(2));
-
-      Point2d p2 = new Point2d(b.getX(), b.getY());
-      Point2d p3 = new Point2d(c.getX(), c.getY());
-
-      // IF block added by CPerez
-      // Jan-02-2007 Checking if the center point is not null
-      // if it is null the returned radius is 0.0.
-      double radius = 0.0;
-      if (intersection != null)
-      {
-         radius = GeometryTools.distanceFromPointToLine(intersection, p2, p3);
-      }
-
-      // End of added IF block
-
-      return radius;
+      return getInCircle2d(tempInCircleCenter);
    }
-
+   
    /**
-    * getInCirclePointIgnoreSwingLeg
+    * Get the radius and center point of the largest 
+    * circle that can be drawn in the polygon.
     *
-    * This method returns the best (largest radius) incircle point of the polygon excluding circles that are not inscribed.
-    * If the swing leg is null it includes all legs
-    * If the swing leg is not null, there must be three specified non-null legs
-    * 2 or more feet cannot be in the same place, and legs cannot be crossed.
-    *
-    * @deprecated
-    * @return Point2d  best incircle point for polygon
+    * @param center of circle point to pack
+    * @return radius of the in circle
     */
-   public Point2d getInCirclePoint3Legs()
+   public double getInCircle2d(FramePoint inCircleCenterToPack)
    {
-      if (!this.getReferenceFrame().isWorldFrame())
-         throw new RuntimeException("SupportPolygon:getInCircleAllLegs() requires the SupportPolygon to be in a world frame!");
-
-      ArrayList<RobotQuadrant> nonSwingLegs = new ArrayList<RobotQuadrant>();
-      for (RobotQuadrant robotQuadrant: RobotQuadrant.values)
+      getInCirclePoint2d(inCircleCenterToPack);
+      
+      double minimumRadius = Double.MAX_VALUE;
+      double radius;
+      
+      for (RobotQuadrant[] legPair : getLegPairs())
       {
-         if (useThisLeg(robotQuadrant))
-            nonSwingLegs.add(robotQuadrant);
+         radius = GeometryTools.distanceFromPointToLine2d(inCircleCenterToPack, getFootstep(legPair[0]), getFootstep(legPair[1]));
+         
+         if (radius < minimumRadius)
+         {
+            minimumRadius = radius;
+         }
       }
 
-      if (nonSwingLegs.size() != 3)
-         throw new RuntimeException("Stance: getInCircleRadiusIgnoreSwingLeg cannot be applied to stance with < 3 nonSwingLegs");
-
-      FramePoint a = getFootstep(nonSwingLegs.get(0));
-      FramePoint b = getFootstep(nonSwingLegs.get(1));
-      FramePoint c = getFootstep(nonSwingLegs.get(2));
-
-      Point2d p1 = new Point2d(a.getX(), a.getY());
-      Point2d p2 = new Point2d(b.getX(), b.getY());
-      Point2d p3 = new Point2d(c.getX(), c.getY());
-      Point2d p4 = new Point2d(p1);
-
-      Point2d intersection = getInCirclePoint(p1, p2, p3, p4);
-
-      return intersection;
+      return minimumRadius;
    }
-
+   
    /**
     * getInCirclePoint
     *
@@ -950,196 +840,83 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param p4 Point2d point defining the three line segments (must be in order)
     * @return Point2d incirlce point
     */
-   public static Point2d getInCirclePoint(Point2d p1, Point2d p2, Point2d p3, Point2d p4)
+   public void getInCirclePoint2d(FramePoint intersectionToPack)
    {
+      if (size() < 3)
+      {
+         throw new UndefinedOperationException("InCirclePoint only defined for 3 and 4 legs.");
+      }
+      
+      int i = 0;
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         tempPointListForInCirclePoint[i++] = getFootstep(robotQuadrant);
+      }
+      
+      if (size() == 3)
+      {
+         tempPointListForInCirclePoint[3] = tempPointListForInCirclePoint[0];
+      }
+      
       // get first two line segments
-      Vector2d v21 = new Vector2d();
-      v21.sub(p1, p2);
-      Vector2d v23 = new Vector2d();
-      v23.sub(p3, p2);
+      tempVectorsForInCirclePoint[0].sub(tempPointListForInCirclePoint[0], tempPointListForInCirclePoint[1]);
+      tempVectorsForInCirclePoint[0].normalize();
+      tempVectorsForInCirclePoint[1].sub(tempPointListForInCirclePoint[2], tempPointListForInCirclePoint[1]);
+      tempVectorsForInCirclePoint[1].normalize();
 
       // normalize and subtract to get vector that bisects the first angle
-      v21.normalize();
-      v23.normalize();
-      Vector2d v2p = new Vector2d(v21);
-      v2p.add(v23);
+      FrameVector v2p = tempVectorsForInCirclePoint[0];
+      v2p.add(tempVectorsForInCirclePoint[1]);
       v2p.normalize();
 
       // get second two line segments
-      Vector2d v34 = new Vector2d();
-      v34.sub(p4, p3);
-      Vector2d v32 = new Vector2d();
-      v32.sub(p2, p3);
+      tempVectorsForInCirclePoint[2].sub(tempPointListForInCirclePoint[3], tempPointListForInCirclePoint[2]);
+      tempVectorsForInCirclePoint[2].normalize();
+      tempVectorsForInCirclePoint[3].sub(tempPointListForInCirclePoint[1], tempPointListForInCirclePoint[2]);
+      tempVectorsForInCirclePoint[3].normalize();
 
       // normalize and subtract to get vector that bisects the second angle
-      v34.normalize();
-      v32.normalize();
-      Vector2d v3p = new Vector2d(v34);
-      v3p.add(v32);
+      FrameVector v3p = tempVectorsForInCirclePoint[2];
+      v3p.add(tempVectorsForInCirclePoint[3]);
       v3p.normalize();
 
       // find intersection point of the two bisecting vectors
-      Point2d intersection = GeometryTools.getIntersectionBetweenTwoLines(p2, v2p, p3, v3p);
+      GeometryTools.getIntersectionBetweenTwoLines2d(intersectionToPack, tempPointListForInCirclePoint[1], v2p, tempPointListForInCirclePoint[2], v3p);
+   }
 
-      if ((Double.isNaN(intersection.x)) || (Double.isNaN(intersection.y)))
-         return null;
-
-//    {
-//       System.err.println("p1 = " + p1);
-//       System.err.println("p2 = " + p2);
-//       System.err.println("p3 = " + p3);
-//       System.err.println("p4 = " + p4);
-//
-//       System.err.println("v21 = " + v21);
-//       System.err.println("v23 = " + v23);
-//       System.err.println("v2p = " + v2p);
-//       System.err.println("v34 = " + v34);
-//       System.err.println("v32 = " + v32);
-//       System.err.println("v3p = " + v3p);
-//
-//       throw new RuntimeException("NaN in InCircle Point for SupportPolygon: " + this);
-//    }
-
-      return intersection;
+   public int getNumberOfFootstepsOnTopOfEachOther()
+   {
+      int total = 0;
+      RobotQuadrant[] quadrants = RobotQuadrant.values;
+      for (int i = 0; i < quadrants.length; i++)
+      {
+         if(containsFootstep(quadrants[i]))
+         {
+            for (int j = i + 1; j < quadrants.length; j++)
+            {
+               if(getFootstep(quadrants[i]).epsilonEquals(getFootstep(quadrants[j]), 0.001))
+               {
+                  total++;
+               }
+            }
+         }
+      }
+      return total;
    }
 
    /**
-    * distanceInsideIncircle
+    * Get the distance of the point inside of the in circle.
     *
-    * @param point Point2d
-    * @param removeSwingLeg boolean
-    * @return double
+    * @param point
+    * @return distance
     */
-   public double distanceInsideIncircle(Point2d point)
+   public double distanceInsideInCircle(FramePoint point)
    {
-      Point2d inCirclePoint = new Point2d();
-      double inCircleRadius;
-      int numberOfLegs = getNumberOfLegs();
-      if (numberOfLegs == 3)
-      {
-         inCirclePoint = getInCirclePoint3Legs();
-         inCircleRadius = getInCircleRadius3Legs();
-      }
-      else if (numberOfLegs == 4)
-      {
-         inCircleRadius = getInCircle(inCirclePoint);
-      }
-      else
-      {
-         return Double.NaN;
-
-//       throw new RuntimeException("Polygon.distanceInsideIncircle(): Unhandled case: numberOfLegs == " + numberOfLegs);
-      }
-
-      double distanceToInCircleCenter = point.distance(inCirclePoint);
-
+      double inCircleRadius = getInCircle2d(tempInCircleCenter);
+      double distanceToInCircleCenter = point.distance(tempInCircleCenter);
       return (inCircleRadius - distanceToInCircleCenter);
    }
-
-   public boolean useThisLeg(FramePoint footstep)
-   {
-      if (footstep == null)
-         return false;
-      else
-         return true;
-   }
    
-   public boolean useThisLeg(RobotQuadrant robotQuadrant)
-   {
-      if (footsteps.get(robotQuadrant) == null)
-         return false;
-      else
-         return true;
-   }
-
-   /**
-    * getCentroidFramePoint
-    *
-    * @param removeSwingLeg boolean
-    * @return FramePoint
-    * @deprecated Creates garbage. Use getCentroid().
-    */
-   public FramePoint getCentroidFramePoint()
-   {
-      FramePoint centroid = new FramePoint(this.getReferenceFrame());
-      getCentroid(centroid);
-
-      return centroid;
-   }
-
-//   /**
-//    * getLastNonNullFootstep
-//    *
-//    * @param removeSwingLeg boolean
-//    * @return int
-//    */
-//   public int getLastNonNullFootstep()
-//   {
-//      for (int i = this.footsteps.length - 1; i >= 0; i--)
-//      {
-//         if (useThisLeg(this.footsteps[i]))
-//         {
-//            return i;
-//         }
-//      }
-//
-//      throw new RuntimeException("Polygon: getLastNonNullFootstep(): no last non null footstep");
-//   }
-//
-//   /**
-//    * getFirstNonNullFootstep
-//    *
-//    * @param removeSwingLeg boolean
-//    * @return int
-//    */
-//   public int getFirstNonNullFootstep()
-//   {
-//      for (int i = 0; i < this.footsteps.length; i++)
-//      {
-//         if (useThisLeg(this.footsteps[i]))
-//         {
-//            return i;
-//         }
-//      }
-//
-//      throw new RuntimeException("Polygon: getFirstNonNullFootstep(): no first non null footstep");
-//   }
-//
-//   /**
-//    * getFirstNonNullFootstep
-//    *
-//    * @param removeSwingLeg boolean
-//    * @return int
-//    */
-//   public int getFirstNullFootstep()
-//   {
-//      for (int i = 0; i < this.footsteps.length; i++)
-//      {
-//         if (!useThisLeg(this.footsteps[i]))
-//         {
-//            return i;
-//         }
-//      }
-//
-//      throw new RuntimeException("Polygon: getFirstNullFootstep(): no first null footstep");
-//   }
-
-   /**
-    * Returns the distance from the centroid (balancing point of the polygon)
-    * to the closest edge of the polygon.   If this distance is small, then the
-    * polygon represents a poor choice for a balanced foot configuration. If it is
-    * negative, then the polygon is statically unstable.
-    *
-    * @return double
-    */
-   public double centroidDistanceInside()
-   {
-      FramePoint centroid = getCentroidFramePoint();
-      Point2d center = new Point2d(centroid.getX(), centroid.getY());
-
-      return distanceInside(center);
-   }
-
    /**
     * Computes a nominal yaw angle. If triangle support, then the angle from the front to back support foot on the same side.
     * If a quad, then the average of the two front to back angles.
@@ -1148,10 +925,10 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getNominalYaw()
    {
-      FramePoint flFootstep = this.getFootstep(RobotQuadrant.FRONT_LEFT);
-      FramePoint frFootstep = this.getFootstep(RobotQuadrant.FRONT_RIGHT);
-      FramePoint hrFootstep = this.getFootstep(RobotQuadrant.HIND_RIGHT);
-      FramePoint hlFootstep = this.getFootstep(RobotQuadrant.HIND_LEFT);
+      FramePoint flFootstep = getFootstep(RobotQuadrant.FRONT_LEFT);
+      FramePoint frFootstep = getFootstep(RobotQuadrant.FRONT_RIGHT);
+      FramePoint hrFootstep = getFootstep(RobotQuadrant.HIND_RIGHT);
+      FramePoint hlFootstep = getFootstep(RobotQuadrant.HIND_LEFT);
 
       Vector2d vector1 = null, vector2 = null;
 
@@ -1188,8 +965,8 @@ public class QuadrupedSupportPolygon implements Serializable
 
    public double getNominalYawHindLegs()
    {
-      FramePoint hrFootstep = this.getFootstep(RobotQuadrant.HIND_RIGHT);
-      FramePoint hlFootstep = this.getFootstep(RobotQuadrant.HIND_LEFT);
+      FramePoint hrFootstep = getFootstep(RobotQuadrant.HIND_RIGHT);
+      FramePoint hlFootstep = getFootstep(RobotQuadrant.HIND_LEFT);
 
       double ret = Math.atan2(hrFootstep.getX() - hlFootstep.getX(), -(hrFootstep.getY() - hlFootstep.getY()));
 
@@ -1203,19 +980,19 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getNominalPitch()
    {
-      FramePoint flFootstep = this.getFootstep(RobotQuadrant.FRONT_LEFT);
-      FramePoint frFootstep = this.getFootstep(RobotQuadrant.FRONT_RIGHT);
-      FramePoint hrFootstep = this.getFootstep(RobotQuadrant.HIND_RIGHT);
-      FramePoint hlFootstep = this.getFootstep(RobotQuadrant.HIND_LEFT);
+      FramePoint flFootstep = getFootstep(RobotQuadrant.FRONT_LEFT);
+      FramePoint frFootstep = getFootstep(RobotQuadrant.FRONT_RIGHT);
+      FramePoint hrFootstep = getFootstep(RobotQuadrant.HIND_RIGHT);
+      FramePoint hlFootstep = getFootstep(RobotQuadrant.HIND_LEFT);
 
       Vector3d vector1 = null, vector2 = null;
 
-      if ((useThisLeg(flFootstep) && useThisLeg(hlFootstep)))
+      if ((containsFootstep(flFootstep) && containsFootstep(hlFootstep)))
       {
          vector1 = new Vector3d(flFootstep.getX() - hlFootstep.getX(), flFootstep.getY() - hlFootstep.getY(), flFootstep.getZ() - hlFootstep.getZ());
       }
 
-      if (useThisLeg(frFootstep) && useThisLeg(hrFootstep))
+      if (containsFootstep(frFootstep) && containsFootstep(hrFootstep))
       {
          vector2 = new Vector3d(frFootstep.getX() - hrFootstep.getX(), frFootstep.getY() - hrFootstep.getY(), frFootstep.getZ() - hrFootstep.getZ());
       }
@@ -1252,7 +1029,6 @@ public class QuadrupedSupportPolygon implements Serializable
       }
    }
 
-
    /**
     * Computes a nominal roll angle. If triangle support, then the angle from the front to back support foot on the same side.
     * If a quad, then the average of the two front to back angles.
@@ -1260,19 +1036,19 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getNominalRoll()
    {
-      FramePoint flFootstep = this.getFootstep(RobotQuadrant.FRONT_LEFT);
-      FramePoint frFootstep = this.getFootstep(RobotQuadrant.FRONT_RIGHT);
-      FramePoint hrFootstep = this.getFootstep(RobotQuadrant.HIND_RIGHT);
-      FramePoint hlFootstep = this.getFootstep(RobotQuadrant.HIND_LEFT);
+      FramePoint flFootstep = getFootstep(RobotQuadrant.FRONT_LEFT);
+      FramePoint frFootstep = getFootstep(RobotQuadrant.FRONT_RIGHT);
+      FramePoint hrFootstep = getFootstep(RobotQuadrant.HIND_RIGHT);
+      FramePoint hlFootstep = getFootstep(RobotQuadrant.HIND_LEFT);
 
       Vector3d vector1 = null, vector2 = null;
 
-      if ((useThisLeg(flFootstep) && useThisLeg(frFootstep)))
+      if ((containsFootstep(flFootstep) && containsFootstep(frFootstep)))
       {
          vector1 = new Vector3d(flFootstep.getX() - frFootstep.getX(), flFootstep.getY() - frFootstep.getY(), flFootstep.getZ() - frFootstep.getZ());
       }
 
-      if (useThisLeg(hlFootstep) && useThisLeg(hrFootstep))
+      if (containsFootstep(hlFootstep) && containsFootstep(hrFootstep))
       {
          vector2 = new Vector3d(hlFootstep.getX() - hrFootstep.getX(), hlFootstep.getY() - hrFootstep.getY(), hlFootstep.getZ() - hrFootstep.getZ());
       }
@@ -1309,7 +1085,6 @@ public class QuadrupedSupportPolygon implements Serializable
       }
    }
 
-
    /**
     * Returns pitch of the polygon in radians.  Negative values indicate the
     * polygon's "front" is higher than the "back": average front foot positions
@@ -1319,104 +1094,79 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getPitchInRadians()
    {
-      FramePoint averageFrontPosition = averageFrontFootPosition();
-      FramePoint averageHindPosition = averageHindFootPosition();
+      FramePoint averageFrontPosition = new FramePoint(getReferenceFrame());
+      getAverageFrontFootPosition(averageFrontPosition);
 
-      return -Math.atan2(averageFrontPosition.getZ() - averageHindPosition.getZ(), averageFrontPosition.getX() - averageHindPosition.getX());
+      FramePoint averageHindPosition = new FramePoint(getReferenceFrame());
+      getAverageHindFootPosition(averageHindPosition);
+      
+      if (!averageFrontPosition.containsNaN() && !averageHindPosition.containsNaN())
+      {
+         return -Math.atan2(averageFrontPosition.getZ() - averageHindPosition.getZ(), averageFrontPosition.getXYPlaneDistance(averageHindPosition));
+      }
+      else
+      {
+         return Double.NaN;
+      }
    }
 
    /**
     * Returns the average position of the vertices in the polygon
-    * corresponding to front foot locations.
+    * corresponding to front foot locations. NaN is front feet aren't
+    * supporting.
     *
-    * @return Point3d
+    * @params framePointToPack
     */
-   public FramePoint averageFrontFootPosition()
+   public void getAverageFrontFootPosition(FramePoint framePointToPack)
    {
-      int footDownCounter = 0;
-      FramePoint footPosition = new FramePoint(getReferenceFrame());
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      if (containsFootstep(RobotQuadrant.FRONT_LEFT) && containsFootstep(RobotQuadrant.FRONT_RIGHT))
       {
-         FramePoint footstep = footsteps.get(robotQuadrant);
-         if (useThisLeg(footstep))
-         {
-            if (robotQuadrant.isQuadrantInFront())
-            {
-               footPosition.add(footstep);
-               footDownCounter++;
-            }
-         }
+         framePointToPack.setToZero();
+         framePointToPack.add(getFootstep(RobotQuadrant.FRONT_LEFT));
+         framePointToPack.add(getFootstep(RobotQuadrant.FRONT_RIGHT));
+         framePointToPack.scale(0.5);
       }
-
-      footPosition.scale(1.0 / ((double) footDownCounter));
-
-      return footPosition;
+      else if (containsFootstep(RobotQuadrant.FRONT_LEFT))
+      {
+         framePointToPack.set(getFootstep(RobotQuadrant.FRONT_LEFT));
+      }
+      else if (containsFootstep(RobotQuadrant.FRONT_RIGHT))
+      {
+         framePointToPack.set(getFootstep(RobotQuadrant.FRONT_RIGHT));
+      }
+      else
+      {
+         framePointToPack.setToNaN();
+      }
    }
 
    /**
     * Returns the average position of the vertices in the polygon
-    * corresponding to hind foot locations.
+    * corresponding to hind foot locations. NaN is hind feet aren't
+    * supporting.
     *
-    * @return Point3d
+    * @params framePointToPack
     */
-   public FramePoint averageHindFootPosition()
+   public void getAverageHindFootPosition(FramePoint framePointToPack)
    {
-      int footDownCounter = 0;
-      FramePoint footPosition = new FramePoint(getReferenceFrame());
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      if (containsFootstep(RobotQuadrant.HIND_LEFT) && containsFootstep(RobotQuadrant.HIND_RIGHT))
       {
-         FramePoint footstep = footsteps.get(robotQuadrant);
-         if (useThisLeg(footstep))
-         {
-            if (robotQuadrant.isQuadrantInHind())
-            {
-               footPosition.add(footstep);
-               footDownCounter++;
-            }
-         }
+         framePointToPack.setToZero();
+         framePointToPack.add(getFootstep(RobotQuadrant.HIND_LEFT));
+         framePointToPack.add(getFootstep(RobotQuadrant.HIND_RIGHT));
+         framePointToPack.scale(0.5);
       }
-
-      footPosition.scale(1.0 / ((double) footDownCounter));
-
-      return footPosition;
-   }
-
-   /**
-    * Rotates the feet about the Centroid, keeping the z heights.
-    *
-    * @return SupportPolygon
-    */
-   public void yawAboutCentroid(double yaw)
-   {
-      FramePoint centroid = getCentroidFramePoint();
-
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      else if (containsFootstep(RobotQuadrant.HIND_LEFT))
       {
-         FramePoint footstep = footsteps.get(quadrant);
-         if (useThisLeg(footstep))
-         {
-            FramePoint rotatedPoint = new FramePoint();
-            footstep.yawAboutPoint(centroid, rotatedPoint, yaw);
-            footstep.set(rotatedPoint);
-         }
+         framePointToPack.set(getFootstep(RobotQuadrant.HIND_LEFT));
       }
-   }
-   
-   /**
-    * Translates this polygon in X and Y.
-    */
-   public void translate(Vector3d translateBy)
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      else if (containsFootstep(RobotQuadrant.HIND_RIGHT))
       {
-         FramePoint footstep = footsteps.get(robotQuadrant);
-         
-         if (useThisLeg(footstep))
-         {
-            footstep.add(translateBy);
-         }
+         framePointToPack.set(getFootstep(RobotQuadrant.HIND_RIGHT));
+      }
+      else
+      {
+         framePointToPack.setToNaN();
       }
    }
 
@@ -1429,7 +1179,7 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double[] getDistancesToSupportLines(Point2d point)
    {
-      int numberOfLegs = getNumberOfLegs();
+      int numberOfLegs = size();
       int numberOfEdges;
 
       // Because of the singular case of 2 feet having one edge
@@ -1444,8 +1194,8 @@ public class QuadrupedSupportPolygon implements Serializable
 
       double[] distances = new double[numberOfEdges];
 
-      RobotQuadrant indexStart = getLastNonNullQuadrant();
-      RobotQuadrant indexEnd = getFirstNonNullQuadrant();
+      RobotQuadrant indexStart = getLastSupportingQuadrant();
+      RobotQuadrant indexEnd = getFirstSupportingQuadrant();
 
       // indexStart must be greater than indexEnd
       if (indexStart.ordinal() < indexEnd.ordinal())
@@ -1453,19 +1203,22 @@ public class QuadrupedSupportPolygon implements Serializable
          throw new RuntimeException("SupportPolygon.distanceInside(): indexStart must be > indexEnd");
       }
 
-      FramePoint pointStart = this.footsteps.get(indexStart);
-      FramePoint pointEnd = this.footsteps.get(indexEnd);
+      FramePoint pointStart = getFootstep(indexStart);
+      FramePoint pointEnd = getFootstep(indexEnd);
 
-      // FramePoint pointStart = footsteps.get(footsteps.size() - 1).getPositionFramePoint();
-      // FramePoint pointEnd = footsteps.get(0).getPositionFramePoint();
+      // FramePoint pointStart = getFootstep(footsteps.size() - 1).getPositionFramePoint();
+      // FramePoint pointEnd = getFootstep(0).getPositionFramePoint();
 
       if ((!pointStart.getReferenceFrame().isWorldFrame()) || (!pointEnd.getReferenceFrame().isWorldFrame()))
       {
          throw new RuntimeException("SupportPolygon.distanceInside() should only be called from a Polygon in a World Frame!!");
       }
 
-      Point2d lineStart = projectXY(pointStart);
-      Point2d lineEnd = projectXY(pointEnd);
+      Point2d lineStart = new Point2d();
+      Point2d lineEnd = new Point2d();
+      pointStart.getPoint2d(lineStart);
+      pointEnd.getPoint2d(lineEnd);
+      
       boolean onLeftSide = GeometryTools.isPointOnLeftSideOfLine(point, lineStart, lineEnd);
       double distance = GeometryTools.distanceFromPointToLine(point, lineStart, lineEnd);
 
@@ -1478,11 +1231,11 @@ public class QuadrupedSupportPolygon implements Serializable
       for (int i = indexEnd.ordinal() + 1; i <= indexStart.ordinal(); i++)
       {
          lineStart = lineEnd;
-         FramePoint footstep = this.footsteps.get(RobotQuadrant.getQuadrantNameFromOrdinal(i));
-         if (useThisLeg(footstep))
+         FramePoint footstep = getFootstep(RobotQuadrant.getQuadrantNameFromOrdinal(i));
+         if (containsFootstep(footstep))
          {
             counter++;
-            lineEnd = projectXY(footstep);
+            footstep.getPoint2d(lineEnd);
 
             onLeftSide = GeometryTools.isPointOnLeftSideOfLine(point, lineStart, lineEnd);
             distance = GeometryTools.distanceFromPointToLine(point, lineStart, lineEnd);
@@ -1500,7 +1253,7 @@ public class QuadrupedSupportPolygon implements Serializable
    {
       for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         FramePoint thisFootstep = footsteps.get(robotQuadrant);
+         FramePoint thisFootstep = getFootstep(robotQuadrant);
          FramePoint otherFootstep = polyTwo.getFootstep(robotQuadrant);
          if(!thisFootstep.epsilonEquals(otherFootstep, 0.005))
          {
@@ -1523,25 +1276,20 @@ public class QuadrupedSupportPolygon implements Serializable
    public FramePoint getBisectorPoint()
    {
       // verify has exactly three legs
-      if (this.getNumberOfLegs() != 3)
-         throw new IllegalArgumentException("This supportPolygon must contain exactly three legs not " + this.getNumberOfLegs());
+      if (size() != 3)
+         throw new IllegalArgumentException("This supportPolygon must contain exactly three legs not " + size());
 
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         if(!useThisLeg(quadrant))
-         {
-            Point2d A = projectXY(this.getFootstep(quadrant.getAcrossBodyQuadrant()));
-            Point2d B = projectXY(this.getFootstep(quadrant.getSameSideQuadrant()));
-            Point2d C = projectXY(this.getFootstep(quadrant.getDiagonalOppositeQuadrant()));
-            Point2d bisectingPoint = GeometryTools.getTriangleBisector(A, B, C);
-
-            return new FramePoint(this.getReferenceFrame(), bisectingPoint.x, bisectingPoint.y, 0.0);
-         }
-      }
-      return null;
+      RobotQuadrant nonSupportingQuadrant = getFirstNonSupportingQuadrant();
+      Point2d A = new Point2d();
+      getFootstep(nonSupportingQuadrant.getAcrossBodyQuadrant()).getPoint2d(A);
+      Point2d B = new Point2d();
+      getFootstep(nonSupportingQuadrant.getSameSideQuadrant()).getPoint2d(B);
+      Point2d C = new Point2d();
+      getFootstep(nonSupportingQuadrant.getDiagonalOppositeQuadrant()).getPoint2d(C);
+      Point2d bisectingPoint = GeometryTools.getTriangleBisector(A, B, C);
+      
+      return new FramePoint(getReferenceFrame(), bisectingPoint.x, bisectingPoint.y, 0.0);
    }
-   
-   
    
    /**
     *  getStanceWidthFrontLegs
@@ -1550,13 +1298,13 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getStanceLength(RobotSide robotSide)
    {
-      if (this.getNumberOfLegs() != 4)
+      if (size() != 4)
       {
          throw new RuntimeException("Need 4 legs for SupportPolygon.getStanceWidthFrontLegs()");
       }
 
-      FramePoint frontFootstep = footsteps.get(RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide));
-      FramePoint endFootstep = footsteps.get(RobotQuadrant.getQuadrant(RobotEnd.HIND, robotSide));
+      FramePoint frontFootstep = getFootstep(RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide));
+      FramePoint endFootstep = getFootstep(RobotQuadrant.getQuadrant(RobotEnd.HIND, robotSide));
 
       return frontFootstep.distance(endFootstep);
    }
@@ -1568,16 +1316,16 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getStanceWidthFrontLegs()
    {
-      if (this.getNumberOfLegs() != 4)
+      if (size() != 4)
       {
          throw new RuntimeException("Need 4 legs for SupportPolygon.getStanceWidthFrontLegs()");
       }
 
-      double heading = this.getNominalYaw();
+      double heading = getNominalYaw();
       Vector2d perpendicularHeadingVecetor = new Vector2d(-Math.sin(heading), Math.cos(heading));
 
-      FramePoint frontLeft = footsteps.get(RobotQuadrant.FRONT_LEFT);
-      FramePoint frontRight = footsteps.get(RobotQuadrant.FRONT_RIGHT);
+      FramePoint frontLeft = getFootstep(RobotQuadrant.FRONT_LEFT);
+      FramePoint frontRight = getFootstep(RobotQuadrant.FRONT_RIGHT);
 
       frontLeft.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       frontRight.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
@@ -1597,16 +1345,16 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getStanceWidthHindLegs()
    {
-      if (this.getNumberOfLegs() != 4)
+      if (size() != 4)
       {
          throw new RuntimeException("Need 4 legs for SupportPolygon.getStanceWidthHindLegs()");
       }
 
-      double heading = this.getNominalYaw();
+      double heading = getNominalYaw();
       Vector2d perpendicularHeadingVecetor = new Vector2d(-Math.sin(heading), Math.cos(heading));
 
-      FramePoint hindLeft = footsteps.get(RobotQuadrant.HIND_LEFT);
-      FramePoint hindRight = footsteps.get(RobotQuadrant.HIND_RIGHT);
+      FramePoint hindLeft = getFootstep(RobotQuadrant.HIND_LEFT);
+      FramePoint hindRight = getFootstep(RobotQuadrant.HIND_RIGHT);
 
       hindLeft.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       hindRight.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
@@ -1619,294 +1367,201 @@ public class QuadrupedSupportPolygon implements Serializable
       return Math.abs(rightToLeft.dot(perpendicularHeadingVecetor));
    }
 
-
-   public boolean epsilonEquals(QuadrupedSupportPolygon polyTwo)
-   {
-      if (polyTwo == null)
-         return false;
-      
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         FramePoint thisFootstep = this.getFootstep(quadrant);
-         FramePoint otherFootstep = polyTwo.getFootstep(quadrant);
-         if(!thisFootstep.epsilonEquals(otherFootstep, 0.005))
-         {
-            return false;
-         }
-         
-      }
-
-      return true;
-   }
-
-   public String toString()
-   {
-      String string = "";
-
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         FramePoint footstep = footsteps.get(quadrant);
-         if (footstep != null)
-            string += " " + quadrant.getCamelCaseNameForStartOfExpression() +  " " + footstep.toString() + " ";
-      }
-
-      return string;
-   }
-
-
-   /**
-    * Returns the intersection points of the polygon and the given line segment.
-    * The first returned FramePoint will be the point nearest the segmentStartFramePoint and the second returned FramePoint
-    * will be the point nearest the segmentEndFramePoint. If both segment FramePoints are inside the polygon, both returned
-    * FramePoints will be non-null. If both segment FramePoints are outside the Polygon, the one corresponding to the nearest will be non-null.
-    * If one is inside and one is outside, such that the segment fully intersect the polygon, then
-    * the one corresponding to the one inside will be non-null.
-    * The z value of the returned points will be set so that the points are along the line between the feet points. That will make these points be
-    * the tipping points on the polygon.
-    *
-    * @param segmentStartFramePoint FramePoint
-    * @param segmentEndFramePoint FramePoint
-    *
-    * @return FramePoint[]
-    */
-   public FramePoint[] getIntersectingPointsOfSegment(FramePoint segmentStartFramePoint, FramePoint segmentEndFramePoint)
-   {
-      double EPSILON = 1e-6;
-
-      this.getReferenceFrame().checkReferenceFrameMatch(segmentStartFramePoint.getReferenceFrame());
-      segmentStartFramePoint.getReferenceFrame().checkReferenceFrameMatch(segmentEndFramePoint.getReferenceFrame());
-
-      if (!segmentStartFramePoint.getReferenceFrame().isWorldFrame())
-      {
-         throw new RuntimeException("!segmentStart.getReferenceFrame().isWorldFrame()");
-      }
-
-      Point2d segmentStart = projectXY(segmentStartFramePoint);
-      Point2d segmentEnd = projectXY(segmentEndFramePoint);
-
-      RobotQuadrant indexStart = getLastNonNullQuadrant();
-      RobotQuadrant indexEnd = getFirstNonNullQuadrant();
-
-      // indexStart must be greater than indexEnd
-      if (indexStart.ordinal() < indexEnd.ordinal())
-      {
-         throw new RuntimeException("SupportPolygon.getIntersectingPointsOfSegment(): indexStart must be > indexEnd");
-      }
-
-      FramePoint feetPointStart = this.footsteps.get(indexStart);
-      FramePoint feetPointEnd = this.footsteps.get(indexEnd);
-
-      Point2d lineStart = projectXY(feetPointStart);
-      Point2d lineEnd = projectXY(feetPointEnd);
-
-      double[] percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(segmentStart, segmentEnd, lineStart, lineEnd);
-
-      FramePoint intersectionNearStart = null, intersectionNearEnd = null;
-
-      if ((percentages != null) && ((-EPSILON < percentages[1]) && (percentages[1] < 1.0 + EPSILON)))
-      {
-         if (percentages[0] <= 0.0)
-         {
-            intersectionNearStart = new FramePoint(feetPointStart.getReferenceFrame());    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-            intersectionNearStart.interpolate(feetPointStart, feetPointEnd, percentages[1]);    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-         }
-         else if (percentages[0] >= 1.0)
-         {
-            intersectionNearEnd = new FramePoint(feetPointStart.getReferenceFrame());    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-            intersectionNearEnd.interpolate(feetPointStart, feetPointEnd, percentages[1]);    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-         }
-         else
-         {
-            // The line segment straddles the support polygon. Return the one that is inside:
-            if (this.isInside(segmentStart))
-            {
-               intersectionNearStart = new FramePoint(feetPointStart.getReferenceFrame());    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-               intersectionNearStart.interpolate(feetPointStart, feetPointEnd, percentages[1]);    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-               intersectionNearEnd = null;
-
-               return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
-            }
-            else
-            {
-               intersectionNearStart = null;
-               intersectionNearEnd = new FramePoint(feetPointStart.getReferenceFrame());    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-               intersectionNearEnd.interpolate(feetPointStart, feetPointEnd, percentages[1]);    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-
-               return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
-            }
-         }
-      }
-
-      for (int i = indexEnd.ordinal() + 1; i <= indexStart.ordinal(); i++)
-      {
-         feetPointStart = feetPointEnd;
-         lineStart = lineEnd;
-
-         FramePoint footstep = this.footsteps.get(RobotQuadrant.getQuadrantNameFromOrdinal(i));
-         if (useThisLeg(footstep))
-         {
-            feetPointEnd = footstep;
-            lineEnd = projectXY(feetPointEnd);
-
-            percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(segmentStart, segmentEnd, lineStart, lineEnd);
-
-            if ((percentages != null) && ((-EPSILON < percentages[1]) && (percentages[1] < 1.0 + EPSILON)))
-            {
-               if (percentages[0] <= 0.0)
-               {
-                  FramePoint newIntersectionNearStart = new FramePoint(feetPointStart.getReferenceFrame());    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-                  newIntersectionNearStart.interpolate(feetPointStart, feetPointEnd, percentages[1]);    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-                  if (intersectionNearStart != null)
-                  {
-                     double distanceOne = segmentStartFramePoint.getXYPlaneDistance(intersectionNearStart);
-                     double distanceTwo = segmentStartFramePoint.getXYPlaneDistance(newIntersectionNearStart);
-                     if (distanceTwo < distanceOne)
-                        intersectionNearStart = newIntersectionNearStart;
-                  }
-                  else
-                  {
-                     intersectionNearStart = newIntersectionNearStart;
-                  }
-               }
-               else if (percentages[0] >= 1.0)
-               {
-                  FramePoint newIntersectionNearEnd = new FramePoint(feetPointStart.getReferenceFrame());    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-                  newIntersectionNearEnd.interpolate(feetPointStart, feetPointEnd, percentages[1]);    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-
-                  if (intersectionNearEnd != null)
-                  {
-                     double distanceOne = segmentEndFramePoint.getXYPlaneDistance(intersectionNearEnd);
-                     double distanceTwo = segmentEndFramePoint.getXYPlaneDistance(newIntersectionNearEnd);
-
-                     if (distanceTwo < distanceOne)
-                        intersectionNearEnd = newIntersectionNearEnd;
-                  }
-                  else
-                  {
-                     intersectionNearEnd = newIntersectionNearEnd;
-                  }
-               }
-               else
-               {
-                  // The line segment straddles the support polygon. Return the one that is inside:
-                  if (this.isInside(segmentStart))
-                  {
-                     intersectionNearStart = new FramePoint(feetPointStart.getReferenceFrame());    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-                     intersectionNearStart.interpolate(feetPointStart, feetPointEnd, percentages[1]);    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-                     intersectionNearEnd = null;
-
-                     return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
-                  }
-                  else
-                  {
-                     intersectionNearStart = null;
-                     intersectionNearEnd = new FramePoint(feetPointStart.getReferenceFrame());    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-                     intersectionNearEnd.interpolate(feetPointStart, feetPointEnd, percentages[1]);    // FramePoint.morph(segmentStartFramePoint, segmentEndFramePoint, percentages[0]);
-
-                     return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
-                  }
-               }
-
-            }
-         }
-      }
-
-      return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
-   }
-   
-   public QuadrupedSupportPolygon deleteLegCopy(RobotQuadrant legName)
-   {
-      QuadrupedSupportPolygon newPolygon = new QuadrupedSupportPolygon(this);
-      newPolygon.deleteLeg(legName);
-      return newPolygon;
-   }
+//   /**
+//    * Returns the intersection points of the polygon and the given line segment.
+//    * The first returned FramePoint will be the point nearest the segmentStartFramePoint and the second returned FramePoint
+//    * will be the point nearest the segmentEndFramePoint. If both segment FramePoints are inside the polygon, both returned
+//    * FramePoints will be non-null. If both segment FramePoints are outside the Polygon, the one corresponding to the nearest will be non-null.
+//    * If one is inside and one is outside, such that the segment fully intersect the polygon, then
+//    * the one corresponding to the one inside will be non-null.
+//    * The z value of the returned points will be set so that the points are along the line between the feet points. That will make these points be
+//    * the tipping points on the polygon.
+//    *
+//    * @param segmentStartFramePoint FramePoint
+//    * @param segmentEndFramePoint FramePoint
+//    *
+//    * @return FramePoint[]
+//    */
+//   public FramePoint[] getIntersectingPointsOfSegment(FramePoint segmentStartFramePoint, FramePoint segmentEndFramePoint)
+//   {
+//      getReferenceFrame().checkReferenceFrameMatch(segmentStartFramePoint.getReferenceFrame());
+//      segmentStartFramePoint.getReferenceFrame().checkReferenceFrameMatch(segmentEndFramePoint.getReferenceFrame());
+//
+//      FramePoint feetPointStart = getFootstep(getFirstSupportingQuadrant());
+//      FramePoint feetPointEnd = getFootstep(getLastSupportingQuadrant());
+//
+//      double[] percentages = new double[2];
+//      GeometryTools.getLineSegmentPercentagesIfIntersecting(segmentStartFramePoint, segmentEndFramePoint, feetPointStart, feetPointEnd, percentages);
+//
+//      FramePoint intersectionNearStart = null;
+//      FramePoint intersectionNearEnd = null;
+//
+//      if (-EPSILON < percentages[1] && percentages[1] < 1.0 + EPSILON)
+//      {
+//         if (percentages[0] <= 0.0)
+//         {
+//            intersectionNearStart = new FramePoint(getReferenceFrame());
+//            intersectionNearStart.interpolate(feetPointStart, feetPointEnd, percentages[1]);
+//         }
+//         else if (percentages[0] >= 1.0)
+//         {
+//            intersectionNearEnd = new FramePoint(getReferenceFrame());
+//            intersectionNearEnd.interpolate(feetPointStart, feetPointEnd, percentages[1]);
+//         }
+//         else if (isInside(segmentStartFramePoint))
+//         {
+//            intersectionNearStart = new FramePoint(getReferenceFrame());
+//            intersectionNearStart.interpolate(feetPointStart, feetPointEnd, percentages[1]);
+//
+//            return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
+//         }
+//         else
+//         {
+//            intersectionNearEnd = new FramePoint(getReferenceFrame());
+//            intersectionNearEnd.interpolate(feetPointStart, feetPointEnd, percentages[1]);
+//
+//            return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
+//         }
+//      }
+//
+//      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+//      {
+//         GeometryTools.getLineSegmentPercentagesIfIntersecting(segmentStartFramePoint, segmentEndFramePoint, feetPointStart, feetPointEnd, percentages);
+//
+//         if ((percentages != null) && ((-EPSILON < percentages[1]) && (percentages[1] < 1.0 + EPSILON)))
+//         {
+//            if (percentages[0] <= 0.0)
+//            {
+//               FramePoint newIntersectionNearStart = new FramePoint(getReferenceFrame());
+//               newIntersectionNearStart.interpolate(feetPointStart, feetPointEnd, percentages[1]);
+//               if (intersectionNearStart != null)
+//               {
+//                  double distanceOne = segmentStartFramePoint.getXYPlaneDistance(intersectionNearStart);
+//                  double distanceTwo = segmentStartFramePoint.getXYPlaneDistance(newIntersectionNearStart);
+//                  if (distanceTwo < distanceOne)
+//                     intersectionNearStart = newIntersectionNearStart;
+//               }
+//               else
+//               {
+//                  intersectionNearStart = newIntersectionNearStart;
+//               }
+//            }
+//            else if (percentages[0] >= 1.0)
+//            {
+//               FramePoint newIntersectionNearEnd = new FramePoint(getReferenceFrame());
+//               newIntersectionNearEnd.interpolate(feetPointStart, feetPointEnd, percentages[1]);
+//
+//               if (intersectionNearEnd != null)
+//               {
+//                  double distanceOne = segmentEndFramePoint.getXYPlaneDistance(intersectionNearEnd);
+//                  double distanceTwo = segmentEndFramePoint.getXYPlaneDistance(newIntersectionNearEnd);
+//
+//                  if (distanceTwo < distanceOne)
+//                     intersectionNearEnd = newIntersectionNearEnd;
+//               }
+//               else
+//               {
+//                  intersectionNearEnd = newIntersectionNearEnd;
+//               }
+//            }
+//            else if (isInside(segmentStartFramePoint))
+//            {
+//               intersectionNearStart = new FramePoint(getReferenceFrame());
+//               intersectionNearStart.interpolate(feetPointStart, feetPointEnd, percentages[1]);
+//               intersectionNearEnd = null;
+//
+//               return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
+//            }
+//            else
+//            {
+//               intersectionNearEnd = new FramePoint(getReferenceFrame());
+//               intersectionNearEnd.interpolate(feetPointStart, feetPointEnd, percentages[1]);
+//               intersectionNearStart = null;
+//
+//               return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
+//            }
+//         }
+//      }
+//
+//      return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
+//   }
    
    public void deleteLegCopy(RobotQuadrant legName, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
    {
       quadrupedSupportPolygonToPack.set(this);
-      quadrupedSupportPolygonToPack.deleteLeg(legName);
+      quadrupedSupportPolygonToPack.removeFootstep(legName);
    }
    
-   public void packPolygonWithoutLeg(RobotQuadrant legToDelete, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
-   {
-      quadrupedSupportPolygonToPack.clear();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if (robotQuadrant != legToDelete)
-         {
-            quadrupedSupportPolygonToPack.setFootstep(robotQuadrant, getFootstep(robotQuadrant));
-         }
-      }
-   }
-
-   public void deleteLeg(RobotQuadrant legName)
-   {
-      footsteps.remove(legName);
-   }
-
    /**
     *  This method returns the common support polygon bewteen this and the supplied supportPolygon
     *
     *  *** Assumes regular gait 
     *
-    * @param nextSupportPolygon SupportPolygon
+    * @param polygonToCompare SupportPolygon
     *        1) must contain only three kegs
     *        2) exactly two footsteps must be the same
-    * @param specifiedLegName LegName is the legname to assign to the intersection footstep
+    * @param quadrantForIntersection LegName is the legname to assign to the intersection footstep
     *        3) must be one of the swinging (same side) leg names
     * @return SupportPolygon That is common to both (can be null for opposite side swing legs)
     *        This should be the two matching feet and the intersection of the two tror lines
     */
-   public QuadrupedSupportPolygon getCommonSupportPolygon(QuadrupedSupportPolygon nextSupportPolygon, RobotQuadrant specifiedLegName)
+   public void getCommonSupportPolygon(QuadrupedSupportPolygon polygonToCompare, QuadrupedSupportPolygon commonPolygonToPack, RobotQuadrant quadrantForIntersection)
    {
       // verify both have exactly three legs
-      if (this.getNumberOfLegs() != 3)
-         throw new IllegalArgumentException("This supportPolygon must contain exactly three legs not " + this.getNumberOfLegs());
-      if (nextSupportPolygon.getNumberOfLegs() != 3)
-         throw new IllegalArgumentException("Next supportPolygon must contain exactly three legs not " + nextSupportPolygon.getNumberOfLegs());
+      if (size() != 3)
+         throw new UndefinedOperationException("This supportPolygon must contain exactly three legs, not " + size());
+      if (polygonToCompare.size() != 3)
+         throw new UndefinedOperationException("Supplied supportPolygon must contain exactly three legs, not " + polygonToCompare.size());
 
       // return null if swing legs are not same side *** Assumes regular gait ***
-      RobotQuadrant currentSwingLeg = this.getFirstNullQuadrant();
-      RobotQuadrant nextSwingLeg = nextSupportPolygon.getFirstNullQuadrant();
-      if (nextSwingLeg != currentSwingLeg.getSameSideQuadrant())
-         return null;
+      RobotQuadrant thisSwingLeg = getFirstNonSupportingQuadrant();
+      RobotQuadrant compareSwingLeg = polygonToCompare.getFirstNonSupportingQuadrant();
+      if (compareSwingLeg != thisSwingLeg.getSameSideQuadrant())
+         throw new UndefinedOperationException("Swing legs should be on same side.");
 
       // verify exactly two legs epsilon match
-      if (this.getNumberOfMatchinfFootsteps(nextSupportPolygon) != 2)
-         throw new IllegalArgumentException("There must be exactly two similar foosteps not " + this.getNumberOfMatchinfFootsteps(nextSupportPolygon));
+      if (getNumberOfMatchinfFootsteps(polygonToCompare) != 2)
+         throw new UndefinedOperationException("There must be exactly two similar foosteps not " + getNumberOfMatchinfFootsteps(polygonToCompare));
 
       // verify specified swing leg name is one of the swinging (same side) leg names
-      if ((specifiedLegName != currentSwingLeg) && (specifiedLegName != nextSwingLeg))
-         throw new IllegalArgumentException("The specified swingleg must be one of the swinging (same side) leg names");
-
-      // if swing legs are the same side find intersection of two trot lines
-      // this is the first trot line
-      Point2d point1 = new Point2d(this.getFootstep(nextSwingLeg).getX(), this.getFootstep(nextSwingLeg).getY());
-      Point2d point1B = new Point2d(this.getFootstep(nextSwingLeg.getDiagonalOppositeQuadrant()).getX(),
-                                    this.getFootstep(nextSwingLeg.getDiagonalOppositeQuadrant()).getY());
-      point1B.sub(point1);
-      Vector2d vector1 = new Vector2d(point1B);
-
-      // this is the second trot line
-      Point2d point2 = new Point2d(nextSupportPolygon.getFootstep(currentSwingLeg).getX(), nextSupportPolygon.getFootstep(currentSwingLeg).getY());
-      Point2d point2B = new Point2d(nextSupportPolygon.getFootstep(currentSwingLeg.getDiagonalOppositeQuadrant()).getX(),
-                                    nextSupportPolygon.getFootstep(currentSwingLeg.getDiagonalOppositeQuadrant()).getY());
-      point2B.sub(point2);
-      Vector2d vector2 = new Vector2d(point2B);
-
-      // this is the intersection
-      Point2d intersection2d = GeometryTools.getIntersectionBetweenTwoLines(point1, vector1, point2, vector2);
-
-      // this is a footstep based on the intersection
-      FramePoint position = new FramePoint(this.getReferenceFrame(), intersection2d.x, intersection2d.y, 0.0);
+      if ((quadrantForIntersection != thisSwingLeg) && (quadrantForIntersection != compareSwingLeg))
+         throw new UndefinedOperationException("The specified intersection quadrant must be one of the swinging (same side) leg names");
       
-      QuadrantDependentList<FramePoint> commonFeetPositions = new QuadrantDependentList<FramePoint>();
-      commonFeetPositions.put(specifiedLegName, position);
+      FrameVector direction1 = tempVectorsForCommonSupportPolygon[0];
+      direction1.sub(getFootstep(compareSwingLeg.getDiagonalOppositeQuadrant()), getFootstep(compareSwingLeg));
       
-      commonFeetPositions.put(currentSwingLeg.getAcrossBodyQuadrant(), getFootstep(currentSwingLeg.getAcrossBodyQuadrant()));
-      commonFeetPositions.put(currentSwingLeg.getDiagonalOppositeQuadrant(), getFootstep(currentSwingLeg.getDiagonalOppositeQuadrant()));
+      FrameVector direction2 = tempVectorsForCommonSupportPolygon[1];
+      direction2.sub(polygonToCompare.getFootstep(thisSwingLeg.getDiagonalOppositeQuadrant()), polygonToCompare.getFootstep(thisSwingLeg));
+      
+      FramePoint intersection = commonPolygonToPack.getFootstepOrCreateIfNonSupporting(quadrantForIntersection);
+      GeometryTools.getIntersectionBetweenTwoLines2d(intersection, getFootstep(compareSwingLeg), direction1, polygonToCompare.getFootstep(thisSwingLeg), direction2);
+      
+      commonPolygonToPack.setFootstep(thisSwingLeg.getAcrossBodyQuadrant(), getFootstep(thisSwingLeg.getAcrossBodyQuadrant()));
+      commonPolygonToPack.setFootstep(thisSwingLeg.getDiagonalOppositeQuadrant(), getFootstep(thisSwingLeg.getDiagonalOppositeQuadrant()));
+      commonPolygonToPack.removeFootstep(quadrantForIntersection.getSameSideQuadrant());
+   }
 
-      return new QuadrupedSupportPolygon(commonFeetPositions);
+   /**
+    *  This method compares this to another support polygon and returns the number of matching footsetps
+    *
+    * @return int the number of footsteps that epsilon match
+    */
+   public int getNumberOfMatchinfFootsteps(QuadrupedSupportPolygon polygon)
+   {
+      // check the number of null legs
+      int numberOfMatching = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         FramePoint thisFootStep = getFootstep(robotQuadrant);
+         FramePoint otherFootStep = polygon.getFootstep(robotQuadrant);
+         
+         if (thisFootStep != null && thisFootStep.epsilonEquals(otherFootStep, 0.0005))
+         {
+            numberOfMatching++;
+         }
+      }
+   
+      return numberOfMatching;
    }
 
    /**
@@ -1919,7 +1574,7 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param nextSupportPolygon SupportPolygon
     *        1) must contain only three legs
     *        2) exactly two footsteps must be the same
-    * @param specifiedLegName LegName is the legname to assign to the intersection footstep
+    * @param quadrantForIntersection LegName is the legname to assign to the intersection footstep
     *        3) must be one of the swinging (same side) leg names
     * @param frontDistance double  distance to shrink the front side
     * @param sideDistance double  distance to shrink the side side
@@ -1930,179 +1585,87 @@ public class QuadrupedSupportPolygon implements Serializable
     *        Each side is shrunken by the specified distance.
     *        If the remaining distance is insufficent to shrink, then return null
     */
-   public QuadrupedSupportPolygon getShrunkenCommonSupportPolygon(QuadrupedSupportPolygon nextSupportPolygon, RobotQuadrant specifiedLegName, double frontDistance,
-           double sideDistance, double hindDistance)
+   public void getShrunkenCommonSupportPolygon(QuadrupedSupportPolygon nextSupportPolygon, QuadrupedSupportPolygon shrunkenCommonPolygonToPack,
+         RobotQuadrant quadrantForIntersection, double frontDistance, double sideDistance, double hindDistance)
    {
-      // get common polygon
-      QuadrupedSupportPolygon commonSupportPolygon = getCommonSupportPolygon(nextSupportPolygon, specifiedLegName);
-
-      // if it is null return null
-      if (commonSupportPolygon == null)
-         return null;
-
-      // find legs invovled
-      RobotQuadrant swingLeg = commonSupportPolygon.getFirstNullQuadrant();
-      RobotQuadrant oppositeFront, oppositeHind;
-      if (swingLeg.isQuadrantInFront())
-      {
-         oppositeFront = swingLeg.getAcrossBodyQuadrant();
-         oppositeHind = swingLeg.getDiagonalOppositeQuadrant();
-      }
-      else
-      {
-         oppositeFront = swingLeg.getDiagonalOppositeQuadrant();
-         oppositeHind = swingLeg.getAcrossBodyQuadrant();
-      }
-
-      // define the starting sides
-      FramePoint swingLegSameSideFootstep = new FramePoint(commonSupportPolygon.getFootstep(swingLeg.getSameSideQuadrant()));
-      FramePoint oppositeFrontFootstep = new FramePoint(commonSupportPolygon.getFootstep(oppositeFront));
-      FramePoint oppositeHindFootstep = new FramePoint(commonSupportPolygon.getFootstep(oppositeHind));
-      Point2d point1 = QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep);
-      Point2d point2 = QuadrupedSupportPolygon.projectXY(oppositeFrontFootstep);
-      Vector2d frontVector;
+      QuadrupedSupportPolygon commonSupportPolygon = new QuadrupedSupportPolygon();
+      getCommonSupportPolygon(nextSupportPolygon, commonSupportPolygon, quadrantForIntersection);
+      
+      shrunkenCommonPolygonToPack.set(commonSupportPolygon);
+      
+      RobotQuadrant swingLeg = commonSupportPolygon.getFirstNonSupportingQuadrant();
+      RobotQuadrant swingLegSameSide = swingLeg.getSameSideQuadrant();
+      RobotQuadrant nextEdgeQuadrant = commonSupportPolygon.getNextClockwiseSupportingQuadrant(swingLegSameSide);
+      RobotQuadrant previousEdgeQuadrant = commonSupportPolygon.getNextCounterClockwiseSupportingQuadrant(swingLegSameSide);
+      
+      RobotQuadrant frontEdgeQuadrant;
+      RobotQuadrant sideEdgeQuadrant;
+      RobotQuadrant hindEdgeQuadrant;
       if (swingLeg.isQuadrantOnLeftSide())
       {
-         point1.sub(point2);
-         frontVector = new Vector2d(point1);
+         frontEdgeQuadrant = swingLegSameSide;
+         sideEdgeQuadrant = nextEdgeQuadrant;
+         hindEdgeQuadrant = previousEdgeQuadrant;
       }
       else
       {
-         point2.sub(point1);
-         frontVector = new Vector2d(point2);
+         frontEdgeQuadrant = previousEdgeQuadrant;
+         sideEdgeQuadrant = nextEdgeQuadrant;
+         hindEdgeQuadrant = swingLegSameSide;
       }
-
-      point2 = QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep);
-      point1 = QuadrupedSupportPolygon.projectXY(oppositeHindFootstep);
-      Vector2d hindVector;
-      if (swingLeg.isQuadrantOnLeftSide())
-      {
-         point1.sub(point2);
-         hindVector = new Vector2d(point1);
-      }
-      else
-      {
-         point2.sub(point1);
-         hindVector = new Vector2d(point2);
-      }
-
-      point1 = QuadrupedSupportPolygon.projectXY(oppositeFrontFootstep);
-      point2 = QuadrupedSupportPolygon.projectXY(oppositeHindFootstep);
-      Vector2d sideVector;
-      if (swingLeg.isQuadrantOnLeftSide())
-      {
-         point1.sub(point2);
-         sideVector = new Vector2d(point1);
-      }
-      else
-      {
-         point2.sub(point1);
-         sideVector = new Vector2d(point2);
-      }
-
-      // first shrink the front side
-      // find normal perpendicular to side
-      Vector2d directionOfShrinkage = GeometryTools.getPerpendicularVector(frontVector);
-      directionOfShrinkage.normalize();
-
-      // scale by desired distance
-      directionOfShrinkage.scale(frontDistance);
-
-      // apply to each foot
-      point1 = QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep);
-      point2 = QuadrupedSupportPolygon.projectXY(oppositeFrontFootstep);
-      point1.add(directionOfShrinkage);
-      point2.add(directionOfShrinkage);
-
-      // find intersection of new side with each existing side
-      Vector2d point1ToPoint2 = new Vector2d(point1);
-      point1ToPoint2.sub(point2);
-      Point2d newSwingLegSameSidePoint = GeometryTools.getIntersectionBetweenTwoLines(point1, point1ToPoint2,
-                                            QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep), hindVector);
-      Point2d oppositeFrontPoint = GeometryTools.getIntersectionBetweenTwoLines(point1, point1ToPoint2,
-                                      QuadrupedSupportPolygon.projectXY(oppositeFrontFootstep), sideVector);
-
-      // update foot positions
-      FramePoint position = new FramePoint(commonSupportPolygon.getReferenceFrame(), newSwingLegSameSidePoint.x, newSwingLegSameSidePoint.y, 0.0);
-//      swingLegSameSideFootstep = new CartesianFramePoint(position, swingLeg.getSameSideQuadrant());
-      swingLegSameSideFootstep = new FramePoint(position);
-      position = new FramePoint(commonSupportPolygon.getReferenceFrame(), oppositeFrontPoint.x, oppositeFrontPoint.y, 0.0);
-//      oppositeFrontFootstep = new CartesianFramePoint(position, oppositeFront);
-      oppositeFrontFootstep = new FramePoint(position);
-
-      // now shrink the hind side
-      // find normal perpendicular to side
-      directionOfShrinkage = GeometryTools.getPerpendicularVector(hindVector);
-      directionOfShrinkage.normalize();
-
-      // scale by desired distance
-      directionOfShrinkage.scale(hindDistance);
-
-      // apply to each foot
-      point1 = QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep);
-      point2 = QuadrupedSupportPolygon.projectXY(oppositeHindFootstep);
-      point1.add(directionOfShrinkage);
-      point2.add(directionOfShrinkage);
-
-      // find intersection of new side with each existing side
-      point1ToPoint2 = new Vector2d(point1);
-      point1ToPoint2.sub(point2);
-      newSwingLegSameSidePoint = GeometryTools.getIntersectionBetweenTwoLines(point1, point1ToPoint2,
-              QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep), frontVector);
-      Point2d oppositeHindPoint = GeometryTools.getIntersectionBetweenTwoLines(point1, point1ToPoint2,
-                                     QuadrupedSupportPolygon.projectXY(oppositeFrontFootstep), sideVector);
-
-      // update foot positions
-      position = new FramePoint(commonSupportPolygon.getReferenceFrame(), newSwingLegSameSidePoint.x, newSwingLegSameSidePoint.y, 0.0);
-//      swingLegSameSideFootstep = new CartesianFramePoint(position, swingLeg.getSameSideQuadrant());
-      swingLegSameSideFootstep = new FramePoint(position);
-      position = new FramePoint(commonSupportPolygon.getReferenceFrame(), oppositeHindPoint.x, oppositeHindPoint.y, 0.0);
-//      oppositeHindFootstep = new CartesianFramePoint(position, oppositeHind);
-      oppositeHindFootstep = new FramePoint(position);
-
-      // now shrink the remaining side
-      // find normal perpendicular to side
-      directionOfShrinkage = GeometryTools.getPerpendicularVector(sideVector);
-      directionOfShrinkage.normalize();
-
-      // scale by desired distance
-      directionOfShrinkage.scale(sideDistance);
-
-      // apply to each foot
-      point1 = QuadrupedSupportPolygon.projectXY(oppositeFrontFootstep);
-      point2 = QuadrupedSupportPolygon.projectXY(oppositeHindFootstep);
-      point1.add(directionOfShrinkage);
-      point2.add(directionOfShrinkage);
-
-      // find intersection of new side with each existing side
-      point1ToPoint2 = new Vector2d(point1);
-      point1ToPoint2.sub(point2);
-      oppositeFrontPoint = GeometryTools.getIntersectionBetweenTwoLines(point1, point1ToPoint2,
-              QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep), frontVector);
-      oppositeHindPoint = GeometryTools.getIntersectionBetweenTwoLines(point1, point1ToPoint2,
-              QuadrupedSupportPolygon.projectXY(swingLegSameSideFootstep), hindVector);
-
-      // update foot positions
-      position = new FramePoint(commonSupportPolygon.getReferenceFrame(), oppositeFrontPoint.x, oppositeFrontPoint.y, 0.0);
-//      oppositeFrontFootstep = new CartesianFramePoint(position, oppositeFront);
-      oppositeFrontFootstep = new FramePoint(position);
-      position = new FramePoint(commonSupportPolygon.getReferenceFrame(), oppositeHindPoint.x, oppositeHindPoint.y, 0.0);
-//      oppositeHindFootstep = new CartesianFramePoint(position, oppositeHind);
-      oppositeHindFootstep = new FramePoint(position);
-
-      // now add new footsteps to shrunken polygon
-      QuadrantDependentList<FramePoint> commonFootsteps = new QuadrantDependentList<FramePoint>();
-//      ArrayList<FramePoint> commonFootsteps = new ArrayList<FramePoint>();
-      commonFootsteps.put(swingLeg.getSameSideQuadrant(), swingLegSameSideFootstep);
-      commonFootsteps.put(oppositeFront, oppositeFrontFootstep);
-      commonFootsteps.put(oppositeHind, oppositeHindFootstep);
-
-      return new QuadrupedSupportPolygon(commonFootsteps);
+      
+      commonSupportPolygon.getShrunkenPolygon2d(shrunkenCommonPolygonToPack, frontEdgeQuadrant, frontDistance);
+      commonSupportPolygon.set(shrunkenCommonPolygonToPack);
+      commonSupportPolygon.getShrunkenPolygon2d(shrunkenCommonPolygonToPack, sideEdgeQuadrant, sideDistance);
+      commonSupportPolygon.set(shrunkenCommonPolygonToPack);
+      commonSupportPolygon.getShrunkenPolygon2d(shrunkenCommonPolygonToPack, hindEdgeQuadrant, hindDistance);
    }
-
-
-
-
+   
+   /**
+    * Shrinks one side of the polygon.
+    * 
+    * @param shrunkenPolygonToPack
+    * @param sideToShrink side to shrink is the clockwise connected edge to the provided quadrant (ex. FRONT_LEFT -> TOP)
+    * @param distance
+    */
+   public void getShrunkenPolygon2d(QuadrupedSupportPolygon shrunkenPolygonToPack, RobotQuadrant sideToShrink, double distance)
+   {
+      shrunkenPolygonToPack.set(this);
+      
+      if (size() == 3)
+      {
+         RobotQuadrant nextEdgeQuadrant = getNextClockwiseSupportingQuadrant(sideToShrink);
+         RobotQuadrant previousEdgeQuadrant = getNextCounterClockwiseSupportingQuadrant(sideToShrink);
+         
+         FramePoint originalShrinkEdgeFoot = getFootstep(sideToShrink);
+         FramePoint originalNextEdgeFoot = getFootstep(nextEdgeQuadrant);
+         FramePoint originalPreviousEdgeFoot = getFootstep(previousEdgeQuadrant);
+         
+         FramePoint shrunkenShrinkEdgeFoot = shrunkenPolygonToPack.getFootstep(sideToShrink);
+         FramePoint shrunkenNextEdgeFoot = shrunkenPolygonToPack.getFootstep(nextEdgeQuadrant);
+         
+         FrameVector shrinkDirection = new FrameVector();
+         shrinkDirection.sub(originalShrinkEdgeFoot, originalNextEdgeFoot);
+         GeometryTools.getPerpendicularVector2d(shrinkDirection, shrinkDirection);
+         shrinkDirection.normalize();
+         shrinkDirection.scale(distance);
+         
+         shrunkenShrinkEdgeFoot.add(shrinkDirection);
+         shrunkenNextEdgeFoot.add(shrinkDirection);
+         
+         GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenShrinkEdgeFoot, shrunkenNextEdgeFoot, shrunkenShrinkEdgeFoot, originalPreviousEdgeFoot, originalShrinkEdgeFoot);
+         GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenNextEdgeFoot, shrunkenShrinkEdgeFoot, shrunkenNextEdgeFoot, originalPreviousEdgeFoot, originalNextEdgeFoot);
+      }
+      else if (size() == 4)
+      {
+         
+      }
+      else
+      {
+         throw new UndefinedOperationException("Can only shrink 3 or 4 side polygon");
+      }
+   }
+   
    /**
     * If this and the given supportPolygon differ only by one footstep, this returns the leg that differs.
     * Else it returns null
@@ -2149,27 +1712,27 @@ public class QuadrupedSupportPolygon implements Serializable
       return swingLeg;
    }
 
-   public double distanceInsideTrotLine(Point2d point)
+   public double distanceInsideTrotLine(FramePoint framePoint)
    {
-      if (this.getNumberOfLegs() == 4)
+      if (size() == 4)
          return 0.0;
 
-      RobotQuadrant swingLeg = getFirstNullQuadrant();
+      RobotQuadrant swingLeg = getFirstNonSupportingQuadrant();
 
-      FramePoint pointStart = footsteps.get(swingLeg.getAcrossBodyQuadrant());
-      FramePoint pointEnd = footsteps.get(swingLeg.getSameSideQuadrant());
+      FramePoint pointStart = getFootstep(swingLeg.getAcrossBodyQuadrant());
+      FramePoint pointEnd = getFootstep(swingLeg.getSameSideQuadrant());
 
-      Point2d lineStart = projectXY(pointStart);
-      Point2d lineEnd = projectXY(pointEnd);
+      temporaryFramePoint.set(pointStart);
+      temporaryFramePoint2.set(pointEnd);
 
-      boolean inside = GeometryTools.isPointOnLeftSideOfLine(point, lineStart, lineEnd);
+      boolean inside = GeometryTools.isPointOnLeftSideOfLine(framePoint, temporaryFramePoint, temporaryFramePoint2);
 
       if ((swingLeg == RobotQuadrant.HIND_LEFT) || (swingLeg == RobotQuadrant.FRONT_RIGHT))
       {
          inside = !inside;
       }
 
-      double distance = GeometryTools.distanceFromPointToLine(point, lineStart, lineEnd);
+      double distance = GeometryTools.distanceFromPointToLine2d(framePoint, temporaryFramePoint, temporaryFramePoint2);
 
       if (!inside)
          distance = -distance;
@@ -2177,65 +1740,50 @@ public class QuadrupedSupportPolygon implements Serializable
       return distance;
    }
 
-
-   /**
-    * getTrotLineMiddle
-    *
-    * @return FramePoint
-    */
-   public FramePoint getTrotLineMiddle()
+   public void getTrotLineMiddle(FramePoint framePointToPack)
    {
-      RobotQuadrant swingLeg = getFirstNullQuadrant();
+      RobotQuadrant swingLeg = getFirstNonSupportingQuadrant();
 
-      FramePoint footstep1 = footsteps.get(swingLeg.getAcrossBodyQuadrant());
-      FramePoint footstep2 = footsteps.get(swingLeg.getSameSideQuadrant());
+      FramePoint footstep1 = getFootstep(swingLeg.getAcrossBodyQuadrant());
+      FramePoint footstep2 = getFootstep(swingLeg.getSameSideQuadrant());
 
-      FramePoint ret = new FramePoint(footstep1);
-      ret.add(footstep2);
+      framePointToPack.set(footstep1);
+      framePointToPack.add(footstep2);
 
-      ret.scale(0.5);
-
-      return ret;
+      framePointToPack.scale(0.5);
    }
 
-   public FrameVector get2DVectorPerpendicularToTrotLinePointingInside()
+   public void get2DVectorPerpendicularToTrotLinePointingInside(FrameVector frameVectorToPack)
    {
-      RobotQuadrant swingLeg = getFirstNullQuadrant();
+      RobotQuadrant swingLeg = getFirstNonSupportingQuadrant();
 
-      FramePoint footstep1 = footsteps.get(swingLeg.getAcrossBodyQuadrant());
-      FramePoint footstep2 = footsteps.get(swingLeg.getSameSideQuadrant());
+      FramePoint footstep1 = getFootstep(swingLeg.getAcrossBodyQuadrant());
+      FramePoint footstep2 = getFootstep(swingLeg.getSameSideQuadrant());
 
-      FrameVector diffVector = new FrameVector(footstep2);
-      diffVector.sub(footstep1);
+      frameVectorToPack.set(footstep2);
+      frameVectorToPack.sub(footstep1);
 
-      diffVector.setZ(0.0);
-      double x = diffVector.getX();
-      double y = diffVector.getY();
+      frameVectorToPack.setZ(0.0);
+      double x = frameVectorToPack.getX();
+      double y = frameVectorToPack.getY();
 
       if (swingLeg == RobotQuadrant.HIND_LEFT)
       {
-         diffVector.setX(y);
-         diffVector.setY(-x);
-         diffVector.normalize();
+         frameVectorToPack.setX(y);
+         frameVectorToPack.setY(-x);
+         frameVectorToPack.normalize();
       }
-
       else if (swingLeg == RobotQuadrant.HIND_RIGHT)
       {
-         diffVector.setX(-y);
-         diffVector.setY(x);
-         diffVector.normalize();
+         frameVectorToPack.setX(-y);
+         frameVectorToPack.setY(x);
+         frameVectorToPack.normalize();
       }
-
       else
       {
          throw new RuntimeException("Not implemented for fronts!");
       }
-
-
-
-      return diffVector;
    }
-
 
    /**
     * Returns true if any of the legs are crossing.
@@ -2250,33 +1798,33 @@ public class QuadrupedSupportPolygon implements Serializable
       // to be really fast I think. I could be wrong though.
 
       double xFL, yFL, xFR, yFR, xHR, yHR, xHL, yHL;
-      if (getNumberOfLegs() == 4)
+      if (size() == 4)
       {
-         xFL = footsteps.get(RobotQuadrant.FRONT_LEFT).getX();
-         yFL = footsteps.get(RobotQuadrant.FRONT_LEFT).getY();
+         xFL = getFootstep(RobotQuadrant.FRONT_LEFT).getX();
+         yFL = getFootstep(RobotQuadrant.FRONT_LEFT).getY();
                        
-         xFR = footsteps.get(RobotQuadrant.FRONT_RIGHT).getX();
-         yFR = footsteps.get(RobotQuadrant.FRONT_RIGHT).getY();
+         xFR = getFootstep(RobotQuadrant.FRONT_RIGHT).getX();
+         yFR = getFootstep(RobotQuadrant.FRONT_RIGHT).getY();
                        
-         xHR = footsteps.get(RobotQuadrant.HIND_RIGHT).getX();
-         yHR = footsteps.get(RobotQuadrant.HIND_RIGHT).getY();
+         xHR = getFootstep(RobotQuadrant.HIND_RIGHT).getX();
+         yHR = getFootstep(RobotQuadrant.HIND_RIGHT).getY();
                        
-         xHL = footsteps.get(RobotQuadrant.HIND_LEFT).getX();
-         yHL = footsteps.get(RobotQuadrant.HIND_LEFT).getY();
+         xHL = getFootstep(RobotQuadrant.HIND_LEFT).getX();
+         yHL = getFootstep(RobotQuadrant.HIND_LEFT).getY();
       }
       else
       {
-         xFL = (footsteps.get(RobotQuadrant.FRONT_LEFT) == null) ? Double.NaN : footsteps.get(RobotQuadrant.FRONT_LEFT).getX();
-         yFL = (footsteps.get(RobotQuadrant.FRONT_LEFT) == null) ? Double.NaN : footsteps.get(RobotQuadrant.FRONT_LEFT).getY();
+         xFL = (getFootstep(RobotQuadrant.FRONT_LEFT) == null) ? Double.NaN : getFootstep(RobotQuadrant.FRONT_LEFT).getX();
+         yFL = (getFootstep(RobotQuadrant.FRONT_LEFT) == null) ? Double.NaN : getFootstep(RobotQuadrant.FRONT_LEFT).getY();
          
-         xFR = (footsteps.get(RobotQuadrant.FRONT_RIGHT) == null) ? Double.NaN : footsteps.get(RobotQuadrant.FRONT_RIGHT).getX();
-         yFR = (footsteps.get(RobotQuadrant.FRONT_RIGHT) == null) ? Double.NaN : footsteps.get(RobotQuadrant.FRONT_RIGHT).getY();
+         xFR = (getFootstep(RobotQuadrant.FRONT_RIGHT) == null) ? Double.NaN : getFootstep(RobotQuadrant.FRONT_RIGHT).getX();
+         yFR = (getFootstep(RobotQuadrant.FRONT_RIGHT) == null) ? Double.NaN : getFootstep(RobotQuadrant.FRONT_RIGHT).getY();
                 
-         xHR = (footsteps.get(RobotQuadrant.HIND_RIGHT) == null) ? Double.NaN : footsteps.get(RobotQuadrant.HIND_RIGHT).getX();
-         yHR = (footsteps.get(RobotQuadrant.HIND_RIGHT) == null) ? Double.NaN : footsteps.get(RobotQuadrant.HIND_RIGHT).getY();
+         xHR = (getFootstep(RobotQuadrant.HIND_RIGHT) == null) ? Double.NaN : getFootstep(RobotQuadrant.HIND_RIGHT).getX();
+         yHR = (getFootstep(RobotQuadrant.HIND_RIGHT) == null) ? Double.NaN : getFootstep(RobotQuadrant.HIND_RIGHT).getY();
                 
-         xHL = (footsteps.get(RobotQuadrant.HIND_LEFT) == null) ? Double.NaN : footsteps.get(RobotQuadrant.HIND_LEFT).getX();
-         yHL = (footsteps.get(RobotQuadrant.HIND_LEFT) == null) ? Double.NaN : footsteps.get(RobotQuadrant.HIND_LEFT).getY();
+         xHL = (getFootstep(RobotQuadrant.HIND_LEFT) == null) ? Double.NaN : getFootstep(RobotQuadrant.HIND_LEFT).getX();
+         yHL = (getFootstep(RobotQuadrant.HIND_LEFT) == null) ? Double.NaN : getFootstep(RobotQuadrant.HIND_LEFT).getY();
       }
 
       double xFLtoFR = xFR - xFL;
@@ -2303,20 +1851,6 @@ public class QuadrupedSupportPolygon implements Serializable
       return false;
 
    }
-
-   /**
-    * replaceFootstepCopy: this replaces the stored footsep with the passed in one.
-    * If the stored footstep is null, it will throw an exception.
-    *
-    * @param footstep Footstep
-    * @return Polygon
-    */
-   public QuadrupedSupportPolygon replaceFootstepCopy(RobotQuadrant quadrant, FramePoint footstep)
-   {
-      QuadrupedSupportPolygon newPolygon = new QuadrupedSupportPolygon(this);
-      newPolygon.setFootstep(quadrant, footstep);
-      return newPolygon;
-   }
    
    /**
     * replaceFootstepCopy: this replaces the stored footsep with the passed in one.
@@ -2338,21 +1872,19 @@ public class QuadrupedSupportPolygon implements Serializable
     *  @return Point3d  A point that is the diagonal intersection of the quad stance
     *                   null if stance is not a quad
     */
-   public FramePoint getDiagonalIntersection()
+   public void getDiagonalIntersection(FramePoint framePointToPack)
    {
       // Copied from http://local.wasp.uwa.edu.au/~pbourke/geometry/lineline2d/
       // Uses the P = P1 + alpha (P2-P1) method rather than y = mx+b and thus doesn't have problems with vertical lines.
 
-      // Footstep[] footstepArray = this.getFootsteps();
+      FramePoint frontLeftFootstep = getFootstep(RobotQuadrant.FRONT_LEFT);
+      FramePoint frontRightFootstep = getFootstep(RobotQuadrant.FRONT_RIGHT);
+      FramePoint hindRightFootstep = getFootstep(RobotQuadrant.HIND_RIGHT);
+      FramePoint hindLeftFootstep = getFootstep(RobotQuadrant.HIND_LEFT);
 
-      FramePoint frontLeftFootstep = footsteps.get(RobotQuadrant.FRONT_LEFT);
-      FramePoint frontRightFootstep = footsteps.get(RobotQuadrant.FRONT_RIGHT);
-      FramePoint hindRightFootstep = footsteps.get(RobotQuadrant.HIND_RIGHT);
-      FramePoint hindLeftFootstep = footsteps.get(RobotQuadrant.HIND_LEFT);
-
-      if ((frontLeftFootstep == null) || (frontRightFootstep == null) || (hindRightFootstep == null) || (hindLeftFootstep == null))
+      if (size() < 4)
       {
-         return null;
+         throw new UndefinedOperationException("Must have 4 support legs");
       }
 
       double x1 = frontLeftFootstep.getX();
@@ -2377,7 +1909,7 @@ public class QuadrupedSupportPolygon implements Serializable
       double xp = x1 + ua * (x2 - x1);
       double yp = y1 + ua * (y2 - y1);
 
-      return new FramePoint(getReferenceFrame(), xp, yp, 0.0);
+      framePointToPack.setIncludingFrame(getReferenceFrame(), xp, yp, 0.0);
    }
 
    /**
@@ -2390,13 +1922,13 @@ public class QuadrupedSupportPolygon implements Serializable
    public boolean isValidTrotPolygon()
    {
       // check that there are two legs in the polygon
-      if (this.getNumberOfLegs() != 2)
+      if (size() != 2)
          return false;
 
-      RobotQuadrant firstLeg = getFirstNonNullQuadrant();
+      RobotQuadrant firstLeg = getFirstSupportingQuadrant();
       RobotQuadrant diagonalLeg = firstLeg.getDiagonalOppositeQuadrant();
       
-      if (footsteps.get(diagonalLeg) == null)
+      if (getFootstep(diagonalLeg) == null)
          return false;
 
       return true;
@@ -2410,10 +1942,10 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public RobotQuadrant getLeftTrotLeg()
    {
-      if (!this.isValidTrotPolygon())
+      if (!isValidTrotPolygon())
          throw new RuntimeException("SupportPolygon is not a ValidTrotPolygon");
 
-      RobotQuadrant firstLeg = getFirstNonNullQuadrant();
+      RobotQuadrant firstLeg = getFirstSupportingQuadrant();
       if(firstLeg.isQuadrantOnLeftSide())
       {
          return firstLeg;
@@ -2430,10 +1962,10 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public RobotQuadrant getRightTrotLeg()
    {
-      if (!this.isValidTrotPolygon())
+      if (!isValidTrotPolygon())
          throw new RuntimeException("SupportPolygon is not a ValidTrotPolygon");
 
-      RobotQuadrant firstLeg = getFirstNonNullQuadrant();
+      RobotQuadrant firstLeg = getFirstSupportingQuadrant();
       if(firstLeg.isQuadrantOnRightSide())
       {
          return firstLeg;
@@ -2442,83 +1974,11 @@ public class QuadrupedSupportPolygon implements Serializable
       return firstLeg.getDiagonalOppositeQuadrant();
    }
 
-
-   public FramePoint getAverageFrontPoint()
+   public boolean getTangentTangentRadiusCircleCenter(RobotQuadrant robotQuadrantToAnchorTo, double radius, FramePoint2d centerToPack)
    {
-      FramePoint frontLeft = this.getFootstep(RobotQuadrant.FRONT_LEFT);
-      FramePoint frontRight = this.getFootstep(RobotQuadrant.FRONT_RIGHT);
-
-      if ((frontLeft != null) && (frontRight != null))
+      if(containsFootstep(robotQuadrantToAnchorTo) && size() == 3)
       {
-         FramePoint ret = new FramePoint(frontLeft);
-         ret.add(frontRight);
-         ret.scale(0.5);
-
-         return ret;
-      }
-
-      else if (frontLeft != null)
-         return new FramePoint(frontLeft);
-      else if (frontRight != null)
-         return new FramePoint(frontRight);
-
-      else
-         throw new RuntimeException("SupportPolygon.getAverageFrontPoint(): Both front legs are null!");
-   }
-
-
-   public FramePoint getAverageHindPoint()
-   {
-      FramePoint hindLeft = this.getFootstep(RobotQuadrant.HIND_LEFT);
-      FramePoint hindRight = this.getFootstep(RobotQuadrant.HIND_RIGHT);
-
-      if ((hindLeft != null) && (hindRight != null))
-      {
-         FramePoint ret = new FramePoint(hindLeft);
-         ret.add(hindRight);
-         ret.scale(0.5);
-
-         return ret;
-      }
-
-      else if (hindLeft != null)
-         return new FramePoint(hindLeft);
-      else if (hindRight != null)
-         return  new FramePoint(hindRight);
-
-      else
-         throw new RuntimeException("SupportPolygon.getAverageFrontPoint(): Both hind legs are null!");
-
-   }
-   
-   public static void main(String[] args)
-   {
-      ReferenceFrame frame = ReferenceFrame.getWorldFrame();
-      QuadrantDependentList<FramePoint> footsteps = new QuadrantDependentList<FramePoint>();
-      
-      
-      FramePoint framePoint;
-
-      framePoint = new FramePoint(frame, 0.0, 0.0, 0.0);
-      footsteps.put(RobotQuadrant.FRONT_LEFT, new FramePoint(framePoint));
-
-      framePoint = new FramePoint(frame, 1.0, 0.0, 0.0);
-      footsteps.put(RobotQuadrant.FRONT_RIGHT, new FramePoint(framePoint));
-
-      framePoint = new FramePoint(frame, 1.0, -1.0, 0.0);
-      footsteps.put(RobotQuadrant.HIND_RIGHT, new FramePoint(framePoint));
-
-      QuadrupedSupportPolygon polygon = new QuadrupedSupportPolygon(footsteps);
-
-      Point2d point = new Point2d(0.5, 0.25);
-      System.out.println("DI=" + polygon.distanceInside(point));
-   }
-
-   public boolean getTangentTangentRadiusCircleCenter(RobotQuadrant robotQuadrantToAnchorTo, double radius, Point2d centerToPack)
-   {
-      if(useThisLeg(robotQuadrantToAnchorTo) && getNumberOfLegs() == 3)
-      {
-         double maximumInCircleRadius = getInCircleRadius3Legs();
+         double maximumInCircleRadius = getInCircleRadius2d();
          if(maximumInCircleRadius < radius)
          {
             return false;
@@ -2574,75 +2034,34 @@ public class QuadrupedSupportPolygon implements Serializable
       return false;
    }
 
-   public RobotQuadrant getClosestFootStep(FramePoint midPoint)
-   {
-      double minDistance = Double.MAX_VALUE;
-      RobotQuadrant quadrant = null;
-      for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         FramePoint footStep = getFootstep(robotQuadrant);
-         if(footStep != null)
-         {
-            if(footStep.distance(midPoint) < minDistance)
-            {
-               quadrant = robotQuadrant;
-            }
-         }
-      }
-      return quadrant;
-   }
-
-   public QuadrupedSupportPolygon swapSameSideFeetCopy(RobotQuadrant quadrant)
-   {
-      QuadrupedSupportPolygon newQuadrupedSupportPolygon = new QuadrupedSupportPolygon(this);
-      newQuadrupedSupportPolygon.setFootstep(quadrant, getFootstep(quadrant.getSameSideQuadrant()));
-      newQuadrupedSupportPolygon.setFootstep(quadrant.getSameSideQuadrant(), getFootstep(quadrant));
-      return newQuadrupedSupportPolygon;
-   }
-
-   FrameVector planeNormalInWorld = new FrameVector();
    public void getIntersectionFromPointAcrossTrotLinePerpindicularToOutsideFeet(RobotQuadrant swingLeg, FramePoint pointAcrossTrotLine, FrameVector planeNormal, FramePoint pointToPack)
    {
-      planeNormalInWorld.setIncludingFrame(planeNormal);
-      planeNormalInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-      planeNormalInWorld.normalize();
+      tempPlaneNormalInWorld.setIncludingFrame(planeNormal);
+      tempPlaneNormalInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+      tempPlaneNormalInWorld.normalize();
       RobotQuadrant acrossBodyQuadrant = swingLeg.getAcrossBodyQuadrant();
       RobotQuadrant sameSideQuadrant = swingLeg.getSameSideQuadrant();
       FramePoint lineStart = getFootstep(acrossBodyQuadrant);
       FramePoint lineEnd = getFootstep(sameSideQuadrant);
       pointToPack.set(GeometryTools.getIntersectionBetweenLineAndPlane(pointAcrossTrotLine, planeNormal, lineStart, lineEnd));
    }
-   
-   private void computeFramePolygonConvex2d()
+
+   public boolean epsilonEquals(QuadrupedSupportPolygon polyTwo)
    {
-      frameConvexPolygon2d.clear();
-      frameConvexPolygon2d.changeFrame(getReferenceFrame());
+      if (polyTwo == null)
+         return false;
+      
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         FramePoint footstep = this.getFootstep(quadrant);
-         if(footstep != null)
+         FramePoint thisFootstep = getFootstep(quadrant);
+         FramePoint otherFootstep = polyTwo.getFootstep(quadrant);
+         
+         if(!thisFootstep.epsilonEquals(otherFootstep, 0.005))
          {
-            frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(footstep);
+            return false;
          }
       }
-      frameConvexPolygon2d.update();
+   
+      return true;
    }
-
-   public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2d polygon)
-   {
-      computeFramePolygonConvex2d();
-      polygon.setFrameConvexPolygon2d(frameConvexPolygon2d);
-   }
-
-   public void packFrameConvexPolygon2d(FrameConvexPolygon2d polygon)
-   {
-      computeFramePolygonConvex2d();
-      polygon.setAndUpdate(frameConvexPolygon2d);
-   }
-
-   public void clear()
-   {
-      footsteps.clear();
-   }
-
 }
