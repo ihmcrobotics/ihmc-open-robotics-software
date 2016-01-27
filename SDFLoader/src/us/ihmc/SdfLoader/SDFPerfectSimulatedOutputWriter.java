@@ -32,10 +32,12 @@ public class SDFPerfectSimulatedOutputWriter implements OutputWriter
       setFullRobotModel(fullRobotModel);
    }
 
+   @Override
    public void initialize()
    {
    }
    
+   @Override
    public void setFullRobotModel(FullRobotModel fullRobotModel)
    {
       revoluteJoints.clear();
@@ -63,10 +65,12 @@ public class SDFPerfectSimulatedOutputWriter implements OutputWriter
       return getName();
    }
 
+   @Override
    public void write()
    {
-      for (ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
+      for (int i = 0; i < revoluteJoints.size(); i++)
       {
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = revoluteJoints.get(i);
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
          OneDoFJoint revoluteJoint = jointPair.getRight();
 
@@ -76,8 +80,9 @@ public class SDFPerfectSimulatedOutputWriter implements OutputWriter
 
    public void updateRobotConfigurationBasedOnFullRobotModel()
    {
-      for (ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
+      for (int i = 0; i < revoluteJoints.size(); i++)
       {
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = revoluteJoints.get(i);
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
          OneDoFJoint revoluteJoint = jointPair.getRight();
 

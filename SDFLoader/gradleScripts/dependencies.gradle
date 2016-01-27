@@ -4,10 +4,10 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2' 
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
        
-    compile project(':SimulationConstructionSet')
-    compile project(':Graphics3DAdapter')
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:SimulationConstructionSet")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:Graphics3DAdapter")
     
-    compile project(':IHMCJavaToolkit')
-    compile project(':IHMCRoboticsToolkit')
-    testCompile project(':IHMCUnitTesting')
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit")
+    compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
+    testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
 }

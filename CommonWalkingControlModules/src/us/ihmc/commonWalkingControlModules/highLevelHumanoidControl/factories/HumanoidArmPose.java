@@ -26,88 +26,88 @@ public enum HumanoidArmPose
       switch (this)
       {
          case STAND_PREP:
-            return symmetricArmPose(0.3, 0.4, 0.05, 1.7, robotSide);
+            return symmetricArmPose(0.3, halfPi - 0.4, 0.05, 1.7, robotSide);
          case SMALL_CHICKEN_WINGS:
-            return symmetricArmPose(0.3, 0.6, 0.05, 1.7, robotSide);
+            return symmetricArmPose(0.3, halfPi - 0.6, 0.05, 1.7, robotSide);
          case LARGE_CHICKEN_WINGS:
-            return symmetricArmPose(0.3, 0.8, 0.05, 1.7, robotSide);
+            return symmetricArmPose(0.3, halfPi - 0.8, 0.05, 1.7, robotSide);
          case STRAIGHTEN_ELBOWS:
-            return symmetricArmPose(0.3, 0.6, 0.05, 1.0, robotSide);
+            return symmetricArmPose(0.3, halfPi - 0.6, 0.05, 1.0, robotSide);
          case SUPPINATE_ARMS_IN_A_LITTLE:
-            return symmetricArmPose(0.3, 0.6, 0.2, 1.7, robotSide);
+            return symmetricArmPose(0.3, halfPi - 0.6, 0.2, 1.7, robotSide);
          case ARMS_BACK:
-            return symmetricArmPose(0.6, 0.4, 0.05, 1.7, robotSide);
+            return symmetricArmPose(0.6, halfPi - 0.4, 0.05, 1.7, robotSide);
          case LARGER_CHICKEN_WINGS:
-            return symmetricArmPose(0.3, 1.0, 0.05, 1.7, robotSide);
+            return symmetricArmPose(0.3, halfPi - 1.0, 0.05, 1.7, robotSide);
          case ARMS_OUT_EXTENDED:
-            return symmetricArmPose(0.3, 1.0, 0.05, 0.9, robotSide);
+            return symmetricArmPose(0.3, halfPi - 1.0, 0.05, 0.9, robotSide);
          case FLYING:
-            return symmetricArmPose(0.3, 1.2, 0.05, 0.4, robotSide);
+            return symmetricArmPose(0.3, halfPi - 1.2, 0.05, 0.4, robotSide);
          case FLYING_PALMS_UP:
-            return symmetricArmPose(0.3, 1.2, -1.0, 0.4, robotSide);
+            return symmetricArmPose(0.3, halfPi - 1.2, -1.0, 0.4, robotSide);
          case FLEX_UP:
             return symmetricArmPose(0.0,0.0,0.0,-2, robotSide);
          case FLEX_DOWN:
             return symmetricArmPose(0.0,0.0,0.0,-1.4, robotSide);
          case FLYING_SUPPINATE_IN:
-            return symmetricArmPose(0.3, 1.2, 1.0, 0.4, robotSide);
+            return symmetricArmPose(0.3, halfPi - 1.2, 1.0, 0.4, robotSide);
          case FLYING_SUPPINATE_OUT:
-            return symmetricArmPose(0.3, 1.2, -1.0, 0.4, robotSide);
+            return symmetricArmPose(0.3, halfPi - 1.2, -1.0, 0.4, robotSide);
          case KARATE_KID_KRANE_KICK:
             return symmetricArmPose(0.0,0.0,0.0,0.0, robotSide);
          case SUPPINATE_ARMS_IN_MORE:
-            return symmetricArmPose(0.3, 0.4, 0.3, 1.7, robotSide);
+            return symmetricArmPose(0.3, halfPi - 0.4, 0.3, 1.7, robotSide);
          case SUPPINATE_ARMS_IN_A_LOT:
-            return symmetricArmPose(0.3, 0.4, 0.5, 1.7, robotSide);
+            return symmetricArmPose(0.3, halfPi - 0.4, 0.5, 1.7, robotSide);
          case SUPER_CHICKEN_WINGS:
-            return symmetricArmPose(0.3, 1.3, 0.05, 1.7, robotSide);
+            return symmetricArmPose(0.3, halfPi - 1.3, 0.05, 1.7, robotSide);
             
          case REACH_BACK:
-            return symmetricArmPose(1.0, 0.4, 0.05, 1.7, robotSide);
+            return symmetricArmPose(1.0, halfPi - 0.4, 0.05, 1.7, robotSide);
          case REACH_WAY_BACK:
-            return symmetricArmPose(1.0, 0.4, 0.05, 0.4, robotSide);
+            return symmetricArmPose(1.0, halfPi - 0.4, 0.05, 0.4, robotSide);
          case ARMS_03:
-            return symmetricArmPose(0.3, 0.4, 0.3, 1.7, robotSide);
+            return symmetricArmPose(0.3, halfPi - 0.4, 0.3, 1.7, robotSide);
          case REACH_FORWARD:
-            return symmetricArmPose(-0.6, 0.4, 0.05, 1.7, robotSide);
+            return symmetricArmPose(-0.6, halfPi - 0.4, 0.05, 1.7, robotSide);
          case REACH_WAY_FORWARD:
-            return symmetricArmPose(-0.6, 0.4, 0.05, 0.4, robotSide);
+            return symmetricArmPose(-0.6, halfPi - 0.4, 0.05, 0.4, robotSide);
          case REACH_FAR_FORWARD:
-            return symmetricArmPose(-0.8 * halfPi, 0.4, 0.0, 0.0, robotSide);
+            return symmetricArmPose(-0.8 * halfPi, halfPi - 0.4, 0.0, 0.0, robotSide);
          case REACH_FAR_BACK:
-            return symmetricArmPose( 0.8 * halfPi, 0.4, 0.0, 0.0, robotSide);
+            return symmetricArmPose( 0.8 * halfPi, halfPi - 0.4, 0.0, 0.0, robotSide);
             
             
          case ARM_STRAIGHT_DOWN:
-            return symmetricArmPose(0.0, 0.5, 1.45, 0.53, robotSide);
+            return symmetricArmPose(0.0, 1.4, 0.0, 0.0, robotSide);
 
          case ARM_NINETY_ELBOW_DOWN:
-            return symmetricArmPose(0.0, halfPi, halfPi, halfPi, robotSide);
+            return symmetricArmPose(0.0, 0.0, halfPi, halfPi, robotSide);
          case ARM_NINETY_ELBOW_DOWN2:
-            return symmetricArmPose(halfPi / 2.0, halfPi, halfPi / 2.0, halfPi, robotSide);
+            return symmetricArmPose(halfPi / 2.0, 0.0, halfPi / 2.0, halfPi, robotSide);
          case ARM_NINETY_ELBOW_FORWARD:
-            return symmetricArmPose(0.0, halfPi, 0.0, halfPi, robotSide);
+            return symmetricArmPose(0.0, 0.0, 0.0, halfPi, robotSide);
          case ARM_NINETY_ELBOW_FORWARD2:
-            return symmetricArmPose(halfPi / 2.0, halfPi, -halfPi / 2.0, halfPi, robotSide);
+            return symmetricArmPose(halfPi / 2.0, 0.0, -halfPi / 2.0, halfPi, robotSide);
          case ARM_NINETY_ELBOW_UP:
-            return symmetricArmPose(0.0, halfPi, -halfPi, halfPi, robotSide);
+            return symmetricArmPose(0.0, 0.0, -halfPi, halfPi, robotSide);
          case ARM_NINETY_ELBOW_UP2:
-            return symmetricArmPose(-halfPi / 2.0, halfPi, -halfPi / 2.0, halfPi, robotSide);
+            return symmetricArmPose(-halfPi / 2.0, 0.0, -halfPi / 2.0, halfPi, robotSide);
          case ARM_FORTFIVE_ELBOW_UP:
-            return symmetricArmPose(0.0, halfPi, -halfPi / 2.0, halfPi, robotSide);
+            return symmetricArmPose(0.0, 0.0, -halfPi / 2.0, halfPi, robotSide);
          case ARM_FORTFIVE_ELBOW_UP2:
-            return symmetricArmPose(-halfPi /2.0, halfPi, 0.0, halfPi, robotSide);
+            return symmetricArmPose(-halfPi /2.0, 0.0, 0.0, halfPi, robotSide);
          case ARM_FORTFIVE_ELBOW_UP3:
-            return symmetricArmPose(halfPi /2.0, halfPi, -halfPi, halfPi, robotSide);
+            return symmetricArmPose(halfPi /2.0, 0.0, -halfPi, halfPi, robotSide);
          case ARM_FORTFIVE_ELBOW_DOWN:
-            return symmetricArmPose(0.0, halfPi, 0.6, halfPi, robotSide);
+            return symmetricArmPose(0.0, 0.0, 0.6, halfPi, robotSide);
          case ARM_FORTFIVE_ELBOW_DOWN2:
-            return symmetricArmPose(halfPi/ 2.0, halfPi, 0.0, halfPi, robotSide);
+            return symmetricArmPose(halfPi/ 2.0, 0.0, 0.0, halfPi, robotSide);
          case ARM_FORTFIVE_ELBOW_DOWN3:
-            return symmetricArmPose(-halfPi/ 2.0, halfPi, halfPi, halfPi, robotSide);
+            return symmetricArmPose(-halfPi/ 2.0, 0.0, halfPi, halfPi, robotSide);
             
          case ARM_OUT_TRICEP_EXERCISE:
-            return symmetricArmPose(0.0, -1.4, 1.4, 0.05, robotSide);
+            return symmetricArmPose(0.0, 0.0, 1.4, 0.05, robotSide);
             
                      
          default:

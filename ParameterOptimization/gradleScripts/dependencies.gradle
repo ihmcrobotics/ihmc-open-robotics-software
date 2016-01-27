@@ -3,7 +3,7 @@ dependencies {
 			
 	
 	//test.sourceSets.test.output
-	compile project(':Graphics3DAdapter')
-	compile project(':IHMCRoboticsToolkit')
-	testCompile project(':IHMCUnitTesting')
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:Graphics3DAdapter")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
+	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
 }

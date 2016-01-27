@@ -7,5 +7,5 @@ fi
 
 gradle distTar -DmainClass=us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher
 
-scp build/distributions/RobotDataCommunication-1.0.tar "$1":
-ssh "$1" "tar xvf RobotDataCommunication-1.0.tar"
+scp build/distributions/RobotDataCommunication.tar "$1":
+ssh "$1" "tar xvf RobotDataCommunication.tar"

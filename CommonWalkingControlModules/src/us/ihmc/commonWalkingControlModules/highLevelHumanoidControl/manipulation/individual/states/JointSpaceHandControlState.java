@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.tools.FormattingTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -73,7 +72,7 @@ public class JointSpaceHandControlState extends State<HandControlState>
             PIDController pidController = new PIDController(gains.getYoKp(), gains.getYoKi(), gains.getYoKd(), gains.getYoMaxIntegralError(), suffix, registry);
             pidControllers.put(joint, pidController);
 
-            RateLimitedYoVariable rateLimitedAcceleration = new RateLimitedYoVariable(suffix + "Acceleration", registry, gains.getYoMaximumJerk(), dt);
+            RateLimitedYoVariable rateLimitedAcceleration = new RateLimitedYoVariable(suffix + "FeedbackAcceleration", registry, gains.getYoMaximumJerk(), dt);
             rateLimitedAccelerations.put(joint, rateLimitedAcceleration);
          }
       }
@@ -110,27 +109,24 @@ public class JointSpaceHandControlState extends State<HandControlState>
          DoubleTrajectoryGenerator trajectoryGenerator = trajectories.get(joint);
          trajectoryGenerator.compute(getTimeInCurrentState());
 
+         joint.setqDesired(trajectoryGenerator.getValue());
+         joint.setQdDesired(trajectoryGenerator.getVelocity());
+         double feedforwardAcceleration = trajectoryGenerator.getAcceleration();
+
          if (doPositionControl)
          {
             enablePositionControl();
-            joint.setqDesired(trajectoryGenerator.getValue());
-            joint.setQdDesired(trajectoryGenerator.getVelocity());
-            double desiredAcceleration = trajectoryGenerator.getAcceleration();
             if (!setDesiredJointAccelerations.getBooleanValue())
-               desiredAcceleration = 0.0;
-            momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
+               feedforwardAcceleration = 0.0;
+            momentumBasedController.setOneDoFJointAcceleration(joint, feedforwardAcceleration);
          }
          else
          {
             double currentPosition = joint.getQ();
             double currentVelocity = joint.getQd();
-            joint.setqDesired(trajectoryGenerator.getValue());
-            joint.setQdDesired(trajectoryGenerator.getVelocity());
-            double feedforwardAcceleration = trajectoryGenerator.getAcceleration();
 
             PIDController pidController = pidControllers.get(joint);
-            double desiredAcceleration = feedforwardAcceleration
-                  + pidController.computeForAngles(currentPosition, joint.getqDesired(), currentVelocity, joint.getQdDesired(), dt);
+            double desiredAcceleration = pidController.computeForAngles(currentPosition, joint.getqDesired(), currentVelocity, joint.getQdDesired(), dt);
 
             desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration.getDoubleValue());
 
@@ -138,7 +134,7 @@ public class JointSpaceHandControlState extends State<HandControlState>
             rateLimitedAcceleration.update(desiredAcceleration);
             desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
 
-            momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
+            momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration + feedforwardAcceleration);
          }
       }
    }
@@ -146,20 +142,11 @@ public class JointSpaceHandControlState extends State<HandControlState>
    @Override
    public void doTransitionIntoAction()
    {
-      if (initialized.getBooleanValue() && getPreviousState() == this)
+      if (!initialized.getBooleanValue() || getPreviousState() != this)
       {
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
             OneDoFJoint joint = oneDoFJoints[i];
-            trajectories.get(joint).initialize( joint.getqDesired(), joint.getQdDesired());
-         }
-      }
-      else
-      {
-         for (int i = 0; i < oneDoFJoints.length; i++)
-         {
-            OneDoFJoint joint = oneDoFJoints[i];
-            trajectories.get(joint).initialize(joint.getQ(), joint.getQd());
 
             if (!doPositionControl)
                pidControllers.get(joint).setCumulativeError(0.0);

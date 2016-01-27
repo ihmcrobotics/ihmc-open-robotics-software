@@ -2,31 +2,27 @@ package us.ihmc.communication.configuration;
 
 public enum NetworkParameterKeys
 {
-   robotController(true, "Hostname/IP of the robot controller."),
-   logger(true, "Hostname/IP of the logger or visualizer network."),
-   networkManager(false, "Hostname/IP of the network manager, as seen from the communication shaper."),
-   networkManagerForUI(false, "Hostname/IP of the networkmanager, as seen from the UI. In normal operation, this is the same as networkmanager"),
+   robotController(true, "Hostname/IP of the robot controller.", "127.0.0.1"),
+   logger(true, "Hostname/IP of the logger or visualizer network.", "127.0.0.1"),
+   networkManager(false, "Hostname/IP of the network manager, as seen from the communication shaper.", "127.0.0.1"),
    
-   rosURI(false, "Fully qualified ROS master URI."),
-   head(false, "Hostname/IP of the head."),
-   leftHand(false, "Hostname/IP of the left hand."),
-   rightHand(false, "Hostname/IP of the right hand."),
+   rosURI(false, "Fully qualified ROS master URI.", "http://127.0.0.1:11311"),
+   head(false, "Hostname/IP of the head.", ""),
+   leftHand(false, "Hostname/IP of the left hand.", ""),
+   rightHand(false, "Hostname/IP of the right hand.", ""), 
    
-   onboard1(false, "IP of first onboard computer"),
-   onboard2(false, "IP of second onboard computer"),
-   onboard3(false, "IP of third onboard computer"),
-   
-   packetShaperServer(false, "IP of the packet shaper Field server"),
-   packetShaperClient(false, "IP of the packet shaper OCU client");
-   
+   loggedCameras(false, "Cameras to be recorded by the logger. Should be a comma seperated list", "");
    
    
    private final boolean required;
    private final String description;
-   private NetworkParameterKeys(boolean required, String description)
+   private final String defaultValue;
+   
+   private NetworkParameterKeys(boolean required, String description, String defaultValue)
    {
       this.required = required;
       this.description = description; 
+      this.defaultValue = defaultValue;
    }
    
    
@@ -40,4 +36,8 @@ public enum NetworkParameterKeys
       return required;
    }
    
+   public String getDefaultValue()
+   {
+      return defaultValue;
+   }
 }

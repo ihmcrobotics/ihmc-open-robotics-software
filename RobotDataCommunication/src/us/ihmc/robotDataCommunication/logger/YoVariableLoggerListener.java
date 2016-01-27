@@ -1,7 +1,6 @@
 package us.ihmc.robotDataCommunication.logger;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,7 +9,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
@@ -18,8 +16,6 @@ import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.YoVariablesUpdatedListener;
-import us.ihmc.robotDataCommunication.logger.util.CookieJar;
-import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
 import us.ihmc.tools.compression.SnappyUtils;
 import us.ihmc.tools.io.printing.PrintTools;
 
@@ -55,7 +51,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private final LogPropertiesWriter logProperties;
    private ArrayList<VideoDataLoggerInterface> videoDataLoggers = new ArrayList<>();
 
-   private final ArrayList<VideoSettings> cameras = new ArrayList<>();
+   private final ArrayList<Integer> cameras = new ArrayList<>();
    private final InetSocketAddress videoStreamAddress;
 
    private boolean clearingLog = false;
@@ -82,33 +78,21 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       
       if(!options.getDisableVideo())
       {
-         File configurationFile = new File(options.getConfigurationFile());
-         try
+         
+         System.out.println("Cameras: " + Arrays.toString(request.getCameras()));
+         for (int camera : request.getCameras())
          {
-            FileInputStream configuration = new FileInputStream(configurationFile);
-            List<VideoSettings> cameraSettings = VideoSettings.loadCameraSettings(configuration);
-            
-            System.out.println("Cameras: " + Arrays.toString(request.getCameras()));
-            for (int camera : request.getCameras())
-            {
-               cameras.add(cameraSettings.get(camera));
-            }
-            
-            if (request.hasVideoStream())
-            {
-               videoStreamAddress = new InetSocketAddress(LogUtils.getByAddress(request.getVideoStream()), request.getVideoPort());
-               System.out.println("Video stream: " + videoStreamAddress);
-            }
-            else
-            {
-               videoStreamAddress = null;
-            }
-            
-            configuration.close();
+            cameras.add(camera);
          }
-         catch (IOException e)
+         
+         if (request.hasVideoStream())
          {
-            throw new RuntimeException("Cannot load camera configuration file " + configurationFile.getAbsolutePath(), e);
+            videoStreamAddress = new InetSocketAddress(LogUtils.getByAddress(request.getVideoStream()), request.getVideoPort());
+            System.out.println("Video stream: " + videoStreamAddress);
+         }
+         else
+         {
+            videoStreamAddress = null;
          }
          
       }
@@ -284,27 +268,6 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       }
       else
       {
-         if (options.isEnableCookieJar())
-         {
-            System.out.println("Creating cookiejar");
-            File cookieJarDirectory = new File(tempDirectory, "cookieJar");
-            cookieJarDirectory.mkdir();
-            CookieJar cookieJar = new CookieJar();
-            cookieJar.setDirectory(cookieJarDirectory.getAbsolutePath());
-            cookieJar.setHost(options.getCookieJarHost());
-            cookieJar.setUser(options.getCookieJarUser());
-            cookieJar.setRemoteDirectory(options.getCookieJarRemoteDirectory());
-
-            PipedCommandExecutor executor = new PipedCommandExecutor(cookieJar);
-            try
-            {
-               executor.execute();
-            }
-            catch (IOException e)
-            {
-               e.printStackTrace();
-            }
-         }
 
          tempDirectory.renameTo(finalDirectory);
       }
@@ -372,7 +335,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
       if (!options.getDisableVideo())
       {
-         for (VideoSettings camera : cameras)
+         for (int camera : cameras)
          {
             try
             {
