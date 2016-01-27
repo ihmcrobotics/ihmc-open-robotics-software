@@ -1,0 +1,19 @@
+evaluationDependsOn(':IHMCOpenRoboticsSoftware:IHMCQuadrupedRobotics')
+
+dependencies 
+{
+  testCompile group: 'junit', name: 'junit', version: '4.11'
+  compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
+  compile group: 'us.ihmc', name: 'IHMCJavaDynamixelLibrary', version: '0.1.1'
+
+  compile project(':IHMCOpenRoboticsSoftware:RobotDataCommunication')
+  compile project(':IHMCOpenRoboticsSoftware:SensorProcessing')
+  compile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit')
+  testCompile project(':IHMCOpenRoboticsSoftware:IHMCRoboticsToolkit').sourceSets.test.output
+  testCompile project(':IHMCOpenRoboticsSoftware:IHMCQuadrupedRobotics').sourceSets.test.output
+  compile project(':IHMCOpenRoboticsSoftware:IHMCQuadrupedRobotics')
+  compile project(':IHMCInternalSoftware:SerialPortCommunication')
+  testCompile project(':IHMCOpenRoboticsSoftware:IHMCUnitTesting')
+  compile project(':EtherlabWrapper')
+  compile project(':AwareRobotics:AwareNetworking')
+}
