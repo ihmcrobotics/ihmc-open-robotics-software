@@ -1,5 +1,6 @@
 package us.ihmc.aware.controller;
 
+import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.state.StateMachine;
@@ -32,10 +33,13 @@ public class QuadrupedControllerManager implements RobotController
       QuadrupedDoNothingController doNothingController = new QuadrupedDoNothingController(runtimeEnvironment);
       QuadrupedStandPrepController standPrepController = new QuadrupedStandPrepController(runtimeEnvironment,
             parameters, paramMapRepository);
+      // QuadrupedVirtualModelController virtualModelController = new QuadrupedVirtualModelController(runtimeEnvironment.getFullRobotModel(), parameters, registry, runtimeEnvironment.getGraphicsListRegistry());
+      // QuadrupedVirtualModelBasedStepController virtualModelBasedStepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, parameters, virtualModelController);
 
       // TODO: Define more state transitions.
       StateMachineBuilder<QuadrupedController, QuadrupedControllerEvent> builder = new StateMachineBuilder<>();
       builder.addTransition(QuadrupedControllerEvent.JOINTS_INITIALIZED, doNothingController, standPrepController);
+      //builder.addTransition(QuadrupedControllerEvent.JOINTS_INITIALIZED, virtualModelBasedStepController, standPrepController);
 
       this.stateMachine = builder.build(doNothingController);
       this.userEventTrigger = new StateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry,
