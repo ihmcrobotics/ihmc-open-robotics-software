@@ -15,18 +15,20 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointT
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DRCOutputWriter drcOutputWriter;
-   
-   private final DoubleYoVariable alphaTorqueOffset =
-         new DoubleYoVariable("alphaTorqueOffset",
-            "Filter for integrating acceleration to get a torque offset at each joint", registry);
+
+   private final DoubleYoVariable alphaTorqueOffset = new DoubleYoVariable("alphaTorqueOffset",
+         "Filter for integrating acceleration to get a torque offset at each joint", registry);
 
    private final BooleanYoVariable resetTorqueOffsets = new BooleanYoVariable("resetTorqueOffsets", registry);
-   
+
    private ArrayList<OneDoFJoint> oneDoFJoints;
    private LinkedHashMap<OneDoFJoint, DoubleYoVariable> torqueOffsetMap;
 
-   public DRCOutputWriterWithTorqueOffsets(DRCOutputWriter drcOutputWriter, double updateDT, boolean runningOnRealRobot)
+   private final double updateDT;
+
+   public DRCOutputWriterWithTorqueOffsets(DRCOutputWriter drcOutputWriter, double updateDT)
    {
+      this.updateDT = updateDT;
       this.drcOutputWriter = drcOutputWriter;
       registry.addChild(drcOutputWriter.getControllerYoVariableRegistry());
    }
@@ -46,13 +48,14 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointT
          double desiredAcceleration = oneDoFJoint.getQddDesired();
 
          DoubleYoVariable torqueOffsetVariable = torqueOffsetMap.get(oneDoFJoint);
-         if (resetTorqueOffsets.getBooleanValue()) torqueOffsetVariable.set(0.0);
-         
+         if (resetTorqueOffsets.getBooleanValue())
+            torqueOffsetVariable.set(0.0);
+
          double offsetTorque = torqueOffsetVariable.getDoubleValue();
          double ditherTorque = 0.0;
-         
+
          double alpha = alphaTorqueOffset.getDoubleValue();
-         offsetTorque = alpha * (offsetTorque + desiredAcceleration * 0.002) + (1.0 - alpha) * offsetTorque;
+         offsetTorque = alpha * (offsetTorque + desiredAcceleration * updateDT) + (1.0 - alpha) * offsetTorque;
          torqueOffsetVariable.set(offsetTorque);
          oneDoFJoint.setTau(oneDoFJoint.getTau() + offsetTorque + ditherTorque);
       }
@@ -70,13 +73,6 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointT
 
       torqueOffsetMap = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//         RigidBody shin = controllerModel.getLegJoint(robotSide, LegJointName.KNEE).getSuccessor();
-//         ArrayList<OneDoFJoint> ankleJoints = new ArrayList<>(Arrays.asList(ScrewTools.filterJoints(ScrewTools.createJointPath(shin, controllerModel.getFoot(robotSide)), OneDoFJoint.class)));
-//         oneDoFJoints.removeAll(ankleJoints);
-//      }
-      
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
          final OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
@@ -84,7 +80,7 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointT
 
          torqueOffsetMap.put(oneDoFJoint, torqueOffset);
       }
-      
+
    }
 
    @Override
@@ -106,4 +102,3 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointT
       torqueOffsetVariable.sub(torqueOffset);
    }
 }
-

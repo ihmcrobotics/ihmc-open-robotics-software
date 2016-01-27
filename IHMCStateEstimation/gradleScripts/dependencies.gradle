@@ -1,15 +1,15 @@
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
-	compile project(':CommonWalkingControlModules')
- 	compile project(':IHMCCommunication')
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:CommonWalkingControlModules")
+ 	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCCommunication")
  	
  	
-	compile project(':SensorProcessing')
-	compile project(':Graphics3DAdapter')
-	compile project(':SimulationConstructionSet')
-	compile project(':Plotting')
-	compile project(':IHMCJavaToolkit')
-	compile project(':IHMCRoboticsToolkit')
-	testCompile project(':IHMCUnitTesting')
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:SensorProcessing")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:Graphics3DAdapter")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:SimulationConstructionSet")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:Plotting")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCJavaToolkit")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
+	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
 }

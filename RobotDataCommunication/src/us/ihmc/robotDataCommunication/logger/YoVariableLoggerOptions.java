@@ -11,21 +11,12 @@ import com.martiansoftware.jsap.Switch;
 public class YoVariableLoggerOptions
 {
    public final static String defaultLogDirectory = System.getProperty("user.home") + "/robotLogs";
-   public final static String defaultVideoCodec = "mjpeg";
-   public final static int defaultVideoQuality = 5;
-
-   public final static String defaultConfigurationFile = "cameras.yaml";
+   public final static double defaultVideoQuality = 0.75;
 
    private String logDirectory = defaultLogDirectory;
-   private String videoCodec = defaultVideoCodec;
-   private int videoQuality = defaultVideoQuality;
+   private double videoQuality = defaultVideoQuality;
 
-   private boolean enableCookieJar = false;
-   private String cookieJarUser = "";
-   private String cookieJarHost = "";
-   private String cookieJarRemoteDirectory = "";
    private boolean disableVideo = false;
-   private String configurationFile = "";
    
    private boolean flushAggressivelyToDisk = false;
 
@@ -35,11 +26,7 @@ public class YoVariableLoggerOptions
             new Switch("disableVideo", 'n', "noVideo", "Disable video recording"),
             new FlaggedOption("logDirectory", JSAP.STRING_PARSER, YoVariableLoggerOptions.defaultLogDirectory, JSAP.NOT_REQUIRED, 'd', "directory",
                   "Directory where to save log files"),
-            new FlaggedOption("videoCodec", JSAP.STRING_PARSER, YoVariableLoggerOptions.defaultVideoCodec, JSAP.NOT_REQUIRED, 'c', "codec",
-                  "Video codec to use"),
-            new FlaggedOption("configurationFile", JSAP.STRING_PARSER, YoVariableLoggerOptions.defaultConfigurationFile, JSAP.NOT_REQUIRED, 'f', "config",
-                  "Camera configuration file"),
-            new FlaggedOption("videoQuality", JSAP.INTEGER_PARSER, String.valueOf(YoVariableLoggerOptions.defaultVideoQuality), JSAP.NOT_REQUIRED, 'q',
+            new FlaggedOption("videoQuality", JSAP.DOUBLE_PARSER, String.valueOf(YoVariableLoggerOptions.defaultVideoQuality), JSAP.NOT_REQUIRED, 'q',
                   "quality", "Video quality"),
             new Switch("flushAggressivelyToDisk", 's', "sync", "Aggressively flush data to disk. Reduces change of data loss but doesn't work on slow platters.") });
       JSAPResult config = jsap.parse(args);
@@ -52,10 +39,8 @@ public class YoVariableLoggerOptions
 
       YoVariableLoggerOptions options = new YoVariableLoggerOptions();
       options.setLogDirectory(config.getString("logDirectory"));
-      options.setVideoCodec(config.getString("videoCodec"));
-      options.setVideoQuality(config.getInt("videoQuality"));
+      options.setVideoQuality(config.getDouble("videoQuality"));
       options.setDisableVideo(config.getBoolean("disableVideo"));
-      options.setConfigurationFile(config.getString("configurationFile"));
       options.setFlushAggressivelyToDisk(config.getBoolean("flushAggressivelyToDisk"));
 
       return options;
@@ -71,22 +56,12 @@ public class YoVariableLoggerOptions
       this.logDirectory = logDirectory;
    }
 
-   public String getVideoCodec()
-   {
-      return videoCodec;
-   }
-
-   public int getVideoQuality()
+   public double getVideoQuality()
    {
       return videoQuality;
    }
 
-   public void setVideoCodec(String videoCodec)
-   {
-      this.videoCodec = videoCodec;
-   }
-
-   public void setVideoQuality(int videoQuality)
+   public void setVideoQuality(double videoQuality)
    {
       this.videoQuality = videoQuality;
    }
@@ -99,56 +74,6 @@ public class YoVariableLoggerOptions
    public void setDisableVideo(boolean disableVideo)
    {
       this.disableVideo = disableVideo;
-   }
-
-   public void setEnableCookieJar(boolean enableCookieJar)
-   {
-      this.enableCookieJar = enableCookieJar;
-   }
-
-   public void setCookieJarUser(String cookieJarUser)
-   {
-      this.cookieJarUser = cookieJarUser;
-   }
-
-   public void setCookieJarHost(String cookieJarHost)
-   {
-      this.cookieJarHost = cookieJarHost;
-   }
-
-   public void setCookieJarRemoteDirectory(String cookieJarRemoteDirectory)
-   {
-      this.cookieJarRemoteDirectory = cookieJarRemoteDirectory;
-   }
-
-   public boolean isEnableCookieJar()
-   {
-      return enableCookieJar;
-   }
-
-   public String getCookieJarUser()
-   {
-      return cookieJarUser;
-   }
-
-   public String getCookieJarHost()
-   {
-      return cookieJarHost;
-   }
-
-   public String getCookieJarRemoteDirectory()
-   {
-      return cookieJarRemoteDirectory;
-   }
-
-   public String getConfigurationFile()
-   {
-      return configurationFile;
-   }
-
-   public void setConfigurationFile(String configurationFile)
-   {
-      this.configurationFile = configurationFile;
    }
 
    public boolean isFlushAggressivelyToDisk()

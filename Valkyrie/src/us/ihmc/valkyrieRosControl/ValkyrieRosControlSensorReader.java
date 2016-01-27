@@ -68,6 +68,9 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    private final Matrix3d quaternionConversionMatrix = new Matrix3d();
    private final Matrix3d orientationMatrix = new Matrix3d();
 
+   private final ValkyrieTorqueHysteresisCompensator torqueHysteresisCompensator;
+   private final ValkyrieAccelerationIntegration accelerationIntegration;
+
    @SuppressWarnings("unchecked")
    public ValkyrieRosControlSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessingConfiguration sensorProcessingConfiguration,
          TimestampProvider timestampProvider, List<YoJointHandleHolder> yoJointHandleHolders, List<YoIMUHandleHolder> yoIMUHandleHolders,
@@ -86,6 +89,10 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       startStandPrep = new BooleanYoVariable("startStandPrep", registry);
       startStandPrep.set(true);
       masterGain.set(0.3);
+
+      double updateDT = sensorProcessingConfiguration.getEstimatorDT();
+      torqueHysteresisCompensator = new ValkyrieTorqueHysteresisCompensator(yoJointHandleHolders, timeInStandprep, registry);
+      accelerationIntegration = new ValkyrieAccelerationIntegration(yoJointHandleHolders, updateDT, registry);
 
       Yaml yaml = new Yaml();
 
@@ -132,7 +139,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
             standPrepAngle = setPointMap.get(jointName);
          }
          ValkyrieRosControlJointControlCommandCalculator controlCommandCalculator = new ValkyrieRosControlJointControlCommandCalculator(jointHandleHolder,
-               standPrepGains, torqueOffset, standPrepAngle, sensorProcessingConfiguration.getEstimatorDT(), registry);
+               standPrepGains, torqueOffset, standPrepAngle, updateDT, registry);
          controlCommandCalculators.add(controlCommandCalculator);
 
          jointToControlCommandCalculatorMap.put(jointName, controlCommandCalculator);
@@ -201,6 +208,10 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       if (standPrepStartTime > 0)
       {
          timeInStandprep.set(TimeTools.nanoSecondstoSeconds(timestamp - standPrepStartTime));
+         
+         torqueHysteresisCompensator.compute();
+         if (ValkyrieRosControlController.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
+            accelerationIntegration.compute();
 
          for (int i = 0; i < controlCommandCalculators.size(); i++)
          {

@@ -5,10 +5,10 @@ dependencies {
 	
 				
 	
-	compile project(':SimulationConstructionSet')
-	compile project(':CommonWalkingControlModules')
-	compile project(':Graphics3DAdapter')
-	compile project(':SensorProcessing')
-	compile project(':IHMCRoboticsToolkit')
-	testCompile project(':IHMCUnitTesting')
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:SimulationConstructionSet")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:CommonWalkingControlModules")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:Graphics3DAdapter")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:SensorProcessing")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
+	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
 }

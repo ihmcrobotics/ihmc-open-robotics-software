@@ -1,4 +1,150 @@
-apply plugin: 'java'
+apply plugin: 'maven-publish'
 
-sourceCompatibility = 1.7
-version = '1.0'
+version = '0.7.0'
+
+project.ext.fullVersion = version
+project.ext.vcsUrl = "https://bitbucket.org/ihmcrobotics/ihmc-open-robotics-software.git"
+project.ext.snapshotCounter = 1
+project.ext.releaseCandidateCounter = 1
+
+getGitInfo()
+
+getDate()
+
+if(buildType.equals("NIGHTLY"))
+{
+  project.ext.fullVersion = version += "-NIGHTLY+date.${project.ext.date}.rev.${project.ext.revision}"
+}
+
+if(buildType.equals("SNAPSHOT"))
+{
+  project.ext.fullVersion = version += "-SNAPSHOT${project.ext.snapshotCounter}.rev.${project.ext.revision}"
+}
+
+if(buildType.equals("RC"))
+{
+  project.ext.fullVersion = version += "-RC${project.ext.releaseCandidateCounter}.rev.${project.ext.revision}"
+}
+
+if(buildType.equals("RELEASE"))
+{
+  if(!project.ext.branch.equals("master"))
+  {
+      throw new GradleException("Cannot make RELEASE build from branch \"${project.ext.branch}\", it is not the branch used for stable releases!")
+  }
+}
+
+repositories {
+  mavenLocal()
+
+  maven {
+    url "https://bengal.ihmc.us/nexus/content/repositories/releases/"
+  }
+
+  maven {
+      url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+  }
+
+  maven {
+      url "https://bengal.ihmc.us/nexus/content/repositories/central/"
+  }
+
+  jcenter()
+
+  mavenCentral()
+}
+
+task publishAllToMavenLocal(type: GradleBuild) {
+  buildFile "build.gradle"
+  def allTasks = [":clean"]
+  subprojects.each {subproject ->
+    allTasks.add(":" + subproject.name + ":publishToMavenLocal")
+  }
+
+  tasks = allTasks
+}
+
+subprojects { subproject ->
+  apply plugin: 'java'
+  apply plugin: 'maven-publish'
+
+  subproject.ext {
+    getOpenRoboticsSoftwareProject = {
+      if(subproject.getParent().name.equals(rootProject.name))
+      {
+        return rootProject
+      }
+      else
+      {
+        return project(':IHMCOpenRoboticsSoftware')
+      }
+    }
+
+    getOpenRoboticsSoftwareGradlePath = {
+      if(subproject.getParent().name.equals(rootProject.name))
+      {
+        return ""
+      }
+      else
+      {
+        return ":IHMCOpenRoboticsSoftware"
+      }
+    }
+  }
+
+  jar {
+    from (project.projectDir) {
+      include 'LICENSE*txt'
+    }
+  }
+
+  task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+  }
+
+  publishing {
+    publications {
+      mavenJava(MavenPublication) {
+
+        groupId 'us.ihmc'
+        artifactId "${project.name}"
+        version "${project.ext.fullVersion}"
+
+        from components.java
+
+        artifact sourceJar {
+          classifier "sources"
+        }
+
+        pom.withXml {
+          def licenseNode = asNode().appendNode('licenses').appendNode('license')
+          licenseNode.appendNode('name', project.ext.licenseName)
+          licenseNode.appendNode('url', project.ext.licenseURL)
+        }
+      }
+    }
+  }
+}
+
+def getGitInfo() {
+  getGitHash()
+  getGitBranch()
+}
+
+def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('yyyy.MM.dd')
+    project.ext.date = formattedDate
+}
+
+def getGitHash() {
+  def cmd = "git rev-parse --short HEAD"
+  def proc = cmd.execute(null, projectDir)
+  project.ext.revision = proc.text.trim()
+}
+
+def getGitBranch() {
+  def cmd = "git rev-parse --abbrev-ref HEAD"
+  def proc = cmd.execute(null, projectDir)
+  project.ext.branch = proc.text.trim()
+}

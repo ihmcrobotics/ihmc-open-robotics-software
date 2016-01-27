@@ -657,7 +657,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       double kpZ = 0.0;
       double zetaXYZ = runningOnRealRobot ? 0.7 : 1.0;
       double kpXYOrientation = runningOnRealRobot ? 0.0 : 200.0; // 40.0
-      double kpZOrientation = runningOnRealRobot ? 0.0 : 200.0; // 120.0
+      double kpZOrientation = runningOnRealRobot ? 100.0 : 200.0; // 120.0
       double zetaOrientation = runningOnRealRobot ? 0.7 : 1.0;
       double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;

@@ -39,7 +39,7 @@ public class LogVisualizer
 
    public LogVisualizer() throws IOException
    {
-      this(32768, false, null);
+      this(8000, false, null);
    }
 
    public LogVisualizer(int bufferSize, boolean showOverheadView,

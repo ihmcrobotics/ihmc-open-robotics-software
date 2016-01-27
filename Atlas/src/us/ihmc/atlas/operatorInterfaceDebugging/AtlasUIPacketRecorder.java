@@ -42,7 +42,7 @@ public class AtlasUIPacketRecorder
       final KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(UnitConversions.megabytesToBytes(10));
       kryoStreamSerializer.registerClasses(netClassList);
       
-      PacketCommunicator packetClient = PacketCommunicator.createTCPPacketCommunicatorClient(NetworkParameters.getHost(NetworkParameterKeys.networkManagerForUI), NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, netClassList);
+      PacketCommunicator packetClient = PacketCommunicator.createTCPPacketCommunicatorClient(NetworkParameters.getHost(NetworkParameterKeys.networkManager), NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, netClassList);
       packetClient.attachStateListener(new NetStateListener()
       {
          @Override

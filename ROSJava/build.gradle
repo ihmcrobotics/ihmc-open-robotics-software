@@ -1,8 +1,13 @@
 apply plugin: 'java'
 apply from: 'gradleScripts/util.gradle'
+if(!rootProject.name.equals(getParent().name)) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
-version = '1.0'
+version = "${getOpenRoboticsSoftwareProject().version}"
+project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+project.ext.licenseName = "Apache License, Version 2.0"
+project.ext.bintrayLicenseName = "Apache-2.0"
 
 setupDefaultDirectoryStructure()
 
@@ -11,16 +16,16 @@ setupDefaultRepositories()
 setupProjectSpecificDependencies()
 
 jar {
-   manifest {
-      attributes(
-      "Created-By": "IHMC Gradle Build Script",
-      "Implementation-Title": project.name,
-      "Implementation-Version": project.version,
-      "Implementation-Vendor": "rosjava",
-      
-      "Bundle-Name": project.name,
-      "Bundle-Version": project.version,
-      "Bundle-License": "http://www.apache.org/licenses/LICENSE-2.0.txt",
-      "Bundle-Vendor": "rosjava")
-   }
+    manifest {
+        attributes(
+                "Created-By": "IHMC Gradle Build Script",
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "rosjava",
+
+                "Bundle-Name": project.name,
+                "Bundle-Version": project.version,
+                "Bundle-License": "${project.ext.licenseURL}",
+                "Bundle-Vendor": "rosjava")
+    }
 }
