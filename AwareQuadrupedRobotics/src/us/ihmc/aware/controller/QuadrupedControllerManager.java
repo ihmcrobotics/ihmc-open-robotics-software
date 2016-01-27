@@ -1,6 +1,7 @@
 package us.ihmc.aware.controller;
 
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineYoVariableTrigger;
@@ -12,7 +13,7 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 /**
  * A {@link RobotController} for switching between other robot controllers according to an internal finite state
  * machine.
- *
+ * <p/>
  * Users can manually fire events on the {@code userTrigger} YoVariable.
  */
 public class QuadrupedControllerManager implements RobotController
@@ -26,9 +27,11 @@ public class QuadrupedControllerManager implements RobotController
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment,
          QuadrupedRobotParameters parameters)
    {
+      ParameterMapRepository paramMapRepository = new ParameterMapRepository(registry);
+
       QuadrupedDoNothingController doNothingController = new QuadrupedDoNothingController(runtimeEnvironment);
       QuadrupedStandPrepController standPrepController = new QuadrupedStandPrepController(runtimeEnvironment,
-            parameters);
+            parameters, paramMapRepository);
 
       // TODO: Define more state transitions.
       StateMachineBuilder<QuadrupedController, QuadrupedControllerEvent> builder = new StateMachineBuilder<>();
