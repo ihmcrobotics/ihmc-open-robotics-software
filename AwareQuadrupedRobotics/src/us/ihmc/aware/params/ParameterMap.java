@@ -31,7 +31,6 @@ public class ParameterMap
     */
    public void insert(String name, double... values)
    {
-      System.out.println("Inserting to " + name + " len " + values.length + " " + Arrays.toString(values));
       DoubleYoVariable[] variables = new DoubleYoVariable[values.length];
       for (int i = 0; i < values.length; i++)
       {
