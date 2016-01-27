@@ -3,7 +3,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 	compile group: 'org.ddogleg' , name: 'ddogleg', version: '0.7'
 	
-	compile project(':Plotting')
-	compile project(':SimulationConstructionSet')
-	testCompile project(':IHMCUnitTesting')
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:Plotting")
+	compile project("${getOpenRoboticsSoftwareGradlePath()}:SimulationConstructionSet")
+	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
 }

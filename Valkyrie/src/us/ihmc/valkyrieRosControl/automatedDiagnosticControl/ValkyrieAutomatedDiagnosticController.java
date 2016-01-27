@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.darpaRoboticsChallenge.diagnostics.AutomatedDiagnosticConfiguration;
-import us.ihmc.darpaRoboticsChallenge.diagnostics.logging.DiagnosticLoggerConfiguration;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -64,6 +63,7 @@ import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
+import us.ihmc.wholeBodyController.diagnostics.logging.DiagnosticLoggerConfiguration;
 
 public class ValkyrieAutomatedDiagnosticController extends IHMCValkyrieControlJavaBridge
 {

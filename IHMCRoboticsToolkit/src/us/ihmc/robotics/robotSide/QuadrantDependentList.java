@@ -1,92 +1,116 @@
 package us.ihmc.robotics.robotSide;
 
+import static us.ihmc.robotics.robotSide.RobotQuadrant.FRONT_LEFT_ORDINAL;
+import static us.ihmc.robotics.robotSide.RobotQuadrant.FRONT_RIGHT_ORDINAL;
+import static us.ihmc.robotics.robotSide.RobotQuadrant.HIND_LEFT_ORDINAL;
+import static us.ihmc.robotics.robotSide.RobotQuadrant.HIND_RIGHT_ORDINAL;
+
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@SuppressWarnings("serial")
-public class QuadrantDependentList<V> extends LinkedHashMap<RobotQuadrant, V> implements Iterable<V>
-{
+@SuppressWarnings("unchecked")
+public class QuadrantDependentList<V>
+{ 
+   private final V[] elements = (V[]) new Object[4];
+   private int size = 0;
+   
+   private final RobotQuadrant[][] quadrantArrays = new RobotQuadrant[5][];
+   {
+      quadrantArrays[0] = new RobotQuadrant[0];
+      quadrantArrays[1] = new RobotQuadrant[1];
+      quadrantArrays[2] = new RobotQuadrant[2];
+      quadrantArrays[3] = new RobotQuadrant[3];
+      quadrantArrays[4] = RobotQuadrant.values;
+   }
+
    public QuadrantDependentList()
    {
       super();
    }
    
-   public QuadrantDependentList(V frontLeftObject, V frontRightObject, V backLeftObject, V backRightObject)
+   public QuadrantDependentList(V frontLeftObject, V frontRightObject, V hindLeftObject, V hindRightObject)
    {
       super();
-      this.put(RobotQuadrant.FRONT_LEFT, frontLeftObject);
-      this.put(RobotQuadrant.FRONT_RIGHT, frontRightObject);
-      this.put(RobotQuadrant.HIND_LEFT, backLeftObject);
-      this.put(RobotQuadrant.HIND_RIGHT, backRightObject);
+      
+      set(RobotQuadrant.FRONT_LEFT, frontLeftObject);
+      set(RobotQuadrant.FRONT_RIGHT, frontRightObject);
+      set(RobotQuadrant.HIND_RIGHT, hindLeftObject);
+      set(RobotQuadrant.HIND_LEFT, hindRightObject);
    }
    
    public V get(RobotQuadrant key)
    {
-      return super.get(key);
+      return elements[key.ordinal()];
    }
    
-   public V set(RobotQuadrant robotQuadrant, V element)
+   public void set(RobotQuadrant robotQuadrant, V element)
    {
-      return this.put(robotQuadrant, element);
-   }
-   
-   @Override
-   public Iterator<V> iterator()
-   {
-      return new MyIterator();
-   }
-   
-   private class MyIterator implements Iterator<V>
-   {
-      private int state;
-
-      public MyIterator()
-      {
-         this.state = 0;
-      }
+      V existingElement = get(robotQuadrant);
+      if (existingElement == element)
+         return;
       
-      @Override
-      public boolean hasNext()
+      if (element == null)
+         --size;
+      else if (existingElement == null)
+         ++size;
+      
+      elements[robotQuadrant.ordinal()] = element;
+      
+      packQuadrantArray();
+   }
+   
+   public V remove(RobotQuadrant robotQuadrant)
+   {
+      V element = get(robotQuadrant);
+      
+      if (element != null)
+         --size;
+      
+      elements[robotQuadrant.ordinal()] = null;
+      
+      packQuadrantArray();
+      
+      return element;
+   }
+   
+   public void clear()
+   {
+      elements[FRONT_LEFT_ORDINAL] = null;
+      elements[FRONT_RIGHT_ORDINAL] = null;
+      elements[HIND_LEFT_ORDINAL] = null;
+      elements[HIND_RIGHT_ORDINAL] = null;
+      size = 0;
+   }
+   
+   private void packQuadrantArray()
+   {
+      if (size == 4)
+         return;
+      
+      for (int i = 0, j = 0; i < RobotQuadrant.values.length; i++)
       {
-         return state < 4;
-      }
-
-      @Override
-      public V next()
-      {
-         if (state == 0)
+         if (containsQuadrant(RobotQuadrant.values[i]))
          {
-            ++state;
-            return get(RobotQuadrant.getQuadrant(RobotEnd.HIND, RobotSide.LEFT));
-         }
-         else if (state == 1)
-         {
-            ++state;
-            return get(RobotQuadrant.getQuadrant(RobotEnd.HIND, RobotSide.RIGHT));
-         }
-         else if (state == 2)
-         {
-            ++state;
-            return get(RobotQuadrant.getQuadrant(RobotEnd.FRONT, RobotSide.LEFT));
-         }
-         else if (state == 3)
-         {
-            ++state;
-            return get(RobotQuadrant.getQuadrant(RobotEnd.FRONT, RobotSide.RIGHT));
-         }
-         else
-         {
-            throw new IndexOutOfBoundsException();
+            quadrantArrays[size][j++] = RobotQuadrant.values[i];
          }
       }
-
-      public void remove()
-      {
-         throw new UnsupportedOperationException("Cannot remove elements from a QuadrantDependentList.");
-      }
+   }
+   
+   public boolean containsQuadrant(RobotQuadrant robotQuadrant)
+   {
+      return elements[robotQuadrant.ordinal()] != null;
+   }
+   
+   public int size()
+   {
+      return size;
+   }
+   
+   public RobotQuadrant[] quadrants()
+   {
+      return quadrantArrays[size];
    }
    
    public static <K extends Enum<K>, V> QuadrantDependentList<EnumMap<K, V>> createListOfEnumMaps(Class<K> keyType)

@@ -14,6 +14,9 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
  */
 public interface RemoteYoGraphic
 {
+   /*
+    * WARNING: Changing the order here will break old logs. Only add new elements to the end of the list
+    */
    public enum RemoteGraphicType
    {
       CYLINDER_DGO,

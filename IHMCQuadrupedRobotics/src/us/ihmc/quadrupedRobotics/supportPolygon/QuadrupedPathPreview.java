@@ -2,14 +2,13 @@ package us.ihmc.quadrupedRobotics.supportPolygon;
 
 import java.awt.Color;
 
-import javax.vecmath.Point2d;
-
 import us.ihmc.quadrupedRobotics.footstepChooser.SwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -24,7 +23,7 @@ public class QuadrupedPathPreview
    private int iterations = 30;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   private final Point2d circleCenter2d = new Point2d();
+   private final FramePoint2d circleCenter2d = new FramePoint2d();
 
    private final CommonQuadrupedReferenceFrames referenceFrames;
 
@@ -45,7 +44,7 @@ public class QuadrupedPathPreview
    private final FramePoint footLocation = new FramePoint(ReferenceFrame.getWorldFrame());
 
    private final FramePoint desiredPosition = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final QuadrupedSupportPolygon emptyPolygon = new QuadrupedSupportPolygon();
+//   private final QuadrupedSupportPolygon emptyPolygon = new QuadrupedSupportPolygon();
 
    public QuadrupedPathPreview(SwingTargetGenerator swingTargetGenerator, CommonQuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -105,26 +104,17 @@ public class QuadrupedPathPreview
          //get next step in future support
          RobotQuadrant nextRegularGaitSwingQuadrant = swingLeg.getNextRegularGaitSwingQuadrant();
          QuadrupedSupportPolygon nextSwingLegSupportPolygon = updatedSupportPolygon.replaceFootstepCopy(swingLeg, desiredPosition);
-         nextSwingLegSupportPolygon.deleteLeg(nextRegularGaitSwingQuadrant);
+         nextSwingLegSupportPolygon.removeFootstep(nextRegularGaitSwingQuadrant);
          drawSupportPolygon(nextSwingLegSupportPolygon, tripleSupportPolygons[i * 2 + 1]);
 
          //if there's a common draw it
-         QuadrupedSupportPolygon shrunkenCommonSupportPolygon = swingLegSupportPolygon.getShrunkenCommonSupportPolygon(nextSwingLegSupportPolygon, swingLeg,
-               0.02, 0.02, 0.02);
-         if (shrunkenCommonSupportPolygon != null)
-         {
-            drawSupportPolygon(shrunkenCommonSupportPolygon, commonSupportPolygons[i]);
+         QuadrupedSupportPolygon shrunkenCommonSupportPolygon = new QuadrupedSupportPolygon();
+         swingLegSupportPolygon.getShrunkenCommonSupportPolygon(nextSwingLegSupportPolygon, shrunkenCommonSupportPolygon, swingLeg, 0.02, 0.02, 0.02);
+         drawSupportPolygon(shrunkenCommonSupportPolygon, commonSupportPolygons[i]);
 
-            shrunkenCommonSupportPolygon.getTangentTangentRadiusCircleCenter(swingLeg, inscribedCircleRadius.getDoubleValue(), circleCenter2d);
-            YoFramePoint circleCenter = circleCenters[i];
-            circleCenter.setXY(circleCenter2d);
-         }
-         else
-         {
-            drawSupportPolygon(emptyPolygon, commonSupportPolygons[i]);
-            YoFramePoint circleCenter = circleCenters[i];
-            circleCenter.set(-5.0, -5.0, 0.0);
-         }
+         shrunkenCommonSupportPolygon.getTangentTangentRadiusCircleCenter(swingLeg, inscribedCircleRadius.getDoubleValue(), circleCenter2d);
+         YoFramePoint circleCenter = circleCenters[i];
+         circleCenter.setXY(circleCenter2d);
 
          updatedSupportPolygon.setFootstep(swingLeg, desiredPosition);
          swingLeg = swingLeg.getNextRegularGaitSwingQuadrant();

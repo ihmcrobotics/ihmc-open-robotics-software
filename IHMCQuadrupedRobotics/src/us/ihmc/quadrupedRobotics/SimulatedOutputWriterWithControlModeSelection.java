@@ -89,11 +89,11 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
    @Override
    public void write()
    {
-      for(PDPositionControllerForOneDoFJoint positionController : positionControllers)
+      for(int i = 0; i < positionControllers.size(); i++)
       {
-         if(positionController.doPositionControl())
+         if(positionControllers.get(i).doPositionControl())
          {
-            positionController.update();
+            positionControllers.get(i).update();
          }
       }
       

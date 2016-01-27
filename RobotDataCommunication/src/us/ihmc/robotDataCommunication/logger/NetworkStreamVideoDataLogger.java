@@ -33,7 +33,7 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
    
    public NetworkStreamVideoDataLogger(byte[] controlIP, File logPath, LogProperties logProperties, InetSocketAddress address) throws SocketException, UnknownHostException
    {
-      super(logPath, logProperties, description, false);
+      super(logPath, logProperties, description);
       
       NetworkInterface iface = NetworkInterface.getByInetAddress(LogUtils.getMyIP(controlIP));
       

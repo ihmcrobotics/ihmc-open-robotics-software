@@ -206,7 +206,7 @@ public class TrotWalkController extends QuadrupedController
          String jointBeforeFootName = quadrupedJointMap.getJointBeforeFootName(robotQuadrant);
          OneDoFJoint oneDoFJointBeforeFoot = fullRobotModel.getOneDoFJointByName(jointBeforeFootName);
          fullRobotModel.getOneDoFJointsFromRootToHere(oneDoFJointBeforeFoot, jointsToControl);
-         oneDofJoints.put(robotQuadrant, jointsToControl);
+         oneDofJoints.set(robotQuadrant, jointsToControl);
          for (OneDoFJoint joint : jointsToControl)
          {
             desiredTorques.put(joint.getName(), new DoubleYoVariable(joint.getName() + "_tau_d", registry));
@@ -229,7 +229,7 @@ public class TrotWalkController extends QuadrupedController
                GraphicType.BALL_WITH_CROSS);
          
          yoGraphicsListRegistry.registerArtifact("feet", footPositionViz.createArtifact());
-         feetLocations.put(robotQuadrant, footPosition);
+         feetLocations.set(robotQuadrant, footPosition);
       }
       
       YoFramePoint hindRightFoot = feetLocations.get(RobotQuadrant.HIND_RIGHT);
@@ -342,7 +342,7 @@ public class TrotWalkController extends QuadrupedController
       }
 
       //update centroid
-      fourFootSupportPolygon.getCentroid(centroid);
+      fourFootSupportPolygon.getCentroid2d(centroid);
 
       //update relative offset from center of feet to center of body
       double body_x = bodyPose.getX() - centroid.getX();
