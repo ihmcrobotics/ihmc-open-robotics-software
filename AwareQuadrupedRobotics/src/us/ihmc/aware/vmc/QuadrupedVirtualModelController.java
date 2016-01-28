@@ -5,7 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.aware.parameters.QuadrupedRobotParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.aware.vmc.QuadrupedContactForceLimits;
 import us.ihmc.aware.vmc.QuadrupedContactForceOptimizationSettings;
 import us.ihmc.aware.vmc.QuadrupedJointLimits;

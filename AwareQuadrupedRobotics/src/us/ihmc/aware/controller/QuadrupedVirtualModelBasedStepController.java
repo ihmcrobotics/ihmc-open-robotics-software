@@ -3,14 +3,15 @@ package us.ihmc.aware.controller;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.controller.common.*;
+import us.ihmc.aware.params.ParameterMap;
+import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.planning.QuadrupedTimedStep;
 import us.ihmc.aware.vmc.QuadrupedContactForceLimits;
 import us.ihmc.aware.vmc.QuadrupedJointLimits;
 import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.aware.parameters.QuadrupedRobotParameters;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
-import us.ihmc.aware.parameters.QuadrupedVirtualModelBasedStepParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.util.HeterogeneousMemoryPool;
@@ -37,7 +38,6 @@ import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
@@ -49,15 +49,34 @@ import java.awt.*;
 
 public class QuadrupedVirtualModelBasedStepController implements QuadrupedController
 {
-   // parameters
    private final SDFFullRobotModel fullRobotModel;
    private final DoubleYoVariable robotTimestamp;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
-   private final QuadrupedVirtualModelBasedStepParameters parameters;
    private final QuadrupedJointNameMap jointNameMap;
    private final double controlDT;
    private final double gravity;
    private final double mass;
+
+   // parameters
+   private final ParameterMap params;
+   private final String BODY_ORIENTATION_PROPORTIONAL_GAINS = "bodyOrientationProportionalGains";
+   private final String BODY_ORIENTATION_DERIVATIVE_GAINS = "bodyOrientationDerivativeGains";
+   private final String BODY_ORIENTATION_INTEGRAL_GAINS = "bodyOrientationIntegralGains";
+   private final String BODY_ORIENTATION_MAX_INTEGRAL_ERROR = "bodyOrientationMaxIntegralError";
+   private final String SWING_POSITION_PROPORTIONAL_GAINS = "swingPositionProportionalGains";
+   private final String SWING_POSITION_DERIVATIVE_GAINS = "swingPositionDerivativeGains";
+   private final String SWING_POSITION_INTEGRAL_GAINS = "swingPositionIntegralGains";
+   private final String SWING_POSITION_MAX_INTEGRAL_ERROR = "swingPositionMaxIntegralError";
+   private final String SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE = "swingPositionGravityFeedforwardForce";
+   private final String DCM_PROPORTIONAL_GAINS = "dcmProportionalGains";
+   private final String DCM_INTEGRAL_GAINS = "dcmIntegralGains";
+   private final String DCM_MAX_INTEGRAL_ERROR = "dcmMaxIntegralError";
+   private final String COM_HEIGHT_PROPORTIONAL_GAIN = "comHeightProportionalGain";
+   private final String COM_HEIGHT_DERIVATIVE_GAIN = "comHeightDerivativeGain";
+   private final String COM_HEIGHT_INTEGRAL_GAIN = "comHeightIntegralGain";
+   private final String COM_HEIGHT_MAX_INTEGRAL_ERROR = "comHeightMaxIntegralError";
+   private final String COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT = "comHeightGravityFeedforwardConstant";
+   private final String COM_HEIGHT_NOMINAL = "comHeightNominal";
 
    // utilities
    private final QuadrupedJointLimits jointLimits;
@@ -84,7 +103,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
    {
       SWING_STATE, SUPPORT_STATE
    }
-
    private final QuadrantDependentList<StateMachine<FootState>> footStateMachine;
 
    // provider inputs
@@ -170,21 +188,40 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
    // temporary
    private final HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
 
-   public QuadrupedVirtualModelBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, QuadrupedVirtualModelController virtualModelController)
+   public QuadrupedVirtualModelBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedVirtualModelController virtualModelController)
    {
-      // parameters
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       this.yoGraphicsListRegistry = runtimeEnvironment.getGraphicsListRegistry();
-      this.parameters = robotParameters.getQuadrupedVirtualModelBasedStepParameters();
       this.jointNameMap = robotParameters.getJointMap();
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
       this.mass = fullRobotModel.getTotalMass();
 
+      // parameters
+      this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedStepController.class);
+      params.setDefault(BODY_ORIENTATION_PROPORTIONAL_GAINS, 5000, 5000, 2500);
+      params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 500);
+      params.setDefault(BODY_ORIENTATION_INTEGRAL_GAINS, 0, 0, 0);
+      params.setDefault(BODY_ORIENTATION_MAX_INTEGRAL_ERROR, 0);
+      params.setDefault(SWING_POSITION_PROPORTIONAL_GAINS, 0, 0, 0);
+      params.setDefault(SWING_POSITION_DERIVATIVE_GAINS, 0, 0, 0);
+      params.setDefault(SWING_POSITION_INTEGRAL_GAINS, 0, 0, 0);
+      params.setDefault(SWING_POSITION_MAX_INTEGRAL_ERROR, 0);
+      params.setDefault(SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE, 0);
+      params.setDefault(DCM_PROPORTIONAL_GAINS, 2, 2, 0);
+      params.setDefault(DCM_INTEGRAL_GAINS, 0, 0, 0);
+      params.setDefault(DCM_MAX_INTEGRAL_ERROR, 0);
+      params.setDefault(COM_HEIGHT_PROPORTIONAL_GAIN, 5000);
+      params.setDefault(COM_HEIGHT_DERIVATIVE_GAIN, 750);
+      params.setDefault(COM_HEIGHT_INTEGRAL_GAIN, 0);
+      params.setDefault(COM_HEIGHT_MAX_INTEGRAL_ERROR, 0);
+      params.setDefault(COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT, 0.95);
+      params.setDefault(COM_HEIGHT_NOMINAL, 0.55);
+
       // utilities
-      jointLimits = new QuadrupedJointLimits(robotParameters.getQuadrupedJointLimits());
-      contactForceLimits = new QuadrupedContactForceLimits(robotParameters.getQuadrupedContactForceLimits());
+      jointLimits = new QuadrupedJointLimits(); // FIXME (pass in robot specific joint limits)
+      contactForceLimits = new QuadrupedContactForceLimits();
       referenceFrames = virtualModelController.getReferenceFrames();
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
       bodyFrame = referenceFrames.getBodyFrame();
@@ -205,7 +242,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       this.virtualModelController = virtualModelController;
       comHeightController = new PIDController("bodyHeight", registry);
       bodyOrientationController = new AxisAngleOrientationController("bodyOrientation", bodyFrame, controlDT, registry);
-      dcmPositionController = new DivergentComponentOfMotionController("dcm", comFrame, controlDT, mass, gravity, parameters.getComHeightNominal(), registry);
+      dcmPositionController = new DivergentComponentOfMotionController("dcm", comFrame, controlDT, mass, gravity, params.get(COM_HEIGHT_NOMINAL), registry);
       swingPositionController = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -234,7 +271,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
          stepCache.set(robotQuadrant, new QuadrupedTimedStep(robotQuadrant));
       }
       bodyOrientationDesired = new FrameOrientation(worldFrame);
-      comHeightDesired = parameters.getComHeightNominal();
+      comHeightDesired = params.get(COM_HEIGHT_NOMINAL);
 
       // setpoints
       solePositionSetpoint = new QuadrantDependentList<>();
@@ -259,7 +296,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       cmpPositionSetpoint = new FramePoint(worldFrame);
       vrpPositionSetpoint = new FramePoint(worldFrame);
       comForceSetpoint = new FrameVector(worldFrame);
-      comHeightSetpoint = parameters.getComHeightNominal();
+      comHeightSetpoint = params.get(COM_HEIGHT_NOMINAL);
 
       // estimates
       soleOrientationEstimate = new QuadrantDependentList<>();
@@ -288,7 +325,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       comVelocityEstimate = new FrameVector(worldFrame);
       dcmPositionEstimate = new FramePoint(worldFrame);
       icpPositionEstimate = new FramePoint(worldFrame);
-      comHeightEstimate = parameters.getComHeightNominal();
+      comHeightEstimate = params.get(COM_HEIGHT_NOMINAL);
 
       // YoVariables
       yoBodyOrientationDesired = new YoFrameOrientation("bodyOrientationDesired", supportFrame, registry);
@@ -493,7 +530,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
    private void updateSetpoints()
    {
       // compute capture point natural frequency
-      double comHeight = Math.max(comHeightSetpoint, parameters.getComHeightNominal() / 5);
+      double comHeight = Math.max(comHeightSetpoint, params.get(COM_HEIGHT_NOMINAL) / 5);
       dcmPositionController.setComHeight(comHeight);
 
       // compute body torque setpoints to track desired body orientation
@@ -515,7 +552,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
 
       // compute vertical force to track desired center of mass height
       comHeightSetpoint = comHeightDesired;
-      double comForceZ = parameters.getComHeightGravityFeedforwardConstant() * mass * gravity + comHeightController.compute(comHeightEstimate, comHeightSetpoint, comVelocityEstimate.getZ(), 0, controlDT);
+      double comForceZ = params.get(COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT) * mass * gravity + comHeightController.compute(comHeightEstimate, comHeightSetpoint, comVelocityEstimate.getZ(), 0, controlDT);
       comForceSetpoint.changeFrame(worldFrame);
       comForceSetpoint.setZ(comForceZ);
 
@@ -626,7 +663,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
    {
       // initialize desired values (provider inputs)
       yoBodyOrientationDesired.setYawPitchRoll(0.0, 0.0, 0.0);
-      yoComHeightDesired.set(parameters.getComHeightNominal());
+      yoComHeightDesired.set(params.get(COM_HEIGHT_NOMINAL));
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -647,23 +684,23 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
          virtualModelController.setContactState(robotQuadrant, true);
       }
       bodyOrientationController.reset();
-      bodyOrientationController.setProportionalGains(parameters.getBodyOrientationProportionalGains());
-      bodyOrientationController.setIntegralGains(parameters.getBodyOrientationIntegralGains(), parameters.getBodyOrientationMaxIntegralError());
-      bodyOrientationController.setDerivativeGains(parameters.getBodyOrientationDerivativeGains());
+      bodyOrientationController.setProportionalGains(params.getVolatileArray(BODY_ORIENTATION_PROPORTIONAL_GAINS));
+      bodyOrientationController.setIntegralGains(params.getVolatileArray(BODY_ORIENTATION_INTEGRAL_GAINS), params.get(BODY_ORIENTATION_MAX_INTEGRAL_ERROR));
+      bodyOrientationController.setDerivativeGains(params.getVolatileArray(BODY_ORIENTATION_DERIVATIVE_GAINS));
       comHeightController.resetIntegrator();
-      comHeightController.setProportionalGain(parameters.getComHeightProportionalGain());
-      comHeightController.setIntegralGain(parameters.getComHeightIntegralGain());
-      comHeightController.setMaxIntegralError(parameters.getComHeightMaxIntegralError());
-      comHeightController.setDerivativeGain(parameters.getComHeightDerivativeGain());
+      comHeightController.setProportionalGain(params.get(COM_HEIGHT_PROPORTIONAL_GAIN));
+      comHeightController.setIntegralGain(params.get(COM_HEIGHT_INTEGRAL_GAIN));
+      comHeightController.setMaxIntegralError(params.get(COM_HEIGHT_MAX_INTEGRAL_ERROR));
+      comHeightController.setDerivativeGain(params.get(COM_HEIGHT_DERIVATIVE_GAIN));
       dcmPositionController.reset();
-      dcmPositionController.setProportionalGains(parameters.getDcmProportionalGains());
-      dcmPositionController.setIntegralGains(parameters.getDcmIntegralGains(), parameters.getDcmMaxIntegralError());
+      dcmPositionController.setProportionalGains(params.getVolatileArray(DCM_PROPORTIONAL_GAINS));
+      dcmPositionController.setIntegralGains(params.getVolatileArray(DCM_INTEGRAL_GAINS), params.get(DCM_MAX_INTEGRAL_ERROR));
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          footStateMachine.get(robotQuadrant).setCurrentState(FootState.SUPPORT_STATE);
-         swingPositionController.get(robotQuadrant).setProportionalGains(parameters.getSwingPositionProportionalGains());
-         swingPositionController.get(robotQuadrant).setIntegralGains(parameters.getSwingPositionIntegralGains(), parameters.getSwingPositionMaxIntegralError());
-         swingPositionController.get(robotQuadrant).setDerivativeGains(parameters.getSwingPositionDerivativeGains());
+         swingPositionController.get(robotQuadrant).setProportionalGains(params.getVolatileArray(SWING_POSITION_PROPORTIONAL_GAINS));
+         swingPositionController.get(robotQuadrant).setIntegralGains(params.getVolatileArray(SWING_POSITION_INTEGRAL_GAINS), params.get(SWING_POSITION_MAX_INTEGRAL_ERROR));
+         swingPositionController.get(robotQuadrant).setDerivativeGains(params.getVolatileArray(SWING_POSITION_DERIVATIVE_GAINS));
       }
 
       // show graphics
@@ -703,7 +740,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
          soleLinearVelocitySetpoint.get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
          soleLinearVelocityEstimate.get(robotQuadrant).changeFrame(soleFrame.get(robotQuadrant));
          soleForceFeedforwardSetpoint.get(robotQuadrant).changeFrame(worldFrame);
-         soleForceFeedforwardSetpoint.get(robotQuadrant).set(0, 0, parameters.getSwingPositionGravityFeedforwardForce());
+         soleForceFeedforwardSetpoint.get(robotQuadrant).set(0, 0, params.get(SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE));
          soleForceFeedforwardSetpoint.get(robotQuadrant).changeFrame(soleFrame.get(robotQuadrant));
          swingPositionController.get(robotQuadrant)
                .compute(soleForceSetpoint.get(robotQuadrant), solePositionSetpoint.get(robotQuadrant), soleLinearVelocitySetpoint.get(robotQuadrant), soleLinearVelocityEstimate.get(robotQuadrant), soleForceFeedforwardSetpoint.get(robotQuadrant));

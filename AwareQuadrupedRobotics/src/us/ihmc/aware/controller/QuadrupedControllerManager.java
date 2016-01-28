@@ -44,8 +44,8 @@ public class QuadrupedControllerManager implements RobotController
       // TODO: Define more state transitions.
       builder.addTransition(QuadrupedControllerEvent.JOINTS_INITIALIZED, QuadrupedControllerState.DO_NOTHING,
             QuadrupedControllerState.STAND_PREP);
-//      builder.addTransition(QuadrupedControllerEvent.STARTING_POSE_REACHED, QuadrupedControllerState.STAND_PREP,
-//            QuadrupedControllerState.VIRTUAL_MODEL_BASED_STEP);
+      builder.addTransition(QuadrupedControllerEvent.STARTING_POSE_REACHED, QuadrupedControllerState.STAND_PREP,
+            QuadrupedControllerState.VIRTUAL_MODEL_BASED_STEP);
 
       this.stateMachine = builder.build(QuadrupedControllerState.DO_NOTHING);
       this.userEventTrigger = new StateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry,
