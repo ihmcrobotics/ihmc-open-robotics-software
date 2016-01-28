@@ -1,6 +1,5 @@
 package us.ihmc.aware.params;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,7 +7,13 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 /**
- * A namespaces mapping of {@link String} keys to {@link DoubleYoVariable} values.
+ * A namespaced mapping of {@link String} keys to {@link DoubleYoVariable} values.
+ * <p/>
+ * If existing parameter values exist at the time of creation, they may be set with {@link #insert(String, double...)}.
+ * A controller can then set any previously unset parameters with {@link #setDefault(String, double...)} to ensure that
+ * all expected parameters contain at least default values.
+ * <p/>
+ * At runtime, controllers can then use {@link #get(String)} to fetch the latest parameters and act accordingly.
  */
 public class ParameterMap
 {
