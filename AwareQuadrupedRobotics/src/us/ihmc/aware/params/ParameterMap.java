@@ -20,7 +20,7 @@ public class ParameterMap
    private final YoVariableRegistry registry;
    private final Class<?> namespace;
 
-   private final Map<String, DoubleYoVariable[]> map = new HashMap<>();
+   private final Map<String, ParameterBufferPair> map = new HashMap<>();
 
    protected ParameterMap(YoVariableRegistry registry, Class<?> namespace)
    {
@@ -46,7 +46,7 @@ public class ParameterMap
          variables[i].set(values[i]);
       }
 
-      map.put(name, variables);
+      map.put(name, new ParameterBufferPair(variables, new double[values.length]));
    }
 
    // TODO: Need to know the array length at insertion time, so this signature doesn't make sense?
@@ -91,8 +91,18 @@ public class ParameterMap
    {
       verifyContains(name, idx);
 
-      DoubleYoVariable[] variables = map.get(name);
-      return variables[idx].getDoubleValue();
+      return map.get(name).variables[idx].getDoubleValue();
+   }
+
+   public double[] getVolatileArray(String name)
+   {
+      double[] buffer = map.get(name).buffer;
+      for (int i = 0; i < buffer.length; i++)
+      {
+         buffer[i] = get(name, i);
+      }
+
+      return buffer;
    }
 
    public void set(String name, double... values)
@@ -107,7 +117,7 @@ public class ParameterMap
    {
       verifyContains(name, idx);
 
-      DoubleYoVariable[] variables = map.get(name);
+      DoubleYoVariable[] variables = map.get(name).variables;
       variables[idx].set(value);
    }
 
@@ -118,9 +128,9 @@ public class ParameterMap
 
    public boolean contains(String name, int idx)
    {
-      DoubleYoVariable[] variables = map.get(name);
+      ParameterBufferPair pair = map.get(name);
 
-      return variables != null && variables.length > idx;
+      return pair != null && pair.variables.length > idx;
    }
 
    /**
