@@ -36,15 +36,15 @@ public class QuadrupedLinkLengths
 
          beforeHipPitch.changeFrame(legAttachmentFrame);
          double hipLength = legAttachment.distance(beforeHipPitch);
-         hipLengths.put(robotQuadrant, new MutableDouble(hipLength));
+         hipLengths.set(robotQuadrant, new MutableDouble(hipLength));
 
          beforeKneePitch.changeFrame(hipPitchFrame);
          double thighLength = hipPitch.distance(beforeKneePitch);
-         thighLengths.put(robotQuadrant, new MutableDouble(thighLength));
+         thighLengths.set(robotQuadrant, new MutableDouble(thighLength));
 
          foot.changeFrame(kneePitchFrame);
          double shinLength = kneePitch.distance(foot);
-         shinLengths.put(robotQuadrant, new MutableDouble(shinLength));
+         shinLengths.set(robotQuadrant, new MutableDouble(shinLength));
       }
    }
    

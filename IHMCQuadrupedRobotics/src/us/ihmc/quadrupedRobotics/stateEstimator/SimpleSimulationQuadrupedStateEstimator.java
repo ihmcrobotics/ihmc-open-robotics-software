@@ -37,7 +37,7 @@ public class SimpleSimulationQuadrupedStateEstimator implements QuadrupedStateEs
          {
             if(groundContactPoint.getParentJoint() == jointBeforeFoot)
             {
-               footSwitches.put(quadrant, new SimulatedContactBasedFootSwitch(prefix + groundContactPoint.getName(), groundContactPoint, registry));
+               footSwitches.set(quadrant, new SimulatedContactBasedFootSwitch(prefix + groundContactPoint.getName(), groundContactPoint, registry));
             }
          }
       }
@@ -61,6 +61,20 @@ public class SimpleSimulationQuadrupedStateEstimator implements QuadrupedStateEs
    public double getCurrentTime()
    {
       return yoTime.getDoubleValue();
+   }
+
+   @Override
+   public void initialize()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   @Override
+   public void enable()
+   {
+      // TODO Auto-generated method stub
+      
    }
 
 }

@@ -1,26 +1,76 @@
-apply plugin: 'java'
-apply from: 'gradleScripts/util.gradle'
+plugins {
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.6'
+}
+
+
+
+if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
-version = '1.0'
+version = "${getOpenRoboticsSoftwareProject().version}"
+project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
+project.ext.licenseName = "GPLv3"
+project.ext.bintrayLicenseName = "GPL-3.0"
 
-setupDefaultDirectoryStructure()
+repositories ihmc.ihmcDefaultArtifactProxies()
 
-setupDefaultRepositories()
 
-setupProjectSpecificDependencies()
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCJavaToolkit"))
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCRoboticsToolkit"))
 
-jar {
-   manifest {
-      attributes(
-      "Created-By": "IHMC Gradle Build Script",
-      "Implementation-Title": project.name,
-      "Implementation-Version": project.version,
-      "Implementation-Vendor": "IHMC",
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+     
+    
+    
+    compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2' 
+
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4' 
+    compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
+	compile group: 'org.georegression' , name: 'georegression', version: '0.8'
+    compile group: 'org.boofcv', name: 'visualize', version: '0.19'
+	compile group: 'org.ddogleg' , name: 'ddogleg', version: '0.7'
+    compile group: 'org.apache.poi', name: 'poi', version: '3.9' 
+    compile group: 'us.ihmc.thirdparty.org.opensphere', name: 'concavehull', version: '1.0'   
+    compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4.1'
+    compile group: 'com.vividsolutions', name: 'jts', version: '1.13' 
+    compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17' 
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3' 
+    compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
+    compile group: 'pl.edu.icm', name: 'JLargeArrays', version: '1.2'
+    compile group: 'org.jgrapht', name: 'jgrapht-core', version: '0.9.0'
+	compile group: 'org.jgrapht', name: 'jgrapht-ext', version: '0.9.0'
+    
+    compile group: 'us.ihmc.thirdparty', name: 'JTransforms', version: '3.0'
       
-      "Bundle-Name": project.name,
-      "Bundle-Version": project.version,
-      "Bundle-License": "http://gnu.org/licenses/gpl-3.0.txt",
-      "Bundle-Vendor": "IHMC")
-   }
+    compile ihmc.getProjectDependency(":IHMCCommunication")
+    compile ihmc.getProjectDependency(":Graphics3DAdapter")
+    compile ihmc.getProjectDependency(":SimulationConstructionSet")
+    
+    compile ihmc.getProjectDependency(":KalmanProject")
+    compile ihmc.getProjectDependency(":SDFLoader")
+    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+    
+    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+    testCompile ihmc.getProjectDependency(":IHMCJavaToolkit").sourceSets.test.output
+    testCompile ihmc.getProjectDependency(":IHMCRoboticsToolkit").sourceSets.test.output
+   
+    
+    
+}
+jar {
+    manifest {
+        attributes(
+                "Created-By": "IHMC Gradle Build Script",
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "IHMC",
+
+                "Bundle-Name": project.name,
+                "Bundle-Version": project.version,
+                "Bundle-License": "${project.ext.licenseURL}",
+                "Bundle-Vendor": "IHMC")
+    }
 }

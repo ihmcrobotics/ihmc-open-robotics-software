@@ -6,12 +6,12 @@ import us.ihmc.multicastLogDataProtocol.LogUtils;
 
 public enum LogSettings
 {
-   ATLAS_IAN(true, "239.255.25.1", 5, 4, 0),
+   ATLAS_IAN(true, "239.255.25.1"),
    ATLAS_NO_CAMERAS(true),
-   VALKYRIE_IHMC(true, "239.255.25.2", 5, 4, 0),
-   VALKYRIE_JSC(true, "239.255.25.2", 6, 7),
+   VALKYRIE_IHMC(true, "239.255.25.2"),
+   VALKYRIE_JSC(true, "239.255.25.2"),
    VALKYRIE_NO_CAMERAS(true),
-   STEPPR_IHMC(true, "239.255.25.3", 2, 3),
+   STEPPR_IHMC(true, "239.255.25.3"),
    SIMULATION(false, "239.255.25.4"),
    BEHAVIOR(false),
    EXO_X1A(false),
@@ -22,18 +22,16 @@ public enum LogSettings
    BABY_BEAST(false);
 
    private final boolean log;
-   private final int[] cameras;
    private final InetAddress videoStream;
 
-   LogSettings(boolean log, int... cameras)
+   LogSettings(boolean log)
    {
-      this(log, null, cameras);
+      this(log, null);
    }
 
-   LogSettings(boolean log, String videoStreamGroup, int... cameras)
+   LogSettings(boolean log, String videoStreamGroup)
    {
       this.log = log;
-      this.cameras = cameras;
       if (videoStreamGroup == null)
       {
          this.videoStream = null;
@@ -42,11 +40,6 @@ public enum LogSettings
       {
          this.videoStream = LogUtils.getByName(videoStreamGroup);
       }
-   }
-
-   public int[] getCameras()
-   {
-      return cameras;
    }
 
    public boolean isLog()

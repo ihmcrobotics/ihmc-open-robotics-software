@@ -37,7 +37,6 @@
 # File types to ignore
 **/*.jar
 **/cookies.txt
-**/gradle.properties
 **/*.iml
 **/*.hprof
 **/hs_err_pid*
@@ -76,3 +75,5 @@
 **/Network Trash Folder
 **/Temporary Items
 **/.apdisk
+
+!**/gradle-wrapper.jar

@@ -1,43 +1,67 @@
 package us.ihmc.robotDataCommunication.logger;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
-import us.ihmc.robotDataCommunication.logger.util.BMDCapture;
-import us.ihmc.robotDataCommunication.logger.util.FFMpeg;
-import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
+import us.ihmc.javadecklink.Capture;
+import us.ihmc.javadecklink.CaptureHandler;
+import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.tools.maps.CircularLongMap;
 
-public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface
+public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implements CaptureHandler
 {
 
    /**
     * Make sure to set a progressive mode, otherwise the timestamps will be all wrong!
     */
 
-   private final PipedCommandExecutor commandExecutor;
+   private final int decklink;
+   private final double quality;
+   private Capture capture;
+   
+   private final CircularLongMap circularLongMap = new CircularLongMap(10000);
 
+   private FileWriter timestampWriter;
+   
+   private int frame;
 
-   public BlackmagicVideoDataLogger(File logPath, LogProperties logProperties, VideoSettings settings, YoVariableLoggerOptions options) throws IOException
+   public BlackmagicVideoDataLogger(File logPath, LogProperties logProperties, int decklinkID, YoVariableLoggerOptions options) throws IOException
    {
-      super(logPath, logProperties, settings.getDescription(), settings.isInterlaced());
-      BMDCapture bmdCapture = new BMDCapture();
-      bmdCapture.setCard(settings.getDevice());
-      bmdCapture.setMode(settings.getMode());
-      bmdCapture.setVideoIn(settings.getVideoIn());
-      bmdCapture.setFormat("nut");
-      bmdCapture.setFilename("pipe:1");
-      bmdCapture.setTimestampData(timestampData);
+      super(logPath, logProperties, "Camera" + decklinkID);
+      decklink = decklinkID;
+      quality = options.getVideoQuality();
 
-      FFMpeg avconv = new FFMpeg();
-      avconv.setAudioCodec(null);
-      avconv.setVideoCodec(options.getVideoCodec());
-      avconv.setQuality(options.getVideoQuality());
-      avconv.setInputFile("-");
-      avconv.setOutputFile(videoFile);
-
-      commandExecutor = new PipedCommandExecutor(bmdCapture, avconv);
-      commandExecutor.execute();
-
+      createCaptureInterface();
+   }
+   
+   private void createCaptureInterface()
+   {
+      File timestampFile = new File(timestampData);
+      capture = new Capture(this);
+      try
+      {
+         timestampWriter = new FileWriter(timestampFile);
+         capture.startCapture(videoFile, decklink, quality);
+      }
+      catch (IOException e)
+      {
+         capture = null;
+         if(timestampWriter != null)
+         {
+            try
+            {
+               timestampWriter.close();
+               timestampFile.delete();
+            }
+            catch (IOException e1)
+            {
+            }
+         }
+         timestampWriter = null;
+         System.out.println("Cannot start capture interface");
+         e.printStackTrace();
+      }
    }
    
    /* (non-Javadoc)
@@ -48,7 +72,7 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface
    {
       close();
       removeLogFiles();
-      commandExecutor.execute();
+      createCaptureInterface();
    }
 
    /* (non-Javadoc)
@@ -57,7 +81,14 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface
    @Override
    public void timestampChanged(long newTimestamp)
    {
-      commandExecutor.writeln(Long.toString(newTimestamp));
+      if(capture != null)
+      {
+         long hardwareTimestamp = capture.getHardwareTime();
+         if(hardwareTimestamp != -1)
+         {
+            circularLongMap.insert(hardwareTimestamp, newTimestamp);
+         }
+      }
    }
 
    /* (non-Javadoc)
@@ -67,8 +98,53 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface
    public void close()
    {
       System.out.println("Signalling recorder");
-      commandExecutor.writeln("-1");
-      commandExecutor.waitFor();
+      if(capture != null)
+      {
+         try
+         {
+            capture.stopCapture();
+            timestampWriter.close();
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+         capture = null;
+         timestampWriter = null;
+      }
+      
+   }
+
+   @Override
+   public void receivedFrameAtTime(long hardwareTime, long pts, long timeScaleNumerator, long timeScaleDenumerator)
+   {
+      
+      if(circularLongMap.size() > 0)
+      {
+         if(frame % 60 == 0)
+         {
+            System.out.println("[Decklink " + decklink + "] Received frame " + frame + " at time " + hardwareTime + "ns, delay: " + TimeTools.nanoSecondstoSeconds(circularLongMap.getLatestKey() - hardwareTime) + "s. pts: " + pts);
+         }
+
+         
+         long robotTimestamp = circularLongMap.getValue(true, hardwareTime);
+         
+         try
+         {
+            if(frame == 0)
+            {
+               timestampWriter.write(timeScaleNumerator + "\n");
+               timestampWriter.write(timeScaleDenumerator + "\n");
+            }
+            timestampWriter.write(robotTimestamp + " " + pts + "\n");
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+         ++frame;
+      }
+      
    }
 
 

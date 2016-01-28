@@ -12,8 +12,8 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class NetworkParameters
 {
-   private static final String helpText = "Please use NetworkParametersCreator to create one and place it in the working directory, or pass in -DnetworkParameterFile=[path].";
-   public static final String defaultParameterFile = "IHMCNetworkParameters.ini";
+   public static final String defaultParameterFile = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "IHMCNetworkParameters.ini";
+   private static final String helpText = "Please use NetworkParametersCreator to create one and save it in " + defaultParameterFile + ", or pass in -DnetworkParameterFile=[path].";
 
    private static NetworkParameters instance = null;
 
@@ -51,12 +51,15 @@ public class NetworkParameters
          }
          catch (IOException e)
          {
-            throw new RuntimeException("Network parameter file " + file.getAbsolutePath() + " cannot be loaded. " + helpText, e);
+            System.err.println("Network parameter file " + file.getAbsolutePath() + " cannot be loaded.\n" + helpText);
+            e.printStackTrace();
+            System.exit(-1);
          }
       }
       else
       {
-         throw new RuntimeException("Network parameter file " + file.getAbsolutePath() + " does not exist. " + helpText);
+         System.err.println("Network parameter file " + file.getAbsolutePath() + " does not exist.\n" + helpText);
+         System.exit(-1);
       }
    }
 
@@ -75,7 +78,7 @@ public class NetworkParameters
       {
          try
          {
-            return new URI("http://" + getHost(NetworkParameterKeys.rosURI));
+            return new URI(getHost(NetworkParameterKeys.rosURI));
          }
          catch (URISyntaxException e)
          {

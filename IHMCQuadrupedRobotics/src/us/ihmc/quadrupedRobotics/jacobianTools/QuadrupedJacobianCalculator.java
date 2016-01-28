@@ -48,12 +48,12 @@ public class QuadrupedJacobianCalculator
          fullRobotModel.getOneDoFJointsFromRootToHere(knee, oneDoFJointsToPack);
          OneDoFJoint[] oneDofJoints = new OneDoFJoint[oneDoFJointsToPack.size()];
          oneDoFJointsToPack.toArray(oneDofJoints);
-         oneDoFJoints.put(quadrant, oneDofJoints);
+         oneDoFJoints.set(quadrant, oneDofJoints);
          GeometricJacobian geometricJacobian = new GeometricJacobian(oneDofJoints, referenceFrames.getBodyFrame());
-         bodyToLegJacobians.put(quadrant, geometricJacobian);
+         bodyToLegJacobians.set(quadrant, geometricJacobian);
          
          PointJacobian pointJacobian = new PointJacobian();
-         bodyToFootJacobians.put(quadrant, pointJacobian);
+         bodyToFootJacobians.set(quadrant, pointJacobian);
       }
       
       DenseMatrix64F jacobianMatrix = bodyToLegJacobians.get(RobotQuadrant.FRONT_LEFT).getJacobianMatrix();

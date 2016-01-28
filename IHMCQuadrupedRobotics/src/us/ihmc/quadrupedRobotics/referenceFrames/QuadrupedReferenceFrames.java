@@ -28,23 +28,12 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.tools.containers.ContainerTools;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
 {
    private final FullRobotModel fullRobotModel;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final Quat4d IDENTITY_QUATERNION = new Quat4d();
 
    private final ReferenceFrame bodyFrame, rootJointFrame;
    private final ZUpFrame bodyZUpFrame;
@@ -68,7 +57,6 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    private final PoseReferenceFrame centerOfFourHipsFrame;
    private final FramePose centerOfFourHipsFramePose;
    private final FramePoint centerOfFourHipsFramePoint = new FramePoint();
-   
 
    public QuadrupedReferenceFrames(SDFFullRobotModel fullRobotModel, QuadrupedJointNameMap quadrupedJointNameMap, QuadrupedPhysicalProperties quadrupedPhysicalProperties)
    {
@@ -106,10 +94,10 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
          soleFrame.updateTranslation(quadrupedPhysicalProperties.getOffsetFromKneeToFoot(robotQuadrant));
          soleFrame.update();
          
-         soleFrames.put(robotQuadrant, soleFrame);
+         soleFrames.set(robotQuadrant, soleFrame);
          
          FramePoint legAttachmentPoint = new FramePoint();
-         legAttachementPoints.put(robotQuadrant, legAttachmentPoint);
+         legAttachementPoints.set(robotQuadrant, legAttachmentPoint);
       }
       
       for (RobotSide robotSide : RobotSide.values)
@@ -147,7 +135,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
          xyOffsetFromRollToPitch.setZ(0.0);
          
          legAttachmentFrame.updateTranslation(xyOffsetFromRollToPitch);
-         legAttachementFrames.put(robotQuadrant, legAttachmentFrame);
+         legAttachementFrames.set(robotQuadrant, legAttachmentFrame);
       }
       
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, fullRobotModel.getElevator());
@@ -282,6 +270,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       return centerOfMassFrameWithRotation;
    }
 
+   @Override
    public ReferenceFrame getCenterOfMassZUpFrame()
    {
       return centerOfMassZUpFrame;
@@ -318,7 +307,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       
       centerOfMassPose.setToZero(centerOfMassFrame);
       centerOfMassPose.changeFrame(bodyFrame);
-      centerOfMassPose.setOrientation(new Quat4d());
+      centerOfMassPose.setOrientation(IDENTITY_QUATERNION);
       
       centerOfMassFrameWithRotation.setPoseAndUpdate(centerOfMassPose);
       centerOfMassZUpFrame.update();

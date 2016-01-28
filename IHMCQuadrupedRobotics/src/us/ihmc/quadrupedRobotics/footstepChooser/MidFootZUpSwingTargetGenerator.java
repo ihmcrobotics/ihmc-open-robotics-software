@@ -290,7 +290,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 
       //rotate the foot about the centroid of the predicted foot polygon
       supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromHalfStride);
-      supportPolygon.getCentroid(centroid);
+      supportPolygon.getCentroid2d(centroid);
       desiredSwingFootPositionFromHalfStride.yawAboutPoint(centroid, desiredSwingFootPositionFromHalfStride, deltaYaw);
    }
 
@@ -337,7 +337,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       
       //rotate the foot about the centroid of the predicted foot polygon
       supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromOppositeSideFoot);
-      supportPolygon.getCentroid(centroid);
+      supportPolygon.getCentroid2d(centroid);
       desiredSwingFootPositionFromOppositeSideFoot.yawAboutPoint(centroid, desiredSwingFootPositionFromOppositeSideFoot, deltaYaw);
    }
 

@@ -148,6 +148,8 @@ public class ManipulationControlModule
       // Important especially when switching between high level states. In such case, we don't want the arm to go to home position
       if (!hasBeenInitialized.getBooleanValue())
       {
+         for (RobotSide robotSide : RobotSide.values)
+            handControlModules.get(robotSide).initialize();
          goToDefaultState();
          hasBeenInitialized.set(true);
       }

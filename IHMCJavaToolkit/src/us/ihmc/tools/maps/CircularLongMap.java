@@ -2,6 +2,12 @@ package us.ihmc.tools.maps;
 
 import java.util.Arrays;
 
+/**
+ * Circular map filled with key->value pairs of the type long. Uses binary search to find values based on key. Ability to use non-exact matches.
+ * 
+ * @author jesper
+ *
+ */
 public class CircularLongMap
 {
    private int insertionIndex = 0;
@@ -53,9 +59,33 @@ public class CircularLongMap
    {
       return size;
    }
+   
+   public long getLatestKey()
+   {
+      if (insertionIndex == 0 && size > 0)
+      {
+         return keys[size - 1];
+      }
+      else
+      {
+         return keys[insertionIndex - 1];
+      }
+   }
+
+   public long getLatestValue()
+   {
+      if (insertionIndex == 0 && size > 0)
+      {
+         return values[size - 1];
+      }
+      else
+      {
+         return values[insertionIndex - 1];
+      }
+   }
 
    /**
-    * Get 
+    * Get the value for key
     * 
     * @param matchNearest Match the nearest key if true.
     * @param key

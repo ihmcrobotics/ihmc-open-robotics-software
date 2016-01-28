@@ -1,29 +1,67 @@
-apply plugin: 'java'
-apply from: 'gradleScripts/util.gradle'
-
-sourceCompatibility = 1.7
-version = '0.0.1'
-
-setupDefaultDirectoryStructure()
-
-setupDefaultRepositories()
-
-setupProjectSpecificDependencies()
-
-buildscript {
-  repositories {
-	  jcenter()
-
-	  maven{
-		  url "https://bengal.ihmc.us/nexus/content/repositories/central/"
-	  }
-  }  
-  dependencies {
-      classpath "com.monochromeroad.gradle-plugins:gradle-aws-s3-sync:0.5"
-      classpath 'org.hidetake:gradle-ssh-plugin:0.3.12'
-  }
+plugins {
+	id 'org.hidetake.ssh' version '0.3.12'
+    id 'us.ihmc.gradle.ihmc-build' version '0.0.6'
 }
 
+
+
+if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
+
+sourceCompatibility = 1.7
+version = "${getOpenRoboticsSoftwareProject().version}"
+project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
+project.ext.licenseName = "GPLv3"
+project.ext.bintrayLicenseName = "GPL-3.0"
+
+repositories ihmc.ihmcDefaultArtifactProxies()
+
+
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCJavaToolkit"))
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCRoboticsToolkit"))
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("DarpaRoboticsChallenge"))
+
+dependencies {
+	testCompile group: 'junit', name: 'junit', version: '4.11'
+	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+	
+	  
+	compile group: 'org.ejml', name: 'all', version: '0.28'
+	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
+	compile group: 'org.yaml', name: 'snakeyaml', version: '1.13' //1.11
+	compile group: 'com.jcraft', name: 'jsch', version: '0.1.51'
+	compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
+	compile group: 'commons-io', name: 'commons-io', version: '2.4'
+	compile group: 'us.ihmc.thirdparty.com.esotericsoftware', name: 'kryonet', version: '2.21'
+	compile group: 'org.bouncycastle', name: 'bcprov-jdk16', version: '1.46'
+	compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.+'
+	compile group: 'org.apache.sshd', name: 'sshd-core', version: '0.12.+'
+	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
+	
+	compile group: 'us.ihmc', name: 'IHMCRosControl', version: '0.2.1'
+	
+	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
+	compile ihmc.getProjectDependency(":DarpaRoboticsChallenge")
+	compile ihmc.getProjectDependency(":Graphics3DAdapter")
+	
+	compile ihmc.getProjectDependency(":IHMCROSTools")
+	
+	compile ihmc.getProjectDependency(":RobotDataCommunication")
+	compile ihmc.getProjectDependency(":ROSJavaMessages")
+	compile ihmc.getProjectDependency(":SDFLoader")
+	compile ihmc.getProjectDependency(":SensorProcessing")
+	compile ihmc.getProjectDependency(":SimulationConstructionSet")
+    compile ihmc.getProjectDependency(":IHMCPerception")
+    compile ihmc.getProjectDependency(":IHMCWholeBodyController")
+	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+	
+	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	
+	testCompile ihmc.getProjectDependency(":IHMCJavaToolkit").sourceSets.test.output
+	testCompile ihmc.getProjectDependency(":DarpaRoboticsChallenge").sourceSets.test.output
+	testCompile ihmc.getProjectDependency(":IHMCRoboticsToolkit").sourceSets.test.output
+}
 apply plugin: 'application'
 applicationName = "IHMCValkyrieAPI"
 mainClassName = "us.ihmc.valkyrie.ValkyrieROSAPISimulator"
@@ -43,176 +81,140 @@ applicationDistribution.from(startScripts.outputDir) {
 	into "bin"
 }
 
-import com.monochromeroad.gradle.plugin.aws.s3.S3Sync
-
-task awsDeploySim(type: S3Sync, dependsOn: distTar) {
-	description = "Push current API release to AWS S3"
-	configFile "aws.properties"
-
-	from "${buildDir}/distributions"
-	into "ihmc/api_releases"
-
-	keepFiles true
-
-	doFirst{
-		if(!project.hasProperty("awsAccessKey") || !project.hasProperty("awsSecretKey"))
+remotes
 		{
-			throw new TaskExecutionException(tasks.tasks.awsDeploySim, new StopActionException("AWS credentials not set, you should store them safely and locally in your user's gradle.properties (defaults to \$HOME/.gradle/gradle.properties)"));
+			valkyrieRealtimeComputer
+					{
+						host = project.hasProperty('valkyrie_link_ip') ? "${valkyrie_link_ip}" : "invalid"
+
+						// Set the username and password in ~/.gradle/gradle.properties.
+						user = project.hasProperty('valkyrie_realtime_username') ? "${valkyrie_realtime_username}" : "invalid"
+						password = project.hasProperty('valkyrie_realtime_password') ? "${valkyrie_realtime_password}" : "invalid"
+
+						knownHosts = allowAnyHosts
+					}
+
+			valkyrieNonRealtimeComputer
+					{
+						host = project.hasProperty('valkyrie_zelda_ip') ? "${valkyrie_zelda_ip}" : "invalid"
+
+						// Set the username and password in ~/.gradle/gradle.properties.
+						user = project.hasProperty('valkyrie_realtime_username') ? "${valkyrie_realtime_username}" : "invalid"
+						password = project.hasProperty('valkyrie_realtime_password') ? "${valkyrie_realtime_password}" : "invalid"
+
+						knownHosts = allowAnyHosts
+					}
 		}
-
-		accessKey awsAccessKey
-		secretKey awsSecretKey
-
-		def verManifestFile = new File("${buildDir}/distributions/val-version")
-
-		verManifestFile.text = version
-	}
-}
-
-apply plugin: 'org.hidetake.ssh'
-
-remotes 
-{
-	valkyrieRealtimeComputer
-	{
-		host = project.hasProperty('valkyrie_link_ip')?"${valkyrie_link_ip}":"invalid"
-		
-		// Set the username and password in ~/.gradle/gradle.properties.
-        user = project.hasProperty('valkyrie_realtime_username')?"${valkyrie_realtime_username}":"invalid"
-        password = project.hasProperty('valkyrie_realtime_password')?"${valkyrie_realtime_password}":"invalid"
-        
-		knownHosts = allowAnyHosts
-	}
-	
-	valkyrieNonRealtimeComputer
-	{
-		host = project.hasProperty('valkyrie_zelda_ip')?"${valkyrie_zelda_ip}":"invalid"
-		
-		// Set the username and password in ~/.gradle/gradle.properties.
-        user = project.hasProperty('valkyrie_realtime_username')?"${valkyrie_realtime_username}":"invalid"
-        password = project.hasProperty('valkyrie_realtime_password')?"${valkyrie_realtime_password}":"invalid"
-        
-		knownHosts = allowAnyHosts
-	}
-}
 
 jar {
 	List depend = []
 	configurations.runtime.each {
-		if(!it.name.contains("IHMCHumanoidOperatorInterface"))
-		{
+		if (!it.name.contains("IHMCHumanoidOperatorInterface")) {
 			depend.add('lib/' + it.name)
 		}
 	}
-   
-   manifest {
-      attributes(
-      "Created-By": "IHMC Gradle Build Script",
-      "Implementation-Title": project.name,
-      "Implementation-Version": project.version,
-      "Implementation-Vendor": "IHMC",
-      
-      "Bundle-Name": project.name,
-      "Bundle-Version": project.version,
-      "Bundle-License": "IHMC Proprietary",
-      "Bundle-Vendor": "IHMC",
-      'Class-Path': depend.join(' '))
-   }
-}
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.6'
+	manifest {
+		attributes(
+				"Created-By": "IHMC Gradle Build Script",
+				"Implementation-Title": project.name,
+				"Implementation-Version": project.version,
+				"Implementation-Vendor": "IHMC",
+
+				"Bundle-Name": project.name,
+				"Bundle-Version": project.version,
+				"Bundle-License": "${project.ext.licenseURL}",
+				"Bundle-Vendor": "IHMC",
+				'Class-Path': depend.join(' '))
+	}
 }
 
 task deployLocal(dependsOn: jar) {
 	def directory = 'valkyrie'
-	doLast{
+	doLast {
 		def dest = new File(System.properties['user.home'], directory)
 		def lib = new File(dest, 'lib')
 		lib.mkdirs();
-		
-		configurations.runtime.each 
-		{
-			if(!it.name.contains("IHMCHumanoidOperatorInterface"))
-			{
-				def src = file(it)
-				copy{
-					from src
-					into lib
+
+		configurations.runtime.each
+				{
+					if (!it.name.contains("IHMCHumanoidOperatorInterface")) {
+						def src = file(it)
+						copy {
+							from src
+							into lib
+						}
+					}
 				}
-			}
-		}
-		
-		copy{
+
+		copy {
 			from jar.archivePath
 			into dest
 			rename { fileName -> "ValkyrieController.jar" }
 		}
-		
+
 	}
 }
 
 task deploy(dependsOn: ['jar']) {
-	
-	def projectDir = project.buildscript.sourceFile.parent 
+
+	def projectDir = project.buildscript.sourceFile.parent
 	def directory = 'valkyrie'
 
 	doLast {
-    	if(!project.hasProperty('valkyrie_realtime_username') || !project.hasProperty('valkyrie_realtime_password'))
-    	{
-    		throw new GradleException("Please set valkyrie_realtime_username and valkyrie_realtime_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
-    	}
+		if (!project.hasProperty('valkyrie_realtime_username') || !project.hasProperty('valkyrie_realtime_password')) {
+			throw new GradleException("Please set valkyrie_realtime_username and valkyrie_realtime_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+		}
 
-		if(!project.hasProperty('valkyrie_link_ip') || !project.hasProperty('valkyrie_zelda_ip'))
-		{
+		if (!project.hasProperty('valkyrie_link_ip') || !project.hasProperty('valkyrie_zelda_ip')) {
 			throw new GradleException("Please set valkyrie_link_ip and valkyrie_zelda_ip in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
 		}
-	
+
 		sshexec {
 			session(remotes.valkyrieRealtimeComputer)
-			{
-				execute("mkdir -p " + directory + "/lib")
-				execute("mkdir -p " + directory + "/Configurations")
-				
-				configurations.runtime.each 
-				{
-					put it, directory + '/lib'
-				}
-				
-				put jar.archivePath, directory + '/ValkyrieController.jar'
-				
-				def scriptDir = new File(projectDir, "launchScripts/")
-				def scriptDirCollection = files { scriptDir.listFiles() }
-				put scriptDirCollection, directory
-				
-				scriptDirCollection.each
-				{
-					execute 'chmod 777 ' + directory + '/' + it.name
-				}			
-			}
-			
+					{
+						execute("mkdir -p " + directory + "/lib")
+						execute("mkdir -p " + directory + "/Configurations")
+
+						configurations.runtime.each
+								{
+									put it, directory + '/lib'
+								}
+
+						put jar.archivePath, directory + '/ValkyrieController.jar'
+
+						def scriptDir = new File(projectDir, "launchScripts/")
+						def scriptDirCollection = files { scriptDir.listFiles() }
+						put scriptDirCollection, directory
+
+						scriptDirCollection.each
+								{
+									execute 'chmod 777 ' + directory + '/' + it.name
+								}
+					}
+
 			session(remotes.valkyrieNonRealtimeComputer)
-			{
-				execute("mkdir -p " + directory + "/lib")
-				execute("mkdir -p " + directory + "/Configurations")
-				
-				configurations.runtime.each 
-				{
-					put it, directory + '/lib'
-				}
-				
-				put jar.archivePath, directory + '/ValkyrieController.jar'
-				
-				def scriptDir = new File(projectDir, "launchScripts/")
-				def scriptDirCollection = files { scriptDir.listFiles() }
-				put scriptDirCollection, directory
-				
-				scriptDirCollection.each
-				{
-					execute 'chmod 777 ' + directory + '/' + it.name
-				}
-			}
-			
+					{
+						execute("mkdir -p " + directory + "/lib")
+						execute("mkdir -p " + directory + "/Configurations")
+
+						configurations.runtime.each
+								{
+									put it, directory + '/lib'
+								}
+
+						put jar.archivePath, directory + '/ValkyrieController.jar'
+
+						def scriptDir = new File(projectDir, "launchScripts/")
+						def scriptDirCollection = files { scriptDir.listFiles() }
+						put scriptDirCollection, directory
+
+						scriptDirCollection.each
+								{
+									execute 'chmod 777 ' + directory + '/' + it.name
+								}
+					}
+
 		}
 	}
 }
@@ -229,28 +231,26 @@ def getCheckedOutGitCommitHash() {
     def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
     // def isRef = head.length > 1     // ref: refs/heads/master
 
-    if(isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
+    if (isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
 
     def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
     refHead.text.trim().take takeFromHash
 }
-
-
 task createRosJar(type: Jar) {
     version = getCheckedOutGitCommitHash()
-    manifest 
-    {
-        attributes 'Implementation-Title': 'ROSAPI',  
-        'Implementation-Version': version,
-        'Main-Class': 'us.ihmc.valkyrie.OpenHumanoidsSimulator'
-    }
-    
+    manifest
+			{
+				attributes 'Implementation-Title': 'ROSAPI',
+						'Implementation-Version': version,
+						'Main-Class': 'us.ihmc.valkyrie.OpenHumanoidsSimulator'
+			}
+
     baseName = 'OpenHumanoidsSimulator'
-    from ( { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } } ) {
-      exclude "META-INF/*.SF"
-      exclude "META-INF/*.DSA"
-      exclude "META-INF/*.RSA"
-      with jar
+    from({ configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }) {
+		exclude "META-INF/*.SF"
+		exclude "META-INF/*.DSA"
+		exclude "META-INF/*.RSA"
+		with jar
     }
 }
 
