@@ -1,11 +1,11 @@
 package us.ihmc.aware.controller;
 
-import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineYoVariableTrigger;
+import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -33,13 +33,16 @@ public class QuadrupedControllerManager implements RobotController
       QuadrupedDoNothingController doNothingController = new QuadrupedDoNothingController(runtimeEnvironment);
       QuadrupedStandPrepController standPrepController = new QuadrupedStandPrepController(runtimeEnvironment,
             parameters, paramMapRepository);
-      // QuadrupedVirtualModelController virtualModelController = new QuadrupedVirtualModelController(runtimeEnvironment.getFullRobotModel(), parameters, registry, runtimeEnvironment.getGraphicsListRegistry());
-      // QuadrupedVirtualModelBasedStepController virtualModelBasedStepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, parameters, virtualModelController);
+      QuadrupedVirtualModelController virtualModelController = new QuadrupedVirtualModelController(
+            runtimeEnvironment.getFullRobotModel(), parameters, registry, runtimeEnvironment.getGraphicsListRegistry());
+      QuadrupedVirtualModelBasedStepController virtualModelBasedStepController = new QuadrupedVirtualModelBasedStepController(
+            runtimeEnvironment, parameters, paramMapRepository, virtualModelController);
 
       StateMachineBuilder<QuadrupedControllerState, QuadrupedControllerEvent> builder = new StateMachineBuilder<>();
 
       builder.addState(QuadrupedControllerState.DO_NOTHING, doNothingController);
       builder.addState(QuadrupedControllerState.STAND_PREP, standPrepController);
+      builder.addState(QuadrupedControllerState.VIRTUAL_MODEL_BASED_STEP, virtualModelBasedStepController);
 
       // TODO: Define more state transitions.
       builder.addTransition(QuadrupedControllerEvent.JOINTS_INITIALIZED, QuadrupedControllerState.DO_NOTHING,
