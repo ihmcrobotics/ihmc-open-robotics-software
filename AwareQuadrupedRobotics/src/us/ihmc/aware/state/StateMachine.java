@@ -1,9 +1,12 @@
 package us.ihmc.aware.state;
 
 import java.util.List;
+import java.util.Map;
 
-public class StateMachine<S extends StateMachineState<E>, E extends Enum<E>>
+public class StateMachine<S extends Enum<S>, E extends Enum<E>>
 {
+   private final Map<S, StateMachineState<E>> states;
+
    /**
     * The list of possible transitions. This is equivalent to a state-transition function in FSM literature.
     */
@@ -18,8 +21,10 @@ public class StateMachine<S extends StateMachineState<E>, E extends Enum<E>>
     */
    private S state;
 
-   public StateMachine(List<StateMachineTransition<S, E>> transitions, S initialState)
+   public StateMachine(Map<S, StateMachineState<E>> states, List<StateMachineTransition<S, E>> transitions,
+         S initialState)
    {
+      this.states = states;
       this.transitions = transitions;
       this.state = initialState;
    }
@@ -38,12 +43,15 @@ public class StateMachine<S extends StateMachineState<E>, E extends Enum<E>>
          StateMachineTransition<S, E> transition = transitions.get(i);
 
          // Check if this transition matches the source state and event.
-         if (transition.getFrom().equals(state) && event.equals(transition.getEvent()))
+         if (transition.getFrom() == state && event == transition.getEvent())
          {
+            StateMachineState<E> fromInstance = getInstanceForEnum(transition.getFrom());
+            StateMachineState<E> toInstance = getInstanceForEnum(transition.getTo());
+
             // It does, so transition to the next state.
-            state.onExit();
+            fromInstance.onExit();
             state = transition.getTo();
-            state.onEntry();
+            toInstance.onEntry();
          }
       }
    }
@@ -53,8 +61,10 @@ public class StateMachine<S extends StateMachineState<E>, E extends Enum<E>>
     */
    public void process()
    {
+      StateMachineState<E> instance = states.get(state);
+
       // Run the current state and see if it generates an event.
-      E event = state.process();
+      E event = instance.process();
       if (event != null)
       {
          trigger(event);
@@ -67,5 +77,15 @@ public class StateMachine<S extends StateMachineState<E>, E extends Enum<E>>
    public S getState()
    {
       return state;
+   }
+
+   private StateMachineState<E> getInstanceForEnum(S state)
+   {
+      if (!states.containsKey(state))
+      {
+         throw new IllegalArgumentException("State " + state + " is not registered");
+      }
+
+      return states.get(state);
    }
 }
