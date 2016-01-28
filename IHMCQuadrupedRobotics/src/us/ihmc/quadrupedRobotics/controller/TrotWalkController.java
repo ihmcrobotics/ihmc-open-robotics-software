@@ -10,9 +10,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
@@ -37,12 +35,10 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicLineSegment;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLine;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLine;
 
 public class TrotWalkController extends QuadrupedController
 {
@@ -225,7 +221,7 @@ public class TrotWalkController extends QuadrupedController
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
        
          YoFramePoint footPosition = new YoFramePoint(prefix, worldFrame, registry);
-         YoGraphicPosition footPositionViz = new YoGraphicPosition(prefix + "FootPositionViz", footPosition, 0.02, getYoAppearance(robotQuadrant),
+         YoGraphicPosition footPositionViz = new YoGraphicPosition(prefix + "FootPositionViz", footPosition, 0.02, YoAppearance.Color(robotQuadrant.getColor()),
                GraphicType.BALL_WITH_CROSS);
          
          yoGraphicsListRegistry.registerArtifact("feet", footPositionViz.createArtifact());
@@ -236,8 +232,8 @@ public class TrotWalkController extends QuadrupedController
       YoFramePoint hindLeftFoot = feetLocations.get(RobotQuadrant.HIND_LEFT);
       YoFramePoint frontLeftFoot = feetLocations.get(RobotQuadrant.FRONT_LEFT);
       YoFramePoint frontRightFoot = feetLocations.get(RobotQuadrant.FRONT_RIGHT);
-      Color hindRightYoAppearance = getColor(RobotQuadrant.HIND_RIGHT);
-      Color hindLeftYoAppearance = getColor(RobotQuadrant.HIND_LEFT);
+      Color hindRightYoAppearance = RobotQuadrant.HIND_RIGHT.getColor();
+      Color hindLeftYoAppearance = RobotQuadrant.HIND_LEFT.getColor();
       hindRightFrontLeftTrotLine = new YoArtifactLine("hindRightFrontLeftTrotLine", hindRightFoot, frontLeftFoot, hindRightYoAppearance);
       hindLeftFrontRightTrotLine = new YoArtifactLine("hindLeftFrontRightTrotLine", hindLeftFoot, frontRightFoot, hindLeftYoAppearance);
       
@@ -247,33 +243,6 @@ public class TrotWalkController extends QuadrupedController
       initialize();
       parentRegistry.addChild(registry);
    }
-   
-   private AppearanceDefinition getYoAppearance(RobotQuadrant robotQuadrant)
-   {
-      switch (robotQuadrant)
-      {
-      case FRONT_LEFT:
-         return YoAppearance.White();
-      case FRONT_RIGHT:
-         return YoAppearance.Yellow();
-      case HIND_LEFT:
-         return YoAppearance.Blue();
-      case HIND_RIGHT:
-         return YoAppearance.Black();
-      default:
-         throw new RuntimeException("bad quad");
-      }
-   }
-   
-   private Color getColor(RobotQuadrant robotQuadrant)
-   {
-      AppearanceDefinition appearance = getYoAppearance(robotQuadrant);
-      
-      YoAppearanceRGBColor yoAppearanceRGBColor = (YoAppearanceRGBColor) appearance;
-      Color color = new Color(yoAppearanceRGBColor.getRed(), yoAppearanceRGBColor.getGreen(), yoAppearanceRGBColor.getBlue());
-      return color;
-   }
-
 
    /**
     * Delete this and use the inverse dynamics robot

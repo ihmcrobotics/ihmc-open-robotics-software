@@ -80,12 +80,12 @@ public class QuadrupedControllerManager implements RobotController
       builder.addStandingExitCondition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.STAND_READY);
 
       builder.addPermissibleTransition(QuadrupedControllerState.STAND_READY, QuadrupedControllerState.VMC_STAND);
-      builder.addPermissibleTransition(QuadrupedControllerState.STAND_READY, QuadrupedControllerState.POSITION_CRAWL);
+//      builder.addPermissibleTransition(QuadrupedControllerState.STAND_READY, QuadrupedControllerState.POSITION_CRAWL);
       builder.addPermissibleTransition(QuadrupedControllerState.STAND_READY, QuadrupedControllerState.TROT_WALK);
 
       builder.addPermissibleTransition(QuadrupedControllerState.VMC_STAND, QuadrupedControllerState.STAND_PREP);
-//      builder.addPermissibleTransition(QuadrupedControllerState.POSITION_CRAWL, QuadrupedControllerState.STAND_PREP);
-//      builder.addPermissibleTransition(QuadrupedControllerState.POSITION_CRAWL, QuadrupedControllerState.TROT_WALK);
+      // TODO builder.addPermissibleTransition(QuadrupedControllerState.POSITION_CRAWL, QuadrupedControllerState.STAND_PREP);
+      // TODO builder.addPermissibleTransition(QuadrupedControllerState.POSITION_CRAWL, QuadrupedControllerState.TROT_WALK);
 
       this.stateMachine = builder.build();
 
