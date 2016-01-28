@@ -77,8 +77,9 @@ task publishAllToMavenLocal(type: GradleBuild) {
 }
 
 subprojects { subproject ->
-  apply plugin: 'java'
+
   apply plugin: 'maven-publish'
+  apply plugin: 'java'
 
   subproject.ext {
     getOpenRoboticsSoftwareProject = {
