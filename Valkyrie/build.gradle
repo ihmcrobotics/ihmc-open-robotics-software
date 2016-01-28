@@ -1,10 +1,11 @@
 plugins {
 	id 'org.hidetake.ssh' version '0.3.12'
+    id 'us.ihmc.gradle.ihmc-build' version '0.0.5'
 }
 
 apply plugin: 'java'
-apply from: 'gradleScripts/util.gradle'
-if(!rootProject.name.equals(getParent().name)) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
+
+if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
@@ -13,12 +14,54 @@ project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"
 
-setupDefaultDirectoryStructure()
+repositories ihmc.ihmcDefaultArtifactProxies()
 
-setupDefaultRepositories()
 
-setupProjectSpecificDependencies()
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCJavaToolkit"))
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCRoboticsToolkit"))
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("DarpaRoboticsChallenge"))
 
+dependencies {
+	testCompile group: 'junit', name: 'junit', version: '4.11'
+	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+	
+	  
+	compile group: 'org.ejml', name: 'all', version: '0.28'
+	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
+	compile group: 'org.yaml', name: 'snakeyaml', version: '1.13' //1.11
+	compile group: 'com.jcraft', name: 'jsch', version: '0.1.51'
+	compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
+	compile group: 'commons-io', name: 'commons-io', version: '2.4'
+	compile group: 'us.ihmc.thirdparty.com.esotericsoftware', name: 'kryonet', version: '2.21'
+	compile group: 'org.bouncycastle', name: 'bcprov-jdk16', version: '1.46'
+	compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.+'
+	compile group: 'org.apache.sshd', name: 'sshd-core', version: '0.12.+'
+	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
+	
+	compile group: 'us.ihmc', name: 'IHMCRosControl', version: '0.2.1'
+	
+	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
+	compile ihmc.getProjectDependency(":DarpaRoboticsChallenge")
+	compile ihmc.getProjectDependency(":Graphics3DAdapter")
+	
+	compile ihmc.getProjectDependency(":IHMCROSTools")
+	
+	compile ihmc.getProjectDependency(":RobotDataCommunication")
+	compile ihmc.getProjectDependency(":ROSJavaMessages")
+	compile ihmc.getProjectDependency(":SDFLoader")
+	compile ihmc.getProjectDependency(":SensorProcessing")
+	compile ihmc.getProjectDependency(":SimulationConstructionSet")
+    compile ihmc.getProjectDependency(":IHMCPerception")
+    compile ihmc.getProjectDependency(":IHMCWholeBodyController")
+	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+	
+	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	
+	testCompile ihmc.getProjectDependency(":IHMCJavaToolkit").sourceSets.test.output
+	testCompile ihmc.getProjectDependency(":DarpaRoboticsChallenge").sourceSets.test.output
+	testCompile ihmc.getProjectDependency(":IHMCRoboticsToolkit").sourceSets.test.output
+}
 apply plugin: 'application'
 applicationName = "IHMCValkyrieAPI"
 mainClassName = "us.ihmc.valkyrie.ValkyrieROSAPISimulator"
@@ -193,8 +236,6 @@ def getCheckedOutGitCommitHash() {
     def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
     refHead.text.trim().take takeFromHash
 }
-
-
 task createRosJar(type: Jar) {
     version = getCheckedOutGitCommitHash()
     manifest

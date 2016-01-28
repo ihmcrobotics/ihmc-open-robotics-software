@@ -1,6 +1,10 @@
+plugins {
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.5'
+}
+
 apply plugin: 'java'
-apply from: 'gradleScripts/util.gradle'
-if(!rootProject.name.equals(getParent().name)) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
+
+if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
@@ -9,12 +13,31 @@ project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
 project.ext.licenseName = "Apache License, Version 2.0"
 project.ext.bintrayLicenseName = "Apache-2.0"
 
-setupDefaultDirectoryStructure()
+repositories ihmc.ihmcDefaultArtifactProxies()
 
-setupDefaultRepositories()
+// Override sourcesets from IHMC plugin.
+sourceSets {
+    main {
+        java {
+            srcDirs = ['generated-src']
+        }
 
-setupProjectSpecificDependencies()
+        resources {
+        }
+    }
 
+    test {
+        java {
+            srcDirs = ['src/test/java']
+        }
+    }
+}
+
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11' 
+    compile ihmc.getProjectDependency(":ROSJavaBootstrap")
+}
 jar {
     manifest {
         attributes(
