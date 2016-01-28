@@ -1,6 +1,10 @@
+plugins {
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.5'
+}
+
 apply plugin: 'java'
-apply from: 'gradleScripts/util.gradle'
-if(!rootProject.name.equals(getParent().name)) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
+
+if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
@@ -9,12 +13,29 @@ project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
 project.ext.licenseName = "Apache License, Version 2.0"
 project.ext.bintrayLicenseName = "Apache-2.0"
 
-setupDefaultDirectoryStructure()
+repositories ihmc.ihmcDefaultArtifactProxies()
 
-setupDefaultRepositories()
 
-setupProjectSpecificDependencies()
+dependencies
+{
+	testCompile group: 'junit', name: 'junit', version: '4.11'
+	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 
+	compile group: 'org.ddogleg' , name: 'ddogleg', version: '0.7'
+
+	compile group: 'org.georegression' , name: 'georegression', version: '0.8'
+	compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
+	compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
+	compile group: 'net.sourceforge.jexcelapi', name: 'jxl', version: '2.6.12'
+	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
+    compile group: 'org.boofcv', name: 'all', version: '0.19'
+
+	
+	compile ihmc.getProjectDependency(":Plotting")
+	compile ihmc.getProjectDependency(":IHMCCommunication")
+	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+}
 jar {
     manifest {
         attributes(
