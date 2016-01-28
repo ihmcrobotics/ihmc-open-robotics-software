@@ -5,7 +5,7 @@ package us.ihmc.aware.state;
  *
  * @param <E> the event enum type.
  */
-public class StateMachineTransition<S extends StateMachineState, E extends Enum<E>>
+public class StateMachineTransition<S extends Enum<S>, E extends Enum<E>>
 {
    /**
     * The event on which to transition.

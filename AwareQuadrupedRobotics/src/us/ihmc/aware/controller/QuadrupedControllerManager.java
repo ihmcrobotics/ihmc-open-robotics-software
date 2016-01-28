@@ -22,7 +22,7 @@ public class QuadrupedControllerManager implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
 
-   private final StateMachine<QuadrupedController, QuadrupedControllerEvent> stateMachine;
+   private final StateMachine<QuadrupedControllerState, QuadrupedControllerEvent> stateMachine;
    private final StateMachineYoVariableTrigger<QuadrupedControllerEvent> userEventTrigger;
 
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment,
@@ -36,12 +36,18 @@ public class QuadrupedControllerManager implements RobotController
       // QuadrupedVirtualModelController virtualModelController = new QuadrupedVirtualModelController(runtimeEnvironment.getFullRobotModel(), parameters, registry, runtimeEnvironment.getGraphicsListRegistry());
       // QuadrupedVirtualModelBasedStepController virtualModelBasedStepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, parameters, virtualModelController);
 
-      // TODO: Define more state transitions.
-      StateMachineBuilder<QuadrupedController, QuadrupedControllerEvent> builder = new StateMachineBuilder<>();
-      builder.addTransition(QuadrupedControllerEvent.JOINTS_INITIALIZED, doNothingController, standPrepController);
-      //builder.addTransition(QuadrupedControllerEvent.JOINTS_INITIALIZED, virtualModelBasedStepController, standPrepController);
+      StateMachineBuilder<QuadrupedControllerState, QuadrupedControllerEvent> builder = new StateMachineBuilder<>();
 
-      this.stateMachine = builder.build(doNothingController);
+      builder.addState(QuadrupedControllerState.DO_NOTHING, doNothingController);
+      builder.addState(QuadrupedControllerState.STAND_PREP, standPrepController);
+
+      // TODO: Define more state transitions.
+      builder.addTransition(QuadrupedControllerEvent.JOINTS_INITIALIZED, QuadrupedControllerState.DO_NOTHING,
+            QuadrupedControllerState.STAND_PREP);
+//      builder.addTransition(QuadrupedControllerEvent.STARTING_POSE_REACHED, QuadrupedControllerState.STAND_PREP,
+//            QuadrupedControllerState.VIRTUAL_MODEL_BASED_STEP);
+
+      this.stateMachine = builder.build(QuadrupedControllerState.DO_NOTHING);
       this.userEventTrigger = new StateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry,
             QuadrupedControllerEvent.class);
    }
