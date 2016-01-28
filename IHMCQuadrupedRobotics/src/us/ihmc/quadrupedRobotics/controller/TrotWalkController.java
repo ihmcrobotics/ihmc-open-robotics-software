@@ -671,17 +671,16 @@ public class TrotWalkController extends QuadrupedController
       @Override
       public void doAction()
       {
-
          computeFeetContactState();
          computeBodyRelativePositionsVelocities();
 
          if (nextState.getEnumValue() == QuadrupedWalkingState.LeftHindRightFrontSupport)
          {
-            //            computeCOMPQ(leftHindLimb, rightForeLimb);
+            // computeCOMPQ(leftHindLimb, rightForeLimb);
          }
          else
          {
-            //            computeCOMPQ(rightHindLimb, leftForeLimb);
+            // computeCOMPQ(rightHindLimb, leftForeLimb);
          }
 
          positionControllersFourLegs();
@@ -696,13 +695,14 @@ public class TrotWalkController extends QuadrupedController
       @Override
       public void doTransitionIntoAction()
       {
+         
       }
 
       @Override
       public void doTransitionOutOfAction()
       {
+         
       }
-
    }
 
    public void preventSlippingForces()
