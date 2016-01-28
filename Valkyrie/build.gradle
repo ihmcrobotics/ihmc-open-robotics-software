@@ -5,7 +5,7 @@ plugins {
 
 apply plugin: 'java'
 
-if(!rootProject.name.equals(getParent().name)) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
+if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
