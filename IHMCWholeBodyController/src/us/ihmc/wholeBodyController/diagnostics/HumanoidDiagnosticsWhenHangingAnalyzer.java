@@ -135,7 +135,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
    {
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
-         String measuredTorqueName = oneDoFJoint.getName() + "_tau";
+         String measuredTorqueName = "raw_tau_" + oneDoFJoint.getName();
          DoubleYoVariable measuredTorque = (DoubleYoVariable) simulationConstructionSet.getVariable(measuredTorqueName);
          controller.setAppliedTorque(oneDoFJoint, measuredTorque.getDoubleValue());
       }

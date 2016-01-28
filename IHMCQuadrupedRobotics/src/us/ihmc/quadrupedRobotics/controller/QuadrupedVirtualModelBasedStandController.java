@@ -177,7 +177,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         yoSolePositionEstimate.put(robotQuadrant, new YoFramePoint(prefix + "SolePositionEstimate", worldFrame, registry));
+         yoSolePositionEstimate.set(robotQuadrant, new YoFramePoint(prefix + "SolePositionEstimate", worldFrame, registry));
       }
       yoSupportCentroidEstimate = new YoFramePoint("supportCentroidEstimate", worldFrame, registry);
       yoSupportOrientationEstimate = new YoFrameOrientation("supportOrientationEstimate", worldFrame, registry);
@@ -242,7 +242,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       // compute support frame (centroid and nominal orientation)
       FramePoint supportCentroid = pool.lease(FramePoint.class);
       FrameOrientation supportOrientation = pool.lease(FrameOrientation.class);
-      supportPolygon.getCentroid(supportCentroid);
+      supportPolygon.getCentroid2d(supportCentroid);
       supportOrientation.changeFrame(supportPolygon.getReferenceFrame());
       supportOrientation.setYawPitchRoll(supportPolygon.getNominalYaw(), 0, 0);
       supportFrame.setPoseAndUpdate(supportCentroid, supportOrientation);

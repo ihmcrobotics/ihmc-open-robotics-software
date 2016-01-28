@@ -1,4 +1,146 @@
-apply plugin: 'java'
+buildscript {
+    repositories {
+        jcenter()
+    }
 
-sourceCompatibility = 1.7
-version = '1.0'
+    dependencies {
+        classpath 'org.ajoberstar:gradle-git:1.4.0-rc.1'
+    }
+}
+
+apply plugin: 'maven-publish'
+
+import org.ajoberstar.grgit.*
+
+project.ext.repo = Grgit.open(projectDir)
+
+version = '0.7.0'
+
+project.ext.fullVersion = version
+project.ext.vcsUrl = "https://github.com/ihmcrobotics/ihmc-open-robotics-software"
+project.ext.snapshotCounter = 1
+project.ext.releaseCandidateCounter = 1
+
+getDate()
+
+if(buildType.equals("NIGHTLY"))
+{
+  project.ext.fullVersion = version += "-NIGHTLY+date.${project.ext.date}.rev.${repo.head().abbreviatedId}"
+}
+
+if(buildType.equals("SNAPSHOT"))
+{
+  project.ext.fullVersion = version += "-SNAPSHOT${project.ext.snapshotCounter}.rev.${repo.head().abbreviatedId}"
+}
+
+if(buildType.equals("RC"))
+{
+  project.ext.fullVersion = version += "-RC${project.ext.releaseCandidateCounter}.rev.${repo.head().abbreviatedId}"
+}
+
+if(buildType.equals("RELEASE"))
+{
+  if(!project.ext.repo.branch.current.name.equals("master"))
+  {
+      throw new GradleException("Cannot make RELEASE build from branch \"${project.ext.repo.branch.current.name}\", it is not the branch used for stable releases!")
+  }
+}
+
+repositories {
+  mavenLocal()
+
+  maven {
+    url "https://bengal.ihmc.us/nexus/content/repositories/releases/"
+  }
+
+  maven {
+      url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+  }
+
+  maven {
+      url "https://bengal.ihmc.us/nexus/content/repositories/central/"
+  }
+
+  jcenter()
+
+  mavenCentral()
+}
+
+task publishAllToMavenLocal(type: GradleBuild) {
+  buildFile "build.gradle"
+  def allTasks = [":clean"]
+  subprojects.each {subproject ->
+    allTasks.add(":" + subproject.name + ":publishToMavenLocal")
+  }
+
+  tasks = allTasks
+}
+
+subprojects { subproject ->
+
+  apply plugin: 'maven-publish'
+  apply plugin: 'java'
+
+  subproject.ext {
+    getOpenRoboticsSoftwareProject = {
+      if(subproject.getParent().name.equals(rootProject.name))
+      {
+        return rootProject
+      }
+      else
+      {
+        return project(':IHMCOpenRoboticsSoftware')
+      }
+    }
+
+    getOpenRoboticsSoftwareGradlePath = {
+      if(subproject.getParent().name.equals(rootProject.name))
+      {
+        return ""
+      }
+      else
+      {
+        return ":IHMCOpenRoboticsSoftware"
+      }
+    }
+  }
+
+  jar {
+    from (project.projectDir) {
+      include 'LICENSE*txt'
+    }
+  }
+
+  task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+  }
+
+  publishing {
+    publications {
+      mavenJava(MavenPublication) {
+
+        groupId 'us.ihmc'
+        artifactId "${project.name}"
+        version "${project.ext.fullVersion}"
+
+        from components.java
+
+        artifact sourceJar {
+          classifier "sources"
+        }
+
+        pom.withXml {
+          def licenseNode = asNode().appendNode('licenses').appendNode('license')
+          licenseNode.appendNode('name', project.ext.licenseName)
+          licenseNode.appendNode('url', project.ext.licenseURL)
+        }
+      }
+    }
+  }
+}
+
+def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('yyyy.MM.dd')
+    project.ext.date = formattedDate
+}

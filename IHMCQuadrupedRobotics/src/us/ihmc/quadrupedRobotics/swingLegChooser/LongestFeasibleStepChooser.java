@@ -30,6 +30,8 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
    private final QuadrantDependentList<YoFramePoint> footstepWorkspaceCenterFramePoints = new QuadrantDependentList<>();
    private RobotQuadrant greatestDistanceFeasibleFootstep;
 
+   private final FramePoint temporaryCentroid = new FramePoint(ReferenceFrame.getWorldFrame());
+
    public LongestFeasibleStepChooser(QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters, CommonQuadrupedReferenceFrames commonQuadrupedReferenceFrames, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.quadrupedControllerParameters = quadrupedControllerParameters;
@@ -91,15 +93,14 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
       {
          // Construct polygon such that the legs conform to a right rectangle with stance height and width, centered at the centroid and pointing toward nominal yaw
          QuadrupedSupportPolygon actualPerfectPolygon = new QuadrupedSupportPolygon();
-         FramePoint centroidFramePoint = actualSupportPolygon.getCentroidFramePoint();
          double nominalYaw = actualSupportPolygon.getNominalYaw();
          double perfectStanceYOffset = quadrupedControllerParameters.getStanceLength() / 2;
          double perfectStanceXOffset = quadrupedControllerParameters.getStanceWidth() / 2;
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            FramePoint framePoint = new FramePoint(centroidFramePoint);
-            framePoint.add(robotQuadrant.getSide().negateIfLeftSide(perfectStanceXOffset), robotQuadrant.getEnd().negateIfHindEnd(perfectStanceYOffset), 0.0);
-            actualPerfectPolygon.setFootstep(robotQuadrant, framePoint);
+            actualSupportPolygon.getCentroid2d(temporaryCentroid);
+            temporaryCentroid.add(robotQuadrant.getSide().negateIfLeftSide(perfectStanceXOffset), robotQuadrant.getEnd().negateIfHindEnd(perfectStanceYOffset), 0.0);
+            actualPerfectPolygon.setFootstep(robotQuadrant, temporaryCentroid);
          }
          actualPerfectPolygon.yawAboutCentroid(nominalYaw);
          

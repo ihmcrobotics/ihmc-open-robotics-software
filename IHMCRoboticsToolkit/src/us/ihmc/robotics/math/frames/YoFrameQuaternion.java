@@ -20,7 +20,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.FormattingTools;
 
 public class YoFrameQuaternion extends ReferenceFrameHolder
 {
@@ -54,7 +53,7 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
    public YoFrameQuaternion(DoubleYoVariable qx, DoubleYoVariable qy, DoubleYoVariable qz, DoubleYoVariable qs, ReferenceFrame referenceFrame)
    {
       this.namePrefix = StringUtils.getCommonPrefix(qx.getName(), qy.getName(), qz.getName(), qs.getName());
-      this.nameSuffix = FormattingTools.getCommonSuffix(qx.getName(), qy.getName(), qz.getName(), qs.getName());
+      this.nameSuffix = YoFrameVariableNameTools.getCommonSuffix(qx.getName(), qy.getName(), qz.getName(), qs.getName());
 
       this.qx = qx;
       this.qy = qy;

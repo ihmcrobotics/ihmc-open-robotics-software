@@ -61,7 +61,7 @@ public class QuadrupedPathPreviewVisualizer implements RobotController
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
          YoFramePoint footPosition = new YoFramePoint(prefix + "footPosition", ReferenceFrame.getWorldFrame(), registry);
-         yoFootPositions.put(robotQuadrant, footPosition);
+         yoFootPositions.set(robotQuadrant, footPosition);
       }
       
       yoFootPositions.get(RobotQuadrant.FRONT_LEFT).set(new Vector3d(0.12, 0.14, 0.0));

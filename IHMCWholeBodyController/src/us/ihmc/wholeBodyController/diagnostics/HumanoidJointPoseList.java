@@ -302,25 +302,44 @@ public class HumanoidJointPoseList
    
    public void createPoseSettersJustArms()
    {
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.REACH_BACK, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.REACH_WAY_BACK, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARMS_03, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.REACH_FORWARD, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.SMALL_CHICKEN_WINGS, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.LARGE_CHICKEN_WINGS, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STRAIGHTEN_ELBOWS, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.SUPPINATE_ARMS_IN_A_LITTLE, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARMS_BACK, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.LARGER_CHICKEN_WINGS, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARMS_OUT_EXTENDED, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.SUPPINATE_ARMS_IN_MORE, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.SUPPINATE_ARMS_IN_A_LOT, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.SUPER_CHICKEN_WINGS, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.FLYING, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.FLYING_SUPPINATE_IN, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.FLYING_SUPPINATE_OUT, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_STRAIGHT_DOWN, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.REACH_BACK, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.REACH_WAY_BACK, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARMS_03, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.REACH_FORWARD, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.SMALL_CHICKEN_WINGS, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.LARGE_CHICKEN_WINGS, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STRAIGHTEN_ELBOWS, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.SUPPINATE_ARMS_IN_A_LITTLE, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARMS_BACK, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.LARGER_CHICKEN_WINGS, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARMS_OUT_EXTENDED, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.SUPPINATE_ARMS_IN_MORE, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.SUPPINATE_ARMS_IN_A_LOT, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.SUPER_CHICKEN_WINGS, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.FLYING, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.FLYING_SUPPINATE_IN, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.FLYING_SUPPINATE_OUT, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_NINETY_ELBOW_DOWN, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_NINETY_ELBOW_DOWN2, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_NINETY_ELBOW_DOWN, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_NINETY_ELBOW_FORWARD, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_NINETY_ELBOW_FORWARD2, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_NINETY_ELBOW_FORWARD, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_NINETY_ELBOW_UP, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_NINETY_ELBOW_UP2, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_NINETY_ELBOW_UP, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_UP, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_UP2, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_UP3, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_UP, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_DOWN, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_DOWN2, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_DOWN3, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_DOWN, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.ARM_OUT_TRICEP_EXERCISE, HumanoidSpinePose.ZERO, HumanoidLegPose.ZERO));
    }
    
    public void createPoseSettersTuneElbowComParameters()

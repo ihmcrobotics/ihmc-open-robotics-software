@@ -1,0 +1,40 @@
+
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearAccelerationInWorldX,root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearAccelerationZ</Variables>
+		<GraphConfiguration>
+			<Name>config49</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearAccelerationY,root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearAccelerationInWorldY</Variables>
+		<GraphConfiguration>
+			<Name>config50</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearAccelerationX,root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearVelocityInWorldZ</Variables>
+		<GraphConfiguration>
+			<Name>config51</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>

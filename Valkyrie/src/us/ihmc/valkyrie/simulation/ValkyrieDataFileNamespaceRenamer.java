@@ -68,8 +68,9 @@ public class ValkyrieDataFileNamespaceRenamer
       @Override
       public String changeNamespaceString(String nameSpaceString)
       {
-         String newNameSpaceString = nameSpaceString.replaceAll("loggedmain", "V1.DRCSimulation");
-         if (newNameSpaceString.startsWith("V1.")) newNameSpaceString = "root." + newNameSpaceString;
+         String newNameSpaceString = nameSpaceString.replaceAll("loggedmain", "valkyrie.DRCSimulation");
+         newNameSpaceString = newNameSpaceString.replaceAll("ValkyrieRosControlSensorReader", "SensorReaderFactory.DRCPerfectSensorReader");
+         if (newNameSpaceString.startsWith("valkyrie.")) newNameSpaceString = "root." + newNameSpaceString;
 
          return newNameSpaceString;
       }
