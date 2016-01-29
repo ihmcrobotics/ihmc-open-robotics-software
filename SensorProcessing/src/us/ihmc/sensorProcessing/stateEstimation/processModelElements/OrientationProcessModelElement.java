@@ -72,7 +72,7 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
       tempRotationVector.set(angularVelocity);
       tempRotationVector.scale(dt);
 
-      RotationTools.setAxisAngleBasedOnRotationVector(tempAxisAngle, tempRotationVector);
+      RotationTools.convertRotationVectorToAxisAngle(tempRotationVector, tempAxisAngle);
 
       quaternionDelta.set(tempAxisAngle);
       quaternion.mul(quaternionDelta);
@@ -85,7 +85,7 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
    {
       orientationPort.getData().getQuaternion(quaternion);
       MatrixTools.extractTuple3dFromEJMLVector(tempRotationVector, correction, 0);
-      RotationTools.setAxisAngleBasedOnRotationVector(tempAxisAngle, tempRotationVector);
+      RotationTools.convertRotationVectorToAxisAngle(tempRotationVector, tempAxisAngle);
       quaternionDelta.set(tempAxisAngle);
       quaternion.mul(quaternionDelta);
       orientation.set(quaternion);

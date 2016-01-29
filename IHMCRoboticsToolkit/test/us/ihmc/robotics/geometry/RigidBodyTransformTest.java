@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RotationTools.ComparisonMode;
+import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
@@ -47,7 +47,7 @@ public class RigidBodyTransformTest
       RigidBodyTransform transform = new RigidBodyTransform();
 
       double epsilonAssert = 1e-8;
-      ComparisonMode comparisonMode = ComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
+      AxisAngleComparisonMode comparisonMode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
       
       double[] thetaTest = generateArrayOfTestAnglesMinus2PiToPiButExcludePlusMinusPi();
 
@@ -101,7 +101,7 @@ public class RigidBodyTransformTest
       AxisAngle4d axisAngleToCheck = new AxisAngle4d();
 
       double epsilonAssert = 1e-8;
-      ComparisonMode comparisonMode = ComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
+      AxisAngleComparisonMode comparisonMode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
 
       double[] thetaTest = generateArrayOfTestAnglesMinus2PiToPiButExcludePlusMinusPi();
 
@@ -159,7 +159,7 @@ public class RigidBodyTransformTest
       AxisAngle4d axisAngleToCheck = new AxisAngle4d();
 
       double epsilonAssert = 1e-8;
-      ComparisonMode comparisonMode = ComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
+      AxisAngleComparisonMode comparisonMode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
 
       double[] thetaTest = generateArrayOfTestAnglesMinus2PiToPiButExcludePlusMinusPi();
       
@@ -1696,7 +1696,7 @@ public class RigidBodyTransformTest
 
          Matrix3d mat = new Matrix3d();
          transform.getRotation(mat);
-         RotationTools.isRotationProper(mat);
+         RotationTools.isRotationMatrixProper(mat);
          assertTrue(checkOrthogonality(transform));
       }
    }
@@ -1771,7 +1771,7 @@ public class RigidBodyTransformTest
          }
          transform3d.get(checkMatrix);
          transform3d.getRotation(mat);
-         RotationTools.isRotationProper(mat);
+         RotationTools.isRotationMatrixProper(mat);
 
          JUnitTools.assertMatrix4dEquals("", matrix, checkMatrix, 1e-10);
       }
@@ -2780,7 +2780,9 @@ public class RigidBodyTransformTest
       temp.rotZ(1.2);  R1.mul(temp);   
       
       System.out.println("..........");
-      quat.set( R1 );
+      // The Quat4d.set(Matrix3d) is buggy
+//      quat.set( R1 );
+      RotationTools.convertMatrixToQuaternion(R1, quat);
       System.out.println("R1: " + quat );
       
       //----------------

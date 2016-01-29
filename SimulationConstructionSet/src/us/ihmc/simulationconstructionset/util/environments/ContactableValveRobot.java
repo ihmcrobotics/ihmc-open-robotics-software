@@ -145,7 +145,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       RigidBodyTransform invertTransform = new RigidBodyTransform();
       Quat4d quat = new Quat4d();
 
-      RotationTools.setQuaternionBasedOnYawPitchRoll(quat, 0.0, Math.PI / 2.0, 0.0);
+      RotationTools.convertYawPitchRollToQuaternion(0.0, Math.PI / 2.0, 0.0, quat);
       transform.setRotation(quat);
       invertTransform.set(transform);
       invertTransform.invert();
@@ -159,7 +159,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       //spokes
       for (int i = 0; i < numberOfSpokes; i++)
       {
-         RotationTools.setQuaternionBasedOnYawPitchRoll(quat, 0.0, 0.0, i * 2.0 * Math.PI / numberOfSpokes);
+         RotationTools.convertYawPitchRollToQuaternion(0.0, 0.0, i * 2.0 * Math.PI / numberOfSpokes, quat);
          transform.setRotation(quat);
          invertTransform.set(transform);
          invertTransform.invert();

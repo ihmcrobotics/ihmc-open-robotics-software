@@ -114,7 +114,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
 
    public void setRotation(double yaw, double pitch, double roll)
    {
-      RotationTools.setQuaternionBasedOnYawPitchRoll(jointRotation, yaw, pitch, roll);
+      RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, jointRotation);
       this.afterJointFrame.setRotation(jointRotation);
    }
 
@@ -126,7 +126,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
 
    public void setRotation(Matrix3d jointRotation)
    {
-      RotationTools.setQuaternionBasedOnMatrix3d(this.jointRotation, jointRotation);
+      RotationTools.convertMatrixToQuaternion(jointRotation, this.jointRotation);
 
       // DON'T USE THIS: the method in Quat4d is flawed and doesn't work for some rotation matrices!
 //      this.jointRotation.set(jointRotation);
@@ -165,7 +165,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
 
    public void packRotation(double[] yawPitchRoll)
    {
-      RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, jointRotation);
+      RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
    }
 
    public void packJointTorque(FrameVector jointTorqueToPack)

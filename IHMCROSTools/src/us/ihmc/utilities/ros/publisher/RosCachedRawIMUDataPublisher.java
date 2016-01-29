@@ -78,7 +78,7 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<BatchRawImuD
    public synchronized void appendRawImuData(long timestampInNanoSeconds, Quat4f orientation, Vector3f linearAcceleration)
    {
       RawImuData rawImuData = newMessageFromType(RawImuData._TYPE);
-      RotationTools.setYawPitchRollBasedOnQuaternion(currentImuOrientation, orientation);
+      RotationTools.convertQuaternionToYawPitchRoll(orientation, currentImuOrientation);
       rawImuData.setImuTimestamp(TimeTools.nanoSecondsToMicroseconds(timestampInNanoSeconds));
       //delta angle (radians) in the frame of the IMU
       rawImuData.setDax(currentImuOrientation[2] - previousImuOrientation[2]);
