@@ -158,7 +158,9 @@ public class HullFace
       rotationMatrix.setColumn(0, xVec);
       rotationMatrix.setColumn(1, yVec);
       rotationMatrix.setColumn(2, zVec);
-      polygonPose.getOrientation().set(rotationMatrix);
+      RotationTools.convertMatrixToQuaternion(rotationMatrix, polygonPose.getOrientation());
+      // The Quat4d.set(Matrix3d) is buggy
+//      polygonPose.getOrientation().set(rotationMatrix);
 
       rotationMatrix.transpose();
       polygonToPack.clear();
