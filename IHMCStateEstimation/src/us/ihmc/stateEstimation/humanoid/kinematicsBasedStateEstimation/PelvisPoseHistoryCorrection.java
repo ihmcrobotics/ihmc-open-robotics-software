@@ -437,8 +437,8 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
 
       Quat4d rotation = new Quat4d();
       pelvisPose.getRotation(rotation);
-      RotationTools.setQuaternionBasedOnYawPitchRoll(rotation, manualRotationOffsetInRadZ.getDoubleValue(), manualRotationOffsetInRadY.getDoubleValue(),
-            manualRotationOffsetInRadX.getDoubleValue());
+      RotationTools.convertYawPitchRollToQuaternion(manualRotationOffsetInRadZ.getDoubleValue(), manualRotationOffsetInRadY.getDoubleValue(), manualRotationOffsetInRadX.getDoubleValue(),
+            rotation);
       pelvisPose.setRotation(rotation);
 
       Vector3d translation = new Vector3d();

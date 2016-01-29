@@ -16,22 +16,20 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RotationTools.ComparisonMode;
+import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class RotationToolsTest
 {
    private Random random = new Random(100L);
-   private double delta = 1e-5;
-   Matrix3d rotationMatrixToPack = new Matrix3d();
-   Quat4d quatToPack = new Quat4d();
+   private static final double EPSILON = 1e-5;
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testAxisAngleEpsilonEquivalentIgnoreCompleteRotations()
+   public void testAxisAngleEpsilonEqualsIgnoreCompleteRotations()
    {
-      ComparisonMode mode = ComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
+      AxisAngleComparisonMode mode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
 
       for (int i = 0; i < 100; i++)
       {
@@ -42,7 +40,7 @@ public class RotationToolsTest
          AxisAngle4d axisAngleA = new AxisAngle4d(randomAxis, randomAngle);
          AxisAngle4d axisAngleB = new AxisAngle4d(randomAxis, randomAngle + randomAngleCompleteRotations);
 
-         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquivalent(axisAngleA, axisAngleB, delta, mode));
+         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
       }
       
       for (int i = 0; i < 100; i++)
@@ -54,7 +52,7 @@ public class RotationToolsTest
          AxisAngle4d axisAngleA = new AxisAngle4d(randomAxis, randomAngle);
          AxisAngle4d axisAngleB = new AxisAngle4d(randomAxis, randomAngle + randomAngleNotCompleteRotations);
 
-         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEquivalent(axisAngleA, axisAngleB, delta,
+         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON,
                mode));
       }
    }
@@ -73,7 +71,7 @@ public class RotationToolsTest
          AxisAngle4d axisAngleA = new AxisAngle4d(randomAxisA, randomAngle);
          AxisAngle4d axisAngleB = new AxisAngle4d(randomAxisA_flipped, -randomAngle);
 
-         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEqualsIgnoreFlippedAxes(axisAngleA, axisAngleB, delta));
+         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEqualsIgnoreFlippedAxes(axisAngleA, axisAngleB, EPSILON));
       }
       
       for (int i = 0; i < 100; i++)
@@ -87,13 +85,13 @@ public class RotationToolsTest
          AxisAngle4d axisAngleA = new AxisAngle4d(randomAxisA, randomAngle);
          AxisAngle4d axisAngleB = new AxisAngle4d(randomAxisA_flipped, randomAngle);
 
-         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEqualsIgnoreFlippedAxes(axisAngleA, axisAngleB, delta));
+         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEqualsIgnoreFlippedAxes(axisAngleA, axisAngleB, EPSILON));
       }
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testAxisAngleEpsilonEquivalentAnglesAreZero()
+   public void testAxisAngleEpsilonEqualsAnglesAreZero()
    {
       int numberOfTests = 100;
       
@@ -105,17 +103,17 @@ public class RotationToolsTest
          AxisAngle4d axisAngleA = new AxisAngle4d(randomAxisA, 0.0);
          AxisAngle4d axisAngleB = new AxisAngle4d(randomAxisB, 0.0);
 
-         ComparisonMode mode = ComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
-         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquivalent(axisAngleA, axisAngleB, delta, mode));
+         AxisAngleComparisonMode mode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
+         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
       }
    }
    
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testAxisAngleEpsilonEquivalentAnglesDivisibleByTwoPi()
+   public void testAxisAngleEpsilonEqualsAnglesDivisibleByTwoPi()
    {
       int numberOfTests = 100;
-      ComparisonMode mode = ComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
+      AxisAngleComparisonMode mode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
 
       for (int i = 0; i < numberOfTests; i++)
       {
@@ -128,7 +126,7 @@ public class RotationToolsTest
          AxisAngle4d axisAngleA = new AxisAngle4d(randomAxisA, randomAngleA_MultipleOfTwoPi);
          AxisAngle4d axisAngleB = new AxisAngle4d(randomAxisB, randomAngleB_MultipleOfTwoPi);
 
-         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquivalent(axisAngleA, axisAngleB, delta, mode));
+         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
       }
       
       for (int i = 0; i < numberOfTests; i++)
@@ -146,13 +144,13 @@ public class RotationToolsTest
          AxisAngle4d axisAngleA = new AxisAngle4d(randomAxisA, randomAngleMultipleOfTwoPi);
          AxisAngle4d axisAngleB = new AxisAngle4d(randomAxisB, randomAngleNotZeroOrMultipleOfTwoPi);
 
-         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEquivalent(axisAngleA, axisAngleB, delta, mode));
+         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
       }
    }
    
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testAxisAngleEpsilonEquivalentMinusPI()
+   public void testAxisAngleEpsilonEqualsMinusPI()
    {
       int numberOfTests = 100;
       
@@ -163,8 +161,8 @@ public class RotationToolsTest
          AxisAngle4d axisAngleA = new AxisAngle4d(randomAxis, -Math.PI);
          AxisAngle4d axisAngleB = new AxisAngle4d(randomAxis, -Math.PI);
 
-         ComparisonMode mode = ComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
-         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquivalent(axisAngleA, axisAngleB, delta, mode));
+         AxisAngleComparisonMode mode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
+         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
       }
       
       for (int i = 0; i < numberOfTests; i++)
@@ -175,14 +173,14 @@ public class RotationToolsTest
          AxisAngle4d axisAngleA = new AxisAngle4d(randomAxisA, -Math.PI);
          AxisAngle4d axisAngleB = new AxisAngle4d(randomAxisB, -Math.PI);
 
-         ComparisonMode mode = ComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
-         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEquivalent(axisAngleA, axisAngleB, delta, mode));
+         AxisAngleComparisonMode mode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
+         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
       }
    }
    
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testAxisAngleEpsilonEquivalentPlusPI()
+   public void testAxisAngleEpsilonEqualsPlusPI()
    {
       int numberOfTests = 100;
       
@@ -193,8 +191,8 @@ public class RotationToolsTest
          AxisAngle4d axisAngleA = new AxisAngle4d(randomAxis, Math.PI);
          AxisAngle4d axisAngleB = new AxisAngle4d(randomAxis, Math.PI);
 
-         ComparisonMode mode = ComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
-         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquivalent(axisAngleA, axisAngleB, delta, mode));
+         AxisAngleComparisonMode mode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
+         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
       }
       
       for (int i = 0; i < numberOfTests; i++)
@@ -205,37 +203,185 @@ public class RotationToolsTest
          AxisAngle4d axisAngleA = new AxisAngle4d(randomAxisA, Math.PI);
          AxisAngle4d axisAngleB = new AxisAngle4d(randomAxisB, Math.PI);
 
-         ComparisonMode mode = ComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
-         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEquivalent(axisAngleA, axisAngleB, delta, mode));
+         AxisAngleComparisonMode mode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
+         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
       }
    }
-   
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testSetYawPitchRoll()
+
+   @DeployableTestMethod(estimatedDuration = 3.0)
+   @Test(timeout = 30000)
+   public void testConvertMatrixToAxisAngle()
    {
-      // Pure Yaw
-      double yaw = 1.0;
-      double pitch = 0.0;
-      double roll = 0.0;
+      
+   }
 
-      RotationTools.setYawPitchRoll(rotationMatrixToPack, yaw, pitch, roll);
+   @DeployableTestMethod(estimatedDuration = 3.0)
+   @Test(timeout = 30000)
+   public void testConvertYawPitchRollToMatrix()
+   {
+      Matrix3d yawRotation = new Matrix3d();
+      Matrix3d pitchRotation = new Matrix3d();
+      Matrix3d rollRotation = new Matrix3d();
+      Matrix3d expectedRotationMatrix = new Matrix3d();
+      Matrix3d actualRotationMatrix = new Matrix3d();
 
-      // 1st Row
-      assertEquals("Rotation Matrix is not right", 0.540302, rotationMatrixToPack.m00, delta);
-      assertEquals("Rotation Matrix is not right", -0.8414709, rotationMatrixToPack.m01, delta);
-      assertEquals("Rotation Matrix is not right", 0.0, rotationMatrixToPack.m02, delta);
+      int numberOfIterations = 100;
+      double startAngle = -2.0 * Math.PI;
+      double endAngle = 2.0 * Math.PI;
+      double dAngle = (endAngle - startAngle) / (numberOfIterations -1);
 
-      // 2nd Row
-      assertEquals("Rotation Matrix is not right", 0.8414709, rotationMatrixToPack.m10, delta);
-      assertEquals("Rotation Matrix is not right", 0.540302, rotationMatrixToPack.m11, delta);
-      assertEquals("Rotation Matrix is not right", 0.0, rotationMatrixToPack.m12, delta);
+      for (int yawIndex = 0; yawIndex < numberOfIterations; yawIndex ++)
+      {
+         double yaw = yawIndex * dAngle + startAngle;
+         for (int pitchIndex = 0; pitchIndex < numberOfIterations; pitchIndex ++)
+         {
+            double pitch = pitchIndex * dAngle + startAngle;
+            for (int rollIndex = 0; rollIndex < numberOfIterations; rollIndex ++)
+            {
+               double roll = rollIndex * dAngle + startAngle;
+               yawRotation.rotZ(yaw);
+               pitchRotation.rotY(pitch);
+               rollRotation.rotX(roll);
+               expectedRotationMatrix.mul(yawRotation, pitchRotation);
+               expectedRotationMatrix.mul(rollRotation);
+               RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, actualRotationMatrix);
+               assertTrue(expectedRotationMatrix.epsilonEquals(actualRotationMatrix, EPSILON));
+            }
+         }
+      }
+   }
 
-      // 3rd Row
-      assertEquals("Rotation Matrix is not right", 0.0, rotationMatrixToPack.m20, delta);
-      assertEquals("Rotation Matrix is not right", 0.0, rotationMatrixToPack.m21, delta);
-      assertEquals("Rotation Matrix is not right", 1.0, rotationMatrixToPack.m22, delta);
+   @DeployableTestMethod(estimatedDuration = 3.0)
+   @Test(timeout = 30000)
+   public void testConvertYawPitchRollArrayToMatrix()
+   {
+      Matrix3d yawRotation = new Matrix3d();
+      Matrix3d pitchRotation = new Matrix3d();
+      Matrix3d rollRotation = new Matrix3d();
+      Matrix3d expectedRotationMatrix = new Matrix3d();
+      Matrix3d actualRotationMatrix = new Matrix3d();
+      double[] yawPitchRoll = new double[3];
 
+      int numberOfIterations = 100;
+      double startAngle = -2.0 * Math.PI;
+      double endAngle = 2.0 * Math.PI;
+      double dAngle = (endAngle - startAngle) / (numberOfIterations -1);
+
+      for (int yawIndex = 0; yawIndex < numberOfIterations; yawIndex ++)
+      {
+         double yaw = yawIndex * dAngle + startAngle;
+         for (int pitchIndex = 0; pitchIndex < numberOfIterations; pitchIndex ++)
+         {
+            double pitch = pitchIndex * dAngle + startAngle;
+            for (int rollIndex = 0; rollIndex < numberOfIterations; rollIndex ++)
+            {
+               double roll = rollIndex * dAngle + startAngle;
+               yawRotation.rotZ(yaw);
+               pitchRotation.rotY(pitch);
+               rollRotation.rotX(roll);
+               expectedRotationMatrix.mul(yawRotation, pitchRotation);
+               expectedRotationMatrix.mul(rollRotation);
+
+               yawPitchRoll[0] = yaw;
+               yawPitchRoll[1] = pitch;
+               yawPitchRoll[2] = roll;
+               RotationTools.convertYawPitchRollToMatrix(yawPitchRoll, actualRotationMatrix);
+               assertTrue(expectedRotationMatrix.epsilonEquals(actualRotationMatrix, EPSILON));
+            }
+         }
+      }
+   }
+
+   /**
+    * Assumes that {@link RotationTools#convertMatrixToQuaternion(Matrix3d, Quat4d)} is tested.
+    * Assumes that {@link RotationTools#quaternionEpsilonEquals(Quat4d, Quat4d, double)} is tested.
+    */
+   @DeployableTestMethod(estimatedDuration = 3.0)
+   @Test(timeout = 30000)
+   public void testConvertYawPitchRollToQuaternion()
+   {
+      Matrix3d yawRotation = new Matrix3d();
+      Matrix3d pitchRotation = new Matrix3d();
+      Matrix3d rollRotation = new Matrix3d();
+      Matrix3d expectedRotationMatrix = new Matrix3d();
+      Quat4d expectedQuaternion = new Quat4d();
+      Quat4d actualQuaternion = new Quat4d();
+
+      int numberOfIterations = 100;
+      double startAngle = -2.0 * Math.PI;
+      double endAngle = 2.0 * Math.PI;
+      double dAngle = (endAngle - startAngle) / (numberOfIterations -1);
+
+      for (int yawIndex = 0; yawIndex < numberOfIterations; yawIndex ++)
+      {
+         double yaw = yawIndex * dAngle + startAngle;
+         for (int pitchIndex = 0; pitchIndex < numberOfIterations; pitchIndex ++)
+         {
+            double pitch = pitchIndex * dAngle + startAngle;
+            for (int rollIndex = 0; rollIndex < numberOfIterations; rollIndex ++)
+            {
+               double roll = rollIndex * dAngle + startAngle;
+               yawRotation.rotZ(yaw);
+               pitchRotation.rotY(pitch);
+               rollRotation.rotX(roll);
+               expectedRotationMatrix.mul(yawRotation, pitchRotation);
+               expectedRotationMatrix.mul(rollRotation);
+
+               RotationTools.convertMatrixToQuaternion(expectedRotationMatrix, expectedQuaternion);
+               RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, actualQuaternion);
+               assertTrue(RotationTools.quaternionEpsilonEquals(expectedQuaternion, actualQuaternion, EPSILON));
+            }
+         }
+      }
+   }
+
+   /**
+    * Assumes that {@link RotationTools#convertMatrixToQuaternion(Matrix3d, Quat4d)} is tested.
+    * Assumes that {@link RotationTools#quaternionEpsilonEquals(Quat4d, Quat4d, double)} is tested.
+    */
+   @DeployableTestMethod(estimatedDuration = 3.0)
+   @Test(timeout = 30000)
+   public void testConvertYawPitchRollArrayToQuaternion()
+   {
+      Matrix3d yawRotation = new Matrix3d();
+      Matrix3d pitchRotation = new Matrix3d();
+      Matrix3d rollRotation = new Matrix3d();
+      Matrix3d expectedRotationMatrix = new Matrix3d();
+      Quat4d expectedQuaternion = new Quat4d();
+      Quat4d actualQuaternion = new Quat4d();
+      double[] yawPitchRoll = new double[3];
+
+      int numberOfIterations = 100;
+      double startAngle = -2.0 * Math.PI;
+      double endAngle = 2.0 * Math.PI;
+      double dAngle = (endAngle - startAngle) / (numberOfIterations -1);
+
+      for (int yawIndex = 0; yawIndex < numberOfIterations; yawIndex ++)
+      {
+         double yaw = yawIndex * dAngle + startAngle;
+         for (int pitchIndex = 0; pitchIndex < numberOfIterations; pitchIndex ++)
+         {
+            double pitch = pitchIndex * dAngle + startAngle;
+            for (int rollIndex = 0; rollIndex < numberOfIterations; rollIndex ++)
+            {
+               double roll = rollIndex * dAngle + startAngle;
+               yawRotation.rotZ(yaw);
+               pitchRotation.rotY(pitch);
+               rollRotation.rotX(roll);
+               expectedRotationMatrix.mul(yawRotation, pitchRotation);
+               expectedRotationMatrix.mul(rollRotation);
+
+               RotationTools.convertMatrixToQuaternion(expectedRotationMatrix, expectedQuaternion);
+
+
+               yawPitchRoll[0] = yaw;
+               yawPitchRoll[1] = pitch;
+               yawPitchRoll[2] = roll;
+               RotationTools.convertYawPitchRollToQuaternion(yawPitchRoll, actualQuaternion);
+               assertTrue(RotationTools.quaternionEpsilonEquals(expectedQuaternion, actualQuaternion, EPSILON));
+            }
+         }
+      }
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -246,32 +392,32 @@ public class RotationToolsTest
       double yaw = 1.0;
       double pitch = 0.0;
       double roll = 0.0;
-
-      RotationTools.setYawPitchRoll(rotationMatrixToPack, yaw, pitch, roll);
+      Matrix3d rotationMatrixToPack = new Matrix3d();
+      RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, rotationMatrixToPack);
 
       // 1st Row
-      assertEquals("Rotation Matrix is not right", 0.540302, rotationMatrixToPack.m00, delta);
-      assertEquals("Rotation Matrix is not right", -0.8414709, rotationMatrixToPack.m01, delta);
-      assertEquals("Rotation Matrix is not right", 0.0, rotationMatrixToPack.m02, delta);
+      assertEquals("Rotation Matrix is not right", 0.540302, rotationMatrixToPack.m00, EPSILON);
+      assertEquals("Rotation Matrix is not right", -0.8414709, rotationMatrixToPack.m01, EPSILON);
+      assertEquals("Rotation Matrix is not right", 0.0, rotationMatrixToPack.m02, EPSILON);
 
       // 2nd Row
-      assertEquals("Rotation Matrix is not right", 0.8414709, rotationMatrixToPack.m10, delta);
-      assertEquals("Rotation Matrix is not right", 0.540302, rotationMatrixToPack.m11, delta);
-      assertEquals("Rotation Matrix is not right", 0.0, rotationMatrixToPack.m12, delta);
+      assertEquals("Rotation Matrix is not right", 0.8414709, rotationMatrixToPack.m10, EPSILON);
+      assertEquals("Rotation Matrix is not right", 0.540302, rotationMatrixToPack.m11, EPSILON);
+      assertEquals("Rotation Matrix is not right", 0.0, rotationMatrixToPack.m12, EPSILON);
 
       // 3rd Row
-      assertEquals("Rotation Matrix is not right", 0.0, rotationMatrixToPack.m20, delta);
-      assertEquals("Rotation Matrix is not right", 0.0, rotationMatrixToPack.m21, delta);
-      assertEquals("Rotation Matrix is not right", 1.0, rotationMatrixToPack.m22, delta);
+      assertEquals("Rotation Matrix is not right", 0.0, rotationMatrixToPack.m20, EPSILON);
+      assertEquals("Rotation Matrix is not right", 0.0, rotationMatrixToPack.m21, EPSILON);
+      assertEquals("Rotation Matrix is not right", 1.0, rotationMatrixToPack.m22, EPSILON);
 
-      pitch = RotationTools.getPitch(rotationMatrixToPack);
-      assertEquals("Pitch is not correct", 0.0, pitch, delta);
+      pitch = RotationTools.computePitch(rotationMatrixToPack);
+      assertEquals("Pitch is not correct", 0.0, pitch, EPSILON);
 
-      roll = RotationTools.getRoll(rotationMatrixToPack);
-      assertEquals("Roll is not correct", 0.0, roll, delta);
+      roll = RotationTools.computeRoll(rotationMatrixToPack);
+      assertEquals("Roll is not correct", 0.0, roll, EPSILON);
 
-      yaw = RotationTools.getYaw(rotationMatrixToPack);
-      assertEquals("Yaw is not correct", 1.0, yaw, delta);
+      yaw = RotationTools.computeYaw(rotationMatrixToPack);
+      assertEquals("Yaw is not correct", 1.0, yaw, EPSILON);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -282,21 +428,22 @@ public class RotationToolsTest
       double yaw = 1.0;
       double pitch = 0.0;
       double roll = 0.0;
-
-      RotationTools.setYawPitchRoll(rotationMatrixToPack, yaw, pitch, roll);
+      Matrix3d rotationMatrixToPack = new Matrix3d();
+      RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, rotationMatrixToPack);
+      Quat4d quatToPack = new Quat4d();
       quatToPack.set(rotationMatrixToPack);
-      double yawSolution = RotationTools.getYawFromQuaternion(quatToPack);
-      assertEquals("Yaw is not correct", yaw, yawSolution, delta);
+      double yawSolution = RotationTools.computeYaw(quatToPack);
+      assertEquals("Yaw is not correct", yaw, yawSolution, EPSILON);
 
       // Yaw, Pitch, and Roll
       yaw = 1.0;
       pitch = 0.5;
       roll = 0.7;
 
-      RotationTools.setYawPitchRoll(rotationMatrixToPack, yaw, pitch, roll);
+      RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, rotationMatrixToPack);
       quatToPack.set(rotationMatrixToPack);
-      yawSolution = RotationTools.getYawFromQuaternion(quatToPack);
-      assertEquals("Yaw is not correct", yaw, yawSolution, delta);
+      yawSolution = RotationTools.computeYaw(quatToPack);
+      assertEquals("Yaw is not correct", yaw, yawSolution, EPSILON);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -306,30 +453,31 @@ public class RotationToolsTest
       double yaw = 1.0;
       double pitch = 0.4;
       double roll = 0.8;
-
-      RotationTools.setYawPitchRoll(rotationMatrixToPack, yaw, pitch, roll);
+      Matrix3d rotationMatrixToPack = new Matrix3d();
+      RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, rotationMatrixToPack);
       Vector3d normal = new Vector3d();
       rotationMatrixToPack.getColumn(2, normal);
+      Quat4d quatToPack = new Quat4d();
       quatToPack.set(rotationMatrixToPack);
 
       Quat4d quatSolution = new Quat4d();
-      RotationTools.getQuaternionFromYawAndZNormal(yaw, normal, quatSolution);
+      RotationTools.computeQuaternionFromYawAndZNormal(yaw, normal, quatSolution);
 
-      assertTrue(RotationTools.quaternionEpsilonEquals(quatToPack, quatSolution, delta));
+      assertTrue(RotationTools.quaternionEpsilonEquals(quatToPack, quatSolution, EPSILON));
       
       yaw = -Math.PI - 0.01;
       pitch = Math.PI/2.0 - 1e-3;
       roll = 0.8;
 
-      RotationTools.setYawPitchRoll(rotationMatrixToPack, yaw, pitch, roll);
+      RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, rotationMatrixToPack);
       normal = new Vector3d();
       rotationMatrixToPack.getColumn(2, normal);
       quatToPack.set(rotationMatrixToPack);
 
       quatSolution = new Quat4d();
-      RotationTools.getQuaternionFromYawAndZNormal(yaw, normal, quatSolution);
+      RotationTools.computeQuaternionFromYawAndZNormal(yaw, normal, quatSolution);
 
-      assertTrue(RotationTools.quaternionEpsilonEquals(quatToPack, quatSolution, delta));
+      assertTrue(RotationTools.quaternionEpsilonEquals(quatToPack, quatSolution, EPSILON));
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -343,14 +491,15 @@ public class RotationToolsTest
 
       for (int i = 0; i < numTests; i++)
       {
-         quatToPack = RandomTools.generateRandomQuaternion(random);
-         double yaw = RotationTools.getYawFromQuaternion(quatToPack);
+         Quat4d quatToPack = RandomTools.generateRandomQuaternion(random);
+         Matrix3d rotationMatrixToPack = new Matrix3d();
+         double yaw = RotationTools.computeYaw(quatToPack);
          rotationMatrixToPack.set(quatToPack);
          rotationMatrixToPack.getColumn(2, normal);
 
-         RotationTools.getQuaternionFromYawAndZNormal(yaw, normal, quatSolution);
+         RotationTools.computeQuaternionFromYawAndZNormal(yaw, normal, quatSolution);
          
-         boolean quaternionsAreEqual = RotationTools.quaternionEpsilonEquals(quatToPack, quatSolution, delta);
+         boolean quaternionsAreEqual = RotationTools.quaternionEpsilonEquals(quatToPack, quatSolution, EPSILON);
          assertTrue(quaternionsAreEqual);
       }
    }
@@ -370,9 +519,9 @@ public class RotationToolsTest
          double roll = (random.nextDouble() - 0.5) * 2.0 * pi;
          double[] yawPitchRoll = {yaw, pitch, roll};
 
-         RotationTools.setQuaternionBasedOnYawPitchRoll(q, yaw, pitch, roll);
+         RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, q);
          double[] yawPitchRollBack = new double[3];
-         RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRollBack, q);
+         RotationTools.convertQuaternionToYawPitchRoll(q, yawPitchRollBack);
 
          double epsilon = 1e-8;
          localAssertArrayEquals(yawPitchRoll, yawPitchRollBack, epsilon);
@@ -395,7 +544,7 @@ public class RotationToolsTest
 //            qtest.set(mTest);
 //            break;
 //         case "apache":
-            RotationTools.setQuaternionBasedOnMatrix3d(qtest, mTest);
+            RotationTools.convertMatrixToQuaternion(mTest, qtest);
 //            break;
 //         case "jme":
 //            Quaternion jqtest = new Quaternion();
@@ -460,7 +609,7 @@ public class RotationToolsTest
          rotationMatrix.set(randomQuaternion);
 
          Quat4d quaternionToPack = new Quat4d();
-         RotationTools.setQuaternionBasedOnMatrix3d(quaternionToPack, rotationMatrix);
+         RotationTools.convertMatrixToQuaternion(rotationMatrix, quaternionToPack);
 
          quaternionToPack.mulInverse(randomQuaternion);
 
@@ -579,7 +728,7 @@ public class RotationToolsTest
             -0.10063683459913739, 0.8627481429886237, 0.49551777898633176,
             -0.026770738081164314, 0.4955177897483468, -0.8681851459369152);
       AxisAngle4d a = new AxisAngle4d();
-      RotationTools.axisAngleFromMatrix(m, a);
+      RotationTools.convertMatrixToAxisAngle(m, a);
       Matrix3d m3 = new Matrix3d();
       m3.set(a);
       assertTrue(m3.epsilonEquals(m, 1e-5));
@@ -594,15 +743,15 @@ public class RotationToolsTest
             -0.10063683459913739f, 0.8627481429886237f, 0.49551777898633176f,
             -0.026770738081164314f, 0.4955177897483468f, -0.8681851459369152f);
       AxisAngle4f a = new AxisAngle4f();
-      RotationTools.axisAngleFromMatrix(m, a);
+      RotationTools.convertMatrixToAxisAngle(m, a);
       Matrix3f m3 = new Matrix3f();
       m3.set(a);
       assertTrue(m3.epsilonEquals(m, 1e-5f));
    }
 
-   public static void assertAxisAngleEquivalent(String errorMsg, AxisAngle4d axisAngleExpected, AxisAngle4d axisAngleActual, ComparisonMode mode, double epsilon)
+   public static void assertAxisAngleEquivalent(String errorMsg, AxisAngle4d axisAngleExpected, AxisAngle4d axisAngleActual, AxisAngleComparisonMode mode, double epsilon)
    {
-      boolean axisAnglesAreEqual = RotationTools.axisAngleEpsilonEquivalent(axisAngleExpected, axisAngleActual, epsilon, mode);
+      boolean axisAnglesAreEqual = RotationTools.axisAngleEpsilonEquals(axisAngleExpected, axisAngleActual, epsilon, mode);
       assertTrue(errorMsg + "\n AxisAngles are not Equal!\n expected:\n<" + axisAngleExpected + ">\n but was:\n<" + axisAngleActual + ">", axisAnglesAreEqual);
    }
 }

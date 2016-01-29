@@ -83,7 +83,7 @@ public class SphereVoxelShape
             finalRotationMatrix.mul(rotationMatrixAroundRay, rotationMatrixForXAxisAlignedWithRay);
 
             Quat4d rotation = new Quat4d();
-            RotationTools.setQuaternionBasedOnMatrix3d(rotation, finalRotationMatrix);
+            RotationTools.convertMatrixToQuaternion(finalRotationMatrix, rotation);
             rotations[rayIndex][rotationAroundRayIndex] = rotation;
          }
       }

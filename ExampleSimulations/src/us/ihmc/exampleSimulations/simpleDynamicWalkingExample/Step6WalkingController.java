@@ -259,7 +259,7 @@ public class Step6WalkingController implements RobotController
    private DoubleYoVariable controlBodyPitch()
    {
       rob.getBodyPitch(rotationToPack);
-      double pitchFromQuaternion = RotationTools.getPitchFromQuaternion(rotationToPack);
+      double pitchFromQuaternion = RotationTools.computePitch(rotationToPack);
 
       rob.getBodyAngularVel(velocityToPack);
       double bodyAngularVel = velocityToPack.getY();
@@ -271,7 +271,7 @@ public class Step6WalkingController implements RobotController
    private DoubleYoVariable controlBodyPitchSingleSupport()
    {
       rob.getBodyPitch(rotationToPack);
-      double pitchFromQuaternion = RotationTools.getPitchFromQuaternion(rotationToPack);
+      double pitchFromQuaternion = RotationTools.computePitch(rotationToPack);
       
       rob.getBodyAngularVel(velocityToPack);
       double bodyAngularVel = velocityToPack.getY();

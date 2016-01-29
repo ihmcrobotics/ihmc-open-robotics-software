@@ -195,7 +195,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule
 
       AxisAngle4d desiredPelvisToPelvisAxisAngle = new AxisAngle4d();
 //      desiredPelvisToPelvisAxisAngle.set(desiredPelvisToPelvis);
-      RotationTools.axisAngleFromMatrix(desiredPelvisToPelvis, desiredPelvisToPelvisAxisAngle);
+      RotationTools.convertMatrixToAxisAngle(desiredPelvisToPelvis, desiredPelvisToPelvisAxisAngle);
       FrameVector proportionalPart = new FrameVector(pelvisFrame, desiredPelvisToPelvisAxisAngle.getX(), desiredPelvisToPelvisAxisAngle.getY(), 0.0);
       proportionalPart.scale(desiredPelvisToPelvisAxisAngle.getAngle());
       proportionalPart.changeFrame(frame);
