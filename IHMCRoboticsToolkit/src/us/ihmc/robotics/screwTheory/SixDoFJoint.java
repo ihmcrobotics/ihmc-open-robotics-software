@@ -111,7 +111,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
 
    public void setPositionAndRotation(RigidBodyTransform transform)
    {
-      RotationTools.setQuaternionBasedOnTransform(jointRotation, transform);
+      RotationTools.convertTransformToQuaternion(transform, jointRotation);
       
       if (!RotationTools.isQuaternionNormalized(jointRotation))
       {
@@ -125,7 +125,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
 
    public void setRotation(double yaw, double pitch, double roll)
    {
-      RotationTools.setQuaternionBasedOnYawPitchRoll(jointRotation, yaw, pitch, roll);
+      RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, jointRotation);
       this.afterJointFrame.setRotation(jointRotation);
    }
 
@@ -142,7 +142,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
 
    public void setRotation(Matrix3d jointRotation)
    {
-      RotationTools.setQuaternionBasedOnMatrix3d(this.jointRotation, jointRotation);
+      RotationTools.convertMatrixToQuaternion(jointRotation, this.jointRotation);
 
       // DON'T USE THIS: the method in Quat4d is flawed and doesn't work for some rotation matrices!
       //      this.jointRotation.set(jointRotation);
@@ -194,7 +194,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
 
    public void packRotation(double[] yawPitchRoll)
    {
-      RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, jointRotation);
+      RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
    }
 
    public void packTranslation(Vector3d vectorToPack)
@@ -270,7 +270,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
    {
       int index = rowStart;
       RotationTools.matrixToQuaternion(jointRotation, matrix, rowStart);
-      RotationTools.assertQuaternionNormalized(jointRotation, "SixDoFJoint " + name + ":");
+      RotationTools.checkQuaternionNormalized(jointRotation);
       index += RotationTools.QUATERNION_SIZE;
       jointTranslation.setX(matrix.get(index++, 0));
       jointTranslation.setY(matrix.get(index++, 0));

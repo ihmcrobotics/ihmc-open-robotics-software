@@ -330,13 +330,13 @@ public class TransformInterpolationCalculatorTest
       Matrix3d maxtrixt1 = new Matrix3d();
       t1.get(maxtrixt1);
 //      axist1.set(maxtrixt1);
-      RotationTools.axisAngleFromMatrix(maxtrixt1, axist1);
+      RotationTools.convertMatrixToAxisAngle(maxtrixt1, axist1);
 
       AxisAngle4d axist2 = new AxisAngle4d();
       Matrix3d maxtrixt2 = new Matrix3d();
       t2.get(maxtrixt2);
 //      axist2.set(maxtrixt2);
-      RotationTools.axisAngleFromMatrix(maxtrixt2, axist2);
+      RotationTools.convertMatrixToAxisAngle(maxtrixt2, axist2);
       
 
 

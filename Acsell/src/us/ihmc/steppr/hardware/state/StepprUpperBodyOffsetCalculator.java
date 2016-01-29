@@ -124,7 +124,7 @@ public class StepprUpperBodyOffsetCalculator
       xsens.getQuaternion(xsensQuat);
       xsensMatrix.set(xsensQuat);
 
-      RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, xsensQuat);
+      RotationTools.convertQuaternionToYawPitchRoll(xsensQuat, yawPitchRoll);
       xsens_yaw.update(yawPitchRoll[0]);
       xsens_pitch.update(yawPitchRoll[1]);
       xsens_roll.update(yawPitchRoll[2]);
