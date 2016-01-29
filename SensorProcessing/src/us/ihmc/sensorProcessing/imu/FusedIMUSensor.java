@@ -159,9 +159,9 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       RigidBodyTransform secondTransform = secondMeasurementFrame.getTransformToParent();
 
       double[] firstYawPitchRoll = new double[3];
-      RotationTools.getYawPitchRoll(firstYawPitchRoll, firstTransform);
+      RotationTools.convertTransformToYawPitchRoll(firstTransform, firstYawPitchRoll);
       double[] secondYawPitchRoll = new double[3];
-      RotationTools.getYawPitchRoll(secondYawPitchRoll, secondTransform);
+      RotationTools.convertTransformToYawPitchRoll(secondTransform, secondYawPitchRoll);
 
       Vector3d firstOffset = new Vector3d();
       firstTransform.get(firstOffset);
@@ -180,7 +180,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       }
 
       Quat4d fusedQuaternion = new Quat4d();
-      RotationTools.setQuaternionBasedOnYawPitchRoll(fusedQuaternion, fusedYawPitchRoll);
+      RotationTools.convertYawPitchRollToQuaternion(fusedYawPitchRoll, fusedQuaternion);
 
       RigidBodyTransform fusedTransform = new RigidBodyTransform(fusedQuaternion, fusedOffset);
       ReferenceFrame fusedMeasurementFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sensorName + "Frame",

@@ -203,12 +203,12 @@ public class YoFrameOrientation extends ReferenceFrameHolder
 
    public void getQuaternion(Quat4d quaternionToPack)
    {
-      RotationTools.setQuaternionBasedOnYawPitchRoll(quaternionToPack, yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue());
+      RotationTools.convertYawPitchRollToQuaternion(yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue(), quaternionToPack);
    }
 
    public void getMatrix3d(Matrix3d rotationMatrixToPack)
    {
-      RotationTools.setYawPitchRoll(rotationMatrixToPack, yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue());
+      RotationTools.convertYawPitchRollToMatrix(yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue(), rotationMatrixToPack);
    }
 
    public void getFrameOrientationIncludingFrame(FrameOrientation orientationToPack)

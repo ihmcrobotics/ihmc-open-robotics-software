@@ -46,7 +46,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          double yaw = 0.0;
          Vector3d translation = new Vector3d(0.630000, 0.100000, 0.580000);
          Matrix3d matrix3d = new Matrix3d();
-         RotationTools.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+         RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, matrix3d);
             transform3DfromWorldToParent = new RigidBodyTransform(matrix3d, translation);
          }
 
@@ -58,7 +58,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
             double yaw = -3.141592;
             Vector3d translation = new Vector3d(-0.038500, 0.000000, -0.086000);
             Matrix3d matrix3d = new Matrix3d();
-            RotationTools.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+            RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, matrix3d);
             transform3DfromParentToChild = new RigidBodyTransform(matrix3d, translation);
          }
 
@@ -88,7 +88,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
             double yaw = 0.0;
             Vector3d translation = new Vector3d(0.640000, 0.270000, 0.580000);
             Matrix3d matrix3d = new Matrix3d();
-            RotationTools.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+            RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, matrix3d);
             transform3DfromWorldToParent = new RigidBodyTransform(matrix3d, translation);
          }
 
@@ -100,7 +100,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
             double yaw = -3.141592;
             Vector3d translation = new Vector3d(-0.040000, 0.000000, -0.086000);
             Matrix3d matrix3d = new Matrix3d();
-            RotationTools.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+            RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, matrix3d);
             transform3DfromParentToChild = new RigidBodyTransform(matrix3d, translation);
          }
 
@@ -130,7 +130,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
             double yaw = 0.0;
             Vector3d translation = new Vector3d(0.340000, 0.300000, 1.290000);
             Matrix3d matrix3d = new Matrix3d();
-            RotationTools.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+            RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, matrix3d);
             transform3DfromWorldToParent = new RigidBodyTransform(matrix3d, translation);
          }
          RigidBodyTransform transform3D = new RigidBodyTransform(transform3DfromWorldToParent);
@@ -193,7 +193,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
             double yaw = 0.0;
             Vector3d translation = new Vector3d(0.530000, 0.070000, 1.050000);
             Matrix3d matrix3d = new Matrix3d();
-            RotationTools.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+            RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, matrix3d);
             transform3DfromWorldToParent = new RigidBodyTransform(matrix3d, translation);
          }
 
@@ -237,7 +237,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
 
          Vector3d translation = new Vector3d(0.560000, -0.020000, 1.080000);
          Matrix3d matrix3d = new Matrix3d();
-         RotationTools.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+         RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, matrix3d);
 
          RigidBodyTransform transform3D = new RigidBodyTransform(matrix3d, translation);
 
@@ -265,7 +265,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
 
          Vector3d translation = new Vector3d(0.560000, -0.020000, 1.080000);
          Matrix3d matrix3d = new Matrix3d();
-         RotationTools.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+         RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, matrix3d);
 
          RigidBodyTransform transform3D = new RigidBodyTransform(matrix3d, translation);
 
