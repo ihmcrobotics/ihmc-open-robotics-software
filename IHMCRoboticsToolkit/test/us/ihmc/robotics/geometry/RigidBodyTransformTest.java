@@ -2780,7 +2780,9 @@ public class RigidBodyTransformTest
       temp.rotZ(1.2);  R1.mul(temp);   
       
       System.out.println("..........");
-      quat.set( R1 );
+      // The Quat4d.set(Matrix3d) is buggy
+//      quat.set( R1 );
+      RotationTools.convertMatrixToQuaternion(R1, quat);
       System.out.println("R1: " + quat );
       
       //----------------

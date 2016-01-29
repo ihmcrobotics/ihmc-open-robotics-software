@@ -181,6 +181,15 @@ public class RotationTools
       }
    };
 
+   private static ThreadLocal<Matrix3d> rotationMatrixForConvertingFloatToDouble = new ThreadLocal<Matrix3d>()
+   {
+      @Override
+      protected Matrix3d initialValue()
+      {
+         return new Matrix3d();
+      }
+   };
+
    /**
     * Compute the yaw rotation from the yaw-pitch-roll rotations induced by the given rotationMatrix.
     * @param rotationMatrix rotation matrix from which the yaw is computed.
@@ -316,14 +325,18 @@ public class RotationTools
    // https://www.mail-archive.com/java3d-interest@java.sun.com/msg09568.html
    public static void convertMatrixToAxisAngle(Matrix3d rotationMatrix, AxisAngle4d axisAngle4dToPack)
    {
-      threadLocalTemporaryQuaternion.get().set(rotationMatrix);
-      axisAngle4dToPack.set(threadLocalTemporaryQuaternion.get());
+      Quat4d quaternion = threadLocalTemporaryQuaternion.get();
+      convertMatrixToQuaternion(rotationMatrix, quaternion);
+      axisAngle4dToPack.set(quaternion);
    }
 
    public static void convertMatrixToAxisAngle(Matrix3f rotationMatrix, AxisAngle4f axisAngle4fToPack)
    {
-      threadLocalTemporaryQuaternion.get().set(rotationMatrix);
-      axisAngle4fToPack.set(threadLocalTemporaryQuaternion.get());
+      Quat4d quat4d = threadLocalTemporaryQuaternion.get();
+      Matrix3d rotationMatrixDouble = rotationMatrixForConvertingFloatToDouble.get();
+      rotationMatrixDouble.set(rotationMatrix);
+      convertMatrixToQuaternion(rotationMatrixDouble, quat4d);
+      axisAngle4fToPack.set(quat4d);
    }
 
    /**
@@ -421,17 +434,18 @@ public class RotationTools
       double qyqy = qy * qy;
       double qzqz = qz * qz;
 
-      double pitchArgument = -2.0 * qx * qz + 2.0 * qw * qy;
+      double pitchArgument = 2.0 * (qw * qy - qx * qz);
 
       yawPitchRollToPack[1] = FastMath.asin(pitchArgument);
 
       if (Math.abs(yawPitchRollToPack[1]) < 0.49 * Math.PI)
       {
-         yawPitchRollToPack[0] = FastMath.atan2(2.0 * qx * qy + 2.0 * qz * qw, 1.0 - 2.0 * qyqy - 2.0 * qzqz);
-         yawPitchRollToPack[2] = FastMath.atan2(2.0 * qy * qz + 2.0 * qx * qw, 1.0 - 2.0 * qxqx - 2.0 * qyqy);
+         yawPitchRollToPack[0] = FastMath.atan2(2.0 * (qx * qy + qz * qw), 1.0 - 2.0 * (qyqy + qzqz));
+         yawPitchRollToPack[2] = FastMath.atan2(2.0 * (qy * qz + qx * qw), 1.0 - 2.0 * (qxqx + qyqy));
       }
       else
       {
+         // Here the yaw-pitch-roll representation is probably messed up. No way to get a proper yaw/roll.
          yawPitchRollToPack[0] = 2.0 * FastMath.atan2(qz, qw);
          yawPitchRollToPack[2] = 0.0;
       }
