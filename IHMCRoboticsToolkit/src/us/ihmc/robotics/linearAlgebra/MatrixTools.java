@@ -18,6 +18,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
@@ -1286,6 +1287,16 @@ public class MatrixTools
       frameTuple.setZ(ejmlVector.get(startIndex + 2, 0));
    }
 
+   public static void extractQuat4dFromEJMLVector(Quat4d quaternion, DenseMatrix64F matrix, int rowStart)
+   {
+      int index = rowStart;
+      double x = matrix.get(index++, 0);
+      double y = matrix.get(index++, 0);
+      double z = matrix.get(index++, 0);
+      double w = matrix.get(index++, 0);
+      quaternion.set(x, y, z, w);
+   }
+
    public static void insertTuple3dIntoEJMLVector(Tuple3d tuple3d, DenseMatrix64F ejmlVector, int[] indices)
    {
       ejmlVector.set(indices[0], 0, tuple3d.getX());
@@ -1305,6 +1316,15 @@ public class MatrixTools
       ejmlVector.set(startIndex + 0, 0, frameTuple.getX());
       ejmlVector.set(startIndex + 1, 0, frameTuple.getY());
       ejmlVector.set(startIndex + 2, 0, frameTuple.getZ());
+   }
+
+   public static void insertQuat4dIntoEJMLVector(DenseMatrix64F matrix, Quat4d quaternion, int rowStart)
+   {
+      int index = rowStart;
+      matrix.set(index++, 0, quaternion.getX());
+      matrix.set(index++, 0, quaternion.getY());
+      matrix.set(index++, 0, quaternion.getZ());
+      matrix.set(index++, 0, quaternion.getW());
    }
 
    public static <T> int computeIndicesIntoVector(List<T> keys, Map<T, Integer> indices, Map<T, Integer> sizes)
