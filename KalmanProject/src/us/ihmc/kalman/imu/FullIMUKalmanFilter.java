@@ -1,7 +1,12 @@
 package us.ihmc.kalman.imu;
 
-import us.ihmc.robotics.geometry.QuaternionTools;
-import Jama.Matrix;
+import javax.vecmath.Quat4d;
+
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
+import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
  * <p>Title: </p>
@@ -27,14 +32,14 @@ public class FullIMUKalmanFilter
     * every other state step.  This is because the covariance should change
     * at a rate somewhat slower than the dynamics of the system.
     */
-   private Matrix P = new Matrix(N, N);    // Covariance matrix
+   private DenseMatrix64F P = new DenseMatrix64F(N, N);    // Covariance matrix
 
    /*
     * A represents the Jacobian of the derivative of the system with respect
     * its states.  We do not allocate the bottom three rows since we know that
     * the derivatives of bias_dot are all zero.
     */
-   private Matrix A = new Matrix(N, N);
+   private DenseMatrix64F A = new DenseMatrix64F(N, N);
 
    /*
     * Q is our estimate noise variance.  It is supposed to be an NxN
@@ -43,7 +48,7 @@ public class FullIMUKalmanFilter
     * it), those are zero.  For the gyro, we expect around 5 deg/sec noise,
     * which is 0.08 rad/sec.  The variance is then 0.08^2 ~= 0.0075.
     */
-   private Matrix Q = new Matrix(N, N);    // Noise estimate
+   private DenseMatrix64F Q = new DenseMatrix64F(N, N);    // Noise estimate
 
    /*
     * R is our measurement noise estimate.  Like Q, it is supposed to be
@@ -52,18 +57,18 @@ public class FullIMUKalmanFilter
     * We only have an expected noise in the pitch and roll accelerometers
     * and in the compass.
     */
-   private Matrix R = new Matrix(3, 3);    // State estimate for angles
+   private DenseMatrix64F R = new DenseMatrix64F(3, 3);    // State estimate for angles
 
-   private Matrix DCM = new Matrix(3, 3);
-   private Matrix Wxq = new Matrix(4, 4);
+   private DenseMatrix64F DCM = new DenseMatrix64F(3, 3);
+   private DenseMatrix64F Wxq = new DenseMatrix64F(4, 4);
 
 // public Matrix accel = new Matrix(3, 1); // Acceleration inputs. User must remove offsets first.
-   public Matrix eulerAngles = new Matrix(3, 1);    // Estimated joint angles.
-   public Matrix eulerError = new Matrix(3, 1);
+   public double[] eulerAngles = new double[3];    // Estimated joint angles.
+   public double[] eulerError = new double[3];
 
 // public Matrix pqr = new Matrix(3, 1);   // Rate gyro rates.
-   public Matrix bias = new Matrix(3, 1);    // Rate gyro bias offset estimates. The Kalman filter adapts to these.
-   public Matrix q = new Matrix(4, 1);    // Estimated orientation in quaternions.
+   public DenseMatrix64F bias = new DenseMatrix64F(3, 1);    // Rate gyro bias offset estimates. The Kalman filter adapts to these.
+   public DenseMatrix64F q = new DenseMatrix64F(4, 1);    // Estimated orientation in quaternions.
    public double q0, q1, q2, q3;    // Redundant estimated orientation in quaternions.
 
    /*
@@ -82,8 +87,8 @@ public class FullIMUKalmanFilter
     * C represents the Jacobian of the measurements of the attitude
     * with respect to the states of the filter.
     */
-   private Matrix C = new Matrix(3, N);
-   private Matrix Ct, E;
+   private DenseMatrix64F C = new DenseMatrix64F(3, N);
+   private DenseMatrix64F Ct, E;
    @SuppressWarnings("unused")
    private static final java.text.DecimalFormat fmt = new java.text.DecimalFormat();
 
@@ -133,7 +138,7 @@ public class FullIMUKalmanFilter
     * body = tBL(3,3)*NED
     * q(4,1)
     */
-   void quatDC(Matrix DCM)
+   void quatDC(DenseMatrix64F DCM)
    {
       double[][] m =
       {
@@ -149,7 +154,7 @@ public class FullIMUKalmanFilter
     * W(4,4)
     * p, q, r (rad/sec)
     */
-   void quatW(Matrix w_xyz)
+   void quatW(DenseMatrix64F w_xyz)
    {
       double p = w_xyz.get(0, 0) / 2.0;
       double q = w_xyz.get(1, 0) / 2.0;
@@ -169,7 +174,7 @@ public class FullIMUKalmanFilter
     * matrix C in the Kalman filter that represents the relationship of
     * the measurements to the states.
     */
-   Matrix dphi_dq()
+   DenseMatrix64F dphi_dq()
    {
       double err = 2 / (dcm22 * dcm22 + dcm12 * dcm12);
 
@@ -178,10 +183,13 @@ public class FullIMUKalmanFilter
          {q1 * dcm22}, {q0 * dcm22 + 2 * q1 * dcm12}, {q3 * dcm22 + 2 * q2 * dcm12}, {q2 * dcm22}
       };
 
-      return new Matrix(m).times(err);    // Fix this to work in place without allocating...
+      DenseMatrix64F mErr = new DenseMatrix64F(m);
+      CommonOps.scale(err, mErr);
+      
+      return mErr;    // Fix this to work in place without allocating...
    }
 
-   Matrix dtheta_dq()
+   DenseMatrix64F dtheta_dq()
    {
       double err = -2 / Math.sqrt(1 - dcm02 * dcm02);
       double[][] m =
@@ -189,10 +197,12 @@ public class FullIMUKalmanFilter
          {-q2}, {q3}, {-q0}, {q1}
       };
 
-      return new Matrix(m).times(err);    // Fix this to work in place without allocating...
+      DenseMatrix64F mErr = new DenseMatrix64F(m);
+      CommonOps.scale(err, mErr);
+      return mErr;    // Fix this to work in place without allocating...
    }
 
-   Matrix dpsi_dq()
+   DenseMatrix64F dpsi_dq()
    {
       double err = 2 / (dcm00 * dcm00 + dcm01 * dcm01);
 
@@ -201,13 +211,15 @@ public class FullIMUKalmanFilter
          {q3 * dcm00}, {q2 * dcm00}, {q1 * dcm00 + 2 * q2 * dcm01}, {q0 * dcm00 + 2 * q3 * dcm01}
       };
 
-      return new Matrix(m).times(err);    // Fix this to work in place without allocating...
+      DenseMatrix64F mErr = new DenseMatrix64F(m);
+      CommonOps.scale(err, mErr);
+      return mErr;    // Fix this to work in place without allocating...
    }
 
-   void setArray(Matrix M, double[][] d)
+   void setArray(DenseMatrix64F M, double[][] d)
    {
       int m, n;
-      if ((m = M.getRowDimension()) == d.length && (n = M.getColumnDimension()) == d[0].length)
+      if ((m = M.getNumRows()) == d.length && (n = M.getNumCols()) == d[0].length)
       {
          for (int i = 0; i < m; i++)
          {
@@ -221,10 +233,10 @@ public class FullIMUKalmanFilter
          System.err.println("setArray: incompatible dimensions.");
    }
 
-   void setMatrix(Matrix M, Matrix d)
+   void setMatrix(DenseMatrix64F M, DenseMatrix64F d)
    {
       int m, n;
-      if ((m = M.getRowDimension()) == d.getRowDimension() && (n = M.getColumnDimension()) == d.getColumnDimension())
+      if ((m = M.getNumRows()) == d.getNumRows() && (n = M.getNumCols()) == d.getNumCols())
       {
          for (int i = 0; i < m; i++)
          {
@@ -240,7 +252,7 @@ public class FullIMUKalmanFilter
 
 
 
-   void makeAMatrix(Matrix pqr)
+   void makeAMatrix(DenseMatrix64F pqr)
    {
       quatW(pqr);
 
@@ -254,20 +266,19 @@ public class FullIMUKalmanFilter
        * A[4..6][4..6] is the partials of d(Gyro_bias_dot)/d(Gyro_bias)
        * which is also zero.
        */
-      double[][] wxq = Wxq.getArray();
       double[][] m =
       {
          {
-            wxq[0][0], wxq[0][1], wxq[0][2], wxq[0][3], q1 / 2, q2 / 2, q3 / 2
+            Wxq.get(0, 0), Wxq.get(0, 1), Wxq.get(0, 2), Wxq.get(0, 3), q1 / 2, q2 / 2, q3 / 2
          },
          {
-            wxq[1][0], wxq[1][1], wxq[1][2], wxq[1][3], -q0 / 2, q3 / 2, -q2 / 2
+            Wxq.get(1, 0), Wxq.get(1, 1), Wxq.get(1, 2), Wxq.get(1, 3), -q0 / 2, q3 / 2, -q2 / 2
          },
          {
-            wxq[2][0], wxq[2][1], wxq[2][2], wxq[2][3], -q3 / 2, -q0 / 2, q1 / 2
+            Wxq.get(2, 0), Wxq.get(2, 1), Wxq.get(2, 2), Wxq.get(2, 3), -q3 / 2, -q0 / 2, q1 / 2
          },
          {
-            wxq[3][0], wxq[3][1], wxq[3][2], wxq[3][3], q2 / 2, -q1 / 2, -q0 / 2
+            Wxq.get(3, 0), Wxq.get(3, 1), Wxq.get(3, 2), Wxq.get(3, 3), q2 / 2, -q1 / 2, -q0 / 2
          },
          {
             0, 0, 0, 0, 0, 0, 0
@@ -283,11 +294,11 @@ public class FullIMUKalmanFilter
       setArray(A, m);
    }
 
-   public static void normalize(Matrix M)
+   public static void normalize(DenseMatrix64F M)
    {
       double mag = 0;
       double s;
-      int m = M.getRowDimension(), n = M.getColumnDimension();
+      int m = M.getNumRows(), n = M.getNumCols();
       for (int i = 0; i < m; i++)
       {
          for (int j = 0; j < n; j++)
@@ -308,19 +319,42 @@ public class FullIMUKalmanFilter
       }
    }
 
-   void Kalman(Matrix P, Matrix X, Matrix C, Matrix R, Matrix err, Matrix K)
+   void Kalman(DenseMatrix64F P, DenseMatrix64F X, DenseMatrix64F C, DenseMatrix64F R, DenseMatrix64F err, DenseMatrix64F K)
    {
-      Ct = C.transpose();
-      E = C.times(P).times(Ct).plus(R);    // E = C*P*Ct+R
-      K = P.times(Ct).times(E.inverse());    // K = P*Ct*inv(E)
-      X.plusEquals(K.times(err));    // X += K*err;
-      P.minusEquals(K.times(C).times(P));    // P -= K*C*P;
+      Ct = new DenseMatrix64F(C);
+      CommonOps.transpose(Ct);
+      E = new DenseMatrix64F(C.getNumRows(), Ct.getNumCols());
+      DenseMatrix64F temp = new DenseMatrix64F(C.getNumRows(), P.getNumCols());
+   // E = C*P*Ct+R
+      CommonOps.mult(C, P, temp);
+      CommonOps.mult(temp, Ct, E);
+      CommonOps.add(E, R, E);
+      DenseMatrix64F E_Inverse = new DenseMatrix64F(E.getNumCols(), E.getNumRows());
+      CommonOps.invert(E, E_Inverse);
+
+      temp = new DenseMatrix64F(P.getNumRows(), Ct.getNumCols());
+      K = new DenseMatrix64F(P.getNumRows(), E_Inverse.getNumCols());
+      // K = P*Ct*inv(E)
+      CommonOps.mult(P, Ct, temp);
+      CommonOps.mult(temp, E_Inverse, K);
+
+      DenseMatrix64F KTimesErr = new DenseMatrix64F(K.getNumRows(), err.getNumCols());
+      CommonOps.mult(K, err, KTimesErr);
+      
+      CommonOps.addEquals(X, KTimesErr); // X += K*err;
+      
+      temp.reshape(K.getNumRows(), C.getNumCols());
+      CommonOps.mult(K, C, temp);
+      DenseMatrix64F KCP = new DenseMatrix64F(K.getNumRows(), P.getNumCols());
+      CommonOps.mult(temp, P, KCP);
+      
+      CommonOps.subtractEquals(P, KCP); // P -= K*C*P;
    }
 
 // void do_kalman(Matrix<3,N> C, Matrix<3,3> R, Matrix<1,3> error, int m=3) {
-   static Matrix K = new Matrix(N, 3);
+   static DenseMatrix64F K = new DenseMatrix64F(N, 3);
 
-   void doKalman(Matrix C, Matrix R, Matrix error)
+   void doKalman(DenseMatrix64F C, DenseMatrix64F R, DenseMatrix64F error)
    {
       // We throw away the K result
 
@@ -331,7 +365,7 @@ public class FullIMUKalmanFilter
       {
          {q.get(0, 0)}, {q.get(1, 0)}, {q.get(2, 0)}, {q.get(3, 0)}, {bias.get(0, 0)}, {bias.get(1, 0)}, {bias.get(2, 0)}
       };
-      Matrix X_vect = new Matrix(x_vect);
+      DenseMatrix64F X_vect = new DenseMatrix64F(x_vect);
 
       Kalman(P, X_vect, C, R, error, K);
 
@@ -345,7 +379,9 @@ public class FullIMUKalmanFilter
       bias.set(2, 0, X_vect.get(6, 0));
       normalize(q);
 
-      QuaternionTools.quaternionsToRollPitchYaw(q, eulerAngles);
+      Quat4d quaternion = new Quat4d();
+      MatrixTools.extractQuat4dFromEJMLVector(quaternion, q, 0);
+      RotationTools.convertQuaternionToYawPitchRoll(quaternion, eulerAngles);
    }
 
    /*
@@ -356,58 +392,56 @@ public class FullIMUKalmanFilter
     */
 
 // Matrix euler_diff(Matrix euler_m, Matrix euler) {
-   void euler_diff(Matrix euler_m, Matrix euler)
+   void euler_diff(double[] euler_m, double[] euler)
    {
-      double[][] m =
-      {
-         {euler_m.get(0, 0) - euler.get(0, 0)}, {euler_m.get(1, 0) - euler.get(1, 0)}, {euler_m.get(2, 0) - euler.get(2, 0)}
-      };
+      eulerError[0] = euler_m[0] - euler[0];
+      eulerError[1] = euler_m[1] - euler[1];
+      eulerError[2] = euler_m[2] - euler[2];
 
-      double d = m[0][0];    // Roll angles go from -180 degs to +180 degs
+      double d = eulerError[2];    // Roll angles go from -180 degs to +180 degs
       if (d < -PI)
-         m[0][0] = d + 2 * PI;
+         eulerError[2] = d + 2 * PI;
       else if (d > PI)
-         m[0][0] = d - 2 * PI;
+         eulerError[2] = d - 2 * PI;
 
 //    m[0][0] = (d < -PI) ? (d + 2 * PI) : ((d > PI) ? (d - 2 * PI) : d);
 
       // +++JEP. This seems very buggy to me. You can't just go around adding +- PI?
-      d = m[1][0];    // Pitch angles only go +/- 90 degs
+      d = eulerError[1];    // Pitch angles only go +/- 90 degs
 
       if (d > PI / 2.0)
       {
-         m[1][0] = d - PI;
+         eulerError[1] = d - PI;
       }
       else if (d < -PI / 2.0)
       {
-         m[1][0] = d + PI;
+         eulerError[1] = d + PI;
       }
 
 //    m[1][0] = (d > PI / 2) ? (d - PI) : ((d < -PI / 2) ? (d + PI) : d);
 
-      d = m[2][0];    // Heading is +/- 180 degs
+      d = eulerError[0];    // Heading is +/- 180 degs
 
       if (d > PI)
       {
-         m[2][0] = d + 2.0 * PI;
+         eulerError[0] = d + 2.0 * PI;
       }
       else if (d < -PI)
       {
-         m[2][0] = d - 2.0 * PI;
+         eulerError[0] = d - 2.0 * PI;
       }
 
 //    m[2][0] = (d > PI) ? (d - 2 * PI) : ((d < -PI) ? (d + 2 * PI) : d);
 
 //    Matrix diff = new Matrix(m);
 //    return diff;
-      setArray(eulerError, m);
    }
 
-   void zero(Matrix a)
+   void zero(DenseMatrix64F a)
    {
-      for (int i = 0; i < a.getRowDimension(); i++)
+      for (int i = 0; i < a.getNumRows(); i++)
       {
-         for (int j = 0; j < a.getColumnDimension(); j++)
+         for (int j = 0; j < a.getNumCols(); j++)
          {
             a.set(i, j, 0.0);
          }
@@ -417,12 +451,12 @@ public class FullIMUKalmanFilter
    /**
     *  Convert accelerations to euler angles
     */
-   double mag(Matrix a)
+   double mag(DenseMatrix64F a)
    {
       double ret = 0.0;
-      for (int i = 0; i < a.getRowDimension(); i++)
+      for (int i = 0; i < a.getNumRows(); i++)
       {
-         for (int j = 0; j < a.getColumnDimension(); j++)
+         for (int j = 0; j < a.getNumCols(); j++)
          {
             ret += a.get(i, j) * a.get(i, j);
          }
@@ -431,29 +465,28 @@ public class FullIMUKalmanFilter
       return Math.sqrt(ret);
    }
 
-   public void accel2euler(Matrix a, double heading)
+   public void accel2euler(DenseMatrix64F a, double heading)
    {
       double g = mag(a);
-      double[][] m =
-      {
-         {-Math.atan2(a.get(1, 0), -a.get(2, 0))},    // Roll
-         {-Math.asin(a.get(0, 0) / -g)},    // Pitch
-         {heading}    // Yaw
-      };
-      setArray(eulerAngles, m);
-
+      eulerAngles[0] = heading;    // Yaw
+      eulerAngles[1] = -Math.asin(a.get(0, 0) / -g);    // Pitch
+      eulerAngles[2] = -Math.atan2(a.get(1, 0), -a.get(2, 0));    // Roll
+      
 //    return new Matrix(m);
    }
 
-   public void compassUpdate(double heading, Matrix accel)
+   public void compassUpdate(double heading, DenseMatrix64F accel)
    {
 //    this.accel = accel;
 
       // Compute our measured and estimated angles
 //    Matrix angles_m = accel2euler(accel, heading);
       accel2euler(accel, heading);
-      Matrix angles_e = new Matrix(3, 1);
-      QuaternionTools.quaternionsToRollPitchYaw(q, angles_e);
+      double[] angles_e = new double[3];
+      
+      Quat4d quaternion = new Quat4d();
+      MatrixTools.extractQuat4dFromEJMLVector(quaternion, q, 0);
+      RotationTools.convertQuaternionToYawPitchRoll(quaternion, angles_e);
 
       // Compute the error between our measurement and our estimate
 //    Matrix error = euler_diff(angles_m, angles_e);
@@ -467,16 +500,14 @@ public class FullIMUKalmanFilter
 
       // Compute the DCM of our quaternion estimate
       quatDC(DCM);    // see Quat.h....
-      double[][] dcm = DCM.getArray();
-      dcm00 = dcm[0][0];
-      dcm01 = dcm[0][1];
-      dcm02 = dcm[0][2];
-      dcm12 = dcm[1][2];
-      dcm22 = dcm[2][2];
-
-      Matrix dphi = dphi_dq();
-      Matrix dtheta = dtheta_dq();
-      Matrix dpsi = dpsi_dq();
+      dcm01 = DCM.get(0, 1);
+      dcm02 = DCM.get(0, 2);
+      dcm12 = DCM.get(1, 2);
+      dcm22 = DCM.get(2, 2);
+      
+      DenseMatrix64F dphi = dphi_dq();
+      DenseMatrix64F dtheta = dtheta_dq();
+      DenseMatrix64F dpsi = dpsi_dq();
 
       C.set(0, 0, dphi.get(0, 0));
       C.set(0, 1, dphi.get(1, 0));
@@ -497,16 +528,15 @@ public class FullIMUKalmanFilter
 //       System.out.println("compass_update:" + " m = " + angles_m + " e = " + angles_e + " err = " + error);
 
 //    doKalman(C, R, error);
-      doKalman(C, R, eulerError);
+      doKalman(C, R, new DenseMatrix64F(new double[][] {eulerError}));
    }
 
-   void unpackQuaternion(Matrix quat)
+   void unpackQuaternion(DenseMatrix64F quat)
    {
-      double[][] q = quat.getArray();
-      q0 = q[0][0];
-      q1 = q[1][0];
-      q2 = q[2][0];
-      q3 = q[3][0];
+      q0 = quat.get(0, 0);
+      q1 = quat.get(1, 0);
+      q2 = quat.get(2, 0);
+      q3 = quat.get(3, 0);
 
    }
 
@@ -517,35 +547,42 @@ public class FullIMUKalmanFilter
     * bias_dot = [0,0,0]
     * Q += Qdot * dt
     */
-   void propagateState(Matrix pqr)
+   void propagateState(DenseMatrix64F pqr)
    {
       quatW(pqr);    // construct the quaternion W matrix in Wxq
-      Matrix Qdot = Wxq.times(q);    // Qdot = Wxq * q;
-      q.plusEquals(Qdot.times(dt));    // q += Qdot * dt;
+      DenseMatrix64F Qdot = new DenseMatrix64F(Wxq.getNumRows(), q.getNumCols());
+      CommonOps.mult(Wxq, q, Qdot);    // Qdot = Wxq * q;
+      CommonOps.addEquals(q, dt, Qdot);    // q += Qdot * dt;
       normalize(q);
 
       // Keep copy up-to-date...
       unpackQuaternion(q);
    }
 
-   void propagateCovariance(Matrix A)
+   void propagateCovariance(DenseMatrix64F A)
    {
-      Matrix Pdot = Q.copy();
+      DenseMatrix64F Pdot = new DenseMatrix64F(Q);    // Pdot = Q + A*P*At
+      DenseMatrix64F A_transpose = new DenseMatrix64F(A);
+      CommonOps.transpose(A_transpose);
+      DenseMatrix64F temp = new DenseMatrix64F(A.getNumRows(), P.getNumCols());
+      CommonOps.mult(A, P, temp);
+      CommonOps.multAdd(temp, A_transpose, Pdot);   // Pdot = Q + A*P*At
+      CommonOps.addEquals(Pdot, dt, Pdot);
+      trace = CommonOps.trace(P);
+//    System.out.print("propagateCovariance: Pdot = ");   Pdot.print(fmt, 10);
+//      Pdot.plusEquals(A.times(P));    // += A * this->P;
 
 //    System.out.print("propagateCovariance: Pdot = ");   Pdot.print(fmt, 10);
-      Pdot.plusEquals(A.times(P));    // += A * this->P;
+//      Pdot.plusEquals(P.times(A.transpose()));    // += this->P * A.transpose();
 
 //    System.out.print("propagateCovariance: Pdot = ");   Pdot.print(fmt, 10);
-      Pdot.plusEquals(P.times(A.transpose()));    // += this->P * A.transpose();
+//      Pdot.timesEquals(dt);    // *= this->dt;
 
 //    System.out.print("propagateCovariance: Pdot = ");   Pdot.print(fmt, 10);
-      Pdot.timesEquals(dt);    // *= this->dt;
-
-//    System.out.print("propagateCovariance: Pdot = ");   Pdot.print(fmt, 10);
-      P.plusEquals(Pdot);    // += Pdot;
+//      P.plusEquals(Pdot);    // += Pdot;
 
 //    System.out.print("propagateCovariance: P = ");   P.print(fmt, 10);
-      trace = P.trace();
+//      trace = P.trace();
    }
 
    /**
@@ -553,16 +590,18 @@ public class FullIMUKalmanFilter
     *
     * @param pqr Matrix Gyro Rate values in order of qd_wy, qd_wx, qd_wz???
     */
-   public void imuUpdate(Matrix pqr)
+   public void imuUpdate(DenseMatrix64F pqr)
    {
-      pqr.minusEquals(bias);
+      CommonOps.subtractEquals(pqr, bias);
       unpackQuaternion(q);
       makeAMatrix(pqr);
       propagateState(pqr);
       propagateCovariance(A);
 
       /* compute angles from quaternions */
-      QuaternionTools.quaternionsToRollPitchYaw(q, eulerAngles);
+      Quat4d quaternion = new Quat4d();
+      MatrixTools.extractQuat4dFromEJMLVector(quaternion, q, 0);
+      RotationTools.convertQuaternionToYawPitchRoll(quaternion, eulerAngles);
    }
 
    /*
@@ -574,13 +613,15 @@ public class FullIMUKalmanFilter
     * and compass.  Perhaps throw away the first few to let things
     * stabilize.
     */
-   public void initialize(Matrix accel, Matrix pqr, double heading)
+   public void initialize(DenseMatrix64F accel, DenseMatrix64F pqr, double heading)
    {
       setMatrix(bias, pqr);
 
 //    euler = accel2euler(accel, heading);
       accel2euler(accel, heading);
-      QuaternionTools.rollPitchYawToQuaternions(eulerAngles, q);
+      Quat4d quaternion = new Quat4d();
+      RotationTools.convertYawPitchRollToQuaternion(eulerAngles, quaternion);
+      MatrixTools.insertQuat4dIntoEJMLVector(q, quaternion, 0);
    }
 
    public void reset()
