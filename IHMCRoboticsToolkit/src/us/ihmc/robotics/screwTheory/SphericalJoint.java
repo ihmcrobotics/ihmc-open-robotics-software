@@ -10,6 +10,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SphericalJoint extends AbstractInverseDynamicsJoint
@@ -219,12 +220,12 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
 
    public void packConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
-      RotationTools.quaternionToMatrix(matrix, jointRotation, rowStart);
+      MatrixTools.insertQuat4dIntoEJMLVector(matrix, jointRotation, rowStart);
    }
 
    public void setConfiguration(DenseMatrix64F matrix, int rowStart)
    {
-      RotationTools.matrixToQuaternion(jointRotation, matrix, rowStart);
+      MatrixTools.extractQuat4dFromEJMLVector(jointRotation, matrix, rowStart);
       this.afterJointFrame.setRotation(jointRotation);
    }
 

@@ -13,7 +13,6 @@ import javax.vecmath.Vector3d;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.geometry.euclidean.threed.NotARotationMatrixException;
 import org.apache.commons.math3.util.FastMath;
-import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -776,28 +775,5 @@ public class RotationTools
 
          return originalNegated.epsilonEquals(result, epsilon);
       }
-   }
-
-   // FIXME This needs to get moved to MatrixTools.
-   @Deprecated
-   public static void quaternionToMatrix(DenseMatrix64F matrix, Quat4d quaternion, int rowStart)
-   {
-      int index = rowStart;
-      matrix.set(index++, 0, quaternion.getX());
-      matrix.set(index++, 0, quaternion.getY());
-      matrix.set(index++, 0, quaternion.getZ());
-      matrix.set(index++, 0, quaternion.getW());
-   }
-
-   // FIXME This needs to get moved to MatrixTools.
-   @Deprecated
-   public static void matrixToQuaternion(Quat4d quaternion, DenseMatrix64F matrix, int rowStart)
-   {
-      int index = rowStart;
-      double x = matrix.get(index++, 0);
-      double y = matrix.get(index++, 0);
-      double z = matrix.get(index++, 0);
-      double w = matrix.get(index++, 0);
-      quaternion.set(x, y, z, w);
    }
 }

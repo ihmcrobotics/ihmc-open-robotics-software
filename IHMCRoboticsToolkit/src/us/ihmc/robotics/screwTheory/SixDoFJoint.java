@@ -11,6 +11,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SixDoFJoint extends AbstractInverseDynamicsJoint
@@ -258,7 +259,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
    public void packConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
-      RotationTools.quaternionToMatrix(matrix, jointRotation, rowStart);
+      MatrixTools.insertQuat4dIntoEJMLVector(matrix, jointRotation, rowStart);
       //      RotationFunctions.assertQuaternionNormalized(jointRotation, "SixDoFJoint "+name+":");
       index += RotationTools.QUATERNION_SIZE;
       matrix.set(index++, 0, jointTranslation.getX());
@@ -269,7 +270,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
    public void setConfiguration(DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
-      RotationTools.matrixToQuaternion(jointRotation, matrix, rowStart);
+      MatrixTools.extractQuat4dFromEJMLVector(jointRotation, matrix, rowStart);
       RotationTools.checkQuaternionNormalized(jointRotation);
       index += RotationTools.QUATERNION_SIZE;
       jointTranslation.setX(matrix.get(index++, 0));
