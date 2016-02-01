@@ -100,3 +100,17 @@ codeDir.list(isGradleProjectFilter).each { mainProject ->
     }
 }
 ```
+
+If this is set up correctly, you can either apply the `ihmc-build` plugin from the [Plugin portal](https://plugins.gradle.org/plugin/us.ihmc.gradle.ihmc-build) and use the dependency resolver methods exposed by the build extensions, or you can manually identify dependencies on projects using the normal Gradle syntax for project dependencies. A sample build.gradle dependency block:
+
+```gradle
+dependencies {
+  compile project(':IHMCOpenRoboticsSoftware:IHMCJavaToolkit') // normal Gradle way of doing things
+}
+
+/* OR */
+
+dependencies {
+  compile ihmc.getProjectDependency(':IHMCJavaToolkit') // ihmc-build way of doing things
+}
+```
