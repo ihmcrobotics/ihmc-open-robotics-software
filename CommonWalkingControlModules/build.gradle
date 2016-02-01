@@ -1,5 +1,5 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.6'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.7'
 }
 
 
@@ -9,12 +9,15 @@ if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn('
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
 project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
 
 evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCRoboticsToolkit"))
 evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCJavaToolkit"))
@@ -23,8 +26,8 @@ dependencies {
     compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.23'
 	testCompile group: 'junit', name: 'junit', version: '4.11'
     compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
-    
-      
+
+
 //    compile group: 'org.ejml', name: 'all', version: '0.28'
     compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
@@ -34,8 +37,8 @@ dependencies {
 	compile group: 'com.github.vincentfk', name:'joptimizer', version:'3.3.0'
     compile group: 'colt', name: 'colt', version: '1.2.0'
     compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
-    
-    
+
+
     compile ihmc.getProjectDependency(":Plotting")
     compile ihmc.getProjectDependency(":KalmanProject")
     compile ihmc.getProjectDependency(":SensorProcessing")

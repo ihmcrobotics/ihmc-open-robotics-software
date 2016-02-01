@@ -1,5 +1,5 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.6'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.7'
 }
 
 
@@ -9,18 +9,22 @@ if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn('
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
 project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
 project.ext.licenseName = "Apache License, Version 2.0"
 project.ext.bintrayLicenseName = "Apache-2.0"
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
+
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 	compile group: 'org.ddogleg' , name: 'ddogleg', version: '0.7'
-	
+
 	compile ihmc.getProjectDependency(":Plotting")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
