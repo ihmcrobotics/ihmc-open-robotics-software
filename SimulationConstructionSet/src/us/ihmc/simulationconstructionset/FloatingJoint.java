@@ -176,35 +176,12 @@ public class FloatingJoint extends Joint
    public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
       Quat4d q = new Quat4d();
-      RotationTools.setQuaternionBasedOnYawPitchRoll(q, yaw, pitch, roll);
-      RotationTools.assertQuaternionNormalized(q, "FloatingJoint "+name+" as set by setYawPitchRoll ");
+      RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, q);
+      RotationTools.checkQuaternionNormalized(q);
       q_qs.set(q.w);
       q_qx.set(q.x);
       q_qy.set(q.y);
       q_qz.set(q.z);
-
-//    double r11, r12, r13, r21, r22, r23, r31, r32, r33;
-//    double Ca, Cb, Cc, Sa, Sb, Sc;
-//
-//    Ca = Math.cos(yaw);
-//    Sa = Math.sin(yaw);
-//    Cb = Math.cos(pitch);
-//    Sb = Math.sin(pitch);
-//    Cc = Math.cos(roll);
-//    Sc = Math.sin(roll);
-//    r11 = Ca * Cb;
-//    r12 = Ca * Sb * Sc - Sa * Cc;
-//    r13 = Ca * Sb * Cc + Sa * Sc;
-//    r21 = Sa * Cb;
-//    r22 = Sa * Sb * Sc + Ca * Cc;
-//    r23 = Sa * Sb * Cc - Ca * Sc;
-//    r31 = -Sb;
-//    r32 = Cb * Sc;
-//    r33 = Cb * Cc;
-//    q_qs.val = Math.sqrt((1.0 + r11 + r22 + r33) / 4.0);
-//    q_qx.val = (r32 - r23) / (4.0 * q_qs.val);
-//    q_qy.val = (r13 - r31) / (4.0 * q_qs.val);
-//    q_qz.val = (r21 - r12) / (4.0 * q_qs.val);
    }
 
    public void setYawPitchRoll(double yaw, double pitch, double roll, double wz, double wy, double wx)

@@ -1,70 +1,32 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import Jama.Matrix;
-import georegression.geometry.RotationMatrixGenerator;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
-import georegression.transform.se.SePointOps_F64;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Random;
+
+import javax.vecmath.Point3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
+
+import georegression.geometry.RotationMatrixGenerator;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.se.Se3_F64;
+import georegression.transform.se.SePointOps_F64;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-import javax.vecmath.Point3d;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 public class MatrixToolsTest
 {
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testCompare()
-   {
-      Matrix A = Matrix.random(6, 6);
-      Matrix B = Matrix.random(6, 6);
-      Matrix C = new Matrix(5, 6);
-      Matrix D = new Matrix(6, 6);
-
-      Matrix Acopy = new Matrix(A.getArray());
-
-      assertFalse(MatrixTools.compare(A, B, 1e-8));
-      assertFalse(MatrixTools.compare(C, D, 1e-8));
-      assertTrue(MatrixTools.compare(A, B, 2.0));
-
-      assertTrue(MatrixTools.compare(A, Acopy, 1e-8));
-
-      assertFalse(MatrixTools.compare(C, D, 1e-8));
-
-   }
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testSetToNaN()
-   {
-      Matrix test = new Matrix(3, 3);
-      MatrixTools.setToNaN(test);
-
-      for (int i = 0; i < 3; i++)
-      {
-         for (int j = 0; j < 3; j++)
-         {
-            assertTrue(Double.isNaN(test.get(i, j)));
-         }
-      }
-   }
-
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToNaNDenseMatrix()
@@ -77,22 +39,6 @@ public class MatrixToolsTest
          for (int j = 0; j < 3; j++)
          {
             assertTrue(Double.isNaN(test.get(i, j)));
-         }
-      }
-   }
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testSetToZero()
-   {
-      Matrix test = new Matrix(3, 3);
-      MatrixTools.setToZero(test);
-
-      for (int i = 0; i < 3; i++)
-      {
-         for (int j = 0; j < 3; j++)
-         {
-            assertEquals(0.0, test.get(i, j), 1e-34);
          }
       }
    }
@@ -115,21 +61,6 @@ public class MatrixToolsTest
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSetMatrixColumnFromArray()
-   {
-      Matrix test = new Matrix(2, 2);
-
-      double[] col = new double[] { 3.0, 4.0 };
-
-      MatrixTools.setMatrixColumnFromArray(test, 1, col);
-
-      assertEquals(col[0], test.get(0, 1), 1e-8);
-      assertEquals(col[1], test.get(1, 1), 1e-8);
-
-   }
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testSetMatrixColumnFromArrayDenseMatrix()
    {
       DenseMatrix64F test = new DenseMatrix64F(2, 2);
@@ -145,21 +76,6 @@ public class MatrixToolsTest
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSetMatrixFromOneBasedArray()
-   {
-      Matrix test = new Matrix(2, 1);
-
-      double[] col = new double[] { 0.0, 3.0, 4.0 };
-
-      MatrixTools.setMatrixFromOneBasedArray(test, col);
-
-      assertEquals(col[1], test.get(0, 0), 1e-8);
-      assertEquals(col[2], test.get(1, 0), 1e-8);
-
-   }
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testSetMatrixFromOneBasedArrayDenseMatrix()
    {
       DenseMatrix64F test = new DenseMatrix64F(2, 1);
@@ -170,22 +86,6 @@ public class MatrixToolsTest
 
       assertEquals(col[1], test.get(0, 0), 1e-8);
       assertEquals(col[2], test.get(1, 0), 1e-8);
-
-   }
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testDiffMatrixIntIntMatrix()
-   {
-      double[][] vals = new double[][] { { 1.0 }, { 2.0 }, { 4.0 }, { 8.0 }, { 16.0 }, { 32.0 } };
-      Matrix test = new Matrix(vals);
-
-      Matrix res = new Matrix(2, 1);
-
-      MatrixTools.diff(test, 2, 3, res);
-
-      assertEquals(4.0, res.get(0, 0), 1e-8);
-      assertEquals(8.0, res.get(1, 0), 1e-8);
 
    }
 
@@ -207,41 +107,6 @@ public class MatrixToolsTest
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testDiffMatrixMatrix()
-   {
-      double[][] vals = new double[][] { { 1.0 }, { 3.0 }, { 4.0 }, { 9.0 }, { 16.0 }, { 32.0 } };
-      double[] expected = new double[] { 2.0, 1.0, 5.0, 7.0, 16.0 };
-      Matrix test = new Matrix(vals);
-
-      Matrix res = new Matrix(5, 1);
-
-      MatrixTools.diff(test, res);
-
-      for (int i = 0; i < 5; i++)
-      {
-         assertEquals(expected[i], res.get(i, 0), 1e-8);
-      }
-
-   }
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testDiffDoubleArrayMatrix()
-   {
-      double[] vals = new double[] { 1.0, 3.0, 4.0, 9.0, 16.0, 32.0 };
-      double[] expected = new double[] { 2.0, 1.0, 5.0, 7.0, 16.0 };
-      Matrix res = new Matrix(5, 1);
-
-      MatrixTools.diff(vals, res);
-
-      for (int i = 0; i < 5; i++)
-      {
-         assertEquals(expected[i], res.get(i, 0), 1e-8);
-      }
-   }
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testDiffDoubleArrayDenseMatrix()
    {
       double[] vals = new double[] { 1.0, 3.0, 4.0, 9.0, 16.0, 32.0 };
@@ -254,58 +119,6 @@ public class MatrixToolsTest
       {
          assertEquals(expected[i], res.get(i, 0), 1e-8);
       }
-   }
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testSetMatrixBlock()
-   {
-      Matrix test = Matrix.random(6, 6);
-      Matrix test2 = Matrix.random(6, 6);
-
-      MatrixTools.setMatrixBlock(test, 2, 1, test2, 0, 1, 2, 3, 2.0);
-
-      Matrix resA = test.getMatrix(2, 3, 1, 3);
-      Matrix resB = test2.getMatrix(0, 1, 1, 3);
-      resB.timesEquals(2.0);
-
-      assertTrue(MatrixTools.compare(resA, resB, 1e-8));
-   }
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testAddMatrixBlock()
-   {
-      Matrix test = Matrix.random(6, 6);
-      Matrix test2 = Matrix.random(6, 6);
-
-      Matrix resA = test.getMatrix(2, 3, 1, 3);
-      MatrixTools.addMatrixBlock(test, 2, 1, test2, 0, 1, 2, 3, 2.0);
-
-      Matrix resB = test.getMatrix(2, 3, 1, 3);
-
-      Matrix resC = test2.getMatrix(0, 1, 1, 3);
-      resC.timesEquals(2.0);
-
-      resB.minusEquals(resC);
-
-      assertTrue(MatrixTools.compare(resA, resB, 1e-8));
-   }
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testTimes()
-   {
-      Matrix test = Matrix.random(6, 6);
-      Matrix test2 = Matrix.random(6, 6);
-
-      Matrix resA = test.times(test2);
-      Matrix resB = new Matrix(6, 6);
-
-      MatrixTools.times(test, test2, resB);
-
-      assertTrue(MatrixTools.compare(resA, resB, 1e-8));
-
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -329,83 +142,6 @@ public class MatrixToolsTest
       assertEquals(p0.x, p1.x, 1e-8);
       assertEquals(p0.y, p1.y, 1e-8);
       assertEquals(p0.z, p1.z, 1e-8);
-   }
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testPseudoinverse()
-   {
-      // compare against MATLAB pinv function
-
-      double[][] Md =
-      {
-         {
-            0.7060, 0.0462, 0.6948, 0.0344, 0.7655, 0.4898
-         },
-         {
-            0.0318, 0.0971, 0.3171, 0.4387, 0.7952, 0.4456
-         },
-         {
-            0.2769, 0.8235, 0.9502, 0.3816, 0.1869, 0.6463
-         }
-      };
-
-      Matrix M = new Matrix(Md);
-      Matrix M_inv = MatrixTools.pseudoinverse(M);
-
-      double[][] expectedReturn_M_inv =
-      {
-         {0.936998438717307, -0.785129603103276, -0.098850772280042}, {-0.415529615479199, -0.090901192323565, 0.656784574946038},
-         {0.296554021230810, -0.353448405794565, 0.397328610544366}, {-0.601416043928672, 0.809418197290933, 0.176759435487931},
-         {0.239240144723877, 0.856358371010319, -0.439451934635555}, {-0.022171162226724, 0.246409897051293, 0.191341831239165}
-      };
-
-      assertEquals(M_inv.getRowDimension(), 6);
-      assertEquals(M_inv.getColumnDimension(), 3);
-
-      // can't use Double.MIN_VALUE here, so I'm making something reasonable up
-      double epsilon = 1e-3;
-
-      for (int row = 0; row < M_inv.getRowDimension(); row++)
-      {
-         for (int col = 0; col < M_inv.getColumnDimension(); col++)
-         {
-            assertEquals(M_inv.get(row, col), expectedReturn_M_inv[row][col], epsilon);
-         }
-      }
-
-      // can't use Double.MIN_VALUE here, so I'm making something reasonable up
-      double epsilon2 = 1e-9;
-
-      double[][] Ad =
-      {
-         {0.243524968724989, 0.196595250431208, 0.473288848902729}, {0.929263623187228, 0.251083857976031, 0.351659507062997},
-         {0.349983765984809, 0.616044676146639, 0.830828627896291}
-      };
-
-      Matrix A = new Matrix(Ad);
-      Matrix A_inv = MatrixTools.pseudoinverse(A);
-
-      assertEquals(A_inv.getRowDimension(), 3);
-      assertEquals(A_inv.getColumnDimension(), 3);
-
-      Matrix eye = A.times(A_inv);
-
-      for (int row = 0; row < eye.getRowDimension(); row++)
-      {
-         for (int col = 0; col < eye.getColumnDimension(); col++)
-         {
-            if (row == col)
-            {
-               assertEquals(eye.get(row, col), 1.0, epsilon2);
-            }
-            else
-            {
-               assertEquals(eye.get(row, col), 0.0, epsilon2);
-            }
-         }
-      }
-
    }
 
    @DeployableTestMethod(estimatedDuration = 0.02)

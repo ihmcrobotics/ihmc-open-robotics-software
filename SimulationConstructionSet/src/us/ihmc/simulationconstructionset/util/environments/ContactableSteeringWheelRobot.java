@@ -216,7 +216,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       //spokes
       for (int i = 0; i < 3; i++)
       {
-         RotationTools.setQuaternionBasedOnYawPitchRoll(quat, 0.0, Math.PI / 2.0, i * 2.0 * Math.PI / 4.0 + Math.PI / 2.0);
+         RotationTools.convertYawPitchRollToQuaternion(0.0, Math.PI / 2.0, i * 2.0 * Math.PI / 4.0 + Math.PI / 2.0, quat);
          transform.setRotation(quat);
          invertTransform.set(transform);
          invertTransform.invert();

@@ -8,12 +8,12 @@ public class RotationVectorToAxisAngleConverter
    private static final double DEFAULT_EPSILON = 2e-12;
    private final Vector3d tempAxisOfRotation = new Vector3d();
 
-   public void convertRotationVectorToAxisAngle(AxisAngle4d axisAngleToPack, Vector3d rotationVector)
+   public void convertRotationVectorToAxisAngle(Vector3d rotationVector, AxisAngle4d axisAngleToPack)
    {
-      convertRotationVectorToAxisAngle(axisAngleToPack, rotationVector, DEFAULT_EPSILON);
+      convertRotationVectorToAxisAngle(rotationVector, DEFAULT_EPSILON, axisAngleToPack);
    }
 
-   public void convertRotationVectorToAxisAngle(AxisAngle4d axisAngleToPack, Vector3d rotationVector, double epsilonNoRotation)
+   public void convertRotationVectorToAxisAngle(Vector3d rotationVector, double epsilonNoRotation, AxisAngle4d axisAngleToPack)
    {
       tempAxisOfRotation.set(rotationVector);
       double angularExcursion = tempAxisOfRotation.length();

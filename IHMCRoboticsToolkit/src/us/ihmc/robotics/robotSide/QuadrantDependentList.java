@@ -36,8 +36,8 @@ public class QuadrantDependentList<V>
       
       set(RobotQuadrant.FRONT_LEFT, frontLeftObject);
       set(RobotQuadrant.FRONT_RIGHT, frontRightObject);
-      set(RobotQuadrant.HIND_RIGHT, hindLeftObject);
-      set(RobotQuadrant.HIND_LEFT, hindRightObject);
+      set(RobotQuadrant.HIND_RIGHT, hindRightObject);
+      set(RobotQuadrant.HIND_LEFT, hindLeftObject);
    }
    
    public V get(RobotQuadrant key)
