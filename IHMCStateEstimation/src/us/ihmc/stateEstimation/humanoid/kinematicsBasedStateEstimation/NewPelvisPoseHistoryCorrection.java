@@ -272,7 +272,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       totalErrorTranslation_Y.set(totalErrorTranslation.getY());
       totalErrorTranslation_Z.set(totalErrorTranslation.getZ());
       totalErrorBetweenPelvisAndLocalizationTransform.getRotation(totalErrorRotation);
-      RotationTools.setYawPitchRollBasedOnQuaternion(totalErrorYawPitchRoll, totalErrorRotation);
+      RotationTools.convertQuaternionToYawPitchRoll(totalErrorRotation, totalErrorYawPitchRoll);
       totalErrorRotation_Yaw.set(totalErrorYawPitchRoll[0]);
       totalErrorRotation_Pitch.set(totalErrorYawPitchRoll[1]);
       totalErrorRotation_Roll.set(totalErrorYawPitchRoll[2]);

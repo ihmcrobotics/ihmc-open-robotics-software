@@ -40,7 +40,7 @@ public class ZUpFrame extends ReferenceFrame
       origin.getReferenceFrame().getTransformToDesiredFrame(nonZUpToWorld, worldFrame);
       nonZUpToWorld.getRotation(nonZUpToWorldRotation);
 
-      double yaw = RotationTools.getYaw(nonZUpToWorldRotation);
+      double yaw = RotationTools.computeYaw(nonZUpToWorldRotation);
       euler.set(0.0, 0.0, yaw);
       transformToParent.setEuler(euler);
 

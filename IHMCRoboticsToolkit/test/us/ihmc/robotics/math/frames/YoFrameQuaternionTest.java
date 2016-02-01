@@ -105,8 +105,8 @@ public class YoFrameQuaternionTest
       double[] yawPitchRollActual = new double[3];
       yoFrameQuaternion.getYawPitchRoll(yawPitchRollActual);
 
-      RotationTools.setYawPitchRoll(matrix3dActual, yawPitchRollActual[0], yawPitchRollActual[1], yawPitchRollActual[2]);
-      RotationTools.setYawPitchRoll(matrix3dExpected, yawPitchRollExpected[0], yawPitchRollExpected[1], yawPitchRollExpected[2]);
+      RotationTools.convertYawPitchRollToMatrix(yawPitchRollActual[0], yawPitchRollActual[1], yawPitchRollActual[2], matrix3dActual);
+      RotationTools.convertYawPitchRollToMatrix(yawPitchRollExpected[0], yawPitchRollExpected[1], yawPitchRollExpected[2], matrix3dExpected);
 
       assertTrue(matrix3dActual.epsilonEquals(matrix3dExpected, EPS));
    }

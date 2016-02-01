@@ -181,7 +181,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
 
          quaternionConversionMatrix.set(orientation);
          orientationMatrix.mul(MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD, quaternionConversionMatrix);
-         RotationTools.setQuaternionBasedOnMatrix3d(orientation, orientationMatrix);
+         RotationTools.convertMatrixToQuaternion(orientationMatrix, orientation);
 
          sensorProcessing.setLinearAccelerationSensorValue(yoIMUHandleHolder.getImuDefinition(), linearAcceleration);
          sensorProcessing.setAngularVelocitySensorValue(yoIMUHandleHolder.getImuDefinition(), angularVelocity);

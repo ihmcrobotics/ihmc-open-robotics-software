@@ -10,11 +10,11 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -23,7 +23,6 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import Jama.Matrix;
 
 public class StanceFullLegJacobian
 {
@@ -155,23 +154,29 @@ public class StanceFullLegJacobian
        */
       torqueOnPelvis.changeFrame(pelvisFrame);
 
-      Matrix vtpJacobianMatrix = new Matrix(6, vtpJacobian.getNumberOfColumns());
-      MatrixTools.convertEJMLToJama(vtpJacobian.getJacobianMatrix(), vtpJacobianMatrix);
+      DenseMatrix64F vtpJacobianMatrix = new DenseMatrix64F(vtpJacobian.getJacobianMatrix());
 
       int[] columns = {0, 1};
       int[] aRows = {3, 4};
-      Matrix A = vtpJacobianMatrix.getMatrix(aRows, columns).transpose();
-
+      DenseMatrix64F A = new DenseMatrix64F(aRows.length, columns.length);
+      MatrixTools.getMatrixBlock(A, vtpJacobianMatrix, aRows, columns);
+      CommonOps.transpose(A);
+      
       int[] bRows = {0, 1, 2, 5};
-      Matrix B = vtpJacobianMatrix.getMatrix(bRows, columns).transpose();
+      DenseMatrix64F B = new DenseMatrix64F(bRows.length, columns.length);
+      MatrixTools.getMatrixBlock(B, vtpJacobianMatrix, bRows, columns);
+      CommonOps.transpose(B);
 
-      Matrix nxyzFZ = new Matrix(4, 1);
+      DenseMatrix64F nxyzFZ = new DenseMatrix64F(4, 1);
       nxyzFZ.set(0, 0, -torqueOnPelvis.getX());
       nxyzFZ.set(1, 0, -torqueOnPelvis.getY());
       nxyzFZ.set(2, 0, -torqueOnPelvis.getZ());
       nxyzFZ.set(3, 0, -fZOnPelvisInPelvisFrame);
+      DenseMatrix64F BnxyzFZ = new DenseMatrix64F(B.getNumRows(), nxyzFZ.getNumCols());
+      CommonOps.mult(B, nxyzFZ, BnxyzFZ);
 
-      Matrix Fxy = (A.solve(B.times(nxyzFZ)));
+      DenseMatrix64F Fxy = new DenseMatrix64F(A.getNumCols(), 1);
+      CommonOps.solve(A, BnxyzFZ, Fxy);
 
       Vector3d forceOnPelvisInPelvisFrame = new Vector3d(Fxy.get(0, 0), Fxy.get(1, 0), fZOnPelvisInPelvisFrame);
 
