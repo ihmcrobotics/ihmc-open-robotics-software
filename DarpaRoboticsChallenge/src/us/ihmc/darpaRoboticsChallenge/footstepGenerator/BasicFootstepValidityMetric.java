@@ -27,8 +27,8 @@ public class BasicFootstepValidityMetric implements FootstepValidityMetric
    public boolean footstepValid(FootstepData stanceFootstep, FootstepData prospectiveFootstep)
    {
       if (stanceFootstep.getRobotSide() == prospectiveFootstep.getRobotSide()) return false;
-      double stanceYaw = RotationTools.getYawFromQuaternion(stanceFootstep.getOrientation());
-      double yawDiff = RotationTools.getYawFromQuaternion(prospectiveFootstep.getOrientation()) - stanceYaw;
+      double stanceYaw = RotationTools.computeYaw(stanceFootstep.getOrientation());
+      double yawDiff = RotationTools.computeYaw(prospectiveFootstep.getOrientation()) - stanceYaw;
 
       yawDiff = AngleTools.trimAngleMinusPiToPi(yawDiff);
       double sign = (prospectiveFootstep.getRobotSide() == RobotSide.LEFT) ? 1.0 : -1.0;
@@ -100,7 +100,7 @@ public class BasicFootstepValidityMetric implements FootstepValidityMetric
          return false;
       }
       //TODO @Agraber make this more comprehensive
-      double stanceYaw = RotationTools.getYawFromQuaternion(stanceFootstep.getOrientation());
+      double stanceYaw = RotationTools.computeYaw(stanceFootstep.getOrientation());
       double sign = (prospectiveFootstep.getRobotSide() == RobotSide.LEFT) ? 1.0 : -1.0;
 
       Vector3d stepVector = new Vector3d(prospectiveFootstep.getLocation());

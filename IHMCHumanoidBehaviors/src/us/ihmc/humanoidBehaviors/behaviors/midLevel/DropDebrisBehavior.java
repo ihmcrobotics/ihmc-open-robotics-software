@@ -78,23 +78,23 @@ public class DropDebrisBehavior extends BehaviorInterface
 
       // turn the hand to put the debris horizontally
       tempPosition.set(0.55, side.negateIfRightSide(0.1), 1.2);
-      RotationTools.setQuaternionBasedOnYawPitchRoll(tempOrientation, 0.0, 0.0, side.negateIfRightSide((Math.toRadians(90.0))));
+      RotationTools.convertYawPitchRollToQuaternion(0.0, 0.0, side.negateIfRightSide((Math.toRadians(90.0))), tempOrientation);
       submitSingleTaskStageHandPose(turnHandPoseToCarryDebris, side, tempPosition, tempOrientation);
 
       // put the arm at the outside
       tempPosition.set(0.2, side.negateIfRightSide(0.8), 1.2);
-      RotationTools.setQuaternionBasedOnYawPitchRoll(tempOrientation, side.negateIfRightSide(Math.toRadians(80.0)), 0.0,
-            side.negateIfRightSide(Math.toRadians(90.0)));
+      RotationTools.convertYawPitchRollToQuaternion(side.negateIfRightSide(Math.toRadians(80.0)), 0.0, side.negateIfRightSide(Math.toRadians(90.0)),
+            tempOrientation);
       submitSingleTaskStageHandPose(armOutPose, side, tempPosition, tempOrientation);
 
       // drop debris by opening hand and turning the hand
       tempPosition.set(0.2, side.negateIfRightSide(0.8), 1.2);
-      RotationTools.setQuaternionBasedOnYawPitchRoll(tempOrientation, side.negateIfRightSide(Math.toRadians(80.0)), 0.0, 0.0);
+      RotationTools.convertYawPitchRollToQuaternion(side.negateIfRightSide(Math.toRadians(80.0)), 0.0, 0.0, tempOrientation);
       submitReleaseDebrisParallellTasks(turnHandPoseToDropDebris, side, tempPosition, tempOrientation);
 
       //put the arm back in front of the robot
       tempPosition.set(0.55, side.negateIfRightSide(0.1), 1.2);
-      RotationTools.setQuaternionBasedOnYawPitchRoll(tempOrientation, 0.0, 0.0, 0.0);
+      RotationTools.convertYawPitchRollToQuaternion(0.0, 0.0, 0.0, tempOrientation);
       submitSingleTaskStageHandPose(armInFrontOfRobotPose, side, tempPosition, tempOrientation);
 
       //put the robot in its default position (arm, pelvis and chest)

@@ -631,7 +631,7 @@ public class Transform3dTest
 		{
 			createRandomRotationMatrix(matrix, random);
 //			axisAngle.set(matrix);
-			RotationTools.axisAngleFromMatrix(matrix, axisAngle);
+			RotationTools.convertMatrixToAxisAngle(matrix, axisAngle);
 			randomizeVector(random, vector);
 			Vector3d scale = new Vector3d(random.nextDouble(),
 					random.nextDouble(), random.nextDouble());
@@ -2690,7 +2690,7 @@ public class Transform3dTest
 
 			Matrix3d mat = new Matrix3d();
 			transform.getRotationScale(mat);
-			RotationTools.isRotationProper(mat);
+			RotationTools.isRotationMatrixProper(mat);
 			assertTrue(checkOrthogonality(transform));
 		}
 	}
@@ -2765,7 +2765,7 @@ public class Transform3dTest
 			}
 			transform3d.get(checkMatrix);
 			transform3d.getRotationScale(mat);
-			RotationTools.isRotationProper(mat);
+			RotationTools.isRotationMatrixProper(mat);
 
 			JUnitTools.assertMatrix4dEquals("", matrix, checkMatrix, 1e-10);
 		}

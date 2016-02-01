@@ -386,7 +386,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       offsetBetweenStartAndGoal_Rotation.getYawPitchRoll(temporaryYawPitchRoll);
       goalYawRaw.set(temporaryYawPitchRoll[0]);
       goalYawWithDeadZone.update();
-      RotationTools.setQuaternionBasedOnYawPitchRoll(updatedGoalOffsetWithDeadZone_Rotation_quat, goalYawWithDeadZone.getDoubleValue(), temporaryYawPitchRoll[1], temporaryYawPitchRoll[2]);
+      RotationTools.convertYawPitchRollToQuaternion(goalYawWithDeadZone.getDoubleValue(), temporaryYawPitchRoll[1], temporaryYawPitchRoll[2], updatedGoalOffsetWithDeadZone_Rotation_quat);
       updatedGoalOffsetWithDeadZone_Rotation.set(updatedGoalOffsetWithDeadZone_Rotation_quat);
       
       goalOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedGoalOffsetWithDeadZone_Rotation_quat);
@@ -486,16 +486,16 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       if (isRotationCorrectionEnabled.getBooleanValue())
       {
-         RotationTools.getYawPitchRoll(stateEstimatorYawPitchRoll, stateEstimatorTransform_Rotation);
+         RotationTools.convertTransformToYawPitchRoll(stateEstimatorTransform_Rotation, stateEstimatorYawPitchRoll);
          
-         RotationTools.setYawPitchRollBasedOnQuaternion(temporaryYawPitchRoll , updatedStartOffset_Rotation_quat);
+         RotationTools.convertQuaternionToYawPitchRoll(updatedStartOffset_Rotation_quat , temporaryYawPitchRoll);
          startYaw.set(temporaryYawPitchRoll[0]);
          
-         RotationTools.setYawPitchRollBasedOnQuaternion(temporaryYawPitchRoll , updatedGoalOffset_Rotation_quat);
+         RotationTools.convertQuaternionToYawPitchRoll(updatedGoalOffset_Rotation_quat , temporaryYawPitchRoll);
          goalYaw.set(temporaryYawPitchRoll[0]);
          
          interpolatedYaw.set((1 - cLippedAlphaFilterValue.getDoubleValue()) * startYaw.getDoubleValue() + cLippedAlphaFilterValue.getDoubleValue() * goalYaw.getDoubleValue());
-         RotationTools.setQuaternionBasedOnYawPitchRoll(interpolatedRotation, interpolatedYaw.getDoubleValue(), stateEstimatorYawPitchRoll[1], stateEstimatorYawPitchRoll[2]);
+         RotationTools.convertYawPitchRollToQuaternion(interpolatedYaw.getDoubleValue(), stateEstimatorYawPitchRoll[1], stateEstimatorYawPitchRoll[2], interpolatedRotation);
       }
       else
       {

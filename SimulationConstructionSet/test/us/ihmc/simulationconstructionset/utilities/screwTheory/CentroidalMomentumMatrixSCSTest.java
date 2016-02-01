@@ -100,7 +100,7 @@ public class CentroidalMomentumMatrixSCSTest
       {
          Vector3d position = RandomTools.generateRandomVector(random);
          Matrix3d rotation = new Matrix3d();
-         RotationTools.setYawPitchRoll(rotation, random.nextDouble(), random.nextDouble(), random.nextDouble());
+         RotationTools.convertYawPitchRollToMatrix(random.nextDouble(), random.nextDouble(), random.nextDouble(), rotation);
          Vector3d linearVelocityInBody = RandomTools.generateRandomVector(random);
          Vector3d linearVelocityInWorld = new Vector3d(linearVelocityInBody);
          rotation.transform(linearVelocityInWorld);

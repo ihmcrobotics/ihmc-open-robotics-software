@@ -215,7 +215,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
    protected void doRotateInstruction(Graphics3DRotateInstruction graphics3dObjectRotateMatrix)
    {
       Quat4d quat4d = new Quat4d();
-      RotationTools.setQuaternionBasedOnMatrix3d(quat4d, graphics3dObjectRotateMatrix.getRotationMatrix());
+      RotationTools.convertMatrixToQuaternion(graphics3dObjectRotateMatrix.getRotationMatrix(), quat4d);
 
       // DON'T USE THIS: the method in Quat4d is flawed and doesn't work for some rotation matrices!
       //      quat4d.set(graphics3dObjectRotateMatrix.getRotationMatrix());

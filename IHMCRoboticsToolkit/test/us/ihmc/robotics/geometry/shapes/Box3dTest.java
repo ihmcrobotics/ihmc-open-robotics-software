@@ -556,9 +556,9 @@ public class Box3dTest
          box.getRotation(rotation);
          
          double epsilon = 1e-14;
-         Assert.assertEquals(yaw, RotationTools.getYaw(rotation), epsilon);
-         Assert.assertEquals(pitch, RotationTools.getPitch(rotation), epsilon);
-         Assert.assertEquals(roll, RotationTools.getRoll(rotation), epsilon);
+         Assert.assertEquals(yaw, RotationTools.computeYaw(rotation), epsilon);
+         Assert.assertEquals(pitch, RotationTools.computePitch(rotation), epsilon);
+         Assert.assertEquals(roll, RotationTools.computeRoll(rotation), epsilon);
       }
    }
 
