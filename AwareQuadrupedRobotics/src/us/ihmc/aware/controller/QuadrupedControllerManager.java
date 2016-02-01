@@ -30,33 +30,37 @@ public class QuadrupedControllerManager implements RobotController
    {
       ParameterMapRepository paramMapRepository = new ParameterMapRepository(registry);
 
-      QuadrupedJointInitializationController doNothingController = new QuadrupedJointInitializationController(runtimeEnvironment);
-      QuadrupedStandPrepController standPrepController = new QuadrupedStandPrepController(runtimeEnvironment,
+      QuadrupedController jointInitializationController = new QuadrupedJointInitializationController(runtimeEnvironment);
+      QuadrupedController standPrepController = new QuadrupedStandPrepController(runtimeEnvironment,
             parameters, paramMapRepository);
-      QuadrupedPositionBasedCrawlControllerAdapter crawlController = new QuadrupedPositionBasedCrawlControllerAdapter(runtimeEnvironment, parameters, paramMapRepository);
+      QuadrupedController standReadyController = new QuadrupedStandReadyController(runtimeEnvironment);
+      QuadrupedController crawlController = new QuadrupedPositionBasedCrawlControllerAdapter(runtimeEnvironment, parameters, paramMapRepository);
       QuadrupedVirtualModelController virtualModelController = new QuadrupedVirtualModelController(
             runtimeEnvironment.getFullRobotModel(), parameters, registry, runtimeEnvironment.getGraphicsListRegistry());
-      QuadrupedVirtualModelBasedStepController virtualModelBasedStepController = new QuadrupedVirtualModelBasedStepController(
+      QuadrupedController virtualModelBasedStepController = new QuadrupedVirtualModelBasedStepController(
             runtimeEnvironment, parameters, paramMapRepository, virtualModelController);
 
       StateMachineBuilder<QuadrupedControllerState, QuadrupedControllerEvent> builder = new StateMachineBuilder<>();
 
-      builder.addState(QuadrupedControllerState.DO_NOTHING, doNothingController);
+      builder.addState(QuadrupedControllerState.JOINT_INITIALIZATION, jointInitializationController);
       builder.addState(QuadrupedControllerState.STAND_PREP, standPrepController);
+      builder.addState(QuadrupedControllerState.STAND_READY, standReadyController);
       builder.addState(QuadrupedControllerState.POSITION_BASED_CRAWL, crawlController);
       builder.addState(QuadrupedControllerState.VIRTUAL_MODEL_BASED_STEP, virtualModelBasedStepController);
 
       // TODO: Define more state transitions.
-      builder.addTransition(QuadrupedControllerEvent.JOINTS_INITIALIZED, QuadrupedControllerState.DO_NOTHING,
+      builder.addTransition(QuadrupedControllerEvent.JOINTS_INITIALIZED, QuadrupedControllerState.JOINT_INITIALIZATION,
             QuadrupedControllerState.STAND_PREP);
+      builder.addTransition(QuadrupedControllerEvent.STARTING_POSE_REACHED, QuadrupedControllerState.STAND_PREP,
+            QuadrupedControllerState.STAND_READY);
 
       // Manually triggered events to transition to main controllers.
-      builder.addTransition(QuadrupedControllerEvent.POSITION_BASED_CRAWL, QuadrupedControllerState.STAND_PREP,
+      builder.addTransition(QuadrupedControllerEvent.POSITION_BASED_CRAWL, QuadrupedControllerState.STAND_READY,
             QuadrupedControllerState.POSITION_BASED_CRAWL);
-      builder.addTransition(QuadrupedControllerEvent.VIRTUAL_MODEL_BASED_STEP, QuadrupedControllerState.STAND_PREP,
+      builder.addTransition(QuadrupedControllerEvent.VIRTUAL_MODEL_BASED_STEP, QuadrupedControllerState.STAND_READY,
             QuadrupedControllerState.VIRTUAL_MODEL_BASED_STEP);
 
-      this.stateMachine = builder.build(QuadrupedControllerState.DO_NOTHING);
+      this.stateMachine = builder.build(QuadrupedControllerState.JOINT_INITIALIZATION);
       this.userEventTrigger = new StateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry,
             QuadrupedControllerEvent.class);
    }
