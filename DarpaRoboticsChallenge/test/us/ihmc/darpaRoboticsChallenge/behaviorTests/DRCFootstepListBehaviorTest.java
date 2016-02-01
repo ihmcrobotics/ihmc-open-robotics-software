@@ -391,7 +391,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       double yaw = footPose2d.getYaw();
       Point3d position = new Point3d(footPose2d.getX(), footPose2d.getY(), height);
       Quat4d orientation = new Quat4d();
-      RotationTools.getQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
+      RotationTools.computeQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
 
       Footstep footstep = new Footstep(foot, robotSide, soleFrame);
       footstep.setSolePose(new FramePose(ReferenceFrame.getWorldFrame(), position, orientation));

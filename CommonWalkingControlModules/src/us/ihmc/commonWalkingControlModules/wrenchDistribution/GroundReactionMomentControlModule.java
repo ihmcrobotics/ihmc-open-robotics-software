@@ -34,7 +34,7 @@ public class GroundReactionMomentControlModule
 
       Matrix3d pelvisToWorld = new Matrix3d();
       pelvisFrame.getTransformToDesiredFrame(worldFrame).get(pelvisToWorld);
-      double pelvisYaw = RotationTools.getYaw(pelvisToWorld);
+      double pelvisYaw = RotationTools.computeYaw(pelvisToWorld);
 
       double error = AngleTools.computeAngleDifferenceMinusPiToPi(desiredPelvisYaw, pelvisYaw);
       ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() + kPelvisYaw.getDoubleValue() * error);

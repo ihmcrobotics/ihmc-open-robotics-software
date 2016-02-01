@@ -119,7 +119,7 @@ public class ThreePointsAverageReferenceFrame extends ReferenceFrame
       
       normalVector.get(temporaryVector);
       
-      RotationTools.getQuaternionFromYawAndZNormal(angleFromOriginTo1 + averageAngle, temporaryVector, temporaryQuaternion);
+      RotationTools.computeQuaternionFromYawAndZNormal(angleFromOriginTo1 + averageAngle, temporaryVector, temporaryQuaternion);
       
       averageOrientation.set(temporaryQuaternion);
    }

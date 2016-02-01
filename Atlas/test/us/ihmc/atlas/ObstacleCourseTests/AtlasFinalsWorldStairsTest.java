@@ -195,7 +195,7 @@ public class AtlasFinalsWorldStairsTest
 
       Point3d startingLocation = new Point3d(1.0, -13.5, 0);
       double directionYaw = -90.0;
-      RotationTools.getQuaternionFromYawAndZNormal(directionYaw / 180.0 * Math.PI, verticalVector, orientation);
+      RotationTools.computeQuaternionFromYawAndZNormal(directionYaw / 180.0 * Math.PI, verticalVector, orientation);
 
       ArrayList<Point2d> leftFootPoint2ds = createPartialSupportPolygonForFoot(walkingControllerParameters);
       ArrayList<Point2d> rightFootPoint2ds = null;
@@ -276,7 +276,7 @@ public class AtlasFinalsWorldStairsTest
 
       Point3d startingLocation = new Point3d(1.0, -13.5, 0);
       double directionYaw = -90.0;
-      RotationTools.getQuaternionFromYawAndZNormal(directionYaw / 180.0 * Math.PI, verticalVector, orientation);
+      RotationTools.computeQuaternionFromYawAndZNormal(directionYaw / 180.0 * Math.PI, verticalVector, orientation);
 
       ArrayList<Point2d> leftFootPoint2ds = createPartialSupportPolygonForFoot(walkingControllerParameters);
       ArrayList<Point2d> rightFootPoint2ds = createPartialSupportPolygonForFoot(walkingControllerParameters);
