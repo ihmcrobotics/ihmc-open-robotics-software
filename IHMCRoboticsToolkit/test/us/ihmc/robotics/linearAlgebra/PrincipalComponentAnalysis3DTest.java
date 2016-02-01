@@ -157,7 +157,7 @@ public class PrincipalComponentAnalysis3DTest
          rotationMatrix.getColumn(1, estimatedSecondaryAxis);
          rotationMatrix.getColumn(2, estimatedThirdAxis);
 
-         assertTrue(RotationTools.isRotationProper(rotationMatrix));
+         assertTrue(RotationTools.isRotationMatrixProper(rotationMatrix));
          assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedPrincipalAxis, EPSILON_HIGH_PRECISION));
       }
    }
@@ -338,7 +338,7 @@ public class PrincipalComponentAnalysis3DTest
          rotationMatrix.getColumn(1, estimatedSecondaryAxis);
          rotationMatrix.getColumn(2, estimatedThirdAxis);
 
-         assertTrue(RotationTools.isRotationProper(rotationMatrix));
+         assertTrue(RotationTools.isRotationMatrixProper(rotationMatrix));
          assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedPrincipalAxis, EPSILON_LOW_PRECISION));
          assertTrue(expectedSecondaryAxis.epsilonEquals(estimatedSecondaryAxis, EPSILON_LOW_PRECISION));
          assertTrue(estimatedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION));
@@ -534,7 +534,7 @@ public class PrincipalComponentAnalysis3DTest
          rotationMatrix.getColumn(1, estimatedSecondaryAxis);
          rotationMatrix.getColumn(2, estimatedThirdAxis);
 
-         assertTrue(RotationTools.isRotationProper(rotationMatrix));
+         assertTrue(RotationTools.isRotationMatrixProper(rotationMatrix));
          assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedPrincipalAxis, EPSILON_LOW_PRECISION));
          assertTrue(estimatedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION));
          assertTrue(expectedSecondaryAxis.epsilonEquals(estimatedSecondaryAxis, EPSILON_LOW_PRECISION));

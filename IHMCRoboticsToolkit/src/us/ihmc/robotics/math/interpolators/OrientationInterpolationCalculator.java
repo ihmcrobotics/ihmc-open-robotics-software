@@ -86,7 +86,7 @@ public class OrientationInterpolationCalculator
 
       // convert to axis-angle
 //      axisAngle.set(relativeRotationMatrix);
-      RotationTools.axisAngleFromMatrix(relativeRotationMatrix, axisAngle);
+      RotationTools.convertMatrixToAxisAngle(relativeRotationMatrix, axisAngle);
       
 
       // compute angular rate

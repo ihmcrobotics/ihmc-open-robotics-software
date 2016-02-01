@@ -118,7 +118,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
             footToWorldRotation);
       FrameOrientation footstepOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
       double[] yawPitchRoll = new double[3];
-      RotationTools.getYawPitchRoll(yawPitchRoll, footToWorldRotation);
+      RotationTools.convertMatrixToYawPitchRoll(footToWorldRotation, yawPitchRoll);
       footstepOrientation.setYawPitchRoll(yawPitchRoll);
 
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
@@ -206,10 +206,10 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       RigidBodyTransform footToSupportTransform = desiredHeadingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       Matrix3d footToSupportRotation = new Matrix3d();
       footToSupportTransform.get(footToSupportRotation);
-      double yaw = RotationTools.getYaw(footToSupportRotation);
+      double yaw = RotationTools.computeYaw(footToSupportRotation);
       double pitch = stepPitch.getDoubleValue();
       double roll = 0.0;
-      RotationTools.setYawPitchRoll(footToSupportRotation, yaw, pitch, roll);
+      RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, footToSupportRotation);
 
       return footToSupportRotation;
    }

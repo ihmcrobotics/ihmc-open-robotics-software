@@ -208,7 +208,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
             
             imuSensor.getLinearAccelerationMeasurement(imuLinearAccelerations[sensorNumber]);
             imuSensor.getOrientationMeasurement(imuOrientationsAsMatrix[sensorNumber]);
-            RotationTools.setQuaternionBasedOnMatrix3d(imuOrientations[sensorNumber], imuOrientationsAsMatrix[sensorNumber]);
+            RotationTools.convertMatrixToQuaternion(imuOrientationsAsMatrix[sensorNumber], imuOrientations[sensorNumber]);
             imuSensor.getAngularVelocityMeasurement(rawImuAngularVelocities[sensorNumber]);
             
             imuPacketToPack.set(imuLinearAccelerations[sensorNumber], imuOrientations[sensorNumber], rawImuAngularVelocities[sensorNumber]);

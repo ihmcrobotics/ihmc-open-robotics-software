@@ -1,26 +1,28 @@
 package us.ihmc.robotics.screwTheory;
 
-import Jama.EigenvalueDecomposition;
-import Jama.Matrix;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.Arrays;
+import java.util.Random;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.DecompositionFactory;
+import org.ejml.interfaces.decomposition.EigenDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.simple.SimpleMatrix;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-import java.util.Arrays;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class RigidBodyInertiaTest
 {
@@ -208,47 +210,48 @@ public class RigidBodyInertiaTest
 
    private static void checkEigenValuesRealAndPositive(Matrix3d matrix, double epsilon)
    {
-      Matrix jamaMatrix = new Matrix(3, 3);
-      MatrixTools.setJamaMatrixFromMatrix3d(0, 0, matrix, jamaMatrix);
+      DenseMatrix64F denseMatrix = new DenseMatrix64F(3, 3);
+      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, matrix, denseMatrix);
+      EigenDecomposition<DenseMatrix64F> eig = DecompositionFactory.eig(3, false);
+      eig.decompose(denseMatrix);
 
-      EigenvalueDecomposition eigenValueDecomposition = jamaMatrix.eig();
-      double[] eigImaginaryParts = eigenValueDecomposition.getImagEigenvalues();
-      double[] eigRealParts = eigenValueDecomposition.getRealEigenvalues();
-
-      for (double eigImaginaryPart : eigImaginaryParts)
+      for (int i = 0; i < eig.getNumberOfEigenvalues(); i++)
       {
+         double eigImaginaryPart = eig.getEigenvalue(i).getImaginary();
+         double eigRealPart = eig.getEigenvalue(i).getReal();
+
          assertEquals(0.0, eigImaginaryPart, epsilon);
-      }
-
-      for (double eigRealPart : eigRealParts)
-      {
          assertTrue(eigRealPart > 0.0);
       }
    }
 
    private static void assertEigenValuesPositiveAndEqual(Matrix3d matrix1, Matrix3d matrix2, double epsilon)
    {
-      Matrix jamaMatrix1 = new Matrix(3, 3);
-      MatrixTools.setJamaMatrixFromMatrix3d(0, 0, matrix1, jamaMatrix1);
+      DenseMatrix64F denseMatrix1 = new DenseMatrix64F(3, 3);
+      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, matrix1, denseMatrix1);
 
-      Matrix jamaMatrix2 = new Matrix(3, 3);
-      MatrixTools.setJamaMatrixFromMatrix3d(0, 0, matrix2, jamaMatrix2);
+      DenseMatrix64F denseMatrix2 = new DenseMatrix64F(3, 3);
+      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, matrix2, denseMatrix2);
 
-      EigenvalueDecomposition eigDecomp1 = jamaMatrix1.eig();
-      double[] eigImaginaryParts1 = eigDecomp1.getImagEigenvalues();
-      double[] eigRealParts1 = eigDecomp1.getRealEigenvalues();
+      EigenDecomposition<DenseMatrix64F> eig1 = DecompositionFactory.eig(3, false);
+      eig1.decompose(denseMatrix1);
+      double[] eigRealParts1 = new double[3];
+      for (int i = 0; i < eig1.getNumberOfEigenvalues(); i++)
+         eigRealParts1[i] = eig1.getEigenvalue(i).getReal();
       Arrays.sort(eigRealParts1);
 
-      EigenvalueDecomposition eigDecomp2 = jamaMatrix2.eig();
-      double[] eigImaginaryParts2 = eigDecomp2.getImagEigenvalues();
-      double[] eigRealParts2 = eigDecomp2.getRealEigenvalues();
+      EigenDecomposition<DenseMatrix64F> eig2 = DecompositionFactory.eig(3, false);
+      eig2.decompose(denseMatrix2);
+      double[] eigRealParts2 = new double[3];
+      for (int i = 0; i < eig2.getNumberOfEigenvalues(); i++)
+         eigRealParts2[i] = eig2.getEigenvalue(i).getReal();
       Arrays.sort(eigRealParts2);
 
-      for (int i = 0; i < 3; i++)
+      for (int i = 0; i < eig1.getNumberOfEigenvalues(); i++)
       {
-         assertEquals(0.0, eigImaginaryParts1[i], epsilon);
-         assertEquals(0.0, eigImaginaryParts2[i], epsilon);
-         assertEquals(eigRealParts1[0], eigRealParts2[0], epsilon);
+         assertEquals(0.0, eig1.getEigenvalue(i).getImaginary(), epsilon);
+         assertEquals(0.0, eig2.getEigenvalue(i).getImaginary(), epsilon);
+         assertEquals(eigRealParts2[0], eigRealParts2[0], epsilon);
       }
 
 

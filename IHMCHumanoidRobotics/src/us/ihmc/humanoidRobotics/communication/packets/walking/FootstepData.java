@@ -87,7 +87,7 @@ public class FootstepData extends IHMCRosApiPacket<FootstepData> implements Tran
       this.robotSide = footstepData.robotSide;
       this.location = new Point3d(footstepData.location);
       this.orientation = new Quat4d(footstepData.orientation);
-      RotationTools.checkUnitLength(this.orientation);
+      RotationTools.checkQuaternionNormalized(this.orientation);
       if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty()){
          this.predictedContactPoints = null;
       }else{
@@ -169,7 +169,7 @@ public class FootstepData extends IHMCRosApiPacket<FootstepData> implements Tran
    public void setOrientation(Quat4d orientation)
    {
       this.orientation.set(orientation);
-      RotationTools.checkUnitLength(this.orientation);
+      RotationTools.checkQuaternionNormalized(this.orientation);
    }
 
    public RobotSide getRobotSide()

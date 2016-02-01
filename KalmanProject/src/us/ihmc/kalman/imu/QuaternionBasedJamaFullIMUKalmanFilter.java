@@ -1,7 +1,11 @@
 package us.ihmc.kalman.imu;
 
-import us.ihmc.robotics.geometry.QuaternionTools;
-import Jama.Matrix;
+import javax.vecmath.Quat4d;
+
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
+import us.ihmc.robotics.geometry.RotationTools;
 
 /**
  * <p>Title: </p>
@@ -28,14 +32,14 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
     * every other state step.  This is because the covariance should change
     * at a rate somewhat slower than the dynamics of the system.
     */
-   private Matrix P = new Matrix(N, N);    // Covariance matrix
+   private DenseMatrix64F P = new DenseMatrix64F(N, N);    // Covariance matrix
 
    /*
     * A represents the Jacobian of the derivative of the system with respect
     * its states.  We do not allocate the bottom three rows since we know that
     * the derivatives of bias_dot are all zero.
     */
-   private Matrix A = new Matrix(N, N);
+   private DenseMatrix64F A = new DenseMatrix64F(N, N);
 
    /*
     * Q is our estimate noise variance.  It is supposed to be an NxN
@@ -44,7 +48,7 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
     * it), those are zero.  For the gyro, we expect around 5 deg/sec noise,
     * which is 0.08 rad/sec.  The variance is then 0.08^2 ~= 0.0075.
     */
-   private Matrix Q = new Matrix(N, N);    // Noise estimate
+   private DenseMatrix64F Q = new DenseMatrix64F(N, N);    // Noise estimate
 
    /*
     * R is our measurement noise estimate.  Like Q, it is supposed to be
@@ -53,10 +57,10 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
     * We only have an expected noise in the pitch and roll accelerometers
     * and in the compass.
     */
-   private Matrix R = new Matrix(4, 4);    // State estimate for angles
-   private Matrix Wxq = new Matrix(4, 4);
-   public Matrix bias = new Matrix(3, 1);    // Rate gyro bias offset estimates. The Kalman filter adapts to these.
-   public Matrix q = new Matrix(4, 1);    // Estimated orientation in quaternions.
+   private DenseMatrix64F R = new DenseMatrix64F(4, 4);    // State estimate for angles
+   private DenseMatrix64F Wxq = new DenseMatrix64F(4, 4);
+   public DenseMatrix64F bias = new DenseMatrix64F(3, 1);    // Rate gyro bias offset estimates. The Kalman filter adapts to these.
+   public DenseMatrix64F q = new DenseMatrix64F(4, 1);    // Estimated orientation in quaternions.
 
    private double dt = .001;
    @SuppressWarnings("unused")
@@ -66,8 +70,8 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
     * C represents the Jacobian of the measurements of the attitude
     * with respect to the states of the filter.
     */
-   private Matrix C = new Matrix(4, N);
-   private Matrix Ct, E;
+   private DenseMatrix64F C = new DenseMatrix64F(4, N);
+   private DenseMatrix64F Ct, E;
    @SuppressWarnings("unused")
    private static final java.text.DecimalFormat fmt = new java.text.DecimalFormat();
 
@@ -82,7 +86,7 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
     * W(4,4)
     * p, q, r (rad/sec)
     */
-   void quatW(Matrix w_xyz)
+   void quatW(DenseMatrix64F w_xyz)
    {
       double p = w_xyz.get(0, 0) / 2.0;
       double q = w_xyz.get(1, 0) / 2.0;
@@ -97,10 +101,10 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
 
 
 
-   void setArray(Matrix M, double[][] d)
+   void setArray(DenseMatrix64F M, double[][] d)
    {
       int m, n;
-      if ((m = M.getRowDimension()) == d.length && (n = M.getColumnDimension()) == d[0].length)
+      if ((m = M.getNumRows()) == d.length && (n = M.getNumCols()) == d[0].length)
       {
          for (int i = 0; i < m; i++)
          {
@@ -114,10 +118,10 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
          System.err.println("setArray: incompatible dimensions.");
    }
 
-   void setMatrix(Matrix M, Matrix d)
+   void setMatrix(DenseMatrix64F M, DenseMatrix64F d)
    {
       int m, n;
-      if ((m = M.getRowDimension()) == d.getRowDimension() && (n = M.getColumnDimension()) == d.getColumnDimension())
+      if ((m = M.getNumRows()) == d.getNumRows() && (n = M.getNumCols()) == d.getNumCols())
       {
          for (int i = 0; i < m; i++)
          {
@@ -133,7 +137,7 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
 
 
 
-   void makeAMatrix(Matrix pqr)
+   void makeAMatrix(DenseMatrix64F pqr)
    {
       quatW(pqr);
 
@@ -147,8 +151,6 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
        * A[4..6][4..6] is the partials of d(Gyro_bias_dot)/d(Gyro_bias)
        * which is also zero.
        */
-      double[][] wxq = Wxq.getArray();
-
       double q0 = q.get(0, 0);
       double q1 = q.get(1, 0);
       double q2 = q.get(2, 0);
@@ -157,16 +159,16 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
       double[][] m =
       {
          {
-            wxq[0][0], wxq[0][1], wxq[0][2], wxq[0][3], q1 / 2, q2 / 2, q3 / 2
+            Wxq.get(0, 0), Wxq.get(0, 1), Wxq.get(0, 2), Wxq.get(0, 3), q1 / 2, q2 / 2, q3 / 2
          },
          {
-            wxq[1][0], wxq[1][1], wxq[1][2], wxq[1][3], -q0 / 2, q3 / 2, -q2 / 2
+            Wxq.get(1, 0), Wxq.get(1, 1), Wxq.get(1, 2), Wxq.get(1, 3), -q0 / 2, q3 / 2, -q2 / 2
          },
          {
-            wxq[2][0], wxq[2][1], wxq[2][2], wxq[2][3], -q3 / 2, -q0 / 2, q1 / 2
+            Wxq.get(2, 0), Wxq.get(2, 1), Wxq.get(2, 2), Wxq.get(2, 3), -q3 / 2, -q0 / 2, q1 / 2
          },
          {
-            wxq[3][0], wxq[3][1], wxq[3][2], wxq[3][3], q2 / 2, -q1 / 2, -q0 / 2
+            Wxq.get(3, 0), Wxq.get(3, 1), Wxq.get(3, 2), Wxq.get(3, 3), q2 / 2, -q1 / 2, -q0 / 2
          },
          {
             0, 0, 0, 0, 0, 0, 0
@@ -182,11 +184,11 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
       setArray(A, m);
    }
 
-   public static void normalizeQuaternion(Matrix M)
+   public static void normalizeQuaternion(DenseMatrix64F M)
    {
       double mag = 0;
       double s;
-      int m = M.getRowDimension(), n = M.getColumnDimension();
+      int m = M.getNumRows(), n = M.getNumCols();
       for (int i = 0; i < m; i++)
       {
          for (int j = 0; j < n; j++)
@@ -220,30 +222,52 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
 
    int nonInvertibleTicks = 0;
 
-   private void Kalman(Matrix P, Matrix X, Matrix C, Matrix R, Matrix err, Matrix K)
+   private void Kalman(DenseMatrix64F P, DenseMatrix64F X, DenseMatrix64F C, DenseMatrix64F R, DenseMatrix64F err, DenseMatrix64F K)
    {
-      Ct = C.transpose();
-      E = C.times(P).times(Ct).plus(R);    // E = C*P*Ct+R
+      Ct = new DenseMatrix64F(C);
+      CommonOps.transpose(Ct);
+      E = new DenseMatrix64F(C.getNumRows(), Ct.getNumCols());
+      DenseMatrix64F temp = new DenseMatrix64F(C.getNumRows(), P.getNumCols());
+   // E = C*P*Ct+R
+      CommonOps.mult(C, P, temp);
+      CommonOps.mult(temp, Ct, E);
+      CommonOps.add(E, R, E);
 
-      if (Math.abs(E.det()) < 1e-6)
+      double Edet = CommonOps.det(E);
+      if (Math.abs(Edet) < 1e-6)
       {
          nonInvertibleTicks++;
 
          if (nonInvertibleTicks > 100)
          {
             nonInvertibleTicks = 0;
-            System.out.println("QuaternionBasedFullIMUKalmanFilter::Kalman: E is not invertible! determinant = " + E.det());
+            System.out.println("QuaternionBasedFullIMUKalmanFilter::Kalman: E is not invertible! determinant = " + Edet);
          }
 
 //       throw new RuntimeException("E is not invertible!!!");
       }
       else
       {
-         Matrix E_Inverse = E.inverse();
+         DenseMatrix64F E_Inverse = new DenseMatrix64F(E.getNumCols(), E.getNumRows());
+         CommonOps.invert(E, E_Inverse);
 
-         K = P.times(Ct).times(E_Inverse);    // K = P*Ct*inv(E)
-         X.plusEquals(K.times(err));    // X += K*err;
-         P.minusEquals(K.times(C).times(P));    // P -= K*C*P;
+         temp = new DenseMatrix64F(P.getNumRows(), Ct.getNumCols());
+         K = new DenseMatrix64F(P.getNumRows(), E_Inverse.getNumCols());
+         // K = P*Ct*inv(E)
+         CommonOps.mult(P, Ct, temp);
+         CommonOps.mult(temp, E_Inverse, K);
+
+         DenseMatrix64F KTimesErr = new DenseMatrix64F(K.getNumRows(), err.getNumCols());
+         CommonOps.mult(K, err, KTimesErr);
+         
+         CommonOps.addEquals(X, KTimesErr); // X += K*err;
+         
+         temp.reshape(K.getNumRows(), C.getNumCols());
+         CommonOps.mult(K, C, temp);
+         DenseMatrix64F KCP = new DenseMatrix64F(K.getNumRows(), P.getNumCols());
+         CommonOps.mult(temp, P, KCP);
+         
+         CommonOps.subtractEquals(P, KCP); // P -= K*C*P;
       }
 
 //    ticks++;
@@ -253,9 +277,9 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
    }
 
 // void do_kalman(Matrix<3,N> C, Matrix<3,3> R, Matrix<1,3> error, int m=3) {
-   public Matrix K = new Matrix(N, 3);
+   public DenseMatrix64F K = new DenseMatrix64F(N, 3);
 
-   void doKalman(Matrix C, Matrix R, Matrix error)
+   void doKalman(DenseMatrix64F C, DenseMatrix64F R, DenseMatrix64F error)
    {
       // We throw away the K result
 
@@ -266,7 +290,7 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
       {
          {q.get(0, 0)}, {q.get(1, 0)}, {q.get(2, 0)}, {q.get(3, 0)}, {bias.get(0, 0)}, {bias.get(1, 0)}, {bias.get(2, 0)}
       };
-      Matrix X_vect = new Matrix(x_vect);
+      DenseMatrix64F X_vect = new DenseMatrix64F(x_vect);
 
       Kalman(P, X_vect, C, R, error, K);
 
@@ -284,11 +308,11 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
    }
 
 
-   void zero(Matrix a)
+   void zero(DenseMatrix64F a)
    {
-      for (int i = 0; i < a.getRowDimension(); i++)
+      for (int i = 0; i < a.getNumRows(); i++)
       {
-         for (int j = 0; j < a.getColumnDimension(); j++)
+         for (int j = 0; j < a.getNumCols(); j++)
          {
             a.set(i, j, 0.0);
          }
@@ -298,12 +322,12 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
    /**
     *  Convert accelerations to euler angles
     */
-   double mag(Matrix a)
+   double mag(DenseMatrix64F a)
    {
       double ret = 0.0;
-      for (int i = 0; i < a.getRowDimension(); i++)
+      for (int i = 0; i < a.getNumRows(); i++)
       {
-         for (int j = 0; j < a.getColumnDimension(); j++)
+         for (int j = 0; j < a.getNumCols(); j++)
          {
             ret += a.get(i, j) * a.get(i, j);
          }
@@ -313,18 +337,23 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
    }
 
 
-   public void accel2quaternions(Matrix a, double heading, double[] quaternions)
+   public void accel2quaternions(DenseMatrix64F a, double heading, double[] quaternions)
    {
       // Accel to euler, then euler to quaternions:
       double g = mag(a);
-      double[] euler =
+      double[] yawPitchRoll =
       {
-         -Math.atan2(a.get(1, 0), -a.get(2, 0)),    // Roll
+            heading    // Yaw
          -Math.asin(a.get(0, 0) / -g),    // Pitch
-         heading    // Yaw
+         -Math.atan2(a.get(1, 0), -a.get(2, 0)),    // Roll
       };
 
-      QuaternionTools.rollPitchYawToQuaternions(euler, quaternions);
+      Quat4d quaternion = new Quat4d();
+      RotationTools.convertYawPitchRollToQuaternion(yawPitchRoll, quaternion);
+      quaternions[0] = quaternion.w;
+      quaternions[1] = quaternion.x;
+      quaternions[2] = quaternion.y;
+      quaternions[3] = quaternion.z;
 
       // return the closest one:
       double distanceSquared = 0.0;
@@ -346,7 +375,7 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
    }
 
 
-   public void compassUpdate(double heading, Matrix accel)
+   public void compassUpdate(double heading, DenseMatrix64F accel)
    {
       // Compute our measured and estimated quaternions
 
@@ -364,7 +393,7 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
          {quaternion_m[0] - q0}, {quaternion_m[1] - q1}, {quaternion_m[2] - q2}, {quaternion_m[3] - q3}
       };
 
-      Matrix quatError = new Matrix(quaternion_error);
+      DenseMatrix64F quatError = new DenseMatrix64F(quaternion_error);
 
       /*
        * Compute our C matrix, which relates the quaternion state
@@ -396,24 +425,29 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
     * bias_dot = [0,0,0]
     * Q += Qdot * dt
     */
-   void propagateState(Matrix pqr)
+   void propagateState(DenseMatrix64F pqr)
    {
       quatW(pqr);    // construct the quaternion W matrix in Wxq
-      Matrix Qdot = Wxq.times(q);    // Qdot = Wxq * q;
-      q.plusEquals(Qdot.times(dt));    // q += Qdot * dt;
+      
+      DenseMatrix64F Qdot = new DenseMatrix64F(Wxq.getNumRows(), q.getNumCols());
+      CommonOps.mult(Wxq, q, Qdot);    // Qdot = Wxq * q;
+      CommonOps.addEquals(q, dt, Qdot);    // q += Qdot * dt;
       normalizeQuaternion(q);
 
       // Keep copy up-to-date...
 //    unpackQuaternion(q);
    }
 
-   void propagateCovariance(Matrix A)
+   void propagateCovariance(DenseMatrix64F A)
    {
-      Matrix Pdot = Q.copy();    // Pdot = Q + A*P*At
-      Pdot.plusEquals(A.times(P).times(A.transpose()));    // += A * this->P;
-      Pdot.timesEquals(dt);    // *= this->dt;
-      P.plusEquals(Pdot);    // += Pdot;
-      trace = P.trace();
+      DenseMatrix64F Pdot = new DenseMatrix64F(Q);    // Pdot = Q + A*P*At
+      DenseMatrix64F A_transpose = new DenseMatrix64F(A);
+      CommonOps.transpose(A_transpose);
+      DenseMatrix64F temp = new DenseMatrix64F(A.getNumRows(), P.getNumCols());
+      CommonOps.mult(A, P, temp);
+      CommonOps.multAdd(temp, A_transpose, Pdot);   // Pdot = Q + A*P*At
+      CommonOps.addEquals(Pdot, dt, Pdot);
+      trace = CommonOps.trace(P);
 
       /*
        *  Old Wrong Code:
@@ -436,9 +470,9 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
     *
     * @param pqr Matrix Gyro Rate values in order of qd_wy, qd_wx, qd_wz???
     */
-   public void imuUpdate(Matrix pqr)
+   public void imuUpdate(DenseMatrix64F pqr)
    {
-      pqr.minusEquals(bias);
+      CommonOps.subtractEquals(pqr, bias);
 
 //    unpackQuaternion(q);
       makeAMatrix(pqr);
@@ -455,7 +489,7 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
     * and compass.  Perhaps throw away the first few to let things
     * stabilize.
     */
-   public void initialize(Matrix accel, Matrix pqr, double heading)
+   public void initialize(DenseMatrix64F accel, DenseMatrix64F pqr, double heading)
    {
 //    System.out.println("Initializing QuaternionBasedJamaFullIMUKalmanFilter. accel = " + QuaternionTools.format4(accel.get(0,0)) + ", " + QuaternionTools.format4(accel.get(1,0)) + ", " + QuaternionTools.format4(accel.get(2,0)));
 
@@ -594,7 +628,7 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
     *
     * @return Matrix
     */
-   public void getQuaternion(Matrix quaternionMatrix)
+   public void getQuaternion(DenseMatrix64F quaternionMatrix)
    {
       quaternionMatrix.set(0, 0, q.get(0, 0));
       quaternionMatrix.set(1, 0, q.get(1, 0));

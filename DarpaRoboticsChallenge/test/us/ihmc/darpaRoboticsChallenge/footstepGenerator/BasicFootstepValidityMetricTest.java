@@ -91,7 +91,7 @@ public class BasicFootstepValidityMetricTest
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
       Quat4d orientation = new Quat4d();
 
-      RotationTools.getQuaternionFromYawAndZNormal(0.0, verticalVector, orientation);
+      RotationTools.computeQuaternionFromYawAndZNormal(0.0, verticalVector, orientation);
       footstepList.add(new FootstepData(stanceSide.getOppositeSide(), new Point3d(0.1, sign * 0.25, 0.0), new Quat4d(orientation)));
       footstepList.add(new FootstepData(stanceSide.getOppositeSide(), new Point3d(0.3, sign * 0.25, 0.0), new Quat4d(orientation)));
       footstepList.add(new FootstepData(stanceSide.getOppositeSide(), new Point3d(0.5, sign * 0.25, 0.0), new Quat4d(orientation)));
@@ -102,7 +102,7 @@ public class BasicFootstepValidityMetricTest
       footstepList.add(new FootstepData(stanceSide.getOppositeSide(), new Point3d(0.0, sign * 0.5, 0.0), new Quat4d(orientation)));
       footstepList.add(new FootstepData(stanceSide.getOppositeSide(), new Point3d(0.0, sign * 0.6, 0.0), new Quat4d(orientation)));
 
-      RotationTools.getQuaternionFromYawAndZNormal(sign * Math.PI/8.0, verticalVector, orientation);
+      RotationTools.computeQuaternionFromYawAndZNormal(sign * Math.PI/8.0, verticalVector, orientation);
       footstepList.add(new FootstepData(stanceSide.getOppositeSide(), new Point3d(0.0, sign * 0.25, 0.0), new Quat4d(orientation)));
 
       return footstepList;
@@ -113,20 +113,20 @@ public class BasicFootstepValidityMetricTest
       List<FootstepData> footstepList = new ArrayList<>();
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
       Quat4d orientation = new Quat4d();
-      RotationTools.getQuaternionFromYawAndZNormal(0.0, verticalVector, orientation);
+      RotationTools.computeQuaternionFromYawAndZNormal(0.0, verticalVector, orientation);
       footstepList.add(new FootstepData(stanceSide, new Point3d(0.0, 0.0, 0.0), new Quat4d(orientation)));
       footstepList.add(new FootstepData(stanceSide, new Point3d(0.25, 0.25, 0.0), new Quat4d(orientation)));
       footstepList.add(new FootstepData(stanceSide, new Point3d(-0.25, 0.25, 0.0), new Quat4d(orientation)));
       footstepList.add(new FootstepData(stanceSide, new Point3d(0.25, -0.25, 0.0), new Quat4d(orientation)));
       footstepList.add(new FootstepData(stanceSide, new Point3d(-0.25, -0.25, 0.0), new Quat4d(orientation)));
 
-      RotationTools.getQuaternionFromYawAndZNormal(-1 * sign * Math.PI/4.0, verticalVector, orientation);
+      RotationTools.computeQuaternionFromYawAndZNormal(-1 * sign * Math.PI/4.0, verticalVector, orientation);
       footstepList.add(new FootstepData(stanceSide.getOppositeSide(), new Point3d(0.0, sign * 0.25, 0.0), new Quat4d(orientation)));
 
-      RotationTools.getQuaternionFromYawAndZNormal(sign * Math.PI/2.0, verticalVector, orientation);
+      RotationTools.computeQuaternionFromYawAndZNormal(sign * Math.PI/2.0, verticalVector, orientation);
       footstepList.add(new FootstepData(stanceSide.getOppositeSide(), new Point3d(0.0, sign * 0.25, 0.0), new Quat4d(orientation)));
 
-      RotationTools.getQuaternionFromYawAndZNormal(0.0, verticalVector, orientation);
+      RotationTools.computeQuaternionFromYawAndZNormal(0.0, verticalVector, orientation);
       footstepList.add(new FootstepData(stanceSide.getOppositeSide(), new Point3d(1.0, sign * 0.25, 0.0), new Quat4d(orientation)));
       footstepList.add(new FootstepData(stanceSide.getOppositeSide(), new Point3d(-1.0, sign * 0.25, 0.0), new Quat4d(orientation)));
       footstepList.add(new FootstepData(stanceSide.getOppositeSide(), new Point3d(0.0, sign * 1.0, 0.0), new Quat4d(orientation)));
