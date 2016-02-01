@@ -1,0 +1,31 @@
+<package>
+  <description brief="Converts a position trajectory to a smooth spline trajectory">
+
+This package takes in position trajectories (with times), and can fill in
+velocities and accelerations at the knot points using various schemes, like
+numerical differentiation, clamped cubic splines, or the Fritsch-Butland monotonic cubic interpolator.
+
+  </description>
+  <author>Mrinal Kalakrishnan / mail@mrinal.net</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/spline_smoother</url>
+
+  <depend package="urdf" />
+  <depend package="angles" />
+  <depend package="roscpp" />
+  <depend package="filters" />
+  <depend package="trajectory_msgs" />
+  <depend package="arm_navigation_msgs" />
+
+  <export>
+    <cpp cflags="-I${prefix}/include -I${prefix}/msg/cpp" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lspline_smoother"/>
+    <filters plugin="${prefix}/default_plugins.xml" />
+  </export>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+
+

@@ -1,0 +1,30 @@
+<package>
+  <description brief="nodelet base class and wrappers">
+    The nodelet package is designed to provide a way to run multiple
+    algorithms in the same process with zero copy transport between
+    algorithms.  
+    
+    This package provides both the nodelet base class needed for
+    implementing a nodelet, as well as the NodeletLoader class used
+    for instantiating nodelets.
+  </description>
+  <author>Tully Foote, Radu Bogdan Rusu</author>
+  <license>BSD</license>
+  <review status="API cleared" notes="http://www.ros.org/wiki/nodelet/Reviews/2010-03-08_API_Review"/>
+  <url>http://ros.org/wiki/nodelet</url>
+  <depend package="pluginlib"/>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="bondcpp" />
+
+  <rosdep name="uuid" />
+
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lnodeletlib -luuid"/>
+  </export>
+  <platform os="ubuntu" version="10.04"/>
+  <platform os="ubuntu" version="10.10"/>
+  <platform os="ubuntu" version="11.04"/>
+</package>
+
+

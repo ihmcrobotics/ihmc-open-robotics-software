@@ -1,0 +1,11 @@
+<robot name="robot"> 
+	<link name="link"> 
+		<collision> 
+			<origin xyz="0.5 0.5 0.5"/>
+			<geometry>
+				<sphere radius="0.5"/>
+			</geometry>
+		</collision>
+	</link>
+</robot>
+

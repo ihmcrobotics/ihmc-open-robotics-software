@@ -1,0 +1,83 @@
+<GraphGroup>
+	<Cols>1</Cols>
+</GraphGroup>
+<Entry Boxes></Entry Boxes>
+
+<Number of ViewPorts>1</Number of ViewPorts>
+ <Main Viewport> 
+<Visible> true</Visible>
+</Main Viewport>
+
+<Graph Array Window Size>0</Graph Array Window Size>
+
+
+<Extra Panels>
+<Main Viewport>
+
+</Main Viewport></Extra Panels>
+
+<Current View>Split Screen 2</Current View>
+<Canvas 1>
+<Camera X>-0.2745496462622826</Camera X>
+<Camera Y>2.137493482394465</Camera Y>
+<Camera Z>1.8208184079646905</Camera Z>
+ <Dolly data> 
+ <Position X>3.0</Position X>
+ <Position Y>0.0</Position Y>
+ <Position Z>0.0</Position Z>
+<Dolly Booleans>
+<Dolly>false</Dolly>
+<Dolly X>true</Dolly X>
+<Dolly Y>true</Dolly Y>
+<Dolly Z>true</Dolly Z>
+</Dolly Booleans>
+</Dolly data>
+ <Track data> 
+ <Position X>0.0</Position X>
+ <Position Y>0.0</Position Y>
+ <Position Z>0.0</Position Z>
+ <Track Booleans>
+<Track>false</Track>
+<Track X>true</Track X>
+<Track Y>true</Track Y>
+<Track Z>false</Track Z>
+</Track Booleans>
+</Track data>
+<Fix Position>
+<Fix X>0.1357144987932864</Fix X>
+<Fix Y>-0.9451507564604154</Fix Y>
+<Fix Z>0.8578384211345086</Fix Z>
+</Fix Position>
+</Canvas 1>
+<Canvas 2>
+<Camera X>0.0</Camera X>
+<Camera Y>-5.0</Camera Y>
+<Camera Z>0.887</Camera Z>
+ <Dolly data> 
+ <Position X>0.0</Position X>
+ <Position Y>-5.0</Position Y>
+ <Position Z>0.0</Position Z>
+<Dolly Booleans>
+<Dolly>true</Dolly>
+<Dolly X>true</Dolly X>
+<Dolly Y>true</Dolly Y>
+<Dolly Z>true</Dolly Z>
+</Dolly Booleans>
+</Dolly data>
+ <Track data> 
+ <Position X>0.0</Position X>
+ <Position Y>0.0</Position Y>
+ <Position Z>0.0</Position Z>
+ <Track Booleans>
+<Track>true</Track>
+<Track X>true</Track X>
+<Track Y>true</Track Y>
+<Track Z>true</Track Z>
+</Track Booleans>
+</Track data>
+<Fix Position>
+<Fix X>0.0</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.887</Fix Z>
+</Fix Position>
+</Canvas 2>

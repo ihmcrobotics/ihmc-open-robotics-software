@@ -1,0 +1,19 @@
+<package>
+  <description brief="PR2 power board drivers">This provides a ROS node for the PR2 Power Board.</description>
+  <author>Curt Meyers, Blaise Gassend</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes="Dec 2009"/>
+  <depend package="roscpp" />
+  <depend package="rospy" />
+  <depend package="diagnostic_updater" />
+  <depend package="diagnostic_msgs" />
+  <depend package="pr2_msgs" />
+  <rosdep name="wxpython" />
+  <url>http://www.ros.org/wiki/pr2_power_board</url>
+  <export> 
+    <cpp cflags="-I${prefix}/srv/cpp" />   
+  </export> 
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>

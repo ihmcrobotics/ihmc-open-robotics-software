@@ -1,0 +1,13 @@
+<stack>
+  <description brief="physics_ode">
+
+     Open Dynamics Physics Engines for Simulation and Planning (Collision Detection).
+
+  </description>
+  <author>Maintained by John Hsu</author>
+  <license>Boost Software License,BSD,LGPL</license>  
+  <review status="Doc reviewed" notes="2010/01/08"/>
+  <url>http://ros.org/wiki/physics_ode</url>
+  <depend stack="ros" /> <!-- rosbuild -->
+
+</stack>

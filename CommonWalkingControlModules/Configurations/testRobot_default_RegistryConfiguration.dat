@@ -1,0 +1,5 @@
+root*false*false
+root.TestRobot*false*false
+root.TestRobot.FootCenterToToeEvaluator*false*false
+root.TestRobot.FootCenterToToeEvaluator.DoubleSupportFootCenterToToeICPComputer*false*false
+root.TestRobot.FootCenterToToeEvaluator.PointAndLinePlotter*false*false

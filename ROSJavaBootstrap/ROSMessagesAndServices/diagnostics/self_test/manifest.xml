@@ -1,0 +1,29 @@
+<package>
+  <description brief="Tools relating to self-tests.">
+    <p>  
+      A self_test is a service call provided by a node that triggers a
+      test of the driver and any associated hardware. This service call can
+      be used by users to quickly verify that a device or process is working.
+      Currently self-tests are mainly used with drivers, but nothing
+      precludes non-driver nodes using them.
+    </p>
+    <p>  
+      The self_test package contains tools to for calling the self-test
+      service from the command-line, or from a regression test. It also
+      provides a C++ API for facilitating writing of self-tests.  
+    </p>
+  </description>
+  <author>Jeremy Leibs and Blaise Gassend</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes="Jan 15 2010"/>
+  <url>http://www.ros.org/wiki/self_test</url>
+  <depend package="roscpp" />
+  <depend package="diagnostic_updater" />
+  <depend package="diagnostic_msgs" />  
+  <export>
+    <cpp cflags="-I${prefix}/include -I${prefix}/srv/cpp"/>
+  </export>
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>

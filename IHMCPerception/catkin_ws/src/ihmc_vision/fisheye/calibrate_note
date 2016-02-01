@@ -1,0 +1,13 @@
+
+
+./cameracalibrator.py --size 3x4 --square 0.03 image:=/multisense/left/image_color  --no-service-check
+./cameracalibrator.py --size 3x4 --square 0.03 image:=/blackfly/right/image_mono camera:=/blackfly/right
+./cameracalibrator.py --size 3x4 --square 0.03 image:=/blackfly/left/image_mono camera:=/blackfly/left
+
+-k 8
+--disable_calib_cb_fast_check  (disable CALIB_CB_FAST_CHECK) 
+--zero-tangential-dist
+
+
+./cameracalibrator.py --size 6x8 --square 0.0233  --zero-tangent-dist -k 8 --disable_calib_cb_fast_check image:=/blackfly/left/image_mono camera:=/blackfly/left
+

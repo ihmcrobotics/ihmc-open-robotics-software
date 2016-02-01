@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+	<name>image_encoding_converter</name>
+	<description>The image_encoding_converter package</description>
+
+	<version>0.1.0</version>
+	<maintainer email="nmertins@ihmc.us">Nathan Mertins</maintainer>
+	<license>BSD</license>
+	<author>Nathan Mertins</author>
+
+	<buildtool_depend>catkin</buildtool_depend>
+	<build_depend>image_transport</build_depend>
+	<build_depend>roscpp</build_depend>
+	<build_depend>sensor_msgs</build_depend>
+
+	<run_depend>image_transport</run_depend>
+	<run_depend>roscpp</run_depend>
+	<run_depend>sensor_msgs</run_depend>
+</package>

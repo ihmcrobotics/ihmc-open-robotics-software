@@ -1,0 +1,19 @@
+<package>
+  <description brief="trajectory_msgs">
+
+     trajectory_msgs
+
+  </description>
+  <author>Stuart Glaser</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes="http://www.ros.org/wiki/robot_mechanism_controllers/Reviews/2009-10-16_Traj_API_Review"/>
+  <url>http://ros.org/wiki/trajectory_msgs</url>
+
+  <export>
+    <cpp cflags="`PKG_CONFIG_PATH=${prefix}/../../lib/pkgconfig pkg-config --cflags trajectory_msgs`"
+         lflags="`PKG_CONFIG_PATH=${prefix}/../../lib/pkgconfig pkg-config --libs trajectory_msgs`"/>
+  </export>
+
+</package>
+
+

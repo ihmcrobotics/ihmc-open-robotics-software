@@ -1,0 +1,38 @@
+<package>
+  <description brief="pr2_teleop_general">
+
+     pr2_teleop_general
+
+  </description>
+  <author>Gil Jones</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/pr2_teleop_general</url>
+
+  <depend package="roscpp" />
+  <depend package="actionlib" />
+  <depend package="actionlib_msgs" />
+  <depend package="geometry_msgs" />
+  <depend package="sensor_msgs" />
+  <depend package="pr2_msgs" />
+  <depend package="pr2_controllers_msgs" />
+  <depend package="pr2_controller_manager" />
+  <depend package="pr2_mechanism_msgs" />
+  <depend package="kinematics_msgs" />
+  <depend package="urdf" />
+  <depend package="urdf_interface" />
+  <depend package="ps3joy" />
+  <depend package="pr2_common_action_msgs" />
+  <depend package="polled_camera" />
+
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib"/>
+  </export>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+
+</package>
+
+

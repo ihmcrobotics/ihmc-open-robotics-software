@@ -1,0 +1,6 @@
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="atlas" >
+    <xacro:include filename="$(find ihmc_gazebo)/urdf/atlas_v5_simple_shapes.urdf" />    
+    <xacro:include filename="$(find ihmc_gazebo)/urdf/atlas_v5.gazebo" />
+    <xacro:include filename="$(find atlas_description)/urdf/atlas_v5.transmission" />
+    <xacro:include filename="$(find multisense_sl_description)/urdf/multisense_sl_v4.urdf" />
+</robot>

@@ -1,0 +1,30 @@
+<package>
+  <description brief="parallel_quickstep">
+    <p>
+      Parallel implementation of quickstep, configurable for CUDA, OpenCL and OpenMP.
+    </p>
+     <p>
+       The package by default is compiled with CPU quickstep.  To enable GPU capabilities, overlay this package and recompile
+       with CUDA drivers installed.
+     </p>
+  </description>
+
+  <author>Jared Duke</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+
+  <depend package="rosbuild"/>
+  <depend package="opende"/>
+
+  <export>
+    <rosbuild cmake_directory="${prefix}/CMakeModules"/>
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -lparallel_quickstep"/>
+  </export>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+
+</package>
+
+

@@ -1,0 +1,22 @@
+<package>
+  <description brief="image_transport">
+
+     image_transport should always be used to subscribe to and publish images. It provides transparent
+     support for transporting images in low-bandwidth compressed formats. Examples (provided by separate
+     plugin packages) include JPEG/PNG compression and Theora streaming video.
+
+  </description>
+  <author>Patrick Mihelich</author>
+  <license>BSD</license>
+  <review status="doc reviewed" notes=""/>
+  <url>http://ros.org/wiki/image_transport</url>
+  <depend package="sensor_msgs"/>
+  <depend package="pluginlib"/>
+  <depend package="message_filters"/>
+
+  <export>
+    <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -limage_transport" cflags="-I${prefix}/include"/>
+    <image_transport plugin="${prefix}/default_plugins.xml" />
+  </export>
+
+</package>

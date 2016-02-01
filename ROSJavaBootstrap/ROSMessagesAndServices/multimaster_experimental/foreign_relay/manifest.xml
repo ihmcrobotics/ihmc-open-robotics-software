@@ -1,0 +1,21 @@
+<package>
+  <description brief="Nodes for relaying to a foreign master.">
+    The foreign_relay node is designed for use with multiple robots running
+    separate masters. It is like a relay, except that it additionally
+    registers its topic on a foreign master. The unreliable_relay node is like 
+    relay in topic_tools except that it requests an unreliable transport.
+  </description>
+  <author>Blaise Gassend</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/foreign_relay</url>
+  <depend package="roscpp"/>
+  <depend package="xmlrpcpp"/>
+  <depend package="topic_tools"/>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+
+

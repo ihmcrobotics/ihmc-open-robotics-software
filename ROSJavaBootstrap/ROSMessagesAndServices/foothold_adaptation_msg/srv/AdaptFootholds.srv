@@ -1,0 +1,5 @@
+# Takes an initial list of footholds and returns the footholds adapted to the terrain
+
+FootholdList initialFootholds
+---
+FootholdList adaptedFootholds

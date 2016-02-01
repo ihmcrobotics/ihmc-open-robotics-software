@@ -1,0 +1,150 @@
+material DRCQual/MetalPlate
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.000000
+
+        texture_unit
+        {
+          texture metal_plate.jpg
+            scale 0.2 0.8
+        }
+    }
+  }
+}
+
+material DRCQual/MetalPlatePlatform
+{
+  receive_shadows on
+
+    technique
+    {
+      pass
+      {
+        ambient 0.5 0.5 0.5 1.000000
+
+          texture_unit
+          {
+            texture metal_plate.jpg
+              scale 1.0 1.0
+          }
+      }
+    }
+}
+
+material DRCQual/MetalPlateRamp
+{
+  receive_shadows on
+
+    technique
+    {
+      pass
+      {
+        ambient 0.5 0.5 0.5 1.000000
+
+          texture_unit
+          {
+            texture metal_plate.jpg
+              scale 1.0 0.1
+          }
+      }
+    }
+}
+
+material DRCQual/Wood
+{
+  technique
+  {
+    pass
+    {
+      ambient 1.0 1.0 1.0 1.0
+        diffuse 1.0 1.0 1.0 1.0
+        specular 0.2 0.2 0.2 1.0 12.5
+
+        texture_unit
+        {
+          texture wood.jpg
+            filtering trilinear
+        }
+    }
+  }
+}
+
+material DRCQual/Target
+{
+  technique
+  {
+    pass
+    {
+      ambient 1.0 1.0 1.0 1.0
+        diffuse 1.0 1.0 1.0 1.0
+        specular 0.2 0.2 0.2 1.0 12.5
+
+        texture_unit
+        {
+          texture target.png
+            filtering trilinear
+        }
+    }
+  }
+}
+
+material DRCQual/WarningWall
+{
+  technique
+  {
+    pass
+    {
+      ambient 1.0 1.0 1.0 1.0
+        diffuse 1.0 1.0 1.0 1.0
+        specular 0.2 0.2 0.2 1.0 12.5
+
+        texture_unit
+        {
+          texture warning_wall.png
+          filtering trilinear
+        }
+    }
+  }
+}
+
+material VRC/LightBlue
+{
+	technique
+	{
+    pass ambient
+    {
+			ambient .584 .745 1
+      diffuse .584 .745 1
+      specular 0.1 0.1 0.1 1 1
+    }
+	}
+}
+
+material VRC/DarkGreen
+{
+	technique
+	{
+		pass ambient
+		{
+			ambient 0 .443 0
+      diffuse 0 .443 0
+      specular 0.1 0.1 0.1 1 1
+		}
+	}
+}
+
+material VRC/DarkRed
+{
+	technique
+	{
+    pass ambient
+    {
+			ambient .533 0 1
+      diffuse .533 0 1
+      specular 0.1 0.1 0.1 1 1
+    }
+	}
+}

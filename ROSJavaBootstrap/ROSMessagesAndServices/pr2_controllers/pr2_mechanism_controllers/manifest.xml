@@ -1,0 +1,49 @@
+<package>
+  <description brief="Controllers for the PR2">
+    The pr2_mechanism_controllers package contains realtime
+    controllers that are meant for specific mechanisms of the PR2.
+  </description>
+  <author>Sachin Chita, John Hsu, Melonee Wise</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes="http://www.ros.org/wiki/pr2_mechanism_controllers/Reviews/2010-01-14_Doc_Review https://code.ros.org/trac/wg-ros-pkg/ticket/3574"/>
+
+  <rosdep name="eigen" />
+
+  <!-- ROS Interfaces -->
+  <depend package="std_msgs" />
+  <depend package="geometry_msgs" />
+  <depend package="pr2_mechanism_msgs" />
+  <depend package="nav_msgs" />
+  <depend package="pr2_msgs" />
+  <depend package="visualization_msgs" />
+  <depend package="diagnostic_msgs" />
+
+  <!-- Plugins -->
+  <depend package="pr2_controller_interface" />
+  
+  <depend package="roscpp" />
+  <depend package="pr2_controllers_msgs" />
+  <depend package="pr2_mechanism_model" />
+  <depend package="realtime_tools" />
+  <depend package="robot_mechanism_controllers" />
+  <depend package="rospy" />
+  <depend package="pluginlib" />
+  <depend package="rosconsole" />
+  <depend package="tf" />
+  <depend package="angles" />
+  <depend package="control_toolbox" />
+  <depend package="filters" />
+  <depend package="diagnostic_updater" />
+  
+  <url>http://ros.org/pr2_mechanism_controllers</url>
+  <export>
+    <cpp cflags="-I${prefix}/include"
+	 lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpr2_mechanism_controllers" />
+    <pr2_controller_interface plugin="${prefix}/controller_plugins.xml" />
+
+  </export>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>

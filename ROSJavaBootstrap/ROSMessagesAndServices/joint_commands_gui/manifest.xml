@@ -1,0 +1,15 @@
+<package>
+  <description brief="joint_commands_gui">
+
+     joint_commands_gui - control atlas robot using a wx gui.
+
+  </description>
+  <author>Maurice Fallon</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://gazebosim.org/wiki/DRC/joint_commands_gui</url>
+  <depend package="osrf_msgs"/>
+
+</package>
+
+

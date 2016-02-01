@@ -1,0 +1,12 @@
+<launch>
+  <node pkg="openni_camera" type="openni_node" name="openni_camera" output="screen" >
+    <param name="image_mode" value="8" />
+    <param name="depth_mode" value="8" />
+    <param name="depth_registration" value="True" />
+  </node>
+  <node pkg="nodelet" type="nodelet" name="points_xyzrgb" args="load depth_image_proc/point_cloud_xyzrgb /openni_camera">
+    <remap from="rgb/image_rect_color" to="/rgb/image_raw" />
+    <remap from="depth_registered/image_rect" to="/depth_registered/image_raw" /> 
+  </node> 
+</launch>
+

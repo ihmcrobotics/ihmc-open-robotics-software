@@ -1,0 +1,37 @@
+IHMC Atlas Gazebo Sim Plugin
+
+Make sure stereo-image-proc is installed:
+
+	sudo apt-get install ros-indigo-stereo-image-proc
+
+	
+Make sure you have the following in your .bashrc: (source ~/.bashrc to update it)
+
+	source /opt/ros/indigo/setup.bash   # this is necessary for drcsim 3.1.0 and later
+	source /usr/share/drcsim/setup.sh
+	source [your_workspace_here]/Atlas/ihmc_gazebo_catkin_ws/devel/setup.bash
+	
+Furthermore do:
+
+	sudo rosdep init
+	rosdep update
+
+To build the plugin:
+
+	Run 'catkin_make' in Atlas/ihmc_gazebo_catkin_ws
+	and
+	'catkin_make install'
+	
+To run the plugin in Gazebo:
+	
+	roslaunch ihmc_gazebo ihmc_atlas_standing.launch
+	or
+	roslaunch ihmc_gazebo ihmc_atlas_car_lateral.launch
+	or
+	roslaunch ihmc_gazebo ihmc_atlas_car_front.launch
+
+REMEMBER: Add catkin_ws/build and catkin_ws/devel to svn:ignore.
+		
+TODO: Put ros_rviz into catkin_ws
+
+	

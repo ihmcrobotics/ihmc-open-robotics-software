@@ -1,0 +1,13 @@
+<launch>
+	<group ns='blackfly'>
+		<include file="camera.launch">
+		  <arg name="camera_serial" value="12502226" />
+		  <arg name="side" value="left" />
+		</include>
+
+		<include file="camera.launch">
+		  <arg name="camera_serial" value="12502218" />
+		  <arg name="side" value="right" />
+		</include>
+	</group>
+</launch>

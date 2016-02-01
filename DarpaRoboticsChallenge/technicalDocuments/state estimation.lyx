@@ -1,0 +1,5332 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\DeclareMathOperator{\Ad}{Ad}
+\DeclareMathOperator{\ad}{ad}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 2
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+A novel state estimator for floating base robots
+\end_layout
+
+\begin_layout Author
+Twan Koolen, Jerry Pratt
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage clearpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage clearpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction and overall estimator design
+\end_layout
+
+\begin_layout Standard
+This document describes the design of a novel state estimator for use in
+ legged robots.
+ The goal of the estimator is to determine the robot's position and orientation
+ in the world, as well as its linear and angular velocity and linear and
+ angular acceleration, given noisy measurements.
+ Joint positions, velocities, and accelerations are assumed to be known
+ or estimated separately, leaving only the task of localization with respect
+ to the world to the presented estimator.
+ Its design can be used with any number of angular velocity, linear acceleration
+, and orientation sensors, attached to any link of the robot.
+ In addition, any number of body-fixed point velocity measurements can be
+ incorporated.
+ This latter type of measurement can be used for example when it is known
+ that certain points on the robot's feet are in nonslipping contact with
+ the ground.
+ The estimator also incorporates information about the desired accelerations
+ of the robot's links, as supplied e.g.
+ by an inverse-dynamics-based controller, which may give it an advantage
+ over other estimation approaches used thus far.
+\end_layout
+
+\begin_layout Standard
+Since our process model is nonlinear, a simple Kalman filter will not do.
+ The main options for nonlinear process models are the extended Kalman filter,
+ the unscented Kalman filter, and the particle filter.
+ In the extended Kalman filter, the process model and measurement model
+ are linearized about the current state estimate, and a regular (time-variant)
+ Kalman filter is applied to the linearized model.
+ In an unscented Kalman filter, a finite set of sample points are chosen
+ and propagated through the nonlinear dynamics, from which the mean and
+ covariance of the estimate are determined, to be used in the Kalman filter
+ update equations.
+ The particle filter is a fully nonlinear filter, that can be considered
+ a statistical, brute-force approach to estimation that often works well
+ for problems that are difficult for the conventional Kalman filter 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Simon2006"
+
+\end_inset
+
+.
+ We have chosen to use the extended Kalman filter approach, because the
+ dynamics are not highly nonlinear, and it has been shown that the performance
+ of an unscented Kalman filter is about the same as that of an extended
+ Kalman filter in this type of application 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Laviola2003"
+
+\end_inset
+
+, making the reduced computational load of the extended Kalman filter the
+ tie breaker.
+\end_layout
+
+\begin_layout Standard
+We have chosen to make the state vector as small as possible, and to have
+ it represent the configuration, velocity, and acceleration of the robot
+ in a consistent and unambiguous manner.
+ The state vector consists of CoM position, velocity, and acceleration,
+ orientation, angular velocity and angular acceleration of one of the robot's
+ links, and bias estimates for each angular velocity sensor and each linear
+ acceleration sensor.
+\end_layout
+
+\begin_layout Standard
+Part of the goal of the presented state estimator is to estimate the orientation
+ of one of the robot's links.
+ Hence, we need to decide on the parameterization of orientation we use.
+ We have chosen to use a unit quaternion to parameterize the global orientation
+ state estimate.
+\end_layout
+
+\begin_layout Standard
+The presented estimator is largely based on the work presented in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bloesch2012"
+
+\end_inset
+
+.
+ The main differences between their approach and ours are:
+\end_layout
+
+\begin_layout Itemize
+we treat IMU linear acceleration measurements as measurements, and not as
+ inputs to the model.
+ Instead, we incorporate accelerations into our state vector;
+\end_layout
+
+\begin_layout Itemize
+we incorporate information concerning desired accelerations, as provided
+ by our controller, into the estimator's process model;
+\end_layout
+
+\begin_layout Itemize
+our estimator can handle any number of IMUs, whereas theirs can only handle
+ one;
+\end_layout
+
+\begin_layout Itemize
+we do not incorporate the position of contact points into our state vector,
+ as this information is redundant
+\end_layout
+
+\begin_layout Standard
+The remainder of this document is structured as follows.
+ In section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Process-model"
+
+\end_inset
+
+, we derive the process model used in the extended Kalman filter.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Measurements"
+
+\end_inset
+
+ presents the measurement model.
+ The appendices contain derivations used throughout the derivations in the
+ two main sections.
+\end_layout
+
+\begin_layout Section
+Process model
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Process-model"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The discrete time extended Kalman filter requires a process model of the
+ form
+\begin_inset Formula 
+\[
+x_{n+1}=Fx_{n}+Gu_{n}+w_{n}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $w_{n}\sim\mathcal{N}\left(0,Q\right)$
+\end_inset
+
+ is the process noise.
+ The matrices 
+\begin_inset Formula $F$
+\end_inset
+
+, 
+\begin_inset Formula $G$
+\end_inset
+
+, and 
+\begin_inset Formula $Q$
+\end_inset
+
+ vary from update to update.
+\end_layout
+
+\begin_layout Standard
+Most of our process model will be more naturally described in continuous
+ time.
+ We will derive this continuous-time part of the process model in section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Continuous-time-part"
+
+\end_inset
+
+.
+ The continuous-time part of the process model will be nonlinear.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Linearized-error-model"
+
+\end_inset
+
+ derives a continuous-time linearized error model.
+ This linearized continuous-time model will then be discretized in section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Discretization"
+
+\end_inset
+
+ with a zero-order hold assumption.
+\end_layout
+
+\begin_layout Standard
+In addition to the continuous-time part, our process model will also incorporate
+ a part that is more naturally described using a linear, discrete-time state
+ space model.
+ This part does not need to be linearized or discretized, and will simply
+ be appended to the discretized version of the continuous time part of the
+ process model to obtain the final model 
+\begin_inset Formula $\left(F,G,Q\right)$
+\end_inset
+
+ used by the estimator.
+ This part of the process model is described in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Discrete-time-part"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Continuous time part of dynamics
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Continuous-time-part"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This section describes the part of the process model that is most naturally
+ described in continuous time.
+\end_layout
+
+\begin_layout Standard
+We use CoM position and velocity in our state vector.
+ The motivations for this choice are the following:
+\end_layout
+
+\begin_layout Itemize
+we conjecture that the CoM on average has smaller variations in its acceleration
+ than any fixed point on the robot, as the CoM is a mass-weighted average
+ of the positions of the robot's link CoMs.
+ Estimating a low bandwidth signal is easier than estimating a high bandwidth
+ signal in the presence of a noisy process and noisy measurements.
+\end_layout
+
+\begin_layout Itemize
+since IMUs are presumed to be mounted to any number of different links,
+ there is no compelling argument to make any link be special by putting
+ its position and velocity in the state vector.
+\end_layout
+
+\begin_layout Itemize
+force measurements could easily be incorporated if desired, since the sum
+ of external forces is directly related to CoM acceleration.
+ We have not yet incorporated a description of these measurements in this
+ document however.
+\end_layout
+
+\begin_layout Standard
+Unfortunately, there is no angular equivalent of the CoM, so we need to
+ pick an 
+\emph on
+orientation estimation link
+\emph default
+, i.e.
+ a link for which the orientation and angular velocity will be part of the
+ state vector.
+\end_layout
+
+\begin_layout Standard
+In addition, we will also estimate biases for the gyros and accelerometers,
+ so these biases also need to be incorporated into the state vector.
+\end_layout
+
+\begin_layout Standard
+In summary, the state vector for this part of the dynamics consists of the
+ following entries:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $r$
+\end_inset
+
+: CoM position in world frame;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\dot{r}$
+\end_inset
+
+: CoM velocity in world frame;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q$
+\end_inset
+
+: unit quaternion describing the orientation of the orientation estimation
+ link with respect to the world frame;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\omega$
+\end_inset
+
+: angular velocity of the orientation estimation link, expressed in body
+ frame;
+\end_layout
+
+\begin_layout Itemize
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $b_{\dot{v}_{i}}$
+\end_inset
+
+: acceleration bias of linear acceleration sensor 
+\begin_inset Formula $i$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $b_{\omega_{i}}$
+\end_inset
+
+: gyro bias of angular velocity sensor 
+\begin_inset Formula $i$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The inputs to the continuous time part of the dynamics consist of desired
+ accelerations computed by the controller.
+ The input vector consists of
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\ddot{r}_{d}$
+\end_inset
+
+: desired CoM acceleration;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\dot{\omega}_{d}$
+\end_inset
+
+: desired angular acceleration of the orientation estimation link.
+\end_layout
+
+\begin_layout Standard
+The dynamics are described in state space form as
+\begin_inset Formula 
+\begin{align*}
+\dot{r} & =\dot{r}\\
+\ddot{r} & =\ddot{r}_{d}+w_{\ddot{r}}\\
+\dot{q} & =\frac{1}{2}q\otimes\omega_{q}\\
+\dot{\omega} & =\dot{\omega}_{d}+w_{\dot{\omega}}\\
+\dot{b}_{\dot{v},i} & =w_{b_{\dot{v},i}}\quad i\in\left\{ 1,2,\dotsc,n\right\} \\
+\dot{b}_{\omega,i} & =w_{b_{\omega,i}}\quad i\in\left\{ 1,2,\dotsc,n\right\} 
+\end{align*}
+
+\end_inset
+
+where 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\omega_{q}=\left(\begin{array}{c}
+\omega\\
+0
+\end{array}\right)$
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+, 
+\begin_inset Formula $\otimes$
+\end_inset
+
+ represents the standard quaternion product, and where the process noise
+ vectors are
+\end_layout
+
+\begin_layout Itemize
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $w_{\ddot{r}}\sim\mathcal{N}\left(0,Q_{\ddot{r}}\right)$
+\end_inset
+
+: CoM acceleration noise
+\end_layout
+
+\begin_layout Itemize
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $w_{\dot{\omega}}\sim\mathcal{N}\left(0,Q_{\dot{\omega}}\right)$
+\end_inset
+
+: orientation link angular acceleration noise
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $w_{b_{\dot{v},i}}\sim\mathcal{N}\left(0,Q_{b_{\dot{v},i}}\right)$
+\end_inset
+
+: acceleration bias random walk noise for IMU 
+\begin_inset Formula $i$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $w_{b_{\omega,i}}\sim\mathcal{N}\left(0,Q_{b_{\omega,i}}\right)$
+\end_inset
+
+: gyro bias random walk noise for IMU 
+\begin_inset Formula $i$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Linearized error model
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Linearized-error-model"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This section describes the linearization of the nonlinear process model
+ presented in the previous section.
+\end_layout
+
+\begin_layout Standard
+The only part of the continuous-time dynamics that is nonlinear is the kinematic
+ equation describing how the unit quaternion 
+\begin_inset Formula $q$
+\end_inset
+
+ changes in time.
+ In addition to this equation being nonlinear, a problem that arises with
+ the use of unit quaternions is that the unit norm constraint needs to be
+ preserved.
+ The update steps in the Kalman filter itself do not know about this constraint
+ and will in general not enforce it.
+\end_layout
+
+\begin_layout Standard
+A simple way to enforce this constraint is to convert differences with respect
+ to the current estimate to a local, minimal description (i.e.
+ using three numbers), compute a correction in terms of this minimal description
+, convert the correction back to a quaternion, and then perform quaternion
+ multiplication to correct the estimate.
+ We will use a local description in terms of an error rotation vector 
+\begin_inset Formula $\phi\in\mathbb{R}^{3}$
+\end_inset
+
+, where 
+\begin_inset Formula $\frac{\phi}{\left\Vert \phi\right\Vert }$
+\end_inset
+
+ is the axis of rotation, and 
+\begin_inset Formula $\left\Vert \phi\right\Vert $
+\end_inset
+
+ is the rotation angle about the axis of rotation.
+ This approach was introduced in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Pittelkau2003"
+
+\end_inset
+
+, and also applied in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bloesch2012"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The equation describing the rotational kinematics in terms of the rotation
+ vector 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is derived in the appendix (section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Appendix:-rotation-vector"
+
+\end_inset
+
+), and reads
+\begin_inset Formula 
+\begin{equation}
+\dot{\phi}=\omega+\frac{\phi\times\omega}{2}+\underbrace{\frac{1}{\left\Vert \phi\right\Vert ^{2}}\left[1-\frac{\left\Vert \phi\right\Vert \sin\left\Vert \phi\right\Vert }{2\left(1-\cos\left\Vert \phi\right\Vert \right)}\right]\phi\times\left(\phi\times\omega\right)}_{c}\label{eq:bortz}
+\end{equation}
+
+\end_inset
+
+Note the singularity at 
+\begin_inset Formula $\left\Vert \phi\right\Vert =n2\pi$
+\end_inset
+
+, with 
+\begin_inset Formula $n\in\mathbb{Z}\backslash0$
+\end_inset
+
+, which is the reason for only using these dynamics locally around the current
+ orientation estimate.
+\end_layout
+
+\begin_layout Standard
+Next, we derive a linearization of 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:bortz"
+
+\end_inset
+
+, written as
+\begin_inset Formula 
+\[
+\dot{\phi}\approx\frac{\partial\dot{\phi}}{\partial\phi}\phi+\frac{\partial\dot{\phi}}{\partial\omega}\omega
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The derivative with respect to 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is 
+\begin_inset Formula 
+\[
+\frac{\partial\dot{\phi}}{\partial\phi}=-\frac{1}{2}\tilde{\omega}+\frac{\partial c}{\partial\phi}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\tilde{x}\in so\left(3\right)$
+\end_inset
+
+ represents the skew-symmetric matrix such that 
+\begin_inset Formula $\tilde{x}y=x\times y$
+\end_inset
+
+ for all 
+\begin_inset Formula $y\in\mathbb{R}^{3}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The derivative with respect to 
+\begin_inset Formula $\omega$
+\end_inset
+
+ is
+\begin_inset Formula 
+\[
+\frac{\partial\dot{\phi}}{\partial\omega}=I+\frac{1}{2}\tilde{\phi}+\frac{\partial c}{\partial\omega}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Since we linearize around 
+\begin_inset Formula $\phi=0$
+\end_inset
+
+, we can simplify these derivatives.
+ Using Mathematica, we have shown that 
+\begin_inset Formula $\lim_{\phi\rightarrow0}\frac{\partial c}{\partial\phi}$
+\end_inset
+
+ and 
+\begin_inset Formula $\lim_{\phi\rightarrow0}\frac{\partial c}{\partial\omega}$
+\end_inset
+
+ exist and are zero.
+ Furthermore, the term in the expression for 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\frac{\partial\dot{\phi}}{\partial\omega}$
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+ that is linear in 
+\begin_inset Formula $\tilde{\phi}$
+\end_inset
+
+ also disappears due to 
+\begin_inset Formula $\phi$
+\end_inset
+
+ being assumed negligably small, finally resulting in the linearized rotation
+ vector kinematics
+\begin_inset Formula 
+\[
+\dot{\phi}\approx I\omega-\frac{1}{2}\tilde{\omega}\phi
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To use this as our process model for orientation, we need to be able to
+ convert a corrective term 
+\begin_inset Formula $\Delta\phi$
+\end_inset
+
+, obtained in the correction step of the Kalman filter based on this model,
+ to the global description in terms of quaternions.
+ This is done using the conversion
+\begin_inset Formula 
+\[
+\Delta q=\zeta\left(\Delta\phi\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula 
+\[
+\zeta:k\mapsto\zeta\left(k\right)=\left(\begin{array}{c}
+\sin\left(\frac{1}{2}\left\Vert k\right\Vert \frac{k}{\left\Vert k\right\Vert }\right)\\
+\cos\left(\frac{1}{2}\left\Vert k\right\Vert \right)
+\end{array}\right)
+\]
+
+\end_inset
+
+so that the correction equation for orientation becomes
+\begin_inset Formula 
+\[
+\hat{q}_{n+1}^{+}=\hat{q}_{n+1}^{-}\otimes\Delta q
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The propagation equation is simply
+\begin_inset Formula 
+\[
+\hat{q}_{n+1}^{-}=\hat{q}_{n}^{+}\otimes\zeta\left(\hat{\omega}\Delta t\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can now construct the continuous-time state space model describing the
+ error dynamics:
+\begin_inset Formula 
+\[
+\dot{x}^{c}=Ax^{c}+Bu+w^{c}
+\]
+
+\end_inset
+
+with
+\begin_inset Formula 
+\begin{align*}
+x^{c} & =\left(r,\dot{r},\phi,\omega,b_{\dot{v},1},\dotsc,b_{a,n},b_{\dot{v},1},\dotsc,b_{\omega,n}\right)\in\mathbb{R}^{n}\\
+u & =\left(\ddot{r}_{d},\dot{\omega}_{d}\right)\\
+w^{c} & =\left(0,w_{\ddot{r}},0,w_{\dot{\omega}},w_{b_{\dot{v},1}},\dotsc,w_{b_{\dot{v},n}},w_{b_{\omega,1}},\dotsc,w_{b_{\omega,n}}\right)\sim\mathcal{N}\left(0,Q^{c}\right)
+\end{align*}
+
+\end_inset
+
+where we have defined the dimension 
+\begin_inset Formula 
+\[
+n=12+3n_{b}
+\]
+
+\end_inset
+
+with the number of bias estimate entries defined as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+n_{b}=n_{\omega}+n_{\dot{v}}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $n_{\omega}$
+\end_inset
+
+ the number of angular velocity sensors and 
+\begin_inset Formula $n_{\dot{v}}$
+\end_inset
+
+ the number of linear acceleration measurements.
+ 
+\end_layout
+
+\begin_layout Standard
+The state matrix is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+A & =\left(\begin{array}{ccc}
+A_{r} & 0 & 0\\
+0 & A_{\phi} & 0\\
+0 & 0 & 0
+\end{array}\right)\in\mathbb{R}^{n\times n}\\
+A_{r} & =\left(\begin{array}{cc}
+0 & I_{3}\\
+0 & 0
+\end{array}\right)\in\mathbb{R}^{6\times6}\\
+A_{\phi} & =\left(\begin{array}{cc}
+-\frac{1}{2}\tilde{\omega} & I_{3}\\
+0 & 0
+\end{array}\right)\in\mathbb{R}^{6\times6}
+\end{align*}
+
+\end_inset
+
+the input matrix is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+B & =\left(\begin{array}{cc}
+B_{r} & 0\\
+0 & B_{\phi}\\
+0 & 0
+\end{array}\right)\in\mathbb{R}^{n\times6}\\
+B_{r} & =\left(\begin{array}{c}
+0\\
+I_{3}
+\end{array}\right)\in\mathbb{R}^{6\times3}\\
+B_{\phi} & =\left(\begin{array}{c}
+0\\
+I_{3}
+\end{array}\right)\in\mathbb{R}^{6\times3}
+\end{align*}
+
+\end_inset
+
+and the noise covariance matrix is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Q^{c} & =\left(\begin{array}{ccc}
+Q_{r} & 0 & 0\\
+0 & Q_{\phi} & 0\\
+0 & 0 & Q_{b}
+\end{array}\right)\in\mathbb{R}^{n\times n}\\
+Q_{r} & =\left(\begin{array}{cc}
+0 & 0\\
+0 & Q_{\ddot{r}}
+\end{array}\right)\in\mathbb{R}^{6\times6}\\
+Q_{\phi} & =\left(\begin{array}{cc}
+0 & 0\\
+0 & Q_{\dot{\omega}}
+\end{array}\right)\in\mathbb{R}^{6\times6}\\
+Q_{b} & =\left(\begin{array}{cccc}
+Q_{b_{\dot{v},1}} & 0 & 0 & 0\\
+0 & \ddots & 0 & 0\\
+0 & 0 & Q_{b_{\omega,1}} & 0\\
+0 & 0 & 0 & \ddots
+\end{array}\right)\in\mathbb{R}^{3n_{b}\times3n_{b}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that the state matrix depends on 
+\begin_inset Formula $\omega$
+\end_inset
+
+ and is hence time-variant.
+\end_layout
+
+\begin_layout Subsection
+Discretization
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Discretization"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The continuous time error dynamics can be approximated using a discrete
+ time system as:
+\begin_inset Formula 
+\begin{align}
+x_{c,n+1} & =F_{c}x_{c,n}+G_{c}u_{n}+w_{c,n}\label{eq:state-space-continuous}\\
+w_{c,n} & \sim\mathcal{N}\left(0,Q_{c,d}\right)\nonumber 
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With a first-order hold approximation, we can write
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: cite
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{align*}
+F_{c} & =e^{A\Delta t}\\
+G_{c} & =\int_{0}^{\Delta t}e^{A\tau}d\tau B\\
+Q_{c,d} & =\int_{0}^{\Delta t}e^{A\tau}Q^{c}e^{A^{T}\tau}d\tau
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that the Matlab documentation for the `kalmd' function additionally
+ states that the measurement noise covariance matrix 
+\begin_inset Formula $R$
+\end_inset
+
+ should become 
+\begin_inset Formula $\frac{1}{\Delta t}R$
+\end_inset
+
+ when the model is discretized.
+ We think this assumes that the measurement in the discretized model is
+ the average of a continuous stream of measurements taken throughout the
+ discretization time step, thereby averaging out the zero-mean noise and
+ resulting in a reduced noise covariance with increased measurement time.
+ We think this is not a good assumption, and instead assume that the original
+ continuous-time measurement noise is just sampled once per discretization
+ time step, resulting in an unaltered covariance.
+\end_layout
+
+\begin_layout Standard
+Van Loan 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "VanLoan1978"
+
+\end_inset
+
+ shows that if we define
+\begin_inset Formula 
+\[
+M=\left(\begin{array}{ccc}
+-A^{T} & Q_{c} & 0\\
+0 & A & B\\
+0 & 0 & 0
+\end{array}\right)
+\]
+
+\end_inset
+
+and
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+e^{M\Delta t}=\left(\begin{array}{ccc}
+F_{2} & G_{2} & H_{2}\\
+0 & F_{3} & G_{3}\\
+0 & 0 & F_{4}
+\end{array}\right)
+\]
+
+\end_inset
+
+then we have
+\begin_inset Formula 
+\begin{align*}
+F_{c} & =F_{3}\\
+G_{c} & =G_{3}\\
+Q_{c,d} & =F_{3}{}^{T}G_{2}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Alternatively, if we define
+\begin_inset Formula 
+\[
+M_{1}=\left(\begin{array}{cc}
+A & B\\
+0 & 0
+\end{array}\right),\quad M_{2}=\left(\begin{array}{cc}
+-A^{T} & Q\\
+0 & A
+\end{array}\right)
+\]
+
+\end_inset
+
+and
+\begin_inset Formula 
+\[
+e^{M_{1}\Delta t}=\left(\begin{array}{cc}
+F_{3} & G_{3}\\
+0 & F_{4}
+\end{array}\right),\quad e^{M_{2}\Delta t}=\left(\begin{array}{cc}
+F_{2} & G_{2}\\
+0 & F_{3}
+\end{array}\right)
+\]
+
+\end_inset
+
+then we can apply the same formulas to find 
+\begin_inset Formula $F_{c}$
+\end_inset
+
+, 
+\begin_inset Formula $G_{c}$
+\end_inset
+
+, and 
+\begin_inset Formula $Q_{c,d}$
+\end_inset
+
+.
+ Although two matrix exponentials are required in this alternative approach,
+ the arguments of the matrix exponential have smaller dimensions in both
+ cases.
+ Since approximating the exponential of an 
+\begin_inset Formula $m\times m$
+\end_inset
+
+ matrix usually requires a fixed number of 
+\begin_inset Formula $m\times m$
+\end_inset
+
+ matrix products, which have complexity 
+\begin_inset Formula $\mathcal{O}\left(n^{3}\right)$
+\end_inset
+
+ using a schoolbook matrix multiplication method, this alternative approach
+ may be more efficient.
+\end_layout
+
+\begin_layout Standard
+The matrix exponential can be approximated in a number of ways, such as
+ using a truncated version of the power series definition or using a Padé
+ approximant 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "VanLoan1978"
+
+\end_inset
+
+.
+ The Padé approximant method is generally considered much more numerically
+ stable than using the power series definition 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Moler2003"
+
+\end_inset
+
+, so we have implemented this approach.
+\end_layout
+
+\begin_layout Standard
+Finally, we note that it is unnecessary to discretize the entire continuous-time
+ state space model as a whole every time step.
+ Since the CoM dynamics, the orientation estimation link dynamics, and the
+ bias dynamics are all completely independent of eachother (i.e.
+ they don't share any states or inputs), their process models can also be
+ discretized independently, resulting in even smaller dimensions of the
+ matrices that need to be exponentiated.
+ Furthermore, since only the orientation estimation link dynamics are time-varia
+nt, this is is the only part of the dynamics that requires discretization
+ at every timestep; the other parts of the dynamics need only be discretized
+ once at startup.
+ This reduces the computational load for discretization to either a single
+ 
+\begin_inset Formula $15\times15$
+\end_inset
+
+ matrix exponential, or alternatively one 
+\begin_inset Formula $9\times9$
+\end_inset
+
+ and one 
+\begin_inset Formula $12\times12$
+\end_inset
+
+ matrix exponential per time step.
+\end_layout
+
+\begin_layout Subsection
+Discrete time part of dynamics
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Discrete-time-part"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This section describes the part of the process model dynamics that is most
+ naturally described directly in terms of a discrete-time difference equation.
+\end_layout
+
+\begin_layout Standard
+In the extended Kalman filter framework, measurements can only refer to
+ states, not to inputs.
+ Since the accelerometers in the IMUs will provide measurements of the linear
+ acceleration, we need to have accelerations as part of the state vector.
+ In addition, a difference between the input accelerations and the estimated
+ accelerations, which also take the linear acceleration measurements into
+ account, may be useful in control, e.g.
+ to estimate the magnitude of unmodeled external forces applied to the robot.
+\end_layout
+
+\begin_layout Standard
+To this end, we introduce the discrete-time states 
+\begin_inset Formula $\ddot{r}_{n}$
+\end_inset
+
+ and 
+\begin_inset Formula $\dot{\omega}_{n}$
+\end_inset
+
+, with dynamics described by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\ddot{r}_{n+1} & =\ddot{r}_{d}+w_{\ddot{r}}\\
+\dot{\omega}_{n+1} & =\dot{\omega}_{d}+w_{\dot{\omega}}
+\end{align*}
+
+\end_inset
+
+Note that the noise terms 
+\begin_inset Formula $w_{\ddot{r}}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{\dot{\omega}}$
+\end_inset
+
+ are the same as for the continuous time dynamics of 
+\begin_inset Formula $\dot{r}$
+\end_inset
+
+ and 
+\begin_inset Formula $\omega$
+\end_inset
+
+, respectively.
+\end_layout
+
+\begin_layout Standard
+In canonical state space form, we can write the dynamics as
+\begin_inset Formula 
+\begin{align}
+x_{d,n+1} & =F_{d}x_{d,n}+G_{d}u_{n}+w_{d,n}\nonumber \\
+w_{d} & \sim\mathcal{N}\left(0,Q_{d}\right)\label{eq:state-space-discrete}
+\end{align}
+
+\end_inset
+
+with 
+\begin_inset Formula 
+\begin{align*}
+x_{d,n} & =\left(\ddot{r}_{n},\dot{\omega}_{n}\right)\\
+w_{d,n} & =\left(w_{\ddot{r}},w_{\dot{\omega}}\right)\\
+F_{d} & =0\\
+G_{d} & =I_{6}\\
+Q_{d} & =\left(\begin{smallmatrix}Q_{\ddot{r}} & 0\\
+0 & Q_{\dot{\omega}}
+\end{smallmatrix}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Combined state space model
+\end_layout
+
+\begin_layout Standard
+Combining 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:state-space-continuous"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:state-space-discrete"
+
+\end_inset
+
+, we obtain as our final process model 
+\begin_inset Formula 
+\[
+\left(\begin{array}{c}
+x_{c}\\
+x_{d}
+\end{array}\right)_{n+1}=\left(\begin{array}{cc}
+F_{c} & 0\\
+0 & F_{d}
+\end{array}\right)\left(\begin{array}{c}
+x_{c}\\
+x_{d}
+\end{array}\right)_{n}+\left(\begin{array}{c}
+G_{c}\\
+G_{d}
+\end{array}\right)u_{n}+\left(\begin{array}{c}
+w_{c,d}\\
+w_{d}
+\end{array}\right)_{n}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+with
+\begin_inset Formula 
+\[
+\left(\begin{array}{c}
+w_{c,d}\\
+w_{d}
+\end{array}\right)_{n}\sim\mathcal{N}\left(0,\left(\begin{smallmatrix}Q_{c,d} & 0\\
+0 & Q_{d}
+\end{smallmatrix}\right)\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Measurements
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Measurements"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This section describes the measurement model used in our state estimator.
+ We define the following measurements:
+\end_layout
+
+\begin_layout Itemize
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $z_{\omega,i}$
+\end_inset
+
+: angular velocity measured by gyro 
+\begin_inset Formula $i$
+\end_inset
+
+ in body frame, including bias and noise (section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:IMU-angular-velocity"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $z_{\dot{v,}i}$
+\end_inset
+
+: linear acceleration measured by accelerometer 
+\begin_inset Formula $i$
+\end_inset
+
+ in body frame, including bias and noise (section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:IMU-linear-acceleration"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $z_{q,i}$
+\end_inset
+
+: orientation of orientation sensor 
+\begin_inset Formula $i$
+\end_inset
+
+ with respect to world, including noise (section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Orientation-measurements"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $z_{\dot{p},i}$
+\end_inset
+
+: velocity of a body-fixed point 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+ with respect to world, expressed in world frame (section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Point-velocity-measurements"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+The last entry can be used when a point is known to be in non-slipping contact
+ with the ground, for example.
+\end_layout
+
+\begin_layout Standard
+This section makes heavy use of twists and spatial acceleration vectors.
+ A primer on these concepts is provided in the appendix (section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Appendix:-Primer-on"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+In what follows, let 
+\begin_inset Formula $\hat{\alpha}$
+\end_inset
+
+ denote the estimated value of a state variable 
+\begin_inset Formula $\alpha$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Angular velocity measurements
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:IMU-angular-velocity"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $\omega_{i}^{i,w}$
+\end_inset
+
+ be the angular velocity of IMU 
+\begin_inset Formula $i$
+\end_inset
+
+ with respect to the world 
+\begin_inset Formula $w$
+\end_inset
+
+, expressed in a frame fixed to IMU 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ The measurement model for angular velocity can be described in the following
+ way.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\omega_{i}^{i,w}=S_{\omega}T_{i}^{i,w}
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $T_{i}^{i,w}$
+\end_inset
+
+ the twist of measurement link 
+\begin_inset Formula $i$
+\end_inset
+
+ with respect to the world 
+\begin_inset Formula $w$
+\end_inset
+
+, expressed in the frame fixed to IMU 
+\begin_inset Formula $i$
+\end_inset
+
+, and with the selection matrix 
+\begin_inset Formula 
+\[
+S_{\omega}=\left(\begin{array}{cc}
+I_{3} & 0_{3\times3}\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $p$
+\end_inset
+
+ denote the orientation estimation link.
+ The twist 
+\begin_inset Formula $T_{i}^{i,w}$
+\end_inset
+
+ can be written as
+\begin_inset Formula 
+\[
+T_{i}^{i,w}=T_{p}^{i,w}+T_{i}^{i,p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The twist 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $T_{i}^{i,p}$
+\end_inset
+
+ depends only on the joint velocities for the joints on the path between
+ 
+\begin_inset Formula $p$
+\end_inset
+
+ and 
+\begin_inset Formula $i$
+\end_inset
+
+ and can be written as
+\begin_inset Formula 
+\[
+T_{i}^{i,p}=J_{i}^{i,p}v_{i}^{p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+The twist 
+\begin_inset Formula $T_{p}^{i,w}$
+\end_inset
+
+ can be written as
+\begin_inset Formula 
+\[
+T_{p}^{i,w}=\Ad_{H_{p}^{i}}T_{p}^{p,w}
+\]
+
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\Ad_{H}:H=\left(\begin{array}{cc}
+R & p\\
+0 & 1
+\end{array}\right)\mapsto\Ad_{H}=\left(\begin{array}{cc}
+R & 0\\
+\tilde{p}R & R
+\end{array}\right)\label{eq:def-Ad}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Combining all of the above, we obtain
+\begin_inset Formula 
+\begin{align*}
+\omega_{i}^{i,w} & =R_{p}^{i}\omega_{p}^{p,w}+\omega_{i}^{i,p}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that 
+\begin_inset Formula $\omega_{p}^{p,w}=\omega$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $z_{\omega,i}$
+\end_inset
+
+ be the measured value of 
+\begin_inset Formula $\omega_{i}^{i,w}$
+\end_inset
+
+.
+ This will include the bias and the noise:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+z_{\omega,i}=R_{p}^{i}\omega+\omega_{i}^{i,p}+b_{\omega_{i}}+v_{\omega,i}
+\]
+
+\end_inset
+
+where
+\begin_inset Formula 
+\[
+v_{\omega,i}\sim\mathcal{N}\left(0,R_{\omega,i}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The estimated measurement will be
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\hat{z}_{\omega,i}=\hat{R}_{p}^{i}\hat{\omega}+\hat{\omega}_{i}^{i,p}+\hat{b}_{\omega,i}
+\]
+
+\end_inset
+
+and the measurement residual will be
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+y_{\omega}=z_{\omega,i}-\hat{z}_{\omega,i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The partial derivatives with respect to the state variables are
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial\hat{z}_{\omega,i}}{\partial\hat{\phi}} & =0 & \frac{\partial\hat{z}_{\omega,i}}{\partial\hat{\omega}} & =\hat{R}_{p}^{i} & \frac{\partial\hat{z}_{\omega,i}}{\partial\hat{b}_{\omega,i}} & =I_{3}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Linear acceleration measurements
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:IMU-linear-acceleration"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Measurement model
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+ be the position of IMU 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ The point 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+ is fixed with respect to body 
+\begin_inset Formula $m$
+\end_inset
+
+.
+ Its acceleration with respect to the world, expressed in world frame can
+ be written as (see 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rotating-point-acceleration"
+
+\end_inset
+
+ in the appendix) 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\ddot{p}_{i}^{w}=\dot{\omega}_{m}^{w,w}\times p_{i}^{w}+\dot{v}_{m}^{w,w}+\omega_{m}^{w,w}\times\left(\omega_{m}^{w,w}\times p_{i}^{w}+v_{m}^{w,w}\right)\label{eq:acceleration-of-point}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The measurement model for linear acceleration is
+\begin_inset Formula 
+\begin{equation}
+z_{\dot{v},i}=R_{w}^{m}\left(\ddot{p}_{i}^{w}+g\right)+b_{\dot{v},i}+v_{\dot{v},i}\label{eq:linear-acceleration-measurement}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $g$
+\end_inset
+
+ is gravitational acceleration, and where
+\begin_inset Formula 
+\[
+v_{\dot{v},i}\sim\mathcal{N}\left(0,R_{\dot{v},i}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+State variable Jacobians
+\end_layout
+
+\begin_layout Standard
+The Jacobian of 
+\begin_inset Formula $z_{\dot{v},i}$
+\end_inset
+
+ with respect to some state variable 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ can be written as
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial z_{\dot{v},i}}{\partial\alpha}=R_{p}^{m}\frac{\partial}{\partial\alpha}\left[R_{w}^{p}\left(\ddot{p}_{i}^{w}+g\right)\right]+\frac{\partial b_{\dot{v},i}}{\partial\alpha}\label{eq:linear-acceleration-jacobian}
+\end{equation}
+
+\end_inset
+
+since 
+\begin_inset Formula $R_{p}^{m}$
+\end_inset
+
+ does not depend on the estimator state.
+\end_layout
+
+\begin_layout Standard
+The only dependence of the rotation matrix 
+\begin_inset Formula $R_{w}^{p}$
+\end_inset
+
+ on the estimator state is through the perturbation rotation vector 
+\begin_inset Formula $\phi$
+\end_inset
+
+, which is defined by
+\begin_inset Formula 
+\[
+R_{p}^{w}=\bar{R}_{p}^{w}R_{\phi}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Applying 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:phi-jacobian-transpose"
+
+\end_inset
+
+ from the appendix with 
+\begin_inset Formula $x=\ddot{p}_{i}^{w}+g$
+\end_inset
+
+ allows us to evaluate 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:linear-acceleration-jacobian"
+
+\end_inset
+
+ around 
+\begin_inset Formula $\phi=0$
+\end_inset
+
+ as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+\frac{\partial z_{\dot{v},i}}{\partial\alpha} & =R_{p}^{m}\left(R_{w}^{p}\frac{\partial}{\partial\alpha}\left(\ddot{p}_{i}^{w}+g\right)+\left[R_{w}^{p}\left(\ddot{p}_{i}^{w}+g\right)\right]\times\frac{\partial\phi}{\partial\alpha}\right)+\frac{\partial b_{\dot{v},i}}{\partial\alpha}\nonumber \\
+ & =R_{w}^{m}\frac{\partial\ddot{p}_{i}^{w}}{\partial\alpha}+\left(z_{\dot{v},i}-b_{\dot{v},i}\right)\times R_{p}^{m}\frac{\partial\phi}{\partial\alpha}+\frac{\partial b_{\dot{v},i}}{\partial\alpha}\label{eq:linear-acceleration-jacobian-approx}
+\end{align}
+
+\end_inset
+
+where we have made use of the fact that 
+\begin_inset Formula $g$
+\end_inset
+
+ does not depend on the estimator state.
+\end_layout
+
+\begin_layout Standard
+Substituting 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:acceleration-of-point"
+
+\end_inset
+
+, the Jacobian that appears in the first term can be written as
+\begin_inset Formula 
+\begin{align}
+\frac{\partial\ddot{p}_{i}^{w}}{\partial\alpha} & =\frac{\partial}{\partial\alpha}\left[\dot{\omega}_{m}^{w,w}\times p_{i}^{w}+\dot{v}_{m}^{w,w}+\omega_{m}^{w,w}\times\left(\omega_{m}^{w,w}\times p_{i}^{w}+v_{m}^{w,w}\right)\right]\nonumber \\
+ & =\frac{\partial}{\partial\alpha}\left(\dot{\omega}_{m}^{w,w}\times p_{i}^{w}\right)+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\alpha}+\frac{\partial}{\partial\alpha}\underbrace{\omega_{m}^{w,w}\times\left(\omega_{m}^{w,w}\times p_{i}^{w}+v_{m}^{w,w}\right)}_{k}\label{eq:point-acceleration-jacobian}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Next, we can expand the partial derivatives of the cross product terms using
+ 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:cross-product-jacobian"
+
+\end_inset
+
+ from the appendix:
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial\alpha}\left(\dot{\omega}_{m}^{w,w}\times p_{i}^{w}\right)=\tilde{\dot{\omega}}_{m}^{w,w}\frac{\partial p_{i}^{w}}{\partial\alpha}-\tilde{p}_{i}^{w}\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\widetilde{\tilde{a}b}=\tilde{a}\tilde{b}-\tilde{b}\tilde{a}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial k}{\partial\alpha} & =\tilde{\omega}_{m}^{w,w}\frac{\partial}{\partial\alpha}\left(\tilde{\omega}_{m}^{w,w}p_{i}^{w}+v_{m}^{w,w}\right)-\left(\widetilde{\tilde{\omega}_{m}^{w,w}p_{i}^{w}}+\tilde{v}_{m}^{w,w}\right)\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}\\
+ & =\tilde{\omega}_{m}^{w,w}\tilde{\omega}_{m}^{w,w}\frac{\partial p_{i}^{w}}{\partial\alpha}-\tilde{\omega}_{m}^{w,w}\tilde{p}_{i}^{w}\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}+\tilde{\omega}_{m}^{w,w}\frac{\partial v_{m}^{w,w}}{\partial\alpha}\\
+ & -\left(\tilde{\omega}_{m}^{w,w}\tilde{p}_{i}^{w}-\tilde{p}_{i}^{w}\tilde{\omega}_{m}^{w,w}+\tilde{v}_{m}^{w,w}\right)\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}\\
+ & =\tilde{\omega}_{m}^{w,w}\tilde{\omega}_{m}^{w,w}\frac{\partial p_{i}^{w}}{\partial\alpha}+\tilde{\omega}_{m}^{w,w}\frac{\partial v_{m}^{w,w}}{\partial\alpha}-\left(2\tilde{\omega}_{m}^{w,w}\tilde{p}_{i}^{w}-\tilde{p}_{i}^{w}\tilde{\omega}_{m}^{w,w}+\tilde{v}_{m}^{w,w}\right)\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}
+\end{align*}
+
+\end_inset
+
+where we have applied 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:jacobi-identity-tilde"
+
+\end_inset
+
+ from the appendix.
+\end_layout
+
+\begin_layout Standard
+Plugging this back into 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:point-acceleration-jacobian"
+
+\end_inset
+
+, we get
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial\ddot{p}_{i}^{w}}{\partial\alpha} & =\left(\tilde{\dot{\omega}}_{m}^{w,w}+\tilde{\omega}_{m}^{w,w}\tilde{\omega}_{m}^{w,w}\right)\frac{\partial p_{i}^{w}}{\partial\alpha}-\left(2\tilde{\omega}_{m}^{w,w}\tilde{p}_{i}^{w}-\tilde{p}_{i}^{w}\tilde{\omega}_{m}^{w,w}+\tilde{v}_{m}^{w,w}\right)\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}\\
+ & +\tilde{\omega}_{m}^{w,w}\frac{\partial v_{m}^{w,w}}{\partial\alpha}-\tilde{p}_{i}^{w}\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha}+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\alpha}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Plugging this back into 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:linear-acceleration-jacobian-approx"
+
+\end_inset
+
+, we get
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+\frac{\partial z_{\dot{v},i}}{\partial\alpha} & =R_{w}^{m}\left(\tilde{\dot{\omega}}_{m}^{w,w}+\tilde{\omega}_{m}^{w,w}\tilde{\omega}_{m}^{w,w}\right)\frac{\partial p_{i}^{w}}{\partial\alpha}\nonumber \\
+ & -R_{w}^{m}\left(2\tilde{\omega}_{m}^{w,w}\tilde{p}_{i}^{w}-\tilde{p}_{i}^{w}\tilde{\omega}_{m}^{w,w}+\tilde{v}_{m}^{w,w}\right)\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}+R_{w}^{m}\tilde{\omega}_{m}^{w,w}\frac{\partial v_{m}^{w,w}}{\partial\alpha}\nonumber \\
+ & -R_{w}^{m}\tilde{p}_{i}^{w}\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha}+R_{w}^{m}\frac{\partial\dot{v}_{m}^{w,w}}{\partial\alpha}+\left(z_{\dot{v},i}-b_{\dot{v},i}\right)\times R_{p}^{w}\frac{\partial\phi}{\partial\alpha}+\frac{\partial b_{\dot{v},i}}{\partial\alpha}\label{eq:linear-acceleration-jacobian-assembly}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This equation shows that the job of finding the Jacobian 
+\begin_inset Formula $\frac{\partial z_{\dot{v},i}}{\partial\alpha}$
+\end_inset
+
+ is now reduced to finding the Jacobians
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{flalign*}
+\frac{\partial\phi}{\partial\alpha} &  & \frac{\partial\omega_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial v_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial\dot{v}_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial p_{i}^{w}}{\partial\alpha} &  & \frac{\partial b_{\dot{v},i}}{\partial\alpha}
+\end{flalign*}
+
+\end_inset
+
+for each state variable 
+\begin_inset Formula $\alpha$
+\end_inset
+
+.
+ Evaluating these Jacobians requires us to write each of these variables
+ in terms of the state variables.
+ This derivation is done in the following subsections.
+\end_layout
+
+\begin_layout Subsubsection
+Orientation perturbation and bias
+\end_layout
+
+\begin_layout Standard
+The Jacobian 
+\begin_inset Formula $\frac{\partial\phi}{\partial\alpha}$
+\end_inset
+
+ can simply be written as
+\begin_inset Formula 
+\[
+\frac{\partial\phi}{\partial\alpha}=\begin{cases}
+I & \alpha=\phi\\
+0 & \text{otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Likewise, the Jacobian 
+\begin_inset Formula $\frac{\partial b_{\dot{v},i}}{\partial\alpha}$
+\end_inset
+
+ is
+\begin_inset Formula 
+\[
+\frac{\partial b_{\dot{v},i}}{\partial\alpha}=\begin{cases}
+I & \alpha=b_{\dot{v},i}\\
+0 & \text{otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Twist
+\end_layout
+
+\begin_layout Standard
+Evaluating the Jacobians 
+\begin_inset Formula $\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}$
+\end_inset
+
+ and 
+\begin_inset Formula $\frac{\partial v_{m}^{w,w}}{\partial\alpha}$
+\end_inset
+
+ requires the twist 
+\begin_inset Formula 
+\[
+T_{m}^{w,w}=\left(\begin{array}{c}
+\omega_{m}^{w,w}\\
+v_{m}^{w,w}
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This twist can be written as
+\begin_inset Formula 
+\begin{align}
+T_{m}^{w,w} & =\Ad_{H_{p}^{w}}\left(T_{p}^{p,w}+T_{m}^{p,p}\right)\label{eq:measurement-link-twist}
+\end{align}
+
+\end_inset
+
+where the twist of the measurement link with respect to the estimation link,
+ 
+\begin_inset Formula $T_{m}^{p,p}$
+\end_inset
+
+, is completely independent of the state of the estimator.
+\end_layout
+
+\begin_layout Standard
+Expanding 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:measurement-link-twist"
+
+\end_inset
+
+, we obtain
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+T_{m}^{w,w} & =\left(\begin{array}{cc}
+R_{p}^{w} & 0\\
+\tilde{p}_{p}^{w}R_{p}^{w} & R_{p}^{w}
+\end{array}\right)\left(\begin{array}{c}
+\omega_{p}^{p,w}+\omega_{m}^{p,p}\\
+v_{p}^{p,w}+v_{m}^{p,p}
+\end{array}\right)\\
+ & =\left(\begin{array}{c}
+R_{p}^{w}\left(\omega_{p}^{p,w}+\omega_{m}^{p,p}\right)\\
+\tilde{p}_{p}^{w}R_{p}^{w}\left(\omega_{p}^{p,w}+\omega_{m}^{p,p}\right)+R_{p}^{w}\left(v_{p}^{p,w}+v_{m}^{p,p}\right)
+\end{array}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This can be rewritten in terms of the state of the estimator by noting that
+ 
+\begin_inset Formula $\omega_{p}^{p,w}=\omega$
+\end_inset
+
+ and using 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rootjoint-position"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rootjoint-linear-vel"
+
+\end_inset
+
+ from the appendix:
+\begin_inset Formula 
+\begin{align*}
+\omega_{m}^{w,w} & =R_{p}^{w}\left(\omega+\omega_{m}^{p,p}\right)\\
+v_{m}^{w,w} & =\tilde{r}R_{p}^{w}\left(\omega+\omega_{m}^{p,p}\right)+R_{p}^{w}\left(v_{m}^{p,p}-\dot{r}^{p}-\tilde{r}^{p}\omega_{m}^{p,p}\right)+\dot{r}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Jacobians of 
+\begin_inset Formula $\omega_{m}^{w,w}$
+\end_inset
+
+ with respect to the state variables become
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial\omega_{m}^{w,w}}{\partial r} & =0 & \frac{\partial\omega_{m}^{w,w}}{\partial\phi} & =-\tilde{\omega}_{m}^{w,w}R_{p}^{w}\\
+\frac{\partial\omega_{m}^{w,w}}{\partial\dot{r}} & =0 & \frac{\partial\omega_{m}^{w,w}}{\partial\omega} & =R_{p}^{w}\\
+\frac{\partial\omega_{m}^{w,w}}{\partial\ddot{r}} & =0 & \frac{\partial\omega_{m}^{w,w}}{\partial\dot{\omega}} & =0
+\end{align*}
+
+\end_inset
+
+where the Jacobian with respect to 
+\begin_inset Formula $\phi$
+\end_inset
+
+ follows from 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:phi-jacobian"
+
+\end_inset
+
+ in the appendix.
+\end_layout
+
+\begin_layout Standard
+The Jacobians of 
+\begin_inset Formula $v_{m}^{w,w}$
+\end_inset
+
+ with respect to the state variables are
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial v_{m}^{w,w}}{\partial r} & =-\tilde{\omega}_{m}^{w,w}\\
+\frac{\partial v_{m}^{w,w}}{\partial\dot{r}} & =I & \frac{\partial v_{m}^{w,w}}{\partial\omega} & =\tilde{r}R_{p}^{w}\\
+\frac{\partial v_{m}^{w,w}}{\partial\ddot{r}} & =0 & \frac{\partial v_{m}^{w,w}}{\partial\dot{\omega}} & =0
+\end{align*}
+
+\end_inset
+
+The Jacobian with respect to 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial v_{m}^{w,w}}{\partial\phi}=-\tilde{r}\tilde{\omega}_{m}^{w,w}R_{p}^{w}-R_{p}^{w}\left(\tilde{v}_{m}^{p,p}-\tilde{\dot{r}}^{p}-\widetilde{\tilde{r}^{p}\omega_{m}^{p,p}}\right)
+\]
+
+\end_inset
+
+where we have used 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rootjoint-linear-vel"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Spatial acceleration
+\end_layout
+
+\begin_layout Standard
+Evaluating the Jacobians 
+\begin_inset Formula $\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha}$
+\end_inset
+
+ and 
+\begin_inset Formula $\frac{\partial\dot{v}_{m}^{w,w}}{\partial\alpha}$
+\end_inset
+
+ requires the spatial acceleration 
+\begin_inset Formula 
+\[
+\dot{T}_{m}^{w,w}=\left(\begin{array}{c}
+\dot{\omega}_{m}^{w,w}\\
+\dot{v}_{m}^{w,w}
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The spatial acceleration can be written as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\dot{T}_{m}^{w,w}=\Ad_{H_{p}^{w}}\left(\ad_{T_{p}^{p,w}}T_{m}^{p,w}+\dot{T}_{m}^{p,w}\right)\label{eq:measurement-link-acceleration}
+\end{equation}
+
+\end_inset
+
+where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+T_{m}^{p,w} & =T_{p}^{p,w}+T_{m}^{p,p}\\
+\dot{T}_{m}^{p,w} & =\dot{T}_{p}^{p,w}+\dot{T}_{m}^{p,p}
+\end{align*}
+
+\end_inset
+
+with 
+\begin_inset Formula $T_{m}^{p,p}$
+\end_inset
+
+ and 
+\begin_inset Formula $\dot{T}_{m}^{p,p}$
+\end_inset
+
+ independent of the state of the estimator.
+ Substituting this into 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:measurement-link-acceleration"
+
+\end_inset
+
+ and expanding, we obtain
+\begin_inset Formula 
+\begin{align*}
+\dot{T}_{m}^{w,w} & =\Ad_{H_{p}^{w}}\left(\ad_{T_{p}^{p,w}}\left(T_{p}^{p,w}+T_{m}^{p,p}\right)+\dot{T}_{p}^{p,w}+\dot{T}_{m}^{p,p}\right)\\
+ & =\left(\begin{array}{cc}
+R_{p}^{w} & 0\\
+\tilde{p}_{p}^{w}R_{p}^{w} & R_{p}^{w}
+\end{array}\right)\left(\left(\begin{array}{cc}
+\tilde{\omega}_{p}^{p,w} & 0\\
+\tilde{v}_{p}^{p,w} & \tilde{\omega}_{p}^{p,w}
+\end{array}\right)\left(\begin{array}{c}
+\omega_{p}^{p,w}+\omega_{m}^{p,p}\\
+v_{p}^{p,w}+v_{m}^{p,p}
+\end{array}\right)+\left(\begin{array}{c}
+\dot{\omega}_{p}^{p,w}+\dot{\omega}_{m}^{p,p}\\
+\dot{v}_{p}^{p,w}+\dot{v}_{m}^{p,p}
+\end{array}\right)\right)\\
+ & =\left(\begin{array}{cc}
+R_{p}^{w} & 0\\
+\tilde{p}_{p}^{w}R_{p}^{w} & R_{p}^{w}
+\end{array}\right)\left(\begin{array}{c}
+\tilde{\omega}_{p}^{p,w}\omega_{m}^{p,p}+\dot{\omega}_{p}^{p,w}+\dot{\omega}_{m}^{p,p}\\
+\tilde{v}_{p}^{p,w}\omega_{m}^{p,p}+\tilde{\omega}_{p}^{p,w}v_{m}^{p,p}+\dot{v}_{p}^{p,w}+\dot{v}_{m}^{p,p}
+\end{array}\right)\\
+ & =\left(\begin{array}{c}
+R_{p}^{w}\left(\tilde{\omega}_{p}^{p,w}\omega_{m}^{p,p}+\dot{\omega}_{p}^{p,w}+\dot{\omega}_{m}^{p,p}\right)\\
+\tilde{p}_{p}^{w}\dot{\omega}_{m}^{w,w}+R_{p}^{w}\left(\dot{v}_{p}^{p,w}+\dot{v}_{m}^{p,p}-\tilde{\omega}_{m}^{p,p}v_{p}^{p,w}-\tilde{v}_{m}^{p,p}\omega_{p}^{p,w}\right)
+\end{array}\right)
+\end{align*}
+
+\end_inset
+
+where we have used the fact that 
+\begin_inset Formula $\tilde{x}x=x\times x=0$
+\end_inset
+
+ and 
+\begin_inset Formula $\tilde{x}y+\tilde{y}x=x\times y+y\times x=0$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The angular acceleration can be written in terms of the state vector using
+ 
+\begin_inset Formula $\omega_{p}^{p,w}=\omega$
+\end_inset
+
+, 
+\begin_inset Formula $\dot{\omega}_{p}^{p,w}=\dot{\omega}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\dot{\omega}_{m}^{w,w}=R_{p}^{w}\left(\dot{\omega}+\dot{\omega}_{m}^{p,p}-\tilde{\omega}_{m}^{p,p}\omega\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Jacobians of 
+\begin_inset Formula $\dot{\omega}_{m}^{w,w}$
+\end_inset
+
+ with respect to the state variables are
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial r} & =0 & \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\phi} & =-\tilde{\dot{\omega}}_{m}^{w,w}R_{p}^{w}\\
+\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\dot{r}} & =0 & \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\omega} & =-R_{p}^{w}\tilde{\omega}_{m}^{p,p}\\
+\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\ddot{r}} & =0 & \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\dot{\omega}} & =R_{p}^{w}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The linear acceleration can be written in terms of the state vector using
+ 
+\begin_inset Formula $\omega_{p}^{p,w}=\omega$
+\end_inset
+
+, 
+\begin_inset Formula $\dot{\omega}_{p}^{p,w}=\dot{\omega}$
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rootjoint-position"
+
+\end_inset
+
+, 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rootjoint-linear-vel"
+
+\end_inset
+
+, and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:eq:rootjoint-linear-acc"
+
+\end_inset
+
+ from the appendix as
+\begin_inset Formula 
+\begin{align*}
+\dot{v}_{m}^{w,w} & =\left(\tilde{r}-\widetilde{R_{p}^{w}r^{p}}\right)\dot{\omega}_{m}^{w,w}\\
+ & +R_{p}^{w}\left(R_{w}^{p}\ddot{r}-\tilde{\omega}R_{w}^{p}\dot{r}-\tilde{\dot{\omega}}r^{p}-\tilde{\omega}\dot{r}^{p}-\ddot{r}^{p}+\dot{v}_{m}^{p,p}-\tilde{\omega}_{m}^{p,p}\left(R_{w}^{p}\dot{r}-\tilde{\omega}r^{p}-\dot{r}^{p}\right)-\tilde{v}_{m}^{p,p}\omega\right)\\
+ & =\tilde{r}R_{p}^{w}\dot{\omega}+\tilde{r}R_{p}^{w}\dot{\omega}_{m}^{p,p}-\tilde{r}R_{p}^{w}\tilde{\omega}_{m}^{p,p}\omega-R_{p}^{w}\tilde{r}^{p}\dot{\omega}_{m}^{p,p}+R_{p}^{w}\tilde{r}^{p}\tilde{\omega}_{m}^{p,p}\omega\\
+ & +\ddot{r}-R_{p}^{w}\tilde{\omega}R_{w}^{p}\dot{r}-R_{p}^{w}\tilde{\omega}\dot{r}^{p}-R_{p}^{w}\ddot{r}^{p}+R_{p}^{w}\dot{v}_{m}^{p,p}\\
+ & +R_{p}^{w}\tilde{\omega}_{m}^{p,p}\tilde{\omega}r^{p}+R_{p}^{w}\tilde{\omega}_{m}^{p,p}\dot{r}^{p}-R_{p}^{w}\tilde{\omega}_{m}^{p,p}R_{w}^{p}\dot{r}-R_{p}^{w}\tilde{v}_{m}^{p,p}\omega
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Jacobians of 
+\begin_inset Formula $\dot{v}_{m}^{w,w}$
+\end_inset
+
+ with respect to the state variables are
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial r} & =-\tilde{\dot{\omega}}_{m}^{w,w}\\
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\dot{r}} & =-\tilde{\omega}_{m}^{w,w}\\
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\ddot{r}} & =I & \frac{\partial\dot{v}_{m}^{w,w}}{\partial\dot{\omega}} & =\tilde{r}R_{p}^{w}
+\end{align*}
+
+\end_inset
+
+The Jacobian with respect to 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\phi}\dot{v}_{m}^{w,w} & =\frac{\partial}{\partial\phi}\left[\tilde{r}R_{p}^{w}\left(\tilde{\omega}\omega_{m}^{p,p}+\dot{\omega}+\dot{\omega}_{m}^{p,p}\right)-R_{p}^{w}\tilde{r}^{p}\left(\tilde{\omega}\omega_{m}^{p,p}+\dot{\omega}+\dot{\omega}_{m}^{p,p}\right)\right]\\
+ & +\frac{\partial}{\partial\phi}\left[R_{p}^{w}\left(-\tilde{\dot{\omega}}r^{p}-\tilde{\omega}\dot{r}^{p}-\ddot{r}^{p}+\dot{v}_{m}^{p,p}+\tilde{\omega}_{m}^{p,p}\tilde{\omega}r^{p}+\tilde{\omega}_{m}^{p,p}\dot{r}^{p}-\tilde{v}_{m}^{p,p}\omega\right)\right]\\
+ & +\frac{\partial}{\partial\phi}\left[\tilde{\dot{r}}R_{p}^{w}\left(\omega+\omega_{m}^{p,p}\right)\right]\\
+ & =-\tilde{r}R_{p}^{w}\left(\widetilde{\tilde{\omega}\omega_{m}^{p,p}}+\tilde{\dot{\omega}}+\tilde{\dot{\omega}}_{m}^{p,p}\right)-\tilde{\dot{r}}R_{p}^{w}\left(\tilde{\omega}+\tilde{\omega}_{m}^{p,p}\right)\\
+ & +R_{p}^{w}\left(\widetilde{\tilde{r}^{p}\tilde{\omega}\omega_{m}^{p,p}}+\widetilde{\tilde{r}^{p}\dot{\omega}_{m}^{p,p}}+\widetilde{\tilde{\omega}\dot{r}^{p}}+\tilde{\ddot{r}}^{p}-\tilde{\dot{v}}_{m}^{p,p}-\widetilde{\tilde{\omega}_{m}^{p,p}\tilde{\omega}r^{p}}-\widetilde{\tilde{\omega}_{m}^{p,p}\dot{r}^{p}}+\widetilde{\tilde{v}_{m}^{p,p}\omega}\right)\\
+ & =\left(\tilde{\ddot{r}}-\tilde{r}\tilde{\dot{\omega}}_{m}^{w,w}-\tilde{\dot{r}}\tilde{\omega}_{m}^{w,w}-\tilde{s}\right)R_{p}^{w}
+\end{align*}
+
+\end_inset
+
+with
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+s & =R_{p}^{w}\left(\tilde{\dot{\omega}}_{m}^{p,w}r^{p}+\dot{v}_{m}^{p,w}+\tilde{\omega}_{m}^{p,w}\dot{r}^{p}+\tilde{\omega}v_{m}^{p,w}+\tilde{\omega}\tilde{\omega}_{m}^{p,w}r^{p}\right)
+\end{align*}
+
+\end_inset
+
+where we have used 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rootjoint-linear-vel"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:eq:rootjoint-linear-acc"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The Jacobian with respect to 
+\begin_inset Formula $\omega$
+\end_inset
+
+ is
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\omega}=\tilde{\dot{r}}R_{p}^{w}-\tilde{r}R_{p}^{w}\tilde{\omega}_{m}^{p,p}+R_{p}^{w}\left(\tilde{r}^{p}\tilde{\omega}_{m}^{p,p}+\tilde{\dot{r}}^{p}-\tilde{\omega}_{m}^{p,p}\tilde{r}^{p}-\tilde{v}_{m}^{p,p}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+IMU position
+\end_layout
+
+\begin_layout Standard
+To evaluate 
+\begin_inset Formula $\frac{\partial p_{i}^{w}}{\partial\alpha}$
+\end_inset
+
+ , the position of the IMU in the world, 
+\begin_inset Formula $p_{i}^{w}$
+\end_inset
+
+, needs to be written in terms of the state of the estimator.
+ Using 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rootjoint-position"
+
+\end_inset
+
+ from the appendix, we obtain
+\begin_inset Formula 
+\begin{align*}
+p_{i}^{w} & =R_{p}^{w}p_{i}^{p}+p_{p}^{w}\\
+ & =R_{p}^{w}\left(p_{i}^{p}-r^{p}\right)+r
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Jacobians can be written as
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial p_{i}^{w}}{\partial r} & =I & \frac{\partial p_{i}^{w}}{\partial\phi} & \approx R_{p}^{w}\left(\tilde{r}^{p}-\tilde{p}_{i}^{p}\right)\\
+\frac{\partial p_{i}^{w}}{\partial\dot{r}} & =0 & \frac{\partial p_{i}^{w}}{\partial\omega} & =0\\
+\frac{\partial p_{i}^{w}}{\partial\ddot{r}} & =0 & \frac{\partial p_{i}^{w}}{\partial\dot{\omega}} & =0
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Assembling the Jacobians
+\end_layout
+
+\begin_layout Standard
+We now insert the computed intermediate Jacobians into 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:linear-acceleration-jacobian-assembly"
+
+\end_inset
+
+ to find 
+\begin_inset Formula $\frac{\partial z_{\dot{v},i}}{\partial\alpha}$
+\end_inset
+
+ for each state variable 
+\begin_inset Formula $\alpha\in\left\{ r,\dot{r},\ddot{r},\phi,\omega,\dot{\omega}\right\} $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Paragraph
+CoM position
+\end_layout
+
+\begin_layout Standard
+The nonzero intermediate Jacobians are
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial v_{m}^{w,w}}{\partial r} & =-\tilde{\omega}_{m}^{w,w} & \frac{\partial\dot{v}_{m}^{w,w}}{\partial r} & =-\tilde{\dot{\omega}}_{m}^{w,w} & \frac{\partial p_{i}^{w}}{\partial r} & =I
+\end{align*}
+
+\end_inset
+
+so that the Jacobian with respect to 
+\begin_inset Formula $r$
+\end_inset
+
+ simply becomes
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial z_{\dot{v},i}}{\partial r} & =R_{w}^{m}\left(\tilde{\dot{\omega}}_{m}^{w,w}+\tilde{\omega}_{m}^{w,w}\tilde{\omega}_{m}^{w,w}\right)-R_{w}^{m}\tilde{\omega}_{m}^{w,w}\tilde{\omega}_{m}^{w,w}-R_{w}^{m}\tilde{\dot{\omega}}_{m}^{w,w}\\
+ & =0
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+CoM velocity
+\end_layout
+
+\begin_layout Standard
+The nonzero intermediate Jacobians are
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial v_{m}^{w,w}}{\partial\dot{r}} & =I & \frac{\partial\dot{v}_{m}^{w,w}}{\partial\dot{r}} & =-\tilde{\omega}_{m}^{w,w}
+\end{align*}
+
+\end_inset
+
+resulting in
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial z_{\dot{v},i}}{\partial\dot{r}} & =R_{w}^{m}\tilde{\omega}_{m}^{w,w}-R_{w}^{m}\tilde{\omega}_{m}^{w,w}\\
+ & =0
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+CoM acceleration
+\end_layout
+
+\begin_layout Standard
+The only nonzero intermediate Jacobian is
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\ddot{r}}=I
+\]
+
+\end_inset
+
+so that the final Jacobian becomes:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial z_{\dot{v},i}}{\partial\ddot{r}}=R_{w}^{m}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Orientation perturbation
+\end_layout
+
+\begin_layout Standard
+All of the intermediate Jacobians are nonzero and nothing seems to obviously
+ cancel out, so we will compute each of the intermediate blocks numerically
+ and then use 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:linear-acceleration-jacobian-assembly"
+
+\end_inset
+
+ numerically to assemble 
+\begin_inset Formula $\frac{\partial z_{\dot{v},i}}{\partial\phi}$
+\end_inset
+
+.
+ The intermediate Jacobian blocks are repeated here for convenience.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\phi}{\partial\phi}=I
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial\omega_{m}^{w,w}}{\partial\phi}=-\tilde{\omega}_{m}^{w,w}R_{p}^{w}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial v_{m}^{w,w}}{\partial\phi}=-\tilde{r}\tilde{\omega}_{m}^{w,w}R_{p}^{w}-R_{p}^{w}\left(\tilde{v}_{m}^{p,p}-\tilde{\dot{r}}^{p}-\widetilde{\tilde{r}^{p}\omega_{m}^{p,p}}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\phi}=-\tilde{\dot{\omega}}_{m}^{w,w}R_{p}^{w}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\phi}=\left(\tilde{\ddot{r}}-\tilde{r}\tilde{\dot{\omega}}_{m}^{w,w}-\tilde{\dot{r}}\tilde{\omega}_{m}^{w,w}-\tilde{s}\right)R_{p}^{w}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial p_{i}^{w}}{\partial\phi}=R_{p}^{w}\left(\tilde{r}^{p}-\tilde{p}_{i}^{p}\right)
+\]
+
+\end_inset
+
+with
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+s=R_{p}^{w}\left(\tilde{\dot{\omega}}_{m}^{p,w}r^{p}+\dot{v}_{m}^{p,w}+\tilde{\omega}_{m}^{p,w}\dot{r}^{p}+\tilde{\omega}v_{m}^{p,w}+\tilde{\omega}\tilde{\omega}_{m}^{p,w}r^{p}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Angular velocity
+\end_layout
+
+\begin_layout Standard
+Since again many of the intermediate Jacobian blocks are nonzero, we will
+ just use 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:linear-acceleration-jacobian-assembly"
+
+\end_inset
+
+ numerically to assemble 
+\begin_inset Formula $\frac{\partial z_{\dot{v},i}}{\partial\omega}$
+\end_inset
+
+.
+ The intermediate Jacobians are repeated here for convenience:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{flalign*}
+\frac{\partial\phi}{\partial\omega} & =0 & \frac{\partial\omega_{m}^{w,w}}{\partial\omega} & =R_{p}^{w} & \frac{\partial v_{m}^{w,w}}{\partial\omega} & =\tilde{r}R_{p}^{w}\\
+\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\omega} & =-R_{p}^{w}\tilde{\omega}_{m}^{p,p} & \frac{\partial p_{i}^{w}}{\partial\omega} & =0
+\end{flalign*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\omega}=\tilde{\dot{r}}R_{p}^{w}-\tilde{r}R_{p}^{w}\tilde{\omega}_{m}^{p,p}+R_{p}^{w}\left(\tilde{r}^{p}\tilde{\omega}_{m}^{p,p}+\tilde{\dot{r}}^{p}-\tilde{\omega}_{m}^{p,p}\tilde{r}^{p}-\tilde{v}_{m}^{p,p}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Angular acceleration
+\end_layout
+
+\begin_layout Standard
+The nonzero intermediate Jacobians are
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\dot{\omega}} & =R_{p}^{w} & \frac{\partial\dot{v}_{m}^{w,w}}{\partial\dot{\omega}} & =\tilde{r}R_{p}^{w}
+\end{align*}
+
+\end_inset
+
+resulting in:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial z_{\dot{v},i}}{\partial\dot{\omega}}=R_{w}^{m}\widetilde{r-p_{i}^{w}}R_{p}^{w}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Bias
+\end_layout
+
+\begin_layout Standard
+The only nonzero intermediate Jacobian is
+\begin_inset Formula 
+\[
+\frac{\partial b_{\dot{v},i}}{\partial b_{\dot{v},i}}=I
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+resulting in
+\begin_inset Formula 
+\[
+\frac{\partial z_{\dot{v},i}}{\partial b_{\dot{v},i}}=I
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Orientation measurements
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Orientation-measurements"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Orientation sensor 
+\begin_inset Formula $i$
+\end_inset
+
+ measures the rotation matrix 
+\begin_inset Formula $R_{i}^{w}$
+\end_inset
+
+, describing the orientation of measurement frame 
+\begin_inset Formula $i$
+\end_inset
+
+ with respect to the world 
+\begin_inset Formula $w$
+\end_inset
+
+.
+ This rotation matrix can be written as
+\begin_inset Formula 
+\[
+R_{i}^{w}=R_{p}^{w}R_{i}^{p}
+\]
+
+\end_inset
+
+i.e.
+ the measured quaternion is a function of the orientation of the orientation
+ estimation frame 
+\begin_inset Formula $p$
+\end_inset
+
+ with respect to the world 
+\begin_inset Formula $w$
+\end_inset
+
+, and of the joint angles of the joints between frames 
+\begin_inset Formula $p$
+\end_inset
+
+ and 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ Postmultiplying a noise rotation matrix 
+\begin_inset Formula $R_{v}$
+\end_inset
+
+, we obtain our measurement model
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+z_{R,i}=R_{p}^{w}R_{i}^{p}R_{v}
+\]
+
+\end_inset
+
+Note that the noise rotation matrix 
+\begin_inset Formula $R_{v}$
+\end_inset
+
+ has to satisfy the constraint that it is orthonormal.
+ It is therefore not the case that each of the elements of this noise rotation
+ matrix has an independent Gaussian distribution.
+ 
+\end_layout
+
+\begin_layout Standard
+The estimated orientation of the orientation estimation link can be written
+ as
+\begin_inset Formula 
+\[
+\hat{R}_{p}^{w}=R_{p}^{w}R_{\phi}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $R_{\phi}$
+\end_inset
+
+ is the rotation matrix associated with the estimation error rotation vector
+ 
+\begin_inset Formula $\phi\in\mathbb{R}^{3}$
+\end_inset
+
+.
+ The predicted measurement can be hence written as
+\begin_inset Formula 
+\[
+\hat{z}_{R,i}=\hat{R}_{p}^{w}R_{i}^{p}=R_{p}^{w}R_{\phi}R_{i}^{p}
+\]
+
+\end_inset
+
+so that the measurement residual can be written in rotation matrix form
+ as
+\begin_inset Formula 
+\begin{align*}
+y_{R,i} & =\hat{z}_{R,i}^{-1}z_{R,i}\\
+ & =R_{p}^{i}R_{\phi}^{-1}R_{w}^{p}R_{p}^{w}R_{i}^{p}R_{v}\\
+ & =R_{p}^{i}R_{\phi}^{-1}R_{i}^{p}R_{v}
+\end{align*}
+
+\end_inset
+
+assuming that 
+\begin_inset Formula $\left\Vert \phi\right\Vert $
+\end_inset
+
+ is small, we can use the first order approximation 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula 
+\[
+R_{\phi}^{-1}=e^{-\tilde{\phi}}\approx I-\tilde{\phi}
+\]
+
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+so that 
+\begin_inset Formula 
+\begin{align*}
+y_{R,i} & \approx R_{p}^{i}\left(I-\tilde{\phi}\right)R_{i}^{p}R_{v}\\
+ & =\left(I-R_{p}^{i}\tilde{\phi}R_{i}^{p}\right)R_{v}\\
+ & =\left(I-\widetilde{R_{p}^{i}\phi}\right)R_{v}
+\end{align*}
+
+\end_inset
+
+where we have used 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:tilde-rotation-property"
+
+\end_inset
+
+ from the appendix.
+ For small 
+\begin_inset Formula $\phi$
+\end_inset
+
+, the approximate rotation matrix 
+\begin_inset Formula $I-\widetilde{R_{p}^{i}\phi}$
+\end_inset
+
+ can be identified with the rotation vector 
+\begin_inset Formula $-R_{p}^{i}\phi$
+\end_inset
+
+.
+ It is in terms of this rotation vector form that we model the noise on
+ the measurement (and hence the residual) as Gaussian, i.e.
+ 
+\begin_inset Formula 
+\begin{align*}
+y_{\phi,i} & =-R_{p}^{i}\phi+v_{\phi}\\
+v_{\phi} & \sim\mathcal{N}\left(0,Q_{\phi}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can finally rewrite this rotation vector measurement residual in the
+ canonical form
+\begin_inset Formula 
+\[
+y_{\phi,i}=z_{\phi,i}-H_{\phi,i}\phi
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $z_{\phi,i}=v_{\phi}$
+\end_inset
+
+ and 
+\begin_inset Formula $H_{\phi,i}=R_{p}^{i}$
+\end_inset
+
+, the measurement output matrix.
+\end_layout
+
+\begin_layout Standard
+Note also that if the joint angle measurements that are needed to find 
+\begin_inset Formula $R_{i}^{p}$
+\end_inset
+
+ are noisy, their covariances will have to be factored into the measurement
+ through the Jacobian between 
+\begin_inset Formula $p$
+\end_inset
+
+ and 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ This is currently not taken into account.
+\end_layout
+
+\begin_layout Subsection
+Point velocity measurements
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Point-velocity-measurements"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If the linear velocity of a certain point fixed to one of the links with
+ respect to the world is known (e.g.
+ because it is in non-slipping contact with the stationary world), then
+ this information can be used for state estimation.
+\end_layout
+
+\begin_layout Standard
+Let point 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+ be fixed in frame 
+\begin_inset Formula $i$
+\end_inset
+
+, so that the augmented coordinate vector 
+\begin_inset Formula $\bar{p}_{i}^{i}=\left(\begin{array}{c}
+p_{i}^{i}\\
+1
+\end{array}\right)\in\mathbb{R}^{4}$
+\end_inset
+
+ is constant.
+ The position of point 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+ can be expressed in 
+\begin_inset Formula $w$
+\end_inset
+
+ using
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\bar{p}_{i}^{w}=H_{p}^{w}H_{i}^{p}\bar{p}_{i}^{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Its velocity is
+\begin_inset Formula 
+\begin{eqnarray}
+\dot{\bar{p}}_{i}^{w} & = & \dot{H}_{p}^{w}H_{i}^{p}\bar{p}_{i}^{i}+H_{p}^{w}\dot{H}_{i}^{p}\bar{p}_{i}^{i}\nonumber \\
+ & = & H_{p}^{w}\left(H_{w}^{p}\dot{H}_{p}^{w}+\dot{H}_{i}^{p}H_{p}^{i}\right)\bar{p}_{i}^{p}\nonumber \\
+ & = & H_{p}^{w}\left(\tilde{T}_{p}^{p,w}+\tilde{T}_{i}^{p,p}\right)\bar{p}_{i}^{p}\label{eq:body-fixed-point-velocity}
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The twist
+\begin_inset Formula 
+\[
+T_{i}^{p,p}=J_{i}^{p,p}v_{i}^{p}
+\]
+
+\end_inset
+
+is known, given the joint velocities for the joints on the path between
+ 
+\begin_inset Formula $p$
+\end_inset
+
+ and 
+\begin_inset Formula $i$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Expanding 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:body-fixed-point-velocity"
+
+\end_inset
+
+, we get
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\dot{\bar{p}}_{i}^{w} & =\left(\begin{array}{cc}
+R_{p}^{w} & p_{p}^{w}\\
+0 & 1
+\end{array}\right)\left(\begin{array}{cc}
+\tilde{\omega}_{p}^{p,w}+\tilde{\omega}_{i}^{p,p} & v_{p}^{p,w}+v_{i}^{p,p}\\
+0 & 0
+\end{array}\right)\left(\begin{array}{c}
+p_{i}^{p}\\
+1
+\end{array}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\dot{p}_{i}^{w}=R_{p}^{w}\left[\left(\tilde{\omega}_{p}^{p,w}+\tilde{\omega}_{i}^{p,p}\right)p_{i}^{p}+v_{p}^{p,w}+v_{i}^{p,p}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rootjoint-linear-vel"
+
+\end_inset
+
+ from the appendix and noting that 
+\begin_inset Formula $\omega_{p}^{p,w}=\omega$
+\end_inset
+
+, we can write this in terms of CoM velocity as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\dot{p}_{i}^{w} & =R_{p}^{w}\left[\left(\tilde{\omega}_{p}^{p,w}+\tilde{\omega}_{i}^{p,p}\right)p_{i}^{p}+R_{w}^{p}\dot{r}-\tilde{\omega}_{p}^{p,w}r^{p}-\frac{d}{dt}\left(r^{p}\right)+v_{i}^{p,p}\right]\\
+ & =\dot{r}+R_{p}^{w}v_{i}'
+\end{align*}
+
+\end_inset
+
+with
+\begin_inset Formula 
+\[
+v_{i}'=\widetilde{r^{p}-p_{i}^{p}}\omega+v_{i}^{p,p}+\tilde{\omega}_{i}^{p,p}p_{i}^{p}-\frac{d}{dt}\left(r^{p}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The partial derivatives with respect to 
+\begin_inset Formula $\dot{r}$
+\end_inset
+
+ and 
+\begin_inset Formula $\omega$
+\end_inset
+
+ are easily found as
+\begin_inset Formula 
+\[
+\frac{\partial\dot{p}_{i}^{w}}{\partial\dot{r}}=I
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{p}_{i}^{w}}{\partial\omega}=R_{p}^{w}\widetilde{r^{p}-p_{i}^{p}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We also need to find the partial derivative with respect to a perturbation
+ rotation vector 
+\begin_inset Formula $\phi$
+\end_inset
+
+.
+ To this end, let
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+R_{p}^{w}\leftarrow R_{p}^{w}R_{\phi}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $R_{\phi}$
+\end_inset
+
+ is the rotation matrix associated with the small perturbation 
+\begin_inset Formula $\phi$
+\end_inset
+
+.
+ In the appendix, it is shown that
+\begin_inset Formula 
+\[
+\lim_{\phi\rightarrow0}\frac{\partial}{\partial\phi}\left[R_{\phi}x\right]=-\tilde{x}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Hence, the partial derivative with respect to 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is 
+\begin_inset Formula 
+\[
+\frac{\partial\dot{p}_{i}^{w}}{\partial\phi}=-R_{p}^{w}\tilde{v}_{i}'
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In summary, the linearized measurement output matrix reads
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+H_{\dot{p}_{i}}=\frac{\partial\dot{p}_{i}^{w}}{\partial\left(\dot{r},\phi,\omega\right)}=\left(\begin{array}{ccc}
+I & R_{p}^{w}\left(\tilde{r}_{p}-\tilde{p}_{i}^{p}\right) & -R_{p}^{w}\tilde{v}_{i}'\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Point position measurements
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: cleanup.
+ Possible move before point acceleration and point velocity measurements
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let point 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+ be fixed in frame 
+\begin_inset Formula $i$
+\end_inset
+
+, so that the augmented coordinate vector 
+\begin_inset Formula $\bar{p}_{i}^{i}=\left(\begin{array}{c}
+p_{i}^{i}\\
+1
+\end{array}\right)\in\mathbb{R}^{4}$
+\end_inset
+
+ is constant.
+ The position of point 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+ can be expressed in 
+\begin_inset Formula $w$
+\end_inset
+
+ using
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\bar{p}_{i}^{w} & =H_{p}^{w}H_{i}^{p}\bar{p}_{i}^{i}\\
+ & =H_{p}^{w}\bar{p}_{i}^{p}
+\end{align*}
+
+\end_inset
+
+or, in terms of 3D vectors,
+\begin_inset Formula 
+\[
+p_{i}^{w}=R_{p}^{w}p_{i}^{p}+p_{p}^{w}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rootjoint-position"
+
+\end_inset
+
+, we get
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+p_{i}^{w} & =R_{p}^{w}p_{i}^{p}+r-R_{p}^{w}r^{p}\\
+ & =R_{p}^{w}\left(p_{i}^{p}-r^{p}\right)+r
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Jacobians are thus
+\begin_inset Formula 
+\[
+\frac{\partial p_{i}^{w}}{\partial r}=I
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial p_{i}^{w}}{\partial\phi}=\frac{\partial}{\partial\phi}R_{p}^{w}\left(p_{i}^{p}-r^{p}\right)=R_{p}^{w}\widetilde{r^{p}-p_{i}^{p}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Appendix: Primer on using screw theory for kinematics
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Appendix:-Primer-on"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This appendix gives a brief introduction to the use of screw theory for
+ kinematics.
+ For a more in-depth introduction to this topic, see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Duindam2006,Featherstone2008,Murray1994"
+
+\end_inset
+
+.
+ Our notation is taken from 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Duindam2006"
+
+\end_inset
+
+, and it is very explicit in describing motions in terms of describing 
+\emph on
+what body
+\emph default
+ is moving with respect to 
+\emph on
+what base
+\emph default
+, and 
+\emph on
+in which frame is the motion expressed
+\emph default
+.
+ This makes it easy to work with relative velocities and accelerations.
+\end_layout
+
+\begin_layout Standard
+This appendix is structured as follows.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Configuration"
+
+\end_inset
+
+ describes how configurations are represented.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Velocity"
+
+\end_inset
+
+ discusses the description of velocities using twists, and section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Acceleration"
+
+\end_inset
+
+ describes the use of spatial acceleration vectors to describe acceleration.
+\end_layout
+
+\begin_layout Subsection
+Configuration
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Configuration"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The configuration of a frame 
+\begin_inset Formula $j$
+\end_inset
+
+ with respect to a frame 
+\begin_inset Formula $i$
+\end_inset
+
+ can be described using the homogeneous transformation matrix
+\begin_inset Formula 
+\[
+H_{j}^{i}=\left(\begin{array}{cc}
+R_{j}^{i} & p_{j}^{i}\\
+0_{1\times3} & 1
+\end{array}\right)\in\mathbb{R}^{4}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $R_{j}^{i}\in\mathbb{R}^{3}$
+\end_inset
+
+ represents the orientation of frame 
+\begin_inset Formula $j$
+\end_inset
+
+ with respect to frame 
+\begin_inset Formula $i$
+\end_inset
+
+ using a rotation matrix whose columns are the unit vectors of frame 
+\begin_inset Formula $j$
+\end_inset
+
+ expressed in 
+\begin_inset Formula $i$
+\end_inset
+
+, and 
+\begin_inset Formula $p_{j}^{i}$
+\end_inset
+
+ represents the position of the origin of frame 
+\begin_inset Formula $j$
+\end_inset
+
+, expressed in frame 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ The representation of configuration using a homogeneous transform is highly
+ redundant, but has the advantage that it is globally valid.
+ There is no three number parameterization of rotation that has no singularities.
+\end_layout
+
+\begin_layout Standard
+The homogeneous transformation matrix 
+\begin_inset Formula $H_{j}^{i}$
+\end_inset
+
+ can be used to transform an augmented position vector expressed in frame
+ 
+\begin_inset Formula $j$
+\end_inset
+
+ to frame 
+\begin_inset Formula $i$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+\left(\begin{array}{c}
+p^{i}\\
+1
+\end{array}\right)=H_{j}^{i}\left(\begin{array}{c}
+p^{j}\\
+1
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Because the transformation matrix 
+\begin_inset Formula $H_{j}^{i}$
+\end_inset
+
+ transforms vectors from frame 
+\begin_inset Formula $j$
+\end_inset
+
+ to frame 
+\begin_inset Formula $i$
+\end_inset
+
+, we will use the convention of calling 
+\begin_inset Formula $H_{j}^{i}$
+\end_inset
+
+ the transformation 
+\emph on
+from frame 
+\begin_inset Formula $i$
+\end_inset
+
+ to frame 
+\begin_inset Formula $j$
+\end_inset
+
+
+\emph default
+.
+\end_layout
+
+\begin_layout Standard
+Transformation matrices can be concatenated using simple matrix multiplication:
+\begin_inset Formula 
+\[
+H_{k}^{i}=H_{j}^{i}H_{k}^{j}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Velocity
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Velocity"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We start by the usual derivation of angular velocity.
+ Let 
+\begin_inset Formula $R_{j}^{i}\left(t\right)$
+\end_inset
+
+ be a time-variant rotation matrix.
+ Its derivative, 
+\begin_inset Formula $\dot{R}_{j}^{i}\left(t\right)$
+\end_inset
+
+, is constrained by the fact that 
+\begin_inset Formula $R_{j}^{i}$
+\end_inset
+
+ must be a rotation matrix at all times.
+ We can exploit the orthogonality property by noting that since 
+\begin_inset Formula $R_{j}^{i}R_{i}^{j}=I$
+\end_inset
+
+, we have
+\begin_inset Formula 
+\[
+\frac{d}{dt}\left(R_{j}^{i}R_{i}^{j}\right)=\dot{R}_{j}^{i}R_{i}^{j}+R_{j}^{i}\dot{R}_{i}^{j}=0
+\]
+
+\end_inset
+
+and since 
+\begin_inset Formula $\dot{R}_{j}^{i}R_{i}^{j}=\left(R_{j}^{i}\dot{R}_{i}^{j}\right)^{T}$
+\end_inset
+
+, we obtain
+\begin_inset Formula 
+\[
+\dot{R}_{j}^{i}R_{i}^{j}=-\left(\dot{R}_{j}^{i}R_{i}^{j}\right)^{T}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+which means that 
+\begin_inset Formula $\dot{R}_{j}^{i}R_{i}^{j}$
+\end_inset
+
+ is a skew-symmetric matrix, and can be written as 
+\begin_inset Formula 
+\begin{equation}
+\dot{R}_{j}^{i}R_{i}^{j}=\left(\begin{array}{ccc}
+0 & -a_{z} & a_{y}\\
+a_{z} & 0 & -a_{x}\\
+-a_{y} & a_{x} & 0
+\end{array}\right)=:\tilde{a},\quad\text{for }a=\left(\begin{array}{c}
+a_{x}\\
+a_{y}\\
+a_{z}
+\end{array}\right)\label{eq:skew-symmetric}
+\end{equation}
+
+\end_inset
+
+The vector 
+\begin_inset Formula $a$
+\end_inset
+
+ is the angular velocity expressed in the base frame 
+\begin_inset Formula $i$
+\end_inset
+
+ (also called the instantaneous spatial angular velocity 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Murray1994"
+
+\end_inset
+
+), and 
+\begin_inset Formula $\tilde{a}$
+\end_inset
+
+ can be called the angular velocity in tilde form 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Duindam2006"
+
+\end_inset
+
+.
+ Switching back and forth between tilde form and 3D vector form is an important
+ operation.
+\end_layout
+
+\begin_layout Standard
+This angular velocity vector 
+\begin_inset Formula $a$
+\end_inset
+
+ may be rotated to any other frame 
+\begin_inset Formula $k$
+\end_inset
+
+ using
+\begin_inset Formula 
+\[
+b=R_{i}^{k}a
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now we note a special property concerning rotation matrices and skew-symmetric
+ matrices.
+ For any vector 
+\begin_inset Formula $x\in\mathbb{R}^{3}$
+\end_inset
+
+, we have 
+\begin_inset Formula 
+\begin{align*}
+\tilde{b}x & =\widetilde{R_{i}^{k}a}x\\
+ & =\left(R_{i}^{k}a\right)\times x\\
+ & =R_{i}^{k}R_{k}^{i}\left(\left(R_{i}^{k}a\right)\times x\right)\\
+ & =R_{i}^{k}\left(R_{k}^{i}\left(R_{i}^{k}a\right)\times\left(R_{k}^{i}x\right)\right)\\
+ & =R_{i}^{k}\left(a\times\left(R_{k}^{i}x\right)\right)\\
+ & =R_{i}^{k}\tilde{a}R_{k}^{i}x
+\end{align*}
+
+\end_inset
+
+Since this result must hold for all vectors 
+\begin_inset Formula $x\in\mathbb{R}^{3}$
+\end_inset
+
+, we must have
+\begin_inset Formula 
+\begin{equation}
+\tilde{b}=\widetilde{R_{i}^{k}a}=R_{i}^{k}\tilde{a}R_{k}^{i}\label{eq:tilde-rotation-property}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Substituting 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:skew-symmetric"
+
+\end_inset
+
+ into this equation, we obtain
+\begin_inset Formula 
+\begin{align*}
+\tilde{b} & =R_{i}^{k}\dot{R}_{j}^{i}R_{i}^{j}R_{k}^{i}\\
+ & =R_{i}^{k}\dot{R}_{j}^{i}R_{k}^{j}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This equation gives us a way of changing the frame of an angular velocity
+ when it is expressed in tilde form.
+ Since 
+\begin_inset Formula $b$
+\end_inset
+
+ denotes the angular velocity of the body frame 
+\begin_inset Formula $j$
+\end_inset
+
+, with respect to base frame 
+\begin_inset Formula $i$
+\end_inset
+
+, expressed in (i.e.
+ rotated to) frame 
+\begin_inset Formula $k$
+\end_inset
+
+, we introduce the very explicit notation 
+\begin_inset Formula 
+\begin{equation}
+\tilde{\omega}_{j}^{k,i}:=R_{i}^{k}\dot{R}_{j}^{i}R_{k}^{j}\label{eq:angular-velocity}
+\end{equation}
+
+\end_inset
+
+i.e.
+ the first superscript denotes the frame in which the angular velocity is
+ expressed, the second superscript denotes the base frame, and the subscript
+ denotes the body frame.
+\end_layout
+
+\begin_layout Standard
+We now extend these results from 
+\begin_inset Formula $SO\left(3\right)$
+\end_inset
+
+ to 
+\begin_inset Formula $SE\left(3\right)$
+\end_inset
+
+.
+ Generalizing 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:angular-velocity"
+
+\end_inset
+
+, the velocity of frame 
+\begin_inset Formula $j$
+\end_inset
+
+ with respect to frame 
+\begin_inset Formula $i$
+\end_inset
+
+ (both linear and angular) can be expressed in a third frame 
+\begin_inset Formula $k$
+\end_inset
+
+ using
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray}
+\tilde{T}_{j}^{k,i} & = & H_{i}^{k}\dot{H}_{j}^{i}H_{k}^{j}\nonumber \\
+ & = & \left(\begin{array}{cc}
+R_{i}^{k} & p_{i}^{k}\\
+0 & 1
+\end{array}\right)\left(\begin{array}{cc}
+\dot{R}_{j}^{i} & \dot{p}_{j}^{i}\\
+0 & 0
+\end{array}\right)\left(\begin{array}{cc}
+R_{k}^{j} & p_{k}^{j}\\
+0 & 1
+\end{array}\right)\nonumber \\
+ & = & \left(\begin{array}{cc}
+R_{i}^{k}\dot{R}_{j}^{i}R_{k}^{j} & R_{i}^{k}\left(\dot{R}_{j}^{i}p_{k}^{j}+\dot{p}_{j}^{i}\right)\\
+0 & 0
+\end{array}\right)\nonumber \\
+ & = & \left(\begin{array}{cc}
+\tilde{\omega}_{j}^{k,i} & v_{j}^{k,i}\\
+0 & 0
+\end{array}\right)\label{eq:twist-def}
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Notice that the angular velocity vector in tilde form, 
+\begin_inset Formula $\tilde{\omega}_{j}^{k,i}$
+\end_inset
+
+, reappears in this equation.
+ The linear part, 
+\begin_inset Formula $v_{j}^{k,i}$
+\end_inset
+
+, can be interpreted as the `stream velocity' of points that are instantaneously
+ coincident with the origin of frame 
+\begin_inset Formula $i$
+\end_inset
+
+ but fixed in frame 
+\begin_inset Formula $j$
+\end_inset
+
+, rotated to frame 
+\begin_inset Formula $k$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Analogously to 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:skew-symmetric"
+
+\end_inset
+
+, the description of the velocity of a rigid body in 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:twist-def"
+
+\end_inset
+
+ can be called the twist in tilde form 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Duindam2006"
+
+\end_inset
+
+.
+ The information contained in this 
+\begin_inset Formula $4\times4$
+\end_inset
+
+ matrix can be summarized concisely using a 
+\begin_inset Formula $6$
+\end_inset
+
+-D vector:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+T_{j}^{k,i}=\left(\begin{array}{c}
+\omega_{j}^{k,i}\\
+v_{j}^{k,i}
+\end{array}\right)\in\mathbb{R}^{6}
+\]
+
+\end_inset
+
+called the twist of frame 
+\begin_inset Formula $j$
+\end_inset
+
+ with respect to frame 
+\begin_inset Formula $i$
+\end_inset
+
+, expressed in frame 
+\begin_inset Formula $k$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Twists have several useful properties.
+ If frames 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $j$
+\end_inset
+
+ are not moving with respect to eachother (e.g.
+ because they are attached to the same rigid body), we have
+\begin_inset Formula 
+\begin{equation}
+T_{j}^{m,i}=0\label{eq:no-motion}
+\end{equation}
+
+\end_inset
+
+In addition,
+\begin_inset Formula 
+\begin{align}
+\tilde{T}_{j}^{m,k} & =H_{i}^{m}\tilde{T}_{j}^{i,k}H_{m}^{i}\label{eq:change-frame-tilde}\\
+T_{j}^{m,k} & =\Ad_{H_{i}^{m}}T_{j}^{i,k}\text{ with }\Ad_{H}:=\left(\begin{array}{cc}
+R & 0\\
+\tilde{p}R & R
+\end{array}\right)\text{ for }H=\left(\begin{array}{cc}
+R & p\\
+0 & 1
+\end{array}\right)\label{eq:change-frame}\\
+T_{j}^{i,k} & =-T_{k}^{i,j}\label{eq:invert}\\
+T_{j}^{m,k} & =T_{i}^{m,k}+T_{j}^{m,i}\label{eq:add}\\
+\frac{d}{dt}\Ad_{H_{i}^{k}} & =\Ad_{H_{i}^{k}}\ad_{T_{i}^{i,k}}\text{ with }\ad_{T}:=\left(\begin{array}{cc}
+\tilde{\omega} & 0\\
+\tilde{v} & \tilde{\omega}
+\end{array}\right)\text{ for }T=\left(\begin{array}{c}
+\omega\\
+v
+\end{array}\right)\label{eq:adjoint-deriv}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Properties 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:change-frame-tilde"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:change-frame"
+
+\end_inset
+
+ provide a way to change frames, in tilde form and in using the concise
+ notation, respectively.
+ Property 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:invert"
+
+\end_inset
+
+ shows that the inversion of body and base frame results in a negated twist.
+ Property 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:add"
+
+\end_inset
+
+ shows that an absolute twist can be obtained by simply adding relative
+ twists together if the body frame of the first is the same as the base
+ frame of the second, and both twists are expressed in the same frame.
+ Finally, 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:adjoint-deriv"
+
+\end_inset
+
+ will be useful to change the frame of a spatial acceleration vector in
+ the next section.
+ Proofs for these properties are provided in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Duindam2006"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsection
+Acceleration
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Acceleration"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The derivative of a twist is a spatial acceleration (terminology taken from
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Featherstone2008"
+
+\end_inset
+
+), that is, the spatial acceleration of frame 
+\begin_inset Formula $j$
+\end_inset
+
+ with respect to frame 
+\begin_inset Formula $i$
+\end_inset
+
+, expressed in frame 
+\begin_inset Formula $k$
+\end_inset
+
+ is written as
+\begin_inset Formula 
+\[
+\dot{T}_{j}^{k,i}=\left(\begin{array}{c}
+\dot{\omega}_{j}^{k,i}\\
+\dot{v}_{j}^{k,i}
+\end{array}\right)\in\mathbb{R}^{6}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Properties 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:invert"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:add"
+
+\end_inset
+
+ for twists have direct analogues for spatial accelerations, as shown simply
+ by differentiating.
+\end_layout
+
+\begin_layout Standard
+Changing frames is somewhat more involved.
+ Taking the derivative of property 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:change-frame"
+
+\end_inset
+
+,
+\begin_inset Formula 
+\begin{eqnarray}
+\dot{T}_{j}^{m,k} & = & \frac{d}{dt}\left(\Ad_{H_{i}^{m}}T_{j}^{i,k}\right)\nonumber \\
+ & = & \frac{d}{dt}\left(\Ad_{H_{i}^{m}}\right)T_{j}^{i,k}+\Ad_{H_{i}^{m}}\dot{T}_{j}^{i,k}\label{eq:spatial-accel-change-frame-1}
+\end{eqnarray}
+
+\end_inset
+
+Using property 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:adjoint-deriv"
+
+\end_inset
+
+, this can be written as
+\begin_inset Formula 
+\begin{equation}
+\dot{T}_{j}^{m,k}=\Ad_{H_{i}^{m}}\left(\ad_{T_{i}^{i,m}}T_{j}^{i,k}+\dot{T}_{j}^{i,k}\right)\label{eq:spatial-acceleration-coordinate-change}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that if either 
+\begin_inset Formula $T_{i}^{i,m}=0$
+\end_inset
+
+ or 
+\begin_inset Formula $T_{j}^{i,k}=0$
+\end_inset
+
+, or if both 
+\begin_inset Formula $m=j$
+\end_inset
+
+ and 
+\begin_inset Formula $k=i$
+\end_inset
+
+, 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:spatial-acceleration-coordinate-change"
+
+\end_inset
+
+ reduces to
+\begin_inset Formula 
+\[
+\dot{T}_{j}^{m,k}=\Ad_{H_{i}^{m}}\dot{T}_{j}^{i,k}\quad\text{(special case)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Appendix: velocity and acceleration of a point fixed in body frame
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $p$
+\end_inset
+
+ be fixed in frame 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ Point 
+\begin_inset Formula $p$
+\end_inset
+
+ can be expressed in frame 
+\begin_inset Formula $j$
+\end_inset
+
+ using the augmented coordinate vector
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+P^{j}=H_{i}^{j}P^{i}\in\mathbb{R}^{4}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Its velocity, as seen from frame 
+\begin_inset Formula $j$
+\end_inset
+
+, is
+\begin_inset Formula 
+\begin{eqnarray}
+\dot{P}^{j} & = & \dot{H}_{i}^{j}P^{i}\nonumber \\
+ & = & \dot{H}_{i}^{j}H_{j}^{i}P^{j}\nonumber \\
+ & = & \tilde{T}_{i}^{j,j}P^{j}\label{eq:rotating-point}
+\end{eqnarray}
+
+\end_inset
+
+or in terms of 3D vectors:
+\begin_inset Formula 
+\begin{equation}
+\dot{p}^{j}=\omega_{i}^{j,j}\times p^{j}+v_{i}^{j,j}\in\mathbb{R}^{3}\label{eq:rotating-point-3d}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that 
+\begin_inset Formula $v_{i}^{j,j}$
+\end_inset
+
+ is not the velocity of the origin of frame 
+\begin_inset Formula $i$
+\end_inset
+
+! It is the velocity at which a point instantaneously fixed in frame 
+\begin_inset Formula $i$
+\end_inset
+
+ flows through the origin of frame 
+\begin_inset Formula $j$
+\end_inset
+
+, expressed in frame 
+\begin_inset Formula $j$
+\end_inset
+
+'s coordinates.
+ Using 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:twist-def"
+
+\end_inset
+
+, it can be written as
+\begin_inset Formula 
+\begin{eqnarray}
+v_{i}^{j,j} & = & \dot{R}_{i}^{j}p_{j}^{i}+\dot{p}_{i}^{j}\nonumber \\
+ & = & \dot{p}_{i}^{j}-\dot{R}_{i}^{j}R_{j}^{i}p_{i}^{j}\nonumber \\
+ & = & \dot{p}_{i}^{j}-\omega_{i}^{j,j}\times p_{i}^{j}\label{eq:linear-velocity}
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Combining 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:linear-velocity"
+
+\end_inset
+
+ with 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rotating-point-3d"
+
+\end_inset
+
+ results in
+\begin_inset Formula 
+\[
+\dot{p}^{j}=\dot{p}_{i}^{j}+\omega_{i}^{j,j}\times\left(p^{j}-p_{i}^{j}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now for the acceleration.
+ Differentiating 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rotating-point"
+
+\end_inset
+
+ gives
+\begin_inset Formula 
+\begin{eqnarray*}
+\ddot{P}^{j} & = & \dot{\tilde{T}}_{i}^{j,j}P^{j}+\tilde{T}_{i}^{j,j}\dot{P}^{j}\\
+ & = & \dot{\tilde{T}}_{i}^{j,j}P^{j}+\tilde{T}_{i}^{j,j}\tilde{T}_{i}^{j,j}P^{j}
+\end{eqnarray*}
+
+\end_inset
+
+or in terms of 3D vectors:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\ddot{p}^{j}=\dot{\omega}_{i}^{j,j}\times p^{j}+\dot{v}_{i}^{j,j}+\omega_{i}^{j,j}\times\left(\omega_{i}^{j,j}\times p^{j}+v_{i}^{j,j}\right)\label{eq:rotating-point-acceleration}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Appendix: rotation vector kinematics
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Appendix:-rotation-vector"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The kinematics of the quaternion 
+\begin_inset Formula $q=\left(\begin{array}{c}
+q_{s}\\
+q_{v}
+\end{array}\right)$
+\end_inset
+
+ are described by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\dot{q}=\frac{1}{2}q\otimes\omega_{q}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\omega_{q}=\left(\begin{array}{c}
+0\\
+\omega
+\end{array}\right)$
+\end_inset
+
+ is the angular velocity quaternion expressed in body frame.
+ Expanding the quaternion product, we obtain
+\begin_inset Formula 
+\begin{equation}
+\left(\begin{array}{c}
+\dot{q}_{s}\\
+\dot{q}_{v}
+\end{array}\right)=\frac{1}{2}\left(\begin{array}{c}
+-q_{v}\cdot\omega\\
+q_{s}\omega+q_{v}\times\omega
+\end{array}\right)\label{eq:quaternion-derivative}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We now express the quaternion in terms of the rotation vector 
+\begin_inset Formula $\phi$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+q=\left(\begin{array}{c}
+\cos\frac{\left\Vert \phi\right\Vert }{2}\\
+\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi}{\left\Vert \phi\right\Vert }
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Plugging this into 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:quaternion-derivative"
+
+\end_inset
+
+, we get:
+\begin_inset Formula 
+\begin{equation}
+\dot{q}=\left(\begin{array}{c}
+-\frac{1}{2}\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\\
+\frac{1}{2}\cos\frac{\left\Vert \phi\right\Vert }{2}\omega+\frac{1}{2}\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi\times\omega}{\left\Vert \phi\right\Vert }
+\end{array}\right)\label{eq:qd-axis-angle}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+But the derivative can also be written in terms of 
+\begin_inset Formula $\dot{\phi}$
+\end_inset
+
+ as:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\dot{q}=\left(\begin{array}{c}
+-\frac{1}{2}\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{d\left\Vert \phi\right\Vert }{dt}\\
+\frac{1}{2}\cos\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi}{\left\Vert \phi\right\Vert }\frac{d\left\Vert \phi\right\Vert }{dt}+\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\dot{\phi}}{\left\Vert \phi\right\Vert }-\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi}{\left\Vert \phi\right\Vert ^{2}}\frac{d\left\Vert \phi\right\Vert }{dt}
+\end{array}\right)\label{eq:qd-axis-angle-2}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Comparing the first row of 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:qd-axis-angle"
+
+\end_inset
+
+ to the first row of 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:qd-axis-angle-2"
+
+\end_inset
+
+, we see that
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{d\left\Vert \phi\right\Vert }{dt}=\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\label{eq:dPhiNormDt}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Subsequently, we can solve the last three rows for 
+\begin_inset Formula $\dot{\phi}$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+\dot{\phi}=\frac{\left\Vert \phi\right\Vert }{\sin\frac{\left\Vert \phi\right\Vert }{2}}\dot{q}_{v}-\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\frac{d\left\Vert \phi\right\Vert }{dt}\phi+\frac{\phi}{\left\Vert \phi\right\Vert }\frac{d\left\Vert \phi\right\Vert }{dt}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Plug in 
+\begin_inset Formula $\dot{q}_{v}$
+\end_inset
+
+ from the last three rows of 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:qd-axis-angle"
+
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{align*}
+\dot{\phi} & =\frac{\left\Vert \phi\right\Vert }{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\omega+\frac{\phi\times\omega}{2}-\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\frac{d\left\Vert \phi\right\Vert }{dt}\phi+\frac{\phi}{\left\Vert \phi\right\Vert }\frac{d\left\Vert \phi\right\Vert }{dt}\\
+ & =\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\left(\left\Vert \phi\right\Vert \omega-\frac{d\left\Vert \phi\right\Vert }{dt}\phi\right)+\frac{\phi\times\omega}{2}+\frac{\phi}{\left\Vert \phi\right\Vert }\frac{d\left\Vert \phi\right\Vert }{dt}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now plug in 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:dPhiNormDt"
+
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{align*}
+\dot{\phi} & =\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\left(\left\Vert \phi\right\Vert \omega-\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\phi\right)+\frac{\phi\times\omega}{2}+\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert ^{2}}\phi\\
+ & =\frac{1}{2\left\Vert \phi\right\Vert }\cot\frac{\left\Vert \phi\right\Vert }{2}\left[\omega\left(\phi\cdot\phi\right)-\phi\left(\phi\cdot\omega\right)\right]+\frac{\phi\times\omega}{2}+\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert ^{2}}\phi
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using the vector triple product identity,
+\begin_inset Formula 
+\[
+\phi\left(\phi\cdot\omega\right)-\omega\left(\phi\cdot\phi\right)=\phi\times\left(\phi\times\omega\right)
+\]
+
+\end_inset
+
+this can be rewritten as
+\begin_inset Formula 
+\begin{align*}
+\dot{\phi} & =-\frac{1}{2\left\Vert \phi\right\Vert }\cot\frac{\left\Vert \phi\right\Vert }{2}\phi\times\left(\phi\times\omega\right)+\frac{\phi\times\omega}{2}+\frac{1}{\left\Vert \phi\right\Vert ^{2}}\left[\phi\times\left(\phi\times\omega\right)+\omega\left\Vert \phi\right\Vert ^{2}\right]\\
+ & =\omega+\frac{\phi\times\omega}{2}+\frac{1}{\left\Vert \phi\right\Vert ^{2}}\left[1-\frac{1}{2\left\Vert \phi\right\Vert }\cot\frac{\left\Vert \phi\right\Vert }{2}\right]\phi\times\left(\phi\times\omega\right)
+\end{align*}
+
+\end_inset
+
+ and using the half-angle formula
+\begin_inset Formula 
+\[
+\cot\frac{\left\Vert \phi\right\Vert }{2}=\frac{\sin\left\Vert \phi\right\Vert }{1-\cos\left\Vert \phi\right\Vert }
+\]
+
+\end_inset
+
+this finally becomes
+\begin_inset Formula 
+\[
+\dot{\phi}=\omega+\frac{\phi\times\omega}{2}+\frac{1}{\left\Vert \phi\right\Vert ^{2}}\left[1-\frac{\left\Vert \phi\right\Vert \sin\left\Vert \phi\right\Vert }{2\left(1-\cos\left\Vert \phi\right\Vert \right)}\right]\phi\times\left(\phi\times\omega\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is known as the Bortz equation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bortz1971"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Appendix: small rotation derivative
+\end_layout
+
+\begin_layout Standard
+Let
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+R=\bar{R}R_{\phi}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $R_{\phi}=e^{\tilde{\phi}}$
+\end_inset
+
+.
+ For small 
+\begin_inset Formula $\phi$
+\end_inset
+
+, 
+\begin_inset Formula $e^{\tilde{\phi}}\approx I+\tilde{\phi}$
+\end_inset
+
+.
+ Hence
+\begin_inset Formula 
+\[
+R\approx\bar{R}_{p}^{w}\left(I+\tilde{\phi}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now let 
+\begin_inset Formula $x$
+\end_inset
+
+ be a vector in 
+\begin_inset Formula $\mathbb{R}^{3}$
+\end_inset
+
+.
+ The Jacobian of 
+\begin_inset Formula $Rx$
+\end_inset
+
+ with respect to some variable 
+\begin_inset Formula $\alpha\in\mathbb{R}^{3}$
+\end_inset
+
+ is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial Rx}{\partial\alpha} & \approx\frac{\partial}{\partial\alpha}\left(\bar{R}x+\bar{R}\tilde{\phi}x\right)\\
+ & =\bar{R}\left(\frac{\partial x}{\partial\alpha}+\frac{\partial}{\partial\alpha}\left[\tilde{\phi}x\right]\right)\\
+ & =\bar{R}\left(\frac{\partial x}{\partial\alpha}+\tilde{\phi}\frac{\partial x}{\partial\alpha}-\tilde{x}\frac{\partial\phi}{\partial\alpha}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where we have used 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:cross-product-jacobian"
+
+\end_inset
+
+ from the appendix to evaluate the Jacobian of the cross product with respect
+ to 
+\begin_inset Formula $\alpha$
+\end_inset
+
+.
+ Since 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is small, we have 
+\begin_inset Formula $\tilde{\phi}\approx0$
+\end_inset
+
+ and 
+\begin_inset Formula $\bar{R}\approx R$
+\end_inset
+
+, so that
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial Rx}{\partial\alpha}=R\left(\frac{\partial x}{\partial\alpha}-\tilde{x}\frac{\partial\phi}{\partial\alpha}\right)\label{eq:phi-jacobian}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Analogously, we have
+\begin_inset Formula 
+\begin{align*}
+R^{T} & =R_{\phi}^{T}\bar{R}^{T}\\
+ & =e^{-\tilde{\phi}}\bar{R}^{T}\\
+ & \approx\left(I-\tilde{\phi}\right)\bar{R}^{T}
+\end{align*}
+
+\end_inset
+
+so that the Jacobian 
+\begin_inset Formula $\frac{\partial R^{T}x}{\partial\alpha}$
+\end_inset
+
+ can be evaluated at small 
+\begin_inset Formula $\phi$
+\end_inset
+
+ as
+\begin_inset Formula 
+\begin{align}
+\frac{\partial R^{T}x}{\partial\alpha} & \approx\frac{\partial}{\partial\alpha}\left[\bar{R}^{T}x-\tilde{\phi}\bar{R}^{T}x\right]\nonumber \\
+ & =\bar{R}^{T}\frac{\partial x}{\partial\alpha}-\frac{\partial}{\partial\alpha}\left[\tilde{\phi}\bar{R}^{T}x\right]\nonumber \\
+ & =\bar{R}^{T}\frac{\partial x}{\partial\alpha}-\left(\tilde{\phi}\bar{R}^{T}\frac{\partial x}{\partial\alpha}-\widetilde{\bar{R}^{T}x}\frac{\partial\phi}{\partial\alpha}\right)\nonumber \\
+ & =R^{T}\frac{\partial x}{\partial\alpha}+\widetilde{R^{T}x}\frac{\partial\phi}{\partial\alpha}\label{eq:phi-jacobian-transpose}
+\end{align}
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Section
+Appendix: position, velocity, and acceleration of estimation link given
+ CoM velocity
+\end_layout
+
+\begin_layout Standard
+The position of the CoM in frame 
+\begin_inset Formula $w$
+\end_inset
+
+ can be related to the CoM position in frame 
+\begin_inset Formula $p$
+\end_inset
+
+ as
+\begin_inset Formula 
+\[
+\bar{r}^{w}=\left(\begin{array}{c}
+r\\
+1
+\end{array}\right)=H_{p}^{w}\bar{r}^{p}\in\mathbb{R}^{4}
+\]
+
+\end_inset
+
+or in terms of non-homogeneous 3D vectors
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+r=R_{p}^{w}r^{p}+p_{p}^{w}
+\]
+
+\end_inset
+
+so that the position of the origin of the frame attached to the estimation
+ link is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+p_{p}^{w}=r-R_{p}^{w}r^{p}\label{eq:rootjoint-position}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The CoM velocity can be written in homogeneous coordinates as
+\begin_inset Formula 
+\begin{align}
+\dot{\bar{r}}^{w} & =\dot{H}_{p}^{w}\bar{r}^{p}+H_{p}^{w}\frac{d}{dt}\left(\bar{r}^{p}\right)\nonumber \\
+ & =H_{p}^{w}\left(H_{w}^{p}\dot{H}_{p}^{w}\bar{r}^{p}+\frac{d}{dt}\left(\bar{r}^{p}\right)\right)\nonumber \\
+ & =H_{p}^{w}\left(\tilde{T}_{p}^{p,w}\bar{r}^{p}+\frac{d}{dt}\left(\bar{r}^{p}\right)\right)\label{eq:com-velocity}
+\end{align}
+
+\end_inset
+
+where
+\begin_inset Formula 
+\[
+\frac{d}{dt}\left(\bar{r}^{p}\right)=J_{\text{CoM},B}^{p}v_{B}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $B$
+\end_inset
+
+ is the set of all joints excluding the 6-DoF joint.
+ To compute 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\frac{d}{dt}\left(\bar{r}^{p}\right)$
+\end_inset
+
+,
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+ we only need to know the joint positions and velocities of all of the joints
+ in 
+\begin_inset Formula $B$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Expanding 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:com-velocity"
+
+\end_inset
+
+, we obtain
+\begin_inset Formula 
+\[
+\dot{r}=R_{p}^{w}\left(\tilde{\omega}r^{p}+v_{p}^{p,w}+\dot{r}^{p}\right)
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $\omega=\omega_{p}^{p,w}$
+\end_inset
+
+.
+ Note that 
+\begin_inset Formula $\dot{r}^{p}=\frac{d}{dt}\left(r^{p}\right)\neq R_{w}^{p}\frac{d}{dt}\left(r^{w}\right)$
+\end_inset
+
+.
+ We can solve for the linear velocity of the estimation link:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+v_{p}^{p,w}=R_{w}^{p}\dot{r}-\tilde{\omega}r^{p}-\dot{r}^{p}\label{eq:rootjoint-linear-vel}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula 
+\[
+\dot{r}^{p}=R_{w}^{p}\dot{r}-\tilde{\omega}r^{p}-v_{p}^{p,w}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To find the linear acceleration of the estimation link, we differentiate
+ this equation:
+\begin_inset Formula 
+\begin{align}
+\dot{v}_{p}^{p,w} & =R_{w}^{p}\ddot{r}+\dot{R}_{w}^{p}\dot{r}-\tilde{\dot{\omega}}r^{p}-\tilde{\omega}\dot{r}^{p}-\ddot{r}^{p}\nonumber \\
+ & =R_{w}^{p}\ddot{r}+\dot{R}_{w}^{p}R_{p}^{w}R_{w}^{p}\dot{r}-\tilde{\dot{\omega}}r^{p}-\tilde{\omega}\dot{r}^{p}-\ddot{r}^{p}\nonumber \\
+ & =R_{w}^{p}\ddot{r}-\tilde{\omega}R_{w}^{p}\dot{r}-\tilde{\dot{\omega}}r^{p}-\tilde{\omega}\dot{r}^{p}-\ddot{r}^{p}\label{eq:eq:rootjoint-linear-acc}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Appendix: computing the Jacobian of a cross product with respect to a vector
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $x\in\mathbb{R}^{3}$
+\end_inset
+
+ and 
+\begin_inset Formula $y\in\mathbb{R}^{3}$
+\end_inset
+
+ each be dependent on 
+\begin_inset Formula $\alpha\in\mathbb{R}^{3}$
+\end_inset
+
+.
+ We can exploit the bilinear property of the cross product to find the Jacobian
+ of the cross product of 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+ with respect to 
+\begin_inset Formula $\alpha$
+\end_inset
+
+.
+ This Jacobian can be written as 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial\alpha}\left(x\times y\right)=\frac{\partial}{\partial x}\left(x\times y\right)\frac{\partial x}{\partial\alpha}+\frac{\partial}{\partial y}\left(x\times y\right)\frac{\partial y}{\partial\alpha}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now we note that
+\begin_inset Formula 
+\[
+x\times y=\tilde{x}y
+\]
+
+\end_inset
+
+so that
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial y}\left(x\times y\right)=\tilde{x}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note also that
+\begin_inset Formula 
+\[
+x\times y=-y\times x=-\tilde{y}x
+\]
+
+\end_inset
+
+so that
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial x}\left(x\times y\right)=-\tilde{y}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Jacobian can hence be written as
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial}{\partial\alpha}\left(x\times y\right)=\tilde{x}\frac{\partial y}{\partial\alpha}-\tilde{y}\frac{\partial x}{\partial\alpha}\label{eq:cross-product-jacobian}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Appendix: Jacobi identity
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $a,b,c\in\mathbb{R}^{3}$
+\end_inset
+
+.
+ The Jacobi identity states that
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+a\times\left(b\times c\right)+c\times\left(a\times b\right)+b\times\left(c\times a\right)=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This can also be written as
+\begin_inset Formula 
+\[
+\left(a\times b\right)\times c=a\times\left(b\times c\right)-b\times\left(a\times c\right)
+\]
+
+\end_inset
+
+or
+\begin_inset Formula 
+\[
+\widetilde{\tilde{a}b}c=\tilde{a}\tilde{b}c-\tilde{b}\tilde{a}c
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Since this must hold for all vectors 
+\begin_inset Formula $c\in\mathbb{R}^{3}$
+\end_inset
+
+, we have
+\begin_inset Formula 
+\begin{equation}
+\widetilde{\tilde{a}b}=\tilde{a}\tilde{b}-\tilde{b}\tilde{a}\label{eq:jacobi-identity-tilde}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "IEEEabrv,stateEstimation"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

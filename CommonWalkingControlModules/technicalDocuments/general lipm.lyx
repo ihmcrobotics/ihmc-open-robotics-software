@@ -1,0 +1,311 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\DeclareMathOperator{\Ad}{Ad}
+\DeclareMathOperator{\ad}{ad}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman lmodern
+\font_sans lmss
+\font_typewriter lmtt
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 2
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\dot{l}=m\ddot{r}=mg+f
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Assumption: moving on a plane:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\ddot{r}=\underbrace{\left(\begin{array}{cc}
+1 & 0\\
+0 & 1\\
+k_{x} & k_{y}
+\end{array}\right)}_{A}\left(\begin{array}{c}
+\ddot{x}\\
+\ddot{y}
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+mk_{x}\ddot{x}+mk_{y}\ddot{y}=-mg_{z}+f_{z}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+f & -mg=\left(\begin{array}{c}
+m\ddot{x}\\
+m\ddot{y}\\
+m\left(k_{x}\ddot{x}+k_{y}\ddot{y}\right)
+\end{array}\right)=\left(\begin{array}{c}
+-m\omega_{0}^{2}p_{x}\\
+-m\omega_{0}^{2}p_{y}\\
+f_{z}
+\end{array}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\begin{array}{c}
+\ddot{x}\\
+\ddot{y}
+\end{array}\right)=-\omega_{0}^{2}\left(\begin{array}{c}
+p_{x}\\
+p_{y}
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f_{z}-mg_{z}=-mk_{x}\omega_{0}^{2}p_{x}-mk_{y}\omega_{0}^{2}p_{y}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f=\left(\begin{array}{cc}
+-m\omega_{0}^{2} & 0\\
+0 & -m\omega_{0}^{2}\\
+-mk_{x}\omega_{0}^{2} & -mk_{y}\omega_{0}^{2}
+\end{array}\right)\left(\begin{array}{c}
+p_{x}\\
+p_{y}
+\end{array}\right)+mg
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\dot{h}=\left(\begin{array}{c}
+\left(\begin{array}{c}
+f_{z}p_{y}-m\omega_{0}^{2}p_{y}p_{z}\\
+-f_{z}p_{x}+m\omega_{0}^{2}p_{x}p_{z}\\
+0
+\end{array}\right)+\tau_{n}\\
+\left(\begin{array}{c}
+m\omega_{0}^{2}p_{x}\\
+m\omega_{0}^{2}p_{y}\\
+f_{z}-mg_{z}
+\end{array}\right)
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\ddot{r}=\left(\begin{array}{c}
+\omega_{0}^{2}p_{x}\\
+\omega_{0}^{2}p_{y}\\
+\frac{f_{z}}{m}-g_{z}
+\end{array}\right)=\left(\begin{array}{ccc}
+\omega_{0}^{2} & 0 & 0\\
+0 & \omega_{0}^{2} & 0\\
+0 & 0 & 1
+\end{array}\right)\left(\begin{array}{c}
+p_{x}\\
+p_{y}\\
+\frac{f_{z}}{m}-g_{z}
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\epsilon & =k_{x}x+k_{y}y-z+z_{c}\\
+ & =\underbrace{\left(\begin{array}{ccc}
+k_{x} & k_{y} & -1\end{array}\right)}_{D}r+\left(\begin{array}{c}
+0\\
+0\\
+z_{c}
+\end{array}\right)=0
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\ddot{\epsilon}=D\ddot{r}=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\begin{array}{cc}
+mI & D^{T}\\
+D & 0
+\end{array}\right)\left(\begin{array}{c}
+\ddot{r}\\
+\mu
+\end{array}\right)=\left(\begin{array}{c}
+f+mg\\
+0
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+D^{T}\mu & =f+mg-m\ddot{r}\\
+DD^{T}\mu & =D\left(f+mg\right)\\
+\mu & =\left(DD^{T}\right)^{-1}D\left(f+mg\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula 
+\begin{align*}
+m\ddot{r} & =\underbrace{\left[I-D^{T}\left(DD^{T}\right)^{-1}D\right]}_{S}\left(f+mg\right)\\
+ & =S\left(\begin{array}{c}
+m\omega_{0}^{2}p_{x}\\
+m\omega_{0}^{2}p_{y}\\
+f_{z}-mg_{z}
+\end{array}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

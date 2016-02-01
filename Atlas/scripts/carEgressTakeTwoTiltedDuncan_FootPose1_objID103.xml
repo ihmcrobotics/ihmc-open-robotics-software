@@ -1,0 +1,6 @@
+<object-stream>
+  <long>8570618046</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
+    <destination>0</destination>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
+</object-stream>

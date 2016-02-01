@@ -1,0 +1,9 @@
+<launch>
+	<include file="$(find elevation_mapping)/launch/atlas.launch" />
+	<env name="ROSCONSOLE_CONFIG_FILE" value="$(find foothold_finder)/launch/custom_rosconsole.conf"/>
+ 	<node pkg="foothold_finder" type="foothold_finder" name="foothold_finder" output="screen">
+ 		<rosparam command="load" file="$(find foothold_finder)/parameters/robots/atlas.yaml" />
+ 		<rosparam command="load" file="$(find foothold_finder)/parameters/foot_shapes/humanoid_foot.yaml" />
+ 		<rosparam command="load" file="$(find foothold_finder)/parameters/search_regions/circle_40cm.yaml" />
+    </node>
+</launch>

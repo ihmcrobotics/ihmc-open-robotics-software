@@ -1,0 +1,28 @@
+<package>
+  <description brief="Displays aggregated robot diagnostics" >
+<p>
+    robot_monitor is a simple GUI tool for displaying robot diagnostics that has been aggregated by the <a href="http://www.ros.org/wiki/diagnostic_aggregator">diagnostic_aggregator</a>. 
+</p>
+<p>
+Some icons from the Silk icon pack are used, which is available from <a href="http://www.famfamfam.com/lab/icons/silk/">famfamfam.com</a>.
+</p>
+
+  </description>
+  <author>Kevin Watts (watts@willowgarage.com), Josh Faust (jfaust@willowgarage.com)</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes="2010/01/09"/>
+  <url>http://www.ros.org/wiki/robot_monitor</url>
+  <depend package="rospy" />
+  <depend package="diagnostic_msgs" />
+  <depend package="rxbag" />
+  <rosdep name="wxwidgets"/>
+  <rosdep name="wxpython"/>
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+  <export>
+    <rxbag plugin="robot_monitor.rxbag_plugins"/>
+  </export>
+</package>
+
+

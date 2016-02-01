@@ -1,0 +1,9 @@
+<stack>
+  <description brief="Tools for use with URDF Models">This package contains a number of tools for making, viewing and using URDF models.</description>
+  <author>Maintained by David Lu!!</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/robot_model_tutorials</url>
+  <depend stack="ros" />
+
+</stack>

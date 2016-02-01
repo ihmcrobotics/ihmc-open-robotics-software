@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.cdt.launch.launchGroup">
+<stringAttribute key="org.eclipse.cdt.launch.launchGroup.0.action" value="NONE"/>
+<stringAttribute key="org.eclipse.cdt.launch.launchGroup.0.enabled" value="true"/>
+<stringAttribute key="org.eclipse.cdt.launch.launchGroup.0.mode" value="debug"/>
+<stringAttribute key="org.eclipse.cdt.launch.launchGroup.0.name" value="DRC Obstacle Course - sim"/>
+<stringAttribute key="org.eclipse.cdt.launch.launchGroup.1.action" value="NONE"/>
+<stringAttribute key="org.eclipse.cdt.launch.launchGroup.1.enabled" value="true"/>
+<stringAttribute key="org.eclipse.cdt.launch.launchGroup.1.mode" value="debug"/>
+<stringAttribute key="org.eclipse.cdt.launch.launchGroup.1.name" value="DRC Obstacle Course - ui"/>
+</launchConfiguration>

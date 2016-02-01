@@ -1,0 +1,22 @@
+<package>
+  <description brief="Messages for geometric primatives">
+
+    geometry_msgs provides messages for common geometric primatives
+    such as points, vectors, and poses. These primatives are designed
+    to provide a common data type and facilitate interoperability
+    throughout the system.
+
+  </description>
+  <author>Tully Foote</author>
+  <license>BSD</license>
+  <review status="doc reviewed" notes="http://www.ros.org/wiki/geometry_msgs/Reviews/2009-09-30_Doc_Review"/>
+  <url>http://ros.org/wiki/geometry_msgs</url>
+
+  <export>
+    <cpp cflags="`PKG_CONFIG_PATH=${prefix}/../../lib/pkgconfig pkg-config --cflags geometry_msgs`"
+         lflags="`PKG_CONFIG_PATH=${prefix}/../../lib/pkgconfig pkg-config --libs geometry_msgs`"/>
+  </export>
+
+</package>
+
+

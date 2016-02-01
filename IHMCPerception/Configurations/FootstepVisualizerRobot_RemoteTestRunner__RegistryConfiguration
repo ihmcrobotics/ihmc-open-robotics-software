@@ -1,0 +1,5 @@
+root*false*false
+root.FootstepVisualizerRobot*false*false
+root.FootstepVisualizerRobot.HeightMapBestFitPlaneCalculatorTest*false*false
+root.FootstepVisualizerRobot.HeightMapBestFitPlaneCalculatorTest.BagOfBallsBalls*false*false
+root.FootstepVisualizer*false*false

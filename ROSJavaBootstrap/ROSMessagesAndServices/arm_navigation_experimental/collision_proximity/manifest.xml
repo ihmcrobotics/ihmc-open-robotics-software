@@ -1,0 +1,27 @@
+<package>
+  <description brief="collision_proximity">
+
+     collision_proximity provides an API for maintaining distance fields through the planning_models paradigm. It provides functionality for generating distance fields from planning scenes, decomposing objects into swept sphere volumes, and finding distances and gradients for all points on a robot.
+
+  </description>
+  <author>Gil Jones</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/collision_proximity</url>
+  <depend package="distance_field"/>
+  <depend package="planning_models"/>
+  <depend package="geometric_shapes"/>
+  <depend package="planning_environment"/>
+  <depend package="bullet"/>
+  <depend package="kinematics_msgs"/>
+  <!--<depend package="mesh_convex_decomposition"/>-->
+  <depend package="spline_smoother"/>
+  <depend package="arm_navigation_msgs"/>
+
+ <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lcollision_proximity" />
+  </export>
+
+</package>
+
+

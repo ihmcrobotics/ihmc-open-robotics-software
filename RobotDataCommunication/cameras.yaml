@@ -1,0 +1,50 @@
+-
+        description: ValkyrieTripod
+        device: 0
+        mode: 14
+        interlaced: false
+        videoIn: SDI
+-
+        description: ValkyrieFrame
+        device: 1
+        mode: 9
+        interlaced: false
+        videoIn: SDI
+-
+        description: StepprTripod
+        device: 2
+        mode: 14
+        interlaced: false
+        videoIn: SDI
+-
+        description: StepprFrame
+        device: 3
+        mode: 9
+        interlaced: false
+        videoIn: SDI
+-
+        description: AtlasTripod
+        device: 0
+        mode: 14
+        interlaced: false
+        videoIn: SDI
+-
+        description: AtlasFrame
+        device: 1
+        mode: 9
+        interlaced: false
+        videoIn: SDI
+
+-
+        description: ValkyrieJSCA
+        device: 0
+        mode: 9
+        interlaced: false
+        videoIn: SDI
+
+-
+        description: ValkyrieJSCB
+        device: 1
+        mode: 9
+        interlaced: false
+        videoIn: SDI

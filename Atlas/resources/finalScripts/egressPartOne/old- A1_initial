@@ -1,0 +1,35 @@
+pelvisPos 0.20202148764121433 0.30888299300219163 0.4870949974509806
+pelvisRot 0.08171818037097155 -0.002352258102183856 0.9951920650369147 0.05393847945798431
+wholeBodyLockLevel CONTROL_MANUALLY
+wholeBodyLeftDoF DOF_NONE
+wholeBodyRightDoF DOF_3P3R
+r_leg_aky -38
+l_arm_wry 230
+r_arm_shx -15
+l_leg_akx -20
+back_bkx 4
+r_arm_elx -133
+l_arm_shz 0
+r_leg_akx 14
+l_leg_aky -91
+l_arm_wrx 27
+r_arm_ely 206
+l_arm_shx 0
+l_arm_wry2 120
+back_bky 12
+neck_ry 74
+l_leg_kny 149
+l_leg_hpy -129
+l_arm_ely 0
+r_leg_hpx -21
+r_arm_shz 55
+r_leg_hpz -29
+r_leg_hpy -54
+r_leg_kny 105
+back_bkz 25
+l_arm_elx 81
+r_arm_wry -42
+l_leg_hpx 19
+l_leg_hpz 49
+r_arm_wry2 40
+r_arm_wrx -131

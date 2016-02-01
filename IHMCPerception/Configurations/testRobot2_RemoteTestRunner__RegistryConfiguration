@@ -1,0 +1,4 @@
+root*false*false
+root.testRobot2*false*false
+root.testRobot2.HeightMapBestFitPlaneCalculatorTest*false*false
+root.testRobot2.HeightMapBestFitPlaneCalculatorTest.BagOfBallsBalls*false*false

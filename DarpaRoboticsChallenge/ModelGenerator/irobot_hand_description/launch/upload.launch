@@ -1,0 +1,4 @@
+<launch>
+    <!-- send urdf to param server -->
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find irobot_hand_description)/robots/irobot_hand.urdf.xacro'" />
+</launch>

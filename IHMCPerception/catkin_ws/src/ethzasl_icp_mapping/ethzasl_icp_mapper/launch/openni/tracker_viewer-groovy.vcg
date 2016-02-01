@@ -1,0 +1,132 @@
+Panels:
+  - Class: rviz/Displays
+    Help Height: 76
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /Status1
+        - /PointCloud21
+        - /PointCloud22
+        - /TF1
+      Splitter Ratio: 0.5
+    Tree Height: 867
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 1
+      Autocompute Intensity Bounds:
+        Max Intensity: 4096
+        Min Intensity: 0
+        Value: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.01
+      Style: Flat Squares
+      Topic: /point_map
+      Use Fixed Frame: true
+      Use rainbow:
+        Max Color: 255; 255; 255
+        Min Color: 0; 0; 0
+        Value: true
+      Value: true
+    - Alpha: 0.5
+      Autocompute Intensity Bounds:
+        Max Intensity: 4096
+        Min Intensity: 0
+        Value: true
+      Autocompute Value Bounds:
+        Max Value: 0.832571
+        Min Value: -0.686012
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 95; 95
+      Color Transformer: FlatColor
+      Decay Time: 0
+      Enabled: true
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.01
+      Style: Flat Squares
+      Topic: /depth_registered/points
+      Use Fixed Frame: true
+      Use rainbow:
+        Max Color: 255; 255; 255
+        Min Color: 0; 0; 0
+        Value: true
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        /kinect:
+          Value: true
+        /openni_rgb_optical_frame:
+          Value: true
+        /map:
+          Value: true
+        All Enabled: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        /map:
+          /kinect:
+            /openni_rgb_optical_frame:
+              {}
+      Update Interval: 0
+      Value: true
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: /map
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+  Value: true
+  Views:
+    Current:
+      Class: rviz/Orbit
+      Distance: 4.97299
+      Focal Point:
+        X: 1.92006
+        Y: 0.135203
+        Z: 0.07183
+      Name: Current View
+      Near Clip Distance: 0.01
+      Pitch: 0.470204
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz)
+      Yaw: 3.20039
+    Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 1114
+  Hide Left Dock: false
+  Hide Right Dock: false
+  QMainWindow State: 000000ff00000000fd000000010000000000000106000003edfc0200000001fb000000100044006900730070006c0061007900730100000034000003ed000000d9010000050000066f000003ed00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Width: 1920
+  X: -4
+  Y: -1169

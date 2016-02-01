@@ -1,0 +1,925 @@
+package us.ihmc.steppr.controlParameters;
+
+import java.util.LinkedHashMap;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.steppr.parameters.BonoPhysicalProperties;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
+
+public class BonoWalkingControllerParameters implements WalkingControllerParameters
+{
+
+   private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
+
+   private final boolean runningOnRealRobot;
+   private final DRCRobotJointMap jointMap;
+
+   public BonoWalkingControllerParameters(DRCRobotJointMap jointMap, boolean runningOnRealRobot)
+   {
+      this.jointMap = jointMap;
+      this.runningOnRealRobot = runningOnRealRobot;
+
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         handPosesWithRespectToChestFrame.put(robotSide, new RigidBodyTransform());
+      }
+   }
+
+   @Override
+   public double getOmega0()
+   {
+      return 3.4;
+   }
+
+   @Override
+   public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
+   {
+      return handPosesWithRespectToChestFrame;
+   }
+
+   @Override
+   public double getTimeToGetPreparedForLocomotion()
+   {
+      return 0.0;
+   }
+
+   @Override
+   public boolean doToeOffIfPossible()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean doToeOffIfPossibleInSingleSupport()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean checkTrailingLegJacobianDeterminantToTriggerToeOff()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean checkECMPLocationToTriggerToeOff()
+   {
+      return false;
+   }
+
+   @Override
+   public double getMinStepLengthForToeOff()
+   {
+      return 0.20;
+   }
+
+   /**
+    * To enable that feature, doToeOffIfPossible() return true is required.
+    */
+   @Override
+   public boolean doToeOffWhenHittingAnkleLimit()
+   {
+      return false;
+   }
+
+   @Override
+   public double getMaximumToeOffAngle()
+   {
+      return Math.toRadians(45.0);
+   }
+
+   @Override
+   public boolean doToeTouchdownIfPossible()
+   {
+      return false;
+   }
+
+   @Override
+   public double getToeTouchdownAngle()
+   {
+      return Math.toRadians(20.0);
+   }
+
+   @Override
+   public boolean doHeelTouchdownIfPossible()
+   {
+      return false;
+   }
+
+   @Override
+   public double getHeelTouchdownAngle()
+   {
+      return Math.toRadians(-20.0);
+   }
+
+   @Override
+   public boolean allowShrinkingSingleSupportFootPolygon()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean allowAutomaticManipulationAbort()
+   {
+      return false;
+   }
+
+   @Override
+   public double getICPErrorThresholdToSpeedUpSwing()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   @Override
+   public double getMinimumSwingTimeForDisturbanceRecovery()
+   {
+      return getDefaultSwingTime();
+   }
+
+   @Override
+   public boolean isNeckPositionControlled()
+   {
+      return false;
+   }
+
+   @Override
+   public String[] getDefaultHeadOrientationControlJointNames()
+   {
+      return new String[0];
+   }
+
+   @Override
+   public String[] getDefaultChestOrientationControlJointNames()
+   {
+//      if (runningOnRealRobot)
+         return new String[] {};
+
+//      String[] defaultChestOrientationControlJointNames = new String[] { jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+//            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), jointMap.getSpineJointName(SpineJointName.SPINE_ROLL) };
+//
+//      return defaultChestOrientationControlJointNames;
+   }
+
+   private final double minimumHeightAboveGround = 0.595;
+   private double nominalHeightAboveGround = 0.670+0.020-0.03-0.02;//+0.010;//+0.020;
+   private final double maximumHeightAboveGround = 0.79;//Hip height fully upright//0.735;
+   //private final double additionalOffsetHeightBono = 0.15;
+   private final double additionalOffsetHeightBono = 0.16; //Spring Ankle
+
+   @Override
+   public double minimumHeightAboveAnkle()
+   {
+      return minimumHeightAboveGround + additionalOffsetHeightBono;
+   }
+
+   @Override
+   public double nominalHeightAboveAnkle()
+   {
+      return nominalHeightAboveGround + additionalOffsetHeightBono;
+   }
+
+   @Override
+   public double maximumHeightAboveAnkle()
+   {
+      return maximumHeightAboveGround + additionalOffsetHeightBono;
+   }
+
+   @Override
+   public double defaultOffsetHeightAboveAnkle()
+   {
+      return 0.0;
+   }
+
+   public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
+   {
+      this.nominalHeightAboveGround = nominalHeightAboveAnkle;
+   }
+
+   @Override
+   public double getNeckPitchUpperLimit()
+   {
+      return 0.0;
+   }
+
+   @Override
+   public double getNeckPitchLowerLimit()
+   {
+      return 0.0;
+   }
+
+   @Override
+   public double getHeadYawLimit()
+   {
+      return 0.0;
+   }
+
+   @Override
+   public double getHeadRollLimit()
+   {
+      return 0.0;
+   }
+
+   @Override
+   public double getFootForwardOffset()
+   {
+      return BonoPhysicalProperties.footForward;
+   }
+
+   @Override
+   public double getFootBackwardOffset()
+   {
+      return BonoPhysicalProperties.footBack;
+   }
+
+   @Override
+   public double getAnkleHeight()
+   {
+      return BonoPhysicalProperties.ankleHeight;
+   }
+
+   @Override
+   public double getLegLength()
+   {
+      return BonoPhysicalProperties.legLength;
+   }
+
+   @Override
+   public double getMinLegLengthBeforeCollapsingSingleSupport()
+   {
+      //TODO: Useful values
+      return 0.1;
+   }
+
+   @Override
+   public double getMinMechanicalLegLength()
+   {
+      return 0.1;
+   }
+
+   @Override
+   public double getInPlaceWidth()
+   {
+      return 0.35;
+   }
+
+   @Override
+   public double getDesiredStepForward()
+   {
+      return 0.3; //0.5; //0.35;
+   }
+
+   @Override
+   public double getMaxStepLength()
+   {
+      return runningOnRealRobot ? 0.5 : 0.4;
+   }
+
+   @Override
+   public double getDefaultStepLength()
+   {
+      return 0.4;
+   }
+
+   @Override
+   public double getMinStepWidth()
+   {
+      // TODO The smallest the best in terms of control.
+      return 0.35;//0.375;
+   }
+
+   @Override
+   public double getMaxStepWidth()
+   {
+      return 0.5; //0.5; //0.4;
+   }
+
+   @Override
+   public double getStepPitch()
+   {
+      return 0.0;
+   }
+
+   @Override
+   public double getMaxStepUp()
+   {
+      return 0.1;
+   }
+
+   @Override
+   public double getMaxStepDown()
+   {
+      return 0.1;
+   }
+
+   @Override
+   public double getMaxSwingHeightFromStanceFoot()
+   {
+      return 0.25;
+   }
+
+   @Override
+   public double getMaxAngleTurnOutwards()
+   {
+      return Math.PI / 4.0;
+   }
+
+   @Override
+   public double getMaxAngleTurnInwards()
+   {
+      return 0;
+   }
+
+   @Override
+   public double getMinAreaPercentForValidFootstep()
+   {
+      return 0.5;
+   }
+
+   @Override
+   public double getDangerAreaPercentForValidFootstep()
+   {
+      return 0.75;
+   }
+
+   @Override
+   public ICPControlGains getICPControlGains()
+   {
+      ICPControlGains gains = new ICPControlGains();
+
+      double kpParallel = 1.5;
+      double kpOrthogonal = 1.8;
+      double ki = 4.0;
+      double kiBleedOff = 0.9;
+      boolean useRawCMP = false;
+      double cmpFilterBreakFrequencyInHertz = 16.0;
+      double cmpRateLimit = 6.0;
+      double cmpAccelerationLimit = 200.0;
+
+      gains.setKpParallelToMotion(kpParallel);
+      gains.setKpOrthogonalToMotion(kpOrthogonal);
+      gains.setKi(ki);
+      gains.setKiBleedOff(kiBleedOff);
+      gains.setUseRawCMP(useRawCMP);
+      gains.setCMPFilterBreakFrequencyInHertz(cmpFilterBreakFrequencyInHertz);
+      gains.setCMPRateLimit(cmpRateLimit);
+      gains.setCMPAccelerationLimit(cmpAccelerationLimit);
+
+      // TODO Try using similar parameters to Atlas:
+//      double kpParallel = 2.5;
+//      double kpOrthogonal = 1.5;
+//      double ki = 0.0;
+//      double kiBleedOff = 0.9;
+//      boolean useRawCMP = true;
+//      boolean useHackToReduceFeedForward = false;
+//
+//      gains.setKpParallelToMotion(kpParallel);
+//      gains.setKpOrthogonalToMotion(kpOrthogonal);
+//      gains.setKi(ki);
+//      gains.setKiBleedOff(kiBleedOff);
+//      gains.setUseRawCMP(useRawCMP);
+//      gains.setUseHackToReduceFeedForward(useHackToReduceFeedForward);
+
+      return gains;
+   }
+
+   @Override
+   public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
+   {
+      YoPDGains gains = new YoPDGains("CoMHeight", registry);
+
+      double kp = runningOnRealRobot ? 40.0 : 50.0;
+      double zeta = runningOnRealRobot ? 0.4 : 1.0;
+      double maxAcceleration = 0.5 * 9.81;
+      double maxJerk = maxAcceleration / 0.05;
+
+      gains.setKp(kp);
+      gains.setZeta(zeta);
+      gains.setMaximumAcceleration(maxAcceleration);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
+   @Override
+   public boolean getCoMHeightDriftCompensation()
+   {
+      return false;
+   }
+
+   @Override
+   public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
+   {
+      YoPDGains gains = new YoPDGains("PelvisXY", registry);
+
+      gains.setKp(4.0);
+      gains.setKd(runningOnRealRobot ? 0.5 : 1.2);
+
+      return gains;
+   }
+
+   @Override
+   public YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry)
+   {
+      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
+
+      double kp = 100;//600.0;
+      double zeta = 0.4;//0.8;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = Double.POSITIVE_INFINITY;
+      double maxJerk = Double.POSITIVE_INFINITY;
+
+      gains.setProportionalGain(kp);
+      gains.setDampingRatio(zeta);
+      gains.setIntegralGain(ki);
+      gains.setMaximumIntegralError(maxIntegralError);
+      gains.setMaximumAcceleration(maxAccel);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
+   @Override
+   public YoOrientationPIDGains createHeadOrientationControlGains(YoVariableRegistry registry)
+   {
+      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
+
+      double kp = 40.0;
+      double zeta = 0.8;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = Double.POSITIVE_INFINITY;
+      double maxJerk = Double.POSITIVE_INFINITY;
+
+      gains.setProportionalGain(kp);
+      gains.setDampingRatio(zeta);
+      gains.setIntegralGain(ki);
+      gains.setMaximumIntegralError(maxIntegralError);
+      gains.setMaximumAcceleration(maxAccel);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
+   @Override
+   public double getTrajectoryTimeHeadOrientation()
+   {
+      return 3.0;
+   }
+
+   @Override
+   public double[] getInitialHeadYawPitchRoll()
+   {
+      return new double[] { 0.0, 0.0, 0.0 };
+   }
+
+   @Override
+   public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
+   {
+      YoPDGains gains = new YoPDGains("UnconstrainedJoints", registry);
+
+      double kp = runningOnRealRobot ? 80.0 : 500.0;
+      double zeta = runningOnRealRobot ? 0.25 : 0.8;
+      double maxAcceleration = runningOnRealRobot ? 6.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 60.0 : Double.POSITIVE_INFINITY;
+
+      gains.setKp(kp);
+      gains.setZeta(zeta);
+      gains.setMaximumAcceleration(maxAcceleration);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
+   @Override
+   public YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry)
+   {
+      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
+
+      double kp = runningOnRealRobot ? 100.0 : 100.0;
+      double zeta = runningOnRealRobot ? 0.7 : 0.8;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
+      double maxJerk = runningOnRealRobot ? 180.0 : 270.0;
+
+      gains.setProportionalGain(kp);
+      gains.setDampingRatio(zeta);
+      gains.setIntegralGain(ki);
+      gains.setMaximumIntegralError(maxIntegralError);
+      gains.setMaximumAcceleration(maxAccel);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
+   @Override
+   public YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry)
+   {
+      YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
+
+      double kpXY = 75.0;
+      double kpZ = 100.0; // 200.0 Trying to smash the ground there
+      double zetaXYZ = 0.3;
+      double kpXYOrientation = 100.0; // 300 not working
+      double kpZOrientation = 100.0;
+      double zetaXYOrientation = 0.3;
+      double zetaZOrientation = runningOnRealRobot ? 0.3 : 0.7;
+      double maxPositionAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxPositionJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxOrientationAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxOrientationJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+
+      gains.setPositionProportionalGains(kpXY, kpZ);
+      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatios(zetaXYOrientation, zetaZOrientation);
+      gains.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
+   @Override
+   public YoSE3PIDGains createHoldPositionFootControlGains(YoVariableRegistry registry)
+   {
+      YoFootSE3Gains gains = new YoFootSE3Gains("HoldFoot", registry);
+
+      double kpXY = 100.0;
+      double kpZ = 0.0;
+      double zetaXYZ = runningOnRealRobot ? 0.2 : 1.0;
+      double kpXYOrientation = runningOnRealRobot ? 40.0 : 100.0;
+      double kpZOrientation = runningOnRealRobot ? 40.0 : 100.0;
+      double zetaOrientation = runningOnRealRobot ? 0.2 : 1.0;
+      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+
+      gains.setPositionProportionalGains(kpXY, kpZ);
+      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
+   @Override
+   public YoSE3PIDGains createToeOffFootControlGains(YoVariableRegistry registry)
+   {
+      YoFootSE3Gains gains = new YoFootSE3Gains("ToeOffFoot", registry);
+
+      double kpXY = 100.0;
+      double kpZ = 0.0;
+      double zetaXYZ = runningOnRealRobot ? 0.4 : 0.4;
+      double kpXYOrientation = runningOnRealRobot ? 200.0 : 200.0;
+      double kpZOrientation = runningOnRealRobot ? 200.0 : 200.0;
+      double zetaOrientation = runningOnRealRobot ? 0.4 : 0.4;
+      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+
+      gains.setPositionProportionalGains(kpXY, kpZ);
+      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
+   @Override
+   public YoSE3PIDGains createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
+   {
+      YoFootSE3Gains gains = new YoFootSE3Gains("EdgeTouchdownFoot", registry);
+
+      double kp = 0.0;
+      double zetaXYZ = runningOnRealRobot ? 0.0 : 0.0;
+      double kpXYOrientation = runningOnRealRobot ? 40.0 : 300.0;
+      double kpZOrientation = runningOnRealRobot ? 40.0 : 300.0;
+      double zetaOrientation = runningOnRealRobot ? 0.4 : 0.4;
+      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+
+      gains.setPositionProportionalGains(kp, kp);
+      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
+   @Override
+   public double getSupportSingularityEscapeMultiplier()
+   {
+      return 30;
+   }
+
+   @Override
+   public double getSwingSingularityEscapeMultiplier()
+   {
+      return runningOnRealRobot ? 50.0 : 200.0;
+   }
+
+   @Override
+   public boolean doPrepareManipulationForLocomotion()
+   {
+      return true;
+   }
+
+   @Override
+   public double getDefaultTransferTime()
+   {
+      if (runningOnRealRobot)
+         return 0.25;//0.15;//0.3;////1.0; //.5;
+      return 0.25; // 1.5; //
+   }
+
+   @Override
+   public double getDefaultSwingTime()
+   {
+      if (runningOnRealRobot)
+         return 1.0;//0.7; //1.0
+      return 0.6; // 1.5; //
+   }
+
+   /** @inheritDoc */
+   @Override
+   public double getSpineYawLimit()
+   {
+      return Math.PI / 4.0;
+   }
+
+   /** @inheritDoc */
+   @Override
+   public double getSpinePitchUpperLimit()
+   {
+      return 0;
+   }
+
+   /** @inheritDoc */
+   @Override
+   public double getSpinePitchLowerLimit()
+   {
+      return 0;
+   }
+
+   /** @inheritDoc */
+   @Override
+   public double getSpineRollLimit()
+   {
+      return Math.PI / 4.0;
+   }
+
+   /** @inheritDoc */
+   @Override
+   public boolean isSpinePitchReversed()
+   {
+      return false;
+   }
+
+   @Override
+   public double getFootWidth()
+   {
+      return BonoPhysicalProperties.footWidth;
+   }
+
+   @Override
+   public double getToeWidth()
+   {
+      return BonoPhysicalProperties.toeWidth;
+   }
+
+   @Override
+   public double getFootLength()
+   {
+      return BonoPhysicalProperties.footForward + BonoPhysicalProperties.footBack;
+   }
+
+   @Override
+   public double getActualFootWidth()
+   {
+      return getFootWidth();
+   }
+
+   @Override
+   public double getActualFootLength()
+   {
+      return getFootLength();
+   }
+
+   @Override
+   public double getFootstepArea()
+   {
+      return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
+   }
+
+   @Override
+   public double getFoot_start_toetaper_from_back()
+   {
+      return 0;
+   }
+
+   @Override
+   public double getSideLengthOfBoundingBoxForFootstepHeight()
+   {
+      return 0;
+   }
+
+   @Override
+   public double getSwingHeightMaxForPushRecoveryTrajectory()
+   {
+      return 0.15;
+   }
+
+   @Override
+   public double getDesiredTouchdownHeightOffset()
+   {
+      return -0.02;
+   }
+
+   @Override
+   public double getDesiredTouchdownVelocity()
+   {
+      return -0.1;
+   }
+
+   @Override
+   public double getDesiredTouchdownAcceleration()
+   {
+      return 0;
+   }
+
+   @Override
+   public double getContactThresholdForce()
+   {
+      return 90.0;
+   }
+
+   @Override
+   public double getSecondContactThresholdForceIgnoringCoP()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   @Override
+   public double getCoPThresholdFraction()
+   {
+      return Double.NaN;
+   }
+
+   @Override
+   public String[] getJointsToIgnoreInController()
+   {
+      if (!runningOnRealRobot)
+         return null;
+
+      String[] defaultChestOrientationControlJointNames = new String[] { jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), jointMap.getSpineJointName(SpineJointName.SPINE_ROLL) };
+
+      return defaultChestOrientationControlJointNames;
+   }
+
+   @Override
+   public void setupMomentumOptimizationSettings(MomentumOptimizationSettings momentumOptimizationSettings)
+   {
+      momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);
+      momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
+      momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
+      momentumOptimizationSettings.setRhoMin(4.0);
+      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.01);
+      momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
+   }
+
+   @Override
+   public boolean doFancyOnToesControl()
+   {
+      return true;
+   }
+
+   @Override
+   public double getContactThresholdHeight()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public FootSwitchType getFootSwitchType()
+   {
+      return FootSwitchType.WrenchBased;
+   }
+
+   @Override
+   public double getMaxICPErrorBeforeSingleSupportX()
+   {
+      return 0.025;
+   }
+
+   @Override
+   public double getMaxICPErrorBeforeSingleSupportY()
+   {
+      return 0.025;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getDurationToCancelOutDesiredICPVelocityWhenStuckInTransfer()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   @Override
+   public boolean finishSingleSupportWhenICPPlannerIsDone()
+   {
+      return true;
+   }
+
+   @Override
+   public double minimumHeightBetweenAnkleAndPelvisForHeightAdjustment()
+   {
+      return 0;
+   }
+
+   @Override
+   public double nominalHeightBetweenAnkleAndPelvisForHeightAdjustment()
+   {
+      return 0;
+   }
+
+   @Override
+   public double maximumHeightBetweenAnkleAndPelvisForHeightAdjustment()
+   {
+      return 0;
+   }
+
+   @Override
+   public double pelvisToAnkleThresholdForWalking()
+   {
+      return 0;
+   }
+   
+   @Override
+   public boolean controlHeadAndHandsWithSliders()
+   {
+      return false;
+   }
+
+   @Override
+   public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
+   {
+      return new SideDependentList<LinkedHashMap<String, ImmutablePair<Double,Double>>>();
+   }
+
+   @Override
+   public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
+   {
+      return new LinkedHashMap<NeckJointName, ImmutablePair<Double,Double>>();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useICPPlannerHackN13()
+   {
+      // TODO When using new ICP planner, set that one to false.
+      return true;
+   }
+}

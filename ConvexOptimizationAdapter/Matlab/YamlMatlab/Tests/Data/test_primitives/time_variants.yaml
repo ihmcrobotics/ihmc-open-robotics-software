@@ -1,0 +1,8 @@
+canonical: !!timestamp 2001-12-15T02:59:43.1Z
+iso8601: !!timestamp 2001-12-14t21:59:43.10-05:00
+spaced: !!timestamp 2001-12-14 21:59:43.10 -5
+date: !!timestamp 2002-12-14
+matrix: 
+    - [!!timestamp '2001-12-15T02:59:43.1Z', 1]
+    - [!!timestamp '2001-12-15T03:59:43.1Z', 2]
+    

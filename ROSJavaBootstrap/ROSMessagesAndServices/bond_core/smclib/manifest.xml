@@ -1,0 +1,22 @@
+<package>
+  <description brief="smclib">
+    The State Machine Compiler (SMC) from http://smc.sourceforge.net/
+    converts a language-independent description of a state machine
+    into the source code to support that state machine.
+
+    This package contains the libraries that a compiled state machine
+    depends on, but it does not contain the compiler itself.
+
+  </description>
+  <author>Various, ROS package maintained by Stuart Glaser</author>
+  <license>Mozilla Public License Version 1.1</license>
+  <review status="3rdparty" notes=""/>
+  <url>http://smc.sourceforge.net/</url>
+
+  <export>
+    <cpp cflags="-I${prefix}/include" />
+  </export>
+
+</package>
+
+

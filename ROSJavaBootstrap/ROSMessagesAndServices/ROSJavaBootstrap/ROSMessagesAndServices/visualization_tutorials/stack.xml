@@ -1,0 +1,12 @@
+<stack>
+  <description brief="Visualization Tutorials">Tutorials related to the visualization stack such as Marker tutorials</description>
+  <author>Maintained by Dave Hershberger and David Gossow</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/visualization_tutorials</url>
+  <depend stack="ros" />
+  <depend stack="roscpp" />
+  <depend stack="visualization_msgs" />
+  <depend stack="interactive_markers" />
+  <depend stack="rviz" />
+</stack>

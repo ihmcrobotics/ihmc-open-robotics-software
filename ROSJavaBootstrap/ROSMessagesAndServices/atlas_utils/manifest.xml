@@ -1,0 +1,18 @@
+<package>
+  <description brief="atlas_utils">
+
+     atlas_utils
+
+  </description>
+  <author>John Hsu</author>
+  <license>Apache 2.0</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/atlas_utils</url>
+  <depend package="robot_state_publisher"/>
+  <depend package="urdf"/>
+  <depend package="xacro"/>
+  <depend package="robot_mechanism_controllers"/>
+  <depend package="osrf_msgs"/>
+  <depend package="atlas_msgs"/>
+
+</package>

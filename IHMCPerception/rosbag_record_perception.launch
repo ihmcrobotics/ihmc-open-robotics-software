@@ -1,0 +1,4 @@
+<launch>
+<node pkg="rosbag" type="rosbag" name="rosbag_record"
+       args="record /tf /tf_static /lidar_to_point_cloud_transformer/assembled_lidar_point_cloud /lidar_to_point_cloud_transformer/filtered_point_cloud /lidar_to_point_cloud_transformer/lidar_point_cloud /atlas/joint_states /atlas/rootPose /icp_correction /icp_error_odom /icp_odom /multisense/lidar_scan /point_map" />
+</launch>

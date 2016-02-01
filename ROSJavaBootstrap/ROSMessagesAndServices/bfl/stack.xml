@@ -1,0 +1,11 @@
+<stack>
+  <description brief="bfl">bfl</description>
+  <author>Maintained by Wim Meeussen</author>
+  <license>,LGPL</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/bfl</url>
+
+  <depend stack="ros" />
+  <depend stack="common_rosdeps" />
+
+</stack>

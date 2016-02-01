@@ -1,0 +1,45 @@
+package arm_navigation_msgs;
+
+public interface ArmNavigationErrorCodes extends org.ros.internal.message.Message {
+  static final java.lang.String _TYPE = "arm_navigation_msgs/ArmNavigationErrorCodes";
+  static final java.lang.String _DEFINITION = "int32 val\n\n# overall behavior\nint32 PLANNING_FAILED=-1\nint32 SUCCESS=1\nint32 TIMED_OUT=-2\n\n# start state errors\nint32 START_STATE_IN_COLLISION=-3\nint32 START_STATE_VIOLATES_PATH_CONSTRAINTS=-4\n\n# goal errors\nint32 GOAL_IN_COLLISION=-5\nint32 GOAL_VIOLATES_PATH_CONSTRAINTS=-6\n\n# robot state\nint32 INVALID_ROBOT_STATE=-7\nint32 INCOMPLETE_ROBOT_STATE=-8\n\n# planning request errors\nint32 INVALID_PLANNER_ID=-9\nint32 INVALID_NUM_PLANNING_ATTEMPTS=-10\nint32 INVALID_ALLOWED_PLANNING_TIME=-11\nint32 INVALID_GROUP_NAME=-12\nint32 INVALID_GOAL_JOINT_CONSTRAINTS=-13\nint32 INVALID_GOAL_POSITION_CONSTRAINTS=-14\nint32 INVALID_GOAL_ORIENTATION_CONSTRAINTS=-15\nint32 INVALID_PATH_JOINT_CONSTRAINTS=-16\nint32 INVALID_PATH_POSITION_CONSTRAINTS=-17\nint32 INVALID_PATH_ORIENTATION_CONSTRAINTS=-18\n\n# state/trajectory monitor errors\nint32 INVALID_TRAJECTORY=-19\nint32 INVALID_INDEX=-20\nint32 JOINT_LIMITS_VIOLATED=-21\nint32 PATH_CONSTRAINTS_VIOLATED=-22\nint32 COLLISION_CONSTRAINTS_VIOLATED=-23\nint32 GOAL_CONSTRAINTS_VIOLATED=-24\nint32 JOINTS_NOT_MOVING=-25\nint32 TRAJECTORY_CONTROLLER_FAILED=-26\n\n# system errors\nint32 FRAME_TRANSFORM_FAILURE=-27\nint32 COLLISION_CHECKING_UNAVAILABLE=-28\nint32 ROBOT_STATE_STALE=-29\nint32 SENSOR_INFO_STALE=-30\n\n# kinematics errors\nint32 NO_IK_SOLUTION=-31\nint32 INVALID_LINK_NAME=-32\nint32 IK_LINK_IN_COLLISION=-33\nint32 NO_FK_SOLUTION=-34\nint32 KINEMATICS_STATE_IN_COLLISION=-35\n\n# general errors\nint32 INVALID_TIMEOUT=-36\n\n";
+  static final int PLANNING_FAILED = -1;
+  static final int SUCCESS = 1;
+  static final int TIMED_OUT = -2;
+  static final int START_STATE_IN_COLLISION = -3;
+  static final int START_STATE_VIOLATES_PATH_CONSTRAINTS = -4;
+  static final int GOAL_IN_COLLISION = -5;
+  static final int GOAL_VIOLATES_PATH_CONSTRAINTS = -6;
+  static final int INVALID_ROBOT_STATE = -7;
+  static final int INCOMPLETE_ROBOT_STATE = -8;
+  static final int INVALID_PLANNER_ID = -9;
+  static final int INVALID_NUM_PLANNING_ATTEMPTS = -10;
+  static final int INVALID_ALLOWED_PLANNING_TIME = -11;
+  static final int INVALID_GROUP_NAME = -12;
+  static final int INVALID_GOAL_JOINT_CONSTRAINTS = -13;
+  static final int INVALID_GOAL_POSITION_CONSTRAINTS = -14;
+  static final int INVALID_GOAL_ORIENTATION_CONSTRAINTS = -15;
+  static final int INVALID_PATH_JOINT_CONSTRAINTS = -16;
+  static final int INVALID_PATH_POSITION_CONSTRAINTS = -17;
+  static final int INVALID_PATH_ORIENTATION_CONSTRAINTS = -18;
+  static final int INVALID_TRAJECTORY = -19;
+  static final int INVALID_INDEX = -20;
+  static final int JOINT_LIMITS_VIOLATED = -21;
+  static final int PATH_CONSTRAINTS_VIOLATED = -22;
+  static final int COLLISION_CONSTRAINTS_VIOLATED = -23;
+  static final int GOAL_CONSTRAINTS_VIOLATED = -24;
+  static final int JOINTS_NOT_MOVING = -25;
+  static final int TRAJECTORY_CONTROLLER_FAILED = -26;
+  static final int FRAME_TRANSFORM_FAILURE = -27;
+  static final int COLLISION_CHECKING_UNAVAILABLE = -28;
+  static final int ROBOT_STATE_STALE = -29;
+  static final int SENSOR_INFO_STALE = -30;
+  static final int NO_IK_SOLUTION = -31;
+  static final int INVALID_LINK_NAME = -32;
+  static final int IK_LINK_IN_COLLISION = -33;
+  static final int NO_FK_SOLUTION = -34;
+  static final int KINEMATICS_STATE_IN_COLLISION = -35;
+  static final int INVALID_TIMEOUT = -36;
+  int getVal();
+  void setVal(int value);
+}

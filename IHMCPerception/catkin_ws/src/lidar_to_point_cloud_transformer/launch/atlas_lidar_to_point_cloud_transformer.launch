@@ -1,0 +1,14 @@
+<launch>
+ 	<node pkg="lidar_to_point_cloud_transformer" type="lidar_to_point_cloud_transformer" name="lidar_to_point_cloud_transformer" output="log">
+	<param name="filter_robot_description" textfile="$(find lidar_to_point_cloud_transformer)/atlas_v4.urdf" /> <!--drc_hand_masks.urdf" /-->
+	<param name="filter_robot_description_topic" value="filter_robot_description" />
+	<param name="filter_padding" type="double" value="0.10" /> <!--cm-->
+    	<param name="laser_scan_topic" type="string" value="/multisense/lidar_scan" />
+    	<param name="fixed_frame" type="string" value="world" />
+		<param name="target_frame" type="string" value="pelvis" /><!--was head frame-->
+		<param name="base_frame_id" type="string" value="/multisense/motor" />
+    	<param name="rotating_frame_id" type="string" value="/multisense/hokuyo_link" />
+    	<param name="limit_angle" type="double" value="3.14159265" />
+    	<rosparam command="load" file="$(find lidar_to_point_cloud_transformer)/parameters/atlas_laser_scan_filter_chain.yaml" />
+    </node>
+</launch>

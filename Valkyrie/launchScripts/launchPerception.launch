@@ -1,0 +1,14 @@
+<launch>
+  <arg name="machine" default="cyberdisc-1.local" />
+  <arg name="user" default="robonaut" />
+  <arg name="ros_workspace" default="/home/robonaut/groovy_workspace" />
+  <machine default="true" name="$(arg machine)" address="$(arg machine)" env-loader="$(arg ros_workspace)/remote_setup.sh" user="$(arg user)" />
+
+  <node pkg="usb_cam" type="usb_cam_node" name="forhead" frame_id="/v1/head" machine="$(arg machine)"/>
+  <node pkg="ibeo8l" type="ibeo8l" name="ibeo">
+    <param name="ip_address" type="string" value="139.169.44.12" />
+    <param name="frame_id"  type="string" value="/ibeo_link" />
+    <param name="queue_size"  type="int" value="10" />
+  </node>
+  <node pkg="ensenso" type="ensenso_door" name="ensenso"/>
+</launch>

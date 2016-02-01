@@ -1,0 +1,6 @@
+libargtable2-dev:
+  ubuntu: libargtable2-dev
+yaml-cpp:
+  ubuntu:
+    apt:
+      packages: [ yaml-cpp0.2.6-dev ]

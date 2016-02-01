@@ -1,0 +1,13 @@
+scan_filter_chain:
+- name: range_filter
+  type: LaserScanRangeFilter
+  params:
+    lower_threshold: 0.3
+    upper_threshold: 35
+
+#- name: dark_shadows
+#  type: LaserScanIntensityFilter
+#  params: 
+#    lower_threshold: 0
+#    upper_threshold: 10000
+

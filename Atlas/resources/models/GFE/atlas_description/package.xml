@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <name>atlas_description</name>
+  <version>3.1.0</version>
+  <description>This package contains Atlas robot description files</description>
+  <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
+  <author email="hsu@osrfoundation.org">John Hsu</author>
+  <license>Apache 2.0</license>
+  <url type="website">http://gazebosim.org/wiki/DRC</url>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>multisense_sl_description</build_depend>
+  <build_depend>sandia_hand_description</build_depend>
+  <build_depend>irobot_hand_description</build_depend>
+  <build_depend>robotiq_hand_description</build_depend>
+  <run_depend>multisense_sl_description</run_depend>
+  <run_depend>sandia_hand_description</run_depend>
+  <run_depend>irobot_hand_description</run_depend>
+  <run_depend>robotiq_hand_description</run_depend>
+  <run_depend>xacro</run_depend>
+</package>

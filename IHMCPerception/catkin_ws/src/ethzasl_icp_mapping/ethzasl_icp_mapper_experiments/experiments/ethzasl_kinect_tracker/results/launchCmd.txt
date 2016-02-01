@@ -1,0 +1,77 @@
+#--------------------------------------
+# Experiment on sensor noise:
+
+./modular_cloud_matcher_batch ./data/mediumComplexEnv/0medium-0slow-0fly-0_2011-02-19-11-33-52.txt ./param_sensNoise.txt res_sensNoise_envMed_slow_fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/highComplexEnv/0high-0slow-0fly-0_2011-02-19-11-44-41.txt ./param_sensNoise.txt res_sensNoise_envHigh_slow_fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/lowComplexEnv/0low-0slow-0fly-0_2011-02-19-11-23-38.txt ./param_sensNoise.txt res_sensNoise_envLow_slow_fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+
+#--------------------------------------
+# Experiment on number of points:
+
+./modular_cloud_matcher_batch ./data/mediumComplexEnv/0medium-0slow-0fly-0_2011-02-19-11-33-52.txt ./param_nbPoints.txt res_nbPoints_envMed_slow_fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/highComplexEnv/0high-0slow-0fly-0_2011-02-19-11-44-41.txt ./param_nbPoints.txt res_nbPoints_envHigh_slow_fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/lowComplexEnv/0low-0slow-0fly-0_2011-02-19-11-23-38.txt ./param_nbPoints.txt res_nbPoints_envLow_slow_fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+
+#--------------------------------------
+# Experiment on epsilon:
+
+./modular_cloud_matcher_batch ./data/mediumComplexEnv/0medium-0slow-0fly-0_2011-02-19-11-33-52.txt ./param_epsilon.txt res_epsilon_envMed_slow_fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/highComplexEnv/0high-0slow-0fly-0_2011-02-19-11-44-41.txt ./param_epsilon.txt res_epsilon_envHigh_slow_fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/lowComplexEnv/0low-0slow-0fly-0_2011-02-19-11-23-38.txt ./param_epsilon.txt res_epsilon_envLow_slow_fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+
+#--------------------------------------
+# Experiment on keyframe knn:
+
+./modular_cloud_matcher_batch ./data/mediumComplexEnv/0medium-0slow-0fly-0_2011-02-19-11-33-52.txt ./param_keyframe_knn.txt res_knn_envMed_slow_fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/highComplexEnv/0high-0slow-0fly-0_2011-02-19-11-44-41.txt ./param_keyframe_knn.txt res_knn_envHigh_slow_fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/lowComplexEnv/0low-0slow-0fly-0_2011-02-19-11-23-38.txt ./param_keyframe_knn.txt res_knn_envLow_slow_fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+
+#--------------------------------------
+#--------------------------------------
+
+#--------------------------------------
+# Final validation for Medium environment:
+
+./modular_cloud_matcher_batch ./data/mediumComplexEnv/0medium-0fast-0fly-0_2011-02-19-11-34-48.txt ./param_final_validation.txt res_final_0medium-0fast-0fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/mediumComplexEnv/0medium-0fast-0rot-0_2011-02-19-11-32-51.txt ./param_final_validation.txt res_final_0medium-0fast-0rot.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/mediumComplexEnv/0medium-0fast-0tr-0_2011-02-19-11-30-40.txt ./param_final_validation.txt res_final_0medium-0fast-0tr.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/mediumComplexEnv/0medium-0medium-0fly-0_2011-02-19-11-34-21.txt ./param_final_validation.txt res_final_0medium-0medium-0fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/mediumComplexEnv/0medium-0medium-0rot-0_2011-02-19-11-32-08.txt ./param_final_validation.txt res_final_0medium-0medium-0rot.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/mediumComplexEnv/0medium-0medium-0tr-0_2011-02-19-11-29-36.txt ./param_final_validation.txt res_final_0medium-0medium-0tr.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/mediumComplexEnv/0medium-0slow-0fly-0_2011-02-19-11-33-52.txt ./param_final_validation.txt res_final_0medium-0slow-0fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/mediumComplexEnv/0medium-0slow-0rot-0_2011-02-19-11-31-26.txt ./param_final_validation.txt res_final_0medium-0slow-0rot.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/mediumComplexEnv/0medium-0slow-0tr-0_2011-02-19-11-28-47.txt ./param_final_validation.txt res_final_0medium-0slow-0tr.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+
+#--------------------------------------
+# Final validation for High environment:
+
+./modular_cloud_matcher_batch ./data/highComplexEnv/0high-0fast-0fly-0_2011-02-19-11-45-42.txt ./param_final_validation.txt res_final_0high-0fast-0fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/highComplexEnv/0high-0fast-0rot-0_2011-02-19-11-43-42.txt ./param_final_validation.txt res_final_0high-0fast-0rot.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/highComplexEnv/0high-0fast-0tr-0_2011-02-19-11-41-28.txt ./param_final_validation.txt res_final_0high-0fast-0tr.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/highComplexEnv/0high-0medium-0fly-0_2011-02-19-11-45-13.txt ./param_final_validation.txt res_final_0high-0medium-0fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/highComplexEnv/0high-0medium-0rot-0_2011-02-19-11-43-02.txt ./param_final_validation.txt res_final_0high-0medium-0rot.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/highComplexEnv/0high-0medium-0tr-0_2011-02-19-11-40-43.txt ./param_final_validation.txt res_final_0high-0medium-0tr.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/highComplexEnv/0high-0slow-0fly-0_2011-02-19-11-44-41.txt ./param_final_validation.txt res_final_0high-0slow-0fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/highComplexEnv/0high-0slow-0rot-0_2011-02-19-11-42-11.txt ./param_final_validation.txt res_final_0high-0slow-0rot.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/highComplexEnv/0high-0slow-0tr-0_2011-02-19-11-40-00.txt ./param_final_validation.txt res_final_0high-0slow-0tr.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+
+#--------------------------------------
+# Final validation for low environment:
+
+./modular_cloud_matcher_batch ./data/lowComplexEnv/0low-0fast-0fly-0_2011-02-19-11-24-34.txt ./param_final_validation.txt res_final_0low-0fast-0fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/lowComplexEnv/0low-0fast-0rot-0_2011-02-19-11-19-40.txt ./param_final_validation.txt res_final_0low-0fast-0rot.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/lowComplexEnv/0low-0fast-0tr-0_2011-02-19-11-15-27.txt ./param_final_validation.txt res_final_0low-0fast-0tr.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/lowComplexEnv/0low-0medium-0fly-0_2011-02-19-11-24-05.txt ./param_final_validation.txt res_final_0low-0medium-0fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/lowComplexEnv/0low-0medium-0rot-0_2011-02-19-11-18-35.txt ./param_final_validation.txt res_final_0low-0medium-0rot.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/lowComplexEnv/0low-0medium-0tr-0_2011-02-19-11-14-25.txt ./param_final_validation.txt res_final_0low-0medium-0tr.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/lowComplexEnv/0low-0slow-0fly-0_2011-02-19-11-23-38.txt ./param_final_validation.txt res_final_0low-0slow-0fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/lowComplexEnv/0low-0slow-0rot-0_2011-02-19-11-17-33.txt ./param_final_validation.txt res_final_0low-0slow-0rot.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+./modular_cloud_matcher_batch ./data/lowComplexEnv/0low-0slow-0tr-0_2011-02-19-11-12-35.txt ./param_final_validation.txt res_final_0low-0slow-0tr.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+
+#--------------------------------------
+# Speed test for different hardware:
+
+
+./modular_cloud_matcher_batch ./data/mediumComplexEnv/0medium-0slow-0fly-0_2011-02-19-11-33-52.txt ./param_speed_hardware.txt res_speedHardware_0medium-0slow-0fly.txt 0.0182521 -0.00901447 -0.0427566 0.508233 0.500217 0.510305 0.480699
+
+

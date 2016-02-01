@@ -1,0 +1,25 @@
+<!--
+This launch file is an example for 2D scan matching
+
+It has been parametrized for the PR2 rosbag that can be downloaded at
+wget http://pr.willowgarage.com/data/gmapping/small_loop_prf.bag
+-->
+
+<launch>
+	<node name="mapper" type="mapper" pkg="ethzasl_icp_mapper" output="screen" >
+		<remap from="scan" to="/base_scan" />
+		<!--remap from="cloud_in" to="/point_cloud" /-->
+		<param name="subscribe_scan" value="true" />
+		<param name="subscribe_cloud" value="false" />
+		<param name="icpConfig" value="$(find ethzasl_icp_mapper)/launch/2D_scans/icp.yaml" />
+		<param name="inputFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/2D_scans/input_filters.yaml" />
+		<param name="mapPostFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/2D_scans/map_post_filters.yaml" />
+		<param name="odom_frame" value="/map" />
+		<param name="map_frame" value="/map_icp" />
+		<param name="useROSLogger" value="false" />
+		<param name="minOverlap" value="0.5" /> 
+		<param name="maxOverlapToMerge" value="0.9" /> 
+		<param name="minMapPointCount" value="1000" /> 
+		<param name="minReadingPointCount" value="150" /> 
+	</node>
+</launch>

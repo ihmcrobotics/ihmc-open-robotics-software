@@ -1,0 +1,29 @@
+<package>
+  <description brief="C++ interface class for controllers">
+   This package specifies the interface to a realtime controller. A
+   controller that implements this interface can be executed by the
+    <a href="http://www.ros.org/wiki/pr2_controller_manager">controller
+  manager</a> in the real time control loop. The package basically
+  contains the C++ controller base class that all controllers need to
+  inherit from.
+  </description>
+  <author>Wim Meeussen</author>
+  <license>BSD</license>
+  <review status="doc reviewed" notes=""/>
+  <url>http://ros.org/wiki/pr2_controller_interface</url>
+
+  <depend package="roscpp"/>
+  <depend package="pr2_mechanism_model"/>
+  <depend package="controller_interface"/>
+
+  <export>
+    <cpp cflags='-I${prefix}/include'
+	 lflags='-Wl,-rpath,${prefix}/lib -L${prefix}/lib'/>
+  </export>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+
+

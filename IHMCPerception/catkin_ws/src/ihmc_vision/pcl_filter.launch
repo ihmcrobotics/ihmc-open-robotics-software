@@ -1,0 +1,50 @@
+<launch>
+      <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
+
+        <node pkg="nodelet" type="nodelet" name="passthrough_x" args="load pcl/PassThrough pcl_manager" output="screen">
+        <remap from="~input" to="/multisense/image_points2_color" />
+        <remap from="~output" to="/passthrough/x_filtered" />
+        <rosparam>
+          filter_field_name: x
+          filter_limit_min: -0.5 
+          filter_limit_max:  0.5
+          <!--
+        input_frame: base_link
+              output_frame: base_link
+      -->
+        </rosparam>
+     </node>
+     <node pkg="nodelet" type="nodelet" name="passthrough_y" args="load pcl/PassThrough pcl_manager" output="screen">
+        <remap from="~input" to="/passthrough/x_filtered" />
+        <remap from="~output" to="/passthrough/xy_filtered" />
+        <rosparam>
+          filter_field_name: y
+          filter_limit_min: -0.5
+          filter_limit_max:  0.5
+        </rosparam>
+     </node>
+
+     <node pkg="nodelet" type="nodelet" name="passthrough_z" args="load pcl/PassThrough pcl_manager" output="screen">
+        <remap from="~input" to="/passthrough/xy_filtered" />
+        <remap from="~output" to="/passthrough/xyz_filtered" />
+        <rosparam>
+          filter_field_name: z
+          filter_limit_min: -0.5
+          filter_limit_max: 2.0 
+        </rosparam>
+     </node>
+
+
+     <node pkg="nodelet" type="nodelet" name="voxel_grid" args="load pcl/VoxelGrid pcl_manager" output="screen">
+        <remap from="~input" to="/passthrough/xyz_filtered"/>
+        <remap from="~output" to="/passthrough/filter"/>
+        <rosparam>
+        filter_field_name: z
+        filter_limit_min: 0.01
+        filter_limit_max: 1.5
+        filter_limit_negative: False
+        leaf_size: 0.01
+        </rosparam>
+    </node>
+
+</launch>

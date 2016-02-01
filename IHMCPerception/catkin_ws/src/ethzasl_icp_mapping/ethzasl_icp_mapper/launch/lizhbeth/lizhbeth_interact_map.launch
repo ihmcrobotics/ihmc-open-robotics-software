@@ -1,0 +1,14 @@
+<!-- 
+FP: 28 March 2013
+-->
+
+<launch>
+	
+	<node name="interact_mapper" type="interact_mapper" pkg="ethzasl_icp_mapper" output="screen">
+		<param name="map_path" value="/home/frank/.ros/3D_maps" />
+		<param name="base_frame" value="/velodyne" />
+		<param name="odom_frame" value="/velodyne" />
+		<param name="map_frame" value="/map" />
+	</node>
+	
+</launch>

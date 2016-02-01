@@ -1,0 +1,10 @@
+<stack>
+  <description brief="multimaster_experimental">Experimental packages exploring different techniques for running nodes in a multiple ROS master setup.</description>
+  <author>Maintained by Ken Conley</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/multimaster_experimental</url>
+  <depend stack="ros" /> 
+  <depend stack="ros_comm" /> <!-- roscpp, xmlrpcpp, roslib, rosgraph, topic_tools, rosservice, rospy, rostopic -->
+
+</stack>

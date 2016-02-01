@@ -1,0 +1,15 @@
+<package>
+  <description brief="rosjava_test">
+     rosjava_test contains testing infrastructure for rosjava.
+  </description>
+  <author>Damon Kohler</author>
+  <license>Apache 2.0</license>
+  <review status="unreviewed" notes="" />
+  <url>http://ros.org/wiki/rosjava_test</url>
+
+  <depend package="rospy" />
+  <depend package="std_msgs" />
+
+</package>
+
+

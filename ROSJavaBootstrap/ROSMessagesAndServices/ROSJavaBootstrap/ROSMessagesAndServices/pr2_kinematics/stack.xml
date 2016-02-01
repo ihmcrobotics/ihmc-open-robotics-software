@@ -1,0 +1,17 @@
+<stack>
+  <description brief="pr2_kinematics">This stack contains an implementation of kinematics for the PR2 robot.</description>
+  <author>Maintained by Sachin Chitta</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/pr2_kinematics</url>
+  <depend stack="arm_navigation" /> <!-- planning_environment, planning_models, kinematics_msgs, kinematics_base, collision_space, arm_navigation_msgs -->
+  <depend stack="common_msgs" /> <!-- geometry_msgs -->
+  <depend stack="common_rosdeps" /> <!-- common_rosdeps -->
+  <depend stack="geometry" /> <!-- tf_conversions, angles -->
+  <depend stack="orocos_kinematics_dynamics" /> <!-- kdl -->
+  <depend stack="pluginlib" /> <!-- pluginlib -->
+  <depend stack="robot_model" /> <!-- urdf, kdl_parser -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- roscpp -->
+
+</stack>

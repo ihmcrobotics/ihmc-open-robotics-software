@@ -1,0 +1,47 @@
+<launch>
+    <node pkg="nodelet" type="nodelet" name="eth_pcl_manager" args="manager" output="screen" />
+
+	<node name="mapper_humanoid" type="mapper_humanoid" pkg="ethzasl_icp_mapper_humanoid" output="screen">
+		<remap from="cloud_in" to="/lidar_to_point_cloud_transformer/assembled_lidar_point_cloud" />
+		<remap from="/icp_correction" to="/ihmc_ros/localization/pelvis_pose_correction" />
+		<param name="subscribe_scan" value="false" />
+		<param name="icpConfig" value="$(find ethzasl_icp_mapper_humanoid)/parameters/outdoor_simulation/icp.yaml" />
+		<param name="inputFiltersConfig" value="$(find ethzasl_icp_mapper_humanoid)/parameters/outdoor_simulation/input_filters.yaml" />
+		<param name="mapPostFiltersConfig" value="$(find ethzasl_icp_mapper_humanoid)/parameters/outdoor_simulation/map_post_filters.yaml" />
+		<param name="odom_frame" value="/world" />
+		<param name="map_frame" value="/world_icp" />
+		<param name="icp_correction_frame" value="/pelvis" />
+		<param name="publish_tf_correction" value="true" />
+		<param name="useROSLogger" value="true" />
+		<param name="minOverlap" value="0.2" /> 
+		<param name="maxOverlapToMerge" value="0.9" /> 
+		<param name="minReadingPointCount" value="1000" /> 
+		<param name="minMapPointCount" value="1000" /> 
+		<param name="localizing" value="true" /> 
+		<param name="mapping" value="true" />
+		<param name="use_sim_time" value="true" />
+	</node>
+	
+	<node pkg="nodelet" type="nodelet" name="point_map_no_ground" args="load pcl/PassThrough eth_pcl_manager" output="screen">
+        <remap from="~input" to="/point_map" />
+        <remap from="~output" to="/point_map_no_ground" />
+        <rosparam>
+          filter_field_name: z
+          filter_limit_min: 0.05  
+          filter_limit_max: +.inf
+          input_frame: world
+          output_frame: world
+        </rosparam>
+     </node>
+  
+  <node pkg="nodelet" type="nodelet" name="voxel_grid_z" args="load pcl/VoxelGrid eth_pcl_manager" output="screen">
+    <remap from="~input" to="/point_map_no_ground" />
+    <remap from="~output" to="/point_map_filtered_z" />
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: 0.02
+      filter_limit_max: +.inf
+      leaf_size: 0.05
+    </rosparam>
+  </node>
+</launch>

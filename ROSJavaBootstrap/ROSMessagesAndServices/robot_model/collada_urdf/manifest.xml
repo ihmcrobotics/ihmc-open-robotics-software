@@ -1,0 +1,30 @@
+<package>
+  <description brief="URDF to COLLADA converter">
+
+    This package contains a tool to convert Unified Robot Description Format (URDF) documents into COLLAborative Design Activity (COLLADA) documents.
+
+    Implements robot-specific COLLADA extensions as defined by
+    http://openrave.programmingvision.com/index.php/Started:COLLADA
+  </description>
+  <author>Tim Field and Rosen Diankov</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes="2010-04-23"/>
+  <url>http://ros.org/wiki/collada_urdf</url>
+  <depend package="roscpp" />
+  <depend package="urdf" />
+  <depend package="colladadom" />
+  <depend package="resource_retriever" />
+  <depend package="angles" />
+  <depend package="common_rosdeps" />
+
+  <rosdep name="assimp"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include"
+         lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lcollada_urdf" />
+  </export>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>

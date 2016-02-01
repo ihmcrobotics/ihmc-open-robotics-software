@@ -1,0 +1,11 @@
+<stack>
+  <description brief="control">control</description>
+  <author>Maintained by Stuart Glaser</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/control</url>
+  <depend stack="common_msgs" /> <!-- actionlib_msgs, trajectory_msgs, geometry_msgs -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- rospy -->
+
+</stack>

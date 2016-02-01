@@ -1,0 +1,3 @@
+<launch>
+   <node pkg="image_encoding_converter" type="image_encoding_converter" name="image_encoding_converter" />
+</launch>

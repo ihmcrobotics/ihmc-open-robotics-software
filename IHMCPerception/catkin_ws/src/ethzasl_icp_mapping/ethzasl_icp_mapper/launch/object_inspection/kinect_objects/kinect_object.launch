@@ -1,0 +1,18 @@
+<!-- 
+-->
+
+<launch>
+  <node name="object_map" type="map_maintainer" pkg="ethzasl_icp_mapper" output="screen"> 
+		<remap from="cloud_in" to="/depth_registered/points" />
+		<param name="icpConfig" value="$(find ethzasl_icp_mapper)/launch/object_inspection/kinect_objects/icp.yaml" />
+		<param name="inputFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/object_inspection/kinect_objects/input_filters.yaml" />
+		<param name="mapPreFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/object_inspection/kinect_objects/map_pre_filters.yaml" />
+		<param name="mapPostFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/object_inspection/kinect_objects/map_post_filters.yaml" />
+		<param name="object_frame" value="/object" />
+		<param name="map_frame" value="/map" />
+		<param name="size_x" value="1.30" />
+		<param name="size_y" value="0.80" />
+		<param name="size_z" value="0.60" />
+  </node>
+  
+</launch>
