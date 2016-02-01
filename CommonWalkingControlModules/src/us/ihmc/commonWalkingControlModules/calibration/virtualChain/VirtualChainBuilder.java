@@ -7,11 +7,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+import org.ejml.ops.MatrixFeatures;
+
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import Jama.Matrix;
 
 public class VirtualChainBuilder
 {
@@ -44,9 +46,9 @@ public class VirtualChainBuilder
    public int getSolutionRank()
    {
       VirtualChainDataMatrix virtualChainDataMatrix = new VirtualChainDataMatrix(virtualChainData);
-      Matrix AMatrix = virtualChainDataMatrix.getAMatrix();
+      DenseMatrix64F AMatrix = virtualChainDataMatrix.getAMatrix();
 
-      int rank = AMatrix.rank();
+      int rank = MatrixFeatures.rank(AMatrix);
 
       return rank;
    }
@@ -59,18 +61,22 @@ public class VirtualChainBuilder
 
       VirtualChainDataMatrix virtualChainDataMatrix = new VirtualChainDataMatrix(virtualChainData);
 
-      Matrix yMatrix = virtualChainDataMatrix.getYMatrix();
-      Matrix AMatrix = virtualChainDataMatrix.getAMatrix();
+      DenseMatrix64F yMatrix = virtualChainDataMatrix.getYMatrix();
+      DenseMatrix64F AMatrix = virtualChainDataMatrix.getAMatrix();
 
-      int virtualChainDegreesOfFreedom = AMatrix.getColumnDimension() / 3;
-      int numberOfPostureRecorded = AMatrix.getRowDimension() / 2;
+      int virtualChainDegreesOfFreedom = AMatrix.getNumCols() / 3;
+      int numberOfPostureRecorded = AMatrix.getNumRows() / 2;
 
       if ((double) numberOfPostureRecorded > (double) 3.0 / 2.0 * virtualChainDegreesOfFreedom)
       {
-         Matrix pseudoInverse = MatrixTools.pseudoinverse(AMatrix);
-         Matrix solution = pseudoInverse.times(yMatrix);
-
-         Matrix errorMatrix = AMatrix.times(solution).minus(yMatrix);
+         DenseMatrix64F pseudoInverse = new DenseMatrix64F(AMatrix.getNumCols(), AMatrix.getNumRows());
+         CommonOps.pinv(AMatrix, pseudoInverse);
+         DenseMatrix64F solution = new DenseMatrix64F(pseudoInverse.getNumRows(), yMatrix.getNumCols());
+         CommonOps.mult(pseudoInverse, yMatrix, solution);
+         DenseMatrix64F errorMatrix = new DenseMatrix64F(AMatrix.getNumRows(), solution.getNumCols());
+         CommonOps.mult(AMatrix, solution, errorMatrix);
+         CommonOps.subtractEquals(solution, yMatrix);
+         
          double[] averageAndMax = computeAverageAndMax(errorMatrix);
 
          System.out.println("Average error on recorded postures = " + averageAndMax[0]);
@@ -106,10 +112,10 @@ public class VirtualChainBuilder
    }
 
 
-   private double[] computeAverageAndMax(Matrix matrix)
+   private double[] computeAverageAndMax(DenseMatrix64F matrix)
    {
-      int rowDimension = matrix.getRowDimension();
-      int columnDimension = matrix.getColumnDimension();
+      int rowDimension = matrix.getNumRows();
+      int columnDimension = matrix.getNumCols();
 
       if (columnDimension != 1)
          throw new RuntimeException();
