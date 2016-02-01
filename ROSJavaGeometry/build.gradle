@@ -16,6 +16,9 @@ project.ext.bintrayLicenseName = "Apache-2.0"
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
+
 // Override sourcesets from IHMC plugin.
 sourceSets {
     main {
@@ -42,9 +45,9 @@ sourceSets {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
-   
+
     compile ihmc.getProjectDependency(":ROSJava")
-   
+
 }
 
 jar {

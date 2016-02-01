@@ -16,6 +16,8 @@ project.ext.bintrayLicenseName = "Apache-2.0"
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
 
 evaluationDependsOn(ihmc.getProjectDependencyGradlePath("ROSJava"))
 dependencies {
@@ -32,7 +34,7 @@ dependencies {
  	compile ihmc.getProjectDependency(":ROSJavaMessages")
  	compile ihmc.getProjectDependency(":ROSJavaGeometry")
  	//compile ihmc.getProjectDependency(":Graphics3DAdapter")
- 	
+
  	compile ihmc.getProjectDependency(":IHMCCommunication")
  	//compile ihmc.getProjectDependency(":Vicon")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")

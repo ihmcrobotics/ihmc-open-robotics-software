@@ -16,6 +16,8 @@ project.ext.bintrayLicenseName = "Apache-2.0"
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
 
 dependencies
 {
@@ -31,7 +33,7 @@ dependencies
 	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
     compile group: 'org.boofcv', name: 'all', version: '0.19'
 
-	
+
 	compile ihmc.getProjectDependency(":Plotting")
 	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")

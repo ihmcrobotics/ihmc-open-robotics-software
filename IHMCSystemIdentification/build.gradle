@@ -16,12 +16,15 @@ project.ext.bintrayLicenseName = "Apache-2.0"
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
+
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 	compile group: 'org.ddogleg' , name: 'ddogleg', version: '0.7'
-	
+
 	compile ihmc.getProjectDependency(":Plotting")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
