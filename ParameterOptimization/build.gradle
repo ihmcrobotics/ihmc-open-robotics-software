@@ -1,19 +1,33 @@
-apply plugin: 'java'
-apply from: 'gradleScripts/util.gradle'
-if(!rootProject.name.equals(getParent().name)) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
+plugins {
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.7'
+}
+
+
+
+if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
 project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
 project.ext.licenseName = "Apache License, Version 2.0"
 project.ext.bintrayLicenseName = "Apache-2.0"
 
-setupDefaultDirectoryStructure()
+repositories ihmc.ihmcDefaultArtifactProxies()
 
-setupDefaultRepositories()
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
 
-setupProjectSpecificDependencies()
+dependencies {
+	testCompile group: 'junit', name: 'junit', version: '4.11'
+
+
+	//test.sourceSets.test.output
+	compile ihmc.getProjectDependency(":Graphics3DAdapter")
+	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+}
 
 jar {
     manifest {

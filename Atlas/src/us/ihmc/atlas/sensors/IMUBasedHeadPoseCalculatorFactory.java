@@ -151,7 +151,7 @@ class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_r
 		Quat4d qRotation = new Quat4d();
 		qRotation.set(aRotation);
 		double[] eulerAngles =new double[3];
-		RotationTools.setYawPitchRollBasedOnQuaternion(eulerAngles, qRotation);
+		RotationTools.convertQuaternionToYawPitchRoll(qRotation, eulerAngles);
 		return eulerAngles;
 	}
 	

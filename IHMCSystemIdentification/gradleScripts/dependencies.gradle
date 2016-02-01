@@ -1,9 +1,0 @@
-dependencies {
-	testCompile group: 'junit', name: 'junit', version: '4.11'
-	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
-	compile group: 'org.ddogleg' , name: 'ddogleg', version: '0.7'
-	
-	compile project("${getOpenRoboticsSoftwareGradlePath()}:Plotting")
-	compile project("${getOpenRoboticsSoftwareGradlePath()}:SimulationConstructionSet")
-	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
-}

@@ -112,7 +112,7 @@ public class PelvisRotationalStateUpdater
 
 
       yoRootJointFrameQuaternion.getYawPitchRoll(lastComputedYawPitchRoll);
-      double currentYaw = RotationTools.getYaw(rotationFromRootJointFrameToWorld);
+      double currentYaw = RotationTools.computeYaw(rotationFromRootJointFrameToWorld);
 
       double yawDifference = AngleTools.computeAngleDifferenceMinusPiToPi(lastComputedYawPitchRoll[0], currentYaw);
       rootJointYawOffsetFromFrozenState.set(yawDifference);

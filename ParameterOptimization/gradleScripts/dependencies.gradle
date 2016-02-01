@@ -1,9 +1,0 @@
-dependencies {
-	testCompile group: 'junit', name: 'junit', version: '4.11'
-			
-	
-	//test.sourceSets.test.output
-	compile project("${getOpenRoboticsSoftwareGradlePath()}:Graphics3DAdapter")
-	compile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCRoboticsToolkit")
-	testCompile project("${getOpenRoboticsSoftwareGradlePath()}:IHMCUnitTesting")
-}

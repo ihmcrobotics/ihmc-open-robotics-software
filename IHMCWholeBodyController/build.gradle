@@ -1,19 +1,44 @@
-apply plugin: 'java'
-apply from: 'gradleScripts/util.gradle'
-if(!rootProject.name.equals(getParent().name)) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
+plugins {
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.7'
+}
+
+
+
+if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
 project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"
 
-setupDefaultDirectoryStructure()
+repositories ihmc.ihmcDefaultArtifactProxies()
 
-setupDefaultRepositories()
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
 
-setupProjectSpecificDependencies()
+dependencies {
+	testCompile group: 'junit', name: 'junit', version: '4.11'
+	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+
+    compile group: 'commons-net', name: 'commons-net', version: '3.3'
+	compile group: 'org.ejml', name: 'all', version: '0.28'
+	compile group: 'org.yaml', name: 'snakeyaml', version: '1.13' //1.11
+	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
+
+	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
+	compile ihmc.getProjectDependency(":IHMCCommunication")
+	compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
+
+	compile ihmc.getProjectDependency(":SDFLoader")
+	compile ihmc.getProjectDependency(":SensorProcessing")
+	compile ihmc.getProjectDependency(":SimulationConstructionSet")
+	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+}
 
 jar {
     manifest {

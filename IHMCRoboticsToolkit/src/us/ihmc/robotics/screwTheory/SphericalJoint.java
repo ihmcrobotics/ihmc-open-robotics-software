@@ -10,6 +10,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SphericalJoint extends AbstractInverseDynamicsJoint
@@ -114,7 +115,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
 
    public void setRotation(double yaw, double pitch, double roll)
    {
-      RotationTools.setQuaternionBasedOnYawPitchRoll(jointRotation, yaw, pitch, roll);
+      RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, jointRotation);
       this.afterJointFrame.setRotation(jointRotation);
    }
 
@@ -126,7 +127,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
 
    public void setRotation(Matrix3d jointRotation)
    {
-      RotationTools.setQuaternionBasedOnMatrix3d(this.jointRotation, jointRotation);
+      RotationTools.convertMatrixToQuaternion(jointRotation, this.jointRotation);
 
       // DON'T USE THIS: the method in Quat4d is flawed and doesn't work for some rotation matrices!
 //      this.jointRotation.set(jointRotation);
@@ -165,7 +166,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
 
    public void packRotation(double[] yawPitchRoll)
    {
-      RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, jointRotation);
+      RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
    }
 
    public void packJointTorque(FrameVector jointTorqueToPack)
@@ -219,12 +220,12 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
 
    public void packConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
-      RotationTools.quaternionToMatrix(matrix, jointRotation, rowStart);
+      MatrixTools.insertQuat4dIntoEJMLVector(matrix, jointRotation, rowStart);
    }
 
    public void setConfiguration(DenseMatrix64F matrix, int rowStart)
    {
-      RotationTools.matrixToQuaternion(jointRotation, matrix, rowStart);
+      MatrixTools.extractQuat4dFromEJMLVector(jointRotation, matrix, rowStart);
       this.afterJointFrame.setRotation(jointRotation);
    }
 

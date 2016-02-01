@@ -1,22 +1,41 @@
-apply plugin: 'java'
-apply from: 'gradleScripts/util.gradle'
-if(!rootProject.name.equals(getParent().name)) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
+plugins {
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.7'
+}
+
+
+
+if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
 project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"
 
 apply plugin: 'application'
 
-setupDefaultDirectoryStructure()
+repositories ihmc.ihmcDefaultArtifactProxies()
 
-setupDefaultRepositories()
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
 
-setupProjectSpecificDependencies()
+dependencies {
+	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
+	compile group: 'net.wimpi', name: 'jamod', version: '1.2'
 
+
+	compile ihmc.getProjectDependency(":DarpaRoboticsChallenge")
+	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
+	compile ihmc.getProjectDependency(":IHMCCommunication")
+	compile ihmc.getProjectDependency(":SDFLoader")
+	compile ihmc.getProjectDependency(":SimulationConstructionSet")
+	compile ihmc.getProjectDependency(":IHMCWholeBodyController")
+	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+}
 applicationName = 'RobotiqControlThread'
 mainClassName = 'us.ihmc.robotiq.control.RobotiqControlThread'
 

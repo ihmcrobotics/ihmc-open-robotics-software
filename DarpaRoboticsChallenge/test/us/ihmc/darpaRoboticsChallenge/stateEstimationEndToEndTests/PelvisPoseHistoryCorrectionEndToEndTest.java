@@ -644,7 +644,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
          targets[i].get(targetTranslation);
          targets[i].get(targetQuat);
 
-         RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, targetQuat);
+         RotationTools.convertQuaternionToYawPitchRoll(targetQuat, yawPitchRoll);
          target.setYawPitchRoll(yawPitchRoll);
          target.setXYZ(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ());
 
@@ -716,7 +716,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
          targets[i].get(targetTranslation);
          targets[i].get(targetQuat);
          
-         RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, targetQuat);
+         RotationTools.convertQuaternionToYawPitchRoll(targetQuat, yawPitchRoll);
          target.setYawPitchRoll(yawPitchRoll);
          target.setXYZ(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ());
          

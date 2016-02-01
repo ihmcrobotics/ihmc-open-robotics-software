@@ -254,7 +254,7 @@ public class ContactableValveRobotTest
       Point3d position = new Point3d(x, y, z);
       Quat4d orientation = new Quat4d();
 
-      RotationTools.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
+      RotationTools.convertYawPitchRollToQuaternion(Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0), orientation);
       framePose.setPose(position, orientation);
 
       return framePose;
