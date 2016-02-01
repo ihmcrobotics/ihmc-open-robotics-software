@@ -227,6 +227,6 @@ public class QuickHull3DWrapperTest
       assertTrue(currentPolygon.getVertex(3).epsilonEquals(new Point2d(0.0, sideLength), tolerance));
 
       assertTrue(polygonPose.getPoint().epsilonEquals(new Point3d(), tolerance));
-      Assert.assertEquals(RotationTools.getYawFromQuaternion(polygonPose.getOrientation()), -Math.PI / 4, tolerance);
+      Assert.assertEquals(RotationTools.computeYaw(polygonPose.getOrientation()), -Math.PI / 4, tolerance);
    }
 }

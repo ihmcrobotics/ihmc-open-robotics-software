@@ -1,6 +1,10 @@
-apply plugin: 'java'
-apply from: 'gradleScripts/util.gradle'
-if(!rootProject.name.equals(getParent().name)) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
+plugins {
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.6'
+}
+
+
+
+if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
@@ -11,15 +15,35 @@ project.ext.bintrayLicenseName = "GPL-3.0"
 
 apply plugin: 'application'
 
-setupDefaultDirectoryStructure()
+repositories ihmc.ihmcDefaultArtifactProxies()
 
-setupDefaultRepositories()
 
-setupProjectSpecificDependencies()
-
+dependencies {
+	testCompile group: 'junit', name: 'junit', version: '4.11'
+	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+	
+	compile group: 'com.google.protobuf', name: 'protobuf-java', version: '2.6.1'
+	compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
+	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
+	
+	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+	compile group: 'com.google.guava', name: 'guava', version: '17.0'
+	compile group: 'org.yaml', name: 'snakeyaml', version: '1.13'
+   	compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'
+	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
+	compile group: 'us.ihmc', name: 'JavaDecklinkAPI', version: '0.1.6'
+	
+	compile ihmc.getProjectDependency(":Graphics3DAdapter")
+	
+	compile ihmc.getProjectDependency(":Plotting")
+	compile ihmc.getProjectDependency(":SDFLoader")
+	compile ihmc.getProjectDependency(":SimulationConstructionSet")
+	compile ihmc.getProjectDependency(":IHMCCommunication")
+	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+}
 mainClassName = hasProperty('mainClass') ? mainClass : "us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher"
-
-
 jar {
    manifest {
       attributes(

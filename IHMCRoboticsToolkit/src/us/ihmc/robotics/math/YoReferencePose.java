@@ -70,7 +70,7 @@ public class YoReferencePose extends ReferenceFrame
 
    private void set(Quat4d newRotation)
    {
-      RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, newRotation);
+      RotationTools.convertQuaternionToYawPitchRoll(newRotation, yawPitchRoll);
       yoFramePose.setYawPitchRoll(yawPitchRoll);
    }
 

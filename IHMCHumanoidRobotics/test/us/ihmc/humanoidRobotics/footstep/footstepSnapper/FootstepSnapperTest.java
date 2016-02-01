@@ -101,7 +101,7 @@ public class FootstepSnapperTest
       {
          listOfPoints = dataReader.getNextSetPointsAndFootstep(footstepData);
          desiredPose.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), footstepData.getLocation().x, footstepData.getLocation().y,
-                                           RotationTools.getYawFromQuaternion(footstepData.getOrientation()));
+                                           RotationTools.computeYaw(footstepData.getOrientation()));
          Footstep footstep = footstepSnapper.generateFootstepUsingHeightMap(desiredPose, spoof.getRigidBody(), spoof.getSoleFrame(),
                                 footstepData.getRobotSide(), listOfPoints, 0.0);
 
@@ -594,7 +594,7 @@ public class FootstepSnapperTest
                {
                   tokenizer.nextToken();
                   yaw = Double.parseDouble(tokenizer.nextToken());
-                  RotationTools.getQuaternionFromYawAndZNormal(yaw, new Vector3d(0.0, 0.0, 1.0), orientation);
+                  RotationTools.computeQuaternionFromYawAndZNormal(yaw, new Vector3d(0.0, 0.0, 1.0), orientation);
                   footstepData.orientation = (orientation);
                }
             }
@@ -834,7 +834,7 @@ public class FootstepSnapperTest
          planePose.setPosition(planePosition);
 
          Quat4d planeOrientation = new Quat4d();
-         RotationTools.getQuaternionFromYawAndZNormal(soleYaw.getDoubleValue(), planeNormal, planeOrientation);
+         RotationTools.computeQuaternionFromYawAndZNormal(soleYaw.getDoubleValue(), planeNormal, planeOrientation);
          planePose.setOrientation(planeOrientation);
 
 //       planePosition.set(planePosition.x, planePosition.y, planePosition.z - 0.01); adversary code, move foot plane down a little

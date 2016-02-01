@@ -714,7 +714,7 @@ public abstract class ReferenceFrame implements Serializable
    {
       // true if the transform preserves the z axis direction and magnitude, paying no heed to transformations.
       // for SO(3) matrices (orthogonal with determinant 1, equivalent to rotations)
-      RotationTools.assertProper(rotation);
+      RotationTools.checkProperRotationMatrix(rotation);
       double epsilon = 1e-14;
 
       return ((Math.abs(rotation.m02) <= epsilon) && (Math.abs(rotation.m12) <= epsilon) && (Math.abs(rotation.m22 - 1.0) <= epsilon));
