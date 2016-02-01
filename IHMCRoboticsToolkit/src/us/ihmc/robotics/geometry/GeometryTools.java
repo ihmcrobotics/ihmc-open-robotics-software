@@ -255,6 +255,20 @@ public class GeometryTools
       return average;
    }
 
+   /**
+    * Returns the average of two 3D points
+    *
+    * @param a FramePoint
+    * @param b FramePoint
+    * @param avgToPack FramePoint
+    */
+   public static void averagePoints(FramePoint a, FramePoint b, FramePoint avgToPack)
+   {
+      avgToPack.setIncludingFrame(a);
+      avgToPack.add(b);
+      avgToPack.scale(0.5);
+   }
+
    // TODO ensure consistant with line 2D
    public static Point2d getOrthogonalProjectionOnLine(Point2d testPoint, Point2d lineStart, Point2d lineEnd)
    {
