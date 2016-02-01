@@ -1,5 +1,7 @@
 package us.ihmc.aware.controller;
 
+import java.util.Arrays;
+
 import com.google.common.primitives.Booleans;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
@@ -27,6 +29,8 @@ public class QuadrupedDoNothingController implements QuadrupedController
    @Override
    public void onEntry()
    {
+      Arrays.fill(initialized, false);
+
       for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {
          joint.setUnderPositionControl(true);
