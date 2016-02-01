@@ -9,6 +9,7 @@ if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
 project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
 project.ext.licenseName = "Apache License, Version 2.0"
 project.ext.bintrayLicenseName = "Apache-2.0"
