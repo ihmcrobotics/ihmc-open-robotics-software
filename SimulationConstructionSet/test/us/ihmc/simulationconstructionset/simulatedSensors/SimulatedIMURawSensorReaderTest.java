@@ -193,7 +193,7 @@ public class SimulatedIMURawSensorReaderTest
       
       AxisAngle4d differenceAxisAngle = new AxisAngle4d();
 //      differenceAxisAngle.set(differenceMatrix);
-      RotationTools.axisAngleFromMatrix(differenceMatrix, differenceAxisAngle);
+      RotationTools.convertMatrixToAxisAngle(differenceMatrix, differenceAxisAngle);
       
       double differenceAngle = differenceAxisAngle.getAngle();
       

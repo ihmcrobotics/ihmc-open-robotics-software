@@ -8,6 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.SymmetricQRAlgorithmDecomposition_D64GCFree;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -64,7 +65,7 @@ public class AverageQuaternionCalculator
 
    public void queueMatrix(Matrix3d rotationMatrix)
    {
-      tempQuaternion.set(rotationMatrix);
+      RotationTools.convertMatrixToQuaternion(rotationMatrix, tempQuaternion);
       queueQuaternion(tempQuaternion);
    }
 

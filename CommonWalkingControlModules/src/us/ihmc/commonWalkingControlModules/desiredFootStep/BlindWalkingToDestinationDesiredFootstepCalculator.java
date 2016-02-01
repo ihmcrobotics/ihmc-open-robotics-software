@@ -115,7 +115,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       FramePoint footstepPosition = getDesiredFootstepPositionCopy(futureSupportAnkleZUpFrame, futureSupportAnkleFrame, futureSwingLegSide, desiredDestination.getFramePoint2dCopy(), footToWorldRotation);
       FrameOrientation footstepOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
       double[] yawPitchRoll = new double[3];
-      RotationTools.getYawPitchRoll(yawPitchRoll, footToWorldRotation);
+      RotationTools.convertMatrixToYawPitchRoll(footToWorldRotation, yawPitchRoll);
       footstepOrientation.setYawPitchRoll(yawPitchRoll);
 
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);

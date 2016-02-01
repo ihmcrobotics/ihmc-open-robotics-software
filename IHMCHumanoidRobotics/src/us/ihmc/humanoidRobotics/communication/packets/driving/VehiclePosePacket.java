@@ -38,7 +38,7 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
       Matrix3d rotationMatrix = new Matrix3d();
       transformFromVehicleToWorld.get(rotationMatrix);
       orientation = new Quat4d();
-      RotationTools.setQuaternionBasedOnMatrix3d(orientation, rotationMatrix);
+      RotationTools.convertMatrixToQuaternion(rotationMatrix, orientation);
 
       Vector3d translation = new Vector3d();
       transformFromVehicleToWorld.get(translation);
@@ -79,7 +79,7 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
    public String toString()
    {
       double[] ypr = new double[3];
-      RotationTools.setYawPitchRollBasedOnQuaternion(ypr, orientation);
+      RotationTools.convertQuaternionToYawPitchRoll(orientation, ypr);
       String ret = ("Car= (" + FormattingTools.getFormattedDecimal3D(position.getX()) + "," + FormattingTools.getFormattedDecimal3D(position.getY()) + ","
                     + FormattingTools.getFormattedDecimal3D(position.getZ()) + ")," + " (" + FormattingTools.getFormattedDecimal3D(ypr[0]) + ","
                     + FormattingTools.getFormattedDecimal3D(ypr[1]) + "," + FormattingTools.getFormattedDecimal3D(ypr[2]) + ")");

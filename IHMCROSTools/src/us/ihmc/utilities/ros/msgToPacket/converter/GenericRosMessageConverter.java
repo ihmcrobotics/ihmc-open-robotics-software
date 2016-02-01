@@ -726,7 +726,7 @@ public class GenericRosMessageConverter
       Point point = msg.getPosition();
       Quat4d quat = convertQuaternionToQuat4d(msg.getOrientation());
       double[] yawPitchRoll = new double[3];
-      RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, quat);
+      RotationTools.convertQuaternionToYawPitchRoll(quat, yawPitchRoll);
 
       FramePoint position = new FramePoint(referenceFrame, point.getX(), point.getY(), point.getZ());
       FrameOrientation orientation = new FrameOrientation(referenceFrame, yawPitchRoll);
