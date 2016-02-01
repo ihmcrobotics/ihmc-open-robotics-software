@@ -1,6 +1,8 @@
 package us.ihmc.aware.parameters;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -18,9 +20,14 @@ public class QuadrupedRuntimeEnvironment
    private final YoGraphicsListRegistry graphicsListRegistry;
    private final YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead;
 
-   public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp, SDFFullRobotModel fullRobotModel,
-         QuadrupedStateEstimator stateEstimator, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
-         YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead)
+   // TODO: These are currently only for the position-based crawl controller. Can they be moved somewhere else?
+   private final GlobalDataProducer globalDataProducer;
+   private final QuadrupedLegInverseKinematicsCalculator legIkCalculator;
+
+   public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp,
+         SDFFullRobotModel fullRobotModel, QuadrupedStateEstimator stateEstimator, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry graphicsListRegistry, YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead,
+         GlobalDataProducer globalDataProducer, QuadrupedLegInverseKinematicsCalculator legIkCalculator)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -29,6 +36,8 @@ public class QuadrupedRuntimeEnvironment
       this.parentRegistry = parentRegistry;
       this.graphicsListRegistry = graphicsListRegistry;
       this.graphicsListRegistryForDetachedOverhead = graphicsListRegistryForDetachedOverhead;
+      this.globalDataProducer = globalDataProducer;
+      this.legIkCalculator = legIkCalculator;
    }
 
    public double getControlDT()
@@ -64,5 +73,15 @@ public class QuadrupedRuntimeEnvironment
    public YoGraphicsListRegistry getGraphicsListRegistryForDetachedOverhead()
    {
       return graphicsListRegistryForDetachedOverhead;
+   }
+
+   public GlobalDataProducer getGlobalDataProducer()
+   {
+      return globalDataProducer;
+   }
+
+   public QuadrupedLegInverseKinematicsCalculator getLegIkCalculator()
+   {
+      return legIkCalculator;
    }
 }

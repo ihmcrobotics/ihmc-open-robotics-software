@@ -33,6 +33,7 @@ public class QuadrupedControllerManager implements RobotController
       QuadrupedDoNothingController doNothingController = new QuadrupedDoNothingController(runtimeEnvironment);
       QuadrupedStandPrepController standPrepController = new QuadrupedStandPrepController(runtimeEnvironment,
             parameters, paramMapRepository);
+      QuadrupedPositionBasedCrawlControllerAdapter crawlController = new QuadrupedPositionBasedCrawlControllerAdapter(runtimeEnvironment, parameters, paramMapRepository);
       QuadrupedVirtualModelController virtualModelController = new QuadrupedVirtualModelController(
             runtimeEnvironment.getFullRobotModel(), parameters, registry, runtimeEnvironment.getGraphicsListRegistry());
       QuadrupedVirtualModelBasedStepController virtualModelBasedStepController = new QuadrupedVirtualModelBasedStepController(
@@ -42,12 +43,17 @@ public class QuadrupedControllerManager implements RobotController
 
       builder.addState(QuadrupedControllerState.DO_NOTHING, doNothingController);
       builder.addState(QuadrupedControllerState.STAND_PREP, standPrepController);
+      builder.addState(QuadrupedControllerState.POSITION_BASED_CRAWL, crawlController);
       builder.addState(QuadrupedControllerState.VIRTUAL_MODEL_BASED_STEP, virtualModelBasedStepController);
 
       // TODO: Define more state transitions.
       builder.addTransition(QuadrupedControllerEvent.JOINTS_INITIALIZED, QuadrupedControllerState.DO_NOTHING,
             QuadrupedControllerState.STAND_PREP);
-      builder.addTransition(QuadrupedControllerEvent.STARTING_POSE_REACHED, QuadrupedControllerState.STAND_PREP,
+
+      // Manually triggered events to transition to main controllers.
+      builder.addTransition(QuadrupedControllerEvent.POSITION_BASED_CRAWL, QuadrupedControllerState.STAND_PREP,
+            QuadrupedControllerState.POSITION_BASED_CRAWL);
+      builder.addTransition(QuadrupedControllerEvent.VIRTUAL_MODEL_BASED_STEP, QuadrupedControllerState.STAND_PREP,
             QuadrupedControllerState.VIRTUAL_MODEL_BASED_STEP);
 
       this.stateMachine = builder.build(QuadrupedControllerState.DO_NOTHING);
