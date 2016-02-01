@@ -30,7 +30,7 @@ public class QuadrupedControllerManager implements RobotController
    {
       ParameterMapRepository paramMapRepository = new ParameterMapRepository(registry);
 
-      QuadrupedDoNothingController doNothingController = new QuadrupedDoNothingController(runtimeEnvironment);
+      QuadrupedJointInitializationController doNothingController = new QuadrupedJointInitializationController(runtimeEnvironment);
       QuadrupedStandPrepController standPrepController = new QuadrupedStandPrepController(runtimeEnvironment,
             parameters, paramMapRepository);
       QuadrupedPositionBasedCrawlControllerAdapter crawlController = new QuadrupedPositionBasedCrawlControllerAdapter(runtimeEnvironment, parameters, paramMapRepository);
