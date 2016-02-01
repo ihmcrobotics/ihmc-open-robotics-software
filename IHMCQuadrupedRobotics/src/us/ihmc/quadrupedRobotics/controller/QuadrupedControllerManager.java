@@ -47,7 +47,7 @@ public class QuadrupedControllerManager implements RobotController
       // Default to QuadrupedControllerState#DO_NOTHING.
       this(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, inverseKinematicsCalculators, stateEstimator,
             globalDataProducer, yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead,
-            QuadrupedControllerState.TROT_WALK);
+            QuadrupedControllerState.DO_NOTHING);
    }
 
    public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters,
@@ -71,16 +71,16 @@ public class QuadrupedControllerManager implements RobotController
       builder.addDoNothingController();
       builder.addStandPrepController();
       builder.addStandReadyController();
-//      builder.addPositionBasedCrawlController(inverseKinematicsCalculators, globalDataProducer);
+      builder.addPositionBasedCrawlController(inverseKinematicsCalculators, globalDataProducer);
       builder.addVirtualModelBasedStandController(virtualModelController);
       builder.addTrotWalkController();
       builder.addSliderBoardController();
 
-      builder.addJointsInitializedCondition(QuadrupedControllerState.DO_NOTHING, QuadrupedControllerState.TROT_WALK);
-      builder.addStandingExitCondition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.TROT_WALK);
+      builder.addJointsInitializedCondition(QuadrupedControllerState.DO_NOTHING, QuadrupedControllerState.STAND_PREP);
+      builder.addStandingExitCondition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.STAND_READY);
 
       builder.addPermissibleTransition(QuadrupedControllerState.STAND_READY, QuadrupedControllerState.VMC_STAND);
-//      builder.addPermissibleTransition(QuadrupedControllerState.STAND_READY, QuadrupedControllerState.POSITION_CRAWL);
+      builder.addPermissibleTransition(QuadrupedControllerState.STAND_READY, QuadrupedControllerState.POSITION_CRAWL);
       builder.addPermissibleTransition(QuadrupedControllerState.STAND_READY, QuadrupedControllerState.TROT_WALK);
 
       builder.addPermissibleTransition(QuadrupedControllerState.VMC_STAND, QuadrupedControllerState.STAND_PREP);
