@@ -20,12 +20,17 @@ import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SimulatedOutputWriterWithControlModeSelection implements OutputWriter
@@ -43,6 +48,11 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
 
    private final Point3d comPoint = new Point3d();
    private final YoFramePoint actualCenterOfMassPosition = new YoFramePoint("actualCenterOfMass", ReferenceFrame.getWorldFrame(), registry);
+   private final QuadrantDependentList<YoGraphicVector> groundForceVectorGraphics = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoFrameVector> groundForceVectors = new QuadrantDependentList<>();
+   private final QuadrantDependentList<Vector3d> tempGroundForceVectors = new QuadrantDependentList<>();
+   private final QuadrantDependentList<Point3d> tempGroundForceOriginPoints = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoFramePoint> groundForceOriginPoints = new QuadrantDependentList<>();
    private final YoGraphicPosition actualCenterOfMassViz = new YoGraphicPosition("actualCenterOfMass", actualCenterOfMassPosition, 0.04, YoAppearance.DeepPink(), GraphicType.BALL_WITH_CROSS);
    
    private final YoFramePoint cop = new YoFramePoint("cop", ReferenceFrame.getWorldFrame(), registry);
@@ -58,6 +68,17 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
       
       createPDControllers(sdfFullRobotModel, robotParameters, oneDegreeOfFreedomJoints);
+      
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         tempGroundForceVectors.set(robotQuadrant, new Vector3d());
+         tempGroundForceOriginPoints.set(robotQuadrant, new Point3d());
+         groundForceOriginPoints.set(robotQuadrant, new YoFramePoint(robotQuadrant.getCamelCaseNameForStartOfExpression() + "GroundForceOriginPoint", ReferenceFrame.getWorldFrame(), parentRegistry));
+         groundForceVectors.set(robotQuadrant, new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "GroundForceVector", ReferenceFrame.getWorldFrame(), parentRegistry));
+         groundForceVectorGraphics.set(robotQuadrant, new YoGraphicVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "GroundForceVectorViz", groundForceOriginPoints.get(robotQuadrant),
+                                                                          groundForceVectors.get(robotQuadrant), 0.0005, YoAppearance.Crimson(), true, 0.075));
+         yoGraphicsListRegistry.registerYoGraphic(robotQuadrant.getCamelCaseNameForStartOfExpression() + "GroundForceVectorGraphic", groundForceVectorGraphics.get(robotQuadrant));
+      }
       
       yoGraphicsListRegistry.registerYoGraphic("actualCenterOfMassViz", actualCenterOfMassViz);
       yoGraphicsListRegistry.registerArtifact("centerOfPressure", copViz.createArtifact());
@@ -104,6 +125,24 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
       cop.set(copPoint);
       actualCenterOfMassPosition.set(comPoint);
       actualCenterOfMassViz.update();
+      
+      ArrayList<GroundContactPoint> allGroundContactPoints = sdfRobot.getAllGroundContactPoints();
+      
+      for (GroundContactPoint groundContactPoint : allGroundContactPoints)
+      {
+         String groundContactPointName = groundContactPoint.getName();
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            if (RobotQuadrant.guessQuadrantFromName(groundContactPointName).equals(robotQuadrant))
+            {
+               groundContactPoint.getForce(tempGroundForceVectors.get(robotQuadrant));
+               groundForceVectors.get(robotQuadrant).set(tempGroundForceVectors.get(robotQuadrant));
+               groundContactPoint.getPosition(tempGroundForceOriginPoints.get(robotQuadrant));
+//               groundContactPoint.getTouchdownLocation(tempGroundForceOriginPoints.get(robotQuadrant));
+               groundForceOriginPoints.get(robotQuadrant).set(tempGroundForceOriginPoints.get(robotQuadrant));
+            }
+         }
+      }
    }
    
    private void createPDControllers(SDFFullRobotModel sdfFullRobotModel, QuadrupedRobotParameters robotParameters, ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints)
