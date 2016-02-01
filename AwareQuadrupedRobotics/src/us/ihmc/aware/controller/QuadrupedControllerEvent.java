@@ -11,4 +11,7 @@ public enum QuadrupedControllerEvent
     * Fired when the robot has been brought to its starting pose.
     */
    STARTING_POSE_REACHED,
+
+   POSITION_BASED_CRAWL,
+   VIRTUAL_MODEL_BASED_STEP,
 }
