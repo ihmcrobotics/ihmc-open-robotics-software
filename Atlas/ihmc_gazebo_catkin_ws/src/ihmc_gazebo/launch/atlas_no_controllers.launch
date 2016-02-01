@@ -1,0 +1,14 @@
+<launch>
+  <arg name="gzname" default="gazebo"/>
+  <arg name="gzworld" default="atlas.world"/>
+  <arg name="extra_gazebo_args" default="-e dart" />
+
+  <param name="/use_sim_time" type="bool" value="true"/>
+
+  <!-- start gazebo with the Atlas and record the gazebo log -->
+  <node name="gazebo" pkg="drcsim_gazebo" type="run_$(arg gzname)" args="$(arg gzworld) $(arg extra_gazebo_args)" output="screen">
+	<remap from="/laser/scan" to="/multisense/lidar_scan" />
+  </node>
+</launch>
+  
+

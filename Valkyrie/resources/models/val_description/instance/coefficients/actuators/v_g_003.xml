@@ -1,0 +1,36 @@
+<CoeffData>
+    <Properties>
+        <CalibrationDate/>
+        <FileGenDate date="2013-06-26" time="22:12:24.531765"/>
+    </Properties>
+    <ClassFile id="g.xml"/>
+    <ControllerFile id="g_sv.xml"/>
+    <LocationFile id="testbench.xml"/>
+    <SensorsFile id="sensors.xml"/>
+    <SafetyFile id="safety.xml"/>
+    <ModeFile id="mode.xml"/>
+    <Coeffs>
+        <Coeff description="" id="ElecRevs" value="3"/>
+        <Coeff description="" id="EncMountingDir" value="1.0"/>
+        <Coeff description="" id="EncoderIndexOffset" value="3.21578736244"/>
+        <Coeff description="" id="Encoder_MaxTicks" value="400320.0"/>
+        <Coeff description="" id="JointKinematicDir" value="1"/>
+        <Coeff description="" id="JointMaxValue" value="3.14159274101"/>
+        <Coeff description="" id="JointMinValue" value="-3.14159274101"/>
+        <Coeff description="" id="JointSafety_LowerLimit_Rad" value="-3.14159265359"/>
+        <Coeff description="" id="JointSafety_UpperLimit_Rad" value="3.14159265359"/>
+        <Coeff description="" id="JointSensors_MotorPosition" value="1"/>
+        <Coeff description="" id="JointSensors_OutputForce" value="3"/>
+        <Coeff description="" id="JointSensors_OutputPosition" value="2.0"/>
+        <Coeff description="" id="JointTorqueLimit_Nm" value="100.0"/>
+        <Coeff description="" id="RLSMagneticPos_CountsToRad" value="0.00076699038"/>
+        <Coeff description="" id="RLSMagneticPos_Offset" value="-0.665061235428"/>
+        <Coeff description="" id="RLSMagneticSpring_CountsToRad" value="0.00076699038"/>
+        <Coeff description="" id="RLSMagneticSpring_Offset" value="-0.246203899384"/>
+        <Coeff description="" id="TorqueControl_Ki" value="0.4"/>
+        <Coeff description="" id="TorqueControl_Ki_Windup" value="4.0"/>
+        <Coeff description="" id="TorqueControl_MotorTorqueDirection" value="1"/>
+        <Coeff description="" id="TorqueControl_Tdob_b" value="0.665"/>
+        <Coeff description="" id="TorqueControl_Tdob_m" value="0.0195"/>
+    </Coeffs>
+</CoeffData>

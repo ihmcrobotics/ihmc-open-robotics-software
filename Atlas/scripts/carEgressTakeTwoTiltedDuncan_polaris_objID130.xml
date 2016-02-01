@@ -1,0 +1,11 @@
+<object-stream>
+  <long>20188720670</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
+    <destination>0</destination>
+    <pause>true</pause>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
+  <long>22590913332</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
+    <destination>0</destination>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
+</object-stream>

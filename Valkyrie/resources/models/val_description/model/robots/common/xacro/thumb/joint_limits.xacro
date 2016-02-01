@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/thumb/joint_limits">
+
+  <xacro:property name="ThumbRollTorqueLimit" value="10" />
+  <xacro:property name="ThumbPitch1TorqueLimit" value="10" />
+  <xacro:property name="ThumbPitch2TorqueLimit" value="10" />
+  <xacro:property name="ThumbPitch3TorqueLimit" value="10" />
+  
+  <xacro:property name="ThumbRollPositionLimit_Lower" value="0.0" />
+  <xacro:property name="ThumbPitch1PositionLimit_Lower" value="0.0" />
+  <xacro:property name="ThumbPitch2PositionLimit_Lower" value="0.0" />
+  <xacro:property name="ThumbPitch3PositionLimit_Lower" value="0.0" />
+  
+  <xacro:property name="ThumbRollPositionLimit_Upper" value="2.356" />
+  <xacro:property name="ThumbPitch1PositionLimit_Upper" value="1.658" />
+  <xacro:property name="ThumbPitch2PositionLimit_Upper" value="1.920" />
+  <xacro:property name="ThumbPitch3PositionLimit_Upper" value="1.57" />
+  
+  <xacro:property name="ThumbRollVelocityLimit" value="1" />
+  <xacro:property name="ThumbPitch1VelocityLimit" value="1" />
+  <xacro:property name="ThumbPitch2VelocityLimit" value="1" />
+  <xacro:property name="ThumbPitch3VelocityLimit" value="1" />
+</robot>

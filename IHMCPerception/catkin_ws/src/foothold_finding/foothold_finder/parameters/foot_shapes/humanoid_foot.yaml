@@ -1,0 +1,17 @@
+foot_shape/x_coordinates:
+- -0.09
+- 0.105
+- 0.165
+- 0.165
+- 0.105
+- -0.09
+
+foot_shape/y_coordinates:
+- 0.06
+- 0.06
+- 0.0475
+- -0.0475
+- -0.06
+- -0.06
+
+foot_shape/line_width: 0.01

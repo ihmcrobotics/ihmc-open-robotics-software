@@ -1,0 +1,9 @@
+# permissible values for mode
+
+# joint damping coefficient, per joint bounds specified in AtlasPlugin.cc
+float64[30] damping_coefficients
+
+---
+bool success
+string status_message
+

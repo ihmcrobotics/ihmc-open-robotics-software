@@ -1,0 +1,36 @@
+<CoeffData>
+    <Properties>
+        <CalibrationDate>
+            <FileGenDate date="2013-07-22" time="19:00:28" />
+        </CalibrationDate>
+    </Properties>
+    <ClassFile id="a.xml" />
+    <ControllerFile id="a_sv.xml" />
+    <LocationFile id="shoulder_pitch.xml" />
+    <SensorsFile id="sensors.xml" />
+    <SafetyFile id="safety.xml" />
+    <ModeFile id="mode.xml" />
+    <Coeffs>
+        <Coeff description="" id="JointMaxValue" value="3.14" />
+        <Coeff description="" id="JointMinValue" value="-3.14" />
+        <Coeff description="" id="JointKinematicDir" value="-1.0" />
+        <Coeff description="" id="PositionOffset_Rad" value="-3.09250532786" />
+        <Coeff description="" id="TorqueOffset_Nm" value="1.16" />
+        <Coeff description="" id="JointSensors_MotorPosition" value="1" />
+        <Coeff description="" id="JointSensors_OutputForce" value="2.0" />
+        <Coeff description="" id="JointSensors_OutputPosition" value="2.0" />
+        <Coeff description="" id="JointSensors_OutputVelocity" value="4.0" />
+        <Coeff description="Encoder Mounting Direction" id="EncMountingDir" value="1" />
+        <Coeff description="Electrical angle offset from Index pulse of Encoder" id="EncoderIndexOffset" value="0.41869" />
+        <Coeff description="" id="JointOutputAPS_MountingGain" value="1.0" />
+        <Coeff description="" id="SpringAPS_MountingGain" value="-1" />
+        <Coeff id="SpringAPS_BitOffset" value="356414306.0" />
+        <Coeff description="" id="LoadCell_MountingGain" value="-1.0" />
+        <Coeff description="" id="LoadCell_NmPerCount" value="0.0949156" />
+        <Coeff description="" id="LoadCell_OffsetBits" value="32950" />
+        <Coeff description="" id="APS1_BiasComp_Enable" value="1" />
+        <Coeff description="" id="CurrVelFilter_fc_Hz" value="200" />
+        <Coeff description="" id="TorqueControl_MotorTorqueDirection" value="1" />
+        <Coeff description="" id="PositionControl_MotorTorqueDirection" value="1" />
+    </Coeffs>
+</CoeffData>

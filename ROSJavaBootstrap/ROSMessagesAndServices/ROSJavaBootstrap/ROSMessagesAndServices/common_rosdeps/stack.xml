@@ -1,0 +1,9 @@
+<stack>
+  <description brief="common_rosdeps">Deprecated: no longer necessary.</description>
+  <author>Maintained by Wim Meeussen</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/common_rosdeps</url>
+  <depend stack="ros" />
+
+</stack>

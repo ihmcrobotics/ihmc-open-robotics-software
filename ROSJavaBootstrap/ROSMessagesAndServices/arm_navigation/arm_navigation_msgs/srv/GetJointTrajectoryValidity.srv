@@ -1,0 +1,51 @@
+# The trajectory for which validity is to be checked
+trajectory_msgs/JointTrajectory trajectory
+
+# The state of the robot. 
+# This state message contains information on the position of the joints of the robot. 
+# Any joint information in the path message above will overwrite corresponding information 
+# for the same joint in the state message.
+# Any joint not contained in either the path or state message will be assumed to be at 
+# the current position of the joint. 
+arm_navigation_msgs/RobotState robot_state
+
+# Collision checks will be performed if this flag is true
+bool check_collisions
+
+# Path constraints will be checked if this flag is true
+bool check_path_constraints
+
+# Goal constraints will be checked if this flag is true
+bool check_goal_constraints
+
+# Joint limits will be checked if this flag is true
+bool check_joint_limits
+
+# If this flag is true, the entire trajectory will be checked before the node returns
+# The default value of this flag is false and so the node will return as soon 
+# as the first check on the points in the trajectory fails
+bool check_full_trajectory
+
+# OPTIONAL specification of a set of path constraints imposed on the robot, 
+# e.g. joint or pose constraints. These constraints will be tested only if
+# check_path_constraints = true
+arm_navigation_msgs/Constraints path_constraints
+
+# OPTIONAL specification of a set of goal constraints imposed on the robot, 
+# e.g. joint or pose constraints. These constraints will be tested only if 
+# check_goal_constraints = true
+arm_navigation_msgs/Constraints goal_constraints
+
+---
+
+# Integer error code corresponding to the first check that was violated
+# The message contains both the returned error code value and a set 
+# of possible error codes
+arm_navigation_msgs/ArmNavigationErrorCodes error_code
+
+# A vector of error flags for all points in the trajectory
+# Each error flag indicates which checks failed for the corresponding
+# point in the trajectory
+arm_navigation_msgs/ArmNavigationErrorCodes[] trajectory_error_codes
+
+arm_navigation_msgs/ContactInformation[] contacts

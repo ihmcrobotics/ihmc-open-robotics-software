@@ -1,0 +1,9 @@
+root*false*false
+root.FallingSphereImpulse*false*false
+root.FallingSphereImpulse.FallingSphereEnergy*false*false
+root.FallingSphereImpulse.FallingSphereEnergy.CollisionGroundContactModel*false*false
+root.FallingSphereImpulse.FallingSphereController*false*false
+root.FallingSphereSpringDamper*false*false
+root.FallingSphereSpringDamper.FallingSphereEnergy*false*false
+root.FallingSphereSpringDamper.FallingSphereEnergy.LinearGroundContactModel*false*false
+root.FallingSphereSpringDamper.FallingSphereController*false*false

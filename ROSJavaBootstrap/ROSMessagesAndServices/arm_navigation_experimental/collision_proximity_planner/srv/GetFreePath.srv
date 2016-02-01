@@ -1,0 +1,4 @@
+# A service definition for a standard forward kinematics service
+arm_navigation_msgs/RobotState robot_state
+---
+arm_navigation_msgs/RobotTrajectory robot_trajectory

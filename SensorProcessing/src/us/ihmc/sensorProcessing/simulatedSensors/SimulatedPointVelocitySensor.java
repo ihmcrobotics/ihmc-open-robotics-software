@@ -1,0 +1,85 @@
+package us.ihmc.sensorProcessing.simulatedSensors;
+
+import javax.vecmath.Vector3d;
+
+import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
+
+
+public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3d>
+{
+   private final RigidBody rigidBody;
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   private final FramePoint pointToMeasureVelocityOf;
+   private final FramePoint tempPointToMeasureVelocityOf = new FramePoint();
+   private final FrameVector pointVelocityFrameVector = new FrameVector();
+
+   private final Twist twist = new Twist();
+
+   private final Vector3d pointVelocity = new Vector3d();
+   private final YoFrameVector yoFrameVectorPerfect, yoFrameVectorNoisy;
+
+   private final TwistCalculator twistCalculator;
+
+   private final ControlFlowOutputPort<Vector3d> pointVelocityOutputPort = createOutputPort("pointVelocityOutputPort");
+
+   public SimulatedPointVelocitySensor(String name, RigidBody rigidBody, FramePoint pointToMeasureVelocityOf,
+           TwistCalculator twistCalculator, YoVariableRegistry registry)
+   {
+      this.rigidBody = rigidBody;
+      this.twistCalculator = twistCalculator;
+
+      this.pointToMeasureVelocityOf = new FramePoint(pointToMeasureVelocityOf);
+
+      this.yoFrameVectorPerfect = new YoFrameVector(name + "Perfect", ReferenceFrame.getWorldFrame(), registry);
+      this.yoFrameVectorNoisy = new YoFrameVector(name + "Noisy", ReferenceFrame.getWorldFrame(), registry);
+   }
+
+   public void startComputation()
+   {
+      twistCalculator.packTwistOfBody(twist, rigidBody);
+      twist.changeFrame(twist.getBaseFrame());
+      
+      tempPointToMeasureVelocityOf.setIncludingFrame(pointToMeasureVelocityOf);
+      tempPointToMeasureVelocityOf.changeFrame(twist.getBaseFrame());
+      twist.packLinearVelocityOfPointFixedInBodyFrame(pointVelocityFrameVector, tempPointToMeasureVelocityOf);
+      
+      pointVelocityFrameVector.changeFrame(worldFrame);
+      pointVelocityFrameVector.get(pointVelocity);
+      
+      yoFrameVectorPerfect.set(pointVelocity);
+
+      corrupt(pointVelocity);
+      yoFrameVectorNoisy.set(pointVelocity);
+      
+      pointVelocityOutputPort.setData(pointVelocity);
+   }
+   
+   public void packPointVelocity(FrameVector velocity)
+   {
+      yoFrameVectorPerfect.getFrameTupleIncludingFrame(velocity);
+   }
+
+   public void waitUntilComputationIsDone()
+   {
+      // empty
+   }
+
+   public ControlFlowOutputPort<Vector3d> getPointVelocityOutputPort()
+   {
+      return pointVelocityOutputPort;
+   }
+
+   public void initialize()
+   {
+//    empty
+   }
+}

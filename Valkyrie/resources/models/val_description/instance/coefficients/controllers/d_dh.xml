@@ -1,0 +1,55 @@
+<CoeffData>
+  <Properties>
+    <CalibrationDate/>
+    <FileGenDate date="2013-07-02" time="19:40:39.664087"/>
+  </Properties>
+  <Coeffs>
+    <!-- - - - - - - - - Filtering - - - - - - - - -->
+    <Coeff description="" value="50" id="JointVelFilter_fc_Hz"/>
+    <Coeff description="" value="800" id="MotorVelFilter_fc_Hz"/>
+    <Coeff description="" value="50" id="MotorAccFilter_fc_Hz"/>
+
+    <!-- - - - - - - - - Controllers - - - - - - - - -->
+    <!-- Commutation -->
+    <Coeff description="-1=master,0=six,1=4quad,2=sv,3=dh" value="3.0" id="Commutation_Select"/>
+
+    <!-- Torque Controller -->
+        <Coeff id="EffortControl_Alpha" value="0.75"/>
+        <Coeff id="EffortControl_AlphaDot" value="0.0"/>
+
+        <!-- Model -->
+        <Coeff description="" value="1.5" id="TorqueControl_m"/>
+        <Coeff description="" value="60.0" id="TorqueControl_b"/>
+
+        <!-- FF -->
+        <Coeff description="" value="0.05" id="TorqueControl_Current2MotorTorque"/>
+        <Coeff description="" value="1" id="TorqueControl_enableFF"/>
+
+        <!-- PID -->
+        <Coeff description="" value="1" id="TorqueControl_enablePID"/>
+        <Coeff description="" value="3.966" id="TorqueControl_Kp"/>
+        <Coeff description="" value="0.95" id="TorqueControl_PD_damp"/>
+        <Coeff description="" value="0" id="TorqueControl_autoKd"/>
+        <Coeff description="" value="0.02" id="TorqueControl_Kd"/>
+        <Coeff description="" value="50.0" id="TorqueControl_Kd_fc_Hz"/>
+
+        <!-- DOB -->
+        <Coeff description="" value="0" id="TorqueControl_enableDOB"/>
+        <Coeff description="" value="300.0" id="TorqueControl_TdobWindupLimit_Nm"/>
+        <Coeff description="" value="50.0" id="TorqueControl_Tdob_fc_Hz"/>
+
+        <!-- DynFF -->
+        <Coeff description="" value="0" id="TorqueControl_enableDynFF"/>
+        <Coeff description="" value="500.0" id="TorqueControl_FFd_fc_Hz"/>
+
+        <!-- Parallel Damping -->
+        <Coeff description="" value="0.0" id="TorqueControl_ParallelDamping"/>   <!--================== P_KD ==================-->
+    <!-- end Torque Controller -->
+
+    <!-- Position Controller -->
+    <Coeff description="" value="400.0" id="PositionControl_Kp"/>
+    <Coeff description="" value="0.0" id="PositionControl_Kd"/>
+    <Coeff description="2 - HarmAPS, 3 - JointAPS" value="4" id="PositionControl_SensorFeedback"/>
+    <!-- end Position Controller -->
+  </Coeffs>
+</CoeffData>

@@ -1,0 +1,26 @@
+<package>
+  <description brief="rqt_pr2_dashboard">
+
+      rqt_pr2_dashboard is a GUI for debugging and controlling low-level state of the PR2.  It shows things like battery status and breaker states, as well as integrating tools like rqt_console and robot_monitor.
+
+  </description>
+  <author>Aaron Blasdel</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rqt_pr2_dashboard</url>
+  <depend package="rospy"/>
+  <depend package="roslib"/>
+  <depend package="std_srvs"/>
+  <depend package="std_msgs"/>
+  <depend package="pr2_power_board"/>
+  <depend package="pr2_msgs"/>
+  <depend package="rqt_robot_dashboard"/>
+  <depend package="rqt_robot_monitor"/>
+  
+  <export>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
+
+</package>
+
+

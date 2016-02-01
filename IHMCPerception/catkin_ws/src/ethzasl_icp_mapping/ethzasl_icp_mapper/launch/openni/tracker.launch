@@ -1,0 +1,28 @@
+<!-- 
+FP: 30 Jan. 2013
+
+Files tuned for ethzasl_icp_mapping commit 52d78c96c2cf2f58a400c649c561dbfec95e41a4
+and for libpointmatcher commit e048c4d1180b1de005af072bf137ea4d8cf2b826
+
+To debug, use: launch minus prefix= "gdb minus minus args"
+-->
+
+<launch>
+  <node name="mapper" type="mapper" pkg="ethzasl_icp_mapper" output="screen"> 
+		<remap from="cloud_in" to="/depth_registered/points" />
+		<param name="subscribe_scan" value="false"/>
+		<param name="icpConfig" value="$(find ethzasl_icp_mapper)/launch/openni/icp.yaml" />
+		<param name="inputFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/openni/input_filters.yaml" />
+		<param name="mapPreFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/openni/map_pre_filters.yaml" />
+		<param name="mapPostFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/openni/map_post_filters.yaml" />
+		<param name="odom_frame" value="/kinect" />
+		<param name="map_frame" value="/map" />
+		<param name="maxOverlapToMerge" value="0.75" />
+		<param name="minOverlap" value="0.60" />
+		<param name="minMapPointCount" value="0" />
+		<param name="useROSLogger" value="false" />
+		<param name="inputQueueSize" value="1" />
+  </node>
+  
+	<node name="static_transform_publisher" type="static_transform_publisher" pkg="tf" args="0 0 0 1.57 3.1416 1.57 /kinect /openni_rgb_optical_frame 100 "/> 
+</launch>

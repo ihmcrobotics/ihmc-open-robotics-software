@@ -1,0 +1,56 @@
+<package>
+  <name>ethzasl_icp_mapper</name>
+  <description>
+     2D/3D mapper based on libpointmatcher (http://github.com/ethz-asl/libpointmatcher)
+  </description>
+  <author>François Pomerleau and Stéphane Magnenat</author>
+  <license>new BSD</license>
+  <url type="website">http://ros.org/wiki/ethzasl_icp_mapper</url>
+  
+  <maintainer email="f.pomerleau@gmail.com">Francois Pomerleau</maintainer>
+
+  <version>0.9.6</version>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>rosbag</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>tf2</build_depend>
+  <build_depend>tf_conversions</build_depend>
+  <build_depend>message_filters</build_depend>
+  <build_depend>map_msgs</build_depend>
+  <build_depend>libpointmatcher</build_depend>
+  <build_depend>libpointmatcher_ros</build_depend>
+  <build_depend>ethzasl_gridmap_2d</build_depend>
+  <build_depend>visualization_msgs</build_depend>
+  <build_depend>interactive_markers</build_depend>
+  <build_depend>message_generation</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>rosbag</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>nav_msgs</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>tf2</run_depend>
+  <run_depend>tf_conversions</run_depend>
+  <run_depend>message_filters</run_depend>
+  <run_depend>map_msgs</run_depend>
+  <run_depend>libpointmatcher</run_depend>
+  <run_depend>libpointmatcher_ros</run_depend>
+  <run_depend>ethzasl_gridmap_2d</run_depend>
+  <run_depend>visualization_msgs</run_depend>
+  <run_depend>interactive_markers</run_depend>
+  <run_depend>message_runtime</run_depend>
+
+</package>
+
+

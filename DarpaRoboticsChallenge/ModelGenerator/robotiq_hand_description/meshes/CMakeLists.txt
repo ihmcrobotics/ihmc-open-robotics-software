@@ -1,0 +1,31 @@
+set (files
+  s-model_articulated
+  s-model_articulated/collision
+  s-model_articulated/collision/link_1.STL
+  s-model_articulated/collision/palm.STL
+  s-model_articulated/collision/link_2.STL
+  s-model_articulated/collision/link_0.STL
+  s-model_articulated/collision/link_3.STL
+  s-model_articulated/visual
+  s-model_articulated/visual/link_1.STL
+  s-model_articulated/visual/palm.STL
+  s-model_articulated/visual/link_2.STL
+  s-model_articulated/visual/link_0.STL
+  s-model_articulated/visual/link_3.STL
+  s-model
+  s-model/collision
+  s-model/collision/GRIPPER_OPEN_FINGER_1.stl
+  s-model/collision/GRIPPER_OPEN_FINGER_3.stl
+  s-model/collision/GRIPPER_CLOSED.stl
+  s-model/collision/GRIPPER_OPEN.stl
+  s-model/collision/GRIPPER_OPEN_FINGER_2.stl
+  s-model/collision/GRIPPER_OPEN_PALM.stl
+  s-model/visual
+  s-model/visual/GRIPPER_OPEN_FINGER_1.stl
+  s-model/visual/GRIPPER_OPEN_FINGER_3.stl
+  s-model/visual/GRIPPER_CLOSED.stl
+  s-model/visual/GRIPPER_OPEN.stl
+  s-model/visual/GRIPPER_OPEN_FINGER_2.stl
+  s-model/visual/GRIPPER_OPEN_PALM.stl
+)
+install(FILES ${files} DESTINATION ${GAZEBO_INSTALL_PATH}/robotiq_hand_description/meshes/)

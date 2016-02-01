@@ -1,0 +1,12 @@
+<stack>
+  <description brief="laser_pipeline">
+     Meta-package of libraries for processing laser data, including converting laser data into 3D representations.
+  </description>
+  <author>Maintained by Jeremy Leibs</author>
+  <license>BSD</license>  
+  <review status="Not reviewed"/>
+  <url>http://ros.org/wiki/laser_pipeline</url>
+  <depend stack="laser_assembler"/>
+  <depend stack="laser_filters"/>
+  <depend stack="laser_geometry"/>
+</stack>

@@ -1,0 +1,11 @@
+<!-- 
+-->
+
+<launch>
+  <node name="dynamic_trails" type="dynamic_trails" pkg="ethzasl_icp_mapper" output="screen" > 
+		<remap from="cloud_in" to="/obstacle_cloud2" />
+		<param name="map_frame" value="/map" />
+		<param name="inputFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/artor/input_trail_filters.yaml" />
+  </node>
+  
+</launch>

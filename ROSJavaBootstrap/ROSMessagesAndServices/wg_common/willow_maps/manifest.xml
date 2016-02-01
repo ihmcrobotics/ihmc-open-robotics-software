@@ -1,0 +1,17 @@
+<package>
+  <description brief="A package that holds Willow Garage maps">
+
+     Holds maps of Willow Garage that can be used for a number of different applications.
+
+  </description>
+  <author>Eitan Marder-Eppstein</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://pr.willowgarage.com/wiki/willow_maps</url>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+
+

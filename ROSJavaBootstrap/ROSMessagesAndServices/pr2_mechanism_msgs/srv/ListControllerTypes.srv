@@ -1,0 +1,5 @@
+# The ListControllers service returns a list of controller types that are known
+# to pr2_mechanism_control. 
+
+---
+string[] types

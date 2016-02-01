@@ -1,0 +1,10 @@
+- Atlas model has super low effort limits. Plugin increases effort limits to infinity. This seems to work.
+- Multisense topic names are different from the robot. Need remapping
+- Force_torque sensors are not handled correctly. 
+	https://bitbucket.org/osrf/sdformat/issue/38/force_torque-sensors-not-handled-by
+- Multisense joint_states published to /joint_states, not /multisense_sl/joint_states as TF expects
+- Multisense TF topic names do not match multisense head
+	
+General crazyness:
+	- SetForce adds force. At every iteration, force is set to zero.
+	- ForceSensors are crazy noisy

@@ -1,0 +1,32 @@
+<package>
+  <name>libpointmatcher_ros</name>
+  <description>
+     Bridge between libpointmatcher and ROS.
+  </description>
+  <version>0.9.6</version>
+  <maintainer email="f.pomerleau@gmail.com">Francois Pomerleau</maintainer>
+  <author>Stéphane Magnenat</author>
+  <license>new BSD</license>
+  <url>http://ros.org/wiki/libpointmatcher_ros</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>tf_conversions</build_depend>
+  <build_depend>eigen_conversions</build_depend>
+  <build_depend>libpointmatcher</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>nav_msgs</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>tf_conversions</run_depend>
+  <run_depend>eigen_conversions</run_depend>
+  <run_depend>libpointmatcher</run_depend>
+  
+</package>
+
+

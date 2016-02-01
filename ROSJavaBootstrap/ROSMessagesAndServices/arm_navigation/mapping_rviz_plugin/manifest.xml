@@ -1,0 +1,25 @@
+<package>
+  <description brief="mapping_rviz_plugin">
+
+     mapping_rviz_plugin
+
+  </description>
+  <author>Josh Faust</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/mapping_rviz_plugin</url>
+  <depend package="rviz"/>
+  <depend package="roscpp"/>
+  <depend package="arm_navigation_msgs"/>
+  <depend package="tf"/>
+  
+  <export>
+    <rviz plugin="${prefix}/plugin_description.xml"/>
+  </export>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+
+

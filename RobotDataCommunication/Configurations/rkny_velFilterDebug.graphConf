@@ -1,0 +1,40 @@
+
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>bono.qd_r_leg_kny,root.loggedmain.DRCEstimatorThread.StepprSensorReader.SensorProcessing.fd_qd_r_leg_kny_sp0,root.loggedmain.DRCEstimatorThread.StepprSensorReader.SensorProcessing.raw_qd_r_leg_kny</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>2.0</MaxScaling>
+			<MinScaling>-2.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>bono.q_r_leg_kny,root.loggedmain.DRCEstimatorThread.StepprSensorReader.SensorProcessing.raw_q_r_leg_kny,root.loggedmain.DRCEstimatorThread.StepprSensorReader.SensorProcessing.filt_q_r_leg_kny_sp0</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.SensorProcessing.raw_qd_r_leg_kny,root.loggedmain.DRCEstimatorThread.StepprSensorReader.SensorProcessing.raw_q_r_leg_kny</Variables>
+		<GraphConfiguration>
+			<Name>config3</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>

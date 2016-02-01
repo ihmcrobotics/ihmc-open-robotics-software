@@ -1,0 +1,8 @@
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robotiq_hand_description" >
+  <xacro:include filename="$(find robotiq_hand_description)/urdf/robotiq_hand.urdf.xacro" />
+
+  <link name="world"/>
+  <xacro:robotiq_hand prefix="" parent="world" reflect="-1">
+    <origin rpy="0 0 0" xyz="0 0 1.0"/>
+  </xacro:robotiq_hand>
+</robot>

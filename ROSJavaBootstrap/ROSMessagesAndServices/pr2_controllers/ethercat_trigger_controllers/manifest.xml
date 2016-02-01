@@ -1,0 +1,26 @@
+<package>
+  <description brief="Controllers for triggering from the realtime loop">
+    Controllers to operate the digital output of the motor controller
+    boards and the projector board. This package has not been reviewed and
+    should be considered unstable.
+  </description>
+  <author>Blaise Gassend</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes="http://www.ros.org/wiki/ethercat_trigger_controllers/Reviews/Jan_12_2010_Doc_Review"/>
+  <depend package="rospy"/>
+  <depend package="pr2_controller_interface" />
+  <depend package="realtime_tools" />
+  <depend package="roscpp" />
+  <depend package="diagnostic_msgs" />
+  <depend package="pluginlib" />
+  <url>http://www.ros.org/wiki/ethercat_trigger_controllers</url>
+  <export>
+    <cpp cflags="-I${prefix}/include"
+	 lflags="-Wl,-rpath,${prefix}/lib/ -L${prefix}/lib -lethercat_trigger_controllers" />
+    <pr2_controller_interface plugin="${prefix}/controller_plugins.xml" />
+  </export>
+  <rosdep name="libtool"/>
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>

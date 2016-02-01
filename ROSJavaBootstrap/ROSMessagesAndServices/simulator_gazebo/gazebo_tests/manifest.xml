@@ -1,0 +1,20 @@
+<package>
+  <description brief="gazebo_tests">
+
+     Contains a variety of unit tests for gazebo, tools and plugins.
+
+  </description>
+  <author>John Hsu</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/gazebo_tests</url>
+  <depend package="gazebo"/>
+  <depend package="gazebo_plugins"/>
+  <depend package="gazebo_worlds"/>
+  <depend package="gazebo_tools"/>
+  <depend package="std_srvs"/>
+  <depend package="geometry_msgs"/>
+
+</package>
+
+

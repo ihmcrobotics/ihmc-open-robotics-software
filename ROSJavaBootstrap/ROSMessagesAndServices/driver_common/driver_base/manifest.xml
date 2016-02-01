@@ -1,0 +1,23 @@
+<package>
+  <description brief="Driver framework">
+    A framework for writing drivers that helps with runtime reconfiguration, diagnostics and self-test.
+
+    This package is currently for internal use only as its API is still
+    under development and is expected to undergo significant changes.
+  </description>
+  <author>Blaise Gassend</author>
+  <license>BSD</license>
+  <review status="Doc Reviewed" note="Jan 18 2010, empty API"/>
+  <depend package="roscpp" />
+  <depend package="self_test" />
+  <depend package="diagnostic_updater" />
+  <depend package="dynamic_reconfigure" />
+  <export>
+    <cpp cflags="-I${prefix}/include -I${prefix}/msg/cpp"/>
+  </export>
+  <url>http://www.ros.org/wiki/driver_base</url>
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+

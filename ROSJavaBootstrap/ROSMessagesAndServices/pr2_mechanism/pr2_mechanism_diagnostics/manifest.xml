@@ -1,0 +1,22 @@
+<package>
+  <description brief="Produces diagnostics from pr2_controller_manager for joints and controllers" >
+The `pr2_mechanism_diagnostics` node subscribes to `mechanism_statistics` and publishes diagnostics data for joints and controllers on `/diagnostics`. 
+  </description>
+  <author>Kevin Watts</author>
+  <license>BSD</license>
+  <review status="doc reviewed" notes=""/>
+  <url>http://ros.org/wiki/pr2_mechanism_diagnostics</url>
+  <depend package="roscpp"/>
+  <depend package="urdf"/>
+  <depend package="rospy"/>
+  <depend package="diagnostic_updater"/>
+  <depend package="diagnostic_msgs"/>
+  <depend package="pr2_mechanism_msgs" />
+  <depend package="pr2_mechanism_model" />
+  <depend package="angles" />
+  <depend package="std_srvs" />
+    <depend package="std_msgs" />
+  
+</package>
+
+

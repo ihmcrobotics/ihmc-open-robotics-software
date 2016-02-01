@@ -1,0 +1,8 @@
+root*false*false
+root.PointMassRobot*false*false
+root.PointMassRobot.LinearGroundContactModel*false*false
+root.PointMassRobot.PointMassIDRobot*false*false
+root.PointMassRobot.registry*false*false
+root.PointMassRobot.registry.swingTrajectoryParabolicCartesianTrajectoryGenerator*false*false
+root.PointMassRobot.registry.swingTrajectoryParabolicCartesianTrajectoryGenerator.swingTrajectoryYoParabolicTrajectoryGenerator*false*false
+root.PointMassRobot.registry.BagOfBallsBalls*false*false

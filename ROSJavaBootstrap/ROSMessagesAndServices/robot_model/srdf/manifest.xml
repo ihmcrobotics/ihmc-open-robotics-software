@@ -1,0 +1,29 @@
+<package>
+  <description brief="srdf">
+
+    SRDF (Semantic Robot Description Format) is a representation of
+    semantic information about robots.
+
+  </description>
+  <author>Ioan Sucan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/srdf</url>
+
+  <rosdep name="tinyxml" />
+
+  <depend package="urdf" />  
+  <depend package="rosconsole" />  
+
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lsrdf"/>
+  </export>
+
+  <platform os="ubuntu" version="10.04"/>
+  <platform os="ubuntu" version="10.10"/>
+  <platform os="ubuntu" version="11.04"/>
+  <platform os="ubuntu" version="11.10"/>
+
+</package>
+
+

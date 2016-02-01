@@ -1,0 +1,16 @@
+<stack>
+  <description brief="common_tutorials">common_tutorials</description>
+  <author>Maintained by Tully Foote</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/common_tutorials</url>
+  <depend stack="actionlib" /> <!-- actionlib -->
+  <depend stack="common_msgs" /> <!-- actionlib_msgs -->
+  <depend stack="geometry" /> <!-- angles -->
+  <depend stack="nodelet_core" /> <!-- nodelet -->
+  <depend stack="pluginlib" /> <!-- pluginlib -->
+  <depend stack="ros" /> <!-- roslib -->
+  <depend stack="ros_comm" /> <!-- rosconsole, std_msgs, roscpp, rospy -->
+  <depend stack="ros_tutorials" /> <!-- turtlesim -->
+
+</stack>

@@ -1,0 +1,20 @@
+MaterialDef Terrain {
+
+	MaterialParameters {
+
+	}
+
+	Technique {
+		VertexShader GLSL100:   lidar/Lidar.vert
+		FragmentShader GLSL100: lidar/Lidar.frag
+		
+		WorldParameters {
+			WorldViewProjectionMatrix
+			WorldViewMatrix
+		}
+
+	}
+	
+    Technique {
+    }
+}

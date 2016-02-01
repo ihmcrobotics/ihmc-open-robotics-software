@@ -1,0 +1,88 @@
+plugins {
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.7'
+}
+
+
+apply plugin: 'java-library-distribution'
+
+if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
+
+sourceCompatibility = 1.7
+version = "${getOpenRoboticsSoftwareProject().version}"
+project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
+project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+project.ext.licenseName = "Apache License, Version 2.0"
+project.ext.bintrayLicenseName = "Apache-2.0"
+
+repositories ihmc.ihmcDefaultArtifactProxies()
+
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
+
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCJavaToolkit"))
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCRoboticsToolkit"))
+dependencies {
+	testCompile group: 'junit', name: 'junit', version: '4.11'
+	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+
+	//compile group: 'cz.advel.jbullet', name: 'jbullet', version: '20101010-1'	//Disabled jbullet because it depends on vecmath 1.3.1. Jesper
+	compile group: 'us.ihmc.thirdparty.com.centralnexus', name: 'joystick', version: '0.7'
+
+	compile group: 'net.jafama', name: 'jafama', version: '2.1.0'
+//	compile group: 'org.ejml', name: 'all', version: '0.28'
+	compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
+	compile group: 'org.georegression' , name: 'georegression', version: '0.8'
+   	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: 'internal-151123'
+	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
+	compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
+	compile group: 'org.apache.xmlgraphics', name: 'batik-svggen', version: '1.7'
+	compile group: 'org.apache.xmlgraphics', name: 'batik-dom', version: '1.7'
+	compile group: 'org.apache.xmlgraphics', name: 'batik-awt-util', version: '1.7'
+	compile group: 'net.sourceforge.jexcelapi', name: 'jxl', version: '2.6.12'
+	compile group: 'jgraph', name: 'jgraph', version: '5.13.0.0' //1.14.0.0
+	compile group: 'com.github.rwl', name: 'jtransforms', version: '2.4.0'
+	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+	compile group: 'com.badlogicgames.gdx', name: 'gdx-bullet-platform', version: '1.0.1', classifier: 'natives-desktop'
+	compile group: 'org.apache.pdfbox', name: 'pdfbox', version: '1.8.4'
+
+	compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'
+
+	compile group: 'org.easytesting', name: 'fest', version: '1.0.3'
+	compile('org.easytesting:fest-swing:1.2.1' )
+	{
+		exclude group: 'org.easytesting', module: 'fest'
+	}
+
+	testCompile ihmc.getProjectDependency(":IHMCJavaToolkit").sourceSets.test.output
+	testCompile ihmc.getProjectDependency(":IHMCRoboticsToolkit").sourceSets.test.output
+    compile ihmc.getProjectDependency(":Plotting")
+	compile ihmc.getProjectDependency(":Graphics3DAdapter")
+	compile ihmc.getProjectDependency(":ParameterOptimization")
+	compile ihmc.getProjectDependency(":IHMCCommunication")
+	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+}
+
+jar {
+    manifest {
+        attributes(
+                "Created-By": "IHMC Gradle Build Script",
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "IHMC",
+
+                "Bundle-Name": project.name,
+                "Bundle-Version": project.version,
+                "Bundle-License": "${project.ext.licenseURL}",
+                "Bundle-Vendor": "IHMC")
+    }
+}
+
+distributions {
+    main {
+        baseName = 'SimulationConstructionSet'
+    }
+}

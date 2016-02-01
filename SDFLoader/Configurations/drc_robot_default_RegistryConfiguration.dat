@@ -1,0 +1,11 @@
+root*false*false
+root.drc_robot*false*false
+root.drc_robot.jaxbController*false*false
+root.drc_robot.jaxbController.AllAnglesController*false*false
+root.drc_robot.jaxbController.AllAnglesController.CommonInertiaElipsoidsVisualizer*false*false
+root.drc_robot.jaxbController.AllAnglesToZeroController*false*false
+root.drc_robot.jaxbController.AllAnglesToZeroController.CommonInertiaElipsoidsVisualizer*false*false
+root.drc_robot.jaxbController.drc_robotSimulatedSensorReader*false*false
+root.drc_robot.AllAnglesToZeroController*false*false
+root.drc_robot.AllAnglesToZeroController.CommonInertiaElipsoidsVisualizer*false*false
+root.LinearGroundContactModel*false*false

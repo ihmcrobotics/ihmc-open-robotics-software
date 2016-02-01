@@ -1,0 +1,8 @@
+# http://code.google.com/p/yamlmatlab/issues/detail?id=6
+# read-in this file in windows like environment
+test:
+  - [16.0, 2.0, 3.0, 13.0]
+  - [5.0, 11.0, 10.0, 8.0]
+  - [9.0, 7.0, 6.0, 12.0]
+  - [4.0, 14.0, 15.0, 1.0]
+  

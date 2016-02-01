@@ -1,0 +1,54 @@
+<package>
+  <description brief="Dynamically reconfigure parameters">
+    This package provides a class to facilitate dynamic node
+    reconfiguration. This package is still under development, and should be
+    considered unstable except for features that are explicitely marked as
+    stable in the documentation.
+  </description>
+  <author>Maintained by Ze'ev Klapow</author>
+  <license>BSD</license>
+  <review status="Doc Reviewed" note="Jan 18 2010, rosparam and Python
+    client API only."/>
+  <url>http://www.ros.org/wiki/dynamic_reconfigure</url>
+  <depend package="rospy" />
+  <depend package="roscpp" />
+  <depend package="rosservice" />
+  <rosdep name="wxpython" />
+  <export>
+      <rosdoc config="rosdoc.yaml" />
+      <rosbuild cmake_directory="${prefix}/cmake" />
+      <cpp cflags="`rosboost-cfg --cflags` -I${prefix}/include -I${prefix}/msg/cpp -I${prefix}/srv/cpp"
+        lflags="`rosboost-cfg --lflags thread` -Wl,-rpath,${prefix}/lib -L${prefix}/lib -ldynamic_reconfigure_config_init_mutex"/>
+  </export>
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+  <platform os="ubuntu" version="10.10"/>
+  <platform os="ubuntu" version="11.04"/>
+  <platform os="ubuntu" version="11.10"/>
+  <rosbuild2>
+    <depend package="rospy" />
+    <depend package="roscpp" />
+    <depend package="rosservice" />
+    <depend package="std_msgs" />
+    <export>
+      <include_dir>${dynamic_reconfigure_PACKAGE_DIR}/include</include_dir>
+      <lib>dynamic_reconfigure_config_init_mutex</lib>
+    </export>
+    <cfgs> cfg/Test.cfg </cfgs>
+    <msgs>
+      msg/BoolParameter.msg      
+      msg/Config.msg	    
+      msg/IntParameter.msg	  
+      msg/SensorLevels.msg
+      msg/ConfigDescription.msg  
+      msg/DoubleParameter.msg  
+      msg/ParamDescription.msg  
+      msg/StrParameter.msg
+    </msgs>
+    <srvs>
+      srv/Reconfigure.srv
+    </srvs>
+  </rosbuild2>
+
+</package>

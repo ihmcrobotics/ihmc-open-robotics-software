@@ -1,0 +1,9 @@
+root*false*false
+root.FlyballGovernorUsualConstraint*false*false
+root.FlyballGovernorUsualConstraint.FlyballGovernorController*false*false
+root.FlyballGovernorUsualConstraint.FlyballGovernorSimpleClosedLoopConstraintController*false*false
+root.FlyballGovernorIntegratedConstraint*false*false
+root.FlyballGovernorIntegratedConstraint.FlyballGovernorController*false*false
+root.FlyballGovernorIntegratedConstraint.Constraint1*false*false
+root.FlyballGovernorIntegratedConstraint.Constraint2*false*false
+root.FlyballGovernorCommonControllerParameters*false*false

@@ -1,0 +1,42 @@
+<CoeffData>
+    <Properties>
+        <CalibrationDate/>
+        <FileGenDate date="2014-12-02" time="18:51:37.459301"/>
+    </Properties>
+    <ClassFile id="e.xml"/>
+    <ControllerFile id="e_sv.xml"/>
+    <LocationFile id="testbench.xml"/>
+    <SensorsFile id="sensors.xml"/>
+    <SafetyFile id="safety.xml"/>
+    <ModeFile id="mode.xml"/>
+    <Coeffs>
+        <Coeff id="APS1_BiasComp_Enable" value="1.0"/>
+        <Coeff id="EncMountingDir" value="1.0"/>
+        <Coeff id="EncoderIndexOffset" value="4.6"/>
+        <Coeff id="ForceControl_MotorForceDirection" value="1.0"/>
+        <Coeff id="ForceOffset_N" value="-43.0"/>
+        <Coeff id="JointForceLimit_N" value="250000.0"/>
+        <Coeff id="JointKinematicDir" value="1.0"/>
+        <Coeff id="JointMaxValue" value="3.14159"/>
+        <Coeff id="JointMinValue" value="-3.14159"/>
+        <Coeff id="JointOutputAPS_MountingGain" value="1.0"/>
+        <Coeff id="JointSafety_LimitZone_m" value="0.0005"/>
+        <Coeff id="JointSafety_LowerLimit_m" value="-1000001.0"/>
+        <Coeff id="JointSafety_UpperLimit_m" value="1000001.0"/>
+        <Coeff id="JointSensors_LinearPosition" value="2.0"/>
+        <Coeff id="JointSensors_LinearVelocity" value="1.0"/>
+        <Coeff id="JointSensors_MotorPosition" value="1.0"/>
+        <Coeff id="JointSensors_OutputForce" value="2.0"/>
+        <Coeff id="JointSensors_OutputPosition" value="3.0"/>
+        <Coeff id="JointSensors_OutputVelocity" value="1.0"/>
+        <Coeff id="LoadCell_MountingGain" value="-1.0"/>
+        <Coeff id="LoadCell_OffsetBits" value="32950.0"/>
+        <Coeff id="PositionOffset_Rad" value="-0.0506">
+            <notes>Was -0.053
+Was -0.0061
+Was -0.0547</notes>
+        </Coeff>
+        <Coeff id="SpringAPS_BitOffset" value="4746676.0"/>
+        <Coeff id="SpringAPS_MountingGain" value="1.0"/>
+    </Coeffs>
+</CoeffData>

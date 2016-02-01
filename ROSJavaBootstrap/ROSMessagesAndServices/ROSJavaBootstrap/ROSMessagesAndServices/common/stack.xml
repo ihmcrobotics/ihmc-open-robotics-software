@@ -1,0 +1,15 @@
+<stack>
+  <description brief="common code for personal robots">
+    This stack is deprecated.  All contents stacks depending on this stack 
+    should be changed to use the new homes of this code.
+  </description>
+  <author>Maintained by Tully Foote tfoote@willowgarage.com</author>
+  <license>BSD,LGPL,MIT,ZLib,Boost Software License</license>  
+  <review status="doc reviewed" notes="2009-10-07"/>
+  <url>http://ros.org/wiki/common</url>
+  <depend stack="actionlib" /> <!-- backwards compatability -->
+  <depend stack="pluginlib" /> <!-- backwards compatability -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- rostest, rospy, roscpp -->
+
+</stack>

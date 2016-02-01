@@ -1,0 +1,31 @@
+<object-stream>
+  <long>2491125172</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
+    <quaternion>
+      <x>0.0</x>
+      <y>0.541709895908409</y>
+      <z>0.0</z>
+      <w>0.8405655171816774</w>
+    </quaternion>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
+  <long>13419996274</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
+    <quaternion>
+      <x>0.0</x>
+      <y>-0.27981241141587987</y>
+      <z>0.0</z>
+      <w>0.9600546934511754</w>
+    </quaternion>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
+  <long>26772761042</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
+    <quaternion>
+      <x>0.0</x>
+      <y>0.34673239055808364</y>
+      <z>0.0</z>
+      <w>0.9379640981071059</w>
+    </quaternion>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
+  <long>40935728745</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand/>
+</object-stream>

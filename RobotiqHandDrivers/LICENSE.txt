@@ -1,0 +1,76 @@
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+EXCEPTION: This distribution of the software may be linked against
+JUnit according to the terms of the section below entitled "JUnit
+Exception".
+
+EXCEPTION: This distribution of the software may be linked against
+IHMC Robot hardware drivers according to the terms of the section 
+below entitled "ROBOT EXCEPTION".
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+_JUNIT EXCEPTION_
+
+0. Definitions
+
+"The software" means any software covered under this license
+agreement. 
+
+"JUnit" means the JUnit framework, distributed by JUnit under the 
+"Eclipse Public License Version 1.0", or a work based on such
+software and licensed under the "Eclipse Public License Version 1.0".
+
+"Eclipse Public License Version 1.0" means the license that can be
+found at https://www.eclipse.org/legal/epl-v10.html.
+
+1. Exception
+
+You have permission to copy, modify, propagate, and distribute a work
+formed by combining JUnit with the software, or a work derivative of 
+such a combination, even if such copying, modification, propagation, 
+or distribution would otherwise violate the terms of the GPL. You must
+comply with the GPL in all respects for all of the code used other than
+JUnit.
+
+You may include this JUnit Exception and its grant of permissions when
+you distribute the software. Inclusion of this notice with such a 
+distribution constitutes a grant of such permission. If you do not wish
+to grant these permissions, remove this section entitled "JUNIT 
+EXCEPTION" from your distribution.
+
+_ROBOT EXCEPTION_
+
+0. Definitions
+
+"The software" means any software covered under this license agreement. 
+
+"IHMC Robot Hardware drivers" means any project developed by the
+Florida Institute for Human and Machine Cognition(IHMC) to directly
+support using the software on physical robot hardware, but which can 
+not be released under the GPL due to agreements with the hardware vendor.
+
+1. Exception
+
+You have permission to link IHMC Robot Hardware drivers to the software, even 
+if such linking would otherwise violate the terms of the GPL. You must comply
+with the GPL in all respects for all of the code used other than linking
+IHMC Robot Hardware drivers to the software. You must also comply with the 
+licensing terms of the IHMC Robot Hardware drivers.
+
+You may include this Robot exception and its grant of permissions when you 
+distribute the software. Inclusion of this notice  with such a distribution 
+constitutes a grant of such permission. If you do not wish to grant these 
+permissions, remove this section entitled "robot exception" from your 
+distribution.
+

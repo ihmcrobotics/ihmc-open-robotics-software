@@ -1,0 +1,24 @@
+<package>
+  <description brief="Unit and regression tests for diagnsotic_aggregator">
+    Basic diagnostic_aggregator tests are  in the <b>diagnostic_aggregator</b> package, but any unit or regression tests that require new nodes, or new Analyzers go here.
+  </description>
+  <author>Kevin Watts</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/test_diagnostic_aggregator</url>
+  <depend package="pluginlib" />
+  <depend package="diagnostic_msgs" />
+  <depend package="diagnostic_aggregator" />
+  <depend package="roscpp" />
+  <depend package="rospy" />
+  <export>
+    <cpp cflags="-I${prefix}/include `rosboost-cfg --cflags`"
+         lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ltestdiagnostic_aggregator `rosboost-cfg --lflags regex`"/>
+       <diagnostic_aggregator plugin="${prefix}/test_diagnostic_aggregator_plugin.xml" />
+  </export>  
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+
+

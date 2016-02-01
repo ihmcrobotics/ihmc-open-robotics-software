@@ -1,0 +1,28 @@
+<package>
+  <description brief="tf2_ros">
+    This package contains the ROS bindings for the tf2 library, for both Python and C++. 
+  </description>
+  <author>Wim Meeussen, Eitan Marder-Eppstein</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/tf2_ros</url>
+
+  <depend package="tf2"/>
+  <depend package="tf2_msgs"/>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="geometry_msgs"/>
+  <depend package="std_msgs"/>
+  <depend package="actionlib"/>
+  <depend package="actionlib_msgs"/>
+  <depend package="rosgraph"/>
+  <depend package="message_filters"/>
+
+ <export>
+    <cpp cflags="-I${prefix}/include -I${prefix}/msg/cpp -I${prefix}/srv/cpp" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ltf2_ros"/>    
+ </export>
+
+
+</package>
+
+

@@ -1,0 +1,23 @@
+<package>
+  <description brief="atlas_msgs">
+    ROS plugins and atlas_msgs for drcsim
+  </description>
+  <author>John Hsu</author>
+  <license>Apache 2.0</license>
+  <depend package="pr2_controller_manager"/>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="image_transport"/>
+  <depend package="tf"/>
+  <depend package="trajectory_msgs"/>
+  <depend package="actionlib"/>
+  <depend package="actionlib_msgs"/>
+  <depend package="control_msgs"/>
+  <depend package="osrf_msgs"/>
+  <depend package="sandia_hand_msgs"/>
+  <!-- generate these here
+  <depend package="gazebo_msgs"/>
+  -->
+</package>

@@ -1,0 +1,21 @@
+<package>
+  <description brief="Monitor PR2 batteries and power board">
+
+     The power_monitor collects messages from the ocean_battery_server and
+     the pr2_power_board, and publishes a summary of their data in a
+     friendlier message format.
+
+  </description>
+  <author>Tim Field, Curt Meyers</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes="Dec 2009"/>
+  <url>http://www.ros.org/wiki/power_monitor</url>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="pr2_msgs"/>
+  <depend package="dynamic_reconfigure"/>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>

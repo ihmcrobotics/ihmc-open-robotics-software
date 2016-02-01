@@ -1,0 +1,11 @@
+<stack>
+  <description brief="filters">This library provides a standardized interface for processing data as a sequence of filters. This package contains a base class upon which to build specific implementations as well as an interface which dynamically loads filters based on runtime parameters. </description>
+  <author>Maintained by Tully Foote</author>
+  <license>BSD</license>  
+  <review status="doc reviewed" notes=""/>
+  <url>http://ros.org/wiki/filters</url>
+  <depend stack="pluginlib" /> <!-- pluginlib -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- rosconsole, roscpp -->
+
+</stack>

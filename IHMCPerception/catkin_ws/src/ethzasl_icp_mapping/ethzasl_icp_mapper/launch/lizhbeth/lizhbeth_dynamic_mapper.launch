@@ -1,0 +1,46 @@
+<!-- 
+FP: 3 Feb. 2014
+
+-->
+
+<launch>
+	<node name="mapper" type="dynamic_mapper" pkg="ethzasl_icp_mapper" output="screen" >
+		<remap from="cloud_in" to="/point_cloud2" />
+		<param name="subscribe_scan" value="false"/>
+		<param name="icpConfig" value="$(find ethzasl_icp_mapper)/launch/lizhbeth/icp_dynamic.yaml" />
+		<param name="inputFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/lizhbeth/input_dyn_filters.yaml" />
+		
+		<param name="odom_frame" value="/world_up" />
+		<param name="map_frame" value="/map" />
+		<param name="publishMapTf" value="true" />
+
+		<param name="useROSLogger" value="true" />
+		<param name="inputQueueSize" value="1" />
+		<param name="tfRefreshPeriod" value="0.005" />
+		<param name="minOverlap" value="0.6" /> 
+		<param name="maxOverlapToMerge" value="0.99" /> 
+		<param name="minReadingPointCount" value="500" /> 
+		<param name="minMapPointCount" value="10000" /> 
+
+		<!-- Parameters for dynamic elements -->
+		<param name="priorStatic" value="0.4"/>
+		<param name="priorDyn" value="0.6"/>
+		<param name="maxAngle" value="0.02"/>
+		<param name="eps_a" value="0.05"/>
+		<param name="eps_d" value="0.02"/>
+		<param name="alpha" value="0.99"/>
+		<param name="beta" value="0.99"/>
+		<param name="maxDyn" value="0.99"/>
+		<param name="maxDistNewPoint" value="0.1"/>
+
+		<!--param name="mapElevation" value=" 0.00"/--> <!-- mapping_1, ... ,9-->
+		<!--param name="mapElevation" value="-0.14"/--> <!-- mapping_10,11,12-->
+		<param name="mapElevation" value="-0.28"/> <!-- mapping_13-->
+	</node>
+
+	<node name="point_cloud_converter" type="point_cloud_converter" pkg="point_cloud_converter">
+		<remap from="points_in" to="/point_cloud" />
+		<remap from="points2_out" to="/point_cloud2" />
+	</node>
+
+</launch>

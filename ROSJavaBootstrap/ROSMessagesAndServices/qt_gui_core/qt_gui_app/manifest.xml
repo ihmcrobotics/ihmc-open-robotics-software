@@ -1,0 +1,11 @@
+<package>
+  <description brief="Integrated graphical user interface">
+    qt_gui_app provides the main to start an instance of the integrated graphical user interface provided by qt_gui.
+  </description>
+  <author>Dirk Thomas</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/qt_gui_app</url>
+
+  <depend package="qt_gui"/>
+</package>

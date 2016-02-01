@@ -1,0 +1,15 @@
+<launch>
+	<group ns='left'>
+	<include file="$(find pointgrey_camera_driver)/launch/camera.launch">
+	  <arg name="camera_serial" value="12502226" />
+	  <arg name="calibrated" value="0" />
+	</include>
+	</group>
+
+	<group ns='right'>
+	<include file="$(find pointgrey_camera_driver)/launch/camera.launch">
+	  <arg name="camera_serial" value="12502218" />
+	  <arg name="calibrated" value="0" />
+	</include>
+	</group>
+</launch>

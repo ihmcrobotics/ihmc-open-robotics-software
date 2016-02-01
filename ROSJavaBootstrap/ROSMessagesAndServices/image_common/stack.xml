@@ -1,0 +1,13 @@
+<stack>
+  <description brief="Common code for working with images">
+    Common code for working with images in ROS.
+  </description>
+  <author>Maintained by Patrick Mihelich</author>
+  <license>BSD</license>  
+  <review status="Doc reviewed" notes="2009/6/10"/>
+  <url>http://ros.org/wiki/image_common</url>
+  <depend stack="common" /> <!-- yaml_cpp, pluginlib -->
+  <depend stack="common_msgs" /> <!-- sensor_msgs -->
+  <depend stack="ros" /> <!-- roscpp, message_filters -->
+
+</stack>

@@ -1,0 +1,22 @@
+MaterialDef Terrain {
+
+	MaterialParameters {
+		Float maxHeight
+		Float minHeight
+		Vector2 scale
+		Float gridSize
+		Float radius
+		Vector3 lineColor
+		Float lineWidth
+		Float alpha
+	}
+
+	Technique {
+		VertexShader GLSL100:   Terrain/CommonTerrainBox.vert
+		FragmentShader GLSL100: Terrain/RainbowHeightBoxTerrain.frag
+		
+		WorldParameters {
+			WorldViewProjectionMatrix
+		}
+	}
+}

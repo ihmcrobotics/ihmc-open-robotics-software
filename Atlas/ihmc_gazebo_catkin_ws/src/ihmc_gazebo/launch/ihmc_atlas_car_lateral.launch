@@ -1,0 +1,32 @@
+<launch>
+
+  <arg name="gzname" default="gazebo"/>
+  <arg name="gzworld" default="'$(find ihmc_gazebo)/worlds/atlas_polaris.world'"/>
+  <arg name="hand_suffix" default=""/>
+  <arg name="extra_gazebo_args" default="-q" />
+  <arg name="model_args" default="" />
+
+  <param name="/atlas/time_to_unpin" type="double" value="0.5"/>
+  <param name="/atlas/startup_mode" type="string" value="car_lateral"/>
+
+
+  <!-- start gazebo with the Atlas -->
+  <include file="$(find ihmc_gazebo)/launch/atlas_no_controllers.launch">
+    <arg name="gzname" value="$(arg gzname)"/>
+    <arg name="gzworld" value="$(arg gzworld)"/>
+    <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)"/>
+  </include>
+
+  <!-- Robot Description -->
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find ihmc_gazebo)/urdf/ihmc_atlas_v5.urdf.xacro'" />
+  <param name="robot_initial_pose/x"     value="0.05" type="double"/>
+  <param name="robot_initial_pose/y"     value="-0.4" type="double"/>
+  <param name="robot_initial_pose/z"     value="1.12" type="double"/>
+  <param name="robot_initial_pose/roll"  value="0.0" type="double"/>
+  <param name="robot_initial_pose/pitch" value="-0.1" type="double"/>
+  <param name="robot_initial_pose/yaw"   value="-1.5" type="double"/>  
+  
+  <rosparam file="$(find ihmc_gazebo)/yaml/car_lateral_config.yaml" command="load"/>
+    
+  <include file="$(find ihmc_gazebo)/launch/ihmc_atlas_v5_bringup.launch"/>
+</launch>

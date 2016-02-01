@@ -1,0 +1,21 @@
+search_region/map_side_length: 0.6
+
+search_region/x_coordinates:
+-  0.0
+-  0.15
+-  0.2
+-  0.15
+-  0.0
+- -0.15
+- -0.2
+- -0.15
+
+search_region/y_coordinates:
+-  0.2
+-  0.15
+-  0.0
+- -0.15
+- -0.2
+- -0.15
+-  0.0
+-  0.15

@@ -1,0 +1,594 @@
+in:
+- - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 01_q_Conv,
+      ZoneName: 03_A1_OL_SO, ZoneID: '01', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 2380.0,
+      Delta: 119.0}
+  - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 03_q_Conv,
+      ZoneName: 03_A1_IL_OS, ZoneID: '03', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 1060.0,
+      Delta: 53.0}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_01_RadiantCeiling,
+      ZoneName: 03_A1_OL_SO, ZoneID: '01', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_02_RadiantCeiling,
+      ZoneName: 03_A1_ML_ME, ZoneID: '02', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_03_RadiantCeiling,
+      ZoneName: 03_A1_IL_OS, ZoneID: '03', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_01_RadiantCeiling,
+      ZoneName: 03_A1_OL_SO, ZoneID: '01', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_03_RadiantCeiling,
+      ZoneName: 03_A1_IL_OS, ZoneID: '03', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 07_q_Conv,
+      ZoneName: 03_B1_OL_MI, ZoneID: '07', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 2380.0,
+      Delta: 119.0}
+  - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 09_q_Conv,
+      ZoneName: 03_B1_IL_OS, ZoneID: '09', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 1325.0,
+      Delta: 66.25}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_07_RadiantCeiling,
+      ZoneName: 03_B1_OL_MI, ZoneID: '07', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_08_RadiantCeiling,
+      ZoneName: 03_B1_ML_OS, ZoneID: '08', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_09_RadiantCeiling,
+      ZoneName: 03_B1_IL_OS, ZoneID: '09', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_07_RadiantCeiling,
+      ZoneName: 03_B1_OL_MI, ZoneID: '07', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_09_RadiantCeiling,
+      ZoneName: 03_B1_IL_OS, ZoneID: '09', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+- - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 04_q_Conv,
+      ZoneName: 03_A2_OL_SO, ZoneID: '04', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 1700.0,
+      Delta: 85.0}
+  - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 06_q_Conv,
+      ZoneName: 03_A2_IL_MI, ZoneID: '06', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 2385.0,
+      Delta: 119.25}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_04_RadiantCeiling,
+      ZoneName: 03_A2_OL_SO, ZoneID: '04', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_05_RadiantCeiling,
+      ZoneName: 03_A2_ML_MI, ZoneID: '05', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_06_RadiantCeiling,
+      ZoneName: 03_A2_IL_MI, ZoneID: '06', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_04_RadiantCeiling,
+      ZoneName: 03_A2_OL_SO, ZoneID: '04', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_06_RadiantCeiling,
+      ZoneName: 03_A2_IL_MI, ZoneID: '06', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 19_q_Conv,
+      ZoneName: 03_D1_OL_SO, ZoneID: '19', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 850.0,
+      Delta: 42.5}
+  - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 21_q_Conv,
+      ZoneName: 03_D1_IL_MI, ZoneID: '21', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 1325.0,
+      Delta: 66.25}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_19_RadiantCeiling,
+      ZoneName: 03_D1_OL_SO, ZoneID: '19', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_20_RadiantCeiling,
+      ZoneName: 03_D1_ML_UN, ZoneID: '20', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_21_RadiantCeiling,
+      ZoneName: 03_D1_IL_MI, ZoneID: '21', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_19_RadiantCeiling,
+      ZoneName: 03_D1_OL_SO, ZoneID: '19', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_21_RadiantCeiling,
+      ZoneName: 03_D1_IL_MI, ZoneID: '21', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+- - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 16_q_Conv,
+      ZoneName: 03_C2_OL_MI, ZoneID: '16', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 2380.0,
+      Delta: 119.0}
+  - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 18_q_Conv,
+      ZoneName: 03_C2_IL_OS, ZoneID: '18', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 1060.0,
+      Delta: 53.0}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_16_RadiantCeiling,
+      ZoneName: 03_C2_OL_MI, ZoneID: '16', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_17_RadiantCeiling,
+      ZoneName: 03_C2_ML_ME, ZoneID: '17', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_18_RadiantCeiling,
+      ZoneName: 03_C2_IL_OS, ZoneID: '18', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_16_RadiantCeiling,
+      ZoneName: 03_C2_OL_MI, ZoneID: '16', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_18_RadiantCeiling,
+      ZoneName: 03_C2_IL_OS, ZoneID: '18', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 22_q_Conv,
+      ZoneName: 03_D2_OL_MI, ZoneID: '22', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 2380.0,
+      Delta: 119.0}
+  - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 24_q_Conv,
+      ZoneName: 03_D2_IL_OS, ZoneID: '24', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 1325.0,
+      Delta: 66.25}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_22_RadiantCeiling,
+      ZoneName: 03_D2_OL_MI, ZoneID: '22', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_23_RadiantCeiling,
+      ZoneName: 03_D2_ML_MI, ZoneID: '23', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_24_RadiantCeiling,
+      ZoneName: 03_D2_IL_OS, ZoneID: '24', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_22_RadiantCeiling,
+      ZoneName: 03_D2_OL_MI, ZoneID: '22', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_24_RadiantCeiling,
+      ZoneName: 03_D2_IL_OS, ZoneID: '24', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+- - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 10_q_Conv,
+      ZoneName: 03_B2_OL_SO, ZoneID: '10', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 1700.0,
+      Delta: 85.0}
+  - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 12_q_Conv,
+      ZoneName: 03_B2_IL_OS, ZoneID: '12', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 2650.0,
+      Delta: 132.5}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_10_RadiantCeiling,
+      ZoneName: 03_B2_OL_SO, ZoneID: '10', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_11_RadiantCeiling,
+      ZoneName: 03_B2_ML_MI, ZoneID: '11', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_12_RadiantCeiling,
+      ZoneName: 03_B2_IL_OS, ZoneID: '12', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_10_RadiantCeiling,
+      ZoneName: 03_B2_OL_SO, ZoneID: '10', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_12_RadiantCeiling,
+      ZoneName: 03_B2_IL_OS, ZoneID: '12', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 13_q_Conv,
+      ZoneName: 03_C1_OL_SO, ZoneID: '13', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 850.0,
+      Delta: 42.5}
+  - - {VarCategoryId: Q_CONV, VariableCategory: Convector heating rate, Identifier: 15_q_Conv,
+      ZoneName: 03_C1_IL_OS, ZoneID: '15', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: 1060.0,
+      Delta: 53.0}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_13_RadiantCeiling,
+      ZoneName: 03_C1_OL_SO, ZoneID: '13', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_14_RadiantCeiling,
+      ZoneName: 03_C1_ML_ME, ZoneID: '14', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPCR, VariableCategory: Zone Ceiling Panel Cooling Rate, Identifier: Hydronic_Low_Temp_Radiant_Cooling_Rate_15_RadiantCeiling,
+      ZoneName: 03_C1_IL_OS, ZoneID: '15', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_13_RadiantCeiling,
+      ZoneName: 03_C1_OL_SO, ZoneID: '13', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+  - - {VarCategoryId: ZCPHR, VariableCategory: Zone Ceiling Panel Heating Rate, Identifier: Hydronic_Low_Temp_Radiant_Heating_Rate_15_RadiantCeiling,
+      ZoneName: 03_C1_IL_OS, ZoneID: '15', VarType: SI, Unit: W, MinValue: 0.0, MaxValue: .NaN,
+      Delta: .NaN}
+out:
+- - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_A1_OL_SO,
+      ZoneName: 03_A1_OL_SO, ZoneID: '01', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_A1_ML_ME,
+      ZoneName: 03_A1_ML_ME, ZoneID: '02', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_A1_IL_OS,
+      ZoneName: 03_A1_IL_OS, ZoneID: '03', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_B1_OL_MI,
+      ZoneName: 03_B1_OL_MI, ZoneID: '07', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_B1_ML_OS,
+      ZoneName: 03_B1_ML_OS, ZoneID: '08', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_B1_IL_OS,
+      ZoneName: 03_B1_IL_OS, ZoneID: '09', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: totEPD, VariableCategory: Total Energy Power Demand, Identifier: Total Energy Power Demand,
+      ZoneName: '-', ZoneID: '-', VarType: SO, Unit: W, MinValue: 0.0, MaxValue: .NaN}
+  - - {VarCategoryId: totHPD, VariableCategory: Total Heat Power Demand, Identifier: Total Heat Power Demand,
+      ZoneName: '-', ZoneID: '-', VarType: SO, Unit: W, MinValue: 0.0, MaxValue: .NaN}
+- - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_A2_OL_SO,
+      ZoneName: 03_A2_OL_SO, ZoneID: '04', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_A2_ML_MI,
+      ZoneName: 03_A2_ML_MI, ZoneID: '05', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_A2_IL_MI,
+      ZoneName: 03_A2_IL_MI, ZoneID: '06', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_D1_OL_SO,
+      ZoneName: 03_D1_OL_SO, ZoneID: '19', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_D1_ML_UN,
+      ZoneName: 03_D1_ML_UN, ZoneID: '20', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_D1_IL_MI,
+      ZoneName: 03_D1_IL_MI, ZoneID: '21', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: totEPD, VariableCategory: Total Energy Power Demand, Identifier: Total Energy Power Demand,
+      ZoneName: '-', ZoneID: '-', VarType: SO, Unit: W, MinValue: 0.0, MaxValue: .NaN}
+  - - {VarCategoryId: totHPD, VariableCategory: Total Heat Power Demand, Identifier: Total Heat Power Demand,
+      ZoneName: '-', ZoneID: '-', VarType: SO, Unit: W, MinValue: 0.0, MaxValue: .NaN}
+- - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_C2_OL_MI,
+      ZoneName: 03_C2_OL_MI, ZoneID: '16', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_C2_ML_ME,
+      ZoneName: 03_C2_ML_ME, ZoneID: '17', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_C2_IL_OS,
+      ZoneName: 03_C2_IL_OS, ZoneID: '18', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_D2_OL_MI,
+      ZoneName: 03_D2_OL_MI, ZoneID: '22', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_D2_ML_MI,
+      ZoneName: 03_D2_ML_MI, ZoneID: '23', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_D2_IL_OS,
+      ZoneName: 03_D2_IL_OS, ZoneID: '24', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: totEPD, VariableCategory: Total Energy Power Demand, Identifier: Total Energy Power Demand,
+      ZoneName: '-', ZoneID: '-', VarType: SO, Unit: W, MinValue: 0.0, MaxValue: .NaN}
+  - - {VarCategoryId: totHPD, VariableCategory: Total Heat Power Demand, Identifier: Total Heat Power Demand,
+      ZoneName: '-', ZoneID: '-', VarType: SO, Unit: W, MinValue: 0.0, MaxValue: .NaN}
+- - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_B2_OL_SO,
+      ZoneName: 03_B2_OL_SO, ZoneID: '10', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_B2_ML_MI,
+      ZoneName: 03_B2_ML_MI, ZoneID: '11', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_B2_IL_OS,
+      ZoneName: 03_B2_IL_OS, ZoneID: '12', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_C1_OL_SO,
+      ZoneName: 03_C1_OL_SO, ZoneID: '13', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_C1_ML_ME,
+      ZoneName: 03_C1_ML_ME, ZoneID: '14', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: ZT, VariableCategory: Zone Temperature, Identifier: Zone_Mean_Air_Temperature_03_C1_IL_OS,
+      ZoneName: 03_C1_IL_OS, ZoneID: '15', VarType: SO, Unit: degC, MinValue: .NaN,
+      MaxValue: 200.0}
+  - - {VarCategoryId: totEPD, VariableCategory: Total Energy Power Demand, Identifier: Total Energy Power Demand,
+      ZoneName: '-', ZoneID: '-', VarType: SO, Unit: W, MinValue: 0.0, MaxValue: .NaN}
+  - - {VarCategoryId: totHPD, VariableCategory: Total Heat Power Demand, Identifier: Total Heat Power Demand,
+      ZoneName: '-', ZoneID: '-', VarType: SO, Unit: W, MinValue: 0.0, MaxValue: .NaN}
+dist:
+- - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 01_03_A1_OL_SO_equip,
+      ZoneName: 03_A1_OL_SO, ZoneID: '01', VarType: V, Unit: 7 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 02_03_A1_ML_ME_equip,
+      ZoneName: 03_A1_ML_ME, ZoneID: '02', VarType: V, Unit: 2 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 03_03_A1_IL_OS_equip,
+      ZoneName: 03_A1_IL_OS, ZoneID: '03', VarType: V, Unit: 10 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 01_03_A1_OL_SO_occup,
+      ZoneName: 03_A1_OL_SO, ZoneID: '01', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 02_03_A1_ML_ME_occup,
+      ZoneName: 03_A1_ML_ME, ZoneID: '02', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 03_03_A1_IL_OS_occup,
+      ZoneName: 03_A1_IL_OS, ZoneID: '03', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 01_03_A1_OL_SO_light,
+      ZoneName: 03_A1_OL_SO, ZoneID: '01', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 02_03_A1_ML_ME_light,
+      ZoneName: 03_A1_ML_ME, ZoneID: '02', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 03_03_A1_IL_OS_light,
+      ZoneName: 03_A1_IL_OS, ZoneID: '03', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT11_03_A1_OL_SO,
+      ZoneName: 03_A1_OL_SO, ZoneID: '01', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT11_03_A1_ML_ME,
+      ZoneName: 03_A1_ML_ME, ZoneID: '02', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT11_03_A1_IL_OS,
+      ZoneName: 03_A1_IL_OS, ZoneID: '03', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_A1_IL_OS,
+      ZoneName: 03_A1_IL_OS, ZoneID: '03', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_A1_OL_SO,
+      ZoneName: 03_A1_OL_SO, ZoneID: '01', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 07_03_B1_OL_MI_equip,
+      ZoneName: 03_B1_OL_MI, ZoneID: '07', VarType: V, Unit: 7 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 08_03_B1_ML_OS_equip,
+      ZoneName: 03_B1_ML_OS, ZoneID: '08', VarType: V, Unit: 10 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 09_03_B1_IL_OS_equip,
+      ZoneName: 03_B1_IL_OS, ZoneID: '09', VarType: V, Unit: 10 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 07_03_B1_OL_MI_occup,
+      ZoneName: 03_B1_OL_MI, ZoneID: '07', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 08_03_B1_ML_OS_occup,
+      ZoneName: 03_B1_ML_OS, ZoneID: '08', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 09_03_B1_IL_OS_occup,
+      ZoneName: 03_B1_IL_OS, ZoneID: '09', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 07_03_B1_OL_MI_light,
+      ZoneName: 03_B1_OL_MI, ZoneID: '07', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 08_03_B1_ML_OS_light,
+      ZoneName: 03_B1_ML_OS, ZoneID: '08', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 09_03_B1_IL_OS_light,
+      ZoneName: 03_B1_IL_OS, ZoneID: '09', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT10_03_B1_OL_MI,
+      ZoneName: 03_B1_OL_MI, ZoneID: '07', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT10_03_B1_ML_OS,
+      ZoneName: 03_B1_ML_OS, ZoneID: '08', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT10_03_B1_IL_OS,
+      ZoneName: 03_B1_IL_OS, ZoneID: '09', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_B1_IL_OS,
+      ZoneName: 03_B1_IL_OS, ZoneID: '09', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_B1_OL_MI,
+      ZoneName: 03_B1_OL_MI, ZoneID: '07', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_A_Core,
+      ZoneName: 03_A_Core, ZoneID: A, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_B_Core,
+      ZoneName: 03_B_Core, ZoneID: B, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_C_Core,
+      ZoneName: 03_C_Core, ZoneID: C, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_D_Core,
+      ZoneName: 03_D_Core, ZoneID: D, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - VarCategoryId: ODBT
+      VariableCategory: Outdoor Dry Bulb Temperature
+      Identifier: Environment_Outdoor_Dry_Bulb
+      ZoneName: Environment
+      ZoneID: []
+      VarType: V
+      Unit: degC
+      MinValue: '-'
+      MaxValue: '200'
+- - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 04_03_A2_OL_SO_equip,
+      ZoneName: 03_A2_OL_SO, ZoneID: '04', VarType: V, Unit: 7 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 05_03_A2_ML_MI_equip,
+      ZoneName: 03_A2_ML_MI, ZoneID: '05', VarType: V, Unit: 7 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 06_03_A2_IL_MI_equip,
+      ZoneName: 03_A2_IL_MI, ZoneID: '06', VarType: V, Unit: 7 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 04_03_A2_OL_SO_occup,
+      ZoneName: 03_A2_OL_SO, ZoneID: '04', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 05_03_A2_ML_MI_occup,
+      ZoneName: 03_A2_ML_MI, ZoneID: '05', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 06_03_A2_IL_MI_occup,
+      ZoneName: 03_A2_IL_MI, ZoneID: '06', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 04_03_A2_OL_SO_light,
+      ZoneName: 03_A2_OL_SO, ZoneID: '04', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 05_03_A2_ML_MI_light,
+      ZoneName: 03_A2_ML_MI, ZoneID: '05', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 06_03_A2_IL_MI_light,
+      ZoneName: 03_A2_IL_MI, ZoneID: '06', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT11_03_A2_OL_SO,
+      ZoneName: 03_A2_OL_SO, ZoneID: '04', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT11_03_A2_ML_MI,
+      ZoneName: 03_A2_ML_MI, ZoneID: '05', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT11_03_A2_IL_MI,
+      ZoneName: 03_A2_IL_MI, ZoneID: '06', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_A2_IL_MI,
+      ZoneName: 03_A2_IL_MI, ZoneID: '06', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_A2_OL_SO,
+      ZoneName: 03_A2_OL_SO, ZoneID: '04', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 19_03_D1_OL_SO_equip,
+      ZoneName: 03_D1_OL_SO, ZoneID: '19', VarType: V, Unit: 7 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 21_03_D1_IL_MI_equip,
+      ZoneName: 03_D1_IL_MI, ZoneID: '21', VarType: V, Unit: 7 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 19_03_D1_OL_SO_occup,
+      ZoneName: 03_D1_OL_SO, ZoneID: '19', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 21_03_D1_IL_MI_occup,
+      ZoneName: 03_D1_IL_MI, ZoneID: '21', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 19_03_D1_OL_SO_light,
+      ZoneName: 03_D1_OL_SO, ZoneID: '19', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 20_03_D1_ML_UN_light,
+      ZoneName: 03_D1_ML_UN, ZoneID: '20', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 21_03_D1_IL_MI_light,
+      ZoneName: 03_D1_IL_MI, ZoneID: '21', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT11_03_D1_OL_SO,
+      ZoneName: 03_D1_OL_SO, ZoneID: '19', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT11_03_D1_ML_UN,
+      ZoneName: 03_D1_ML_UN, ZoneID: '20', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT11_03_D1_IL_MI,
+      ZoneName: 03_D1_IL_MI, ZoneID: '21', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_D1_IL_MI,
+      ZoneName: 03_D1_IL_MI, ZoneID: '21', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_D1_OL_SO,
+      ZoneName: 03_D1_OL_SO, ZoneID: '19', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_A_Core,
+      ZoneName: 03_A_Core, ZoneID: A, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_B_Core,
+      ZoneName: 03_B_Core, ZoneID: B, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_C_Core,
+      ZoneName: 03_C_Core, ZoneID: C, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_D_Core,
+      ZoneName: 03_D_Core, ZoneID: D, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - VarCategoryId: ODBT
+      VariableCategory: Outdoor Dry Bulb Temperature
+      Identifier: Environment_Outdoor_Dry_Bulb
+      ZoneName: Environment
+      ZoneID: []
+      VarType: V
+      Unit: degC
+      MinValue: '-'
+      MaxValue: '200'
+- - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 16_03_C2_OL_MI_equip,
+      ZoneName: 03_C2_OL_MI, ZoneID: '16', VarType: V, Unit: 7 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 17_03_C2_ML_ME_equip,
+      ZoneName: 03_C2_ML_ME, ZoneID: '17', VarType: V, Unit: 2 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 18_03_C2_IL_OS_equip,
+      ZoneName: 03_C2_IL_OS, ZoneID: '18', VarType: V, Unit: 10 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 16_03_C2_OL_MI_occup,
+      ZoneName: 03_C2_OL_MI, ZoneID: '16', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 17_03_C2_ML_ME_occup,
+      ZoneName: 03_C2_ML_ME, ZoneID: '17', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 18_03_C2_IL_OS_occup,
+      ZoneName: 03_C2_IL_OS, ZoneID: '18', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 16_03_C2_OL_MI_light,
+      ZoneName: 03_C2_OL_MI, ZoneID: '16', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 17_03_C2_ML_ME_light,
+      ZoneName: 03_C2_ML_ME, ZoneID: '17', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 18_03_C2_IL_OS_light,
+      ZoneName: 03_C2_IL_OS, ZoneID: '18', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT10_03_C2_OL_MI,
+      ZoneName: 03_C2_OL_MI, ZoneID: '16', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT10_03_C2_ML_ME,
+      ZoneName: 03_C2_ML_ME, ZoneID: '17', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT10_03_C2_IL_OS,
+      ZoneName: 03_C2_IL_OS, ZoneID: '18', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_C2_IL_OS,
+      ZoneName: 03_C2_IL_OS, ZoneID: '18', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_C2_OL_MI,
+      ZoneName: 03_C2_OL_MI, ZoneID: '16', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 22_03_D2_OL_MI_equip,
+      ZoneName: 03_D2_OL_MI, ZoneID: '22', VarType: V, Unit: 7 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 23_03_D2_ML_MI_equip,
+      ZoneName: 03_D2_ML_MI, ZoneID: '23', VarType: V, Unit: 7 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 24_03_D2_IL_OS_equip,
+      ZoneName: 03_D2_IL_OS, ZoneID: '24', VarType: V, Unit: 10 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 22_03_D2_OL_MI_occup,
+      ZoneName: 03_D2_OL_MI, ZoneID: '22', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 23_03_D2_ML_MI_occup,
+      ZoneName: 03_D2_ML_MI, ZoneID: '23', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 24_03_D2_IL_OS_occup,
+      ZoneName: 03_D2_IL_OS, ZoneID: '24', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 22_03_D2_OL_MI_light,
+      ZoneName: 03_D2_OL_MI, ZoneID: '22', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 23_03_D2_ML_MI_light,
+      ZoneName: 03_D2_ML_MI, ZoneID: '23', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 24_03_D2_IL_OS_light,
+      ZoneName: 03_D2_IL_OS, ZoneID: '24', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT11_03_D2_OL_MI,
+      ZoneName: 03_D2_OL_MI, ZoneID: '22', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT11_03_D2_ML_MI,
+      ZoneName: 03_D2_ML_MI, ZoneID: '23', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT11_03_D2_IL_OS,
+      ZoneName: 03_D2_IL_OS, ZoneID: '24', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_D2_IL_OS,
+      ZoneName: 03_D2_IL_OS, ZoneID: '24', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_D2_OL_MI,
+      ZoneName: 03_D2_OL_MI, ZoneID: '22', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_A_Core,
+      ZoneName: 03_A_Core, ZoneID: A, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_B_Core,
+      ZoneName: 03_B_Core, ZoneID: B, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_C_Core,
+      ZoneName: 03_C_Core, ZoneID: C, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_D_Core,
+      ZoneName: 03_D_Core, ZoneID: D, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - VarCategoryId: ODBT
+      VariableCategory: Outdoor Dry Bulb Temperature
+      Identifier: Environment_Outdoor_Dry_Bulb
+      ZoneName: Environment
+      ZoneID: []
+      VarType: V
+      Unit: degC
+      MinValue: '-'
+      MaxValue: '200'
+- - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 10_03_B2_OL_SO_equip,
+      ZoneName: 03_B2_OL_SO, ZoneID: '10', VarType: V, Unit: 7 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 11_03_B2_ML_MI_equip,
+      ZoneName: 03_B2_ML_MI, ZoneID: '11', VarType: V, Unit: 7 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 12_03_B2_IL_OS_equip,
+      ZoneName: 03_B2_IL_OS, ZoneID: '12', VarType: V, Unit: 10 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 10_03_B2_OL_SO_occup,
+      ZoneName: 03_B2_OL_SO, ZoneID: '10', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 11_03_B2_ML_MI_occup,
+      ZoneName: 03_B2_ML_MI, ZoneID: '11', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 12_03_B2_IL_OS_occup,
+      ZoneName: 03_B2_IL_OS, ZoneID: '12', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 10_03_B2_OL_SO_light,
+      ZoneName: 03_B2_OL_SO, ZoneID: '10', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 11_03_B2_ML_MI_light,
+      ZoneName: 03_B2_ML_MI, ZoneID: '11', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 12_03_B2_IL_OS_light,
+      ZoneName: 03_B2_IL_OS, ZoneID: '12', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT10_03_B2_OL_SO,
+      ZoneName: 03_B2_OL_SO, ZoneID: '10', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT10_03_B2_ML_MI,
+      ZoneName: 03_B2_ML_MI, ZoneID: '11', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT10_03_B2_IL_OS,
+      ZoneName: 03_B2_IL_OS, ZoneID: '12', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_B2_IL_OS,
+      ZoneName: 03_B2_IL_OS, ZoneID: '12', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_B2_OL_SO,
+      ZoneName: 03_B2_OL_SO, ZoneID: '10', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 13_03_C1_OL_SO_equip,
+      ZoneName: 03_C1_OL_SO, ZoneID: '13', VarType: V, Unit: 7 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 14_03_C1_ML_ME_equip,
+      ZoneName: 03_C1_ML_ME, ZoneID: '14', VarType: V, Unit: 2 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: EG, VariableCategory: Equipment Gains, Identifier: 15_03_C1_IL_OS_equip,
+      ZoneName: 03_C1_IL_OS, ZoneID: '15', VarType: V, Unit: 10 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 13_03_C1_OL_SO_occup,
+      ZoneName: 03_C1_OL_SO, ZoneID: '13', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 14_03_C1_ML_ME_occup,
+      ZoneName: 03_C1_ML_ME, ZoneID: '14', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: OG, VariableCategory: Occupancy Gains, Identifier: 15_03_C1_IL_OS_occup,
+      ZoneName: 03_C1_IL_OS, ZoneID: '15', VarType: V, Unit: '-', MinValue: '0', MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 13_03_C1_OL_SO_light,
+      ZoneName: 03_C1_OL_SO, ZoneID: '13', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 14_03_C1_ML_ME_light,
+      ZoneName: 03_C1_ML_ME, ZoneID: '14', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: LG, VariableCategory: Lighting Gains, Identifier: 15_03_C1_IL_OS_light,
+      ZoneName: 03_C1_IL_OS, ZoneID: '15', VarType: V, Unit: 6.6 W/m2, MinValue: '0',
+      MaxValue: '1'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT10_03_C1_OL_SO,
+      ZoneName: 03_C1_OL_SO, ZoneID: '13', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT10_03_C1_ML_ME,
+      ZoneName: 03_C1_ML_ME, ZoneID: '14', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: FP, VariableCategory: Fan Power, Identifier: FanPower_RLT10_03_C1_IL_OS,
+      ZoneName: 03_C1_IL_OS, ZoneID: '15', VarType: V, Unit: W, MinValue: '0', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_C1_IL_OS,
+      ZoneName: 03_C1_IL_OS, ZoneID: '15', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: SS, VariableCategory: SolarStuff, Identifier: SS_03_C1_OL_SO,
+      ZoneName: 03_C1_OL_SO, ZoneID: '13', VarType: V, Unit: W, MinValue: '-', MaxValue: '-'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_A_Core,
+      ZoneName: 03_A_Core, ZoneID: A, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_B_Core,
+      ZoneName: 03_B_Core, ZoneID: B, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_C_Core,
+      ZoneName: 03_C_Core, ZoneID: C, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - {VarCategoryId: CT, VariableCategory: Core Temperature, Identifier: Zone_Mean_Air_Temperature_03_D_Core,
+      ZoneName: 03_D_Core, ZoneID: D, VarType: V, Unit: degC, MinValue: '-', MaxValue: '200'}
+  - - VarCategoryId: ODBT
+      VariableCategory: Outdoor Dry Bulb Temperature
+      Identifier: Environment_Outdoor_Dry_Bulb
+      ZoneName: Environment
+      ZoneID: []
+      VarType: V
+      Unit: degC
+      MinValue: '-'
+      MaxValue: '200'

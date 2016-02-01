@@ -1,0 +1,52 @@
+# Produced by CVXGEN, 2014-02-11 21:41:08 -0500.
+# CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2012 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+dimensions
+  #  nSupportVectors = 4 # number of basis vectors for approximation of friciton cones
+  #  nPointsPerContact = 4 # points per plane contact
+  #  nPlanes = 4 # number of plane contacts
+  rhoSize = 64 #nPlanes * nSupportVectors * nPointsPerContact
+  wrenchLength = 6 # universal constant for physical space
+  nDoF = 38 # size of the robot actuator joint acceleration space.
+end
+
+parameters
+  A (wrenchLength, nDoF) # CentroidalMomentumMatrix
+  b (wrenchLength, 1) # MomentumDotEquationRightHandSide DesiredChangeInMomentum
+  C (wrenchLength, wrenchLength) diagonal psd #MomentumDotWeight
+
+  Js (nDoF, nDoF) # SecondaryConstraintJacobian
+  ps (nDoF, 1) # SecondaryConstraintRightHandSide
+  Ws (nDoF, nDoF) diagonal psd # SecondaryConstraintWeight
+
+  Lambda (nDoF, nDoF) diagonal psd # JointAccelerationRegularization
+
+  Qrho (wrenchLength, rhoSize) # ContactPointWrenchMatrix
+  c (wrenchLength, 1) # WrenchEquationRightHandSide
+  rhoMin (rhoSize) positive
+  WRho (rhoSize, rhoSize) diagonal psd # GroundReactionForceRegularization
+
+  rhoPrevious (rhoSize) positive
+  WRhoSmoother (rhoSize, rhoSize) diagonal psd # RateOfChangeOfGroundReactionForceRegularization
+
+  rhoPreviousMean (rhoSize) positive
+  WRhoCoPPenalty (rhoSize, rhoSize) diagonal psd # CoPRegularization
+end
+
+variables
+  rho (rhoSize) # magnitude of each ground reaction force component
+  vd (nDoF) # JointAccelerations
+end
+
+minimize
+  quad(A * vd - b, C) + quad(Js * vd - ps, Ws) + quad(rho, WRho) + quad(vd, Lambda) + quad(rho - rhoPrevious, WRhoSmoother) + quad(rho - rhoPreviousMean, WRhoCoPPenalty)
+subject to
+  Qrho * rho == A * vd + c # simple force balance
+  rho >= rhoMin
+end

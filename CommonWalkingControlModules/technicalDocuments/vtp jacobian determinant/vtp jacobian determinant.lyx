@@ -1,0 +1,315 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\DeclareMathOperator{\Ad}{Ad}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman lmodern
+\font_sans lmss
+\font_typewriter lmtt
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 2
+\use_esint 0
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+J_{vtp} & = & \Ad_{H_{vtp}^{u}}\left(\begin{array}{cc}
+0 & 0\\
+e_{x} & e_{y}
+\end{array}\right)\\
+ & = & \left(\begin{array}{cc}
+\tilde{p}Re_{x} & \tilde{p}Re_{y}\\
+Re_{x} & Re_{y}
+\end{array}\right)
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+J_{vtp,2\times2}=QJ_{vtp}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+with 
+\begin_inset Formula 
+\begin{align*}
+Q & =\left(\begin{array}{cccccc}
+1 & 0 & 0 & 0 & 0 & 0\\
+0 & 1 & 0 & 0 & 0 & 0
+\end{array}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+Q & = & \left(\begin{array}{cccccc}
+1 & 0 & 0 & 0 & 0 & 0\\
+0 & 1 & 0 & 0 & 0 & 0
+\end{array}\right)\\
+ & = & \left(\begin{array}{cc}
+e_{x}^{T} & 0\\
+e_{y}^{T} & 0
+\end{array}\right)
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+so that
+\begin_inset Formula 
+\[
+J_{vtp,2\times2}=\left(\begin{array}{cc}
+e_{x}^{T}\tilde{p}Re_{x} & e_{y}^{T}\tilde{p}Re_{y}\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+J_{vtp,2\times2} & = & \left(\begin{array}{cc}
+e_{x}^{T}\tilde{p}Re_{x} & e_{y}^{T}\tilde{p}Re_{y}\end{array}\right)\\
+ & = & P^{T}\tilde{p}RP
+\end{eqnarray*}
+
+\end_inset
+
+with
+\begin_inset Formula 
+\[
+P=\left(\begin{array}{cc}
+e_{x} & e_{y}\end{array}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\tilde{p}=\left(\begin{array}{ccc}
+0 & -p_{z} & p_{y}\\
+p_{z} & 0 & -p_{x}\\
+-p_{y} & p_{x} & 0
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+R=\left(\begin{array}{ccc}
+r_{11} & r_{12} & r_{13}\\
+r_{21} & r_{22} & r_{23}\\
+r_{31} & r_{32} & r_{33}
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This can be rewritten as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+J_{vtp,2\times2}=\left(\begin{array}{cc}
+0 & -p_{z}\\
+p_{z} & 0
+\end{array}\right)\left(\begin{array}{cc}
+r_{11} & r_{12}\\
+r_{21} & r_{22}
+\end{array}\right)
+\]
+
+\end_inset
+
+so that
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\det\left(J_{vtp,2\times2}\right) & = & \det\left(\begin{array}{cc}
+0 & -p_{z}\\
+p_{z} & 0
+\end{array}\right)\det\left(\begin{array}{cc}
+r_{11} & r_{12}\\
+r_{21} & r_{22}
+\end{array}\right)\\
+ & = & p_{z}^{2}\left(r_{11}r_{22}-r_{12}r_{21}\right)
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+One way to have this determinant be zero is when 
+\begin_inset Formula $p_{z}=0$
+\end_inset
+
+.
+ The other way is to have the term in parentheses be zero.
+ The rotation matrix can be written in terms of yaw 
+\begin_inset Formula $\alpha$
+\end_inset
+
+, pitch 
+\begin_inset Formula $\beta$
+\end_inset
+
+ and roll 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ as
+\begin_inset Formula 
+\[
+R=\left(\begin{array}{ccc}
+c\alpha c\beta & c\alpha s\beta s\gamma-s\alpha c\gamma & c\alpha s\beta c\gamma+s\alpha s\gamma\\
+s\alpha c\beta & s\alpha s\beta s\gamma+c\alpha c\gamma & s\alpha s\beta c\gamma-c\alpha s\gamma\\
+-s\beta & c\beta s\gamma & c\beta c\gamma
+\end{array}\right)
+\]
+
+\end_inset
+
+so that
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+r_{11}r_{22}-r_{12}r_{21} & = & c\alpha c\beta s\alpha s\beta s\gamma+c^{2}\alpha c\beta c\gamma\\
+ & - & c\alpha c\beta s\alpha s\beta s\gamma+s^{2}\alpha c\beta c\gamma\\
+ & = & c\beta c\gamma
+\end{eqnarray*}
+
+\end_inset
+
+which shows that the other way to have the determinant be zero is when 
+\begin_inset Formula $\cos\beta$
+\end_inset
+
+ or 
+\begin_inset Formula $\cos\gamma$
+\end_inset
+
+ are zero.
+ 
+\end_layout
+
+\begin_layout Standard
+In summary, 
+\begin_inset Formula $J_{vtp,2\times2}$
+\end_inset
+
+ is invertible if and only if neither of the following conditions are true:
+\end_layout
+
+\begin_layout Enumerate
+the 
+\begin_inset Formula $z$
+\end_inset
+
+-coordinate of the VTP is zero, expressed in the upper body-fixed frame
+\end_layout
+
+\begin_layout Enumerate
+the 
+\begin_inset Formula $z$
+\end_inset
+
+-axis of the upper body-fixed frame lies in the horizontal plane of the
+ foot-fixed frame
+\end_layout
+
+\end_body
+\end_document

@@ -1,0 +1,4 @@
+atlas_hardware_interface/AtlasDiffFilt2 q_filt
+atlas_hardware_interface/AtlasDiffFilt2 qd_filt
+atlas_hardware_interface/AtlasDiffFilt2 f_filt
+atlas_hardware_interface/AtlasDiffFilt3 ferr_filt

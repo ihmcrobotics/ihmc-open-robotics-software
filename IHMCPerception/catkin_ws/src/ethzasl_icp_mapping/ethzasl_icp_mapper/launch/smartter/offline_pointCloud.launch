@@ -1,0 +1,10 @@
+<launch>
+	<node name="vtkToPointCloud" type="vtkToPointCloud" pkg="ethzasl_point_cloud_vtk_tools" output="screen">
+		<param name="mapFrameId" value="/base_link" /> 
+		<param name="cloudTopic" value="/sick/point_cloud" /> 
+		<param name="csvListFiles" value="/media/ASL-DATASET/datasets/laser3D/turningSick/carArroundETH/csv_odom/icp_list.csv" /> 
+		<param name="dataDirectory" value="/media/ASL-DATASET/datasets/laser3D/turningSick/carArroundETH/csv_odom" /> 
+		<param name="publishRate" value="1" /> 
+		<param name="pauseEachMsg" value="false" /> 
+	</node>
+</launch>

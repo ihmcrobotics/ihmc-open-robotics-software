@@ -1,0 +1,24 @@
+<package>
+  <description brief="Aggregates, collects and analyzes robot diagnostics" >
+    <p><b>diagnostic_aggregator</b> contains the tools to aggregate and analyze robot diagnostics on an active robot. It uses the <b>Aggregator</b> class as to aggregate and process data. The aggregator tool loads diagnostic Analyzers as plug-ins. These analyzers can perform basic diagnostics analysis, such as testing when things are stale, or having known errors. Analyzers are subclasses of <b>Analyzer</b>. <b>AnalyzerGroup</b> and <b>GenericAnalyzer</b> are two of these subclasses.</p>
+
+      <p>The Aggregator should be run on a robot, and is typically launched in the robot's launch file. Viewing of this aggregated diagnostics is done with the Robot Monitor, in the <b>robot_monitor</b> package. </p>
+    </description>
+  <author>Kevin Watts</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes=""/>
+  <url>http://www.ros.org/wiki/diagnostic_aggregator</url>
+  <depend package="diagnostic_msgs" />
+  <depend package="roscpp" />
+  <depend package="xmlrpcpp" /> 
+  <depend package="pluginlib" />
+  <depend package="rospy" /> <!-- For testing -->
+  <export>
+    <cpp cflags="-I${prefix}/include `rosboost-cfg --cflags`" 
+    lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ldiagnostic_aggregator `rosboost-cfg --lflags regex`"/>
+    <diagnostic_aggregator plugin="${prefix}/analyzer_plugins.xml" />
+  </export>
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>

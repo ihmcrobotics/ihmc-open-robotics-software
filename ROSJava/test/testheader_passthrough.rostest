@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="rosjava" type="testheader_publisher.py" name="node0" />
+  <node pkg="rosjava" type="PassthroughTestNode" name="rosjava_node" />
+  <test pkg="rosjava" type="test_testheader_passthrough.py" test-name="testheader_passthrough" />
+</launch>

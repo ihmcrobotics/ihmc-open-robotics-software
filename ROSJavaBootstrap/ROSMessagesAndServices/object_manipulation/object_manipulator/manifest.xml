@@ -1,0 +1,44 @@
+<package>
+  <description brief="object_manipulator">
+
+     Core functionality for pickup and place tasks. Services Pickup
+     and Place action goals.
+
+  </description>
+  <author>Matei Ciocarlie and Kaijen Hsiao</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/object_manipulator</url>
+
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="tf"/>
+  <depend package="pluginlib"/>
+  <depend package="std_srvs"/>
+  <depend package="actionlib"/>
+  <depend package="object_manipulation_msgs"/>  
+  <depend package="sensor_msgs"/>
+  <depend package="kinematics_msgs"/>
+  <depend package="pr2_controllers_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="arm_navigation_msgs"/>
+  <depend package="visualization_msgs"/>
+  <depend package="interpolated_ik_motion_planner"/>
+  <depend package="pr2_mechanism_msgs"/>
+  <depend package="eigen_conversions"/>
+  <depend package="planning_environment"/>
+  <depend package="arm_kinematics_constraint_aware"/>
+
+  <depend package="common_rosdeps" />
+
+  <!--depend package="profiling"/-->
+
+  <rosdep name="python" />
+  <rosdep name="python-scipy" />
+
+  <export>
+    <cpp cflags="`pkg-config --cflags eigen3` -I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lobject_manipulator_tools -lobject_manipulator_grasp_execution -lobject_manipulator_place_execution"/>
+  </export>
+</package>
+
+

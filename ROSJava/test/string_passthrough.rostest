@@ -1,0 +1,17 @@
+<launch>
+  <node pkg="rosjava" type="string_publisher.py" name="node0" />
+  <node pkg="rosjava" type="string_publisher.py" name="node1" />
+  <node pkg="rosjava" type="string_publisher.py" name="node2" />
+  <node pkg="rosjava" type="string_publisher.py" name="node3" />
+  <node pkg="rosjava" type="string_publisher.py" name="node4" />
+  <node pkg="rosjava" type="string_publisher.py" name="node5" />
+  <node pkg="rosjava" type="string_publisher.py" name="node6" />
+  <node pkg="rosjava" type="string_publisher.py" name="node7" />
+  <node pkg="rosjava" type="string_publisher.py" name="node8" />
+  <node pkg="rosjava" type="string_publisher.py" name="node9" />
+
+  <node pkg="rosjava" type="PassthroughTestNode" name="rosjava_node" />
+
+  <test pkg="rosjava" type="test_string_passthrough.py" test-name="string_passthrough" time-limit="90" />
+
+</launch>

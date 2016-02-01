@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+
+   <param name="robot_description" command="$(find xacro)/xacro.py '$(find robotiq_s_model_visualization)/cfg/robotiq_hand.urdf.xacro'" />
+
+</launch>

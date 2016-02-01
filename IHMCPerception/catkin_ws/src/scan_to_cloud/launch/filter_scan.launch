@@ -1,0 +1,44 @@
+<launch>
+  <arg name="target_frame" default="world" />
+  
+  <!-- feed for near scan -->
+  <node pkg="laser_filters" type="scan_to_cloud_filter_chain" name="lidar_nearscan_filter">
+    <rosparam command="load" file="$(find scan_to_cloud)/config/default.yaml"/>
+    <param name="high_fidelity" value="true" />
+    <param name="target_frame" type="string" value="$(arg target_frame)" />
+    <param name="incident_angle_correction" value="false" />
+    <remap from="scan" to="/multisense/lidar_scan"/>
+    <remap from="cloud_filtered" to="/multisense/filtered_cloud" />
+  </node>
+
+  <!-- feed for near scan -->
+  <node pkg="laser_filters" type="scan_to_cloud_filter_chain" name="lidar_quadtree_filter">
+    <rosparam command="load" file="$(find scan_to_cloud)/config/shadows.yaml"/>
+    <param name="high_fidelity" value="true" />
+    <param name="target_frame" type="string" value="$(arg target_frame)" />
+    <param name="incident_angle_correction" value="false" />
+    <remap from="scan" to="/multisense/lidar_scan"/>
+    <remap from="cloud_filtered" to="/multisense/highly_filtered_cloud" />
+  </node>
+  <node pkg="nodelet" type="nodelet" name="StatisticalOutlierRemoval" args="load pcl/StatisticalOutlierRemoval pcl_manager" output="screen">
+        <remap from="~input" to="/multisense/highly_filtered_cloud"/>
+        <remap from="~output" to="/multisense/quadtree_cloud"/>
+        <rosparam>
+               mean_k: 5
+               stddev: 0.02
+        </rosparam>
+  </node>
+
+
+  <node pkg="laser_assembler" type="point_cloud2_assembler" name="point_cloud_assembler">
+    <remap from="cloud" to="/multisense/filtered_cloud" />
+    <param name="fixed_frame" value="$(arg target_frame)" />
+    <param name="max_clouds" value="1200" />
+  </node>
+
+  <node pkg="scan_to_cloud" type="periodic_assembler" name="periodic_assembler"/>
+
+  <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
+
+
+</launch>

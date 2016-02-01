@@ -1,0 +1,15 @@
+root*false*false
+root.RowOfDominosRobot*false*false
+root.RowOfDominosRobot.GDX*false*false
+root.RowOfDominosRobot.GDX.shape0*false*false
+root.RowOfDominosRobot.GDX.shape1*false*false
+root.RowOfDominosRobot.GDX.shape2*false*false
+root.RowOfDominosRobot.GDX.shape3*false*false
+root.RowOfDominosRobot.GDX.shape4*false*false
+root.RowOfDominosRobot.GDX.shape5*false*false
+root.RowOfDominosRobot.GDX.shape6*false*false
+root.RowOfDominosRobot.GDX.shape7*false*false
+root.RowOfDominosRobot.GDX.shape8*false*false
+root.RowOfDominosRobot.GDX.shape9*false*false
+root.RowOfDominosRobot.GDX.shape10*false*false
+root.DefaultCollisionVisualize*false*false

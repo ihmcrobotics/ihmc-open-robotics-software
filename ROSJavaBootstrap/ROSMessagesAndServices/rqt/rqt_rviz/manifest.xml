@@ -1,0 +1,17 @@
+<package>
+  <description brief="Plugin embedding RViz">
+    rqt_rviz provides a GUI plugin embedding RViz.
+  </description>
+  <author>Dorian Scholz</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rqt_rviz</url>
+
+  <depend package="rqt_gui"/>
+  <depend package="rqt_gui_cpp"/>
+  <depend package="rviz"/>
+
+  <export>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
+</package>

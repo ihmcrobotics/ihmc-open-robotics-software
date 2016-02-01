@@ -1,0 +1,9 @@
+<package>
+  <description brief="rosjava_bootstrap">
+    rosjava_bootstrap provides classes required for message generation.
+  </description>
+  <author>Ken Conley, Damon Kohler (damonkohler@google.com)</author>
+  <license>Apache 2.0</license>
+  <review status="unreviewed" notes="" />
+  <url>http://ros.org/wiki/rosjava_bootstrap</url>
+</package>

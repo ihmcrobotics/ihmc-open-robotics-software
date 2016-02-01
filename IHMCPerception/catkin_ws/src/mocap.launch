@@ -1,0 +1,51 @@
+<launch>
+	<!-- this launch file brings up all the topics required to run lidar tests. 
+        This file is very fragile and will require updates anytime the launch
+        file for the real robot is changed!-->
+
+        <!--for every experiment / all you need for experiment one-->
+        <include file="$(find multisense_bringup)/multisense.launch" />
+        <node name="set_motor_speed" pkg="dynamic_reconfigure" type="dynparam"  args="set --timeout=10 /multisense motor_speed 2.5" />
+        <node name="set_resolution" pkg="dynamic_reconfigure" type="dynparam"  args="set --timeout=10 /multisense resolution 2048x1088x256" />
+
+	<!-- test two (filter_scan_test)-->
+	<node pkg="laser_filters" type="scan_to_cloud_filter_chain" name="scan_to_cloud_filter_chain_no_filters" ns="filter_scan_test">
+	    <param name="high_fidelity" value="true" />
+	    <param name="target_frame" type="string" value="/multisense/head_root" />
+	    <param name="incident_angle_correction" value="false" />
+	    <remap from="scan" to="/multisense/lidar_scan"/>
+	    <remap from="cloud_filtered" to="unfiltered_cloud_in_head_root" />
+	</node>
+
+	<include file="$(find scan_to_cloud)/launch/filter_scan.launch" ns="filter_scan_test">
+		<arg name="target_frame" value="multisense/head_root" />
+	</include>
+
+        <!-- test four (world frame using ros module) -->
+	<arg name="atlas_urdf" default="$(find ihmc_models)/urdf/atlas_unplugged_v5_no_hands_no_head.urdf" />
+	<arg name="robot_namespace" default="atlas" />
+        <param name="/atlas/robot_description" textfile="$(arg atlas_urdf)" />
+
+	<node name="transform_provider" pkg="transform_provider" type="transform_provider_node" />
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" output="log">
+              <remap from="joint_states" to="/$(arg robot_namespace)/output/joint_states" />
+              <remap from="robot_description" to="/$(arg robot_namespace)/robot_description" />
+        </node>
+	<include file="$(find scan_to_cloud)/launch/filter_scan.launch" />
+
+	<include file="$(find scan_to_cloud)/launch/filter_scan.launch" ns="pelvis">
+		<arg name="target_frame" value="pelvis" />
+	</include>
+	<include file="$(find scan_to_cloud)/launch/filter_scan.launch" ns="ltorso">
+		<arg name="target_frame" value="ltorso" />
+	</include>
+	<include file="$(find scan_to_cloud)/launch/filter_scan.launch" ns="mtorso">
+		<arg name="target_frame" value="mtorso" />
+	</include>
+	<include file="$(find scan_to_cloud)/launch/filter_scan.launch" ns="utorso">
+		<arg name="target_frame" value="utorso" />
+	</include>
+	<include file="$(find scan_to_cloud)/launch/filter_scan.launch" ns="head">
+		<arg name="target_frame" value="head" />
+	</include>
+</launch>

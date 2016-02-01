@@ -1,0 +1,9 @@
+<launch>
+
+  <rosparam command="load" file="$(find rosjava)/test/parameter_client_params.yaml" />
+  <node pkg="rosjava" type="ParameterServerTestNode" name="param_client" />
+  <test pkg="rosjava" type="test_parameter_client.py" test-name="parameter_client" />
+
+  <!-- TODO test inside of a namespace -->
+
+</launch>

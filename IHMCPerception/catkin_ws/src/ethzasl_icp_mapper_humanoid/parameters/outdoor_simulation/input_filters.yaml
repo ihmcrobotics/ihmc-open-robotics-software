@@ -1,0 +1,19 @@
+- BoundingBoxDataPointsFilter:
+   xMin: -3.5
+   xMax: 3.5
+   yMin: -3.5
+   yMax: 3.5
+   zMin: -3.5
+   zMax: 3.5
+   removeInside: 0
+- SimpleSensorNoiseDataPointsFilter:
+   sensorType: 2
+- SamplingSurfaceNormalDataPointsFilter:
+   knn: 20
+   ratio: 0.6
+   keepNormals: 1
+   keepDensities: 1
+- MaxDensityDataPointsFilter:
+   maxDensity: 1000
+- ObservationDirectionDataPointsFilter
+- OrientNormalsDataPointsFilter 

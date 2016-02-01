@@ -1,0 +1,3 @@
+root*false*false
+root.atlas*false*false
+root.atlas.AtlasWholeBodyIkController*false*false

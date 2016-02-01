@@ -1,0 +1,10 @@
+# Namespace to publish response topics in. A polled camera driver node should publish:
+#   <response_namespace>/image_raw
+#   <response_namespace>/camera_info
+string response_namespace
+
+# Region of interest, if supported by the camera.
+sensor_msgs/RegionOfInterest roi
+---
+# Timestamp of the captured image. Can be matched against incoming sensor_msgs/Image header.
+time stamp

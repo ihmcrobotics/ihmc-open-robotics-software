@@ -1,0 +1,34 @@
+<package>
+  <description brief="Python bindings for the Qt widget library, plus helpers for writing other Python bindings.">
+
+This stack provides Python bindings for Qt.
+There are two providers: pyqt and pyside.  PyQt is released under the
+GPL, which can be too restrictive.  Therefore this package also
+provides PySide when available.  PySide uses the LGPL license, but is
+not available via normal Debian package channels on Ubuntu Lucid.
+
+Both the bindings and tools to build bindings are included from each
+available provider.  For PyQt, this is called "SIP".  For PySide, it
+is called "Shiboken" (and other tools).
+
+Also provided is adapter code to make the user's Python code
+independent of which binding provider was actually used.
+
+  </description>
+  <author>Dave Hershberger, Dirk Thomas</author>
+  <license>BSD, LGPL, GPL</license>
+  <review status="unreviewed"/>
+  <url>http://ros.org/wiki/python_qt_binding</url>
+
+  <depend package="rosbuild"/>
+
+  <rosdep name="ros"/>
+  <rosdep name="qt4-qmake"/>
+  <rosdep name="python-qt-bindings"/>
+
+  <export>
+    <rosbuild cmake_directory="${prefix}/cmake"/>
+    <cpp cflags="-I${prefix}/include"/> <!-- hack until catkin and CFG_EXTRA enables to pass path to sip_configure.py -->
+  </export>
+
+</package>
