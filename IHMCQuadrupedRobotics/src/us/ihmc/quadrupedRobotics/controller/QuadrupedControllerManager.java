@@ -47,7 +47,7 @@ public class QuadrupedControllerManager implements RobotController
       // Default to QuadrupedControllerState#DO_NOTHING.
       this(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, inverseKinematicsCalculators, stateEstimator,
             globalDataProducer, yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead,
-            QuadrupedControllerState.DO_NOTHING);
+            QuadrupedControllerState.TROT_WALK);
    }
 
    public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters,
@@ -76,8 +76,8 @@ public class QuadrupedControllerManager implements RobotController
       builder.addTrotWalkController();
       builder.addSliderBoardController();
 
-      builder.addJointsInitializedCondition(QuadrupedControllerState.DO_NOTHING, QuadrupedControllerState.STAND_PREP);
-      builder.addStandingExitCondition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.STAND_READY);
+      builder.addJointsInitializedCondition(QuadrupedControllerState.DO_NOTHING, QuadrupedControllerState.TROT_WALK);
+      builder.addStandingExitCondition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.TROT_WALK);
 
       builder.addPermissibleTransition(QuadrupedControllerState.STAND_READY, QuadrupedControllerState.VMC_STAND);
 //      builder.addPermissibleTransition(QuadrupedControllerState.STAND_READY, QuadrupedControllerState.POSITION_CRAWL);

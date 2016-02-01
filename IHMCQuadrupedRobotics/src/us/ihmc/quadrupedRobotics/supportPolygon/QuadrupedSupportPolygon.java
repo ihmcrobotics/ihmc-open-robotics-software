@@ -1316,26 +1316,10 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getStanceWidthFrontLegs()
    {
-      if (size() != 4)
-      {
-         throw new RuntimeException("Need 4 legs for SupportPolygon.getStanceWidthFrontLegs()");
-      }
-
-      double heading = getNominalYaw();
-      Vector2d perpendicularHeadingVecetor = new Vector2d(-Math.sin(heading), Math.cos(heading));
-
-      FramePoint frontLeft = getFootstep(RobotQuadrant.FRONT_LEFT);
-      FramePoint frontRight = getFootstep(RobotQuadrant.FRONT_RIGHT);
-
-      frontLeft.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      frontRight.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-
-      double vectorX = frontLeft.getX() - frontRight.getX();
-      double vectorY = frontLeft.getY() - frontRight.getY();
-
-      Vector2d rightToLeft = new Vector2d(vectorX, vectorY);
-
-      return Math.abs(rightToLeft.dot(perpendicularHeadingVecetor));
+      if (!containsFootstep(RobotQuadrant.FRONT_LEFT) || !containsFootstep(RobotQuadrant.FRONT_RIGHT))
+         throw new RuntimeException("Must have both front feet.");
+      
+      return getFootstep(RobotQuadrant.FRONT_LEFT).distance(getFootstep(RobotQuadrant.FRONT_RIGHT));
    }
 
    /**
@@ -1345,26 +1329,10 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getStanceWidthHindLegs()
    {
-      if (size() != 4)
-      {
-         throw new RuntimeException("Need 4 legs for SupportPolygon.getStanceWidthHindLegs()");
-      }
-
-      double heading = getNominalYaw();
-      Vector2d perpendicularHeadingVecetor = new Vector2d(-Math.sin(heading), Math.cos(heading));
-
-      FramePoint hindLeft = getFootstep(RobotQuadrant.HIND_LEFT);
-      FramePoint hindRight = getFootstep(RobotQuadrant.HIND_RIGHT);
-
-      hindLeft.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      hindRight.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-
-      double vectorX = hindLeft.getX() - hindRight.getX();
-      double vectorY = hindLeft.getY() - hindRight.getY();
-
-      Vector2d rightToLeft = new Vector2d(vectorX, vectorY);
-
-      return Math.abs(rightToLeft.dot(perpendicularHeadingVecetor));
+      if (!containsFootstep(RobotQuadrant.HIND_LEFT) || !containsFootstep(RobotQuadrant.HIND_RIGHT))
+         throw new RuntimeException("Must have both hind feet.");
+      
+      return getFootstep(RobotQuadrant.HIND_LEFT).distance(getFootstep(RobotQuadrant.HIND_RIGHT));
    }
 
 //   /**
