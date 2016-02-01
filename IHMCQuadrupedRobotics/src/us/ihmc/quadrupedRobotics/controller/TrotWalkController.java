@@ -819,14 +819,14 @@ public class TrotWalkController extends QuadrupedController
       k_y.set(0.0); // 2000.0);
       b_y.set(50.0); // 0.0);    // 50 for pace, 0 for trot.
 
-      k_roll.set(3000.0);
-      b_roll.set(50.0);
+      k_roll.set(300.0);
+      b_roll.set(40.0);
 
-      k_pitch.set(5000.0); // 80.0);
-      b_pitch.set(50.0); // 20.0);
+      k_pitch.set(500.0); // 80.0);
+      b_pitch.set(40.0); // 20.0);
 
-      k_yaw.set(3000.0); // 80.0);    // 250.0);
-      b_yaw.set(50.0); // 20.0);    // 100.0);
+      k_yaw.set(300.0); // 80.0);    // 250.0);
+      b_yaw.set(40.0); // 20.0);    // 100.0);
 
       k_z.set(30000.0);
       b_z.set(10000.0);
