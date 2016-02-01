@@ -75,7 +75,7 @@ public class VirtualChainBuilder
          CommonOps.mult(pseudoInverse, yMatrix, solution);
          DenseMatrix64F errorMatrix = new DenseMatrix64F(AMatrix.getNumRows(), solution.getNumCols());
          CommonOps.mult(AMatrix, solution, errorMatrix);
-         CommonOps.subtractEquals(solution, yMatrix);
+         CommonOps.subtractEquals(errorMatrix, yMatrix);
          
          double[] averageAndMax = computeAverageAndMax(errorMatrix);
 
