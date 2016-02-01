@@ -4,21 +4,22 @@ import java.util.ArrayList;
 
 import javax.vecmath.Matrix3d;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.robotics.geometry.FramePoint2d;
-import Jama.Matrix;
 
 public class VirtualChainDataMatrix
 {
-   private Matrix yMatrix;
-   private Matrix AMatrix;
+   private DenseMatrix64F yMatrix;
+   private DenseMatrix64F AMatrix;
    
    public VirtualChainDataMatrix(VirtualChainData virtualChainData)
    {
       int numberOfDataPoints = virtualChainData.getNumberOfDataPoints();
       int numberOfDegreesOfFreedom = virtualChainData.getNumberOfDegreesOfFreedom();
       
-      yMatrix = new Matrix(2 * numberOfDataPoints, 1);
-      AMatrix = new Matrix(2 * numberOfDataPoints, 3 * numberOfDegreesOfFreedom);
+      yMatrix = new DenseMatrix64F(2 * numberOfDataPoints, 1);
+      AMatrix = new DenseMatrix64F(2 * numberOfDataPoints, 3 * numberOfDegreesOfFreedom);
       
       
       ArrayList<VirtualChainDataPoint> virtualChainDataPoints = virtualChainData.getVirtualChainDataPoints();
@@ -54,12 +55,12 @@ public class VirtualChainDataMatrix
       }
    }
    
-   public Matrix getYMatrix()
+   public DenseMatrix64F getYMatrix()
    {
       return yMatrix;
    }
    
-   public Matrix getAMatrix()
+   public DenseMatrix64F getAMatrix()
    {
       return AMatrix;
    }

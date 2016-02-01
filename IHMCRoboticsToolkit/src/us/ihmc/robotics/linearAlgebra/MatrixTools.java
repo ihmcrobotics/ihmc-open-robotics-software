@@ -1,19 +1,10 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import Jama.Matrix;
-import Jama.SingularValueDecomposition;
-import georegression.struct.point.Vector3D_F64;
-import georegression.struct.se.Se3_F64;
-import gnu.trove.list.array.TIntArrayList;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixIO;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameTuple;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -24,20 +15,23 @@ import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4d;
 import javax.vecmath.Vector4f;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+import org.ejml.ops.MatrixIO;
+
+import georegression.struct.point.Vector3D_F64;
+import georegression.struct.se.Se3_F64;
+import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MatrixTools
 {
-   private static final String NULL_TRANSFORM_IDENTIFIER = "NULL_TRANSFORM3D";
-
    public final static Matrix3d IDENTITY = new Matrix3d();
 
    static
@@ -50,11 +44,6 @@ public class MatrixTools
     *
     * @param matrix
     */
-   public static void setToNaN(Matrix matrix)
-   {
-      setToValue(matrix, Double.NaN);
-   }
-
    public static void setToNaN(DenseMatrix64F matrix)
    {
       setToValue(matrix, Double.NaN);
@@ -65,31 +54,9 @@ public class MatrixTools
     *
     * @param matrix
     */
-   public static void setToZero(Matrix matrix)
-   {
-      setToValue(matrix, 0.0);
-   }
-
    public static void setToZero(DenseMatrix64F matrix)
    {
       setToValue(matrix, 0.0);
-   }
-
-   /**
-    * Set all elements of matrix to val
-    *
-    * @param matrix
-    * @param val
-    */
-   private static void setToValue(Matrix matrix, double val)
-   {
-      for (int i = 0; i < matrix.getRowDimension(); i++)
-      {
-         for (int j = 0; j < matrix.getColumnDimension(); j++)
-         {
-            matrix.set(i, j, val);
-         }
-      }
    }
 
    private static void setToValue(DenseMatrix64F matrix, double val)
@@ -344,21 +311,6 @@ public class MatrixTools
     * @param column Column
     * @param columnValues
     */
-   public static void setMatrixColumnFromArray(Matrix matrix, int column, double[] columnValues)
-   {
-      for (int i = 0; i < matrix.getRowDimension(); i++)
-      {
-         matrix.set(i, column, columnValues[i]);
-      }
-   }
-
-   /**
-    * Set a column of a Matrix to an Array
-    *
-    * @param matrix Matrix to set
-    * @param column Column
-    * @param columnValues
-    */
    public static void setMatrixColumnFromArray(DenseMatrix64F matrix, int column, double[] columnValues)
    {
       for (int i = 0; i < matrix.numRows; i++)
@@ -379,14 +331,6 @@ public class MatrixTools
       for (int i = startRow; i < columnValues.length; i++)
       {
          matrix.unsafe_set(i, column, columnValues[i]);
-      }
-   }
-
-   public static void setMatrixFromOneBasedArray(Matrix ret, double[] oneBasedArray)
-   {
-      for (int i = 0; i < oneBasedArray.length - 1; i++)
-      {
-         ret.set(i, 0, oneBasedArray[i + 1]);
       }
    }
 
@@ -416,53 +360,11 @@ public class MatrixTools
     * @param numberOfRows  Rows to differentiate
     * @param vectorToPack  Result row vector
     */
-   public static void diff(Matrix vectorToDiff, int startRow, int numberOfRows, Matrix vectorToPack)
-   {
-      for (int i = 1; i < numberOfRows; i++)
-      {
-         vectorToPack.set(i - 1, 0, vectorToDiff.get(startRow + i, 0) - vectorToDiff.get(startRow + i - 1, 0));
-      }
-   }
-
-   /**
-    *
-    * Differentiates a row vector by subtracting the previous element from the current element
-    *
-    * @param vectorToDiff  Row vector
-    * @param startRow   Row to start at
-    * @param numberOfRows  Rows to differentiate
-    * @param vectorToPack  Result row vector
-    */
    public static void diff(DenseMatrix64F vectorToDiff, int startRow, int numberOfRows, DenseMatrix64F vectorToPack)
    {
       for (int i = 1; i < numberOfRows; i++)
       {
          vectorToPack.unsafe_set(i - 1, 0, vectorToDiff.unsafe_get(startRow + i, 0) - vectorToDiff.unsafe_get(startRow + i - 1, 0));
-      }
-   }
-
-   /**
-    * Differentiates a row vector by subtracting the previous element from the current element
-    *
-    * @param vectorToDiff Row vector
-    * @param vectorToPack Result row vector
-    */
-   public static void diff(Matrix vectorToDiff, Matrix vectorToPack)
-   {
-      diff(vectorToDiff, 0, vectorToDiff.getRowDimension(), vectorToPack);
-   }
-
-   /**
-    * Differentiates an array by subtracting the previous element from the current element
-    *
-    * @param vectorToDiff
-    * @param vectorToPack  Result row vector
-    */
-   public static void diff(double[] vectorToDiff, Matrix vectorToPack)
-   {
-      for (int i = 1; i < vectorToDiff.length; i++)
-      {
-         vectorToPack.set(i - 1, 0, vectorToDiff[i] - vectorToDiff[i - 1]);
       }
    }
 
@@ -480,47 +382,12 @@ public class MatrixTools
       }
    }
 
-   public static void numericallyDifferentiate(Matrix derivativeToPack, Matrix previousMatrixToUpdate, Matrix newMatrix, double dt)
-   {
-      set(derivativeToPack, newMatrix);
-      derivativeToPack.minusEquals(previousMatrixToUpdate);
-      derivativeToPack.timesEquals(1.0 / dt);
-      set(previousMatrixToUpdate, newMatrix);
-   }
-
    public static void numericallyDifferentiate(DenseMatrix64F derivativeToPack, DenseMatrix64F previousMatrixToUpdate, DenseMatrix64F newMatrix, double dt)
    {
       derivativeToPack.set(newMatrix);
       CommonOps.subtractEquals(derivativeToPack, previousMatrixToUpdate);
       CommonOps.scale(1.0 / dt, derivativeToPack);
       previousMatrixToUpdate.set(newMatrix);
-   }
-
-   /**
-    *
-    * Sets a block of a matrix
-    *
-    * @param dest Set a block of this matrix
-    * @param destStartRow Row index of the top left corner of the block to set
-    * @param destStartColumn Column index of the top left corner of the block to set
-    * @param src Get a block of this matrix
-    * @param srcStartRow Row index of the top left corner of the block to use from otherMatrix
-    * @param srcStartColumn Column index of the top left corner of the block to use from otherMatrix
-    * @param numberOfRows Row size of the block
-    * @param numberOfColumns Column size of the block
-    * @param scale Scale the block from otherMatrix by this value
-    *
-    */
-   public static void setMatrixBlock(Matrix dest, int destStartRow, int destStartColumn, Matrix src, int srcStartRow, int srcStartColumn, int numberOfRows,
-         int numberOfColumns, double scale)
-   {
-      for (int i = 0; i < numberOfRows; i++)
-      {
-         for (int j = 0; j < numberOfColumns; j++)
-         {
-            dest.set(destStartRow + i, destStartColumn + j, scale * src.get(srcStartRow + i, srcStartColumn + j));
-         }
-      }
    }
 
    /**
@@ -558,33 +425,6 @@ public class MatrixTools
     * @param rows rows of input matrix to use in setting matrix to pack
     * @param columns columns of input matrix to use in setting matrix to pack
     */
-   public static void getMatrixBlock(Matrix matrixToPack, Matrix input, int[] rows, int[] columns)
-   {
-      MathTools.checkIfInRange(matrixToPack.getRowDimension(), rows.length, rows.length);
-      MathTools.checkIfInRange(matrixToPack.getColumnDimension(), columns.length, columns.length);
-
-      int newI = 0;
-      for (int i : rows)
-      {
-         int newJ = 0;
-         for (int j : columns)
-         {
-            matrixToPack.set(newI, newJ, input.get(i, j));
-            newJ++;
-         }
-
-         newI++;
-      }
-   }
-
-   /**
-    * Sets matrixToPack to the entries of input in the specified rows and columns
-    *
-    * @param matrixToPack matrix to pack
-    * @param input input matrix
-    * @param rows rows of input matrix to use in setting matrix to pack
-    * @param columns columns of input matrix to use in setting matrix to pack
-    */
    public static void getMatrixBlock(DenseMatrix64F matrixToPack, DenseMatrix64F input, int[] rows, int[] columns)
    {
       if ((rows.length != matrixToPack.getNumRows()) || (columns.length != matrixToPack.getNumCols()))
@@ -603,34 +443,6 @@ public class MatrixTools
          }
 
          newI++;
-      }
-   }
-
-   /**
-    *
-    * Adds to a block of a matrix
-    *
-    * @param dest Add to a block of this matrix
-    * @param destStartRow Row index of the top left corner of the block to set
-    * @param destStartColumn Column index of the top left corner of the block to set
-    * @param source Get a block of this matrix
-    * @param sourceStartRow Row index of the top left corner of the block to use from otherMatrix
-    * @param sourceStartColumn Column index of the top left corner of the block to use from otherMatrix
-    * @param numberOfRows Row size of the block
-    * @param numberOfColumns Column size of the block
-    * @param scale Scale the block from otherMatrix by this value
-    *
-    */
-   public static void addMatrixBlock(Matrix dest, int destStartRow, int destStartColumn, Matrix source, int sourceStartRow, int sourceStartColumn,
-         int numberOfRows, int numberOfColumns, double scale)
-   {
-      for (int i = 0; i < numberOfRows; i++)
-      {
-         for (int j = 0; j < numberOfColumns; j++)
-         {
-            dest.set(destStartRow + i, destStartColumn + j,
-                  dest.get(destStartRow + i, destStartColumn + j) + scale * source.get(sourceStartRow + i, sourceStartColumn + j));
-         }
       }
    }
 
@@ -681,81 +493,6 @@ public class MatrixTools
       }
    }
 
-   /**
-    * Linear algebraic matrix multiplication, A * B
-    *
-    * @param A    a matrix
-    * @param B    another matrix
-    * @param resultToPack     Matrix product, A * B
-    * @return
-    * @exception  IllegalArgumentException Matrix inner dimensions must agree.
-    */
-
-   public static void times(Matrix A, Matrix B, Matrix resultToPack)
-   {
-      int m = A.getRowDimension();
-      int Bm = B.getRowDimension();
-      int n = A.getColumnDimension();
-      int Bn = B.getColumnDimension();
-
-      if (Bm != n)
-      {
-         throw new IllegalArgumentException("Matrix inner dimensions must agree.");
-      }
-
-      if ((resultToPack.getRowDimension() != m) || (resultToPack.getColumnDimension() != Bn))
-         throw new IllegalArgumentException("Matrix inner dimensions must agree.");
-
-      double[][] C = resultToPack.getArray();
-
-      // double[] Bcolj = new double[n];
-      double[][] BArray = B.getArray();
-      double[][] AArray = A.getArray();
-      for (int j = 0; j < Bn; j++)
-      {
-         // for (int k = 0; k < n; k++) {
-         // Bcolj[k] = B.getArray()[k][j];
-         // }
-         for (int i = 0; i < m; i++)
-         {
-            double[] Arowi = AArray[i];
-            double s = 0;
-            for (int k = 0; k < n; k++)
-            {
-               s += Arowi[k] * BArray[k][j]; // Bcolj[k];
-            }
-
-            C[i][j] = s;
-         }
-      }
-   }
-
-   /**
-    * Compares to matrices
-    *
-    * @param A A matrix
-    * @param B Another matrix
-    * @return false if not equal, true if equal
-    */
-   public static boolean compare(Matrix A, Matrix B, double delta)
-   {
-      if (A.getRowDimension() != B.getRowDimension())
-         return false;
-      if (A.getColumnDimension() != B.getColumnDimension())
-         return false;
-
-      for (int i = 0; i < A.getRowDimension(); i++)
-      {
-         for (int j = 0; j < B.getRowDimension(); j++)
-         {
-            if ((Math.abs(A.get(i, j)) - Math.abs(B.get(i, j))) > delta)
-               return false;
-         }
-      }
-
-      return true;
-   }
-
    public static void linspace(double[] vector, double d1, double d2, int n)
    {
       // double[] vector = new double[n];
@@ -778,29 +515,6 @@ public class MatrixTools
 
    }
 
-   public static void set(Matrix destination, Matrix source)
-   {
-      destination.setMatrix(0, source.getRowDimension() - 1, 0, source.getColumnDimension() - 1, source);
-   }
-
-   public static Matrix flipUpDown(Matrix matrix)
-   {
-      Matrix ret = matrix.copy();
-      int nRows = ret.getRowDimension();
-      int nColumns = ret.getColumnDimension();
-
-      for (int i = 0; i < nRows; i++)
-      {
-         int newRowNumber = nRows - i - 1;
-         for (int j = 0; j < nColumns; j++)
-         {
-            ret.set(newRowNumber, j, matrix.get(i, j));
-         }
-      }
-
-      return ret;
-   }
-
    public static DenseMatrix64F flipUpDown(DenseMatrix64F matrix)
    {
       DenseMatrix64F ret = matrix.copy();
@@ -817,38 +531,6 @@ public class MatrixTools
       }
 
       return ret;
-   }
-
-   public static void convertJamaToEJML(Matrix jamaMatrix, DenseMatrix64F ejmlMatrixToPack)
-   {
-      if ((jamaMatrix.getRowDimension() != ejmlMatrixToPack.getNumRows()) || (jamaMatrix.getColumnDimension() != ejmlMatrixToPack.getNumCols()))
-      {
-         throw new RuntimeException("Dimensions don't match");
-      }
-
-      for (int i = 0; i < jamaMatrix.getRowDimension(); i++)
-      {
-         for (int y = 0; y < jamaMatrix.getColumnDimension(); y++)
-         {
-            ejmlMatrixToPack.set(i, y, jamaMatrix.get(i, y));
-         }
-      }
-   }
-
-   public static void convertEJMLToJama(DenseMatrix64F ejmlMatrix, Matrix jamaMatrixToPack)
-   {
-      if ((jamaMatrixToPack.getRowDimension() != ejmlMatrix.getNumRows()) || (jamaMatrixToPack.getColumnDimension() != ejmlMatrix.getNumCols()))
-      {
-         throw new RuntimeException("Dimensions don't match");
-      }
-
-      for (int i = 0; i < jamaMatrixToPack.getRowDimension(); i++)
-      {
-         for (int y = 0; y < jamaMatrixToPack.getColumnDimension(); y++)
-         {
-            jamaMatrixToPack.set(i, y, ejmlMatrix.get(i, y));
-         }
-      }
    }
 
    public static void denseMatrixToMatrix3d(DenseMatrix64F denseMatrix, Matrix3d matrixToPack, int startRow, int startColumn)
@@ -1096,138 +778,6 @@ public class MatrixTools
       matrixToPack.set(startRow + 0, startColumn, tuple.getX());
       matrixToPack.set(startRow + 1, startColumn, tuple.getY());
       matrixToPack.set(startRow + 2, startColumn, tuple.getZ());
-   }
-
-   public static void setJamaMatrixFromMatrix3d(int startRow, int startColumn, Matrix3d fromMatrix3d, Matrix toJamaMatrix)
-   {
-      for (int i = 0; i < 3; i++)
-      {
-         for (int j = 0; j < 3; j++)
-         {
-            toJamaMatrix.set(i + startRow, j + startColumn, fromMatrix3d.getElement(i, j));
-         }
-      }
-   }
-
-   public static Vector3d matrixToVector3d(Matrix M)
-   {
-      // warning: no exception handling here
-
-      if (M.getRowDimension() > M.getColumnDimension())
-         return new Vector3d(M.get(0, 0), M.get(1, 0), M.get(2, 0));
-
-      return new Vector3d(M.get(0, 0), M.get(0, 1), M.get(0, 2));
-   }
-
-   public static Matrix vector3dToMatrix(Vector3d p)
-   {
-      Matrix M = new Matrix(3, 1);
-      M.set(0, 0, p.getX());
-      M.set(1, 0, p.getY());
-      M.set(2, 0, p.getZ());
-
-      return M;
-   }
-
-   static Matrix pseudoinverseDiag(Matrix D)
-   {
-      int n = Math.min(D.getRowDimension(), D.getColumnDimension());
-      Matrix D_pinv = new Matrix(D.getRowDimension(), D.getColumnDimension(), 0);
-      for (int i = 0; i < n; i++)
-      {
-         double val = 0;
-         if (D.get(i, i) > 10e-8)
-            val = 1.0 / D.get(i, i);
-         D_pinv.set(i, i, val);
-      }
-
-      return D_pinv;
-   }
-
-   /**
-    * Returns the Moore-Penrose pseudoinverse of the matrix M
-    */
-   public static Matrix pseudoinverse(Matrix M)
-   {
-      boolean transposed = false;
-
-      // for JAMA svd, #rows must be >= #cols
-      if (M.getRowDimension() < M.getColumnDimension())
-      {
-         M = M.transpose();
-         transposed = true;
-      }
-
-      SingularValueDecomposition svd = M.svd();
-
-      Matrix S_pinv = pseudoinverseDiag(svd.getS());
-      Matrix U_t = (svd.getU()).transpose();
-      Matrix V = svd.getV();
-
-      Matrix ret = (V.times(S_pinv)).times(U_t);
-      if (transposed)
-         return ret.transpose();
-
-      return ret;
-
-   }
-
-   /**
-    * Copies a javax.vecmath.Matrix3d into a Jama.Matrix
-    */
-   public static Matrix toMatrix(Matrix3d matrix3d)
-   {
-      int size = 3;
-      Matrix ret = new Matrix(size, size);
-
-      for (int i = 0; i < size; i++)
-      {
-         for (int j = 0; j < size; j++)
-         {
-            ret.set(i, j, matrix3d.getElement(i, j));
-         }
-      }
-
-      return ret;
-   }
-
-   public static void saveTransform(RigidBodyTransform transform3D, PrintWriter printWriter)
-   {
-      if (transform3D == null)
-      {
-         printWriter.println(NULL_TRANSFORM_IDENTIFIER);
-
-         return;
-      }
-
-      double[] doubles = new double[16];
-      transform3D.get(doubles);
-
-      for (int i = 0; i < doubles.length - 1; i++)
-      {
-         printWriter.print(doubles[i] + " ");
-      }
-
-      printWriter.print(doubles[doubles.length - 1]);
-      printWriter.println();
-   }
-
-   public static RigidBodyTransform loadTransform(BufferedReader bufferedReader) throws IOException
-   {
-      double[] doubles = new double[16];
-      String line = bufferedReader.readLine();
-      if (line.equals(NULL_TRANSFORM_IDENTIFIER))
-      {
-         return null;
-      }
-
-      StringTokenizer tokenizer = new StringTokenizer(line, " ");
-      for (int i = 0; i < doubles.length - 1; i++)
-      {
-         doubles[i] = Double.parseDouble(tokenizer.nextToken());
-      }
-
-      return new RigidBodyTransform(doubles);
    }
 
    public static int denseMatrixToArrayColumnMajor(DenseMatrix64F src, int srcStartRow, int srcStartCol, int numRows, int numCols, double[] dest,
