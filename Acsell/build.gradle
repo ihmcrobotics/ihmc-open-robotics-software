@@ -1,8 +1,7 @@
 plugins {
 	id 'org.hidetake.ssh' version '1.1.3'
-    id 'us.ihmc.gradle.ihmc-build' version '0.0.6'
+    id 'us.ihmc.gradle.ihmc-build' version '0.0.8'
 }
-
 
 
 if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
@@ -11,28 +10,31 @@ sourceCompatibility = 1.7
 
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
 project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
 
 evaluationDependsOn(ihmc.getProjectDependencyGradlePath("DarpaRoboticsChallenge"))
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
-	
+
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
 	//testCompile ihmc.getProjectDependency(":CommonWalkingControlModules").sourceSets.test.output
 	//test.sourceSets.test.output
 	testCompile ihmc.getProjectDependency(":DarpaRoboticsChallenge").sourceSets.test.output
-			
+
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
 	compile ihmc.getProjectDependency(":DarpaRoboticsChallenge")
 	compile ihmc.getProjectDependency(":Graphics3DAdapter")
-	
+
 	compile ihmc.getProjectDependency(":SDFLoader")
 	compile ihmc.getProjectDependency(":SensorProcessing")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
