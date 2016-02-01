@@ -59,7 +59,7 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
 
       Quat4d robotInitialOrientation = new Quat4d();
-      RotationTools.setQuaternionBasedOnYawPitchRoll(robotInitialOrientation, robotInitialYaw, 0.0, 0.0);
+      RotationTools.convertYawPitchRollToQuaternion(robotInitialYaw, 0.0, 0.0, robotInitialOrientation);
       Point3d robotPosition = new Point3d(robotInitialPosition);
       FramePose robotInitialPose = new FramePose(constructionWorldFrame, robotPosition, robotInitialOrientation);
 
@@ -155,7 +155,7 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
    {
       FramePose debrisPose = new FramePose(robotInitialPoseReferenceFrame);
       Quat4d orientation = new Quat4d();
-      RotationTools.setQuaternionBasedOnYawPitchRoll(orientation, debrisYaw, debrisPitch, debrisRoll);
+      RotationTools.convertYawPitchRollToQuaternion(debrisYaw, debrisPitch, debrisRoll, orientation);
       debrisPose.setPose(positionWithRespectToRobot, orientation);
       debrisPose.changeFrame(constructionWorldFrame);
       return debrisPose;

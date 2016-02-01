@@ -38,7 +38,7 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       this.orientation = orientation;
       this.surfaceNormal = surfaceNormal;
       this.swingTrajectoryTime = swingTrajectoryTime;
-      RotationTools.checkUnitLength(this.orientation);
+      RotationTools.checkQuaternionNormalized(this.orientation);
    }
 
    public HandstepPacket(HandstepPacket handstepPacket)
@@ -47,7 +47,7 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       this.location = new Point3d(handstepPacket.location);
       this.orientation = new Quat4d(handstepPacket.orientation);
       this.surfaceNormal = new Vector3d(handstepPacket.surfaceNormal);
-      RotationTools.checkUnitLength(this.orientation);
+      RotationTools.checkQuaternionNormalized(this.orientation);
    }
 
    public Point3d getLocation()
@@ -88,7 +88,7 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
    public void setOrientation(Quat4d orientation)
    {
       this.orientation.set(orientation);
-      RotationTools.checkUnitLength(this.orientation);
+      RotationTools.checkQuaternionNormalized(this.orientation);
    }
 
    public void setSurfaceNormal(Vector3d surfaceNormal)

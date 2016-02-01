@@ -109,7 +109,7 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
 
       Matrix3d footToPelvisOrientation = new Matrix3d();
       footToPelvis.get(footToPelvisOrientation);
-      double desiredHipYaw = RotationTools.getYaw(footToPelvisOrientation);    // TODO: wrong and not necessary for R2, but ok for now.
+      double desiredHipYaw = RotationTools.computeYaw(footToPelvisOrientation);    // TODO: wrong and not necessary for R2, but ok for now.
       try
       {
          inverseKinematicsCalculator.solve(desiredLegJointPositions.get(swingSide), footToPelvis, swingSide, desiredHipYaw);

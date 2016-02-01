@@ -991,7 +991,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       Quat4d q = new Quat4d();
 
       //This code has a singularity when yaw and roll line up (e.g. pitch is 90, can't rotate in one direction any more).
-      RotationTools.setQuaternionBasedOnYawPitchRoll(q, q_yaw.getDoubleValue(), q_pitch.getDoubleValue(), q_roll.getDoubleValue());
+      RotationTools.convertYawPitchRollToQuaternion(q_yaw.getDoubleValue(), q_pitch.getDoubleValue(), q_roll.getDoubleValue(), q);
 
       //This code compounds the rotations so that on subsequent frames the ability to rotate in lost rotation directions is regained
       //This affectively uses global yaw pitch and roll each time.

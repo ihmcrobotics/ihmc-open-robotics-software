@@ -125,7 +125,7 @@ public class ManipulableToroid
       copy.getOrientation(rotationMatrix);
       AxisAngle4d axisAngle = new AxisAngle4d();
 //      axisAngle.set(rotationMatrix);
-      RotationTools.axisAngleFromMatrix(rotationMatrix, axisAngle);
+      RotationTools.convertMatrixToAxisAngle(rotationMatrix, axisAngle);
       setQ(axisAngle.getAngle());
 
       updateVisualizers();
@@ -176,7 +176,7 @@ public class ManipulableToroid
          rotationMatrix.setColumn(1, yAxis);
          rotationMatrix.setColumn(2, zAxis);
 
-         if (!RotationTools.isRotationProper(rotationMatrix))
+         if (!RotationTools.isRotationMatrixProper(rotationMatrix))
             throw new RuntimeException("rotation not proper");
 
          transformToParent.setRotationAndZeroTranslation(rotationMatrix);

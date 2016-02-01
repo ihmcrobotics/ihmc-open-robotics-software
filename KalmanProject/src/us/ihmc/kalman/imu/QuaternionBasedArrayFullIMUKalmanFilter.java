@@ -1,9 +1,12 @@
 package us.ihmc.kalman.imu;
 
+import javax.vecmath.Quat4d;
+
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.QuaternionTools;
-import Jama.Matrix;
+import us.ihmc.robotics.geometry.RotationTools;
 
 /**
  * <p>Title: </p>
@@ -921,7 +924,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       normalize(Quat);
    }
 
-   private final double[] tempEulerAngles = new double[3];
+   private final double[] tempYawPitchRollAngles = new double[3];
 
    /**
     *  Convert accelerations to euler angles
@@ -934,12 +937,16 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 //    double[] euler =
 //        { -Math.atan2(a[1][0], -a[2][0]), -Math.asin(a[0][0] / -g), heading}; // Roll, Pitch, Yaw
 
-      tempEulerAngles[0] = -Math.atan2(a[1], -a[2]);    // roll
-      tempEulerAngles[1] = -Math.asin(a[0] / -g);    // pitch
-      tempEulerAngles[2] = heading;    // yaw
-
-
-      QuaternionTools.rollPitchYawToQuaternions(tempEulerAngles, quaternions);
+      tempYawPitchRollAngles[0] = heading;    // yaw
+      tempYawPitchRollAngles[1] = -Math.asin(a[0] / -g);    // pitch
+      tempYawPitchRollAngles[2] = -Math.atan2(a[1], -a[2]);    // roll
+      
+      Quat4d quaternion = new Quat4d();
+      RotationTools.convertYawPitchRollToQuaternion(tempYawPitchRollAngles, quaternion);
+      quaternions[0] = quaternion.w;
+      quaternions[1] = quaternion.x;
+      quaternions[2] = quaternion.y;
+      quaternions[3] = quaternion.z;
 
       // return the closest one:
       double distanceSquared = 0.0;
@@ -1231,7 +1238,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 //    setNoiseParameters(q_noise, r_noise);
 // }
 
-   public void initialize(Matrix accel, Matrix pqr, double heading)
+   public void initialize(DenseMatrix64F accel, DenseMatrix64F pqr, double heading)
    {
 //    System.out.println("Initializing QuaternionBasedArrayFullIMUKalmanFilter. accel = " + QuaternionTools.format4(accel.get(0,0)) + ", " + QuaternionTools.format4(accel.get(1,0)) + ", " + QuaternionTools.format4(accel.get(2,0)));
 
@@ -1280,21 +1287,21 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       reset(P);
    }
 
-   public void accel2quaternions(Matrix accel, double d, double[] quaternions)
+   public void accel2quaternions(DenseMatrix64F accel, double d, double[] quaternions)
    {
 //    accel2quaternions(accel.getArray()[0], d, quaternions);
-      accel2quaternions(accel.getColumnPackedCopy(), d, quaternions);
+      accel2quaternions(accel.getData(), d, quaternions);
    }
 
-   public void imuUpdate(Matrix pqr)
+   public void imuUpdate(DenseMatrix64F pqr)
    {
 //    imuUpdate(pqr.getArray()[0]);
-      imuUpdate(pqr.getColumnPackedCopy());
+      imuUpdate(pqr.getData());
    }
 
    private double[] accelArrayTemp = new double[3];
 
-   public void compassUpdate(double heading, Matrix accel)
+   public void compassUpdate(double heading, DenseMatrix64F accel)
    {
       accelArrayTemp[0] = accel.get(0, 0);
       accelArrayTemp[1] = accel.get(1, 0);
@@ -1310,7 +1317,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       return bias[i].getDoubleValue();
    }
 
-   public void getQuaternion(Matrix qMatrix)
+   public void getQuaternion(DenseMatrix64F qMatrix)
    {
 //    Matrix qMatrix = new Matrix(4,1);
 
