@@ -1,6 +1,6 @@
 plugins {
 	id 'org.hidetake.ssh' version '0.3.12'
-    id 'us.ihmc.gradle.ihmc-build' version '0.0.6'
+    id 'us.ihmc.gradle.ihmc-build' version '0.0.7'
 }
 
 
