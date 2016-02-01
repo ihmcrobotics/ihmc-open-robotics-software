@@ -53,7 +53,6 @@ public class SimpleSimulationQuadrupedStateEstimator implements QuadrupedStateEs
    @Override
    public void doControl()
    {
-      // TODO Auto-generated method stub
       
    }
 
@@ -66,15 +65,12 @@ public class SimpleSimulationQuadrupedStateEstimator implements QuadrupedStateEs
    @Override
    public void initialize()
    {
-      // TODO Auto-generated method stub
       
    }
 
    @Override
    public void enable()
    {
-      // TODO Auto-generated method stub
       
    }
-
 }
