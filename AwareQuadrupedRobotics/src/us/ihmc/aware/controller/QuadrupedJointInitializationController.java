@@ -10,7 +10,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 /**
  * This controller sets desired joint angles to their actual values when the joint comes online.
  */
-public class QuadrupedDoNothingController implements QuadrupedController
+public class QuadrupedJointInitializationController implements QuadrupedController
 {
    private final FullRobotModel fullRobotModel;
 
@@ -20,7 +20,7 @@ public class QuadrupedDoNothingController implements QuadrupedController
     */
    private final boolean initialized[];
 
-   public QuadrupedDoNothingController(QuadrupedRuntimeEnvironment environment)
+   public QuadrupedJointInitializationController(QuadrupedRuntimeEnvironment environment)
    {
       this.fullRobotModel = environment.getFullRobotModel();
       this.initialized = new boolean[fullRobotModel.getOneDoFJoints().length];
