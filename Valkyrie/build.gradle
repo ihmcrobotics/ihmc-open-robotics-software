@@ -1,6 +1,6 @@
 plugins {
 	id 'org.hidetake.ssh' version '0.3.12'
-    id 'us.ihmc.gradle.ihmc-build' version '0.0.6'
+    id 'us.ihmc.gradle.ihmc-build' version '0.0.8'
 }
 
 
@@ -10,12 +10,15 @@ if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn('
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
 project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
 
 evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCJavaToolkit"))
 evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCRoboticsToolkit"))
@@ -24,8 +27,8 @@ evaluationDependsOn(ihmc.getProjectDependencyGradlePath("DarpaRoboticsChallenge"
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
-	
-	  
+
+
 	compile group: 'org.ejml', name: 'all', version: '0.28'
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'org.yaml', name: 'snakeyaml', version: '1.13' //1.11
@@ -37,15 +40,15 @@ dependencies {
 	compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.+'
 	compile group: 'org.apache.sshd', name: 'sshd-core', version: '0.12.+'
 	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
-	
+
 	compile group: 'us.ihmc', name: 'IHMCRosControl', version: '0.2.1'
-	
+
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
 	compile ihmc.getProjectDependency(":DarpaRoboticsChallenge")
 	compile ihmc.getProjectDependency(":Graphics3DAdapter")
-	
+
 	compile ihmc.getProjectDependency(":IHMCROSTools")
-	
+
 	compile ihmc.getProjectDependency(":RobotDataCommunication")
 	compile ihmc.getProjectDependency(":ROSJavaMessages")
 	compile ihmc.getProjectDependency(":SDFLoader")
@@ -55,9 +58,9 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCWholeBodyController")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-	
+
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
-	
+
 	testCompile ihmc.getProjectDependency(":IHMCJavaToolkit").sourceSets.test.output
 	testCompile ihmc.getProjectDependency(":DarpaRoboticsChallenge").sourceSets.test.output
 	testCompile ihmc.getProjectDependency(":IHMCRoboticsToolkit").sourceSets.test.output
