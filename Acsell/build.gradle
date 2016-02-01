@@ -17,22 +17,24 @@ project.ext.bintrayLicenseName = "GPL-3.0"
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
 
 evaluationDependsOn(ihmc.getProjectDependencyGradlePath("DarpaRoboticsChallenge"))
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
-	
+
 	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
 	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
 	//testCompile ihmc.getProjectDependency(":CommonWalkingControlModules").sourceSets.test.output
 	//test.sourceSets.test.output
 	testCompile ihmc.getProjectDependency(":DarpaRoboticsChallenge").sourceSets.test.output
-			
+
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
 	compile ihmc.getProjectDependency(":DarpaRoboticsChallenge")
 	compile ihmc.getProjectDependency(":Graphics3DAdapter")
-	
+
 	compile ihmc.getProjectDependency(":SDFLoader")
 	compile ihmc.getProjectDependency(":SensorProcessing")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")

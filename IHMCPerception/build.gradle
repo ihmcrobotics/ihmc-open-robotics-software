@@ -16,14 +16,16 @@ project.ext.bintrayLicenseName = "GPL-3.0"
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
-	
+
     compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
     compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
     compile group: 'us.ihmc.thirdparty', name: 'opencv', version: '3.1.0-internal2'
-    
+
 	compile ihmc.getProjectDependency(":IHMCCommunication")
     compile ihmc.getProjectDependency(":IHMCROSTools")
 	compile ihmc.getProjectDependency(":IHMCWholeBodyController")

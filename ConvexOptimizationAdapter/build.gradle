@@ -16,22 +16,24 @@ project.ext.bintrayLicenseName = "Apache-2.0"
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
 
 dependencies
 {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	testCompile group: 'org.yaml', name: 'snakeyaml', version: '1.13'
-	  
+
 	compile group: 'org.ejml', name: 'all', version: '0.28'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'colt', name: 'colt', version: '1.2.0'
 	compile group: 'com.github.vincentfk', name:'joptimizer', version:'3.3.0'
-	
-	
+
+
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
-	
+
 }
 
 jar {
