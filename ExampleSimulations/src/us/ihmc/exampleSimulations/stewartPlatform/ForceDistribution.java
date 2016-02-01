@@ -2,7 +2,8 @@ package us.ihmc.exampleSimulations.stewartPlatform;
 
 import javax.vecmath.Vector3d;
 
-import Jama.Matrix;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 public class ForceDistribution
 {
@@ -50,7 +51,7 @@ public class ForceDistribution
 
    }
 
-   private Matrix aMatrix66 = new Matrix(6, 6);
+   private DenseMatrix64F aMatrix66 = new DenseMatrix64F(6, 6);
 
 
    public void solveActuatorForcesSingleLeg(double[] act_force, double Fx, double Fy, double Fz, double Nx, double Ny, double Nz, Vector3d[] a_hat,
@@ -78,15 +79,16 @@ public class ForceDistribution
       {
          {Fx}, {Fy}, {Fz}, {Nx}, {Ny}, {Nz}
       };
-      Matrix bMatrix = new Matrix(vals2);
+      DenseMatrix64F bMatrix = new DenseMatrix64F(vals2);
 
-      double det = aMatrix66.det();
+      double det = CommonOps.det(aMatrix66);
 
       // System.out.println(det);
       if (Math.abs(det) < 0.000001)
          return;
 
-      Matrix x = aMatrix66.solve(bMatrix);
+      DenseMatrix64F x = new DenseMatrix64F(aMatrix66.getNumRows(), 1);
+      CommonOps.solve(aMatrix66, bMatrix, x);
 
 
       for (int i = 0; i < 6; i++)

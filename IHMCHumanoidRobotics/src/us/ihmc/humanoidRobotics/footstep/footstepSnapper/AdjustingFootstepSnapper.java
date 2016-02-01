@@ -161,7 +161,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
       position.set(originalFootstepFound.getLocation());
       orientation.set(originalFootstepFound.getOrientation());
       orientation.getColumn(2, zOrientation);
-      double originalYaw = RotationTools.getYawFromQuaternion(originalFootstepFound.getOrientation());
+      double originalYaw = RotationTools.computeYaw(originalFootstepFound.getOrientation());
 
       double[] angleOffsets;
       if (angleAdjustment > 0)

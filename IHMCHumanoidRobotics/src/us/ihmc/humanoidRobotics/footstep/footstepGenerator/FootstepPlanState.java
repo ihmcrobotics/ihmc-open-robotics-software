@@ -38,7 +38,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
    {
       footstepData.location = new Point3d(x, y, 0);
       footstepData.orientation = new Quat4d();
-      RotationTools.setQuaternionBasedOnYawPitchRoll(footstepData.orientation, theta, 0, 0);
+      RotationTools.convertYawPitchRollToQuaternion(theta, 0, 0, footstepData.orientation);
       footstepData.robotSide = side;
       this.theta = theta;
    }

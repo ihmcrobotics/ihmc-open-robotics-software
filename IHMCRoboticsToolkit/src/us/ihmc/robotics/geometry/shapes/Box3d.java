@@ -225,7 +225,7 @@ public class Box3d implements Shape3d
 
    public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
-      RotationTools.setYawPitchRoll(temporaryMatrix, yaw, pitch, roll);
+      RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, temporaryMatrix);
       setRotation(temporaryMatrix);
    }
 

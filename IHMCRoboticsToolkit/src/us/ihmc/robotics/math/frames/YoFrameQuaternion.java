@@ -70,7 +70,7 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
 
    public void set(Matrix3d matrix)
    {
-      RotationTools.setQuaternionBasedOnMatrix3d(quaternion, matrix);
+      RotationTools.convertMatrixToQuaternion(matrix, quaternion);
       getYoValuesFromQuat4d();
    }
 
@@ -82,13 +82,13 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
 
    public void set(double[] yawPitchRoll)
    {
-      RotationTools.setQuaternionBasedOnYawPitchRoll(quaternion, yawPitchRoll);
+      RotationTools.convertYawPitchRollToQuaternion(yawPitchRoll, quaternion);
       getYoValuesFromQuat4d();
    }
 
    public void set(double yaw, double pitch, double roll)
    {
-      RotationTools.setQuaternionBasedOnYawPitchRoll(quaternion, yaw, pitch, roll);
+      RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, quaternion);
       getYoValuesFromQuat4d();
    }
 
@@ -139,7 +139,7 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
    public void getYawPitchRoll(double[] yawPitchRoll)
    {
       putYoValuesIntoQuat4d();
-      RotationTools.setYawPitchRollBasedOnQuaternion(yawPitchRoll, quaternion);
+      RotationTools.convertQuaternionToYawPitchRoll(quaternion, yawPitchRoll);
    }
 
    public void getFrameOrientationIncludingFrame(FrameOrientation frameOrientation)

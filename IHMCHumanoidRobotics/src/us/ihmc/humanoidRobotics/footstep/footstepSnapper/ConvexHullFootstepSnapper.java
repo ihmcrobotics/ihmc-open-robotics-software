@@ -218,7 +218,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
    {
       FootstepData originalFootstepFound = new FootstepData(footstep);
       Point3d position = originalFootstepFound.getLocation();
-      double yaw = RotationTools.getYawFromQuaternion(originalFootstepFound.getOrientation());
+      double yaw = RotationTools.computeYaw(originalFootstepFound.getOrientation());
 
       if (!useMask)
       {
@@ -382,7 +382,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       // add in lower boundary points
       Point3d position = footstep.getLocation();
       Quat4d orientation = footstep.getOrientation();
-      double yaw = RotationTools.getYawFromQuaternion(orientation);
+      double yaw = RotationTools.computeYaw(orientation);
       addLowerBoundaryPointsToHullPointList(convexHullPointsList, position.x, position.y, yaw);
 
 
@@ -425,7 +425,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
 
          face.getPlane(facePlane);
          Quat4d newOrientation = new Quat4d();
-         RotationTools.getQuaternionFromYawAndZNormal(yaw, facePlane.getNormalCopy(), newOrientation);
+         RotationTools.computeQuaternionFromYawAndZNormal(yaw, facePlane.getNormalCopy(), newOrientation);
          FootstepData currentFaceFootstep = new FootstepData(footstep.getRobotSide(), new Point3d(x, y, facePlane.getZOnPlane(x, y)), newOrientation);
          currentPredictedContactPoints = getPredictedContactPointsForFootstep(currentFaceFootstep, points, distanceTolerance);
 
