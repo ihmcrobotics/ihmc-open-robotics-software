@@ -10,13 +10,14 @@ import us.ihmc.graphics3DAdapter.camera.CameraPropertiesHolder;
 
 public class DollyCheckBox extends JCheckBox implements ActionListener
 {
+   private static final String DOLLY = "Dolly";
    private static final long serialVersionUID = -6898471398304979545L;
    private ActiveCameraHolder cameraHolder;
 
    public DollyCheckBox(ActiveCameraHolder cameraHolder)
    {
-      super("Dolly");
-      this.setName("Dolly");
+      super(DOLLY);
+      this.setName(DOLLY);
 
       this.cameraHolder = cameraHolder;
 
