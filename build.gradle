@@ -27,6 +27,10 @@ if (buildType.equals("NIGHTLY")) {
     project.ext.fullVersion = version += "-NIGHTLY+date.${project.ext.date}.rev.${repo.head().abbreviatedId}"
 }
 
+if (buildType.equals("LOCAL")) {
+    project.ext.fullVersion = "LOCAL"
+}
+
 if (buildType.equals("SNAPSHOT")) {
     project.ext.fullVersion = version += "-SNAPSHOT${project.ext.snapshotCounter}.rev.${repo.head().abbreviatedId}"
 }
@@ -63,8 +67,12 @@ repositories {
 
 task publishAllToMavenLocal(type: GradleBuild) {
     buildFile "build.gradle"
-    def allTasks = [":clean"]
+    def allTasks = new ArrayList<String>()
+    buildType = "LOCAL"
+    project.ext.fullVersion = "LOCAL"
     subprojects.each { subproject ->
+//        subproject.buildType = "LOCAL"
+        subproject.ext.fullVersion = "LOCAL"
         allTasks.add(":" + subproject.name + ":publishToMavenLocal")
     }
 
