@@ -1,5 +1,6 @@
 package us.ihmc.wholeBodyController.concurrent;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Point2d;
@@ -8,6 +9,7 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.humanoidRobotics.model.IntermediateDesiredJointDataHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -18,6 +20,7 @@ public class ControllerDataForEstimatorHolder
    private final SideDependentList<Point2d> centerOfPressure = new SideDependentList<>();
    private AtomicReference<RobotMotionStatus> robotMotionStatus = new AtomicReference<RobotMotionStatus>(null);
 
+   private final List<RigidBody> feet;
    private final CenterOfPressureDataHolder controllerCenterOfPressureDataHolder;
    private final CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder;
 
@@ -35,6 +38,8 @@ public class ControllerDataForEstimatorHolder
       {
          centerOfPressure.put(robotSide, new Point2d());
       }
+      
+      this.feet = controllerCenterOfPressureDataHolder.getRigidBodies();
 
       this.estimatorCenterOfPressureDataHolder = estimatorCenterOfPressureDataHolder;
       this.controllerCenterOfPressureDataHolder = controllerCenterOfPressureDataHolder;
@@ -47,9 +52,9 @@ public class ControllerDataForEstimatorHolder
 
    public void readControllerDataIntoEstimator()
    {
-      for (RobotSide robotSide : RobotSide.values)
+      for (RigidBody foot : feet)
       {
-         estimatorCenterOfPressureDataHolder.setCenterOfPressure(centerOfPressure.get(robotSide), robotSide);
+         estimatorCenterOfPressureDataHolder.setCenterOfPressure(centerOfPressure.get(foot), foot);
       }
 
       if (robotMotionStatus.get() != null)
@@ -60,9 +65,9 @@ public class ControllerDataForEstimatorHolder
 
    public void writeControllerDataFromController()
    {
-      for (RobotSide robotSide : RobotSide.values)
+      for (RigidBody foot : feet)
       {
-         controllerCenterOfPressureDataHolder.getCenterOfPressure(centerOfPressure.get(robotSide), robotSide);
+         controllerCenterOfPressureDataHolder.getCenterOfPressure(centerOfPressure.get(foot), foot);
       }
 
       robotMotionStatus.set(controllerRobotMotionStatusHolder.getCurrentRobotMotionStatus());

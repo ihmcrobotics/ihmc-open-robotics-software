@@ -23,6 +23,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
@@ -51,6 +52,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final ReferenceFrame rootJointFrame;
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> copFrames = new SideDependentList<ReferenceFrame>();
+   private final SideDependentList<RigidBody> feetRigidBodies = new SideDependentList<RigidBody>();
 
    private final YoFramePoint rootJointPosition = new YoFramePoint("estimatedRootJointPositionWithKinematics", worldFrame, registry);
    private final YoFrameVector rootJointLinearVelocity = new YoFrameVector("estimatedRootJointVelocityWithKinematics", worldFrame, registry);
@@ -145,6 +147,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
             }
          };
          copFrames.put(robotSide, copFrame);
+         feetRigidBodies.put(robotSide, bipedFeet.get(robotSide).getRigidBody());
       }
 
       if (VISUALIZE)
@@ -259,7 +262,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       ReferenceFrame footFrame = soleFrames.get(trustedSide);
 
       if (useControllerDesiredCoP.getBooleanValue())
-         centerOfPressureDataHolderFromController.getCenterOfPressure(tempCoP2d, trustedSide);
+         centerOfPressureDataHolderFromController.getCenterOfPressure(tempCoP2d, feetRigidBodies.get(trustedSide));
       else
          footSwitches.get(trustedSide).computeAndPackCoP(tempCoP2d);
       
