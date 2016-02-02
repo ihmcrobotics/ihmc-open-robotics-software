@@ -73,7 +73,7 @@ public class DesiredPointAccelerationCommand
       {
          InverseDynamicsJoint joint = jointsInOrder[i];
          
-         jointsInOrder[i].packDesiredAccelerationMatrix(jointAccelerations, index);
+         jointsInOrder[i].getDesiredAccelerationMatrix(jointAccelerations, index);
          index = index + joint.getDegreesOfFreedom();
       }
       

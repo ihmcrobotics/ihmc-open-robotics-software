@@ -32,12 +32,12 @@ public class ConvectiveTermCalculator
          InverseDynamicsJoint joint = jointPathFromBaseToEndEffector[i];
          if (currentBody == joint.getPredecessor())
          {
-            joint.packPredecessorTwist(jointTwist);
+            joint.getPredecessorTwist(jointTwist);
             currentBody = joint.getSuccessor();
          }
          else if (currentBody == joint.getSuccessor())
          {
-            joint.packSuccessorTwist(jointTwist);
+            joint.getSuccessorTwist(jointTwist);
             currentBody = joint.getPredecessor();
          }
          else

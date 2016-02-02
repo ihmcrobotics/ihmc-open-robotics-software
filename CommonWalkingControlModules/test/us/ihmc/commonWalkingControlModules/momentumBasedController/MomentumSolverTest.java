@@ -585,7 +585,7 @@ public class MomentumSolverTest
       JUnitTools.assertTuple3dEquals(rateOfChangeOfLinearMomentum, desiredMomentumRate.getLinearPartCopy(), 1e-9);
 
       SpatialAccelerationVector pelvisAcceleration = new SpatialAccelerationVector();
-      rootJoint.packDesiredJointAcceleration(pelvisAcceleration);
+      rootJoint.getDesiredJointAcceleration(pelvisAcceleration);
       JUnitTools.assertTuple3dEquals(angularAcceleration, pelvisAcceleration.getAngularPartCopy(), 1e-9);
 
       checkTaskSpaceAcceleration(rootJoint, twistCalculator, jacobian, spatialAcceleration, 1e-9, false);
@@ -762,7 +762,7 @@ public class MomentumSolverTest
    private static void checkJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration, double epsilon)
    {
       DenseMatrix64F check = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
-      joint.packDesiredAccelerationMatrix(check, 0);
+      joint.getDesiredAccelerationMatrix(check, 0);
       JUnitTools.assertMatrixEquals(jointAcceleration, check, epsilon);
    }
 

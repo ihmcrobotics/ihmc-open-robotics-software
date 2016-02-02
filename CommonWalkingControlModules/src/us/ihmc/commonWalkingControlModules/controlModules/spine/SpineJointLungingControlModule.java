@@ -421,7 +421,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 	private FrameVector getIDRevoluteJointAxis(InverseDynamicsJoint jointName, ReferenceFrame expressedInFrame)
 	{
 		Twist twistToPack = new Twist();
-		jointName.packJointTwist(twistToPack);
+		jointName.getJointTwist(twistToPack);
 
 
 		Vector3d axis = twistToPack.getAngularPartCopy();
@@ -548,7 +548,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 			//FIXME: This only computes pitch axis angular acceleration
 			FrameVector spinePitchAngularAcceleration = new FrameVector(expressedInFrame);
 		    SpatialAccelerationVector spinePitchAccelToPack = new SpatialAccelerationVector();
-		    spinePitchIDjoint.packJointAcceleration(spinePitchAccelToPack);
+		    spinePitchIDjoint.getJointAcceleration(spinePitchAccelToPack);
 		    spinePitchAngularAcceleration.setIncludingFrame(spinePitchAccelToPack.getExpressedInFrame(), spinePitchAccelToPack.getAngularPartCopy());
 		    spinePitchAngularAcceleration.changeFrame(expressedInFrame);
 			return spinePitchAngularAcceleration;
@@ -560,17 +560,17 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 	      FrameVector totalAngularAccelerationAcrossJoints = new FrameVector(pelvisFrame);
 	      
 	      SpatialAccelerationVector spinePitchAccelToPack = new SpatialAccelerationVector();
-	      spinePitchIDjoint.packJointAcceleration(spinePitchAccelToPack);
+	      spinePitchIDjoint.getJointAcceleration(spinePitchAccelToPack);
 	      FrameVector spinePitchAngularAccel = new FrameVector(spinePitchAccelToPack.getExpressedInFrame(), spinePitchAccelToPack.getAngularPartCopy());
 	      spinePitchAngularAccel.changeFrame(pelvisFrame);
 	      
 	      SpatialAccelerationVector spineYawAccelToPack = new SpatialAccelerationVector();
-	      spineYawIDjoint.packJointAcceleration(spineYawAccelToPack);
+	      spineYawIDjoint.getJointAcceleration(spineYawAccelToPack);
 	      FrameVector spineYawAngularAccel = new FrameVector(spineYawAccelToPack.getExpressedInFrame(), spineYawAccelToPack.getAngularPartCopy()); 
 	      spineYawAngularAccel.changeFrame(pelvisFrame);
 	      
 	      SpatialAccelerationVector spineRollAccelToPack = new SpatialAccelerationVector();
-	      spineRollIDjoint.packJointAcceleration(spineRollAccelToPack);
+	      spineRollIDjoint.getJointAcceleration(spineRollAccelToPack);
 	      FrameVector spineRollAngularAccel = new FrameVector(spineRollAccelToPack.getExpressedInFrame(), spineRollAccelToPack.getAngularPartCopy());
 	      spineRollAngularAccel.changeFrame(pelvisFrame);
 	      

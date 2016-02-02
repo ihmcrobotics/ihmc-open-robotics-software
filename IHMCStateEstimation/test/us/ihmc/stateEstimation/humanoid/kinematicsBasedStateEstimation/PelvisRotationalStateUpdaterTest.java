@@ -130,7 +130,7 @@ public class PelvisRotationalStateUpdaterTest
       setRandomRobotConfigurationAndUpdateSensors(joints, inverseDynamicsStructure, stateEstimatorSensorDefinitions, jointAndIMUSensorDataSource);
       
       rootJoint.packRotation(rotationExpected);
-      rootJoint.packJointTwist(twistExpected);
+      rootJoint.getJointTwist(twistExpected);
       
       // Reset the root joint state configuration so the test fails if the PelvisRotationalStateUpdater actually does not do anything.
       rootJoint.setPositionAndRotation(new RigidBodyTransform());
@@ -141,7 +141,7 @@ public class PelvisRotationalStateUpdaterTest
       pelvisRotationalStateUpdater.initialize();
 
       rootJoint.packRotation(rotationEstimated);
-      rootJoint.packJointTwist(twistEstimated);
+      rootJoint.getJointTwist(twistEstimated);
       
       JUnitTools.assertQuaternionsEqualUsingDifference(rotationExpected, rotationEstimated, EPS);
       JUnitTools.assertTuple3dEquals(twistExpected.getAngularPartCopy(), twistEstimated.getAngularPartCopy(), EPS);
@@ -151,7 +151,7 @@ public class PelvisRotationalStateUpdaterTest
          setRandomRobotConfigurationAndUpdateSensors(joints, inverseDynamicsStructure, stateEstimatorSensorDefinitions, jointAndIMUSensorDataSource);
          
          rootJoint.packRotation(rotationExpected);
-         rootJoint.packJointTwist(twistExpected);
+         rootJoint.getJointTwist(twistExpected);
          
          // Reset the root joint state configuration so the test fails if the PelvisRotationalStateUpdater actually does not do anything.
          rootJoint.setPositionAndRotation(new RigidBodyTransform());
@@ -162,7 +162,7 @@ public class PelvisRotationalStateUpdaterTest
          pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
 
          rootJoint.packRotation(rotationEstimated);
-         rootJoint.packJointTwist(twistEstimated);
+         rootJoint.getJointTwist(twistEstimated);
          
          JUnitTools.assertQuaternionsEqualUsingDifference(rotationExpected, rotationEstimated, EPS);
          JUnitTools.assertTuple3dEquals(twistExpected.getAngularPartCopy(), twistEstimated.getAngularPartCopy(), EPS);

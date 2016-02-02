@@ -573,7 +573,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    public void setRobotRootJointVelocityAndAngularVelocityToMatchFullRobotModel(SixDoFJoint sixDoFJoint, FloatingJoint floatingJoint)
    {
       Twist rootJointTwist = new Twist();
-      sixDoFJoint.packJointTwist(rootJointTwist);
+      sixDoFJoint.getJointTwist(rootJointTwist);
 
       floatingJoint.setAngularVelocityInBody(rootJointTwist.getAngularPartCopy());
 
@@ -790,7 +790,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       SixDoFJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
-      sixDoFJoint.packJointTwist(bodyTwist);
+      sixDoFJoint.getJointTwist(bodyTwist);
 
       FrameVector originAcceleration = new FrameVector(elevatorFrame, RandomTools.generateRandomVector(random, maxRootJointLinearAcceleration));
       FrameVector angularAcceleration = new FrameVector(bodyFrame, RandomTools.generateRandomVector(random, maxRootJointAngularAcceleration));
@@ -809,7 +809,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       SixDoFJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
-      sixDoFJoint.packJointTwist(bodyTwist);
+      sixDoFJoint.getJointTwist(bodyTwist);
 
       FrameVector originAcceleration = new FrameVector(elevatorFrame);
       FrameVector angularAcceleration = new FrameVector(bodyFrame);
@@ -831,7 +831,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       SixDoFJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
-      sixDoFJoint.packJointTwist(bodyTwist);
+      sixDoFJoint.getJointTwist(bodyTwist);
 
       FrameVector originAcceleration = new FrameVector(elevatorFrame);
       FrameVector angularAcceleration = new FrameVector(bodyFrame);
@@ -849,7 +849,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       spatialAccelerationVectorOfSimulatedRootJoint.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
 
       SpatialAccelerationVector spatialAccelerationVectorOfInverseDynamicsRootJoint = new SpatialAccelerationVector();
-      sixDoFJoint.packDesiredJointAcceleration(spatialAccelerationVectorOfInverseDynamicsRootJoint);
+      sixDoFJoint.getDesiredJointAcceleration(spatialAccelerationVectorOfInverseDynamicsRootJoint);
 
       return spatialAccelerationVectorOfInverseDynamicsRootJoint.epsilonEquals(spatialAccelerationVectorOfInverseDynamicsRootJoint, epsilon);
    }

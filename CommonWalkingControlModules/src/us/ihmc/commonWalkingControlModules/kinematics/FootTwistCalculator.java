@@ -35,7 +35,7 @@ public class FootTwistCalculator
       for (LegJointName legJointName : fullRobotModel.getRobotSpecificJointNames().getLegJointNames())
       {
          OneDoFJoint joint = fullRobotModel.getLegJoint(robotSide, legJointName);
-         joint.packSuccessorTwist(tempTwist);
+         joint.getSuccessorTwist(tempTwist);
          ret.changeFrame(tempTwist.getExpressedInFrame());
          ret.add(tempTwist);
       }

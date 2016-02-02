@@ -102,14 +102,14 @@ public class SpatialAccelerationCalculator
       RigidBody predecessor = joint.getPredecessor();
       RigidBody successor = joint.getSuccessor();
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
-      joint.packPredecessorTwist(tempJointTwist);
+      joint.getPredecessorTwist(tempJointTwist);
       if (!doVelocityTerms)
          tempJointTwist.setToZero();
 
       if (useDesireds)
-         joint.packDesiredSuccessorAcceleration(tempJointAcceleration);
+         joint.getDesiredSuccessorAcceleration(tempJointAcceleration);
       else
-         joint.packSuccessorAcceleration(tempJointAcceleration);
+         joint.getSuccessorAcceleration(tempJointAcceleration);
       if (!doAccelerationTerms)
          tempJointAcceleration.setToZero();
       
