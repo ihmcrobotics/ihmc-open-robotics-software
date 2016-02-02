@@ -123,7 +123,7 @@ public class PelvisRotationalStateUpdater
       rootJoint.setRotation(rotationFromRootJointFrameToWorld);
 
       // Set the rootJoint twist to zero.
-      rootJoint.packJointTwist(twistRootBodyRelativeToWorld);
+      rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
       twistRootBodyRelativeToWorld.setToZero();
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
 
@@ -206,7 +206,7 @@ public class PelvisRotationalStateUpdater
       angularVelocityMeasurementLinkRelativeToWorld.changeFrame(worldFrame);
       measurementFrameAngularVelocityInWorld.set(angularVelocityMeasurementLinkRelativeToWorld);
 
-      rootJoint.packJointTwist(twistRootBodyRelativeToWorld);
+      rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
       twistRootBodyRelativeToWorld.setAngularPart(angularVelocityRootJointFrameRelativeToWorld);
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
       twistCalculator.compute();

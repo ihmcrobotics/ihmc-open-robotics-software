@@ -51,7 +51,7 @@ public abstract class MassMatrixCalculatorTest
       Twist successorTwist = new Twist();
       for (RevoluteJoint joint : joints)
       {
-         joint.packSuccessorTwist(successorTwist);
+         joint.getSuccessorTwist(successorTwist);
          successorTwist.changeFrame(worldFrame);
          twistWithRespectToWorld.add(successorTwist);
 

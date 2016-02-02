@@ -74,7 +74,7 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
 
       while (currentBody != imuJoint.getSuccessor())
       {
-         currentBody.getParentJoint().packPredecessorTwist(jointTwist);
+         currentBody.getParentJoint().getPredecessorTwist(jointTwist);
          jointTwist.changeFrame(twistToPack.getExpressedInFrame());
          twistToPack.add(jointTwist);
          currentBody = currentBody.getParentJoint().getPredecessor();
@@ -89,7 +89,7 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
    {
       ReferenceFrame footFrame = foot.getParentJoint().getFrameAfterJoint();
 
-      imuJoint.packJointTwist(jointTwist);
+      imuJoint.getJointTwist(jointTwist);
       angularVelocityToPack.setToZero(jointTwist.getExpressedInFrame());
       jointTwist.packAngularPart(angularVelocityToPack.getVector());    // angular velocity of IMU w.r.t world == IMU w.r.t ankle ZUp by assumption, in IMU frame
       angularVelocityToPack.changeFrame(footFrame);    // angular velocity of IMU w.r.t. ankle ZUp, in foot frame

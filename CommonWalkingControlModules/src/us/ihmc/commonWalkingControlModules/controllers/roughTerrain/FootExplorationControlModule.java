@@ -1354,8 +1354,8 @@ public class FootExplorationControlModule
    private void updateAnkleVelocity()
    {
       double absVelocity = 0.0;
-      jointX.packVelocityMatrix(jointVelocityMatrix, 0);
-      jointY.packVelocityMatrix(jointVelocityMatrix, 1);
+      jointX.getVelocityMatrix(jointVelocityMatrix, 0);
+      jointY.getVelocityMatrix(jointVelocityMatrix, 1);
       int numRows = jointVelocityMatrix.getNumRows();
       for (int i = 0; i < numRows; i++)
       {

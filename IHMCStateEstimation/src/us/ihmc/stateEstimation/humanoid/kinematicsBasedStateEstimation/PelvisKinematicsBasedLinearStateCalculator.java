@@ -381,7 +381,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    
    private void updateKinematicsNewTwist()
    {      
-      rootJoint.packJointTwist(tempRootBodyTwist);
+      rootJoint.getJointTwist(tempRootBodyTwist);
       
       rootJointLinearVelocityNewTwist.getFrameTupleIncludingFrame(tempFrameVector);
       tempFrameVector.changeFrame(tempRootBodyTwist.getExpressedInFrame());

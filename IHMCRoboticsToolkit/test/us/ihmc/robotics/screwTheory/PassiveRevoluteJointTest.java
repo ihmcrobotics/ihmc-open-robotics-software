@@ -42,7 +42,7 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.packTauMatrix(null);
+         joint.getTauMatrix(null);
       }
       catch(RuntimeException e)
       {
@@ -57,7 +57,7 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.packVelocityMatrix(matrix, rowStart);
+         joint.getVelocityMatrix(matrix, rowStart);
       }
       catch(RuntimeException e)
       {
@@ -72,7 +72,7 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.packDesiredAccelerationMatrix(matrix, rowStart);
+         joint.getDesiredAccelerationMatrix(matrix, rowStart);
       }
       catch(RuntimeException e)
       {
@@ -192,7 +192,7 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.packConfigurationMatrix(matrix, rowStart);
+         joint.getConfigurationMatrix(matrix, rowStart);
       }
       catch(RuntimeException e)
       {

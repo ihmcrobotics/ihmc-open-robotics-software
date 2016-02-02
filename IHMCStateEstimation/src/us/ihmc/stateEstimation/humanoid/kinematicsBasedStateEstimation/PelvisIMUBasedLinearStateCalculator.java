@@ -204,7 +204,7 @@ public class PelvisIMUBasedLinearStateCalculator
 
    private void getCorrectionVelocityForMeasurementFrameOffset(FrameVector correctionTermToPack)
    {
-      rootJoint.packJointTwist(tempRootJointTwist);
+      rootJoint.getJointTwist(tempRootJointTwist);
       tempRootJointTwist.packAngularPart(tempRootJointAngularVelocity);
       
       measurementOffset.setToZero(measurementFrame);

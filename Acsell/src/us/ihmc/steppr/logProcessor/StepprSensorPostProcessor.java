@@ -330,7 +330,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
       estimatedRootJointQuaternion.set(orientation);
       estimatedRootJointOrientation.set(orientation);
       
-      rootJoint.packJointTwist(twist);
+      rootJoint.getJointTwist(twist);
 
       twist.packLinearPart(linearFrameVelocity);
       linearFrameVelocity.changeFrame(worldFrame);

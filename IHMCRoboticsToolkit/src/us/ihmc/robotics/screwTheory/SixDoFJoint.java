@@ -39,27 +39,27 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       return afterJointFrame;
    }
    
-   public void packJointTwist(Twist twistToPack)
+   public void getJointTwist(Twist twistToPack)
    {
       twistToPack.set(jointTwist);
    }
    
-   public void packJointAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.set(jointAcceleration);
    }
    
-   public void packDesiredJointAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getDesiredJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.set(jointAccelerationDesired);
    }
    
-   public void packTauMatrix(DenseMatrix64F matrix)
+   public void getTauMatrix(DenseMatrix64F matrix)
    {
       successorWrench.packMatrix(matrix);
    }
    
-   public void packVelocityMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
    {
       jointTwist.packMatrix(matrix, rowStart);
    }
@@ -74,7 +74,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       jointTwist.packLinearPart(linearVelocityToPack);
    }
    
-   public void packDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       jointAccelerationDesired.packMatrix(matrix, rowStart);
    }
@@ -256,7 +256,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       // empty
    }
    
-   public void packConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
       MatrixTools.insertQuat4dIntoEJMLVector(matrix, jointRotation, rowStart);

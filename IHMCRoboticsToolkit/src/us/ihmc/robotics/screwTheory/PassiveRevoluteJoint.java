@@ -25,19 +25,19 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    }
 
    @Override
-   public void packTauMatrix(DenseMatrix64F matrix)
+   public void getTauMatrix(DenseMatrix64F matrix)
    {
       throw new RuntimeException("Cannot set torque of a passive joint");  
    }
 
    @Override
-   public void packVelocityMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
    {
       throw new RuntimeException("Cannot set velocity of a passive joint");
    }
 
    @Override
-   public void packDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
@@ -91,7 +91,7 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    }
 
    @Override
-   public void packConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       throw new RuntimeException("Cannot set position of a passive joint");
    }

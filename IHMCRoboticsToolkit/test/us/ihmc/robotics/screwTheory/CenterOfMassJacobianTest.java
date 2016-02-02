@@ -109,7 +109,7 @@ public class CenterOfMassJacobianTest
 
       sixDoFJoint.setPositionAndRotation(RigidBodyTransform.generateRandomTransform(random));
       Twist sixDoFJointTwist = new Twist();
-      sixDoFJoint.packJointTwist(sixDoFJointTwist);
+      sixDoFJoint.getJointTwist(sixDoFJointTwist);
       sixDoFJointTwist.setLinearPart(RandomTools.generateRandomVector(random));
       sixDoFJointTwist.setAngularPart(RandomTools.generateRandomVector(random));
       sixDoFJoint.setJointTwist(sixDoFJointTwist);
@@ -172,7 +172,7 @@ public class CenterOfMassJacobianTest
 
       ReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
       Twist rootJointTwist = new Twist();
-      rootJoint.packJointTwist(rootJointTwist);
+      rootJoint.getJointTwist(rootJointTwist);
       FrameVector rootJointLinearVelocity = new FrameVector(rootJointFrame);
       rootJointTwist.packLinearPart(rootJointLinearVelocity);
       

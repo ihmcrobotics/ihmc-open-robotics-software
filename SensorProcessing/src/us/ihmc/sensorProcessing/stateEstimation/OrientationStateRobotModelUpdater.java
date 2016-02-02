@@ -85,7 +85,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
 
    private void updateRootJointTwistAngularPart(TwistCalculator twistCalculator, SixDoFJoint rootJoint, FrameVector estimationLinkAngularVelocity)
    {
-      rootJoint.packJointTwist(tempRootJointTwist);
+      rootJoint.getJointTwist(tempRootJointTwist);
       computeRootJointAngularVelocity(twistCalculator, tempRootJointAngularVelocity, estimationLinkAngularVelocity);
 
       tempRootJointTwist.setAngularPart(tempRootJointAngularVelocity.getVector());
