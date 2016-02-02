@@ -17,7 +17,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.filters.BacklashCompensatingVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -55,19 +54,13 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    private final YoFramePoint rootJointPosition = new YoFramePoint("estimatedRootJointPositionWithKinematics", worldFrame, registry);
    private final YoFrameVector rootJointLinearVelocity = new YoFrameVector("estimatedRootJointVelocityWithKinematics", worldFrame, registry);
-   private final YoFrameVector rootJointLinearVelocityTwist = new YoFrameVector("estimatedRootJointVelocityWithTwist", worldFrame, registry);
-   private final BooleanYoVariable useTwistToComputeRootJointLinearVelocity = new BooleanYoVariable("useTwistToComputeRootJointLinearVelocity", registry);
-   
+
    private final YoFrameVector leftFootVelocityInWorld = new YoFrameVector("leftFootVelocityInWorld", worldFrame, registry);
    private final YoFrameVector rightFootVelocityInWorld = new YoFrameVector("rightFootVelocityInWorld", worldFrame, registry);
    private final SideDependentList<YoFrameVector> footVelocitiesInWorld = new SideDependentList<YoFrameVector>(leftFootVelocityInWorld, rightFootVelocityInWorld);
    private final SideDependentList<Twist> footTwistsInWorld = new SideDependentList<Twist>(new Twist(), new Twist());
    private final YoFrameVector rootJointLinearVelocityNewTwist = new YoFrameVector("estimatedRootJointVelocityNewTwist", worldFrame, registry);
    private final DoubleYoVariable alphaRootJointLinearVelocityNewTwist = new DoubleYoVariable("alphaRootJointLinearVelocityNewTwist", registry);
-
-   private final DoubleYoVariable alphaRootJointLinearVelocityBacklashKinematics = new DoubleYoVariable("alphaRootJointLinearVelocityBacklashKinematics", registry);
-   private final DoubleYoVariable slopTimeRootJointLinearVelocityBacklashKinematics = new DoubleYoVariable("slopTimeRootJointLinearVelocityBacklashKinematics", registry);
-   private final BacklashCompensatingVelocityYoFrameVector rootJointLinearVelocityBacklashKinematics;
 
    private final DoubleYoVariable alphaFootToRootJointPosition = new DoubleYoVariable("alphaFootToRootJointPosition", registry);
    private final SideDependentList<AlphaFilteredYoFrameVector> footToRootJointPositions = new SideDependentList<AlphaFilteredYoFrameVector>();
@@ -109,9 +102,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
       this.twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       this.footSwitches = footSwitches;
       this.centerOfPressureDataHolderFromController = centerOfPressureDataHolderFromController;
-
-      rootJointLinearVelocityBacklashKinematics = BacklashCompensatingVelocityYoFrameVector.createBacklashCompensatingVelocityYoFrameVector("estimatedRootJointLinearVelocityBacklashKin", "", 
-            alphaRootJointLinearVelocityBacklashKinematics, estimatorDT, slopTimeRootJointLinearVelocityBacklashKinematics, registry, rootJointPosition);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -192,28 +182,16 @@ public class PelvisKinematicsBasedLinearStateCalculator
    {
       alphaRootJointLinearVelocityNewTwist.set(alpha);
    }
-   
-   public void setPelvisLinearVelocityBacklashParameters(double alphaFilter, double slopTime)
-   {
-      alphaRootJointLinearVelocityBacklashKinematics.set(alphaFilter);
-      slopTimeRootJointLinearVelocityBacklashKinematics.set(slopTime);
-   }
 
    public void setAlphaCenterOfPressure(double alphaFilter)
    {
       alphaCoPFilter.set(alphaFilter);
-   }
-   
-   public void enableTwistEstimation(boolean enable)
-   {
-      useTwistToComputeRootJointLinearVelocity.set(enable);
    }
 
    private void reset()
    {
       rootJointPosition.setToZero();
       rootJointLinearVelocity.setToZero();
-      rootJointLinearVelocityTwist.setToZero();
    }
 
    /**
@@ -445,8 +423,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          correctFootPositionsUsingCoP(trustedSide);
          updatePelvisWithKinematics(trustedSide, listOfTrustedSides.length);
       }
-      rootJointLinearVelocityBacklashKinematics.update();
-
+      
       kinematicsIsUpToDate.set(false);
    }
 
@@ -468,10 +445,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    public void getPelvisVelocity(FrameVector linearVelocityToPack)
    {
-      if (useTwistToComputeRootJointLinearVelocity.getBooleanValue())
-         rootJointLinearVelocityNewTwist.getFrameTupleIncludingFrame(linearVelocityToPack);
-      else
-         rootJointLinearVelocityBacklashKinematics.getFrameTupleIncludingFrame(linearVelocityToPack);
+      rootJointLinearVelocityNewTwist.getFrameTupleIncludingFrame(linearVelocityToPack);
    }
 
    public void getFootToPelvisPosition(FramePoint positionToPack, RobotSide robotSide)
