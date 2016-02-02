@@ -71,7 +71,7 @@ task publishAllToMavenLocal(type: GradleBuild) {
     buildType = "LOCAL"
     project.ext.fullVersion = "LOCAL"
     subprojects.each { subproject ->
-        subproject.buildType = "LOCAL"
+//        subproject.buildType = "LOCAL"
         subproject.ext.fullVersion = "LOCAL"
         allTasks.add(":" + subproject.name + ":publishToMavenLocal")
     }
