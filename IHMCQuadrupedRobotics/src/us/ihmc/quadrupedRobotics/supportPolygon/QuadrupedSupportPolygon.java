@@ -555,7 +555,7 @@ public class QuadrupedSupportPolygon implements Serializable
 
    public void getCentroid2d(FramePoint centroidToPack)
    {
-      centroidToPack.setToZero();
+      centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
       
       for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
