@@ -25,7 +25,6 @@ dependencies
   testCompile ihmc.getProjectDependency(":IHMCRoboticsToolkit").sourceSets.test.output
   testCompile ihmc.getProjectDependency(":IHMCQuadrupedRobotics").sourceSets.test.output
   compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
-  compile ihmc.getProjectDependency(":SerialPortCommunication")
   testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
   compile ihmc.getProjectDependency(":EtherlabWrapper")
   compile ihmc.getProjectDependency(":AwareNetworking")
