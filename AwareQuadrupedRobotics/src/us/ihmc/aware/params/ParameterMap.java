@@ -94,6 +94,14 @@ public class ParameterMap
       return map.get(name).variables[idx].getDoubleValue();
    }
 
+   /**
+    * Gets a temporary array of values. The returned array is a reference to an internal buffer and is not guaranteed to
+    * remain consistent with the actual parameter values after successive {@link #set(String, double...)} calls.
+    *
+    * @param name the base parameter name
+    * @return the temprary array
+    */
+   // TODO(Kyle Cesare): This is a HACK and is extremely error prone.
    public double[] getVolatileArray(String name)
    {
       double[] buffer = map.get(name).buffer;
@@ -105,6 +113,10 @@ public class ParameterMap
       return buffer;
    }
 
+   /**
+    * @param name   the base parameter name
+    * @param values the array of values to be stored in the given parameter
+    */
    public void set(String name, double... values)
    {
       for (int i = 0; i < values.length; i++)
@@ -121,6 +133,10 @@ public class ParameterMap
       variables[idx].set(value);
    }
 
+   /**
+    * @param name the base parameter name
+    * @return whether or not the given parameter name exists in the map
+    */
    public boolean contains(String name)
    {
       return contains(name, 0);
