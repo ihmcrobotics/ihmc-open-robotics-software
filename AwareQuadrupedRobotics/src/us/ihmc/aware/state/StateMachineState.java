@@ -7,6 +7,11 @@ public interface StateMachineState<E extends Enum<E>>
     */
    void onEntry();
 
+   /**
+    * Called regularly by the state machine to allow the state to do any time-dependent internal processing.
+    *
+    * @return a new event to be fired in the state machine, or <code>null</code> if no event is to be fired
+    */
    E process();
 
    /**
