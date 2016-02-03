@@ -70,28 +70,39 @@ public class QuadrupedControllerManager implements RobotController
             commonControllerParameters, quadrupedRobotParameters, requestedState);
       builder.addDoNothingController();
       builder.addStandPrepController();
-      builder.addStandReadyController();
-      builder.addPositionBasedCrawlController(inverseKinematicsCalculators, globalDataProducer);
-      builder.addVirtualModelBasedStandController(virtualModelController);
-      builder.addSliderBoardController();
+
+      if (startState == QuadrupedControllerState.STAND_READY)
+      {
+         builder.addStandReadyController();
+      }
+      if (startState == QuadrupedControllerState.POSITION_CRAWL)
+      {
+         builder.addPositionBasedCrawlController(inverseKinematicsCalculators, globalDataProducer);
+      }
+      if (startState == QuadrupedControllerState.VMC_STAND)
+      {
+         builder.addVirtualModelBasedStandController(virtualModelController);
+      }
+      if (startState == QuadrupedControllerState.TROT_WALK)
+      {
+         builder.addTrotWalkController();
+      }
+      if (startState == QuadrupedControllerState.SLIDER_BOARD)
+      {
+         builder.addSliderBoardController();
+      }
 
       builder.addJointsInitializedCondition(QuadrupedControllerState.DO_NOTHING, QuadrupedControllerState.STAND_PREP);
-      builder.addStandingExitCondition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.STAND_READY);
-
-      builder.addPermissibleTransition(QuadrupedControllerState.STAND_READY, QuadrupedControllerState.VMC_STAND);
-      builder.addPermissibleTransition(QuadrupedControllerState.STAND_READY, QuadrupedControllerState.POSITION_CRAWL);
-
-      builder.addPermissibleTransition(QuadrupedControllerState.VMC_STAND, QuadrupedControllerState.STAND_PREP);
-      builder.addPermissibleTransition(QuadrupedControllerState.POSITION_CRAWL, QuadrupedControllerState.STAND_PREP);
+      builder.addStandingExitCondition(QuadrupedControllerState.STAND_PREP, startState);
 
       this.stateMachine = builder.build();
 
       // Transition to the start state. The entry action must be triggered manually.
-      stateMachine.setCurrentState(startState);
+      stateMachine.setCurrentState(QuadrupedControllerState.STAND_PREP);
       stateMachine.getCurrentState().doTransitionIntoAction();
 
       // Set the initial requested state to the actual start state.
-      requestedState.set(startState);
+      requestedState.set(QuadrupedControllerState.STAND_PREP);
    }
 
    @Override
