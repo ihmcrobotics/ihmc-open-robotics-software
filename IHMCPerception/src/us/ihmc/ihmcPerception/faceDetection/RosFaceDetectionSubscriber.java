@@ -2,6 +2,8 @@ package us.ihmc.ihmcPerception.faceDetection;
 
 import people_msgs.PositionMeasurement;
 import people_msgs.PositionMeasurementArray;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
@@ -9,9 +11,13 @@ import javax.vecmath.Point3d;
 
 public class RosFaceDetectionSubscriber extends AbstractRosTopicSubscriber<PositionMeasurementArray>
 {
-   public RosFaceDetectionSubscriber(String topicName, RosMainNode node)
+   private final PacketCommunicator packetCommunicator;
+
+   public RosFaceDetectionSubscriber(String topicName, RosMainNode node, PacketCommunicator packetCommunicator)
    {
       super(PositionMeasurementArray._TYPE);
+
+      this.packetCommunicator = packetCommunicator;
 
       node.attachSubscriber(topicName, this);
    }
@@ -32,6 +38,6 @@ public class RosFaceDetectionSubscriber extends AbstractRosTopicSubscriber<Posit
       }
 
       DetectedFacesPacket detectedFaces = new DetectedFacesPacket(ids, positions);
-
+      packetCommunicator.send(detectedFaces);
    }
 }
