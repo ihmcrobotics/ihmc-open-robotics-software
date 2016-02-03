@@ -5,7 +5,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedContr
    @Override
    public void onEntry()
    {
-      
+
    }
 
    @Override

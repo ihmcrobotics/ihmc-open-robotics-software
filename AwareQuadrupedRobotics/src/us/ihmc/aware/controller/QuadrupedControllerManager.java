@@ -37,6 +37,7 @@ public class QuadrupedControllerManager implements RobotController
       QuadrupedController crawlController = new QuadrupedPositionBasedCrawlControllerAdapter(runtimeEnvironment, parameters, paramMapRepository);
       QuadrupedVirtualModelController virtualModelController = new QuadrupedVirtualModelController(
             runtimeEnvironment.getFullRobotModel(), parameters, registry, runtimeEnvironment.getGraphicsListRegistry());
+      QuadrupedController virtualModelBasedStandController = new QuadrupedVirtualModelBasedStandController();
       QuadrupedController virtualModelBasedStepController = new QuadrupedVirtualModelBasedStepController(
             runtimeEnvironment, parameters, paramMapRepository, virtualModelController);
 
@@ -46,6 +47,7 @@ public class QuadrupedControllerManager implements RobotController
       builder.addState(QuadrupedControllerState.STAND_PREP, standPrepController);
       builder.addState(QuadrupedControllerState.STAND_READY, standReadyController);
       builder.addState(QuadrupedControllerState.POSITION_BASED_CRAWL, crawlController);
+      builder.addState(QuadrupedControllerState.VIRTUAL_MODEL_BASED_STAND, virtualModelBasedStandController);
       builder.addState(QuadrupedControllerState.VIRTUAL_MODEL_BASED_STEP, virtualModelBasedStepController);
 
       // TODO: Define more state transitions.
@@ -57,6 +59,8 @@ public class QuadrupedControllerManager implements RobotController
       // Manually triggered events to transition to main controllers.
       builder.addTransition(QuadrupedControllerEvent.POSITION_BASED_CRAWL, QuadrupedControllerState.STAND_READY,
             QuadrupedControllerState.POSITION_BASED_CRAWL);
+      builder.addTransition(QuadrupedControllerEvent.VIRTUAL_MODEL_BASED_STAND, QuadrupedControllerState.STAND_READY,
+            QuadrupedControllerState.VIRTUAL_MODEL_BASED_STAND);
       builder.addTransition(QuadrupedControllerEvent.VIRTUAL_MODEL_BASED_STEP, QuadrupedControllerState.STAND_READY,
             QuadrupedControllerState.VIRTUAL_MODEL_BASED_STEP);
 
