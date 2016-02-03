@@ -682,7 +682,11 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          virtualModelController.setContactState(robotQuadrant, true);
+         virtualModelController.setContactForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
       }
+      virtualModelController.setComForceCommandWeights(1.0, 1.0, 1.0);
+      virtualModelController.setComTorqueCommandWeights(1.0, 1.0, 1.0);
+
       bodyOrientationController.reset();
       bodyOrientationController.setProportionalGains(params.getVolatileArray(BODY_ORIENTATION_PROPORTIONAL_GAINS));
       bodyOrientationController.setIntegralGains(params.getVolatileArray(BODY_ORIENTATION_INTEGRAL_GAINS), params.get(BODY_ORIENTATION_MAX_INTEGRAL_ERROR));
