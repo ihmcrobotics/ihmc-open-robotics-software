@@ -41,22 +41,25 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
 
    private final FrameVector comForceCommand;
-   private final YoFrameVector yoComForceCommand;
    private final FrameVector comForceSolution;
-   private final YoFrameVector yoComForceSolution;
    private final FrameVector comTorqueCommand;
-   private final YoFrameVector yoComTorqueCommand;
    private final FrameVector comTorqueSolution;
-   private final YoFrameVector yoComTorqueSolution;
    private final QuadrantDependentList<FrameVector> swingForceCommand;
-   private final QuadrantDependentList<YoFrameVector> yoSwingForceCommand;
    private final QuadrantDependentList<FrameVector> swingForceSolution;
-   private final QuadrantDependentList<YoFrameVector> yoSwingForceSolution;
+   private final QuadrantDependentList<FrameVector> contactForceCommand;
    private final QuadrantDependentList<FrameVector> contactForceSolution;
-   private final QuadrantDependentList<YoFrameVector> yoContactForceSolution;
    private final QuadrantDependentList<boolean[]> contactState;
-   private final QuadrantDependentList<BooleanYoVariable> yoContactState;
    private final QuadrantDependentList<FramePoint> solePosition;
+
+   private final YoFrameVector yoComForceCommand;
+   private final YoFrameVector yoComForceSolution;
+   private final YoFrameVector yoComTorqueCommand;
+   private final YoFrameVector yoComTorqueSolution;
+   private final QuadrantDependentList<YoFrameVector> yoSwingForceCommand;
+   private final QuadrantDependentList<YoFrameVector> yoSwingForceSolution;
+   private final QuadrantDependentList<YoFrameVector> yoContactForceCommand;
+   private final QuadrantDependentList<YoFrameVector> yoContactForceSolution;
+   private final QuadrantDependentList<BooleanYoVariable> yoContactState;
    private final QuadrantDependentList<YoFramePoint> yoSolePosition;
 
    private final QuadrupedContactForceOptimization contactForceOptimization;
@@ -86,37 +89,47 @@ public class QuadrupedVirtualModelController
 
       // initialize control variables
       comForceCommand = new FrameVector(comFrame);
-      yoComForceCommand = new YoFrameVector("comForceCommand", worldFrame, registry);
       comForceSolution = new FrameVector(comFrame);
-      yoComForceSolution = new YoFrameVector("comForceSolution", worldFrame, registry);
       comTorqueCommand = new FrameVector(comFrame);
-      yoComTorqueCommand = new YoFrameVector("comTorqueCommand", worldFrame, registry);
       comTorqueSolution = new FrameVector(comFrame);
-      yoComTorqueSolution = new YoFrameVector("comTorqueSolution", worldFrame, registry);
       swingForceCommand = new QuadrantDependentList<>();
-      yoSwingForceCommand = new QuadrantDependentList<>();
       swingForceSolution = new QuadrantDependentList<>();
-      yoSwingForceSolution = new QuadrantDependentList<>();
+      contactForceCommand = new QuadrantDependentList<>();
       contactForceSolution = new QuadrantDependentList<>();
-      yoContactForceSolution = new QuadrantDependentList<>();
       contactState = new QuadrantDependentList<>();
-      yoContactState = new QuadrantDependentList<>();
       solePosition = new QuadrantDependentList<>();
-      yoSolePosition = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          swingForceCommand.set(robotQuadrant, new FrameVector(comFrame));
+         swingForceSolution.set(robotQuadrant, new FrameVector(comFrame));
+         contactForceCommand.set(robotQuadrant, new FrameVector(comFrame));
+         contactForceSolution.set(robotQuadrant, new FrameVector(comFrame));
+         contactState.set(robotQuadrant, new boolean[1]);
+         solePosition.set(robotQuadrant, new FramePoint(comFrame));
+      }
+
+      // initialize yo variables
+      yoComForceCommand = new YoFrameVector("comForceCommand", worldFrame, registry);
+      yoComForceSolution = new YoFrameVector("comForceSolution", worldFrame, registry);
+      yoComTorqueCommand = new YoFrameVector("comTorqueCommand", worldFrame, registry);
+      yoComTorqueSolution = new YoFrameVector("comTorqueSolution", worldFrame, registry);
+      yoSwingForceCommand = new QuadrantDependentList<>();
+      yoSwingForceSolution = new QuadrantDependentList<>();
+      yoContactForceCommand = new QuadrantDependentList<>();
+      yoContactForceSolution = new QuadrantDependentList<>();
+      yoContactState = new QuadrantDependentList<>();
+      yoSolePosition = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
          yoSwingForceCommand.set(robotQuadrant,
                new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SwingForceCommand", worldFrame, registry));
-         swingForceSolution.set(robotQuadrant, new FrameVector(comFrame));
          yoSwingForceSolution.set(robotQuadrant,
                new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SwingForceSolution", worldFrame, registry));
-         contactForceSolution.set(robotQuadrant, new FrameVector(comFrame));
+         yoContactForceCommand.set(robotQuadrant,
+               new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "ContactForceCommand", worldFrame, registry));
          yoContactForceSolution.set(robotQuadrant,
                new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "ContactForceSolution", worldFrame, registry));
-         contactState.set(robotQuadrant, new boolean[1]);
          yoContactState.set(robotQuadrant, new BooleanYoVariable(robotQuadrant.getCamelCaseNameForStartOfExpression() + "ContactState", registry));
-         solePosition.set(robotQuadrant, new FramePoint(comFrame));
          yoSolePosition.set(robotQuadrant, new YoFramePoint(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SolePosition", worldFrame, registry));
       }
 
@@ -164,9 +177,13 @@ public class QuadrupedVirtualModelController
       comTorqueCommand.setToZero();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         swingForceCommand.get(robotQuadrant).setToZero();
          contactState.get(robotQuadrant)[0] = true;
+         contactForceCommand.get(robotQuadrant).setToZero();
+         swingForceCommand.get(robotQuadrant).setToZero();
       }
+
+      // initialize contact force optimization settings
+      contactForceOptimizationSettings.setDefaultSettings();
 
       // initialize visualizers
       setVisible(false);
@@ -187,29 +204,9 @@ public class QuadrupedVirtualModelController
       contactForceOptimizationSettings.setComForceCommandWeights(weights);
    }
 
-   public void setComTorqueCommand(FrameVector comTorque)
+   public void setComForceCommandWeights(double weightX, double weightY, double weightZ)
    {
-      comTorqueCommand.setIncludingFrame(comTorque);
-   }
-
-   public void setComTorqueCommandWeights(double[] weights)
-   {
-      contactForceOptimizationSettings.setComTorqueCommandWeights(weights);
-   }
-
-   public void setSwingForceCommand(RobotQuadrant robotQuadrant, FrameVector swingForce)
-   {
-      swingForceCommand.get(robotQuadrant).setIncludingFrame(swingForce);
-   }
-
-   public void setContactState(RobotQuadrant robotQuadrant, boolean inContact)
-   {
-      contactState.get(robotQuadrant)[0] = inContact;
-   }
-
-   public void setContactForceRegularizationWeights(double weights)
-   {
-      contactForceOptimizationSettings.setContactForceRegularizationWeights(weights);
+      contactForceOptimizationSettings.setComForceCommandWeights(weightX, weightY, weightZ);
    }
 
    public void getComForceSolution(FrameVector comForce)
@@ -217,19 +214,59 @@ public class QuadrupedVirtualModelController
       comForce.setIncludingFrame(comForceSolution);
    }
 
+   public void setComTorqueCommand(FrameVector comTorque)
+   {
+      comTorqueCommand.setIncludingFrame(comTorque);
+   }
+
+   public void setComTorqueCommandWeights(double weightX, double weightY, double weightZ)
+   {
+      contactForceOptimizationSettings.setComTorqueCommandWeights(weightX, weightY, weightZ);
+   }
+
+   public void setComTorqueCommandWeights(double[] weights)
+   {
+      contactForceOptimizationSettings.setComTorqueCommandWeights(weights);
+   }
+
    public void getComTorqueSolution(FrameVector comTorque)
    {
       comTorque.setIncludingFrame(comTorqueSolution);
    }
 
-   public void getSwingForceSolution(RobotQuadrant robotQuadrant, FrameVector swingForce)
+   public void setContactState(RobotQuadrant robotQuadrant, boolean inContact)
    {
-      swingForce.setIncludingFrame(swingForceSolution.get(robotQuadrant));
+      contactState.get(robotQuadrant)[0] = inContact;
+   }
+
+   public void setContactForceCommand(RobotQuadrant robotQuadrant, FrameVector contactForce)
+   {
+      contactForceCommand.get(robotQuadrant).setIncludingFrame(contactForce);
+   }
+
+   public void setContactForceCommandWeights(RobotQuadrant robotQuadrant, double[] weights)
+   {
+      contactForceOptimizationSettings.setContactForceCommandWeights(robotQuadrant, weights);
+   }
+
+   public void setContactForceCommandWeights(RobotQuadrant robotQuadrant, double weightX, double weightY, double weightZ)
+   {
+      contactForceOptimizationSettings.setContactForceCommandWeights(robotQuadrant, weightX, weightY, weightZ);
    }
 
    public void getContactForceSolution(RobotQuadrant robotQuadrant, FrameVector contactForce)
    {
       contactForce.setIncludingFrame(contactForceSolution.get(robotQuadrant));
+   }
+
+   public void setSwingForceCommand(RobotQuadrant robotQuadrant, FrameVector swingForce)
+   {
+      swingForceCommand.get(robotQuadrant).setIncludingFrame(swingForce);
+   }
+
+   public void getSwingForceSolution(RobotQuadrant robotQuadrant, FrameVector swingForce)
+   {
+      swingForce.setIncludingFrame(swingForceSolution.get(robotQuadrant));
    }
 
    public void compute(QuadrupedJointLimits jointLimits, QuadrupedContactForceLimits contactForceLimits)
@@ -247,6 +284,10 @@ public class QuadrupedVirtualModelController
       // compute optimal contact forces
       contactForceOptimization.setComTorqueCommand(comTorqueCommand);
       contactForceOptimization.setComForceCommand(comForceCommand);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         contactForceOptimization.setContactForceCommand(robotQuadrant, contactForceCommand.get(robotQuadrant));
+      }
       contactForceOptimization.solve(solePosition, contactState, contactForceLimits, contactForceOptimizationSettings);
       contactForceOptimization.getComTorqueSolution(comTorqueSolution);
       contactForceOptimization.getComForceSolution(comForceSolution);
@@ -324,9 +365,11 @@ public class QuadrupedVirtualModelController
          yoSwingForceCommand.get(robotQuadrant).set(swingForceCommand.get(robotQuadrant));
          swingForceSolution.get(robotQuadrant).changeFrame(yoSwingForceSolution.get(robotQuadrant).getReferenceFrame());
          yoSwingForceSolution.get(robotQuadrant).set(swingForceSolution.get(robotQuadrant));
-         yoContactState.get(robotQuadrant).set(contactState.get(robotQuadrant)[0]);
+         contactForceCommand.get(robotQuadrant).changeFrame(yoContactForceCommand.get(robotQuadrant).getReferenceFrame());
+         yoContactForceCommand.get(robotQuadrant).set(contactForceCommand.get(robotQuadrant));
          contactForceSolution.get(robotQuadrant).changeFrame(yoContactForceSolution.get(robotQuadrant).getReferenceFrame());
          yoContactForceSolution.get(robotQuadrant).set(contactForceSolution.get(robotQuadrant));
+         yoContactState.get(robotQuadrant).set(contactState.get(robotQuadrant)[0]);
          solePosition.get(robotQuadrant).changeFrame(yoSolePosition.get(robotQuadrant).getReferenceFrame());
          yoSolePosition.get(robotQuadrant).set(solePosition.get(robotQuadrant));
       }
