@@ -16,6 +16,8 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
     */
    private final List<StateMachineTransition<S, E>> transitions;
 
+   private final S initialState;
+
    /**
     * The present state.
     */
@@ -31,6 +33,7 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
    {
       this.states = states;
       this.transitions = transitions;
+      this.initialState = initialState;
       this.state = initialState;
    }
 
@@ -50,13 +53,7 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
          // Check if this transition matches the source state and event.
          if (transition.getFrom() == state && event == transition.getEvent())
          {
-            StateMachineState<E> fromInstance = getInstanceForEnum(transition.getFrom());
-            StateMachineState<E> toInstance = getInstanceForEnum(transition.getTo());
-
-            // It does, so transition to the next state.
-            fromInstance.onExit();
-            state = transition.getTo();
-            toInstance.onEntry();
+            transition(transition.getFrom(), transition.getTo());
          }
       }
    }
@@ -67,7 +64,7 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
    public void process()
    {
       // Call the initial state's onEntry if it has not been called yet.
-      if(!initialized)
+      if (!initialized)
       {
          StateMachineState<E> instance = getInstanceForEnum(state);
          instance.onEntry();
@@ -92,6 +89,14 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
       return state;
    }
 
+   /**
+    * Resets the state machine to the initial state, regardless of whether or not there is a transition to follow.
+    */
+   public void reset()
+   {
+      transition(state, initialState);
+   }
+
    private StateMachineState<E> getInstanceForEnum(S state)
    {
       if (!states.containsKey(state))
@@ -100,5 +105,16 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
       }
 
       return states.get(state);
+   }
+
+   private void transition(S from, S to)
+   {
+      StateMachineState<E> fromInstance = getInstanceForEnum(from);
+      StateMachineState<E> toInstance = getInstanceForEnum(to);
+
+      // It does, so transition to the next state.
+      fromInstance.onExit();
+      state = to;
+      toInstance.onEntry();
    }
 }
