@@ -6,14 +6,10 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
-import us.ihmc.aware.vmc.QuadrupedContactForceLimits;
-import us.ihmc.aware.vmc.QuadrupedContactForceOptimizationSettings;
-import us.ihmc.aware.vmc.QuadrupedJointLimits;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -36,34 +32,15 @@ public class QuadrupedVirtualModelController
    private final QuadrupedJointNameMap jointMap;
 
    private final QuadrupedReferenceFrames referenceFrames;
-   private final ReferenceFrame comFrame;
    private final ReferenceFrame worldFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
 
-   private final FrameVector comForceCommand;
-   private final FrameVector comForceSolution;
-   private final FrameVector comTorqueCommand;
-   private final FrameVector comTorqueSolution;
-   private final QuadrantDependentList<FrameVector> swingForceCommand;
-   private final QuadrantDependentList<FrameVector> swingForceSolution;
-   private final QuadrantDependentList<FrameVector> contactForceCommand;
-   private final QuadrantDependentList<FrameVector> contactForceSolution;
-   private final QuadrantDependentList<boolean[]> contactState;
+   private final QuadrantDependentList<FrameVector> soleVirtualForce;
+   private final QuadrantDependentList<FrameVector> soleContactForce;
    private final QuadrantDependentList<FramePoint> solePosition;
-
-   private final YoFrameVector yoComForceCommand;
-   private final YoFrameVector yoComForceSolution;
-   private final YoFrameVector yoComTorqueCommand;
-   private final YoFrameVector yoComTorqueSolution;
-   private final QuadrantDependentList<YoFrameVector> yoSwingForceCommand;
-   private final QuadrantDependentList<YoFrameVector> yoSwingForceSolution;
-   private final QuadrantDependentList<YoFrameVector> yoContactForceCommand;
-   private final QuadrantDependentList<YoFrameVector> yoContactForceSolution;
-   private final QuadrantDependentList<BooleanYoVariable> yoContactState;
+   private final QuadrantDependentList<YoFrameVector> yoSoleVirtualForce;
+   private final QuadrantDependentList<YoFrameVector> yoSoleContactForce;
    private final QuadrantDependentList<YoFramePoint> yoSolePosition;
-
-   private final QuadrupedContactForceOptimization contactForceOptimization;
-   private final QuadrupedContactForceOptimizationSettings contactForceOptimizationSettings;
 
    private final QuadrantDependentList<OneDoFJoint[]> legJoints;
    private final QuadrantDependentList<GeometricJacobian> footJacobian;
@@ -72,8 +49,8 @@ public class QuadrupedVirtualModelController
    private final DenseMatrix64F virtualForceVector;
 
    private final YoGraphicsList yoGraphicsList;
-   private final QuadrantDependentList<YoGraphicVector> yoContactForceSolutionViz;
-   private boolean contactForceIsVisible;
+   private final QuadrantDependentList<YoGraphicVector> yoSoleVirtualForceViz;
+   private final QuadrantDependentList<YoGraphicVector> yoSoleContactForceViz;
 
    public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedRobotParameters robotParameters, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -83,59 +60,32 @@ public class QuadrupedVirtualModelController
 
       // initialize reference frames
       referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointMap, robotParameters.getPhysicalProperties());
-      comFrame = referenceFrames.getCenterOfMassZUpFrame();
       worldFrame = ReferenceFrame.getWorldFrame();
       soleFrame = referenceFrames.getFootReferenceFrames();
 
       // initialize control variables
-      comForceCommand = new FrameVector(comFrame);
-      comForceSolution = new FrameVector(comFrame);
-      comTorqueCommand = new FrameVector(comFrame);
-      comTorqueSolution = new FrameVector(comFrame);
-      swingForceCommand = new QuadrantDependentList<>();
-      swingForceSolution = new QuadrantDependentList<>();
-      contactForceCommand = new QuadrantDependentList<>();
-      contactForceSolution = new QuadrantDependentList<>();
-      contactState = new QuadrantDependentList<>();
       solePosition = new QuadrantDependentList<>();
+      soleVirtualForce = new QuadrantDependentList<>();
+      soleContactForce = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         swingForceCommand.set(robotQuadrant, new FrameVector(comFrame));
-         swingForceSolution.set(robotQuadrant, new FrameVector(comFrame));
-         contactForceCommand.set(robotQuadrant, new FrameVector(comFrame));
-         contactForceSolution.set(robotQuadrant, new FrameVector(comFrame));
-         contactState.set(robotQuadrant, new boolean[1]);
-         solePosition.set(robotQuadrant, new FramePoint(comFrame));
+         solePosition.set(robotQuadrant, new FramePoint(worldFrame));
+         soleVirtualForce.set(robotQuadrant, new FrameVector(worldFrame));
+         soleContactForce.set(robotQuadrant, new FrameVector(worldFrame));
       }
 
       // initialize yo variables
-      yoComForceCommand = new YoFrameVector("comForceCommand", worldFrame, registry);
-      yoComForceSolution = new YoFrameVector("comForceSolution", worldFrame, registry);
-      yoComTorqueCommand = new YoFrameVector("comTorqueCommand", worldFrame, registry);
-      yoComTorqueSolution = new YoFrameVector("comTorqueSolution", worldFrame, registry);
-      yoSwingForceCommand = new QuadrantDependentList<>();
-      yoSwingForceSolution = new QuadrantDependentList<>();
-      yoContactForceCommand = new QuadrantDependentList<>();
-      yoContactForceSolution = new QuadrantDependentList<>();
-      yoContactState = new QuadrantDependentList<>();
       yoSolePosition = new QuadrantDependentList<>();
+      yoSoleVirtualForce = new QuadrantDependentList<>();
+      yoSoleContactForce = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         yoSwingForceCommand.set(robotQuadrant,
-               new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SwingForceCommand", worldFrame, registry));
-         yoSwingForceSolution.set(robotQuadrant,
-               new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SwingForceSolution", worldFrame, registry));
-         yoContactForceCommand.set(robotQuadrant,
-               new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "ContactForceCommand", worldFrame, registry));
-         yoContactForceSolution.set(robotQuadrant,
-               new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "ContactForceSolution", worldFrame, registry));
-         yoContactState.set(robotQuadrant, new BooleanYoVariable(robotQuadrant.getCamelCaseNameForStartOfExpression() + "ContactState", registry));
          yoSolePosition.set(robotQuadrant, new YoFramePoint(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SolePosition", worldFrame, registry));
+         yoSoleVirtualForce.set(robotQuadrant,
+               new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleVirtualForce", worldFrame, registry));
+         yoSoleContactForce.set(robotQuadrant,
+               new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleContactForce", worldFrame, registry));
       }
-
-      // initialize contact force optimization
-      contactForceOptimization = new QuadrupedContactForceOptimization(referenceFrames);
-      contactForceOptimizationSettings = new QuadrupedContactForceOptimizationSettings();
 
       // initialize jacobian variables
       legJoints = new QuadrantDependentList<>();
@@ -157,153 +107,60 @@ public class QuadrupedVirtualModelController
 
       // initialize graphics
       yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
-      yoContactForceSolutionViz = new QuadrantDependentList<>();
+      yoSoleVirtualForceViz = new QuadrantDependentList<>();
+      yoSoleContactForceViz = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
       {
-         yoContactForceSolutionViz.set(robotQuadrant, new YoGraphicVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleForceSolution",
-               yoSolePosition.get(robotQuadrant), yoContactForceSolution.get(robotQuadrant), 0.002, YoAppearance.Chartreuse()));
-         yoGraphicsList.add(yoContactForceSolutionViz.get(robotQuadrant));
+         yoSoleVirtualForceViz.set(robotQuadrant, new YoGraphicVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleVirtualForce",
+               yoSolePosition.get(robotQuadrant), yoSoleVirtualForce.get(robotQuadrant), 0.002, YoAppearance.OrangeRed()));
+         yoSoleContactForceViz.set(robotQuadrant, new YoGraphicVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleContactForce",
+               yoSolePosition.get(robotQuadrant), yoSoleContactForce.get(robotQuadrant), 0.002, YoAppearance.Chartreuse()));
+         yoGraphicsList.add(yoSoleVirtualForceViz.get(robotQuadrant));
+         yoGraphicsList.add(yoSoleContactForceViz.get(robotQuadrant));
       }
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
 
       parentRegistry.addChild(registry);
-      this.reinitialize();
+      this.reset();
    }
 
-   public void reinitialize()
+   public void reset()
    {
-      // initialize commands
-      comForceCommand.setToZero();
-      comTorqueCommand.setToZero();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         contactState.get(robotQuadrant)[0] = true;
-         contactForceCommand.get(robotQuadrant).setToZero();
-         swingForceCommand.get(robotQuadrant).setToZero();
+         soleVirtualForce.get(robotQuadrant).setToZero();
+         soleContactForce.get(robotQuadrant).setToZero();
       }
-
-      // initialize contact force optimization settings
-      contactForceOptimizationSettings.setDefaultSettings();
-
-      // initialize visualizers
       setVisible(false);
    }
 
-   public QuadrupedReferenceFrames getReferenceFrames()
+   public void setSoleVirtualForce(RobotQuadrant robotQuadrant, FrameVector virtualForce)
    {
-      return referenceFrames;
+      soleVirtualForce.get(robotQuadrant).setIncludingFrame(virtualForce);
+
+      // contact force is in the opposite direction
+      soleContactForce.get(robotQuadrant).setIncludingFrame(virtualForce);
+      soleContactForce.get(robotQuadrant).scale(-1.0);
    }
 
-   public void setComForceCommand(FrameVector comForce)
+   public void setSoleContactForce(RobotQuadrant robotQuadrant, FrameVector contactForce)
    {
-      comForceCommand.setIncludingFrame(comForce);
+      soleContactForce.get(robotQuadrant).setIncludingFrame(contactForce);
+
+      // virtual force is in the opposite direction
+      soleVirtualForce.get(robotQuadrant).setIncludingFrame(contactForce);
+      soleVirtualForce.get(robotQuadrant).scale(-1.0);
    }
 
-   public void setComForceCommandWeights(double[] weights)
+   public void compute(QuadrupedJointLimits jointLimits)
    {
-      contactForceOptimizationSettings.setComForceCommandWeights(weights);
-   }
-
-   public void setComForceCommandWeights(double weightX, double weightY, double weightZ)
-   {
-      contactForceOptimizationSettings.setComForceCommandWeights(weightX, weightY, weightZ);
-   }
-
-   public void getComForceSolution(FrameVector comForce)
-   {
-      comForce.setIncludingFrame(comForceSolution);
-   }
-
-   public void setComTorqueCommand(FrameVector comTorque)
-   {
-      comTorqueCommand.setIncludingFrame(comTorque);
-   }
-
-   public void setComTorqueCommandWeights(double weightX, double weightY, double weightZ)
-   {
-      contactForceOptimizationSettings.setComTorqueCommandWeights(weightX, weightY, weightZ);
-   }
-
-   public void setComTorqueCommandWeights(double[] weights)
-   {
-      contactForceOptimizationSettings.setComTorqueCommandWeights(weights);
-   }
-
-   public void getComTorqueSolution(FrameVector comTorque)
-   {
-      comTorque.setIncludingFrame(comTorqueSolution);
-   }
-
-   public void setContactState(RobotQuadrant robotQuadrant, boolean inContact)
-   {
-      contactState.get(robotQuadrant)[0] = inContact;
-   }
-
-   public void setContactForceCommand(RobotQuadrant robotQuadrant, FrameVector contactForce)
-   {
-      contactForceCommand.get(robotQuadrant).setIncludingFrame(contactForce);
-   }
-
-   public void setContactForceCommandWeights(RobotQuadrant robotQuadrant, double[] weights)
-   {
-      contactForceOptimizationSettings.setContactForceCommandWeights(robotQuadrant, weights);
-   }
-
-   public void setContactForceCommandWeights(RobotQuadrant robotQuadrant, double weightX, double weightY, double weightZ)
-   {
-      contactForceOptimizationSettings.setContactForceCommandWeights(robotQuadrant, weightX, weightY, weightZ);
-   }
-
-   public void getContactForceSolution(RobotQuadrant robotQuadrant, FrameVector contactForce)
-   {
-      contactForce.setIncludingFrame(contactForceSolution.get(robotQuadrant));
-   }
-
-   public void setSwingForceCommand(RobotQuadrant robotQuadrant, FrameVector swingForce)
-   {
-      swingForceCommand.get(robotQuadrant).setIncludingFrame(swingForce);
-   }
-
-   public void getSwingForceSolution(RobotQuadrant robotQuadrant, FrameVector swingForce)
-   {
-      swingForce.setIncludingFrame(swingForceSolution.get(robotQuadrant));
-   }
-
-   public void compute(QuadrupedJointLimits jointLimits, QuadrupedContactForceLimits contactForceLimits)
-   {
-      // compute sole positions and jacobians in center of mass frame
+      // compute sole positions and jacobians
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          solePosition.get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
-         solePosition.get(robotQuadrant).changeFrame(comFrame);
          footJacobian.get(robotQuadrant).compute();
          soleJacobian.get(robotQuadrant).set(footJacobian.get(robotQuadrant), solePosition.get(robotQuadrant));
          soleJacobian.get(robotQuadrant).compute();
-      }
-
-      // compute optimal contact forces
-      contactForceOptimization.setComTorqueCommand(comTorqueCommand);
-      contactForceOptimization.setComForceCommand(comForceCommand);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         contactForceOptimization.setContactForceCommand(robotQuadrant, contactForceCommand.get(robotQuadrant));
-      }
-      contactForceOptimization.solve(solePosition, contactState, contactForceLimits, contactForceOptimizationSettings);
-      contactForceOptimization.getComTorqueSolution(comTorqueSolution);
-      contactForceOptimization.getComForceSolution(comForceSolution);
-      contactForceOptimization.getContactForceSolution(contactForceSolution);
-
-      // compute optimal swing forces
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if (contactState.get(robotQuadrant)[0])
-         {
-            swingForceSolution.get(robotQuadrant).setToZero();
-         }
-         else
-         {
-            swingForceSolution.get(robotQuadrant).setIncludingFrame(swingForceCommand.get(robotQuadrant));
-         }
       }
 
       // compute joint torques using jacobian transpose
@@ -311,22 +168,10 @@ public class QuadrupedVirtualModelController
       {
          DenseMatrix64F jacobianMatrix = soleJacobian.get(robotQuadrant).getJacobianMatrix();
          ReferenceFrame jacobianFrame = soleJacobian.get(robotQuadrant).getFrame();
-         if (contactState.get(robotQuadrant)[0])
-         {
-            contactForceSolution.get(robotQuadrant).changeFrame(jacobianFrame);
-            virtualForceVector.set(0, 0, -contactForceSolution.get(robotQuadrant).getX());
-            virtualForceVector.set(1, 0, -contactForceSolution.get(robotQuadrant).getY());
-            virtualForceVector.set(2, 0, -contactForceSolution.get(robotQuadrant).getZ());
-            contactForceSolution.get(robotQuadrant).changeFrame(comFrame);
-         }
-         else
-         {
-            swingForceSolution.get(robotQuadrant).changeFrame(jacobianFrame);
-            virtualForceVector.set(0, 0, swingForceSolution.get(robotQuadrant).getX());
-            virtualForceVector.set(1, 0, swingForceSolution.get(robotQuadrant).getY());
-            virtualForceVector.set(2, 0, swingForceSolution.get(robotQuadrant).getZ());
-            swingForceSolution.get(robotQuadrant).changeFrame(comFrame);
-         }
+         soleVirtualForce.get(robotQuadrant).changeFrame(jacobianFrame);
+         virtualForceVector.set(0, 0, soleVirtualForce.get(robotQuadrant).getX());
+         virtualForceVector.set(1, 0, soleVirtualForce.get(robotQuadrant).getY());
+         virtualForceVector.set(2, 0, soleVirtualForce.get(robotQuadrant).getZ());
          CommonOps.multTransA(jacobianMatrix, virtualForceVector, legEffortVector.get(robotQuadrant));
 
          int index = 0;
@@ -350,54 +195,38 @@ public class QuadrupedVirtualModelController
          }
       }
 
-      // update yo variables
-      comForceCommand.changeFrame(yoComForceCommand.getReferenceFrame());
-      yoComForceCommand.set(comForceCommand);
-      comForceSolution.changeFrame(yoComForceSolution.getReferenceFrame());
-      yoComForceSolution.set(comForceSolution);
-      comTorqueCommand.changeFrame(yoComTorqueCommand.getReferenceFrame());
-      yoComTorqueCommand.set(comTorqueCommand);
-      comTorqueSolution.changeFrame(yoComTorqueSolution.getReferenceFrame());
-      yoComTorqueSolution.set(comTorqueSolution);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         swingForceCommand.get(robotQuadrant).changeFrame(yoSwingForceCommand.get(robotQuadrant).getReferenceFrame());
-         yoSwingForceCommand.get(robotQuadrant).set(swingForceCommand.get(robotQuadrant));
-         swingForceSolution.get(robotQuadrant).changeFrame(yoSwingForceSolution.get(robotQuadrant).getReferenceFrame());
-         yoSwingForceSolution.get(robotQuadrant).set(swingForceSolution.get(robotQuadrant));
-         contactForceCommand.get(robotQuadrant).changeFrame(yoContactForceCommand.get(robotQuadrant).getReferenceFrame());
-         yoContactForceCommand.get(robotQuadrant).set(contactForceCommand.get(robotQuadrant));
-         contactForceSolution.get(robotQuadrant).changeFrame(yoContactForceSolution.get(robotQuadrant).getReferenceFrame());
-         yoContactForceSolution.get(robotQuadrant).set(contactForceSolution.get(robotQuadrant));
-         yoContactState.get(robotQuadrant).set(contactState.get(robotQuadrant)[0]);
+         soleVirtualForce.get(robotQuadrant).changeFrame(yoSoleVirtualForce.get(robotQuadrant).getReferenceFrame());
+         yoSoleVirtualForce.get(robotQuadrant).set(soleVirtualForce.get(robotQuadrant));
+         soleContactForce.get(robotQuadrant).changeFrame(yoSoleContactForce.get(robotQuadrant).getReferenceFrame());
+         yoSoleContactForce.get(robotQuadrant).set(soleContactForce.get(robotQuadrant));
          solePosition.get(robotQuadrant).changeFrame(yoSolePosition.get(robotQuadrant).getReferenceFrame());
          yoSolePosition.get(robotQuadrant).set(solePosition.get(robotQuadrant));
-      }
-
-      // update graphics
-      yoGraphicsList.setVisible(false);
-      if (contactForceIsVisible)
-      {
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         {
-            if (contactState.get(robotQuadrant)[0])
-            {
-               yoContactForceSolutionViz.get(robotQuadrant).setVisible(true);
-            }
-         }
       }
    }
 
    public void setVisible(boolean visible)
    {
-      setContactForceVisible(visible);
-      yoGraphicsList.setVisible(false);
+      if (visible == false)
+      {
+         yoGraphicsList.setVisible(false);
+      }
    }
 
-   public void setContactForceVisible(boolean visible)
+   public void setSoleVirtualForceVisible(RobotQuadrant robotQuadrant, boolean visible)
    {
-      contactForceIsVisible = visible;
-      yoGraphicsList.setVisible(false);
+      yoSoleVirtualForceViz.get(robotQuadrant).setVisible(visible);
+   }
+
+   public void setSoleContactForceVisible(RobotQuadrant robotQuadrant, boolean visible)
+   {
+      yoSoleContactForceViz.get(robotQuadrant).setVisible(visible);
+   }
+
+   public QuadrupedReferenceFrames getReferenceFrames()
+   {
+      return referenceFrames;
    }
 
    public YoVariableRegistry getRegistry()

@@ -16,6 +16,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 public class QuadrupedContactForceOptimization
 {
    private final ReferenceFrame comFrame;
+   private final QuadrantDependentList<ReferenceFrame> soleFrame;
    private final ConstrainedQPSolver qpSolver;
 
    private final FrameVector comTorqueCommand;
@@ -25,6 +26,7 @@ public class QuadrupedContactForceOptimization
    private final QuadrantDependentList<FrameVector> contactForceCommand;
    private final QuadrantDependentList<FrameVector> contactForceSolution;
    private final QuadrantDependentList<FramePoint> contactPosition;
+   private final QuadrantDependentList<boolean[]> contactState;
 
    private final DenseMatrix64F comWrenchCommandVector;
    private final DenseMatrix64F comWrenchSolutionVector;
@@ -45,6 +47,7 @@ public class QuadrupedContactForceOptimization
    public QuadrupedContactForceOptimization(QuadrupedReferenceFrames referenceFrames)
    {
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
+      soleFrame = referenceFrames.getFootReferenceFrames();
       qpSolver = new QuadProgSolver(null);
 
       comTorqueCommand = new FrameVector(comFrame);
@@ -54,11 +57,13 @@ public class QuadrupedContactForceOptimization
       contactForceCommand = new QuadrantDependentList<>();
       contactForceSolution = new QuadrantDependentList<>();
       contactPosition = new QuadrantDependentList<>();
+      contactState = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          contactForceCommand.set(robotQuadrant, new FrameVector(comFrame));
          contactForceSolution.set(robotQuadrant, new FrameVector(comFrame));
          contactPosition.set(robotQuadrant, new FramePoint(comFrame));
+         contactState.set(robotQuadrant, new boolean[1]);
       }
 
       comWrenchCommandVector = new DenseMatrix64F(6, 1);
@@ -78,6 +83,18 @@ public class QuadrupedContactForceOptimization
       temporaryMatrixB = new DenseMatrix64F(12, 12);
    }
 
+   public void reset()
+   {
+      // initialize commands
+      comForceCommand.setToZero();
+      comTorqueCommand.setToZero();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         contactForceCommand.get(robotQuadrant).setToZero();
+         contactState.get(robotQuadrant)[0] = true;
+      }
+   }
+
    public void setComTorqueCommand(FrameVector comTorque)
    {
       comTorqueCommand.setIncludingFrame(comTorque);
@@ -93,16 +110,20 @@ public class QuadrupedContactForceOptimization
       contactForceCommand.get(robotQuadrant).setIncludingFrame(contactForce);
    }
 
-   public void solve(QuadrantDependentList<FramePoint> solePosition, QuadrantDependentList<boolean[]> contactState,
-         QuadrupedContactForceLimits contactForceLimits, QuadrupedContactForceOptimizationSettings optimizationSettings)
+   public void setContactState(RobotQuadrant robotQuadrant, boolean inContact)
+   {
+      contactState.get(robotQuadrant)[0] = inContact;
+   }
+
+   public void solve(QuadrupedContactForceLimits contactForceLimits, QuadrupedContactForceOptimizationSettings optimizationSettings)
    {
       // initialize optimization variables
-      initializeComWrenchMapMatrix(solePosition, contactState);
-      initializeComWrenchCommandVector(comTorqueCommand, comForceCommand);
-      initializeContactForceCommandVector(contactForceCommand, contactState);
-      initializeOptimizationWeights(optimizationSettings, contactState);
+      initializeComWrenchMapMatrix();
+      initializeComWrenchCommandVector();
+      initializeContactForceCommandVector();
+      initializeOptimizationWeights(optimizationSettings);
       initializeOptimizationCostTerms();
-      initializeOptimizationConstraints(contactForceLimits, contactState);
+      initializeOptimizationConstraints(contactForceLimits);
 
       // compute contact force solution
       if (optimizationSettings.getSolver() == QuadrupedContactForceOptimizationSettings.Solver.CONSTRAINED_QP)
@@ -112,7 +133,7 @@ public class QuadrupedContactForceOptimization
       else
       {
          computeUnconstrainedContactForceSolution();
-         constrainContactForceSolution(contactForceLimits, contactState);
+         constrainContactForceSolution(contactForceLimits);
       }
       int rowOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -145,12 +166,9 @@ public class QuadrupedContactForceOptimization
       comForceSolution.setZ(comWrenchSolutionVector.get(5, 0));
    }
 
-   public void getContactForceSolution(QuadrantDependentList<FrameVector> contactForce)
+   public void getContactForceSolution(RobotQuadrant robotQuadrant, FrameVector contactForce)
    {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         contactForce.get(robotQuadrant).setIncludingFrame(contactForceSolution.get(robotQuadrant));
-      }
+      contactForce.setIncludingFrame(contactForceSolution.get(robotQuadrant));
    }
 
    public void getComTorqueSolution(FrameVector comTorque)
@@ -176,7 +194,7 @@ public class QuadrupedContactForceOptimization
       return numberOfContacts;
    }
 
-   private void initializeComWrenchMapMatrix(QuadrantDependentList<FramePoint> solePosition, QuadrantDependentList<boolean[]> contactState)
+   private void initializeComWrenchMapMatrix()
    {
       // compute map from contact forces to centroidal forces and torques
       int numberOfContacts = getNumberOfContacts(contactState);
@@ -185,7 +203,7 @@ public class QuadrupedContactForceOptimization
       int columnOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         contactPosition.get(robotQuadrant).setIncludingFrame(solePosition.get(robotQuadrant));
+         contactPosition.get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
          contactPosition.get(robotQuadrant).changeFrame(comFrame);
          if (contactState.get(robotQuadrant)[0])
          {
@@ -203,7 +221,7 @@ public class QuadrupedContactForceOptimization
       }
    }
 
-   private void initializeComWrenchCommandVector(FrameVector comTorqueCommand, FrameVector comForceCommand)
+   private void initializeComWrenchCommandVector()
    {
       comTorqueCommand.changeFrame(comFrame);
       comWrenchCommandVector.set(0, 0, comTorqueCommand.getX());
@@ -215,7 +233,7 @@ public class QuadrupedContactForceOptimization
       comWrenchCommandVector.set(5, 0, comForceCommand.getZ());
    }
 
-   private void initializeContactForceCommandVector(QuadrantDependentList<FrameVector> contactForceCommand, QuadrantDependentList<boolean[]> contactState)
+   private void initializeContactForceCommandVector()
    {
       int numberOfContacts = getNumberOfContacts(contactState);
 
@@ -234,7 +252,7 @@ public class QuadrupedContactForceOptimization
       contactForceSolutionVector.reshape(3 * numberOfContacts, 1);
    }
 
-   private void initializeOptimizationWeights(QuadrupedContactForceOptimizationSettings optimizationSettings, QuadrantDependentList<boolean[]> contactState)
+   private void initializeOptimizationWeights(QuadrupedContactForceOptimizationSettings optimizationSettings)
    {
       int numberOfContacts = getNumberOfContacts(contactState);
 
@@ -308,7 +326,7 @@ public class QuadrupedContactForceOptimization
       CommonOps.add(MtQM, R, A);
    }
 
-   private void initializeOptimizationConstraints(QuadrupedContactForceLimits contactForceLimits, QuadrantDependentList<boolean[]> contactState)
+   private void initializeOptimizationConstraints(QuadrupedContactForceLimits contactForceLimits)
    {
       DenseMatrix64F u = contactForceSolutionVector;
       DenseMatrix64F beq = qpEqualityVector;
@@ -416,7 +434,7 @@ public class QuadrupedContactForceOptimization
       CommonOps.scale(-1, b);
    }
 
-   private void constrainContactForceSolution(QuadrupedContactForceLimits contactForceLimits, QuadrantDependentList<boolean[]> contactState)
+   private void constrainContactForceSolution(QuadrupedContactForceLimits contactForceLimits)
    {
       int rowOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
