@@ -67,7 +67,7 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
          }
          catch (Exception e)
          {
-            System.err.println("In YoArtifactPolygon.java: " + e.getClass().getSimpleName() + " while calling draw().");
+            e.printStackTrace();
             return;
          }
          
