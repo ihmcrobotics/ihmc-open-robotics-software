@@ -424,17 +424,18 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
 
    private void registerGraphics()
    {
-      YoGraphicPosition yoComPositionEstimateViz = new YoGraphicPosition("comPositionEstimate", yoComPositionEstimate, 0.025, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition("icpPositionEstimate", yoIcpPositionEstimate, 0.025, YoAppearance.Chartreuse());
-      YoGraphicPosition yoIcpPositionSetpointViz = new YoGraphicPosition("icpPositionSetpoint", yoIcpPositionSetpoint, 0.025, YoAppearance.Blue());
-      YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition("cmpPositionSetpoint", yoCmpPositionSetpoint, 0.025, YoAppearance.Magenta());
+      String prefix = getClass().getSimpleName();
+      YoGraphicPosition yoComPositionEstimateViz = new YoGraphicPosition(prefix + "pcomPositionEstimate", yoComPositionEstimate, 0.025, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition(prefix + "icpPositionEstimate", yoIcpPositionEstimate, 0.025, YoAppearance.Chartreuse());
+      YoGraphicPosition yoIcpPositionSetpointViz = new YoGraphicPosition(prefix + "icpPositionSetpoint", yoIcpPositionSetpoint, 0.025, YoAppearance.Blue());
+      YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition(prefix + "cmpPositionSetpoint", yoCmpPositionSetpoint, 0.025, YoAppearance.Magenta());
       yoGraphicsList.add(yoComPositionEstimateViz);
       yoGraphicsList.add(yoIcpPositionEstimateViz);
       yoGraphicsList.add(yoIcpPositionSetpointViz);
       yoGraphicsList.add(yoCmpPositionSetpointViz);
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
 
-      YoArtifactPolygon yoSupportPolygonArtifact = new YoArtifactPolygon("supportPolygon", yoSupportPolygonEstimate, Color.BLACK, false);
+      YoArtifactPolygon yoSupportPolygonArtifact = new YoArtifactPolygon(prefix + "supportPolygon", yoSupportPolygonEstimate, Color.BLACK, false);
       artifactList.add(yoComPositionEstimateViz.createArtifact());
       artifactList.add(yoIcpPositionEstimateViz.createArtifact());
       artifactList.add(yoIcpPositionSetpointViz.createArtifact());
