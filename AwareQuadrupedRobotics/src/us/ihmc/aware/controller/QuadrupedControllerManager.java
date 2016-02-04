@@ -37,7 +37,8 @@ public class QuadrupedControllerManager implements RobotController
       QuadrupedController crawlController = new QuadrupedPositionBasedCrawlControllerAdapter(runtimeEnvironment, parameters, paramMapRepository);
       QuadrupedVirtualModelController virtualModelController = new QuadrupedVirtualModelController(
             runtimeEnvironment.getFullRobotModel(), parameters, registry, runtimeEnvironment.getGraphicsListRegistry());
-      QuadrupedController virtualModelBasedStandController = new QuadrupedVirtualModelBasedStandController();
+      QuadrupedController virtualModelBasedStandController = new QuadrupedVirtualModelBasedStandController(
+            runtimeEnvironment, parameters, paramMapRepository, virtualModelController);
       QuadrupedController virtualModelBasedStepController = new QuadrupedVirtualModelBasedStepController(
             runtimeEnvironment, parameters, paramMapRepository, virtualModelController);
 
