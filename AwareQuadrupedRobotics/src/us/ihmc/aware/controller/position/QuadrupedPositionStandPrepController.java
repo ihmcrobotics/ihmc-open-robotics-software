@@ -1,9 +1,10 @@
-package us.ihmc.aware.controller;
+package us.ihmc.aware.controller.position;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
@@ -15,7 +16,7 @@ import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 /**
  * A controller that will track the minimum jerk trajectory to bring joints to a preparatory pose.
  */
-public class QuadrupedStandPrepController implements QuadrupedController
+public class QuadrupedPositionStandPrepController implements QuadrupedPositionController
 {
    public static final String PARAM_TRAJECTORY_TIME = "trajectoryTime";
 
@@ -31,11 +32,11 @@ public class QuadrupedStandPrepController implements QuadrupedController
     */
    private double timeInTrajectory = 0.0;
 
-   public QuadrupedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedRobotParameters parameters,
+   public QuadrupedPositionStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedRobotParameters parameters,
          ParameterMapRepository paramMapRepository)
    {
       this.parameters = parameters;
-      this.params = paramMapRepository.get(QuadrupedStandPrepController.class);
+      this.params = paramMapRepository.get(QuadrupedPositionStandPrepController.class);
       this.fullRobotModel = environment.getFullRobotModel();
       this.dt = environment.getControlDT();
 
@@ -71,7 +72,7 @@ public class QuadrupedStandPrepController implements QuadrupedController
    }
 
    @Override
-   public QuadrupedControllerEvent process()
+   public QuadrupedPositionControllerEvent process()
    {
       fullRobotModel.updateFrames();
 
@@ -86,7 +87,7 @@ public class QuadrupedStandPrepController implements QuadrupedController
 
       timeInTrajectory += dt;
 
-      return isMotionExpired() ? QuadrupedControllerEvent.STARTING_POSE_REACHED : null;
+      return isMotionExpired() ? QuadrupedPositionControllerEvent.STARTING_POSE_REACHED : null;
    }
 
    @Override

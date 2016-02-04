@@ -1,12 +1,13 @@
-package us.ihmc.aware.controller;
+package us.ihmc.aware.controller.position;
 
+import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionBasedCrawlController;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 
-public class QuadrupedPositionBasedCrawlControllerAdapter implements QuadrupedController
+public class QuadrupedPositionBasedCrawlControllerAdapter implements QuadrupedPositionController
 {
 //   private static final String PARAM_INITIAL_COM_HEIGHT = "initialCoMHeight";
 //   private static final String PARAM_DEFAULT_SWING_HEIGHT = "defaultSwingHeight";
@@ -43,7 +44,7 @@ public class QuadrupedPositionBasedCrawlControllerAdapter implements QuadrupedCo
    }
 
    @Override
-   public QuadrupedControllerEvent process()
+   public QuadrupedPositionControllerEvent process()
    {
       controller.doAction();
 

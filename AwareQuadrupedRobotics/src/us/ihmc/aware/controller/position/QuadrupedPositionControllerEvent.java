@@ -1,6 +1,6 @@
-package us.ihmc.aware.controller;
+package us.ihmc.aware.controller.position;
 
-public enum QuadrupedControllerEvent
+public enum QuadrupedPositionControllerEvent
 {
    /**
     * Fired when the low-level actuator has been brought online and a safe desired angle is set.
@@ -12,7 +12,6 @@ public enum QuadrupedControllerEvent
     */
    STARTING_POSE_REACHED,
 
-   POSITION_BASED_CRAWL,
-   VIRTUAL_MODEL_BASED_STAND,
-   VIRTUAL_MODEL_BASED_STEP,
+   REQUEST_STAND_PREP,
+   REQUEST_POSITION_BASED_CRAWL,
 }

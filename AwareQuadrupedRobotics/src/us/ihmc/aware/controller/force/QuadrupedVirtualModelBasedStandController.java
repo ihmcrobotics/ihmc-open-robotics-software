@@ -1,11 +1,10 @@
-package us.ihmc.aware.controller;
+package us.ihmc.aware.controller.force;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.controller.common.*;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
-import us.ihmc.aware.planning.QuadrupedTimedStep;
 import us.ihmc.aware.vmc.*;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
@@ -14,9 +13,7 @@ import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.util.HeterogeneousMemoryPool;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
-import us.ihmc.aware.util.PreallocatedQueue;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
-import us.ihmc.robotics.controllers.EuclideanPositionController;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -32,10 +29,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.*;
-import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.robotics.stateMachines.StateMachine;
-import us.ihmc.robotics.stateMachines.StateTransition;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
@@ -45,7 +39,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 
 import java.awt.*;
 
-public class QuadrupedVirtualModelBasedStepController implements QuadrupedController
+public class QuadrupedVirtualModelBasedStandController implements QuadrupedForceController
 {
    private final SDFFullRobotModel fullRobotModel;
    private final DoubleYoVariable robotTimestamp;
@@ -61,11 +55,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
    private final String BODY_ORIENTATION_DERIVATIVE_GAINS = "bodyOrientationDerivativeGains";
    private final String BODY_ORIENTATION_INTEGRAL_GAINS = "bodyOrientationIntegralGains";
    private final String BODY_ORIENTATION_MAX_INTEGRAL_ERROR = "bodyOrientationMaxIntegralError";
-   private final String SWING_POSITION_PROPORTIONAL_GAINS = "swingPositionProportionalGains";
-   private final String SWING_POSITION_DERIVATIVE_GAINS = "swingPositionDerivativeGains";
-   private final String SWING_POSITION_INTEGRAL_GAINS = "swingPositionIntegralGains";
-   private final String SWING_POSITION_MAX_INTEGRAL_ERROR = "swingPositionMaxIntegralError";
-   private final String SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE = "swingPositionGravityFeedforwardForce";
    private final String DCM_PROPORTIONAL_GAINS = "dcmProportionalGains";
    private final String DCM_INTEGRAL_GAINS = "dcmIntegralGains";
    private final String DCM_MAX_INTEGRAL_ERROR = "dcmMaxIntegralError";
@@ -96,19 +85,9 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
    private final PIDController comHeightController;
    private final AxisAngleOrientationController bodyOrientationController;
    private final DivergentComponentOfMotionController dcmPositionController;
-   private final QuadrantDependentList<EuclideanPositionController> swingPositionController;
 
-   // state machines
-   public enum FootState
-   {
-      SWING_STATE, SUPPORT_STATE
-   }
-   private final QuadrantDependentList<StateMachine<FootState>> footStateMachine;
 
    // provider inputs
-   private static int STEP_QUEUE_CAPACITY = 30;
-   private final PreallocatedQueue<QuadrupedTimedStep> stepQueue;
-   private final QuadrantDependentList<QuadrupedTimedStep> stepCache;
    private final FrameOrientation bodyOrientationDesired;
    private double comHeightDesired;
 
@@ -188,7 +167,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
    // temporary
    private final HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
 
-   public QuadrupedVirtualModelBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedVirtualModelController virtualModelController)
+   public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedVirtualModelController virtualModelController)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -204,11 +183,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 500);
       params.setDefault(BODY_ORIENTATION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(BODY_ORIENTATION_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(SWING_POSITION_PROPORTIONAL_GAINS, 0, 0, 0);
-      params.setDefault(SWING_POSITION_DERIVATIVE_GAINS, 0, 0, 0);
-      params.setDefault(SWING_POSITION_INTEGRAL_GAINS, 0, 0, 0);
-      params.setDefault(SWING_POSITION_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE, 0);
       params.setDefault(DCM_PROPORTIONAL_GAINS, 2, 2, 0);
       params.setDefault(DCM_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(DCM_MAX_INTEGRAL_ERROR, 0);
@@ -245,33 +219,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       comHeightController = new PIDController("bodyHeight", registry);
       bodyOrientationController = new AxisAngleOrientationController("bodyOrientation", bodyFrame, controlDT, registry);
       dcmPositionController = new DivergentComponentOfMotionController("dcm", comFrame, controlDT, mass, gravity, params.get(COM_HEIGHT_NOMINAL), registry);
-      swingPositionController = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression() + "SwingState";
-         swingPositionController.set(robotQuadrant, new EuclideanPositionController(prefix, soleFrame.get(robotQuadrant), controlDT, registry));
-      }
-
-      // state machines
-      footStateMachine = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         SwingState swingState = new SwingState(FootState.SWING_STATE, robotQuadrant);
-         SupportState supportState = new SupportState(FootState.SUPPORT_STATE, robotQuadrant);
-         String prefix = getClass().getSimpleName() + robotQuadrant.getCamelCaseNameForMiddleOfExpression();
-         footStateMachine.set(robotQuadrant, new StateMachine<>(prefix, prefix + "TransitionTime", FootState.class, robotTimestamp, registry));
-         footStateMachine.get(robotQuadrant).addState(swingState);
-         footStateMachine.get(robotQuadrant).addState(supportState);
-         footStateMachine.get(robotQuadrant).setCurrentState(FootState.SUPPORT_STATE);
-      }
 
       // provider inputs
-      stepQueue = new PreallocatedQueue<>(QuadrupedTimedStep.class, STEP_QUEUE_CAPACITY);
-      stepCache = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         stepCache.set(robotQuadrant, new QuadrupedTimedStep(robotQuadrant));
-      }
       bodyOrientationDesired = new FrameOrientation(worldFrame);
       comHeightDesired = params.get(COM_HEIGHT_NOMINAL);
 
@@ -400,34 +349,10 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       return artifactList;
    }
 
-   public boolean addStep(QuadrupedTimedStep quadrupedTimedStep)
-   {
-      if (quadrupedTimedStep.getTimeInterval().getStartTime() > robotTimestamp.getDoubleValue() && stepQueue.enqueue())
-      {
-
-         stepQueue.getTail().set(quadrupedTimedStep);
-         return true;
-      }
-      return false;
-   }
-
-   public void removeSteps()
-   {
-      while(stepQueue.dequeue())
-      {
-      }
-   }
-
-   public int getStepQueueSize()
-   {
-      return stepQueue.size();
-   }
-
-
    private void registerGraphics()
    {
       String prefix = getClass().getSimpleName();
-      YoGraphicPosition yoComPositionEstimateViz = new YoGraphicPosition(prefix + "pcomPositionEstimate", yoComPositionEstimate, 0.025, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition yoComPositionEstimateViz = new YoGraphicPosition(prefix + "comPositionEstimate", yoComPositionEstimate, 0.025, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition(prefix + "icpPositionEstimate", yoIcpPositionEstimate, 0.025, YoAppearance.Chartreuse());
       YoGraphicPosition yoIcpPositionSetpointViz = new YoGraphicPosition(prefix + "icpPositionSetpoint", yoIcpPositionSetpoint, 0.025, YoAppearance.Blue());
       YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition(prefix + "cmpPositionSetpoint", yoCmpPositionSetpoint, 0.025, YoAppearance.Magenta());
@@ -444,27 +369,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       artifactList.add(yoCmpPositionSetpointViz.createArtifact());
       artifactList.add(yoSupportPolygonArtifact);
       yoGraphicsListRegistry.registerArtifactList(artifactList);
-   }
-
-   private void handleStepEvents()
-   {
-      if (stepQueue.size() > 0)
-      {
-         QuadrupedTimedStep currentStep = stepQueue.getHead();
-         double currentTime = robotTimestamp.getDoubleValue();
-         double currentStepStartTime = currentStep.getTimeInterval().getStartTime();
-         RobotQuadrant robotQuadrant = currentStep.getRobotQuadrant();
-         if (currentTime > currentStepStartTime)
-         {
-            // dequeue step
-            stepCache.get(robotQuadrant).set(currentStep);
-            if (footStateMachine.get(robotQuadrant).getCurrentStateEnum() == FootState.SUPPORT_STATE)
-            {
-               footStateMachine.get(robotQuadrant).setCurrentState(FootState.SWING_STATE);
-            }
-            stepQueue.dequeue();
-         }
-      }
    }
 
    private void updateEstimates()
@@ -558,13 +462,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       double comForceZ = params.get(COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT) * mass * gravity + comHeightController.compute(comHeightEstimate, comHeightSetpoint, comVelocityEstimate.getZ(), 0, controlDT);
       comForceSetpoint.changeFrame(worldFrame);
       comForceSetpoint.setZ(comForceZ);
-
-      // compute virtual forces to track swing foot trajectories
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         footStateMachine.get(robotQuadrant).checkTransitionConditions();
-         footStateMachine.get(robotQuadrant).doAction();
-      }
 
       // compute optimal contact forces
       contactForceOptimization.setComForceCommand(comForceSetpoint);
@@ -662,11 +559,10 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       yoComHeightEstimate.set(comHeightEstimate);
    }
 
-   @Override public QuadrupedControllerEvent process()
+   @Override public QuadrupedForceControllerEvent process()
    {
       pool.evict();
       readYoVariables();
-      handleStepEvents();
       updateEstimates();
       updateSetpoints();
       writeYoVariables();
@@ -713,13 +609,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       dcmPositionController.reset();
       dcmPositionController.setProportionalGains(params.getVolatileArray(DCM_PROPORTIONAL_GAINS));
       dcmPositionController.setIntegralGains(params.getVolatileArray(DCM_INTEGRAL_GAINS), params.get(DCM_MAX_INTEGRAL_ERROR));
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         footStateMachine.get(robotQuadrant).setCurrentState(FootState.SUPPORT_STATE);
-         swingPositionController.get(robotQuadrant).setProportionalGains(params.getVolatileArray(SWING_POSITION_PROPORTIONAL_GAINS));
-         swingPositionController.get(robotQuadrant).setIntegralGains(params.getVolatileArray(SWING_POSITION_INTEGRAL_GAINS), params.get(SWING_POSITION_MAX_INTEGRAL_ERROR));
-         swingPositionController.get(robotQuadrant).setDerivativeGains(params.getVolatileArray(SWING_POSITION_DERIVATIVE_GAINS));
-      }
 
       // show graphics
       yoGraphicsListRegistry.hideYoGraphics();
@@ -740,76 +629,4 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       artifactList.setVisible(false);
       virtualModelController.setVisible(false);
    }
-
-   private class SwingState extends State<FootState>
-   {
-      private final RobotQuadrant robotQuadrant;
-
-      public SwingState(FootState stateEnum, RobotQuadrant robotQuadrant)
-      {
-         super(stateEnum);
-         this.robotQuadrant = robotQuadrant;
-
-         // configure state transitions
-         addStateTransition(new StateTransition<>(FootState.SUPPORT_STATE, new SwingToSupportCondition()));
-      }
-
-      @Override public void doAction()
-      {
-         // compute sole force setpoints to track swing trajectory
-         soleForceSetpoint.get(robotQuadrant).changeFrame(soleFrame.get(robotQuadrant));
-         solePositionSetpoint.get(robotQuadrant).changeFrame(soleFrame.get(robotQuadrant));
-         soleLinearVelocitySetpoint.get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
-         soleLinearVelocityEstimate.get(robotQuadrant).changeFrame(soleFrame.get(robotQuadrant));
-         soleForceFeedforwardSetpoint.get(robotQuadrant).changeFrame(worldFrame);
-         soleForceFeedforwardSetpoint.get(robotQuadrant).set(0, 0, params.get(SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE));
-         soleForceFeedforwardSetpoint.get(robotQuadrant).changeFrame(soleFrame.get(robotQuadrant));
-         swingPositionController.get(robotQuadrant)
-               .compute(soleForceSetpoint.get(robotQuadrant), solePositionSetpoint.get(robotQuadrant), soleLinearVelocitySetpoint.get(robotQuadrant), soleLinearVelocityEstimate.get(robotQuadrant), soleForceFeedforwardSetpoint.get(robotQuadrant));
-      }
-
-      @Override public void doTransitionIntoAction()
-      {
-         // initialize controllers
-         swingPositionController.get(robotQuadrant).reset();
-      }
-
-      @Override public void doTransitionOutOfAction()
-      {
-      }
-
-      private class SwingToSupportCondition implements StateTransitionCondition
-      {
-         @Override public boolean checkCondition()
-         {
-            // detect if contact has occurred
-            return false;
-         }
-      }
-   }
-
-   private class SupportState extends State<FootState>
-   {
-      private final RobotQuadrant robotQuadrant;
-
-      public SupportState(FootState stateEnum, RobotQuadrant robotQuadrant)
-      {
-         super(stateEnum);
-         this.robotQuadrant = robotQuadrant;
-      }
-
-      @Override public void doAction()
-      {
-      }
-
-      @Override public void doTransitionIntoAction()
-      {
-      }
-
-      @Override public void doTransitionOutOfAction()
-      {
-
-      }
-   }
-
 }
