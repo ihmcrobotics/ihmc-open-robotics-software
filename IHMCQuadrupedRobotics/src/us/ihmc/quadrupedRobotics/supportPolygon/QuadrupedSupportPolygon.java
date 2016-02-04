@@ -458,23 +458,32 @@ public class QuadrupedSupportPolygon implements Serializable
       frameConvexPolygon2d.changeFrame(getReferenceFrame());
       for (RobotQuadrant supportingQuadrant : getSupportingQuadrantsInOrder())
       {
-         frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
+//       frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
+         FramePoint footstep = this.getFootstep(supportingQuadrant);
+         if (footstep != null)
+         {
+            frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(footstep);
+         }
       }
       frameConvexPolygon2d.update();
    }
 
    public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2d yoFrameConvexPolygon2d)
    {
-      FrameConvexPolygon2d frameConvexPolygon2d = yoFrameConvexPolygon2d.getFrameConvexPolygon2d();
+//      FrameConvexPolygon2d frameConvexPolygon2d = yoFrameConvexPolygon2d.getFrameConvexPolygon2d();
+//      
+//      frameConvexPolygon2d.clear();
+//      frameConvexPolygon2d.changeFrame(getReferenceFrame());
+//      for (RobotQuadrant supportingQuadrant : getSupportingQuadrantsInOrder())
+//      {
+//         if (getFootstep(supportingQuadrant) == null)
+//            throw new RuntimeException("kill self");
+//            
+//         frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
+//      }
+//      frameConvexPolygon2d.update();
       
-      frameConvexPolygon2d.clear();
-      frameConvexPolygon2d.changeFrame(getReferenceFrame());
-      for (RobotQuadrant supportingQuadrant : getSupportingQuadrantsInOrder())
-      {
-         frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
-      }
-      frameConvexPolygon2d.update();
-      
+      computeFramePolygonConvex2d();
       yoFrameConvexPolygon2d.setFrameConvexPolygon2d(frameConvexPolygon2d);
    }
 
