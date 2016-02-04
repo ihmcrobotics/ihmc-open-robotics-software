@@ -1,16 +1,18 @@
-package us.ihmc.aware.controller;
+package us.ihmc.aware.controller.position;
 
 import java.util.Arrays;
 
 import com.google.common.primitives.Booleans;
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.aware.controller.QuadrupedController;
+import us.ihmc.aware.controller.position.QuadrupedPositionControllerEvent;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
  * This controller sets desired joint angles to their actual values when the joint comes online.
  */
-public class QuadrupedJointInitializationController implements QuadrupedController
+public class QuadrupedPositionJointInitializationController implements QuadrupedPositionController
 {
    private final FullRobotModel fullRobotModel;
 
@@ -20,7 +22,7 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
     */
    private final boolean initialized[];
 
-   public QuadrupedJointInitializationController(QuadrupedRuntimeEnvironment environment)
+   public QuadrupedPositionJointInitializationController(QuadrupedRuntimeEnvironment environment)
    {
       this.fullRobotModel = environment.getFullRobotModel();
       this.initialized = new boolean[fullRobotModel.getOneDoFJoints().length];
@@ -38,7 +40,7 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
    }
 
    @Override
-   public QuadrupedControllerEvent process()
+   public QuadrupedPositionControllerEvent process()
    {
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
@@ -52,7 +54,7 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
          }
       }
 
-      return allJointsInitialized() ? QuadrupedControllerEvent.JOINTS_INITIALIZED : null;
+      return allJointsInitialized() ? QuadrupedPositionControllerEvent.JOINTS_INITIALIZED : null;
    }
 
    @Override
