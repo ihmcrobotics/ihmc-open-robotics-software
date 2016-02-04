@@ -75,26 +75,6 @@ public class QuadrupedSupportPolygonTest
    
    @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testGetEdgeNormals()
-   {
-      QuadrupedSupportPolygon quadrupedSupportPolygon = createSimplePolygon();
-      
-      FrameVector2d[] normalsToPack = new FrameVector2d[quadrupedSupportPolygon.size()];
-      for (int i = 0; i < normalsToPack.length; i++)
-      {
-         normalsToPack[i] = new FrameVector2d(quadrupedSupportPolygon.getReferenceFrame());
-      }
-      
-      quadrupedSupportPolygon.getEdgeNormals2d(normalsToPack);
-      
-      assertEquals("Does not equal", new FrameVector2d(WORLD, 0.0, 1.0), normalsToPack[0]);
-      assertEquals("Does not equal", new FrameVector2d(WORLD, 1.0, 0.0), normalsToPack[1]);
-      assertEquals("Does not equal", new FrameVector2d(WORLD, 0.0, -1.0), normalsToPack[2]);
-      assertEquals("Does not equal", new FrameVector2d(WORLD, -1.0, 0.0), normalsToPack[3]);
-   }
-   
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
    public void testGetLegPairs()
    {
       final QuadrupedSupportPolygon quadrupedSupportPolygon = createSimplePolygon();
@@ -214,11 +194,6 @@ public class QuadrupedSupportPolygonTest
       for (int j = 0; j < normalsToPack.length; j++)
       {
          normalsToPack[j] = new FrameVector2d();
-      }
-      
-      for (int i = 0; i < reps; i++)
-      {
-         createSimplePolygon.getEdgeNormals2d(normalsToPack);
       }
    }
    
