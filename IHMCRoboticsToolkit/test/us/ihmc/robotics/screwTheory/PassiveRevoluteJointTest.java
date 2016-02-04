@@ -53,36 +53,6 @@ public class PassiveRevoluteJointTest
    
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testPackVelocityMatrix()
-   {
-      try
-      {
-         joint.getVelocityMatrix(matrix, rowStart);
-      }
-      catch(RuntimeException e)
-      {
-         return; 
-      }     
-      Assert.fail();
-   }
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testPackDesiredAccelerationMatrix()
-   {
-      try
-      {
-         joint.getDesiredAccelerationMatrix(matrix, rowStart);
-      }
-      catch(RuntimeException e)
-      {
-         return; 
-      }     
-      Assert.fail();
-   }
-   
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testSetTorqueFromWrench()
    {
       try
@@ -188,21 +158,6 @@ public class PassiveRevoluteJointTest
    
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testPackConfigurationMatrix()
-   {
-      try
-      {
-         joint.getConfigurationMatrix(matrix, rowStart);
-      }
-      catch(RuntimeException e)
-      {
-         return; 
-      }     
-      Assert.fail();
-   }
-   
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testSetConfiguration()
    {
       try
@@ -260,19 +215,4 @@ public class PassiveRevoluteJointTest
       }     
       Assert.fail();
    }
-   
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testSetIntegrateDesiredAccelerations()
-   {
-      try
-      {
-         joint.setIntegrateDesiredAccelerations(integrateQddDes);
-      }
-      catch(RuntimeException e)
-      {
-         return; 
-      }     
-      Assert.fail();
-   }  
 }
