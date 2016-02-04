@@ -3,7 +3,8 @@ package us.ihmc.ihmcPerception.faceDetection;
 import people_msgs.PositionMeasurement;
 import people_msgs.PositionMeasurementArray;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
@@ -11,13 +12,17 @@ import javax.vecmath.Point3d;
 
 public class RosFaceDetectionSubscriber extends AbstractRosTopicSubscriber<PositionMeasurementArray>
 {
-   private final PacketCommunicator packetCommunicator;
+   private final FramePoint framePoint = new FramePoint();
 
-   public RosFaceDetectionSubscriber(String topicName, RosMainNode node, PacketCommunicator packetCommunicator)
+   private final PacketCommunicator packetCommunicator;
+   private final ReferenceFrame cameraFrame;
+
+   public RosFaceDetectionSubscriber(String topicName, RosMainNode node, PacketCommunicator packetCommunicator, ReferenceFrame cameraFrame)
    {
       super(PositionMeasurementArray._TYPE);
 
       this.packetCommunicator = packetCommunicator;
+      this.cameraFrame = cameraFrame;
 
       node.attachSubscriber(topicName, this);
    }
@@ -25,16 +30,19 @@ public class RosFaceDetectionSubscriber extends AbstractRosTopicSubscriber<Posit
    @Override
    public void onNewMessage(PositionMeasurementArray message)
    {
-      PositionMeasurement[] people = (PositionMeasurement[]) message.getPeople().toArray();
+      Object[] people = message.getPeople().toArray();
 
       String[] ids = new String[people.length];
       Point3d[] positions = new Point3d[people.length];
 
       for(int i = 0; i < people.length; i++)
       {
-         PositionMeasurement person = people[i];
+         PositionMeasurement person = (PositionMeasurement) people[i];
          ids[i] = person.getObjectId();
-         positions[i] = new Point3d(person.getPos().getX(), person.getPos().getY(), person.getPos().getZ());
+
+         framePoint.setIncludingFrame(cameraFrame, person.getPos().getX(), person.getPos().getY(), person.getPos().getZ());
+         framePoint.changeFrame(ReferenceFrame.getWorldFrame());
+         positions[i] = framePoint.getPoint();
       }
 
       DetectedFacesPacket detectedFaces = new DetectedFacesPacket(ids, positions);
