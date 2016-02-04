@@ -6,6 +6,9 @@ import us.ihmc.aware.controller.common.*;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.planning.QuadrupedTimedStep;
+import us.ihmc.aware.state.StateMachine;
+import us.ihmc.aware.state.StateMachineBuilder;
+import us.ihmc.aware.state.StateMachineState;
 import us.ihmc.aware.vmc.*;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
@@ -32,10 +35,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.*;
-import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.robotics.stateMachines.StateMachine;
-import us.ihmc.robotics.stateMachines.StateTransition;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
@@ -101,9 +100,13 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
    // state machines
    public enum FootState
    {
-      SWING_STATE, SUPPORT_STATE
+      SUPPORT_STATE, SWING_STATE
    }
-   private final QuadrantDependentList<StateMachine<FootState>> footStateMachine;
+   public enum FootEvent
+   {
+      LIFT_OFF, TOUCH_DOWN
+   }
+   private final QuadrantDependentList<StateMachine<FootState, FootEvent>> footStateMachine;
 
    // provider inputs
    private static int STEP_QUEUE_CAPACITY = 30;
@@ -256,13 +259,12 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       footStateMachine = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         SwingState swingState = new SwingState(FootState.SWING_STATE, robotQuadrant);
-         SupportState supportState = new SupportState(FootState.SUPPORT_STATE, robotQuadrant);
-         String prefix = getClass().getSimpleName() + robotQuadrant.getCamelCaseNameForMiddleOfExpression();
-         footStateMachine.set(robotQuadrant, new StateMachine<>(prefix, prefix + "TransitionTime", FootState.class, robotTimestamp, registry));
-         footStateMachine.get(robotQuadrant).addState(swingState);
-         footStateMachine.get(robotQuadrant).addState(supportState);
-         footStateMachine.get(robotQuadrant).setCurrentState(FootState.SUPPORT_STATE);
+         StateMachineBuilder<FootState, FootEvent> stateMachineBuilder = new StateMachineBuilder<>();
+         stateMachineBuilder.addState(FootState.SUPPORT_STATE, new SupportState(robotQuadrant));
+         stateMachineBuilder.addState(FootState.SWING_STATE, new SwingState(robotQuadrant));
+         stateMachineBuilder.addTransition(FootEvent.LIFT_OFF, FootState.SUPPORT_STATE, FootState.SWING_STATE);
+         stateMachineBuilder.addTransition(FootEvent.TOUCH_DOWN, FootState.SWING_STATE, FootState.SUPPORT_STATE);
+         footStateMachine.set(robotQuadrant, stateMachineBuilder.build(FootState.SUPPORT_STATE));
       }
 
       // provider inputs
@@ -457,12 +459,12 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
          if (currentTime > currentStepStartTime)
          {
             // dequeue step
-            stepCache.get(robotQuadrant).set(currentStep);
-            if (footStateMachine.get(robotQuadrant).getCurrentStateEnum() == FootState.SUPPORT_STATE)
+            if (footStateMachine.get(robotQuadrant).getState() == FootState.SUPPORT_STATE)
             {
-               footStateMachine.get(robotQuadrant).setCurrentState(FootState.SWING_STATE);
+               stepCache.get(robotQuadrant).set(currentStep);
+               stepQueue.dequeue();
+               footStateMachine.get(robotQuadrant).trigger(FootEvent.LIFT_OFF);
             }
-            stepQueue.dequeue();
          }
       }
    }
@@ -562,8 +564,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       // compute virtual forces to track swing foot trajectories
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         footStateMachine.get(robotQuadrant).checkTransitionConditions();
-         footStateMachine.get(robotQuadrant).doAction();
+         footStateMachine.get(robotQuadrant).process();
       }
 
       // compute optimal contact forces
@@ -715,7 +716,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       dcmPositionController.setIntegralGains(params.getVolatileArray(DCM_INTEGRAL_GAINS), params.get(DCM_MAX_INTEGRAL_ERROR));
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         footStateMachine.get(robotQuadrant).setCurrentState(FootState.SUPPORT_STATE);
+//       footStateMachine.get(robotQuadrant).reset(); // FIXME (reset state machine)
          swingPositionController.get(robotQuadrant).setProportionalGains(params.getVolatileArray(SWING_POSITION_PROPORTIONAL_GAINS));
          swingPositionController.get(robotQuadrant).setIntegralGains(params.getVolatileArray(SWING_POSITION_INTEGRAL_GAINS), params.get(SWING_POSITION_MAX_INTEGRAL_ERROR));
          swingPositionController.get(robotQuadrant).setDerivativeGains(params.getVolatileArray(SWING_POSITION_DERIVATIVE_GAINS));
@@ -741,20 +742,22 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       virtualModelController.setVisible(false);
    }
 
-   private class SwingState extends State<FootState>
+   private class SwingState implements StateMachineState<FootEvent>
    {
       private final RobotQuadrant robotQuadrant;
 
-      public SwingState(FootState stateEnum, RobotQuadrant robotQuadrant)
+      public SwingState(RobotQuadrant robotQuadrant)
       {
-         super(stateEnum);
          this.robotQuadrant = robotQuadrant;
-
-         // configure state transitions
-         addStateTransition(new StateTransition<>(FootState.SUPPORT_STATE, new SwingToSupportCondition()));
       }
 
-      @Override public void doAction()
+      @Override public void onEntry()
+      {
+         // initialize controllers
+         swingPositionController.get(robotQuadrant).reset();
+      }
+
+      @Override public FootEvent process()
       {
          // compute sole force setpoints to track swing trajectory
          soleForceSetpoint.get(robotQuadrant).changeFrame(soleFrame.get(robotQuadrant));
@@ -766,47 +769,33 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
          soleForceFeedforwardSetpoint.get(robotQuadrant).changeFrame(soleFrame.get(robotQuadrant));
          swingPositionController.get(robotQuadrant)
                .compute(soleForceSetpoint.get(robotQuadrant), solePositionSetpoint.get(robotQuadrant), soleLinearVelocitySetpoint.get(robotQuadrant), soleLinearVelocityEstimate.get(robotQuadrant), soleForceFeedforwardSetpoint.get(robotQuadrant));
+         return null;
       }
 
-      @Override public void doTransitionIntoAction()
+      @Override public void onExit()
       {
-         // initialize controllers
-         swingPositionController.get(robotQuadrant).reset();
-      }
-
-      @Override public void doTransitionOutOfAction()
-      {
-      }
-
-      private class SwingToSupportCondition implements StateTransitionCondition
-      {
-         @Override public boolean checkCondition()
-         {
-            // detect if contact has occurred
-            return false;
-         }
       }
    }
 
-   private class SupportState extends State<FootState>
+   private class SupportState implements StateMachineState<FootEvent>
    {
       private final RobotQuadrant robotQuadrant;
 
-      public SupportState(FootState stateEnum, RobotQuadrant robotQuadrant)
+      public SupportState(RobotQuadrant robotQuadrant)
       {
-         super(stateEnum);
          this.robotQuadrant = robotQuadrant;
       }
 
-      @Override public void doAction()
+      @Override public void onEntry()
       {
       }
 
-      @Override public void doTransitionIntoAction()
+      @Override public FootEvent process()
       {
+         return null;
       }
 
-      @Override public void doTransitionOutOfAction()
+      @Override public void onExit()
       {
 
       }
