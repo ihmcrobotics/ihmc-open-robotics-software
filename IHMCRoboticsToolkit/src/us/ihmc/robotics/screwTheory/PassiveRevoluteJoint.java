@@ -2,6 +2,7 @@ package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -24,22 +25,15 @@ public class PassiveRevoluteJoint extends RevoluteJoint
       super(name, predecessor, beforeJointFrame, jointAxis);
    }
 
+   /**
+    * Torque on a passive joint is always zero
+    */
    @Override
    public void getTauMatrix(DenseMatrix64F matrix)
    {
-      throw new RuntimeException("Cannot set torque of a passive joint");  
-   }
-
-   @Override
-   public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
-   {
-      throw new RuntimeException("Cannot set velocity of a passive joint");
-   }
-
-   @Override
-   public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
-   {
-      throw new RuntimeException("Cannot set acceleration of a passive joint");
+      MathTools.checkIfInRange(matrix.getNumRows(), 1, Integer.MAX_VALUE);
+      MathTools.checkIfInRange(matrix.getNumCols(), 1, Integer.MAX_VALUE);
+      matrix.set(0, 0, 0);
    }
 
    @Override
@@ -91,12 +85,6 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    }
 
    @Override
-   public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
-   {
-      throw new RuntimeException("Cannot set position of a passive joint");
-   }
-
-   @Override
    public void setConfiguration(DenseMatrix64F matrix, int rowStart)
    {
       throw new RuntimeException("Cannot set position of a passive joint");
@@ -118,12 +106,6 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    public void setQddDesired(InverseDynamicsJoint originalJoint)
    {
       throw new RuntimeException("Cannot set acceleration of a passive joint");
-   }
-
-   @Override
-   public void setIntegrateDesiredAccelerations(boolean integrateDesiredAccelerations)
-   {
-      throw new RuntimeException("Cannot modify the acceleration of a passive joint");
    }
 
    @Override
