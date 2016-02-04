@@ -71,29 +71,18 @@ public class QuadrupedControllerManager implements RobotController
       builder.addDoNothingController();
       builder.addStandPrepController();
 
-      if (startState == QuadrupedControllerState.STAND_READY)
-      {
-         builder.addStandReadyController();
-      }
-      if (startState == QuadrupedControllerState.POSITION_CRAWL)
-      {
-         builder.addPositionBasedCrawlController(inverseKinematicsCalculators, globalDataProducer);
-      }
-      if (startState == QuadrupedControllerState.VMC_STAND)
-      {
-         builder.addVirtualModelBasedStandController(virtualModelController);
-      }
-      if (startState == QuadrupedControllerState.TROT_WALK)
-      {
-         builder.addTrotWalkController();
-      }
-      if (startState == QuadrupedControllerState.SLIDER_BOARD)
-      {
-         builder.addSliderBoardController();
-      }
+      builder.addStandReadyController();
+      builder.addPositionBasedCrawlController(inverseKinematicsCalculators, globalDataProducer);
+      builder.addVirtualModelBasedStandController(virtualModelController);
+      builder.addTrotWalkController();
+      builder.addSliderBoardController();
 
       builder.addJointsInitializedCondition(QuadrupedControllerState.DO_NOTHING, QuadrupedControllerState.STAND_PREP);
       builder.addStandingExitCondition(QuadrupedControllerState.STAND_PREP, startState);
+      
+//      DO_NOTHING, STAND_PREP, STAND_READY, POSITION_CRAWL, VMC_STAND, SLIDER_BOARD, TROT_WALK;
+      builder.addPermissibleTransition(QuadrupedControllerState.POSITION_CRAWL, QuadrupedControllerState.SLIDER_BOARD);
+      
 
       this.stateMachine = builder.build();
 
