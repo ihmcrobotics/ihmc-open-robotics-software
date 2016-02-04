@@ -26,18 +26,18 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
 
    private final Map<String, AlphaFilteredYoVariable> alphaFilteredQDesiredMap = new HashMap<>();
    private final Map<String, DoubleYoVariable> QDesiredMap = new HashMap<>();
-   private final Map<String, MutableBoolean> jointInitialized = new HashMap<>();
+   private final Map<String, BooleanYoVariable> jointInitialized = new HashMap<>();
+   private final Map<String, BooleanYoVariable> jointOnline = new HashMap<>();
    private final Map<String, DoubleYoVariable> sineFrequencyMap = new HashMap<>();
    private final Map<String, DoubleYoVariable> sineAmplitudeMap = new HashMap<>();
    
    private final BooleanYoVariable startChirp = new BooleanYoVariable("startChirp", sliderBoardRegistry);
    private double chirpStartTime = -1;
 
-   public QuadrupedLegJointSliderBoardController(SDFFullRobotModel fullRobotModel, YoVariableRegistry registry)
+   public QuadrupedLegJointSliderBoardController(SDFFullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
    {
       super(QuadrupedControllerState.SLIDER_BOARD);
       this.fullRobotModel = fullRobotModel;
-      registry.addChild(sliderBoardRegistry);
 
       jointMap = fullRobotModel.getOneDoFJointsAsMap();
       jointMapKeySet.addAll(jointMap.keySet());
@@ -50,14 +50,17 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
          AlphaFilteredYoVariable alphaFilteredQDesired = new AlphaFilteredYoVariable(key + "_alpha_filtered_q_d", sliderBoardRegistry, qDesiredAlpha, qDesired);
          alphaFilteredQDesiredMap.put(key, alphaFilteredQDesired);
          QDesiredMap.put(key, qDesired);
-         jointInitialized.put(key, new MutableBoolean(false));
+         jointInitialized.put(key, new BooleanYoVariable(key + "_initialized", sliderBoardRegistry));
+         jointOnline.put(key, new BooleanYoVariable(key + "_online", sliderBoardRegistry));
+//         jointInitialized.put(key, online);
          
-         DoubleYoVariable sineFrequency = new DoubleYoVariable(key + "_freq", registry);
-         DoubleYoVariable sineAmplitude = new DoubleYoVariable(key + "_amp", registry);
+         DoubleYoVariable sineFrequency = new DoubleYoVariable(key + "_freq", sliderBoardRegistry);
+         DoubleYoVariable sineAmplitude = new DoubleYoVariable(key + "_amp", sliderBoardRegistry);
          
          sineFrequencyMap.put(key, sineFrequency);
          sineAmplitudeMap.put(key, sineAmplitude);
       }
+      parentRegistry.addChild(sliderBoardRegistry);
    }
 
    @Override public RobotMotionStatus getMotionStatus()
@@ -75,17 +78,19 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
       for (int i = 0; i < jointMapKeySet.size(); i++)
       {
          String key = jointMapKeySet.get(i);
-         MutableBoolean initialized = jointInitialized.get(key);
+         BooleanYoVariable initialized = jointInitialized.get(key);
          OneDoFJoint oneDoFJoint = jointMap.get(key);
          AlphaFilteredYoVariable alphaFilteredYoVariable = alphaFilteredQDesiredMap.get(key);
          DoubleYoVariable yoVariable = QDesiredMap.get(key);
-         if(initialized.isFalse())
+         jointOnline.get(key).set(oneDoFJoint.isOnline());
+         
+         if(initialized.getBooleanValue())
          {
             if(oneDoFJoint.isOnline())
             {
                yoVariable.set(oneDoFJoint.getQ());
                alphaFilteredYoVariable.reset();
-               initialized.setValue(true);
+               initialized.set(true);
             }
          }
          
@@ -111,6 +116,8 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
    {
       for(OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {
+         DoubleYoVariable desiredQ = QDesiredMap.get(joint.getName());
+         desiredQ.set(joint.getQ());
          joint.setUnderPositionControl(true);
       }
    }
