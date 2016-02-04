@@ -25,6 +25,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedJointLimits;
 
 public class QuadrupedVirtualModelController
 {

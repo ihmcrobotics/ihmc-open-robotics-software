@@ -59,6 +59,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             QuadrupedForceControllerState.STAND);
       builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STEP, QuadrupedForceControllerState.STAND_PREP,
             QuadrupedForceControllerState.STEP);
+      builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STEP, QuadrupedForceControllerState.STAND,
+            QuadrupedForceControllerState.STEP);
 
       // Transitions from controllers back to stand prep.
       builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STAND_PREP, QuadrupedForceControllerState.STAND,
